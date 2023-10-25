@@ -102,7 +102,8 @@
                                     item-value="name"
                                     @update:options="onUserScenariosPagination"
                                 >
-                                    <template slot="items" slot-scope="props" v-slot:item="props">
+                                    <template v-slot:item="props">
+                                        <tr>
                                         <td>
                                         
                                             <v-edit-dialog
@@ -110,21 +111,21 @@
                                                 lazy
                                                 persistent
                                                 :return-value.sync="
-                                                    props.item.name
+                                                    props.item.raw.name
                                                 "
                                                 @save="
                                                     onEditScenarioName(
-                                                        props.item,
+                                                        props.item.raw,
                                                         nameUpdate,
                                                     )
                                                 "
                                                 @open="
                                                     prepareForNameEdit(
-                                                        props.item.name,
+                                                        props.item.raw.name,
                                                     )
                                                 "
                                             >
-                                                {{ props.item.name }}
+                                                {{ props.item.raw.name }}
                                                 <template v-slot:input>
                                                     <v-text-field
                                                         label="Edit"
@@ -141,45 +142,45 @@
                                         </td>
                                         <td>
                                             {{
-                                                props.item.creator
-                                                    ? props.item.creator
+                                                props.item.raw.creator
+                                                    ? props.item.raw.creator
                                                     : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
                                             {{
-                                                props.item.owner
-                                                    ? props.item.owner
+                                                props.item.raw.owner
+                                                    ? props.item.raw.owner
                                                     : '[ No Owner ]'
                                             }}
                                         </td>
                                         <td>
                                             {{
-                                                props.item.networkName
-                                                    ? props.item.networkName
+                                                props.item.raw.networkName
+                                                    ? props.item.raw.networkName
                                                     : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
                                             {{
                                                 formatDate(
-                                                    props.item.createdDate,
+                                                    props.item.raw.createdDate,
                                                 )
                                             }}
                                         </td>
                                         <td>
                                             {{
                                                 formatDate(
-                                                    props.item.lastModifiedDate,
+                                                    props.item.raw.lastModifiedDate,
                                                 )
                                             }}
                                         </td>
                                         <td>
-                                            {{ formatDate(props.item.lastRun) }}
+                                            {{ formatDate(props.item.raw.lastRun) }}
                                         </td>
-                                        <td>{{ props.item.status }}</td>
-                                        <td>{{ props.item.runTime }}</td>
-                                        <td>{{ props.item.reportStatus }}</td>
+                                        <td>{{ props.item.raw.status }}</td>
+                                        <td>{{ props.item.raw.runTime }}</td>
+                                        <td>{{ props.item.raw.reportStatus }}</td>
                                         <td>
                                             <v-menu  location="left">
                                                 <template
@@ -191,7 +192,7 @@
                                                     <v-btn
                                                         id="Scenarios-actionMenu-vbtn"
                                                         color="text-green darken-1"
-                                                        icon
+                                                        flat
                                                         v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
@@ -204,8 +205,8 @@
                                                         :key="i"
                                                         @click="OnActionTaken(
                                                                 item.action,
-                                                                props.item.users,
-                                                                props.item,
+                                                                props.item.raw.users,
+                                                                props.item.raw,
                                                                 true) "
                                                         class="menu-style">
                                                         <v-list-item-title icon>
@@ -217,6 +218,7 @@
                                                 </v-list>
                                             </v-menu>
                                         </td>
+                                    </tr>
                                     </template>
                                     <!-- <v-alert
                                         :model-value="hasMineSearch()"
@@ -309,21 +311,21 @@
                                                 lazy
                                                 persistent
                                                 :return-value.sync="
-                                                    props.item.name
+                                                    props.item.raw.name
                                                 "
                                                 @save="
                                                     onEditScenarioName(
-                                                        props.item,
+                                                        props.item.raw,
                                                         nameUpdate,
                                                     )
                                                 "
                                                 @open="
                                                     prepareForNameEdit(
-                                                        props.item.name,
+                                                        props.item.raw.name,
                                                     )
                                                 "
                                             >
-                                                {{ props.item.name }}
+                                                {{ props.item.raw.name }}
                                                 <template v-slot:input>
                                                     <v-text-field
                                                         label="Edit"
@@ -340,45 +342,45 @@
                                         </td>
                                         <td>
                                             {{
-                                                props.item.creator
-                                                    ? props.item.creator
+                                                props.item.raw.creator
+                                                    ? props.item.raw.creator
                                                     : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
                                             {{
-                                                props.item.owner
-                                                    ? props.item.owner
+                                                props.item.raw.owner
+                                                    ? props.item.raw.owner
                                                     : '[ No Owner ]'
                                             }}
                                         </td>
                                         <td>
                                             {{
-                                                props.item.networkName
-                                                    ? props.item.networkName
+                                                props.item.raw.networkName
+                                                    ? props.item.raw.networkName
                                                     : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
                                             {{
                                                 formatDate(
-                                                    props.item.createdDate,
+                                                    props.item.raw.createdDate,
                                                 )
                                             }}
                                         </td>
                                         <td>
                                             {{
                                                 formatDate(
-                                                    props.item.lastModifiedDate,
+                                                    props.item.raw.lastModifiedDate,
                                                 )
                                             }}
                                         </td>
                                         <td>
-                                            {{ formatDate(props.item.lastRun) }}
+                                            {{ formatDate(props.item.raw.lastRun) }}
                                         </td>
-                                        <td>{{ props.item.status }}</td>
-                                        <td>{{ props.item.runTime }}</td>
-                                        <td>{{ props.item.reportStatus }}</td>
+                                        <td>{{ props.item.raw.status }}</td>
+                                        <td>{{ props.item.raw.runTime }}</td>
+                                        <td>{{ props.item.raw.reportStatus }}</td>
                                         <td>
                                             <v-menu >
                                                 <template
@@ -389,7 +391,7 @@
                                                     <v-btn
                                                         id="Scenarios-shared-actionMenu-vbtn"
                                                         color="text-green darken-1"
-                                                        icon
+                                                        flat
                                                         v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
@@ -399,7 +401,7 @@
                                                 <v-list>
                                                     <v-list-item v-for="(item,i) in actionItemsForSharedScenario"
                                                         :key="i"
-                                                        @click="OnActionTaken(item.action,props.item.users,props.item,false)"
+                                                        @click="OnActionTaken(item.action,props.item.raw.users,props.item.raw,false)"
                                                         class="menu-style">
                                                         <v-list-item-title icon>                                                        
                                                             <img v-if="item.isCustomIcon" style="padding-right:5px" v-bind:src="item.icon"/>

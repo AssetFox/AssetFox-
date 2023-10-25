@@ -468,7 +468,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
   onMounted(()=>mounted())
    function mounted() {
     textareaInput = document.getElementById('equation_textarea') as HTMLTextAreaElement;
-    cursorPosition = textareaInput.selectionStart;
+    //cursorPosition = textareaInput.selectionStart;
     if (hasValue(stateNumericAttributes)) {
       setAttributesList();
     }

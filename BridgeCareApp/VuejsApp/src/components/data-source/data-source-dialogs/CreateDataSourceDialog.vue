@@ -11,7 +11,7 @@
         </v-card-title>           
       <v-card-text class="ghd-dialog-box-padding-center">
         <v-row column>
-          <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
+          <div class="ghd-md-gray ghd-control-label">Name</div>
           <v-text-field outline id="CreateDataSourceDialog-Name-vtextField"
             v-model="datasourceName"
             class="ghd-text-field-border ghd-text-field"/>

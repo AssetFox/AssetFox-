@@ -39,7 +39,7 @@
   </v-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import Vue from 'vue';
 import {contains} from 'ramda';
 import {CreateBudgetLibraryDialogData} from '@/shared/models/modals/create-budget-library-dialog-data';

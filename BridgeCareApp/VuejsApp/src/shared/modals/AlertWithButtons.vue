@@ -1,5 +1,5 @@
 <template>
-    <v-dialog max-width="350" persistent v-bind:show="dialogDataWithButtons.showDialog">
+    <v-dialog max-width="350" persistent v-model="showDialogComputed">
         <v-card>
             <v-card-title class="headline">
                 <v-row justify-center>
@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-    import Vue from 'vue';
+    import Vue, { computed } from 'vue';
     import {AlertDataWithButtons} from '../models/modals/alert-data';
     import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
     import { useStore } from 'vuex';
@@ -47,7 +47,7 @@
     const props = defineProps<{
         dialogDataWithButtons: AlertDataWithButtons
     }>()
-
+    let showDialogComputed = computed(() => props.dialogDataWithButtons.showDialog);
 const emit = defineEmits(['submit'])
 
 

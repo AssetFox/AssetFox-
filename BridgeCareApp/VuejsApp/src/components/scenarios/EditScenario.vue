@@ -7,7 +7,7 @@
                 elevation="0"
                 style="border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; border: 1px solid #999999;"
             >
-                <v-list 
+                <v-list
                     id = "EditScenario-navigation-vList"
                     class="ghd-navigation-list">
                     <v-list-item
@@ -16,9 +16,8 @@
                         :key="navigationTab.tabName"
                         v-for="navigationTab in visibleNavigationTabs()"
                     >
-                        <v-list-tile id="EditScenario-tabs-vListTile" :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
-                            <v-list-tile-action>
-                                <v-list-tile-icon>
+                        <v-list-item id="EditScenario-tabs-vListTile" :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
+                            <template v-slot:prepend>
                                     <TreatmentSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Treatment'"/>  
                                     <TargetConditionGoalSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Target Condition Goal'"/>  
                                     <RemainingLifeLimitSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Remaining Life Limit'"/>  
@@ -30,11 +29,10 @@
                                     <AnalysisMethodSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Analysis Method'"/>  
                                     <CalculatedAttributeSvg style="height: 32px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Calculated Attribute'"/>  
                                     <CommittedProjectSvg style="height: 32px; width: 24px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Committed Projects'"/>  
-                                    <ReportsSvg style="height: 38px; width: 30px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Reports & Outputs'"/>  
-                                </v-list-tile-icon>
-                            </v-list-tile-action>
-                            <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>
-                        </v-list-tile>
+                                    <ReportsSvg style="height: 38px; width: 22px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Reports & Outputs'"/>  
+                            </template>
+                            <v-list-item-title style="width: auto;" v-text="navigationTab.tabName"></v-list-item-title>
+                        </v-list-item>
                     </v-list-item>
                 </v-list>
                 <div style="margin: auto; width: 85%;">
@@ -70,7 +68,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount } from 'vue'; 
+import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, onBeforeMount } from 'vue'; 
 import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
 import ImportExportCommittedProjectsDialog from '@/components/scenarios/scenarios-dialogs/ImportExportCommittedProjectsDialog.vue';
 import { any, clone, isNil, propEq } from 'ramda';
@@ -98,11 +96,12 @@ import TargetConditionGoalSvg from '@/shared/icons/TargetConditionGoalSvg.vue';
 import TreatmentSvg from '@/shared/icons/TreatmentSvg.vue';
 import CalculatedAttributeSvg from '@/shared/icons/CalculatedAttributeSvg.vue';
 import CommittedProjectSvg from '@/shared/icons/CommittedProjectSvg.vue';
+import ReportsSvg from '@/shared/icons/ReportsSvg.vue';
 import { useStore } from 'vuex'; 
 import { useRouter } from 'vue-router'; 
 
     let store = useStore(); 
-    const $router = useRouter(); 
+    const router = useRouter(); 
 
     const stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks) ;
     let hasAdminAccess: boolean = (store.state.authenticationModule.hasAdminAccess) ; 
@@ -217,13 +216,19 @@ import { useRouter } from 'vue-router';
     let alertData: AlertData = clone(emptyAlertData);
     let alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
 
+    onMounted(() => {
+    });
+    onBeforeMount(() => {
+        selectedScenarioId = router.currentRoute.value.path;  //router.currentRoute.value.query.scenarioId as string;
+        let temp: string = router.currentRoute.value.query.scenarioId as string;
+    });
     created();
     function created() { 
             // set selectedScenarioId
-            selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
-            networkId = $router.currentRoute.value.query.networkId as string;
-            simulationName = $router.currentRoute.value.query.scenarioName as string;
-            networkName = $router.currentRoute.value.query.networkName as string;
+            selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
+            networkId = router.currentRoute.value.query.networkId as string;
+            simulationName = router.currentRoute.value.query.scenarioName as string;
+            networkName = router.currentRoute.value.query.networkName as string;
 
             // check that selectedScenarioId is set
             if (selectedScenarioId === getBlankGuid()) {
@@ -231,7 +236,7 @@ import { useRouter } from 'vue-router';
                 addErrorNotificationAction({
                     message: 'Found no selected scenario for edit',
                 });
-                $router.push('/Scenarios/');
+                router.push('/Scenarios/');
             } else {                
                 navigationTabs = navigationTabs.map(
                     (navTab: NavigationTab) => {
@@ -269,7 +274,7 @@ import { useRouter } from 'vue-router';
                 );
                 // if no matching navigation path was found in the href, then route with path of first navigationTabs entry
                 if (!hasChildPath) {
-                    $router.push(navigationTabs[0].navigation);
+                    router.push(navigationTabs[0].navigation);
                 }                
             }
     }

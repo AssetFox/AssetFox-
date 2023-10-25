@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-bind:show="showDialog">
+  <v-dialog max-width="450px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title>
         <v-row justify-center>
@@ -25,12 +25,14 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import {emptyNetwork, Network} from '@/shared/models/iAM/network';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 
   const props = defineProps<{showDialog: boolean}>();
   const emit = defineEmits(['submit'])
+
+  let showDialogComputed = computed(() => props.showDialog);
 
   let newNetwork: Network = {...emptyNetwork, id: getNewGuid()};
 

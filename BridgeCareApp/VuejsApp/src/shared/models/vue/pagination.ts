@@ -4,6 +4,7 @@ export interface Pagination {
     rowsPerPage: number;
     sortBy: string;
     totalItems: number;
+    sort: any[];
 }
 
 export const emptyPagination: Pagination = {
@@ -11,5 +12,6 @@ export const emptyPagination: Pagination = {
     page: 1,
     rowsPerPage: 5,
     sortBy: '',
-    totalItems: 0
+    totalItems: 0,
+    sort: []
 };

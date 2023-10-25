@@ -1,8 +1,8 @@
 <template>
     <v-dialog
         persistent
-        maximizable
-        v-bind:show="dialogData.showDialog"
+        v-model="dialogData.showDialog"
+        width="auto"
         class="criterion-library-editor-dialog"
     >
         <v-card>
@@ -19,23 +19,21 @@
                 </v-row>
             </v-card-text>
             <v-card-actions>
-                <v-row justify-center>
-                    <v-btn
-                        class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                        variant = "flat"
-                        @click="onSubmit(false)"
-                    >
-                        Cancel
-                    </v-btn>
-                    <v-btn
-                        :disabled="!canUpdateOrCreate"
-                        class="ghd-blue-bg ghd-white ghd-button-text"
-                        variant = "flat"
-                        @click="onSubmit(true)"
-                    >
-                        Save
-                    </v-btn>
-                </v-row>
+                <v-btn
+                    class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
+                    variant = "flat"
+                    @click="onSubmit(false)"
+                >
+                    Cancel
+                </v-btn>
+                <v-btn
+                    :disabled="!canUpdateOrCreate"
+                    class="ghd-blue-bg ghd-white ghd-button-text"
+                    variant = "flat"
+                    @click="onSubmit(true)"
+                >
+                    Save
+                </v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
@@ -59,59 +57,57 @@ import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import CriteriaEditor from '../components/CriteriaEditor.vue';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import {inject, reactive, toRefs, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
 
 let store = useStore();
 const emit = defineEmits(['submit'])
 const props = defineProps<{
     dialogData: GeneralCriterionEditorDialogData
     }>()
+const { dialogData } = toRefs(props);
 let stateCriterionLibraries = ref<CriterionLibrary[]>(store.state.criterionModule.criterionLibraries);
 let stateSelectedCriterionLibrary = ref<CriterionLibrary>(store.state.criterionModule.selectedCriterionLibrary);
 let stateSelectedCriterionIsValid = ref<boolean>(store.state.criterionModule.selectedCriterionIsValid);
 
-let criteriaEditorData: CriteriaEditorData = {
+const criteriaEditorData = ref<CriteriaEditorData>({
     ...emptyCriteriaEditorData,
     isLibraryContext: true
-  };
+  });
 
-  let uuidNIL: string = getBlankGuid();
-  let canUpdateOrCreate: boolean = false;
+  const canUpdateOrCreate = ref<boolean>(false);
 
   let CriteriaExpressionToReturn: string | null = "";
 
-  watch(()=>props.dialogData,()=>onDialogDataChanged())
-    function onDialogDataChanged() {
+  watch(dialogData,()=> {
         const htmlTag: HTMLCollection = document.getElementsByTagName('html') as HTMLCollection;
         const criteriaEditorCard: HTMLCollection = document.getElementsByClassName('criteria-editor-card') as HTMLCollection;
 
-        if (props.dialogData.showDialog) {    
-            criteriaEditorData = {
-                    ...criteriaEditorData,
+        if (dialogData.value.showDialog) {    
+            criteriaEditorData.value = {
+                    ...criteriaEditorData.value,
                     mergedCriteriaExpression: props.dialogData.CriteriaExpression,
                     isLibraryContext: true
                 };
 
-            canUpdateOrCreate = false;
+            canUpdateOrCreate.value = false;
 
-            if (hasValue(htmlTag)) {
-                htmlTag[0].setAttribute('style', 'overflow:hidden;');
-            }
+            // if (hasValue(htmlTag)) {
+            //     htmlTag[0].setAttribute('style', 'overflow:hidden;');
+            // }
 
-            if (hasValue(criteriaEditorCard)) {
-                criteriaEditorCard[0].setAttribute('style', 'height:100%');
-            }
-            } else {
-            if (hasValue(htmlTag)) {
-                htmlTag[0].setAttribute('style', 'overflow:auto;');
-            }
+            // if (hasValue(criteriaEditorCard)) {
+            //     criteriaEditorCard[0].setAttribute('style', 'height:100%');
+            // }
+            // } else {
+            // if (hasValue(htmlTag)) {
+            //     htmlTag[0].setAttribute('style', 'overflow:auto;');
+            // }
         }
-    }
+    });
 
     function onSubmitCriteriaEditorResult(result: CriteriaEditorResult) {
-        canUpdateOrCreate = result.validated;
+        canUpdateOrCreate.value = result.validated;
 
         if (result.validated) {
             CriteriaExpressionToReturn = result.criteria

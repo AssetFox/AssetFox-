@@ -1,5 +1,5 @@
 <template>
-    <v-dialog max-width="600px" persistent v-bind:show="DialogData.showDialog">
+    <v-dialog max-width="600px" persistent v-model="DialogData.showDialog">
         <v-card>
             <v-card-title class="ghd-dialog-box-padding-top">
             <v-row justify-space-between align-center>
@@ -8,9 +8,11 @@
             </v-card-title>
             <v-card-text class="ghd-dialog-box-padding-center">
                 <v-row>
-                    <v-select :items='settingItems'
+                    <v-select :items='DialogData.settingsList'
                     variant="outlined"
-                    v-model='settingSelectItemValue'                         
+                    item-title="text"
+                    item-value="value"
+                    v-model='DialogData.selectedItem'                         
                     class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>   
                     <v-btn style="margin-top: 2px !important; margin-left: 10px !important"
@@ -22,7 +24,7 @@
                 </v-row>
                 <v-list>
                     <v-list-tile
-                    v-for="setting in selectedSettings"
+                    v-for="setting in DialogData.AddedItems"
                     :key="setting">
                         <v-list-tile-content >
                             <v-list-tile-title v-text="setting.value"></v-list-tile-title>
@@ -52,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { shallowRef } from 'vue';
+import Vue, { shallowRef, toRefs } from 'vue';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
@@ -61,29 +63,32 @@ import { clone, empty, isNil } from 'ramda';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { AdminSelectItem } from '@/shared/models/vue/admin-select-item';
+import Dialog from 'primevue/dialog';
 
     let InputRules: InputValidationRules = rules;
-    let DialogData: EditAdminDataDialogData = emptyEditAdminDataDialogData ;
+     const props = defineProps<{
+        DialogData: EditAdminDataDialogData
+     }>()
     
-    let selectedSettings: {value:string, networkType:string}[] = [];
-    let settingsList= shallowRef<string[]>([]);
-    let settingItems: SelectItem[] = [];
+    const selectedSettings=  ref<AdminSelectItem[]>([]);
+    const settingsList= ref<string[]>([]);
+    const settingItems=ref<SelectItem[]>([]);
     const emit = defineEmits(['submit'])
-    let settingSelectItemValue: string | null = null;
+    const settingSelectItemValue =  ref<string>('');
     let primarySuffix: string = "(P)"
     let rawDataSuffix: string = "(R)"
     let primaryType: string  = "PRIMARY"
     let rawType: string = "RAW"
-
+    const { DialogData } = toRefs(props);
     //watchers
-    watch(DialogData, () => onDialogDataChanged)
-    function onDialogDataChanged() {
-        selectedSettings = DialogData.selectedSettings.map(_ => {
+    watch(DialogData, () =>  {
+       DialogData.value.AddedItems = DialogData.value.selectedSettings.map(_ => {
             let toReturn: {value: string, networkType: string} 
             let type = "";
             let value = "";
             const suffix = _.substring(_.length - 3);
-            if(DialogData.settingName == "InventoryReports"){
+            if(DialogData.value.settingName == "InventoryReports"){
                 if(suffix === primarySuffix){
                     type = primarySuffix;
                     value = _.substring(0, _.length - 3);
@@ -103,36 +108,38 @@ import { useRouter } from 'vue-router';
             toReturn = {value: value, networkType: type};
             return toReturn
         });
-        settingsList.value = clone(DialogData.settingsList);
-        settingSelectItemValue = null;
-    }
-    watch(settingsList,() => onSettingsListChanged)
-    function onSettingsListChanged(){
-        settingItems = settingsList.value.map(_ => {
+        settingsList.value = clone(DialogData.value.settingsList);
+        DialogData.value.selectedItem = '';
+    })
+    watch(settingsList,() => {
+        settingItems.value = settingsList.value.map(_ => {
             return {text: _, value: _}
         });
+    })
+    watch(selectedSettings,() => {
     }
-
+    )
     function onDeleteSettingClick(setting:any){
-        selectedSettings = selectedSettings.filter(_ => _.value !== setting.value);
+        DialogData.value.AddedItems = DialogData.value.AddedItems.filter(_ => _.value !== setting.value);
     }
     function onAddClick(){
-        if(!isNil(settingSelectItemValue)){
-            selectedSettings.push({value: settingSelectItemValue, 
-            networkType: DialogData.settingName === "InventoryReports" ? primarySuffix : ""})
+        if(!isNil(DialogData.value.selectedItem)){
+            //DialogData.value.selectedSettings.push(settingSelectItemValue.value,DialogData.value.settingName === "InventoryReports" ? primarySuffix : "")
+            DialogData.value.AddedItems.push({value: DialogData.value.selectedItem, 
+            networkType: DialogData.value.settingName === "InventoryReports" ? primarySuffix : ""})
         }            
     }
 
     function isAddDisabled(){
-        if(!isNil(settingSelectItemValue)){
-            return !isNil(selectedSettings.find(_ => _.value === settingSelectItemValue!));
+        if(!isNil(DialogData.value.selectedItem)){
+            return !isNil(DialogData.value.AddedItems.find(_ => _.value === DialogData.value.selectedItem!));
         }
         return true;
     }
 
     function onSubmit(submit: boolean) {
         if (submit) {
-        emit('submit', selectedSettings.map(_ => _.value + _.networkType));
+        emit('submit', DialogData.value.AddedItems.map(_ => _.value + _.networkType));
         } else {
         emit('submit', null);
         }

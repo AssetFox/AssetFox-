@@ -127,7 +127,6 @@
                                             id="TargetConditionGoalEditor-editTargetConditionGoalAttribute-vselect"
                                             v-if="header.value === 'attribute'"
                                             :items="numericAttributeNames"
-                                            append-icon=$vuetify.icons.ghd-down
                                             label="Select an Attribute"
                                             v-model="item.value.attribute"
                                             :rules="[
@@ -206,7 +205,7 @@
                     </template>
                 </v-data-table-server>
             </div>
-        <v-row v-show="hasSelectedLibrary || hasScenario">
+            <v-row v-show="hasSelectedLibrary || hasScenario">
             <v-col>
             <v-btn flat
                 id="TargetConditionGoalEditor-deleteSelected-vbtn"
@@ -216,62 +215,68 @@
             </v-btn>
         </v-col>
         </v-row>
+
+            <v-divider
+                :thickness="4"
+                class="border-opacity-100"
+            ></v-divider>
+
         <v-row>
-        <v-col v-show="hasSelectedLibrary && !hasScenario">
-            <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
-            <v-textarea
-                class="ghd-control-text ghd-control-border"
-                variant="outlined"
-                v-model="selectedTargetConditionGoalLibrary.description"
-                @update:model-value="checkHasUnsavedChanges()">
-            </v-textarea>
-        </v-col>
-        <v-row style="margin: 20px;">
-        <v-col v-show="hasSelectedLibrary || hasScenario" style="padding: 20px;">
-            <v-row justify-center row>
-                <v-btn variant = "outlined"
-                    id="TargetConditionGoalEditor-deleteLibrary-btn"
-                    @click="onShowConfirmDeleteAlert"
-                    class="ghd-white-bg ghd-blue"
-                    v-show="!hasScenario"
-                    :disabled="!hasSelectedLibrary"
-                >
-                    Delete Library
-                </v-btn>
-                <v-btn :disabled='!hasUnsavedChanges' flat
-                    @click="onDiscardChanges"
-                    class="ghd-white-bg ghd-blue"
-                    v-show="hasScenario"
-                >
-                    Cancel
-                </v-btn>
-                <v-btn flat
-                    id="TargetConditionGoalEditor-CreateAsNewLibrary-btn"
-                    @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                    :disabled="disableCrudButtons()"
-                >
-                    Create as New Library
-                </v-btn>
-                <v-btn
-                    @click="onUpsertScenarioTargetConditionGoals"
-                    class="ghd-blue-bg ghd-white"
-                    v-show="hasScenario"
-                    :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
-                >
-                    Save
-                </v-btn>
-                <v-btn
-                    id="TargetConditionGoalEditor-UpdateLibrary-btn"
-                    @click="onUpsertTargetConditionGoalLibrary"
-                    class="ghd-blue-bg ghd-white"
-                    v-show="!hasScenario"
-                    :disabled="disableCrudButtons() || !hasUnsavedChanges || !hasLibraryEditPermission"
-                >
-                    Update Library
-                </v-btn>
-            </v-row>
-        </v-col>
+            <v-col v-show="hasSelectedLibrary && !hasScenario">
+                <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
+                <v-textarea
+                    class="ghd-control-text ghd-control-border"
+                    variant="outlined"
+                    v-model="selectedTargetConditionGoalLibrary.description"
+                    @update:model-value="checkHasUnsavedChanges()">
+                </v-textarea>
+            </v-col>
+            <v-row style="margin: 20px;" justify="end">
+            <v-col cols="6" v-show="hasSelectedLibrary || hasScenario" style="padding: 20px;">
+                <v-row justify-center row>
+                    <v-btn variant = "outlined"
+                        id="TargetConditionGoalEditor-deleteLibrary-btn"
+                        @click="onShowConfirmDeleteAlert"
+                        class="ghd-white-bg ghd-blue"
+                        v-show="!hasScenario"
+                        :disabled="!hasSelectedLibrary"
+                    >
+                        Delete Library
+                    </v-btn>
+                    <v-btn :disabled='!hasUnsavedChanges' flat
+                        @click="onDiscardChanges"
+                        class="ghd-white-bg ghd-blue"
+                        v-show="hasScenario"
+                    >
+                        Cancel
+                    </v-btn>
+                    <v-btn flat
+                        id="TargetConditionGoalEditor-CreateAsNewLibrary-btn"
+                        @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        :disabled="disableCrudButtons()"
+                    >
+                        Create as New Library
+                    </v-btn>
+                    <v-btn
+                        @click="onUpsertScenarioTargetConditionGoals"
+                        class="ghd-blue-bg ghd-white"
+                        v-show="hasScenario"
+                        :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
+                    >
+                        Save
+                    </v-btn>
+                    <v-btn
+                        id="TargetConditionGoalEditor-UpdateLibrary-btn"
+                        @click="onUpsertTargetConditionGoalLibrary"
+                        class="ghd-blue-bg ghd-white"
+                        v-show="!hasScenario"
+                        :disabled="disableCrudButtons() || !hasUnsavedChanges || !hasLibraryEditPermission"
+                    >
+                        Update Library
+                    </v-btn>
+                </v-row>
+            </v-col>
         </v-row>
     </v-row>
     

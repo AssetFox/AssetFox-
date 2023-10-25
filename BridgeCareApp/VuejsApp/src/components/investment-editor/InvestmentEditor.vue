@@ -149,10 +149,11 @@
                 </v-col>
             </v-row>
         </v-col>
+
         <!--
-        <v-col v-show='hasSelectedLibrary || hasScenario' xs12>            
-        <!-- datatable -->
-            <!-- <v-col >
+            <v-col v-show='hasSelectedLibrary || hasScenario' xs12>            
+        
+             <v-col >
                 <v-data-table 
                     id="InvestmentEditor-investmentsDataTable-dataTable"
                     :headers='budgetYearsGridHeaders' 
@@ -203,8 +204,9 @@
                        class='ghd-blue ghd-button' variant = "flat">
                     Delete Selected
                 </v-btn>
-            </v-col> -->
+            </v-col>
         </v-col>
+    -->
         <v-col v-show='hasSelectedLibrary && !hasScenario' xs12>
             <v-row justify-center>
                 <v-col>
@@ -342,7 +344,7 @@ import { Hub } from '@/connectionHub';
 import ScenarioService from '@/services/scenario.service';
 import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
-import {inject, reactive, ref, shallowReactive, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import {inject, reactive, ref, shallowReactive, onMounted, onBeforeUnmount, computed, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import mitt from 'mitt';

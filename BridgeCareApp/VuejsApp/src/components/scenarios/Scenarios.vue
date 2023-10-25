@@ -1,15 +1,16 @@
 <template>
     <v-row column>
         <v-col cols = "12">
-            <v-card elevation="5" color="blue lighten-5">
+            <v-card elevation="5" >
                 <v-tabs center-active v-model="tab">
-                    <v-tabs-slider color="blue"></v-tabs-slider>
                     <v-tab
                         v-for="item in tabItems"
                         :key="item.name"
+                        :value="item.name"
                         class="tab-theme"
+                        bg-color="primary"
                     >
-                        <GhdQueueSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'Work queue'"/> 
+                        <GhdQueueSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'General work queue'"/> 
                         <GhdShareSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'Shared with me'"/>  
                         <GhdStarSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'My scenarios'"/>  
                         {{ item.name }} ( {{ item.count }} )
@@ -17,9 +18,9 @@
                     <v-spacer></v-spacer>
                     <v-col cols = "1"></v-col>
                 </v-tabs>
-                <v-window v-model="tab">
-                    <v-window-item>
-                        <v-col cols = "12">
+                <v-window v-model="tab" style="background-color: #d9e0ed;">
+                    <v-window-item value="My scenarios">
+                         <v-col cols = "12">
                             <v-card elevation="5">
                                 <v-card-title>
                                     <v-col cols = "6">
@@ -28,10 +29,11 @@
                                                 id="Scenarios-searchScenarios-textField"
                                                 type="text"
                                                 placeholder="Search in scenarios"
-                                                prepend-inner-icon=$vuetify.icons.ghd-search
                                                 hide-details
                                                 single-line
                                                 v-model="searchMine"
+                                                prepend-inner-icon=ghd-search 
+
                                                 outline
                                                 clearable
                                                 @click:clear="onMineClearClick()"
@@ -84,15 +86,21 @@
                                         </v-btn>
                                     </v-row>
                                 </v-card-title>
-                                <v-data-table
-                                    id="Scenarios-scenarios-datatable"
+                                <v-data-table-server
                                     :items="currentUserScenariosPage"                      
-                                    :totalItems="totalUserScenarios"
+                                    :items-length="totalUserScenarios"
                                     :pagination.sync="userScenariosPagination"
                                     :headers="scenarioGridHeaders"
-                                    sort-icon=$vuetify.icons.ghd-table-sort
-                                    
-                                    calculate-widths
+                                    :items-per-page-options="[
+                                        {value: 5, title: '5'},
+                                        {value: 10, title: '10'},
+                                        {value: 25, title: '25'},
+                                    ]"
+                                    v-model:sort-by="userScenariosPagination.sort"
+                                    v-model:page="userScenariosPagination.page"
+                                    v-model:items-per-page="userScenariosPagination.rowsPerPage"
+                                    item-value="name"
+                                    @update:options="onUserScenariosPagination"
                                 >
                                     <template slot="items" slot-scope="props" v-slot:item="props">
                                         <td>
@@ -173,7 +181,7 @@
                                         <td>{{ props.item.runTime }}</td>
                                         <td>{{ props.item.reportStatus }}</td>
                                         <td>
-                                            <v-menu offset location="left">
+                                            <v-menu  location="left">
                                                 <template
                                                     v-slot:activator="{
                                                         props
@@ -191,7 +199,7 @@
                                                 </template>
 
                                                 <v-list>
-                                                    <v-list-tile
+                                                    <v-list-item
                                                         v-for="(item,i) in actionItems"
                                                         :key="i"
                                                         @click="OnActionTaken(
@@ -200,17 +208,17 @@
                                                                 props.item,
                                                                 true) "
                                                         class="menu-style">
-                                                        <v-list-tile-title icon>
+                                                        <v-list-item-title icon>
                                                             <img v-if="item.isCustomIcon" style="padding-right:5px" v-bind:src="item.icon"/>
                                                             <v-icon v-else class="action-icon-padding">{{ item.icon}}</v-icon> 
                                                             {{item.title}}
-                                                        </v-list-tile-title>
-                                                    </v-list-tile>
+                                                        </v-list-item-title>
+                                                    </v-list-item>
                                                 </v-list>
                                             </v-menu>
                                         </td>
                                     </template>
-                                    <v-alert
+                                    <!-- <v-alert
                                         :model-value="hasMineSearch()"
                                         class="ara-orange-bg"
                                         icon="fas fa-exclamation"
@@ -218,13 +226,13 @@
                                     >
                                         Your search for "{{ currentSearchMine }}" found
                                         no results.
-                                    </v-alert>
-                                </v-data-table>
+                                    </v-alert> -->
+                                </v-data-table-server>
                             </v-card>
                         </v-col>
                     </v-window-item>
-                    <v-window-item>
-                        <v-col cols = "12">
+                    <v-window-item value="Shared with me">
+                       <v-col cols = "12">
                             <v-card elevation="5">
                                 <v-card-title>
                                     <v-col cols = "6">
@@ -234,7 +242,6 @@
                                                 label="Search"
                                                 placeholder="Search in scenarios"
                                                 outline
-                                                prepend-inner-icon=$vuetify.icons.ghd-search
                                                 hide-details
                                                 single-line
                                                 v-model="searchShared"
@@ -278,15 +285,24 @@
                                         
                                     </v-col>
                                 </v-card-title>
-                                <v-data-table
+                                <v-data-table-server
                                     :items="currentSharedScenariosPage"                      
-                                    :totalItems="totalSharedScenarios"
+                                    :items-length="totalSharedScenarios"
                                     :pagination.sync="sharedScenariosPagination"
                                     :headers="scenarioGridHeaders"
-                                    sort-icon=$vuetify.icons.ghd-table-sort
+                                    :items-per-page-options="[
+                                        {value: 5, title: '5'},
+                                        {value: 10, title: '10'},
+                                        {value: 25, title: '25'},
+                                    ]"
+                                    v-model:sort-by="sharedScenariosPagination.sort"
+                                    v-model:page="sharedScenariosPagination.page"
+                                    v-model:items-per-page="sharedScenariosPagination.rowsPerPage"
+                                    item-value="name"
+                                    @update:options="onSharedScenariosPagination"
                                 >
                                     <template slot="items" slot-scope="props" v-slot:item="props">
-
+                                    <tr>
                                         <td>
                                             <v-edit-dialog
                                                 size="large"
@@ -364,7 +380,7 @@
                                         <td>{{ props.item.runTime }}</td>
                                         <td>{{ props.item.reportStatus }}</td>
                                         <td>
-                                            <v-menu offset location="left">
+                                            <v-menu >
                                                 <template
                                                     v-slot:activator="{
                                                         props
@@ -381,34 +397,26 @@
                                                 </template>
 
                                                 <v-list>
-                                                    <v-list-tile v-for="(item,i) in actionItemsForSharedScenario"
+                                                    <v-list-item v-for="(item,i) in actionItemsForSharedScenario"
                                                         :key="i"
                                                         @click="OnActionTaken(item.action,props.item.users,props.item,false)"
                                                         class="menu-style">
-                                                        <v-list-tile-title icon>                                                        
+                                                        <v-list-item-title icon>                                                        
                                                             <img v-if="item.isCustomIcon" style="padding-right:5px" v-bind:src="item.icon"/>
                                                             <v-icon v-else class="action-icon-padding">{{ item.icon}}</v-icon>  
                                                             {{item.title}}
-                                                        </v-list-tile-title>
-                                                    </v-list-tile>
+                                                        </v-list-item-title>
+                                                    </v-list-item>
                                                 </v-list>
                                             </v-menu>
                                         </td>
-                                    </template>
-                                    <template v-slot:no-data v-if="hasSharedSearch()">
-                                        <v-alert
-                                            :model-value="true"
-                                            class="ara-orange-bg"
-                                            icon="fas fa-exclamation">
-                                            Your search for "{{ currentSearchShared }}"
-                                            found no results.
-                                        </v-alert>
-                                    </template>                                 
-                                </v-data-table>
+                                        </tr>
+                                    </template>                                                                 
+                                </v-data-table-server>
                             </v-card>
                         </v-col>
                     </v-window-item>
-                    <v-window-item>
+                    <v-window-item value="General work queue">
                         <v-col cols = "12">
                             <v-card elevation="5">
                                 <v-card-title class="ghd-dialog-padding-top-title">
@@ -417,12 +425,22 @@
                                     </v-row>
 
                                 </v-card-title>
-                                <v-data-table
+                                <v-data-table-server
                                     :headers="workQueueGridHeaders"
-                                    :items="currentWorkQueuePage"
                                     :totalItems="totalQueuedSimulations"
                                     :pagination.sync="workQueuePagination"
-                                    sort-icon=$vuetify.icons.ghd-table-sort
+                                    :items="currentWorkQueuePage"                      
+                                    :items-length="totalQueuedSimulations"
+                                    :items-per-page-options="[
+                                        {value: 5, title: '5'},
+                                        {value: 10, title: '10'},
+                                        {value: 25, title: '25'},
+                                    ]"
+                                    v-model:sort-by="workQueuePagination.sort"
+                                    v-model:page="workQueuePagination.page"
+                                    v-model:items-per-page="workQueuePagination.rowsPerPage"
+                                    item-value="name"
+                                    @update:options="onWorkQueuePagination"
                                 >                           
                                     <template slot="items" slot-scope="props" v-slot:item="props">
                                         <td>{{ props.item.queuePosition }}</td>
@@ -447,7 +465,7 @@
                                         <td>{{ props.item.previousRunTime }}</td>
                                         <td>{{ props.item.status }}</td>  
                                         <td>
-                                            <v-menu offset location="left">
+                                            <v-menu location="left">
                                                 <template
                                                     v-slot:activator="{
                                                         props
@@ -479,19 +497,29 @@
                                     <template v-slot:no-data>
                                         {{ getEmptyWorkQueueMessage() }}
                                     </template>
-                                </v-data-table>
+                                </v-data-table-server>
                                 <v-card-title class="ghd-dialog-padding-top-title">
                                     <v-row justify-start>
                                     <div class="dialog-header"><h5>Fast Queue</h5></div>
                                     </v-row>
 
                                 </v-card-title>
-                                <v-data-table
+                                <v-data-table-server
                                     :headers="workQueueGridHeaders"
                                     :items="currentFastWorkQueuePage"
                                     :totalItems="totalFastQueuedItems"
-                                    :pagination.sync="fastWorkQueuePagination"
-                                    sort-icon=$vuetify.icons.ghd-table-sort
+                                    :pagination.sync="fastWorkQueuePagination"                  
+                                    :items-length="totalFastQueuedItems"
+                                    :items-per-page-options="[
+                                        {value: 5, title: '5'},
+                                        {value: 10, title: '10'},
+                                        {value: 25, title: '25'},
+                                    ]"
+                                    v-model:sort-by="fastWorkQueuePagination.sort"
+                                    v-model:page="fastWorkQueuePagination.page"
+                                    v-model:items-per-page="fastWorkQueuePagination.rowsPerPage"
+                                    item-value="name"
+                                    @update:options="onFastWorkQueuePagination"
                                 >                           
                                     <template slot="items" slot-scope="props" v-slot:item="props">
                                         <td>{{ props.item.queuePosition }}</td>
@@ -516,7 +544,7 @@
                                         <td>{{ props.item.previousRunTime }}</td>
                                         <td>{{ props.item.status }}</td>  
                                         <td>
-                                            <v-menu offset left>
+                                            <v-menu  left>
                                                 <template
                                                     v-slot:activator="{
                                                         props
@@ -532,15 +560,15 @@
                                                 </template>
 
                                                 <v-list>
-                                                    <v-list-tile v-for="(item,i) in actionItemsForFastWorkQueue"
+                                                    <v-list-item v-for="(item,i) in actionItemsForFastWorkQueue"
                                                         :key="i"
                                                         @click="OnWorkQueueActionTaken(item.action,props.item)"
                                                         class="menu-style">
-                                                        <v-list-tile-title icon>                                                        
+                                                        <v-list-item-title icon>                                                        
                                                             <img style="padding-right:5px" v-bind:src="item.icon"/>
                                                             {{item.title}}
-                                                        </v-list-tile-title>
-                                                    </v-list-tile>
+                                                        </v-list-item-title>
+                                                    </v-list-item>
                                                 </v-list>
                                             </v-menu>
                                         </td>
@@ -548,7 +576,7 @@
                                     <template v-slot:no-data>
                                         {{ getEmptyWorkQueueMessage() }}
                                     </template>
-                                </v-data-table>
+                                </v-data-table-server>
                             </v-card>
                         </v-col>
                     </v-window-item>
@@ -559,14 +587,14 @@
          <ConfirmAnalysisRunAlertPrehecks
             :dialogDataPreChecks="onSecondConfirmAnalysisRunAlertData"
             @submit="onSecondConfirmAnalysisRunAlertSubmit"
-        />
-        -->
-         <ConfirmAnalysisRunAlertWithButtons :is="Alert" 
+        /> -->
+       
+         <AlertWithButtons
             :dialogDataWithButtons="confirmAnalysisRunAlertData"
             @submit="onConfirmAnalysisRunAlertSubmit"
             />
 
-        <ConfirmConvertToRelationalAlert :is="Alert"
+        <Alert
             :dialogData="ConfirmConvertJsonToRelationalData"
             @submit="onConfirmConvertJsonToRelationalAlertSubmit"
         />
@@ -578,17 +606,17 @@
             @submit="onShareScenarioDialogSubmit"
         />
 
-        <ConfirmCloneScenarioAlert :is="Alert"
+        <Alert
             :dialogData="confirmCloneScenarioAlertData"
             @submit="onConfirmCloneScenarioAlertSubmit"
         />
 
-        <ConfirmDeleteAlert :is="Alert"
+        <Alert
             :dialogData="confirmDeleteAlertData"
             @submit="onConfirmDeleteAlertSubmit"
         />
        
-        <ConfirmCancelAlert :is="Alert"
+        <Alert
             :dialogData="confirmCancelAlertData"
             @submit="onConfirmCancelAlertSubmit"
         />
@@ -597,8 +625,7 @@
             :showDialog="showCreateScenarioDialog"
             @submit="onCreateScenarioDialogSubmit"
         />
-        <!-- missing implemtation
-            <FilterScenarioList
+        <FilterScenarioList
             :showDialog="showSharedFilterScenarioList"
             @submit="onFilterSharedScenarioListSubmit"
         />
@@ -606,7 +633,7 @@
             :showDialog="showFilterScenarioList"
             @submit="onFilterScenarioListSubmit"
         />
-        -->
+       
 
         <CloneScenarioDialog
             :dialogData="cloneScenarioDialogData"
@@ -622,7 +649,7 @@
             :dialogData="alertDataForDeletingCommittedProjects"
             @submit="onDeleteCommittedProjectsSubmit"
         />
-        <CommittedProjectsFileUploaderDialog :is="ImportExportCommittedProjectsDialog" 
+        <ImportExportCommittedProjectsDialog
             :showDialog="showImportExportCommittedProjectsDialog"
             @submit="onSubmitImportExportCommittedProjectsDialogResult"
             @delete="onDeleteCommittedProjects"
@@ -631,7 +658,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, onMounted, inject } from 'vue'; 
+import { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, onMounted, inject, readonly, computed, reactive } from 'vue'; 
 import moment from 'moment';
 import {
     emptyScenario,
@@ -694,245 +721,246 @@ import ScenarioService from '@/services/scenario.service';
 import { useStore } from 'vuex'; 
 import { useRouter } from 'vue-router'; 
 import mitt from 'mitt';
+import $vuetify from '@/plugins/vuetify';
+import { onBeforeMount } from 'vue';
 
     let store = useStore(); 
     const $router = useRouter();     
     const $emitter = mitt()
+    
+    const stateNetworks = computed<Network[]>(() => store.state.networkModule.networks) ;
+    const stateScenarios = computed<Scenario[]>(() => store.state.scenarioModule.scenarios); 
 
-    const stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks) ;
-    const stateScenarios: Scenario[] = shallowReactive(store.state.scenarioModule.scenarios); 
+    const stateSharedScenariosPage = computed<Scenario[]>(() => store.state.scenarioModule.currentSharedScenariosPage) ;
+    const stateUserScenariosPage = computed<Scenario[]>(() => store.state.scenarioModule.currentUserScenarioPage) ;
 
-    const stateSharedScenariosPage: Scenario[] = shallowReactive(store.state.scenarioModule.currentSharedScenariosPage) ;
-    const stateUserScenariosPage: Scenario[] = shallowReactive(store.state.scenarioModule.currentUserScenarioPage) ;
+    let stateTotalSharedScenarios = computed<number>(() => store.state.scenarioModule.totalSharedScenarios) ;
+    let stateTotalUserScenarios = computed<number>(() => store.state.scenarioModule.totalUserScenarios) ;
 
-    let stateTotalSharedScenarios: ShallowRef<number> = shallowRef(store.state.scenarioModule.totalSharedScenarios) ;
-    let stateTotalUserScenarios: ShallowRef<number> = shallowRef(store.state.scenarioModule.totalUserScenarios) ;
+    const stateWorkQueuePage = computed<QueuedWork[]>(() => store.state.scenarioModule.currentWorkQueuePage) ;
+    let stateTotalQueuedSimulations = computed<number>(() => store.state.scenarioModule.totalQueuedSimulations) ;
+    const stateFastWorkQueuePage = computed<QueuedWork[]>(() => store.state.scenarioModule.currentFastWorkQueuePage);
+    let stateTotalFastQueuedItems = computed<number>(() => store.state.scenarioModule.totalFastQueuedItems);
 
-    const stateWorkQueuePage: QueuedWork[] = shallowReactive(store.state.scenarioModule.currentWorkQueuePage) ;
-    let stateTotalQueuedSimulations: ShallowRef<number> = shallowRef(store.state.scenarioModule.totalQueuedSimulations) ;
-    const stateFastWorkQueuePage: QueuedWork[] = shallowReactive(store.state.scenarioModule.currentFastWorkQueuePage);
-    let stateTotalFastQueuedItems: ShallowRef<number> = shallowRef(store.state.scenarioModule.totalFastQueuedItems);
-
-    // let navigation: any[] = (store.state.breadcrumbModule.navigation) ; 
 
     let authenticated:boolean = (store.state.authenticationModule.authenticated);
     let userId: string = (store.state.authenticationModule.userId);
     let hasAdminAccess: boolean = (store.state.authenticationModule.hasAdminAccess) ; 
     let hasSimulationAccess:boolean = (store.state.authenticationModule.hasSimulationAccess) ; 
 
-    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification')}
-    async function addWarningNotificationAction(payload?: any): Promise<any>{await store.dispatch('addWarningNotification')}
-    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification')}
-    async function addInfoNotificationAction(payload?: any): Promise<any>{await store.dispatch('addInfoNotification')}
-    async function getScenariosAction(payload?: any): Promise<any>{await store.dispatch('getScenarios')}
-    async function getSharedScenariosPageAction(payload?: any): Promise<any>{await store.dispatch('getSharedScenariosPage')}
-    async function createScenarioAction(payload?: any): Promise<any>{await store.dispatch('createScenario')}
-    async function cloneScenarioAction(payload?: any): Promise<any>{await store.dispatch('cloneScenario')}
+    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification', payload)}
+    async function addWarningNotificationAction(payload?: any): Promise<any>{await store.dispatch('addWarningNotification', payload)}
+    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification', payload)}
+    async function addInfoNotificationAction(payload?: any): Promise<any>{await store.dispatch('addInfoNotification', payload)}
+    async function getScenariosAction(payload?: any): Promise<any>{await store.dispatch('getScenarios', payload)}
+    async function getSharedScenariosPageAction(payload?: any): Promise<any>{await store.dispatch('getSharedScenariosPage', payload)}
+    async function createScenarioAction(payload?: any): Promise<any>{await store.dispatch('createScenario', payload)}
+    async function cloneScenarioAction(payload?: any): Promise<any>{await store.dispatch('cloneScenario', payload)}
 
-    async function updateScenarioAction(payload?: any): Promise<any>{await store.dispatch('updateScenario')}
-    async function deleteScenarioAction(payload?: any): Promise<any>{await store.dispatch('deleteScenario')}
-    async function cancelWorkQueueItemAction(payload?: any): Promise<any>{await store.dispatch('cancelWorkQueueItem')}
-    async function cancelFastQueueItemAction(payload?: any): Promise<any>{await store.dispatch('cancelFastQueueItem')}
-    async function runSimulationAction(payload?: any): Promise<any>{await store.dispatch('runSimulation')}
+    async function updateScenarioAction(payload?: any): Promise<any>{await store.dispatch('updateScenario', payload)}
+    async function deleteScenarioAction(payload?: any): Promise<any>{await store.dispatch('deleteScenario', payload)}
+    async function cancelWorkQueueItemAction(payload?: any): Promise<any>{await store.dispatch('cancelWorkQueueItem', payload)}
+    async function cancelFastQueueItemAction(payload?: any): Promise<any>{await store.dispatch('cancelFastQueueItem', payload)}
+    async function runSimulationAction(payload?: any): Promise<any>{await store.dispatch('runSimulation', payload)}
 
-    async function migrateLegacySimulationDataAction(payload?: any): Promise<any>{await store.dispatch('migrateLegacySimulationData')}
-    async function updateSimulationAnalysisDetailAction(payload?: any): Promise<any>{await store.dispatch('updateSimulationAnalysisDetail')}
-    async function updateSimulationReportDetailAction(payload?: any): Promise<any>{await store.dispatch('updateSimulationReportDetail')}
-    async function updateNetworkRollupDetailAction(payload?: any): Promise<any>{await store.dispatch('updateNetworkRollupDetail')}
+    async function migrateLegacySimulationDataAction(payload?: any): Promise<any>{await store.dispatch('migrateLegacySimulationData', payload)}
+    async function updateSimulationAnalysisDetailAction(payload?: any): Promise<any>{await store.dispatch('updateSimulationAnalysisDetail', payload)}
+    async function updateSimulationReportDetailAction(payload?: any): Promise<any>{await store.dispatch('updateSimulationReportDetail', payload)}
+    async function updateNetworkRollupDetailAction(payload?: any): Promise<any>{await store.dispatch('updateNetworkRollupDetail', payload)}
 
-    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario')} 
-    async function upsertBenefitQuantifierAction(payload?: any): Promise<any>{await store.dispatch('upsertBenefitQuantifier')} 
+    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario', payload)} 
+    async function upsertBenefitQuantifierAction(payload?: any): Promise<any>{await store.dispatch('upsertBenefitQuantifier', payload)} 
     async function aggregateNetworkDataAction(payload?: any): Promise<any>{await store.dispatch('aggregateNetworkData')} 
-    async function getUserScenariosPageAction(payload?: any): Promise<any>{await store.dispatch('getUserScenariosPage')}
+    async function getUserScenariosPageAction(payload?: any): Promise<any>{await store.dispatch('getUserScenariosPage', payload)}
 
-    async function updateQueuedWorkStatusAction(payload?: any): Promise<any>{await store.dispatch('updateQueuedWorkStatus')} 
-    async function getWorkQueuePageAction(payload?: any): Promise<any>{await store.dispatch('getWorkQueuePage')} 
-    async function getFastWorkQueuePageAction(payload?: any): Promise<any>{await store.dispatch('getFastWorkQueuePage')} 
-    async function updateFastQueuedWorkStatusAction(payload?: any): Promise<any>{await store.dispatch('updateFastQueuedWorkStatus')} 
+    async function updateQueuedWorkStatusAction(payload?: any): Promise<any>{await store.dispatch('updateQueuedWorkStatus', payload)} 
+    async function getWorkQueuePageAction(payload?: any): Promise<any>{await store.dispatch('getWorkQueuePage', payload)} 
+    async function getFastWorkQueuePageAction(payload?: any): Promise<any>{await store.dispatch('getFastWorkQueuePage', payload)} 
+    async function updateFastQueuedWorkStatusAction(payload?: any): Promise<any>{await store.dispatch('updateFastQueuedWorkStatus', payload)} 
     
     let networks: Network[] = [];
-    let scenarioGridHeaders: DataTableHeader[] = [
+    let scenarioGridHeaders: any = [
         {
-            text: 'Scenario',
-            value: 'name',
+            title: 'Scenario',
+            key: 'name',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Creator',
-            value: 'creator',
+            title: 'Creator',
+            key: 'creator',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Owner',
-            value: 'owner',
+            title: 'Owner',
+            key: 'owner',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Network',
-            value: 'network',
+            title: 'Network',
+            key: 'network',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Date Created',
-            value: 'createdDate',
+            title: 'Date Created',
+            key: 'createdDate',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Date Last Modified',
-            value: 'lastModifiedDate',
+            title: 'Date Last Modified',
+            key: 'lastModifiedDate',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Date Last Run',
-            value: 'lastRun',
+            title: 'Date Last Run',
+            key: 'lastRun',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Status',
-            value: 'status',
+            title: 'Status',
+            key: 'status',
             align: 'left',
             sortable: false,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Run Time',
-            value: 'runTime',
+            title: 'Run Time',
+            key: 'runTime',
             align: 'left',
             sortable: false,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Report Status',
-            value: 'reportStatus',
+            title: 'Report Status',
+            key: 'reportStatus',
             align: 'left',
             sortable: false,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Action',
-            value: 'actions',
+            title: 'Action',
+            key: 'actions',
             align: 'left',
             sortable: false,
             class: 'header-border',
             width: '',
         },
         {
-            text: '',
-            value: '',
+            title: '',
+            key: '',
             align: 'left',
             sortable: false,
             class: 'header-border',
             width: '',
         },
     ];
-    let workQueueGridHeaders: DataTableHeader[] = [
+    let workQueueGridHeaders: any[] = [
         {
-            text: 'Queue Position',
-            value: 'queuePosition',
+            title: 'Queue Position',
+            key: 'queuePosition',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },        
         {
-            text: 'Name',
-            value: 'name',
+            title: 'Name',
+            key: 'name',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Description',
-            value: 'workDescription',
+            title: 'Description',
+            key: 'workDescription',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Queued By',
-            value: 'queueingUser',
+            title: 'Queued By',
+            key: 'queueingUser',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Queued Time',
-            value: 'queueEntryTimestamp',
+            title: 'Queued Time',
+            key: 'queueEntryTimestamp',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Start Time',
-            value: 'workStartedTimestamp',
+            title: 'Start Time',
+            key: 'workStartedTimestamp',
             align: 'left',
             sortable: true,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Current Run Time',
-            value: 'currentRunTime',
+            title: 'Current Run Time',
+            key: 'currentRunTime',
             align: 'left',
             sortable: false,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Previous Run Time',
-            value: 'previousRunTime',
+            title: 'Previous Run Time',
+            key: 'previousRunTime',
             align: 'left',
             sortable: false,
             class: 'header-border',
             width: '',
         },        
         {
-            text: 'Status',
-            value: 'status',
+            title: 'Status',
+            key: 'status',
             align: 'left',
             sortable: false,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Action',
-            value: 'actions',
+            title: 'Action',
+            key: 'actions',
             align: 'left',
             sortable: false,
             class: 'header-border',
             width: '',
         },
         {
-            text: '',
-            value: '',
+            title: '',
+            key: '',
             align: 'left',
             sortable: false,
             class: 'header-border',
@@ -944,8 +972,8 @@ import mitt from 'mitt';
     let actionItemsForSharedScenario: ScenarioActions[] = [];
     let actionItemsForWorkQueue: ScenarioActions[] = [];
     let actionItemsForFastWorkQueue: ScenarioActions[] = [];
-    let tabItems: TabItems[] = [];
-    let tab: string = '';
+    const tabItems: TabItems[] = reactive([]);
+    let tab = ref('');
     let availableActions: any;
     let availableSimulationActions: any;
     let nameUpdate: string = '';
@@ -953,44 +981,44 @@ import mitt from 'mitt';
     let scenarios: Scenario[] = [];
 
     let userScenarios: Scenario[] = [];
-    let currentUserScenariosPage: Scenario[] = []
+    let currentUserScenariosPage = ref<Scenario[]>([])
     const userScenariosPagination: Pagination = shallowReactive(clone(emptyPagination));
 
     let totalUserScenarios: ShallowRef<number> = shallowRef(0);
 
     let sharedScenarios: Scenario[] = [];
-    let currentSharedScenariosPage: Scenario[] = [];
+    let currentSharedScenariosPage: Ref<Scenario[]> = ref([]);
     const sharedScenariosPagination: Pagination = shallowReactive(clone(emptyPagination));    
     let totalSharedScenarios = ref<number>(0);
     let initializing: boolean = true;
     
-    let searchMine: string = '';
-    let currentSearchMine: string = ''
+    let searchMine = ref('');
+    let currentSearchMine = ref('')
     let sortedMineCategory: string = '';
     let sortedMineValue: string = '';
     let sortedCategory: string = '';
     let sortedValue: string = '';
-    let searchShared: string = '';
+    let searchShared = ref('');
     let currentSearchShared: string = '';
     //confirmRollupAlertData: AlertData = clone(emptyAlertData);
     //showCreateNetworkDialog: boolean = false;
-    let reportsDownloaderDialogData: ReportsDownloaderDialogData = clone(emptyReportsDownloadDialogData,);
+    let reportsDownloaderDialogData= ref(clone(emptyReportsDownloadDialogData));
 
-    let confirmAnalysisRunAlertData: AlertData = clone(emptyAlertData);
-    let shareScenarioDialogData: ShareScenarioDialogData = clone(emptyShareScenarioDialogData,);
+    let confirmAnalysisRunAlertData= ref(clone(emptyAlertDataWithButtons));
+    let shareScenarioDialogData = ref(clone(emptyShareScenarioDialogData));
     
-    let ConfirmConvertJsonToRelationalData: AlertData = clone(emptyAlertData);
-    let confirmCloneScenarioAlertData: AlertData = clone(emptyAlertData);
-    let cloneScenarioDialogData: CloneScenarioDialogData = clone(emptyCloneScenarioDialogData);
-    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
-    let confirmCancelAlertData: AlertData = clone(emptyAlertData);
-    let showCreateScenarioDialog: boolean = false;
+    let ConfirmConvertJsonToRelationalData = ref(clone(emptyAlertData));
+    let confirmCloneScenarioAlertData  = ref(clone(emptyAlertData));
+    let cloneScenarioDialogData = ref(clone(emptyCloneScenarioDialogData));
+    let confirmDeleteAlertData = ref(clone(emptyAlertData));
+    let confirmCancelAlertData = ref(clone(emptyAlertData));
+    let showCreateScenarioDialog = ref(false);
     let selectedScenario: Scenario = clone(emptyScenario);   
     let networkDataAssignmentStatus: string = '';
     let rules: InputValidationRules = validationRules;
     let showMigrateLegacySimulationDialog: boolean = false;
     let showImportExportCommittedProjectsDialog: boolean = false;
-    let alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
+    let alertDataForDeletingCommittedProjects = ref({ ...emptyAlertData });
     let selectedScenarioId: string = "";
     
     let currentWorkQueuePage: QueuedWork[] = [];
@@ -1006,28 +1034,30 @@ import mitt from 'mitt';
     let selectedFastQueuedWork: QueuedWork = clone(emptyQueuedWork);
 
     let aggragateDialogData: any = { showDialog: false };
+    let showFilterScenarioList = ref(false);
+    let showSharedFilterScenarioList = ref(false)
 
-    watch(stateNetworks, onStateNetworksChanged) 
-    function onStateNetworksChanged() {
-        networks = clone(stateNetworks);
+    watch(stateNetworks, onstateNetworksChanged) 
+    function onstateNetworksChanged() {
+        networks = clone(stateNetworks.value);
         if (hasValue(networks)) {
             initializeScenarioPages()
         }
     }
  
-    watch(stateScenarios, onStateScenariosChanged) 
-    function onStateScenariosChanged() {
-        scenarios = clone(stateScenarios);
+    watch(stateScenarios, onstateScenariosChanged) 
+    function onstateScenariosChanged() {
+        scenarios = clone(stateScenarios.value);
     }
 
-    watch(stateSharedScenariosPage, onStateSharedScenariosPageChanged) 
-    function onStateSharedScenariosPageChanged(){
-        currentSharedScenariosPage = clone(stateSharedScenariosPage);
+    watch(stateSharedScenariosPage, onstateSharedScenariosPageChanged) 
+    function onstateSharedScenariosPageChanged(){
+        currentSharedScenariosPage.value = clone(stateSharedScenariosPage.value);
     }
 
     watch(stateTotalSharedScenarios, onStateTotalSharedScenariosChanged) 
     function onStateTotalSharedScenariosChanged(){
-        totalSharedScenarios = stateTotalSharedScenarios;
+        totalSharedScenarios.value = stateTotalSharedScenarios.value;
     }
     watch(totalSharedScenarios, onTotalSharedScenariosChanged) 
     function onTotalSharedScenariosChanged(){
@@ -1036,12 +1066,12 @@ import mitt from 'mitt';
 
     watch(stateUserScenariosPage, onStateUserScenariosPageChanged) 
     function onStateUserScenariosPageChanged(){
-        currentUserScenariosPage = clone(stateUserScenariosPage);
+        currentUserScenariosPage.value = clone(stateUserScenariosPage.value);
     }
 
     watch(stateTotalUserScenarios, onStateTotalUserScenariosChanged) 
     function onStateTotalUserScenariosChanged(){
-        totalUserScenarios = stateTotalUserScenarios;
+        totalUserScenarios.value = stateTotalUserScenarios.value;
     }
     watch(totalUserScenarios, onTotalUserScenariosChanged) 
     function onTotalUserScenariosChanged(){
@@ -1050,12 +1080,12 @@ import mitt from 'mitt';
     
     watch(stateWorkQueuePage, onStateWorkQueuePageChanged) 
     function onStateWorkQueuePageChanged(){
-        currentWorkQueuePage = clone(stateWorkQueuePage);
+        currentWorkQueuePage = clone(stateWorkQueuePage.value);
     }
 
     watch(stateTotalQueuedSimulations, onStateTotalQueuedSimulations) 
     function onStateTotalQueuedSimulations(){
-        totalQueuedSimulations = stateTotalQueuedSimulations;
+        totalQueuedSimulations.value = stateTotalQueuedSimulations.value;
     }
     watch(totalQueuedSimulations, onTotalQueuedSimulationsChanged) 
     function onTotalQueuedSimulationsChanged(){
@@ -1064,12 +1094,12 @@ import mitt from 'mitt';
 
     watch(stateFastWorkQueuePage, onStateFastWorkQueuePageChanged) 
     function onStateFastWorkQueuePageChanged(){
-        currentFastWorkQueuePage = clone(stateFastWorkQueuePage);
+        currentFastWorkQueuePage = clone(stateFastWorkQueuePage.value);
     }
 
     watch(stateTotalFastQueuedItems, onStateTotalFastQueuedItemsChanged) 
     function onStateTotalFastQueuedItemsChanged(){
-        totalFastQueuedItems = stateTotalFastQueuedItems;
+        totalFastQueuedItems.value = stateTotalFastQueuedItems.value;
     }
   
     watch(totalFastQueuedItems, onTotalFastQueuedItemsChanged) 
@@ -1077,11 +1107,10 @@ import mitt from 'mitt';
         setTabTotals();
     }
 
-    watch(userScenariosPagination, onUserScenariosPagination) 
     function onUserScenariosPagination() {
         if(initializing)
             return;
-        const { sortBy, descending, page, rowsPerPage } = userScenariosPagination;
+        const { sort, descending, page, rowsPerPage } = userScenariosPagination;
 
         const request: PagingRequest<Scenario>= {
             page: page,
@@ -1093,19 +1122,18 @@ import mitt from 'mitt';
                 addedRows: [],
                 isModified: false,
             },           
-            sortColumn: sortBy != null ? sortBy : '',
-            isDescending: descending != null ? descending : false,
-            search: currentSearchMine
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
+            search: currentSearchMine.value
         };
         if(hasValue(networks) )
             getUserScenariosPageAction(request); 
     }
 
-    watch(sharedScenariosPagination, onSharedScenariosPagination) 
-    function onSharedScenariosPagination() {
+    function onSharedScenariosPagination(pageEvent?: { page: number, itemsPerPage: number, sortBy: string[] }) {
         if(initializing)
             return;
-        const { sortBy, descending, page, rowsPerPage } = sharedScenariosPagination;
+        const { sort, descending, page, rowsPerPage } = sharedScenariosPagination;
 
         const request: PagingRequest<Scenario>= {
             page: page,
@@ -1117,8 +1145,8 @@ import mitt from 'mitt';
                 addedRows: [],
                 isModified: false,
             },           
-            sortColumn: sortBy != null ? sortBy : '',
-            isDescending: descending != null ? descending : false,
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: currentSearchShared
         };
         if(hasValue(networks) )
@@ -1143,7 +1171,7 @@ import mitt from 'mitt';
             },           
             sortColumn: sortBy != null ? sortBy : '',
             isDescending: descending != null ? descending : false,
-            search: currentSearchMine
+            search: currentSearchMine.value
         };
 
         if(hasValue(networks))
@@ -1206,9 +1234,8 @@ import mitt from 'mitt';
         getFastWorkQueuePageAction(workQueueRequest);    
     }
 
-    onMounted(() => mounted);
-    function mounted() {
-        networks = clone(stateNetworks);
+    onBeforeMount(() => {
+        networks = clone(stateNetworks.value);
         if (hasValue(networks) ) {
             initializeScenarioPages();
         } 
@@ -1329,11 +1356,10 @@ import mitt from 'mitt';
             { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: totalSharedScenarios.value },
             { name: 'General work queue', icon: require("@/assets/icons/queue.svg"), count: totalQueuedSimulations.value },
         );
-        tab = 'My scenarios';
-    }
+        tab.value = 'My scenarios';
+    });
 
-    onBeforeUnmount(()=> beforeDestroy); 
-    function beforeDestroy() {
+    onBeforeUnmount(()=> {
         $emitter.off(
             Hub.BroadcastEventType.BroadcastDataMigrationEvent,
             getDataMigrationStatus,
@@ -1362,7 +1388,7 @@ import mitt from 'mitt';
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
             getReportStatus,
         );
-    }
+    }); 
 
     function initializeScenarioPages(){
         const { sortBy, descending, page, rowsPerPage } = sharedScenariosPagination;
@@ -1402,14 +1428,14 @@ import mitt from 'mitt';
             initializing = false;
             initializingWorkQueue = false;
             initializingFastWorkQueue = false;
-            totalUserScenarios = stateTotalUserScenarios;
-            totalSharedScenarios = stateTotalSharedScenarios;
-            totalQueuedSimulations = stateTotalQueuedSimulations;
-            totalFastQueuedItems = stateTotalFastQueuedItems;
-            currentUserScenariosPage = clone(stateUserScenariosPage);
-            currentSharedScenariosPage = clone(stateSharedScenariosPage);
-            currentWorkQueuePage = clone(stateWorkQueuePage);
-            currentFastWorkQueuePage = clone(stateFastWorkQueuePage);
+            totalUserScenarios.value = stateTotalUserScenarios.value;
+            totalSharedScenarios.value = stateTotalSharedScenarios.value;
+            totalQueuedSimulations.value = stateTotalQueuedSimulations.value;
+            totalFastQueuedItems.value = stateTotalFastQueuedItems.value;
+            currentUserScenariosPage.value = clone(stateUserScenariosPage.value);
+            currentSharedScenariosPage.value = clone(stateSharedScenariosPage.value);
+            currentWorkQueuePage = clone(stateWorkQueuePage.value);
+            currentFastWorkQueuePage = clone(stateFastWorkQueuePage.value);
         })))); 
     }
 
@@ -1448,14 +1474,14 @@ import mitt from 'mitt';
         scenario.name = name;
         if (hasValue(scenario.name)) {
             updateScenarioAction({ scenario: scenario }).then(() => {
-                if(tab == '0')
+                if(tab.value == '0')
                     onUserScenariosPagination();
                 else
                     onSharedScenariosPagination();
             });
         } else {
             scenarios = [];
-            setTimeout(() => (scenarios = clone(stateScenarios)));
+            setTimeout(() => (scenarios = clone(stateScenarios.value)));
         }
     }
 
@@ -1466,18 +1492,19 @@ import mitt from 'mitt';
     function onShowConfirmAnalysisRunAlert(scenario: Scenario) {
         selectedScenario = clone(scenario);
 
-        confirmAnalysisRunAlertData = {
+        confirmAnalysisRunAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
             message:
                 'Only one simulation can be run at a time. The model run you are about to queue will be ' +
                 'executed in the order in which it was received.',
+            buttons: []
         };
     }
 
     function onConfirmAnalysisRunAlertSubmit(submit: boolean) {
-        confirmAnalysisRunAlertData = clone(emptyAlertData);
+        confirmAnalysisRunAlertData.value = clone(emptyAlertDataWithButtons);
 
         if (submit && selectedScenario.id !== getBlankGuid()) {
             runSimulationAction({
@@ -1490,7 +1517,7 @@ import mitt from 'mitt';
     function onShowConfirmConvertJsonToRelationalAlert(scenario: Scenario) {
         selectedScenario = clone(scenario);
 
-        ConfirmConvertJsonToRelationalData = {
+        ConfirmConvertJsonToRelationalData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1500,7 +1527,7 @@ import mitt from 'mitt';
     }
 
     function onConfirmConvertJsonToRelationalAlertSubmit(submit: boolean) {
-        ConfirmConvertJsonToRelationalData = clone(emptyAlertData);
+        ConfirmConvertJsonToRelationalData.value = clone(emptyAlertData);
 
         if (submit && selectedScenario.id !== getBlankGuid()) {
             ScenarioService.ConvertSimulationOutputToRelational(selectedScenario.id);
@@ -1508,7 +1535,7 @@ import mitt from 'mitt';
     }
 
     function onShowReportsDownloaderDialog(scenario: Scenario) {
-        reportsDownloaderDialogData = {
+        reportsDownloaderDialogData.value = {
             showModal: true,
             scenarioId: scenario.id,
             networkId: scenario.networkId,
@@ -1545,7 +1572,7 @@ import mitt from 'mitt';
     }
 
     function onShowShareScenarioDialog(scenario: Scenario) {
-        shareScenarioDialogData = {
+        shareScenarioDialogData.value = {
             showDialog: true,
             scenario: clone(scenario),
         };
@@ -1553,11 +1580,11 @@ import mitt from 'mitt';
 
     function onShareScenarioDialogSubmit(scenarioUsers: ScenarioUser[]) {
         const scenario: Scenario = {
-            ...shareScenarioDialogData.scenario,
+            ...shareScenarioDialogData.value.scenario,
             users: [],
         };
 
-        shareScenarioDialogData = clone(emptyShareScenarioDialogData);
+        shareScenarioDialogData.value = clone(emptyShareScenarioDialogData);
 
         if (!isNil(scenarioUsers) && scenario.id !== getBlankGuid()) {
             updateScenarioAction({
@@ -1569,7 +1596,7 @@ import mitt from 'mitt';
     function onShowConfirmCloneScenarioAlert(scenario: Scenario) {
         selectedScenario = clone(scenario);
 
-        confirmCloneScenarioAlertData = {
+        confirmCloneScenarioAlertData.value = {
             showDialog: true,
             heading: 'Clone Scenario',
             choice: true,
@@ -1580,21 +1607,21 @@ import mitt from 'mitt';
     function onShowCloneScenarioDialog(scenario: Scenario) {
         selectedScenario = clone(scenario);
 
-        cloneScenarioDialogData = {
+        cloneScenarioDialogData.value = {
             showDialog: true,
             scenario: selectedScenario
         };
     }
 
     function onConfirmCloneScenarioAlertSubmit(submit: boolean) {
-        confirmCloneScenarioAlertData = clone(emptyAlertData);
+        confirmCloneScenarioAlertData.value = clone(emptyAlertData);
 
         if (submit && selectedScenario.id !== getBlankGuid()) {
             cloneScenarioAction({
                 scenarioId: selectedScenario.id,
             }).then(() => {
                 selectedScenario = clone(emptyScenario)
-                if(tab == '0')
+                if(tab.value == '0')
                     onUserScenariosPagination();
                 else
                     onSharedScenariosPagination();
@@ -1603,7 +1630,7 @@ import mitt from 'mitt';
     }
 
     function onCloneScenarioDialogSubmit(scenario: Scenario) {
-        cloneScenarioDialogData = clone(emptyCloneScenarioDialogData);
+        cloneScenarioDialogData.value = clone(emptyCloneScenarioDialogData);
 
         if (!isNil(scenario)) {
             cloneScenarioAction({
@@ -1620,7 +1647,7 @@ import mitt from 'mitt';
     function onShowConfirmDeleteAlert(scenario: Scenario) {
         selectedScenario = clone(scenario);
 
-        confirmDeleteAlertData = {
+        confirmDeleteAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1632,7 +1659,7 @@ import mitt from 'mitt';
     function onShowConfirmCancelAlert(simulation: QueuedWork) {
         selectedQueuedWork = clone(simulation);
 
-        confirmCancelAlertData = {
+        confirmCancelAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1643,7 +1670,7 @@ import mitt from 'mitt';
     function onShowConfirmFastCancelAlert(simulation: QueuedWork) {
         selectedFastQueuedWork = clone(simulation);
 
-        confirmCancelAlertData = {
+        confirmCancelAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1652,7 +1679,7 @@ import mitt from 'mitt';
     }
 
     function onConfirmDeleteAlertSubmit(submit: boolean) {
-        confirmDeleteAlertData = clone(emptyAlertData);
+        confirmDeleteAlertData.value = clone(emptyAlertData);
 
         if (submit && selectedScenario.id !== getBlankGuid()) {
             deleteScenarioAction({
@@ -1665,7 +1692,7 @@ import mitt from 'mitt';
     }
 
     function onConfirmCancelAlertSubmit(submit: boolean) {
-        confirmCancelAlertData = clone(emptyAlertData);
+        confirmCancelAlertData.value = clone(emptyAlertData);
 
         if (submit && selectedQueuedWork.id !== getBlankGuid() && selectedQueuedWork.id.trim() != '') {
             cancelWorkQueueItemAction({
@@ -1679,6 +1706,41 @@ import mitt from 'mitt';
                 selectedFastQueuedWork = clone(emptyQueuedWork);
             });
         }
+    }
+    function onFilterScenarioListSubmit(filterCategory:string, FilterValue:string) {
+        showFilterScenarioList.value = false;
+        sortedMineCategory = filterCategory;
+        sortedMineValue = FilterValue;
+        if ((filterCategory !=''&&!isNil(filterCategory)) && (FilterValue !=''&&!isNil(FilterValue)))
+        {
+            currentSearchMine.value = FilterValue;
+            resetPageMine();
+        }
+        else if(!isNil(filterCategory)||!isNil(FilterValue))
+        {
+            sortedMineCategory = '';
+            sortedMineValue = '';
+            currentSearchMine.value = '';
+            resetPageMine();
+        }
+    }
+    function onFilterSharedScenarioListSubmit(filterCategory:string, FilterValue:string) {
+        showSharedFilterScenarioList.value = false;
+        sortedCategory = filterCategory;
+        sortedValue = FilterValue;
+        if ((filterCategory !=''&&!isNil(filterCategory)) && (FilterValue !=''&&!isNil(FilterValue)))
+        {
+            currentSearchShared = FilterValue;
+            resetPageShared();
+        }
+        else if(!isNil(filterCategory)||!isNil(FilterValue))
+        {
+            sortedCategory = ''
+            sortedValue = ''
+            currentSearchShared = '';
+            resetPageShared();
+        }
+        
     }
 
     function getDataMigrationStatus(data: any) {
@@ -1717,7 +1779,7 @@ import mitt from 'mitt';
             var updatedQueueItem = data.queueItem as queuedWorkStatusUpdate
             if(isNil(updatedQueueItem))
                 return;
-            var queueItem = stateWorkQueuePage.find(_ => _.id === updatedQueueItem.id)
+            var queueItem = stateWorkQueuePage.value.find(_ => _.id === updatedQueueItem.id)
             if(!isNil(queueItem)){
                 updateQueuedWorkStatusAction({
                     workQueueStatusUpdate: updatedQueueItem
@@ -1736,7 +1798,7 @@ import mitt from 'mitt';
             var updatedQueueItem = data.queueItem as queuedWorkStatusUpdate
             if(isNil(updatedQueueItem))
                 return;
-            var queueItem = stateFastWorkQueuePage.find(_ => _.id === updatedQueueItem.id)
+            var queueItem = stateFastWorkQueuePage.value.find(_ => _.id === updatedQueueItem.id)
             if(!isNil(queueItem)){
                 updateFastQueuedWorkStatusAction({
                     workQueueStatusUpdate: updatedQueueItem
@@ -1758,7 +1820,7 @@ import mitt from 'mitt';
     }
 
     function onCreateScenarioDialogSubmit(scenario: Scenario) {
-        showCreateScenarioDialog = false;
+        showCreateScenarioDialog.value = false;
 
         if (!isNil(scenario)) {
             createScenarioAction({
@@ -1830,7 +1892,7 @@ import mitt from 'mitt';
     }
 
     function onDeleteCommittedProjects() {
-        alertDataForDeletingCommittedProjects = {
+        alertDataForDeletingCommittedProjects.value = {
             showDialog: true,
             heading: 'Are you sure?',
             message:
@@ -1840,7 +1902,7 @@ import mitt from 'mitt';
     }
 
     function onDeleteCommittedProjectsSubmit(doDelete: boolean) {
-        alertDataForDeletingCommittedProjects = { ...emptyAlertData };
+        alertDataForDeletingCommittedProjects.value = { ...emptyAlertData };
 
         if (doDelete) {
             CommittedProjectsService.deleteSpecificCommittedProjects(
@@ -1920,18 +1982,18 @@ import mitt from 'mitt';
     }
 
     function onMineSearchClick(){
-        currentSearchMine = searchMine;
+        currentSearchMine.value = searchMine.value;
         resetPageMine()
     }
 
     function onMineClearClick(){
-        searchMine = '';
+        searchMine.value = '';
         onMineSearchClick();
     }
     function onMineFilterClearClick(){
         sortedMineCategory = '';
         sortedMineValue = '';
-        currentSearchMine= '';
+        currentSearchMine.value= '';
         resetPageMine()
     }
 
@@ -1941,7 +2003,7 @@ import mitt from 'mitt';
     }
 
     function onSharedSearchClick(){
-        currentSearchShared = searchShared;
+        currentSearchShared = searchShared.value;
         resetPageShared()
     }
     function onSharedFilterClearClick(){
@@ -1952,7 +2014,7 @@ import mitt from 'mitt';
     }
 
     function onSharedClearClick(){
-        searchShared = '';
+        searchShared.value = '';
         onSharedSearchClick();
     }
 
@@ -1966,7 +2028,7 @@ import mitt from 'mitt';
     }
 
     function hasMineSearch(): boolean{
-        return currentSearchMine.trim() !== '';
+        return currentSearchMine.value.trim() !== '';
     }
 
     function setTabTotals(){

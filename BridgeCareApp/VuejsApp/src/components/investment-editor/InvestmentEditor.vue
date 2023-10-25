@@ -7,7 +7,6 @@
                     <v-select 
                         id="InvestmentEditor-investmentLibrary-select"
                         :items='librarySelectItems'
-                        append-icon=$vuetify.icons.ghd-down
                         variant="outlined"
                         v-model='librarySelectItemValue'
                         class="ghd-select ghd-text-field ghd-text-field-border budget-parent">
@@ -150,7 +149,7 @@
         </v-col>
         <v-col v-show='hasSelectedLibrary || hasScenario' xs12>            
         <!-- datatable -->
-            <v-col >
+            <!-- <v-col >
                 <v-data-table 
                     id="InvestmentEditor-investmentsDataTable-dataTable"
                     :headers='budgetYearsGridHeaders' 
@@ -201,7 +200,7 @@
                        class='ghd-blue ghd-button' variant = "flat">
                     Delete Selected
                 </v-btn>
-            </v-col>
+            </v-col> -->
         </v-col>
         <v-col v-show='hasSelectedLibrary && !hasScenario' xs12>
             <v-row justify-center>
@@ -273,10 +272,11 @@
         <ImportExportInvestmentBudgetsDialog :showDialog='showImportExportInvestmentBudgetsDialog'
                                              @submit='onSubmitImportExportInvestmentBudgetsDialogResult' />
     </v-row>
+    <ConfirmDialog></ConfirmDialog>
 </template>
 
-<script lang='ts' setup>
-import Vue, { shallowRef } from 'vue';
+<script setup lang='ts'>
+import { shallowRef } from 'vue';
 import SetRangeForAddingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForAddingBudgetYearsDialog.vue';
 import SetRangeForDeletingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForDeletingBudgetYearsDialog.vue';
 import EditBudgetsDialog from './investment-editor-dialogs/EditBudgetsDialog.vue';
@@ -343,8 +343,11 @@ import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import mitt from 'mitt';
+import { useConfirm } from 'primevue/useconfirm';
+import ConfirmDialog from 'primevue/confirmdialog';
 
 let store = useStore();
+const confirm = useConfirm();
 const emit = defineEmits(['submit'])
 const $router = useRouter();
 const $emitter = mitt()
@@ -1450,14 +1453,14 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
         if (hasUnsavedChanges && unsavedDialogAllowed) {
-            // @ts-ignore
-            Vue.dialog
-                .confirm(
-                    'You have unsaved changes. Are you sure you wish to continue?',
-                    { reverse: true },
-                )
-                .then(() => next())
-                .catch(() => otherwise())
+ 
+            confirm.require({
+                message: "You have unsaved changes. Are you sure you wish to continue?",
+                header: "Unsaved Changes",
+                icon: 'pi pi-question-circle',
+                accept: ()=>next(),
+                reject: ()=>otherwise()
+            });
         } 
         else {
             unsavedDialogAllowed = true;

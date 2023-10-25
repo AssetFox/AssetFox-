@@ -275,6 +275,7 @@
             :dialogData="criterionEditorDialogData"
             @submit="onSubmitCriterionEditorDialogResult"
         />
+        <ConfirmDialog></ConfirmDialog>
     </v-row>
 </template>
 <script lang="ts" setup>
@@ -344,9 +345,11 @@ import { LibraryUser } from '@/shared/models/iAM/user';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import vuetify from '@/plugins/vuetify';
+import { useConfirm } from 'primevue/useconfirm';
+import ConfirmDialog from 'primevue/confirmdialog';
 
 let store = useStore();
+const confirm = useConfirm();
 let stateCalculatedAttributeLibraries = ref<CalculatedAttributeLibrary[]>(store.state.calculatedAttributeModule.calculatedAttributeLibraries);
 let stateSelectedCalculatedAttributeLibrary = ref<CalculatedAttributeLibrary>(store.state.calculatedAttributeModule.selectedCalculatedAttributeLibrary);
 let stateScenarioCalculatedAttributes = ref<CalculatedAttribute[]>(store.state.calculatedAttributeModule.scenarioCalculatedAttributes);
@@ -1470,15 +1473,14 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
              addedCalcAttr.length > 0 ||
             ( hasSelectedLibrary && ! hasScenario && hasUnsavedChangesCore('',  selectedCalculatedAttributeLibrary,  stateSelectedCalculatedAttributeLibrary))
         if (hasUnsavedChanges &&  unsavedDialogAllowed) {
-            // @ts-ignore
-            Vue.dialog
-                .confirm(
-                    'You have unsaved changes. Are you sure you wish to continue?',
-                    { reverse: true },
-                )
-                .then(() => next())
-                .catch(() => otherwise())
 
+            confirm.require({
+                message: "You have unsaved changes. Are you sure you wish to continue?",
+                header: "Unsaved Changes",
+                icon: 'pi pi-question-circle',
+                accept: ()=>next(),
+                reject: ()=>otherwise()
+            });
         } 
         else {
              unsavedDialogAllowed = true;

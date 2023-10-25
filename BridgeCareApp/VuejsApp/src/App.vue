@@ -2,11 +2,11 @@
     <v-app class="paper-white-bg">
         <v-main>
             <v-toolbar app class="paper-white-bg">
-                <v-toolbar-title>
+                <v-toolbar-title >
                     <v-row no-gutters>
-                    <div><img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')" style="width: auto;" /></div>
-                    <div><img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')" style="width: auto;" /></div>
-                </v-row>
+                        <img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')"  />
+                        <img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')"  />
+                    </v-row>
                 </v-toolbar-title>
                 <v-toolbar-items>
                     <v-btn
@@ -182,7 +182,7 @@
                         icon
                         color="#002E6C"
                     >
-                        <v-icon small color="white">fas fa-sign-in-alt</v-icon>
+                        <font-awesome-icon :icon="['fas','sign-in-alt']"/>
                     </v-btn>
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="authenticated">
@@ -194,7 +194,7 @@
                         icon
                         color="#002E6C"
                     >
-                        <v-icon size="small" color="white">fas fa-sign-out-alt</v-icon>
+                    <font-awesome-icon :icon="['fas', 'sign-out-alt']"/>
                     </v-btn>
                     <v-btn
                         id="App-esecLogout-vbtn"
@@ -204,7 +204,7 @@
                         icon                        
                         color="#002E6C"
                     >
-                        <v-icon size="small" color="white">fas fa-sign-out-alt</v-icon>
+                        <font-awesome-icon :icon="['fas', 'sign-out-alt']"/>
                     </v-btn>
                 </v-toolbar-title>
             </v-toolbar>
@@ -298,8 +298,8 @@ import config from '../public/config.json';
 
     let store = useStore();
     let authenticated = computed(() => store.state.authenticationModule.authenticated);
-    let hasRole = ref<boolean>(store.state.authenticationModule.hasRole);
-    let username = ref<string>(store.state.authenticationModule.username);
+    let hasRole = computed<boolean>(() => store.state.authenticationModule.hasRole);
+    let username = computed<string>(() => store.state.authenticationModule.username);
     let hasAdminAccess = computed(() => store.state.authenticationModule.hasAdminAccess);
 
     let refreshing = ref<boolean>(store.state.authenticationModule.refreshing);

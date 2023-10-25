@@ -12,12 +12,10 @@
                         class="settings-list ghd-control-text"
                         :key="navigationTab.tabName"
                         :model-value="navigationTab"
-                        v-for="navigationTab in visibleNavigationTabs()"
-                        :to="navigationTab.navigation"               
+                        v-for="navigationTab in visibleNavigationTabs()"                        
                     >
-                        <v-list-tile style="border-bottom: 1px solid #CCCCCC;">
-                            <v-list-tile-action>
-                                <v-list-tile-icon>
+                        <v-list-item :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
+                            <template v-slot:prepend>
                                     <!-- <v-icon class="mx-2" slot="prependIcon" v-text="navigationTab.tabIcon"></v-icon> -->
                                     <TreatmentSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Treatment'"/>  
                                     <TargetConditionGoalSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Target Condition Goal'"/>  
@@ -28,10 +26,9 @@
                                     <CashFlowSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Cash Flow'"/>  
                                     <BudgetPrioritySvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Budget Priority'"/>  
                                     <CalculatedAttributeSvg style="height: 32px; width: 32px"  class="library-icon-stroke" v-if="navigationTab.tabName === 'Calculated Attribute'"/>  
-                                </v-list-tile-icon>
-                            </v-list-tile-action>
-                                <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>
-                        </v-list-tile>
+                            </template>
+                                <v-list-item-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-item-title>
+                        </v-list-item>
                     </v-list-item>
                 </v-list>
             </v-card>

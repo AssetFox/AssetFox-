@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="450px" max-height="600px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
          <v-row justify-space-between align-center>
@@ -45,16 +45,17 @@ import {Budget, BudgetAmount, BudgetLibrary, emptyBudgetLibrary} from '@/shared/
 import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { getUserName } from '@/shared/utils/get-user-info';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, computed, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
 let store = useStore();
 const props = defineProps<{
-
   dialogData:CreateBudgetLibraryDialogData,
   libraryNames: string[];
 }>()
+let showDialogComputed = computed(() => props.dialogData.showDialog);
+
 const emit = defineEmits(['submit'])
 let getIdByUserNameGetter: any = store.getters.getIdByUserName
 let newBudgetLibrary: BudgetLibrary = {...emptyBudgetLibrary, id: getNewGuid()};

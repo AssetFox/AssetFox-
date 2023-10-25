@@ -1,9 +1,9 @@
 <template>
     <v-row column>
         <v-col cols = "12">
-            <v-row row style="margin-top:40px;">
+            <v-row row style="margin-top:0px;">
                 <v-col cols = "4" class="ghd-constant-header">
-                    <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Select an Investment library</span></v-subheader>
+                    <v-subheader class="ghd-control-label ghd-md-gray"><span>Select an Investment library</span></v-subheader><!--class="ghd-md-gray ghd-control-subheader"-->
                     <v-select 
                         id="InvestmentEditor-investmentLibrary-select"
                         :items='librarySelectItems'
@@ -43,7 +43,7 @@
                 </v-col>
             </v-row>
             <!-- only for scenario -->
-            <v-row row style="margin-top:-20px;">
+            <v-row row style="margin-top:20px;">
                 <!-- text boxes for scenario only -->
                 <v-col cols = "2" v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-subheader"><span>First Year of Analysis Period</span></v-subheader>
@@ -95,9 +95,9 @@
                               @change='onEditInvestmentPlan("shouldAccumulateUnusedBudgetAmounts", $event)' />
                 </v-col>
             </v-row>
-            <v-divider v-if='hasScenario || hasSelectedLibrary' />
+            <v-divider v-show ='hasScenario || hasSelectedLibrary' />
             <v-row row justify-space-between v-show='hasSelectedLibrary || hasScenario'>
-                <v-col cols = "4">
+                <v-col cols = "5">
                     <v-row row>
                         <v-btn id="InvestmentEditor-editBudgets-btn"
                             @click='onShowEditBudgetsDialog'
@@ -106,7 +106,7 @@
                         </v-btn>
                         <v-text-field id="InvestmentEditor-numberYearsToAdd-textField"
                                       :disabled='currentPage.length === 0' type="number" min=1 :mask="'##########'"
-                                      class="ghd-text-field-border ghd-text-field ghd-left-paired-textbox shrink"
+                                      class="ghd-text-field-border ghd-text-field"
                                       v-bind:class="{ 'ghd-blue-text-field': currentPage.length !== 0}"
                                       outline v-model.number="range" />
                         <v-btn id="InvestmentEditor-addBudgetYearRange-btn"
@@ -149,8 +149,9 @@
                 </v-col>
             </v-row>
         </v-col>
+        <!--
         <v-col v-show='hasSelectedLibrary || hasScenario' xs12>            
-        <!-- datatable -->
+        datatable
             <v-col >
                 <v-data-table 
                     id="InvestmentEditor-investmentsDataTable-dataTable"
@@ -203,7 +204,7 @@
                     Delete Selected
                 </v-btn>
             </v-col>
-        </v-col>
+        </v-col> -->
         <v-col v-show='hasSelectedLibrary && !hasScenario' xs12>
             <v-row justify-center>
                 <v-col>
@@ -217,14 +218,14 @@
             </v-row>
         </v-col>
         <v-col cols = "12">
-            <v-row justify-center row v-show='hasSelectedLibrary || hasScenario'>
+            <v-row v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn id="InvestmentEditor-cancel-btn"
                        :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "flat" class='ghd-blue ghd-button-text ghd-button'
                        v-show='hasScenario'>
                     Cancel
                 </v-btn>
                 <v-btn outline id="InvestmentEditor-deleteLibrary-btn"
-                       @click='onShowConfirmDeleteAlert' variant = "flat" class='ghd-blue ghd-button-text ghd-button' v-show='!hasScenario'
+                       @click='onShowConfirmDeleteAlert' variant = "outlined" class='ghd-blue ghd-button-text ghd-button' v-show='!hasScenario'
                        :disabled='!hasLibraryEditPermission'>
                     Delete Library
                 </v-btn>
@@ -352,9 +353,9 @@ const $router = useRouter();
 const $emitter = mitt()
 
 //let stateBudgetLibraries = ref<BudgetLibrary[]>(store.state.investmentModule.budgetLibraries);       
-let stateBudgetLibraries = computed<BudgetLibrary[]>(() => store.state.investmentModule.budgetLibraries) ;  
+const stateBudgetLibraries = computed<BudgetLibrary[]>(() => store.state.investmentModule.budgetLibraries) ;  
 
-let stateSelectedBudgetLibrary = ref<BudgetLibrary>(store.state.investmentModule.selectedBudgetLibrary)
+const stateSelectedBudgetLibrary = computed<BudgetLibrary>(() => store.state.investmentModule.selectedBudgetLibrary);
 let stateInvestmentPlan = ref<InvestmentPlan>(store.state.investmentModule.investmentPlan);
 let stateScenarioBudgets = ref<Budget[]>(store.state.investmentModule.scenarioBudgets);
 let hasUnsavedChanges = ref<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges);
@@ -362,13 +363,13 @@ let hasUnsavedChanges = ref<boolean>(store.state.unsavedChangesFlagModule.hasUns
 let hasAdminAccess: boolean = shallowReactive(store.state.authenticationModule.hasAdminAccess) ; 
 
 let isSuccessfulImport = ref<boolean>(store.state.investmentModule.isSuccessfulImport);
-let currentUserCriteriaFilter = ref<UserCriteriaFilter>(store.state.userModule.currentUserCriteriaFilter)
+let currentUserCriteriaFilter = ref<UserCriteriaFilter>(store.state.userModule.currentUserCriteriaFilter);
 let hasPermittedAccess = ref<boolean>(store.state.investmentModule.hasPermittedAccess);
 
 async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess');}
 async function getInvestmentAction(payload?: any): Promise<any> {await store.dispatch('getInvestment');}
 async function getBudgetLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getBudgetLibraries');}
-async function selectBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectBudgetLibrary');}
+async function selectBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectBudgetLibrary', payload);}
 async function upsertInvestmentAction(payload?: any): Promise<any> {await store.dispatch('upsertInvestment');}
 async function upsertBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertBudgetLibrary');}
 async function deleteBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteBudgetLibrary');}
@@ -409,10 +410,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let firstYear: number = 0;
     let initializing: boolean = true;
 
-    let selectedBudgetLibrary: BudgetLibrary = clone(emptyBudgetLibrary);
+    const selectedBudgetLibrary = ref<BudgetLibrary>(clone(emptyBudgetLibrary));
     let investmentPlan: InvestmentPlan = clone(emptyInvestmentPlan);
     let selectedScenarioId: string = getBlankGuid();
-    let hasSelectedLibrary: boolean = false;
+    let hasSelectedLibrary = ref<boolean>(false);
 
     //let librarySelectItems: SelectItem[] = [];
     //let librarySelectItemNames: string[] = [];
@@ -429,9 +430,12 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let selectedBudgetYearsGridData: BudgetYearsGridData[] = [];
     let selectedBudgetYears: number[] = [];
 
-    let createBudgetLibraryDialogData: CreateBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
+    //let createBudgetLibraryDialogData: CreateBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
+    let createBudgetLibraryDialogData = ref<CreateBudgetLibraryDialogData>(clone(emptyCreateBudgetLibraryDialogData));
+    
     let shareBudgetLibraryDialogData: ShareBudgetLibraryDialogData = clone(emptyShareBudgetLibraryDialogData);
     let editBudgetsDialogData: EditBudgetsDialogData = clone(emptyEditBudgetsDialogData);
+
     let showSetRangeForAddingBudgetYearsDialog: boolean = false;
     let showSetRangeForDeletingBudgetYearsDialog: boolean = false;
     let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
@@ -457,7 +461,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let firstYearOfAnalysisPeriodShift = shallowRef<number>(0);
 
     let unsavedDialogAllowed: boolean = true;
-    let trueLibrarySelectItemValue = shallowRef<string|null>('');
+    let trueLibrarySelectItemValue = ref<string|null>('');
     let librarySelectItemValueAllowedChanged: boolean = true;
 
     function addYearLabel() {
@@ -474,34 +478,36 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         }
     
     // REPLACE with created() ?
-    function beforeRouteEnter() {
-        (() => {
-            (async () => { 
-                librarySelectItemValue.value = '';
-                await getHasPermittedAccessAction();
-                await getBudgetLibrariesAction()
-                if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
-                    selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
+    //function beforeRouteEnter() {
+    created();
+    function created() {
+        // (() => {
+        //     (async () => { 
+        //         librarySelectItemValue.value = '';
+        //         await getHasPermittedAccessAction();
+        //         await getBudgetLibrariesAction()
+        //         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
+        //             selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
 
-                    if (selectedScenarioId === uuidNIL) {
-                        addErrorNotificationAction({
-                            message: 'Found no selected scenario for edit',
-                        });
-                        $router.push('/Scenarios/');
-                    }
+        //             if (selectedScenarioId === uuidNIL) {
+        //                 addErrorNotificationAction({
+        //                     message: 'Found no selected scenario for edit',
+        //                 });
+        //                 $router.push('/Scenarios/');
+        //             }
 
-                    hasScenario = true;
-                    ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
-                        if(response.data){
-                            setAlertMessageAction("An investment import has been added to the work queue")
-                        }
-                    })
-                    await initializePages();
-                }
-                else
-                    initializing = false;               
-            })();                    
-        });
+        //             hasScenario = true;
+        //             ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
+        //                 if(response.data){
+        //                     setAlertMessageAction("An investment import has been added to the work queue")
+        //                 }
+        //             })
+        //             await initializePages();
+        //         }
+        //         else
+        //             initializing = false;               
+        //     })();                    
+        // });
     }
 
     onMounted(() => {
@@ -524,7 +530,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     });
         
     // Watchers
-    watch(pagination, () => onPaginationChanged)
+    watch(pagination, onPaginationChanged)
     async function onPaginationChanged() {
         if(initializing)
             return;
@@ -534,7 +540,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             page: page,
             rowsPerPage: rowsPerPage,
             syncModel: {
-                libraryId: selectedBudgetLibrary.id === uuidNIL ? null : selectedBudgetLibrary.id,
+                libraryId: selectedBudgetLibrary.value.id === uuidNIL ? null : selectedBudgetLibrary.value.id,
                 updatedBudgets: Array.from(updatedBudgetsMap.values()).map(r => r[1]),
                 budgetsForDeletion: deletionBudgetIds,
                 addedBudgets: addedBudgets,
@@ -555,7 +561,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             search: currentSearch
         };
         
-        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL){
+        if((!hasSelectedLibrary.value || hasScenario) && selectedScenarioId !== uuidNIL){
             await InvestmentService.getScenarioInvestmentPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
@@ -573,10 +579,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 }
             });
         }            
-        else if(hasSelectedLibrary){
+        else if(hasSelectedLibrary.value){
             if(librarySelectItemValue === null)
                 return;
-                await InvestmentService.getBudgetLibraryModifiedDate(selectedBudgetLibrary.id).then(response => {
+                await InvestmentService.getBudgetLibraryModifiedDate(selectedBudgetLibrary.value.id).then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
@@ -641,15 +647,19 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     });
 
     watch(librarySelectItemValue,() => {
+        console.log(`librarySelectItemValue watch entered: ${librarySelectItemValue.value}`);
+        hasSelectedLibrary.value = true;
+
         if(hasScenario){
             onSelectItemValueChanged();
             unsavedDialogAllowed = false;
         }           
         else if(librarySelectItemValueAllowedChanged){
-            CheckUnsavedDialog(onSelectItemValueChanged, () => {
+            //CheckUnsavedDialog(onSelectItemValueChanged, () => {
                 librarySelectItemValueAllowedChanged = false;
-                librarySelectItemValue.value = trueLibrarySelectItemValue.value;               
-            });
+                onSelectItemValueChanged();
+                //librarySelectItemValue.value = trueLibrarySelectItemValue.value;               
+            //});
         }
         parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
         newLibrarySelection = true;
@@ -658,21 +668,25 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     });
 
     function onSelectItemValueChanged() {
+        console.log(`onSelectItemValueChanged function: ${librarySelectItemValue.value}`);
+        
         trueLibrarySelectItemValue = librarySelectItemValue
-        selectBudgetLibraryAction(librarySelectItemValue);
+        selectBudgetLibraryAction(librarySelectItemValue.value);
     }
 
     watch(stateSelectedBudgetLibrary,() => {
-        selectedBudgetLibrary = clone(stateSelectedBudgetLibrary.value);
+        console.log(`stateSelectedBudgetLibrary ENTERED`);
+        selectedBudgetLibrary.value = clone(stateSelectedBudgetLibrary.value);
     });
 
     watch(selectedBudgetLibrary,()=> {
-        hasSelectedLibrary = selectedBudgetLibrary.id !== uuidNIL;
-
-        if (hasSelectedLibrary) {
+        
+        hasSelectedLibrary.value = selectedBudgetLibrary.value.id !== uuidNIL;
+        console.log(`selectedBudgetLibrary ENTERED: ${hasSelectedLibrary.value}`);
+        if (hasSelectedLibrary.value) {
             checkLibraryEditPermission();
             hasCreatedLibrary = false;
-            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedBudgetLibrary.id, workType: WorkType.ImportLibraryInvestment}).then(response => {
+            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedBudgetLibrary.value.id, workType: WorkType.ImportLibraryInvestment}).then(response => {
                 if(response.data){
                     setAlertMessageAction("An investment import has been added to the work queue")
                 }
@@ -682,7 +696,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         }
 
         clearChanges()
-        onPaginationChanged()
+       //onPaginationChanged()
     });
 
     watch(stateInvestmentPlan,() => {
@@ -837,9 +851,9 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
 
             setHasUnsavedChangesAction({ value: budgetsHaveUnsavedChanges || investmentPlanHasUnsavedChanges });
-        } else if (hasSelectedLibrary) {
+        } else if (hasSelectedLibrary.value) {
             const hasUnsavedChanges: boolean = hasUnsavedChangesCore('',
-                { ...clone(selectedBudgetLibrary), budgets: clone(currentPage) },
+                { ...clone(selectedBudgetLibrary.value), budgets: clone(currentPage) },
                 stateSelectedBudgetLibrary);
             setHasUnsavedChangesAction({ value: hasUnsavedChanges });
         }
@@ -884,7 +898,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     function onShareBudgetLibraryDialogSubmit(budgetLibraryUsers: BudgetLibraryUser[]) {
         shareBudgetLibraryDialogData = clone(emptyShareBudgetLibraryDialogData);
 
-        if (!isNil(budgetLibraryUsers) && selectedBudgetLibrary.id !== getBlankGuid())
+        if (!isNil(budgetLibraryUsers) && selectedBudgetLibrary.value.id !== getBlankGuid())
         {
             let libraryUserData: LibraryUser[] = [];
 
@@ -907,10 +921,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 libraryUserData.push(libraryUser);
             });
 
-            upsertOrDeleteBudgetLibraryUsersAction((selectedBudgetLibrary.id, libraryUserData));
+            upsertOrDeleteBudgetLibraryUsersAction((selectedBudgetLibrary.value.id, libraryUserData));
 
             //update budget library sharing
-            InvestmentService.upsertOrDeleteBudgetLibraryUsers(selectedBudgetLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+            InvestmentService.upsertOrDeleteBudgetLibraryUsers(selectedBudgetLibrary.value.id, libraryUserData).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
                 {
                     addSuccessNotificationAction({ message: 'Shared budget library' })
@@ -921,14 +935,15 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function onShowCreateBudgetLibraryDialog(createAsNewLibrary: boolean) {
-        createBudgetLibraryDialogData = {
+        console.log(`onShowCreateBudgetLibraryDialog button clicked`)
+        createBudgetLibraryDialogData.value = {
             showDialog: true,
             budgets: createAsNewLibrary ? currentPage : [],
         };
     }
 
     function onSubmitCreateCreateBudgetLibraryDialogResult(budgetLibrary: BudgetLibrary) {//needs a few things
-        createBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
+        createBudgetLibraryDialogData.value = clone(emptyCreateBudgetLibraryDialogData);
 
     if (!isNil(budgetLibrary)) {
         hasCreatedLibrary = true;
@@ -937,7 +952,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             library: budgetLibrary,
             isNewLibrary: true,
             syncModel: {
-                libraryId: budgetLibrary.budgets.length === 0 || !hasSelectedLibrary ? null : selectedBudgetLibrary.id,
+                libraryId: budgetLibrary.budgets.length === 0 || !hasSelectedLibrary.value ? null : selectedBudgetLibrary.value.id,
                 Investment: investmentPlan,
                 budgetsForDeletion: budgetLibrary.budgets.length === 0 ? [] : deletionBudgetIds,
                 updatedBudgets: budgetLibrary.budgets.length === 0 ? [] : Array.from(updatedBudgetsMap.values()).map(r => r[1]),
@@ -980,7 +995,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     function getOwnerUserName(): string {
 
         if (!hasCreatedLibrary) {
-            return getUserNameByIdGetter(selectedBudgetLibrary.owner);
+            //return getUserNameByIdGetter(selectedBudgetLibrary.owner);
         }
 
         return getUserName();
@@ -991,7 +1006,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function checkUserIsLibraryOwner() {
-        return getUserNameByIdGetter(selectedBudgetLibrary.owner) == getUserName();
+        return getUserNameByIdGetter(selectedBudgetLibrary.value.owner) == getUserName();
     }
 
     function onAddBudgetYear() {
@@ -1149,7 +1164,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function exportInvestmentBudgets() {
-        const id: string = hasScenario ? selectedScenarioId : selectedBudgetLibrary.id;
+        const id: string = hasScenario ? selectedScenarioId : selectedBudgetLibrary.value.id;
         InvestmentService.exportInvestmentBudgets(id, hasScenario)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
@@ -1183,7 +1198,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             } else {
                 importLibraryInvestmentBudgetsFileAction({
                     ...data,
-                    id: selectedBudgetLibrary.id,
+                    id: selectedBudgetLibrary.value.id,
                     currentUserCriteriaFilter: currentUserCriteriaFilter
                 })
                 .then(() => {
@@ -1220,7 +1235,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     function onUpsertInvestment() {
         const investmentPlanUpsert: InvestmentPlan = clone(investmentPlan);
 
-        if (selectedBudgetLibrary.id === uuidNIL || hasUnsavedChanges && newLibrarySelection ===false) {scenarioLibraryIsModified = true;}
+        if (selectedBudgetLibrary.value.id === uuidNIL || hasUnsavedChanges && newLibrarySelection ===false) {scenarioLibraryIsModified = true;}
         else { scenarioLibraryIsModified = false; }
 
         const sync: InvestmentPagingSyncModel = {
@@ -1254,7 +1269,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
     function onUpsertBudgetLibrary() {
         const sync: InvestmentPagingSyncModel = {
-            libraryId: selectedBudgetLibrary.id === uuidNIL ? null : selectedBudgetLibrary.id,
+            libraryId: selectedBudgetLibrary.value.id === uuidNIL ? null : selectedBudgetLibrary.value.id,
             updatedBudgets: Array.from(updatedBudgetsMap.values()).map(r => r[1]),
             budgetsForDeletion: deletionBudgetIds,
             addedBudgets: addedBudgets,
@@ -1267,7 +1282,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         }
 
         const upsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
-            library: selectedBudgetLibrary,
+            library: selectedBudgetLibrary.value,
             isNewLibrary: false,
             syncModel: sync,
             scenarioId: null
@@ -1275,8 +1290,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         InvestmentService.upsertBudgetLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 clearChanges()
-                budgetLibraryMutator(selectedBudgetLibrary);
-                selectedBudgetLibraryMutator(selectedBudgetLibrary.id);
+                budgetLibraryMutator(selectedBudgetLibrary.value);
+                selectedBudgetLibraryMutator(selectedBudgetLibrary.value.id);
                 addSuccessNotificationAction({message: "Updated budget library",});
             }
         });
@@ -1316,7 +1331,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
         if (submit) {
             librarySelectItemValue.value = null;
-            deleteBudgetLibraryAction(selectedBudgetLibrary.id);
+            deleteBudgetLibraryAction(selectedBudgetLibrary.value.id);
         }
     }
 
@@ -1336,8 +1351,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             return amountsAreValid
         });
 
-        if (hasSelectedLibrary) {
-            return !(rules['generalRules'].valueIsNotEmpty(selectedBudgetLibrary.name) === true &&
+        if (hasSelectedLibrary.value) {
+            return !(rules['generalRules'].valueIsNotEmpty(selectedBudgetLibrary.value.name) === true &&
                 allBudgetDataIsValid);
         } else if (hasScenario) {
             const allInvestmentPlanDataIsValid: boolean = rules['generalRules'].valueIsNotEmpty(investmentPlan.minimumProjectCostLimit) === true &&
@@ -1457,9 +1472,9 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             deletionYears.length > 0 || 
             addedBudgetAmounts.size > 0 ||
             updatedBudgetAmounts.size > 0 || 
-            (hasScenario && hasSelectedLibrary) ||
+            (hasScenario && hasSelectedLibrary.value) ||
             (hasScenario && hasUnsavedChangesCore('', CheckInvestmentPlan, CheckStateInvestmentPlan)) || 
-            (hasSelectedLibrary && hasUnsavedChangesCore('', selectedBudgetLibrary, stateSelectedBudgetLibrary))
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedBudgetLibrary.value, stateSelectedBudgetLibrary))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -1498,7 +1513,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     function importCompleted(data: any){
         var importComp = data.importComp as importCompletion
         if( importComp.workType === WorkType.ImportScenarioInvestment && importComp.id === selectedScenarioId ||
-            hasSelectedLibrary && importComp.workType === WorkType.ImportLibraryInvestment && importComp.id === selectedBudgetLibrary.id){
+            hasSelectedLibrary.value && importComp.workType === WorkType.ImportLibraryInvestment && importComp.id === selectedBudgetLibrary.value.id){
             clearChanges()
             pagination.page = 1
             initializePages().then(async () => {
@@ -1521,7 +1536,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             page: 1,
             rowsPerPage: 5,
             syncModel: {
-                libraryId: selectedBudgetLibrary.id === uuidNIL ? null : selectedBudgetLibrary.id,
+                libraryId: selectedBudgetLibrary.value.id === uuidNIL ? null : selectedBudgetLibrary.value.id,
                 updatedBudgets: Array.from(updatedBudgetsMap.values()).map(r => r[1]),
                 budgetsForDeletion: deletionBudgetIds,
                 addedBudgets: addedBudgets,
@@ -1537,7 +1552,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             search: ''
         };
         
-        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL){
+        if((!hasSelectedLibrary.value || hasScenario) && selectedScenarioId !== uuidNIL){
             await InvestmentService.getScenarioInvestmentPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
@@ -1562,7 +1577,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 initializing = false;
             });
         }            
-        else if(hasSelectedLibrary)
+        else if(hasSelectedLibrary.value)
                 await InvestmentService.getLibraryInvestmentPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;

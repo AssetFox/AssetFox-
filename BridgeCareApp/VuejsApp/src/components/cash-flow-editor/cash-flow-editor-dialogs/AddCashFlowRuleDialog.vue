@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-bind:show="showDialog">
+  <v-dialog max-width="450px" persistent v-model="computedShowDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-row justify-space-between align-center>
@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import {
   CashFlowRule,
   emptyCashFlowRule,
@@ -45,18 +45,18 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 
 const props = defineProps<{showDialog: boolean}>()
 const emit = defineEmits(['submit']);
-let newCashRule: CashFlowRule = {...emptyCashFlowRule, id: getNewGuid()};
+let newCashRule  = ref({...emptyCashFlowRule, id: getNewGuid()});
 let inputRules: InputValidationRules = rules;
-
+let computedShowDialog = computed(() => props.showDialog)
 function disableSubmitButton() {
-  return !(inputRules['generalRules'].valueIsNotEmpty(newCashRule.name) === true);
+  return !(inputRules['generalRules'].valueIsNotEmpty(newCashRule.value.name) === true);
 }
 function onSubmit(submit: boolean) {
   if (submit) {
-    emit('submit', newCashRule);
+    emit('submit', newCashRule.value);
   } else {
     emit('submit', null);
   }
-  newCashRule = {...emptyCashFlowRule, id: getNewGuid()};
+  newCashRule.value = {...emptyCashFlowRule, id: getNewGuid()};
 }
 </script>

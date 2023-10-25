@@ -31,6 +31,8 @@ import PrimeVue from 'primevue/config';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
+import ConfirmationService from 'primevue/confirmationservice';
+import ConfirmDialog from 'primevue/dialog';
 import "primevue/resources/themes/saga-blue/theme.css"; 
 import 'primevue/resources/primevue.min.css'
 import 'primeicons/primeicons.css';
@@ -72,10 +74,12 @@ var defaultOptions = {
 };
 
 app.use(VueSanitize, defaultOptions);
-
+app.use(ConfirmationService);
 app.component("Dialog",Dialog)
    .component("Button", Button)
-   .component("DataTable", DataTable);
+   .component("DataTable", DataTable)
+   .component("ConfirmDialog", ConfirmDialog);
+
 app.config.globalProperties.productionTip = false;
 //app.use(VuejsDialog);
 //app.config.globalProperties.$config = config;

@@ -1,6 +1,6 @@
 ﻿<template>
     <v-row>
-        <v-dialog content content-class="centered-dialog" persistent v-bind:show="loading">
+        <v-dialog content content-class="centered-dialog" persistent v-model="showDialogComputed">
             <v-container>
                 <v-row align-center column justify-center>
                     <v-progress-circular :size="70" :width="7" class="ara-blue-pantone-281"
@@ -13,13 +13,13 @@
 </template>
 
 <script lang="ts" setup>
-    import Vue from 'vue';
+    import Vue, { computed } from 'vue';
     import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
 let store = useStore();
-let loading = ref<boolean>(store.state.busyModule.isBusy);
+let showDialogComputed = computed<boolean>(() => store.state.busyModule.isBusy);
 
 </script>
 

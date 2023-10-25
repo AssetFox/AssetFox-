@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-bind:show="showDialog">
+  <v-dialog max-width="450px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title>
         <v-row justify-center>
@@ -26,11 +26,11 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue'; 
+import Vue, { computed } from 'vue'; 
 
   const emit = defineEmits(['submit'])
   const props = defineProps<{showDialog: boolean}>();
-
+  let showDialogComputed = computed(() => props.showDialog);
 
   let legacySimulationId: number = 0;
 

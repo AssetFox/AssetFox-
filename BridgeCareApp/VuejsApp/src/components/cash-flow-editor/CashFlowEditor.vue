@@ -275,6 +275,7 @@
         <AddCashFlowRuleDialog
             :showDialog="showAddCashFlowRuleDialog"
             @submit="onSubmitAddCashFlowRule"/>
+        <ConfirmDialog></ConfirmDialog>
     </v-row>
 </template>
 
@@ -1001,14 +1002,14 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
         if (hasUnsavedChanges && unsavedDialogAllowed) {
-            // @ts-ignore
-            Vue.dialog
-                .confirm(
-                    'You have unsaved changes. Are you sure you wish to continue?',
-                    { reverse: true },
-                )
-                .then(() => next())
-                .catch(() => otherwise())
+
+            confirm.require({
+                message: "You have unsaved changes. Are you sure you wish to continue?",
+                header: "Unsaved Changes",
+                icon: 'pi pi-question-circle',
+                accept: ()=>next(),
+                reject: ()=>otherwise()
+            });
         } 
         else {
             unsavedDialogAllowed = true;

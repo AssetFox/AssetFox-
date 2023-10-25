@@ -221,14 +221,11 @@ import { useRouter } from 'vue-router';
     onBeforeMount(() => {
         selectedScenarioId = router.currentRoute.value.path;  //router.currentRoute.value.query.scenarioId as string;
         let temp: string = router.currentRoute.value.query.scenarioId as string;
-            console.log("route scenario id: " + selectedScenarioId);
-            console.log("route ???" + temp);
     });
     created();
     function created() { 
             // set selectedScenarioId
             selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
-            console.log("route scenario id: " + selectedScenarioId);
             networkId = router.currentRoute.value.query.networkId as string;
             simulationName = router.currentRoute.value.query.scenarioName as string;
             networkName = router.currentRoute.value.query.networkName as string;

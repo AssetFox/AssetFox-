@@ -1,16 +1,14 @@
 <template>
-    <Dialog v-model:visible="showDialog">
     <div class="criteria-editor-card-text">
-    <v-row >
+    <v-row style="padding:1em">
         <div>
-            <v-row justify-space-between>
-                <v-col cols = "6">
-                    <v-row justify-start
-                    >
+            <v-row justify-space-between style="padding: 10px; width: 100em; height: 48em;">
+                <v-col > 
+                    <v-row justify-start style="padding: 10px"> 
                         <h3 class="ghd-dialog">Output</h3>
                     </v-row>
                     <v-card class="elevation-0" style="border: 1px solid;">
-                        <div class="conjunction-and-messages-container" style="margin-top:4px;">
+                        <div class="conjunction-and-messages-container" >
                             <v-row
                                 :class="{
                                     'justify-space-between': !criteriaEditorData.isLibraryContext,
@@ -19,11 +17,13 @@
                                 }"
                             >
                             <v-col cols = "2">
-                                <v-row>
+                                <v-row style="padding: 15px;">
                                 <v-select
                                     :items="conjunctionSelectListItems"
                                     class="ghd-control-border ghd-control-text ghd-select"
                                     v-model="selectedConjunction"
+                                    density="compact"
+                                    variant="outlined"
                                 >
                                     <template v-slot:selection="{ item }">
                                         <span class="ghd-control-text">{{ item.raw.text }}</span>
@@ -40,6 +40,7 @@
                                 </v-select>
                                 </v-row>
                             </v-col>
+                            <div style="padding:20px">
                                 <v-btn
                                     id="CriteriaEditor-addSubCriteria-btn"
                                     @click="onAddSubCriteria"
@@ -47,6 +48,7 @@
                                     variant = "flat"                                
                                     >Add Subcriteria
                                 </v-btn>
+                            </div>
                             </v-row>
                         </div>
                         <v-card-text
@@ -135,12 +137,12 @@
                         </v-card-actions>
                     </v-card>
                 </v-col>
-                <v-col cols = "6">
-                    <v-row justify-start
+                <v-col>
+                    <v-row justify-start style="padding: 10px;"
                     >
                         <h3 class="ghd-dialog">Criteria Editor</h3>
                     </v-row>
-                    <v-card class="elevation-0" style="border: 1px solid;height:682px;">                  
+                    <v-card class="elevation-0" style="border: 1px solid;">                  
                         <v-card-text
                             :class="{
                                 'criteria-editor-card-dialog':
@@ -158,16 +160,19 @@
                             >                        
                             </v-row>                     
                             <v-tabs class="ghd-control-text" style="margin-left:4px;margin-right:4px;"
-                                v-if="selectedSubCriteriaClauseIndex !== -1"
+                                v-if="selectedSubCriteriaClauseIndex !== -1" v-model="tab"
                             >
-                                <v-tab @click="onParseRawSubCriteria" ripple  id="CriteriaEditor-treeView-tab">
+                                <v-tab @click="onParseRawSubCriteria"   id="CriteriaEditor-treeView-tab" value="tree">
                                     Tree View
                                 </v-tab>
-                                <v-tab @click="onParseSubCriteriaJson" ripple id="CriteriaEditor-rawView-tab">
+                                <v-tab @click="onParseSubCriteriaJson"  id="CriteriaEditor-rawView-tab" value="raw">
                                     Raw Criteria
                                 </v-tab>
-                                <v-window-item>
-                                    <vue-query-builder 
+                           </v-tabs>
+                            <v-window v-model="tab">
+                                <v-window-item value="tree">
+                                    query here
+                                    <!-- <VueQueryBuilder
                                         id="CriteriaEditor-criteria-vuequerybuilder"
                                         :labels="queryBuilderLabels"
                                         :maxDepth="25"
@@ -176,19 +181,20 @@
                                         v-if="queryBuilderRules.length > 0"
                                         v-model="selectedSubCriteriaClause"
                                     >
-                                    </vue-query-builder>
+                                    </VueQueryBuilder> -->
                                 </v-window-item>
-                                <v-window-item>
+                                <v-window-item value="raw">
                                     <v-textarea
                                         id="CriteriaEditor-rawText-vtextarea"
                                         no-resize
-                                        outline
+                                        variant="outlined"
                                         rows="23"
                                         v-model="selectedRawSubCriteriaClause"
                                         class="ghd-control-text"
                                     ></v-textarea>
                                 </v-window-item>
-                            </v-tabs>
+                            </v-window>
+
                         </v-card-text>
                         <v-card-actions
                             :class="{
@@ -252,18 +258,15 @@
                         id="CriteriaEditor-cancel-btn"
                         @click="onSubmitCriteriaEditorResult(false)"
                         class="ara-orange-bg text-white"
-                        >Cancel</v-btn
-                    >
+                        >Cancel</v-btn>
                 </v-row>
             </v-col>
         </div>
     </v-row>
 </div>
-</Dialog>
 </template>
 
 <script lang="ts" setup>
-import Vue, { shallowRef } from 'vue';
 import VueQueryBuilder from "vue-query-builder/src/VueQueryBuilder.vue";
 import {
     Criteria,
@@ -323,7 +326,7 @@ const currentUserCriteriaFilter = computed<UserCriteriaFilter>(() => store.state
 async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
 async function getAttributeSelectValuesAction(payload?: any): Promise<any> {await store.dispatch('getAttributeSelectValues');}
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
-
+const tab = ref<any>(null);
     let queryBuilderRules: any[] = [];
     let queryBuilderLabels: object = {
         matchType: '',
@@ -337,7 +340,6 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         removeGroup: `<img class='img-general' src="${require("@/assets/icons/trash-ghd-blue.svg")}"/>`,
         textInputPlaceholder: 'value',
     };
-    const showDialog = ref<boolean>(false);
     const cannotSubmit = ref<boolean>(true);
     const validCriteriaMessage = ref<string | null>(null);
     const invalidCriteriaMessage = ref<string | null>(null);
@@ -348,15 +350,14 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         { text: 'AND', value: 'AND' },
     ]);
     const selectedConjunction = ref<string>('OR');
-    let subCriteriaClauses= shallowRef<string[]>([]);
+    const subCriteriaClauses= ref<string[]>([]);
     const selectedSubCriteriaClauseIndex = ref<number>(-1);
-    let selectedSubCriteriaClause= shallowRef<Criteria |null>(null);
-    let selectedRawSubCriteriaClause = shallowRef<string>('');
+    const selectedSubCriteriaClause= ref<Criteria |null>(null);
+    const selectedRawSubCriteriaClause = ref<string>('');
     let activeTab = 'tree-view';
     const checkOutput = ref<boolean>(false);
 
     onMounted(()=> {
-        console.log("here in criteria dialog: " + criteriaEditorData.value.networkId);
         if (hasValue(stateAttributes)) {
             setQueryBuilderRules();
             
@@ -364,7 +365,6 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     });
 
     watch(()=>criteriaEditorData,() => {
-        console.log("Show Dialog: " + showDialog.value);
         //TODO
         /*const mainCriteria: Criteria = parseCriteriaString(
       this.criteriaEditorData.mergedCriteriaExpression != null ? this.criteriaEditorData.mergedCriteriaExpression : ''

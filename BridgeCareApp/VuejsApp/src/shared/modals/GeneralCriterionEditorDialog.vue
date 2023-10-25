@@ -90,8 +90,6 @@ const criteriaEditorData = ref<CriteriaEditorData>({
                     isLibraryContext: true
                 };
 
-                console.log("here in dialog: " + dialogData.value.showDialog);
-
             canUpdateOrCreate.value = false;
 
             // if (hasValue(htmlTag)) {

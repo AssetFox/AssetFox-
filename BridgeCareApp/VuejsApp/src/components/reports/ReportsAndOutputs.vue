@@ -141,7 +141,6 @@ import Column from 'primevue/column';
             name: event.data.name,
             mergedExpression: event.data.mergedExpression
         };
-        console.log("Selected Report: " + selectedReport.value.name);
     };
     function showEditDialog(): void {
         editShow.value = !editShow.value;
@@ -166,7 +165,6 @@ import Column from 'primevue/column';
             propEq('id', reportId),
             currentPage.value,
         ) as Report;
-        console.log("show criteria: " + selectedReport.value.name);
 
         criterionEditorDialogData.value = {
             showDialog: true,

@@ -2,11 +2,11 @@
     <v-dialog         
         scrollable
         persistent
-        v-bind:show="dialogData.showDialog"
+        v-model="showDialogComputed"
         max-width="60%"
         transition="dialog-bottom-transition"
     >
-        <v-card elevation="5" variant = "outlined" >
+        <v-card elevation="5"  >
             <v-card-title>
                 <h3 class="dialog-header">
                     Aggregate Data
@@ -157,7 +157,7 @@ import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { any, clone, find, findIndex, isNil, propEq, update } from 'ramda';
 import { Hub } from '@/connectionHub';
-import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, inject } from 'vue'; 
+import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, inject, computed } from 'vue'; 
 import { useStore } from 'vuex'; 
 import mitt from 'mitt';
 
@@ -165,7 +165,7 @@ import mitt from 'mitt';
     const $emitter = mitt()
 
     const props = defineProps<{dialogData: any}>();
-
+    let showDialogComputed = computed(() => props.dialogData.showDialog);
     const stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks);
 
     async function aggregateNetworkDataAction(payload?: any): Promise<any>{await store.dispatch('aggregateNetworkData')}

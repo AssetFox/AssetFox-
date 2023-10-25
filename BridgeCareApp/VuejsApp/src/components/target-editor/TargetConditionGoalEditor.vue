@@ -536,26 +536,23 @@ import ConfirmDialog from 'primevue/confirmdialog';
         getTargetConditionGoalLibrariesAction();
         numericAttributeNames = getPropertyValues('name', getNumericAttributesGetter);
         getHasPermittedAccessAction();
-        selectedScenarioId = "26C23F48-9B5C-4AEC-BDE0-0778AA512E10";
-        hasScenario.value = true;
-        initializePages();
-        // if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.TargetConditionGoal) !== -1) { 
-        //     //selectedScenarioId = to.query.scenarioId;
-        //     selectedScenarioId = $router.currentRoute.value.query.scenarioId as string; 
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.TargetConditionGoal) !== -1) { 
+            //selectedScenarioId = to.query.scenarioId;
+            selectedScenarioId = $router.currentRoute.value.query.scenarioId as string; 
             
-        //     if (selectedScenarioId === uuidNIL) {
-        //         addErrorNotificationAction({
-        //             message: 'Found no selected scenario for edit',
-        //         });
-        //         $router.push('/Scenarios/');
-        //     }
+            if (selectedScenarioId === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Found no selected scenario for edit',
+                });
+                $router.push('/Scenarios/');
+            }
 
-        //     hasScenario.value = true;
-        //     getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-        //         selectScenarioAction({ scenarioId: selectedScenarioId });        
-        //         initializePages();
-        //     });                                        
-        // }
+            hasScenario.value = true;
+            getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
+                selectScenarioAction({ scenarioId: selectedScenarioId });        
+                initializePages();
+            });                                        
+        }
     });            
     onBeforeUnmount(()=> beforeDestroy());
     function beforeDestroy() {

@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="showDialogComputed">
+  <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
          <v-row>
@@ -47,24 +47,31 @@ import {Budget, BudgetAmount, BudgetLibrary, emptyBudgetLibrary} from '@/shared/
 import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { getUserName } from '@/shared/utils/get-user-info';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, computed, watch, Ref} from 'vue';
+import { ref, computed, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
 let store = useStore();
+// const props = defineProps<{
+//   dialogData:CreateBudgetLibraryDialogData,
+//   libraryNames: string[];
+// }>()
+// let showDialogComputed = computed(() => props.dialogData.showDialog);
+
 const props = defineProps<{
-  dialogData:CreateBudgetLibraryDialogData,
-  libraryNames: string[];
-}>()
-let showDialogComputed = computed(() => props.dialogData.showDialog);
+          dialogData:CreateBudgetLibraryDialogData,
+          libraryNames: string[];
+        }>();
+const { dialogData } = toRefs(props);
 
 const emit = defineEmits(['submit'])
+
 let getIdByUserNameGetter: any = store.getters.getIdByUserName
 let newBudgetLibrary = ref<BudgetLibrary>({...emptyBudgetLibrary, id: getNewGuid()});
 let rules: InputValidationRules = validationRules;
 
-watch(()=>props.dialogData,()=> onDialogDataChanged())
-  function onDialogDataChanged() {
+watch(()=> props.dialogData,()=> {
+  
     let currentUser: string = getUserName();
     newBudgetLibrary.value = {
       ...newBudgetLibrary.value,
@@ -78,7 +85,8 @@ watch(()=>props.dialogData,()=> onDialogDataChanged())
       })),
       owner: getIdByUserNameGetter(currentUser)
     };
-  }
+  });
+
   function canDisableSave() : boolean {
     let check: boolean = false;
     if (newBudgetLibrary.value.name === '') return true;
@@ -87,11 +95,10 @@ watch(()=>props.dialogData,()=> onDialogDataChanged())
   }
   function onSubmit(submit: boolean) {
     if (submit) {
-      emit('submit', newBudgetLibrary);
+      emit('submit', newBudgetLibrary.value);
     } else {
       emit('submit', null);
     }
-
     newBudgetLibrary.value = {...emptyBudgetLibrary, id: getNewGuid()};
   }
 </script>

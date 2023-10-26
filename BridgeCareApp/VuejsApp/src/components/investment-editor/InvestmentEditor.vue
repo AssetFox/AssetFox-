@@ -1,7 +1,7 @@
 <template>
-    <v-row column>
+    <v-row>
         <v-col cols = "12">
-            <v-row row style="margin-top:0px;">
+            <v-row style="margin-top:0px;">
                 <v-col cols = "4" class="ghd-constant-header">
                     <v-subheader class="ghd-control-label ghd-md-gray"><span>Select an Investment library</span></v-subheader><!--class="ghd-md-gray ghd-control-subheader"-->
                     <v-select 
@@ -43,7 +43,7 @@
                 </v-col>
             </v-row>
             <!-- only for scenario -->
-            <v-row row style="margin-top:20px;">
+            <v-row style="margin-top:20px;">
                 <!-- text boxes for scenario only -->
                 <v-col cols = "2" v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-subheader"><span>First Year of Analysis Period</span></v-subheader>
@@ -96,9 +96,9 @@
                 </v-col>
             </v-row>
             <v-divider v-show ='hasScenario || hasSelectedLibrary' />
-            <v-row row justify-space-between v-show='hasSelectedLibrary || hasScenario'>
+            <v-row justify-space-between v-show='hasSelectedLibrary || hasScenario'>
                 <v-col cols = "5">
-                    <v-row row>
+                    <v-row>
                         <v-btn id="InvestmentEditor-editBudgets-btn"
                             @click='onShowEditBudgetsDialog'
                             variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
@@ -116,7 +116,7 @@
                             Add Year(s)
                         </v-btn>
                     </v-row>
-                    <v-row row>
+                    <v-row>
                         <div class = "ghd-md-gray ghd-control-subheader" style="margin-left:2% !important;"> 
                             Number of Budgets: {{ currentPage.length }}
                         </div>
@@ -150,64 +150,63 @@
             </v-row>
         </v-col>
 
-        <!--
-            <v-col v-show='hasSelectedLibrary || hasScenario' xs12>            
-        
-             <v-col >
-                <v-data-table 
-                    id="InvestmentEditor-investmentsDataTable-dataTable"
-                    :headers='budgetYearsGridHeaders' 
-                    :items="budgetYearsGridData"
-                    class='v-table__overflow ghd-table' 
-                    item-key='year' 
-                    select-all 
-                    sort-icon=$vuetify.icons.ghd-table-sort
-                    v-model='selectedBudgetYearsGridData' 
-                    :pagination.sync="pagination"
-                    :total-items="totalItems"
-                    :rows-per-page-items=[5,10,25]
-                    :must-sort='true'>
-                    <template slot='items' slot-scope='props' v-slot:item="{item}">
-                        <td>
-                            <v-checkbox hide-details primary v-model='item.raw.selected'></v-checkbox>
-                        </td>
-                        <td v-for='header in budgetYearsGridHeaders'>
-                            <div v-if="header.value === 'year'">
-                                <span class='sm-txt'>{{ item.value.year + firstYearOfAnalysisPeriodShift}}</span>
-                            </div>       
-                            <div v-if="header.value === 'action'">
-                                <v-btn @click="onRemoveBudgetYear(item.value.year)" class="ghd-blue" icon>
-                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')" />
-                                </v-btn>
-                            </div>
-                            <div v-if="header.value !== 'year' && header.value !== 'action'">
-                                <v-edit-dialog :return-value.sync='item.value.values[header.value]'
-                                               @save='onEditBudgetYearValue(item.value.year, header.value, item.value.values[header.value])'
-                                               size="large" lazy>
-                                    <v-text-field readonly single-line class='sm-txt'
-                                                  :model-value='formatAsCurrency(item.value.values[header.value])'
-                                                  :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                    <template v-slot:input>
-                                        <v-text-field label='Edit' single-line
-                                                      v-model.number='item.value.values[header.value]'
-                                                      v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
-                                                      :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                    </template>
-                                </v-edit-dialog>
-                            </div>
+    <v-col v-show='hasSelectedLibrary || hasScenario' xs12>             
+        <v-col>
+            <v-data-table-server
+                id="InvestmentEditor-investmentsDataTable-dataTable"
+                :headers='budgetYearsGridHeaders' 
+                :items="budgetYearsGridData"
+                :items-length="totalItems"
+                class='v-table__overflow ghd-table' 
+                item-value='year' 
+                select-all 
+                sort-icon=$vuetify.icons.ghd-table-sort
+                v-model='selectedBudgetYearsGridData' 
+                :pagination.sync="pagination"
+                
+                :rows-per-page-items=[5,10,25]
+                :must-sort='true'>
+                <template slot='items' slot-scope='props' v-slot:item="{item}">
+                    <td>
+                        <v-checkbox hide-details primary v-model='item.raw.selected'></v-checkbox>
+                    </td>
+                    <td v-for='header in budgetYearsGridHeaders'>
+                        <div v-if="header.value === 'year'">
+                            <span class='sm-txt'>{{ item.value.year + firstYearOfAnalysisPeriodShift}}</span>
+                        </div>       
+                        <div v-if="header.value === 'action'">
+                            <v-btn @click="onRemoveBudgetYear(item.value.year)" class="ghd-blue" icon>
+                                <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')" />
+                            </v-btn>
+                        </div>
+                        <div v-if="header.value !== 'year' && header.value !== 'action'">
+                            <v-edit-dialog :return-value.sync='item.value.values[header.value]'
+                                            @save='onEditBudgetYearValue(item.value.year, header.value, item.value.values[header.value])'
+                                            size="large" lazy>
+                                <v-text-field readonly single-line class='sm-txt'
+                                                :model-value='formatAsCurrency(item.value.values[header.value])'
+                                                :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                <template v-slot:input>
+                                    <v-text-field label='Edit' single-line
+                                                    v-model.number='item.value.values[header.value]'
+                                                    v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
+                                                    :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                </template>
+                            </v-edit-dialog>
+                        </div>
 
-                        </td>
-                    </template>
-                </v-data-table>
-                <v-btn id="InvestmentEditor-deleteSelected-btn"
-                       :disabled='selectedBudgetYears.length === 0' @click='onRemoveBudgetYears'
-                       class='ghd-blue ghd-button' variant = "flat">
-                    Delete Selected
-                </v-btn>
-            </v-col>
+                    </td>
+                </template>
+            </v-data-table-server>
+            <v-btn id="InvestmentEditor-deleteSelected-btn"
+                    :disabled='selectedBudgetYears.length === 0' @click='onRemoveBudgetYears'
+                    class='ghd-blue ghd-button' variant = "flat">
+                Delete Selected
+            </v-btn>
         </v-col>
-    -->
-        <v-col v-show='hasSelectedLibrary && !hasScenario' xs12>
+    </v-col>
+    
+        <v-col v-show='hasSelectedLibrary && !hasScenario' cols = "12">
             <v-row justify-center>
                 <v-col>
                     <v-subheader class="ghd-subheader">Description</v-subheader>
@@ -380,7 +379,7 @@ async function upsertBudgetLibraryAction(payload?: any): Promise<any> {await sto
 async function deleteBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteBudgetLibrary');}
 async function upsertOrDeleteBudgetLibraryUsersAction(payload: any): Promise<any> {await store.dispatch('upsertOrDeleteBudgetLibraryUsers');}
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
-async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
+async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
 async function importScenarioInvestmentBudgetsFileAction(payload?: any): Promise<any> {await store.dispatch('importScenarioInvestmentBudgetsFile');}
 async function importLibraryInvestmentBudgetsFileAction(payload?: any): Promise<any> {await store.dispatch('importLibraryInvestmentBudgetsFile');}
 async function getCriterionLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getCriterionLibraries');}
@@ -396,21 +395,23 @@ function investmentPlanMutator(payload:any){store.commit('investmentPlanMutator'
 function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImportMutator');}
     let modifiedDate: string;
 
-    let addedBudgets: Budget[] = [];
+    let addedBudgets = ref<Budget[]>([]);
     let updatedBudgetsMap:Map<string, [Budget, Budget]> = new Map<string, [Budget, Budget]>();//0: original value | 1: updated value
-    let deletionBudgetIds: string[] = [];
-    let BudgetCache: Budget[] = [];
+    let deletionBudgetIds = ref<string[]>([]);
+    let BudgetCache = ref<Budget[]>([]);
     let budgetAmountCache: BudgetAmount[] = [];
     let updatedBudgetAmountsMaps:Map<string, [BudgetAmount, BudgetAmount]> = new Map<string, [BudgetAmount, BudgetAmount]>();//0: original value | 1: updated value 
     let addedBudgetAmounts: Map<string, BudgetAmount[]> = new  Map<string, BudgetAmount[]>();
-    let deletionYears: number[] = [] 
+    let deletionYears = ref<number[]>([]);
     let updatedBudgetAmounts:  Map<string, BudgetAmount[]> = new  Map<string, BudgetAmount[]>();
     let gridSearchTerm = '';
     let currentSearch = '';
-    let pagination: Pagination = clone(emptyPagination);
+    //let pagination: Pagination = clone(emptyPagination);
+    const pagination: Pagination = shallowReactive(clone(emptyPagination));
+    
     let isPageInit = false;
-    let totalItems = 0;
-    let currentPage: Budget[] = [];
+    let totalItems = ref<number>(0);
+    let currentPage = ref<Budget[]>([]);
     let lastYear: number = 0;
     let firstYear: number = 0;
     let initializing: boolean = true;
@@ -426,19 +427,19 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     const librarySelectItemNames = ref<string[]>([]);
     let librarySelectItemValue = ref<string|null>('');
 
-    let actionHeader: DataTableHeader = { text: 'Action', value: 'action', align: 'left', sortable: false, class: '', width: '' }
+    let actionHeader: any = { title: 'Action', key: 'action', align: 'left', sortable: false, class: '', width: '' }
     let budgetYearsGridHeaders: any[] = [
         { title: 'Year', key: 'year', sortable: true, align: 'left', class: '', width: '' },
         actionHeader
     ];
-    let budgetYearsGridData: BudgetYearsGridData[] = [];
-    let selectedBudgetYearsGridData: BudgetYearsGridData[] = [];
-    let selectedBudgetYears: number[] = [];
+    let budgetYearsGridData = ref<BudgetYearsGridData[]>([]);
+    let selectedBudgetYearsGridData = ref<BudgetYearsGridData[]>([]);
+    let selectedBudgetYears = ref<number[]>([]);
 
     //let createBudgetLibraryDialogData: CreateBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
     let createBudgetLibraryDialogData = ref<CreateBudgetLibraryDialogData>(clone(emptyCreateBudgetLibraryDialogData));
     
-    let shareBudgetLibraryDialogData: ShareBudgetLibraryDialogData = clone(emptyShareBudgetLibraryDialogData);
+    let shareBudgetLibraryDialogData = ref<ShareBudgetLibraryDialogData>(clone(emptyShareBudgetLibraryDialogData));
     let editBudgetsDialogData: EditBudgetsDialogData = clone(emptyEditBudgetsDialogData);
 
     let showSetRangeForAddingBudgetYearsDialog: boolean = false;
@@ -465,7 +466,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let originalFirstYear: number = 0
     let firstYearOfAnalysisPeriodShift = shallowRef<number>(0);
 
-    let unsavedDialogAllowed: boolean = true;
+    let unsavedDialogAllowed = ref<boolean>(true);
     let trueLibrarySelectItemValue = ref<string|null>('');
     let librarySelectItemValueAllowedChanged: boolean = true;
 
@@ -546,9 +547,9 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             syncModel: {
                 libraryId: selectedBudgetLibrary.value.id === uuidNIL ? null : selectedBudgetLibrary.value.id,
                 updatedBudgets: Array.from(updatedBudgetsMap.values()).map(r => r[1]),
-                budgetsForDeletion: deletionBudgetIds,
-                addedBudgets: addedBudgets,
-                deletionyears: deletionYears ,
+                budgetsForDeletion: deletionBudgetIds.value,
+                addedBudgets: addedBudgets.value,
+                deletionyears: deletionYears.value ,
                 updatedBudgetAmounts: mapToIndexSignature( updatedBudgetAmounts),
                 Investment: !isNil(investmentPlan) ? {
                 ...investmentPlan,
@@ -570,11 +571,11 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
                     firstYear = data.firstYear;
-                    currentPage = data.items.sort((a, b) => a.budgetOrder - b.budgetOrder);
-                    BudgetCache = clone(currentPage);
-                    BudgetCache.forEach(_ => _.budgetAmounts = []);
-                    budgetAmountCache = currentPage.flatMap(_ => _.budgetAmounts)
-                    totalItems = data.totalItems;
+                    currentPage.value = data.items.sort((a, b) => a.budgetOrder - b.budgetOrder);
+                    BudgetCache.value = clone(currentPage.value);
+                    BudgetCache.value.forEach(_ => _.budgetAmounts = []);
+                    budgetAmountCache = currentPage.value.flatMap(_ => _.budgetAmounts)
+                    totalItems.value = data.totalItems;
                     investmentPlan = data.investmentPlan;                   
                     lastYear = data.lastYear;
                     
@@ -597,11 +598,11 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             await InvestmentService.getLibraryInvestmentPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
-                    currentPage = data.items;
-                    BudgetCache = clone(currentPage);
-                    BudgetCache.forEach(_ => _.budgetAmounts = []);
-                    budgetAmountCache = currentPage.flatMap(_ => _.budgetAmounts)
-                    totalItems = data.totalItems;
+                    currentPage.value = data.items;
+                    BudgetCache.value = clone(currentPage.value);
+                    BudgetCache.value.forEach(_ => _.budgetAmounts = []);
+                    budgetAmountCache = currentPage.value.flatMap(_ => _.budgetAmounts)
+                    totalItems.value = data.totalItems;
                     lastYear = data.lastYear
                 }
             }); 
@@ -647,7 +648,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     });
 
     watch(selectedBudgetYearsGridData,()=> {
-        selectedBudgetYears = getPropertyValues('year', selectedBudgetYearsGridData) as number[];
+        selectedBudgetYears.value = getPropertyValues('year', selectedBudgetYearsGridData.value) as number[];
     });
 
     watch(librarySelectItemValue,() => {
@@ -655,14 +656,14 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
         if(hasScenario){
             onSelectItemValueChanged();
-            unsavedDialogAllowed = false;
+            unsavedDialogAllowed.value = false;
         }           
         else if(librarySelectItemValueAllowedChanged){
-            //CheckUnsavedDialog(onSelectItemValueChanged, () => {
+            CheckUnsavedDialog(onSelectItemValueChanged, () => {
                 librarySelectItemValueAllowedChanged = false;
                 onSelectItemValueChanged();
-                //librarySelectItemValue.value = trueLibrarySelectItemValue.value;               
-            //});
+                librarySelectItemValue.value = trueLibrarySelectItemValue.value;               
+            });
         }
         parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
         newLibrarySelection = true;
@@ -703,7 +704,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         checkHasUnsavedChanges();
     });
 
-    watch(currentPage,() => {
+    watch(currentPage, () => {
         setGridHeaders();
         setGridData();
         
@@ -735,12 +736,12 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     });
 
     function onRemoveBudgetYears() {
-        deletionYears = deletionYears.concat(selectedBudgetYears)
+        deletionYears.value = deletionYears.value.concat(selectedBudgetYears.value)
         let deletedAddYears: number[] = [];
         for(let [key, value] of addedBudgetAmounts){
             let val = addedBudgetAmounts.get(key)! 
             val = val.filter(v => {
-                if(!deletionYears.includes(v.year)){                  
+                if(!deletionYears.value.includes(v.year)){                  
                     return true;
                 }
 
@@ -751,8 +752,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 addedBudgetAmounts.delete(key)
         }
         if (deletedAddYears.length > 0) {
-            selectedBudgetYears = selectedBudgetYears.filter(year => !deletedAddYears.includes(year))
-            deletionYears = deletionYears.concat(selectedBudgetYears)
+            selectedBudgetYears.value = selectedBudgetYears.value.filter(year => !deletedAddYears.includes(year))
+            deletionYears.value = deletionYears.value.concat(selectedBudgetYears.value)
             onPaginationChanged();
             return;
         }
@@ -761,9 +762,9 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
         for (let [key, value] of updatedBudgetAmounts) {
             let val = updatedBudgetAmounts.get(key)!
-            const ids = val.filter(v => deletionYears.includes(v.year)).map(v => v.id)
+            const ids = val.filter(v => deletionYears.value.includes(v.year)).map(v => v.id)
             deletedUpdateIds = deletedUpdateIds.concat(ids)
-            val = val.filter(v => !deletionYears.includes(v.year))
+            val = val.filter(v => !deletionYears.value.includes(v.year))
             if (val.length == 0)
                 updatedBudgetAmounts.delete(key)
         }
@@ -799,7 +800,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             onPaginationChanged();
             return;
         }
-        deletionYears.push(year)
+        deletionYears.value.push(year)
 
         let deleteIds: string[] = []
         for (let [key, value] of updatedBudgetAmounts) {
@@ -828,7 +829,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
     function setHasUnsavedChangesFlag() {
         if (hasScenario) {
-            const budgetsHaveUnsavedChanges: boolean = hasUnsavedChangesCore('', currentPage, stateScenarioBudgets);
+            const budgetsHaveUnsavedChanges: boolean = hasUnsavedChangesCore('', currentPage.value, stateScenarioBudgets.value);
 
 
             const clonedInvestmentPlan: InvestmentPlan = clone(investmentPlan);
@@ -851,15 +852,15 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             setHasUnsavedChangesAction({ value: budgetsHaveUnsavedChanges || investmentPlanHasUnsavedChanges });
         } else if (hasSelectedLibrary.value) {
             const hasUnsavedChanges: boolean = hasUnsavedChangesCore('',
-                { ...clone(selectedBudgetLibrary.value), budgets: clone(currentPage) },
+                { ...clone(selectedBudgetLibrary.value), budgets: clone(currentPage.value) },
                 stateSelectedBudgetLibrary);
             setHasUnsavedChangesAction({ value: hasUnsavedChanges });
         }
     }
 
     function setGridHeaders() {
-        const budgetNames: string[] = getPropertyValues('name', currentPage) as string[];
-        const budgetHeaders: DataTableHeader[] = budgetNames
+        const budgetNames: string[] = getPropertyValues('name', currentPage.value) as string[];
+        const budgetHeaders: any[] = budgetNames
             .map((name: string) => ({
                 text: name,
                 value: name,
@@ -867,7 +868,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 align: 'left',
                 class: '',
                 width: '',
-            }) as DataTableHeader);
+            }) as any);
         budgetYearsGridHeaders = [
             budgetYearsGridHeaders[0],
             ...budgetHeaders,
@@ -876,25 +877,25 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function setGridData() {
-        budgetYearsGridData = [];
-        if(currentPage.length <= 0)
+        budgetYearsGridData.value = [];
+        if(currentPage.value.length <= 0)
             return;
-        for(let i = 0; i < currentPage[0].budgetAmounts.length; i++){
-            let year = currentPage[0].budgetAmounts[i].year
+        for(let i = 0; i < currentPage.value[0].budgetAmounts.length; i++){
+            let year = currentPage.value[0].budgetAmounts[i].year
             let values: {[budgetName: string]: number | null} = {}
-            for(let o = 0; o < currentPage.length; o++){
-                values[currentPage[o].name] = currentPage[o].budgetAmounts[i].value
+            for(let o = 0; o < currentPage.value.length; o++){
+                values[currentPage.value[o].name] = currentPage.value[o].budgetAmounts[i].value
             }
-            budgetYearsGridData.push({year, values})
+            budgetYearsGridData.value.push({year, values})
         }        
     }
 
     function syncInvestmentPlanWithBudgets() {//gets call in on pagination now       
-        investmentPlan.numberOfYearsInAnalysisPeriod = totalItems > 0 ? totalItems : 1
+        investmentPlan.numberOfYearsInAnalysisPeriod = totalItems.value > 0 ? totalItems.value : 1
     }
 
     function onShareBudgetLibraryDialogSubmit(budgetLibraryUsers: BudgetLibraryUser[]) {
-        shareBudgetLibraryDialogData = clone(emptyShareBudgetLibraryDialogData);
+        shareBudgetLibraryDialogData.value = clone(emptyShareBudgetLibraryDialogData);
 
         if (!isNil(budgetLibraryUsers) && selectedBudgetLibrary.value.id !== getBlankGuid())
         {
@@ -935,14 +936,15 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     function onShowCreateBudgetLibraryDialog(createAsNewLibrary: boolean) {
         createBudgetLibraryDialogData.value = {
             showDialog: true,
-            budgets: createAsNewLibrary ? currentPage : [],
+            budgets: createAsNewLibrary ? currentPage.value : [],
         };
     }
 
-    function onSubmitCreateCreateBudgetLibraryDialogResult(budgetLibrary: BudgetLibrary) {//needs a few things
+    function onSubmitCreateCreateBudgetLibraryDialogResult(budgetLibrary:BudgetLibrary) {//needs a few things        
         createBudgetLibraryDialogData.value = clone(emptyCreateBudgetLibraryDialogData);
 
     if (!isNil(budgetLibrary)) {
+        console.log(`onSubmitCreateCreateBudgetLibraryDialogResult: ${budgetLibrary.id}`); 
         hasCreatedLibrary = true;
         librarySelectItemValue.value = budgetLibrary.id;
         const libraryUpsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
@@ -951,10 +953,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             syncModel: {
                 libraryId: budgetLibrary.budgets.length === 0 || !hasSelectedLibrary.value ? null : selectedBudgetLibrary.value.id,
                 Investment: investmentPlan,
-                budgetsForDeletion: budgetLibrary.budgets.length === 0 ? [] : deletionBudgetIds,
+                budgetsForDeletion: budgetLibrary.budgets.length === 0 ? [] : deletionBudgetIds.value,
                 updatedBudgets: budgetLibrary.budgets.length === 0 ? [] : Array.from(updatedBudgetsMap.values()).map(r => r[1]),
-                addedBudgets: budgetLibrary.budgets.length === 0 ? [] : addedBudgets,
-                deletionyears: budgetLibrary.budgets.length === 0 ? [] : deletionYears,
+                addedBudgets: budgetLibrary.budgets.length === 0 ? [] : addedBudgets.value,
+                deletionyears: budgetLibrary.budgets.length === 0 ? [] : deletionYears.value,
                 updatedBudgetAmounts: budgetLibrary.budgets.length === 0 ? {} : mapToIndexSignature(updatedBudgetAmounts),
                 addedBudgetAmounts: budgetLibrary.budgets.length === 0 ? {} : mapToIndexSignature(addedBudgetAmounts),
                 firstYearAnalysisBudgetShift: 0,
@@ -1009,7 +1011,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     function onAddBudgetYear() {
         const nextYear: number = getNextYear();
 
-        const budgets: Budget[] = clone(currentPage);
+        const budgets: Budget[] = clone(currentPage.value);
 
         budgets.forEach((budget: Budget) => {
             const newBudgetAmount: BudgetAmount = {
@@ -1031,18 +1033,18 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     function onRemoveLatestBudgetYear() {
         const latestYear: number = lastYear;
 
-        const budgets: Budget[] = clone(currentPage);
+        const budgets: Budget[] = clone(currentPage.value);
 
         budgets.forEach((budget: Budget) => {
             budget.budgetAmounts = budget.budgetAmounts.filter((budgetAmount: BudgetAmount) =>
                 !(budgetAmount.year == latestYear));
         });
 
-        currentPage = clone(budgets);
+        currentPage.value = clone(budgets);
     }
 
     function onShowShareBudgetLibraryDialog(budgetLibrary: BudgetLibrary) { 
-            shareBudgetLibraryDialogData = 
+            shareBudgetLibraryDialogData.value = 
             { 
                 showDialog: true, 
                 budgetLibrary: clone(budgetLibrary), 
@@ -1057,7 +1059,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         const startYear: number = hasValue(latestYear) && latestYear !== 0 ? latestYear + 1 : moment().year();
         const endYear = moment().year(startYear).add(range, 'years').year();
 
-            const budgets: Budget[] = clone(currentPage);
+            const budgets: Budget[] = clone(currentPage.value);
 
             for (let currentYear = startYear; currentYear < endYear; currentYear++) {
                 budgets.forEach((budget: Budget) => {
@@ -1086,24 +1088,24 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             const endYear: number = lastYear;
             const startYear: number = endYear - range + 1;
 
-            const budgets: Budget[] = clone(currentPage);
+            const budgets: Budget[] = clone(currentPage.value);
 
             budgets.forEach((budget: Budget) => {
                 budget.budgetAmounts = budget.budgetAmounts.filter((budgetAmount: BudgetAmount) =>
                     !(budgetAmount.year >= startYear && budgetAmount.year <= endYear));
             });
 
-            currentPage = clone(budgets);
+            currentPage.value = clone(budgets);
         }
     }
 
 
     function onShowEditBudgetsDialog() {
 
-        currentPage.sort((b1, b2) => b1.budgetOrder - b2.budgetOrder);
+        currentPage.value.sort((b1, b2) => b1.budgetOrder - b2.budgetOrder);
         editBudgetsDialogData = {
             showDialog: true,
-            budgets: clone(BudgetCache),
+            budgets: clone(BudgetCache.value),
             scenarioId: selectedScenarioId,
         };
     }
@@ -1111,11 +1113,11 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     function onSubmitEditBudgetsDialogResult(budgetChanges: EmitedBudgetChanges) {        
         editBudgetsDialogData = clone(emptyEditBudgetsDialogData);
         if(!isNil(budgetChanges)){
-            addedBudgets = addedBudgets.concat(budgetChanges.addedBudgets);
+            addedBudgets.value = addedBudgets.value.concat(budgetChanges.addedBudgets);
             budgetChanges.addedBudgets.forEach(budget => {
                 let amounts: BudgetAmount[] = [];
-                if(currentPage.length > 0){
-                    currentPage[0].budgetAmounts.forEach(amount => {
+                if(currentPage.value.length > 0){
+                    currentPage.value[0].budgetAmounts.forEach(amount => {
                         amounts.push({
                             id: getNewGuid(),
                             budgetName: budget.name,
@@ -1126,28 +1128,28 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 }
                 addedBudgetAmounts.set(budget.name, amounts);
             });          
-            let addedIds = addedBudgets.map(b => b.id);            
+            let addedIds = addedBudgets.value.map(b => b.id);            
             budgetChanges.deletionIds.forEach(id => removeBudget(id));
-            deletionBudgetIds = deletionBudgetIds.filter(b => !addedIds.includes(b));
+            deletionBudgetIds.value = deletionBudgetIds.value.filter(b => !addedIds.includes(b));
             budgetChanges.updatedBudgets.forEach(budget => onUpdateBudget(budget.id, budget));                       
             
             onPaginationChanged();
         }      
     }
     function removeBudget(id: string){
-        if(any(propEq('id', id), addedBudgets)){
-            addedBudgets = addedBudgets.filter((addBudge: Budget) => addBudge.id != id);
-            deletionBudgetIds.push(id);
-            const budget = currentPage.find(b => b.id === id);
+        if(any(propEq('id', id), addedBudgets.value)){
+            addedBudgets.value = addedBudgets.value.filter((addBudge: Budget) => addBudge.id != id);
+            deletionBudgetIds.value.push(id);
+            const budget = currentPage.value.find(b => b.id === id);
             if(!isNil(budget))
                 addedBudgetAmounts.delete(budget.name)
         }              
         else if(any(propEq('id', id), Array.from(updatedBudgetsMap.values()).map(r => r[1]))){
             updatedBudgetsMap.delete(id)
-            deletionBudgetIds.push(id);
+            deletionBudgetIds.value.push(id);
         }          
         else
-            deletionBudgetIds.push(id);
+            deletionBudgetIds.value.push(id);
     }
 
     function OnDownloadTemplateClick() {
@@ -1208,8 +1210,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function onEditBudgetYearValue(year: number, budgetName: string, value: number) {//check out
-        if (any(propEq('name', budgetName), currentPage)) {
-            const budget: Budget = find(propEq('name', budgetName), currentPage) as Budget;
+        if (any(propEq('name', budgetName), currentPage.value)) {
+            const budget: Budget = find(propEq('name', budgetName), currentPage.value) as Budget;
 
             if (any(propEq('year', year), budget.budgetAmounts)) {
                 const budgetAmount: BudgetAmount = find(propEq('year', year), budget.budgetAmounts) as BudgetAmount;
@@ -1236,11 +1238,11 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         else { scenarioLibraryIsModified = false; }
 
         const sync: InvestmentPagingSyncModel = {
-            libraryId: selectedBudgetLibrary.id === uuidNIL ? null : selectedBudgetLibrary.id,
+            libraryId: selectedBudgetLibrary.value.id === uuidNIL ? null : selectedBudgetLibrary.id,
             updatedBudgets: Array.from(updatedBudgetsMap.values()).map(r => r[1]),
-            budgetsForDeletion: deletionBudgetIds,
-            addedBudgets: addedBudgets,
-            deletionyears: deletionYears,
+            budgetsForDeletion: deletionBudgetIds.value,
+            addedBudgets: addedBudgets.value,
+            deletionyears: deletionYears.value,
             updatedBudgetAmounts: mapToIndexSignature(updatedBudgetAmounts),
             Investment: {
                 ...investmentPlan,
@@ -1265,12 +1267,13 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function onUpsertBudgetLibrary() {
+        console.log(`UPDATE LIBRARY`);
         const sync: InvestmentPagingSyncModel = {
             libraryId: selectedBudgetLibrary.value.id === uuidNIL ? null : selectedBudgetLibrary.value.id,
             updatedBudgets: Array.from(updatedBudgetsMap.values()).map(r => r[1]),
-            budgetsForDeletion: deletionBudgetIds,
-            addedBudgets: addedBudgets,
-            deletionyears: deletionYears ,
+            budgetsForDeletion: deletionBudgetIds.value,
+            addedBudgets: addedBudgets.value,
+            deletionyears: deletionYears.value ,
             updatedBudgetAmounts: mapToIndexSignature( updatedBudgetAmounts),
             Investment: null,
             addedBudgetAmounts: mapToIndexSignature(addedBudgetAmounts),
@@ -1333,7 +1336,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function disableCrudButton() {
-        const allBudgetDataIsValid: boolean = currentPage.every((budget: Budget) => {
+        const allBudgetDataIsValid: boolean = currentPage.value.every((budget: Budget) => {
             let amountsAreValid = true;
             const addedAmounts = addedBudgetAmounts.get(budget.name);
             const updatedAmounts = updatedBudgetAmounts.get(budget.name);
@@ -1370,14 +1373,14 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function onUpdateBudget(rowId: string, updatedRow: Budget){        
-    if(any(propEq('id', rowId), addedBudgets))
+    if(any(propEq('id', rowId), addedBudgets.value))
     {            
-        addedBudgets[addedBudgets.findIndex((b => b.id == rowId))] = updatedRow;
+        addedBudgets.value[addedBudgets.value.findIndex((b => b.id == rowId))] = updatedRow;
         return;
     }
     let mapEntry = updatedBudgetsMap.get(rowId)
     if(isNil(mapEntry)){
-        const row = BudgetCache.find(r => r.id === rowId);
+        const row = BudgetCache.value.find(r => r.id === rowId);
         if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
             updatedBudgetsMap.set(rowId, [row , updatedRow])
     }
@@ -1428,12 +1431,12 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
     function clearChanges() {
         updatedBudgetsMap.clear();
-        addedBudgets = [];
-        deletionBudgetIds = [];
+        addedBudgets.value = [];
+        deletionBudgetIds.value = [];
         updatedBudgetAmountsMaps.clear();
         updatedBudgetAmounts.clear();
         addedBudgetAmounts.clear();
-        deletionYears = [];
+        deletionYears.value = [];
         if (hasScenario)
             investmentPlan = clone(stateInvestmentPlan.value);
     }
@@ -1463,10 +1466,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 : 0,
         };
         const hasUnsavedChanges: boolean = 
-            deletionBudgetIds.length > 0 || 
-            addedBudgets.length > 0 ||
+            deletionBudgetIds.value.length > 0 || 
+            addedBudgets.value.length > 0 ||
             updatedBudgetsMap.size > 0 || 
-            deletionYears.length > 0 || 
+            deletionYears.value.length > 0 || 
             addedBudgetAmounts.size > 0 ||
             updatedBudgetAmounts.size > 0 || 
             (hasScenario && hasSelectedLibrary.value) ||
@@ -1476,8 +1479,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
-        if (hasUnsavedChanges && unsavedDialogAllowed) {
- 
+        if (hasUnsavedChanges.value && unsavedDialogAllowed.value) {
             confirm.require({
                 message: "You have unsaved changes. Are you sure you wish to continue?",
                 header: "Unsaved Changes",
@@ -1487,7 +1489,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             });
         } 
         else {
-            unsavedDialogAllowed = true;
+            unsavedDialogAllowed.value = true;
             next();
         }
     };
@@ -1535,9 +1537,9 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             syncModel: {
                 libraryId: selectedBudgetLibrary.value.id === uuidNIL ? null : selectedBudgetLibrary.value.id,
                 updatedBudgets: Array.from(updatedBudgetsMap.values()).map(r => r[1]),
-                budgetsForDeletion: deletionBudgetIds,
-                addedBudgets: addedBudgets,
-                deletionyears: deletionYears ,
+                budgetsForDeletion: deletionBudgetIds.value,
+                addedBudgets: addedBudgets.value,
+                deletionyears: deletionYears.value ,
                 updatedBudgetAmounts: mapToIndexSignature( updatedBudgetAmounts),
                 Investment: null,
                 addedBudgetAmounts: mapToIndexSignature(addedBudgetAmounts),
@@ -1553,11 +1555,11 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             await InvestmentService.getScenarioInvestmentPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
-                    currentPage = data.items.sort((a, b) => a.budgetOrder - b.budgetOrder);
-                    BudgetCache = clone(currentPage);
-                    BudgetCache.forEach(_ => _.budgetAmounts = []);
-                    budgetAmountCache = currentPage.flatMap(_ => _.budgetAmounts)
-                    totalItems = data.totalItems;
+                    currentPage.value = data.items.sort((a, b) => a.budgetOrder - b.budgetOrder);
+                    BudgetCache.value = clone(currentPage.value);
+                    BudgetCache.value.forEach(_ => _.budgetAmounts = []);
+                    budgetAmountCache = currentPage.value.flatMap(_ => _.budgetAmounts)
+                    totalItems.value = data.totalItems;
                     investmentPlan = data.investmentPlan;
                     investmentPlanMutator(investmentPlan)
                     syncInvestmentPlanWithBudgets();
@@ -1567,10 +1569,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     if(data.firstYear === 0)
                         originalFirstYear = moment().year()
                 }
-                setParentLibraryName(currentPage.length > 0 ? currentPage[0].libraryId : "None");
-                loadedParentId = currentPage.length > 0 ? currentPage[0].libraryId : "";
+                setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
+                loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
                 loadedParentName = parentLibraryName; //store original
-                scenarioLibraryIsModified = currentPage.length > 0 ? currentPage[0].isModified : false;
+                scenarioLibraryIsModified = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
                 initializing = false;
             });
         }            
@@ -1578,11 +1580,11 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 await InvestmentService.getLibraryInvestmentPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
-                    currentPage = data.items;
-                    BudgetCache = clone(currentPage);
-                    BudgetCache.forEach(_ => _.budgetAmounts = []);
-                    budgetAmountCache = currentPage.flatMap(_ => _.budgetAmounts)
-                    totalItems = data.totalItems;
+                    currentPage.value = data.items;
+                    BudgetCache.value = clone(currentPage.value);
+                    BudgetCache.value.forEach(_ => _.budgetAmounts = []);
+                    budgetAmountCache = currentPage.value.flatMap(_ => _.budgetAmounts)
+                    totalItems.value = data.totalItems;
                     lastYear = data.lastYear;
                 }
                 initializing = false;

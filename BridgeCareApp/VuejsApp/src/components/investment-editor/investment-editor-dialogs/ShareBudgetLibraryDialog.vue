@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="500px" persistent v-model = "showDialogComputed">
     <v-card>
       <v-card-title>
         <v-row justify-center>
@@ -57,27 +57,27 @@ import { BudgetLibraryUserGridRow, ShareBudgetLibraryDialogData } from '@/shared
 import InvestmentService from '@/services/investment.service';
     import { AxiosResponse } from 'axios';
     import { http2XX } from '@/shared/utils/http-utils';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, computed, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
 let store = useStore();
 const emit = defineEmits(['submit'])
-const props = defineProps<{
-  dialogData: ShareBudgetLibraryDialogData
-}>()
+const props = defineProps<{dialogData: ShareBudgetLibraryDialogData}>()
+
+let showDialogComputed = computed(() => props.dialogData.showDialog);
 let stateUsers = ref<User[]>(store.state.userModule.users);
 
-  let budgetLibraryUserGridHeaders: DataTableHeader[] = [
+  let budgetLibraryUserGridHeaders: any[] = [
     {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
   ];
-  let budgetLibraryUserGridRows: BudgetLibraryUserGridRow[] = [];
+  let budgetLibraryUserGridRows = ref<BudgetLibraryUserGridRow[]>([]);
   let currentUserAndOwner: BudgetLibraryUser[] = [];
   let searchTerm: string = '';
 
-  watch(props.dialogData,()=>onDialogDataChanged)
+  watch(()=>props.dialogData,()=>onDialogDataChanged)
   function onDialogDataChanged() {
     if (props.dialogData.showDialog) {
       onSetGridData();
@@ -88,7 +88,7 @@ let stateUsers = ref<User[]>(store.state.userModule.users);
   function onSetGridData() {
     const currentUser: string = getUserName();
 
-    budgetLibraryUserGridRows = stateUsers.value
+    budgetLibraryUserGridRows.value = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -134,14 +134,14 @@ let stateUsers = ref<User[]>(store.state.userModule.users);
                 const otherUsers: BudgetLibraryUser[] = filter(isNotCurrentUserOrOwner, budgetLibraryUsers) as BudgetLibraryUser[];
 
                 otherUsers.forEach((budgetLibraryUser: BudgetLibraryUser) => {
-                    if (any(propEq('id', budgetLibraryUser.userId), budgetLibraryUserGridRows)) {
+                    if (any(propEq('id', budgetLibraryUser.userId), budgetLibraryUserGridRows.value)) {
                         const budgetLibraryUserGridRow: BudgetLibraryUserGridRow = find(
-                            propEq('id', budgetLibraryUser.userId), budgetLibraryUserGridRows) as BudgetLibraryUserGridRow;
+                            propEq('id', budgetLibraryUser.userId), budgetLibraryUserGridRows.value) as BudgetLibraryUserGridRow;
 
-                        budgetLibraryUserGridRows = update(
-                            findIndex(propEq('id', budgetLibraryUser.userId), budgetLibraryUserGridRows),
+                        budgetLibraryUserGridRows.value = update(
+                            findIndex(propEq('id', budgetLibraryUser.userId), budgetLibraryUserGridRows.value),
                             { ...budgetLibraryUserGridRow, isShared: true, canModify: budgetLibraryUser.canModify },
-                            budgetLibraryUserGridRows
+                            budgetLibraryUserGridRows.value
                         );
                     }
                 });
@@ -151,9 +151,9 @@ let stateUsers = ref<User[]>(store.state.userModule.users);
 
   function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      budgetLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), budgetLibraryUserGridRows),
-          'canModify', false, budgetLibraryUserGridRows);
+      budgetLibraryUserGridRows.value = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), budgetLibraryUserGridRows.value),
+          'canModify', false, budgetLibraryUserGridRows.value);
     }
   }
 
@@ -164,11 +164,11 @@ let stateUsers = ref<User[]>(store.state.userModule.users);
       emit('submit', null);
     }
 
-    budgetLibraryUserGridRows = [];
+    budgetLibraryUserGridRows.value = [];
   }
 
   function getBudgetLibraryUsers() {
-    const usersSharedWith: BudgetLibraryUser[] = budgetLibraryUserGridRows
+    const usersSharedWith: BudgetLibraryUser[] = budgetLibraryUserGridRows.value
         .filter((budgetLibraryUserGridRow: BudgetLibraryUserGridRow) => budgetLibraryUserGridRow.isShared)
         .map((budgetLibraryUserGridRow: BudgetLibraryUserGridRow) => ({
           userId: budgetLibraryUserGridRow.id,

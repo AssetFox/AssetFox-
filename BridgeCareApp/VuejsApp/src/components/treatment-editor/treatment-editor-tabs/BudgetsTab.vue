@@ -16,7 +16,7 @@
                         <v-row v-else>
                             <v-data-table :headers='budgetHeaders' :items='budgets'
                                           class='elevation-1 v-table__overflow budgets-data-table ghd-control-text'
-                                          sort-icon=$vuetify.icons.ghd-table-sort
+                                          sort-icon=ghd-table-sort
                                           hide-actions
                                           item-key='id' select-all
                                           v-model='selectedBudgets'>
@@ -39,7 +39,7 @@
 </template>
 
 <script lang='ts' setup>
-import Vue, { shallowRef } from 'vue';
+import Vue, { shallowRef, computed } from 'vue';
 import { clone, contains } from 'ramda';
 import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { SimpleBudgetDetail } from '@/shared/models/iAM/investment';
@@ -52,30 +52,32 @@ import { getPropertyValues } from '@/shared/utils/getter-utils';
 
     const emit = defineEmits(['submit', 'onModifyBudget'])
     let store = useStore();
-    let stateScenarioSimpleBudgetDetails = ref<SimpleBudgetDetail[]>(store.state.adminDataModule.stateAttributes);
+    let stateScenarioSimpleBudgetDetails = computed<SimpleBudgetDetail[]>(() => store.state.adminDataModule.stateAttributes);
 
-    let selectedTreatmentBudgets = shallowRef<string[]>();
-    let addTreatment: boolean;
-    let fromLibrary: boolean;    
+    const props = defineProps<{
+         selectedTreatmentBudgets: string[],
+         addTreatment: boolean,
+         fromLibrary: boolean  
+    }>();  
 
     let initializedBudgets: boolean = false;
-    let budgetHeaders: DataTableHeader[] = [        
-        { text: 'Budget', value: 'name', align: 'left', sortable: true, class: '', width: '300' },
+    let budgetHeaders: any[] = [        
+        { title: 'Budget', key: 'name', align: 'left', sortable: true, class: '', width: '300' },
     ];
     let budgets = shallowRef<SimpleBudgetDetail[]>();
     let selectedBudgets = shallowRef<SimpleBudgetDetail[]>();
 
    
 
-    watch(stateScenarioSimpleBudgetDetails, () => onStateScenarioInvestmentLibraryChanged)
+    watch(stateScenarioSimpleBudgetDetails, () => onStateScenarioInvestmentLibraryChanged())
      async function onStateScenarioInvestmentLibraryChanged() {
         budgets.value = clone(stateScenarioSimpleBudgetDetails.value);
     }
 
     
-    watch(selectedTreatmentBudgets, () => onBudgetsTabDataChanged)
+    watch(() => props.selectedTreatmentBudgets, () => onBudgetsTabDataChanged())
      async function onBudgetsTabDataChanged() {   
-        if ((addTreatment || fromLibrary) && !initializedBudgets) {        
+        if ((props.addTreatment || props.fromLibrary) && !initializedBudgets) {        
             selectedBudgets.value = budgets.value;
             initializedBudgets = true;
         } else {
@@ -84,17 +86,17 @@ import { getPropertyValues } from '@/shared/utils/getter-utils';
         }
     }
 
-    watch(selectedBudgets, () => onSelectedBudgetsChanged)
+    watch(selectedBudgets, () => onSelectedBudgetsChanged())
      async function onSelectedBudgetsChanged() { 
         const selectedBudgetIds: string[] = getPropertyValues('id', selectedBudgets.value!) as string[];
-        if (!isEqual(selectedTreatmentBudgets, selectedBudgetIds)) {
+        if (!isEqual(props.selectedTreatmentBudgets, selectedBudgetIds)) {
             emit('onModifyBudget', selectedBudgets.value);
         }
     }
 
-    watch(budgets, () => onBudgetsChanged)
+    watch(budgets, () => onBudgetsChanged())
      async function onBudgetsChanged(){ 
-        selectedBudgets = clone(budgets);
+        selectedBudgets.value = clone(budgets.value);
     }
 
 </script>

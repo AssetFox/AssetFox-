@@ -9,9 +9,11 @@
                         <v-select
                                   id="CalculatedAttribute-CalculatedAttribute-select"
                                   :items="librarySelectItems"
-                                  append-icon=vuetify.icons.ghd-down
+                                  append-icon=ghd-down
                                   variant="outlined"
                                   v-model="librarySelectItemValue"
+                                  item-title="text" 
+                                    item-value="value" 
                                   class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>
                         <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
@@ -21,7 +23,7 @@
                     <v-row align-end>
                         <v-text-field
                                     id="CalculatedAttribute-search-textField"
-                                    prepend-inner-icon=vuetify.icons.ghd-search
+                                    prepend-inner-icon=ghd-search
                                     hide-details
                                     lablel="Search"
                                     placeholder="Search Calcultated Attribute"
@@ -72,9 +74,11 @@
                     <v-select
                         id="CalculatedAttribute-Attribute-select"   
                         :items="attributeSelectItems"
-                        append-icon=vuetify.icons.ghd-down
+                        append-icon=ghd-down
                         variant="outlined"
                         class="ghd-select ghd-text-field ghd-text-field-border"
+                        item-title="text" 
+                        item-value="value" 
                         v-model="attributeSelectItemValue">
                     </v-select>
                 </v-row>
@@ -87,10 +91,12 @@
                     <v-select
                         id="CalculatedAttribute-Timing-select"
                         :items="attributeTimingSelectItems"
-                        append-icon=vuetify.icons.ghd-down
+                        append-icon=ghd-down
                         variant="outlined"
                         v-model="attributeTimingSelectItemValue"
                         :disabled="!hasAdminAccess"
+                        item-title="text" 
+                        item-value="value" 
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         v-on:change="setTiming">
                     </v-select>
@@ -132,11 +138,22 @@
                 :header="calculatedAttributeGridHeaders"
                 :items="selectedGridItem"
                 :pagination.sync="pagination"
-                :total-items="totalItems"
-                :rows-per-page-items=[5,10,25]
                 class="v-table__overflow ghd-table"
-                sort-icon=vuetify.icons.ghd-table-sort
-                item-key="calculatedAttributeLibraryEquationId">
+                sort-icon=ghd-table-sort
+                item-key="calculatedAttributeLibraryEquationId"                            
+
+                     
+                :items-length="totalItems"
+                :items-per-page-options="[
+                    {value: 5, title: '5'},
+                    {value: 10, title: '10'},
+                    {value: 25, title: '25'},
+                ]"
+                v-model:sort-by="pagination.sort"
+                v-model:page="pagination.page"
+                v-model:items-per-page="pagination.rowsPerPage"
+                @update:options="onPaginationChanged"
+                >
                 <template slot="items" slot-scope="props" v-slot:item="props">
                     <td class="text-xs-center">
                         <v-text-field
@@ -340,40 +357,41 @@ import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
-import { isNullOrUndefined } from 'util';
 import { LibraryUser } from '@/shared/models/iAM/user';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
+import mitt from 'mitt';
+import { computed } from 'vue';
 
 let store = useStore();
 const confirm = useConfirm();
-let stateCalculatedAttributeLibraries = ref<CalculatedAttributeLibrary[]>(store.state.calculatedAttributeModule.calculatedAttributeLibraries);
-let stateSelectedCalculatedAttributeLibrary = ref<CalculatedAttributeLibrary>(store.state.calculatedAttributeModule.selectedCalculatedAttributeLibrary);
-let stateScenarioCalculatedAttributes = ref<CalculatedAttribute[]>(store.state.calculatedAttributeModule.scenarioCalculatedAttributes);
-let stateSelectedLibraryCalculatedAttributes = ref<CalculatedAttribute[]>(store.state.calculatedAttributeModule.selectedLibraryCalculatedAttributes);
-let stateCalculatedAttributes = ref<Attribute[]>(store.state.calculatedAttributeModule.calculatedAttributes);
-let hasUnsavedChanges = ref<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges);
-let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
-let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isSharedLibrary);
+let stateCalculatedAttributeLibraries = computed<CalculatedAttributeLibrary[]>(() => store.state.calculatedAttributeModule.calculatedAttributeLibraries);
+let stateSelectedCalculatedAttributeLibrary = computed<CalculatedAttributeLibrary>(() => store.state.calculatedAttributeModule.selectedCalculatedAttributeLibrary);
+let stateScenarioCalculatedAttributes = computed<CalculatedAttribute[]>(() => store.state.calculatedAttributeModule.scenarioCalculatedAttributes);
+let stateSelectedLibraryCalculatedAttributes = computed<CalculatedAttribute[]>(() => store.state.calculatedAttributeModule.selectedLibraryCalculatedAttributes);
+let stateCalculatedAttributes = computed<Attribute[]>(() => store.state.calculatedAttributeModule.calculatedAttributes);
+let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
+let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeModule.isSharedLibrary);
 
-    async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedCalculatedAttributeLibrary');}
-    async function upsertScenarioCalculatedAttributeAction(payload?: any): Promise<any> {await store.dispatch('upsertScenarioCalculatedAttribute');}
-    async function deleteCalculatedAttributeLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteCalculatedAttributeLibrary');}
-    async function getCalculatedAttributeLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getCalculatedAttributeLibraries');}
-    async function getScenarioCalculatedAttributeAction(payload?: any): Promise<any> {await store.dispatch('getScenarioCalculatedAttribute');}
-    async function getSelectedLibraryCalculatedAttributesAction(payload?: any): Promise<any> {await store.dispatch('getSelectedLibraryCalculatedAttributes');}
-    async function selectCalculatedAttributeLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectCalculatedAttributeLibrary');}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
-    async function getCalculatedAttributesAction(payload?: any): Promise<any> {await store.dispatch('getCalculatedAttributes');}
-    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
-    async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification');}
-    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario');}
-    async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario');}
-    function selectedCalculatedAttributeLibraryMutator(payload: any){store.commit('selectedCalculatedAttributeLibraryMutator');}
-    function calculatedAttributeLibraryMutator(payload: any){store.commit('calculatedAttributeLibraryMutator');}
+    async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedCalculatedAttributeLibrary', payload);}
+    async function upsertScenarioCalculatedAttributeAction(payload?: any): Promise<any> {await store.dispatch('upsertScenarioCalculatedAttribute', payload);}
+    async function deleteCalculatedAttributeLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteCalculatedAttributeLibrary', payload);}
+    async function getCalculatedAttributeLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getCalculatedAttributeLibraries', payload);}
+    async function getScenarioCalculatedAttributeAction(payload?: any): Promise<any> {await store.dispatch('getScenarioCalculatedAttribute', payload);}
+    async function getSelectedLibraryCalculatedAttributesAction(payload?: any): Promise<any> {await store.dispatch('getSelectedLibraryCalculatedAttributes', payload);}
+    async function selectCalculatedAttributeLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectCalculatedAttributeLibrary', payload);}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+    async function getCalculatedAttributesAction(payload?: any): Promise<any> {await store.dispatch('getCalculatedAttributes', payload);}
+    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+    async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification', payload);}
+    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario', payload);}
+    async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario', payload);}
+    function selectedCalculatedAttributeLibraryMutator(payload: any){store.commit('selectedCalculatedAttributeLibraryMutator', payload);}
+    function calculatedAttributeLibraryMutator(payload: any){store.commit('calculatedAttributeLibraryMutator', payload);}
     let getUserNameByIdGetter: any = store.getters.getUserNameById;
 
     let updatedCalcAttrMap:Map<string, [CalculatedAttribute, CalculatedAttribute]> = 
@@ -404,9 +422,9 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
     let defaultEquationCache: CriterionAndEquationSet = emptyCriterionAndEquationSet;
     let defaultSelected: boolean = false;
 
-    let hasSelectedLibrary: boolean = false;
+    let hasSelectedLibrary = ref(false);
     let isDefaultBool = shallowRef<boolean>(false); //this exists because isDefault can't be tracked so this bool is tracked for the switch and is then synced with isDefault
-    let hasScenario: boolean = false;
+    let hasScenario = ref(false);
     let rules: InputValidationRules = validationRules;
     let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
    let showCreateCalculatedAttributeDialog = false;
@@ -461,26 +479,26 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
     let loadedParentId: string = "";
     let newLibrarySelection: boolean = false;
 
-    let calculatedAttributeGridHeaders: DataTableHeader[] = [
+    let calculatedAttributeGridHeaders: any[] = [
         {
-            text: 'Equation',
-            value: 'equation',
+            title: 'Equation',
+            key: 'equation',
             align: 'left',
             sortable: true,
             class: '',
             width: '',
         },
         {
-            text: 'Criterion',
-            value: 'criteriaExpression',
+            title: 'Criterion',
+            key: 'criteriaExpression',
             align: 'left',
             sortable: true,
             class: '',
             width: '',
         },
         {
-            text: '',
-            value: '',
+            title: '',
+            key: '',
             align: 'left',
             sortable: false,
             class: '',
@@ -493,8 +511,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
     
     beforeRouteEnter();
     function beforeRouteEnter(){
-        (() => {
-            librarySelectItemValue.value = '';
+        librarySelectItemValue.value = '';
             attributeSelectItemValue.value = '';
 
             getCalculatedAttributesAction().then( () => {
@@ -511,7 +528,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
                             $router.push('/Scenarios/');
                         }
 
-                        hasScenario = true;
+                        hasScenario.value = true;
                         getScenarioCalculatedAttributeAction(selectedScenarioId).then(()=> {
                             getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
                                 selectScenarioAction({ scenarioId: selectedScenarioId });        
@@ -520,7 +537,6 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
                     }
                 });                
             });
-        });
     }
     onBeforeUnmount(()=>beforeDestroy())
     function beforeDestroy() {
@@ -534,7 +550,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
         if( initializing)
             return;
          checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } =  pagination;
+        const { sort, descending, page, rowsPerPage } =  pagination;
         const request: CalculatedAttributePagingRequestModel= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -548,12 +564,12 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
                 defaultEquations: mapToIndexSignature( defaultEquations),
                 isModified:  scenarioLibraryIsModified
             },           
-            sortColumn: sortBy === '' ? 'year' : sortBy,
-            isDescending: descending != null ? descending : false,
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search:  currentSearch,
             attributeId:  stateCalculatedAttributes.value.find(_ => _.name ===  selectedAttribute.attribute)!.id
         };
-        if((! hasSelectedLibrary &&  hasScenario) &&  selectedScenarioId !==  uuidNIL){
+        if((! hasSelectedLibrary.value &&  hasScenario.value) &&  selectedScenarioId !==  uuidNIL){
             CalculatedAttributeService.getScenarioCalculatedAttrbiutetPage( selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as calculcatedAttributePagingPageModel;
@@ -566,7 +582,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
                 }
             });
         }            
-        else if(hasSelectedLibrary)
+        else if(hasSelectedLibrary.value)
         initializing = true;
         await CalculatedAttributeService.getCalculatedLibraryModifiedDate(selectedCalculatedAttributeLibrary.id).then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
@@ -585,7 +601,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
                      totalItems = data.totalItems;
                      defaultEquation = data.defaultEquation;
                      selectedGridItem =  calculatedAttributeGridModelConverter( currentPage);
-                    if (!isNullOrUndefined( selectedCalculatedAttributeLibrary.id) ) {
+                    if (!isNil( selectedCalculatedAttributeLibrary.id) ) {
                          getIsSharedLibraryAction( selectedCalculatedAttributeLibrary).then(() => isShared = isSharedLibrary.value);
                     }
                 }
@@ -670,7 +686,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
     //but only when in libraries
     watch(librarySelectItemValue,() => onLibrarySelectItemValueChangedCheckUnsaved)
     function onLibrarySelectItemValueChangedCheckUnsaved(){
-        if(hasScenario){
+        if(hasScenario.value){
             onLibrarySelectItemValueChanged();
             unsavedDialogAllowed = false;
         }           
@@ -785,7 +801,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
     }
     watch(stateScenarioCalculatedAttributes,() => onStateScenarioCalculatedAttributeChanged)
     function onStateScenarioCalculatedAttributeChanged() {
-        if (hasScenario) {
+        if (hasScenario.value) {
             if (
                 !isNil(stateScenarioCalculatedAttributes.value) &&
                 stateScenarioCalculatedAttributes.value.length > 0
@@ -809,14 +825,14 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
         if (
             selectedCalculatedAttributeLibrary.id !== uuidNIL 
         ) {
-            hasSelectedLibrary = true;
+            hasSelectedLibrary.value = true;
         } 
         else {
-            hasSelectedLibrary = false;
+            hasSelectedLibrary.value = false;
         }
 
         clearChanges();
-        if (hasScenario && hasSelectedLibrary) {
+        if (hasScenario.value && hasSelectedLibrary.value) {
             getSelectedLibraryCalculatedAttributesAction(selectedCalculatedAttributeLibrary.id).then(() =>{
                 // we need new ids for the object which is assigned to a scenario.
                 calculatedAttributeGridData = clone(
@@ -840,12 +856,12 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
             })
 
             
-        } else if (hasScenario && !hasSelectedLibrary) {
+        } else if (hasScenario.value && !hasSelectedLibrary.value) {
             // If a user un select a Library, then reset the grid data from the scenario calculated attribute state
             resetGridData();
             onCalculatedAttributeGridDataChanged();
         } 
-        else if (!hasScenario && hasSelectedLibrary) {
+        else if (!hasScenario.value && hasSelectedLibrary.value) {
             // If a user is in Lirabry page
             getSelectedLibraryCalculatedAttributesAction(selectedCalculatedAttributeLibrary.id).then(() =>{
                 calculatedAttributeGridData = clone(
@@ -883,7 +899,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
     watch(isSharedLibrary,()=> onStateSharedAccessChanged)
     function onStateSharedAccessChanged() {
          isShared =  isSharedLibrary.value;
-         if (!isNullOrUndefined( selectedCalculatedAttributeLibrary) ) {
+         if (!isNil( selectedCalculatedAttributeLibrary) ) {
             selectCalculatedAttributeLibraryAction(selectedCalculatedAttributeLibrary).then(() => isShared = isSharedLibrary.value);
                     }
         //if (!isNullOrUndefined(selectedCalculatedAttributeLibrary)) {
@@ -992,7 +1008,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
 
         if (!isNil(calculatedAttributeLibrary)) {
             const syncModel: CalculatedAttributePagingSyncModel = {
-                libraryId: calculatedAttributeLibrary.calculatedAttributes.length === 0 || ! hasSelectedLibrary ? null :  selectedCalculatedAttributeLibrary.id,
+                libraryId: calculatedAttributeLibrary.calculatedAttributes.length === 0 || ! hasSelectedLibrary.value ? null :  selectedCalculatedAttributeLibrary.id,
                 updatedCalculatedAttributes: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? [] : Array.from( updatedCalcAttrMap.values()).map(r => r[1]),
                 deletedPairs: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature( deletionPairsIds),
                 updatedPairs: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature(  updatedPairs),
@@ -1005,7 +1021,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
                 syncModel: syncModel,
                 isNewLibrary: true,
                 library: calculatedAttributeLibrary,
-                scenarioId:  hasScenario ?  selectedScenarioId : null
+                scenarioId:  hasScenario.value ?  selectedScenarioId : null
             }
             CalculatedAttributeService.upsertCalculatedAttributeLibrary(request).then(((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -1259,7 +1275,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
             emptyCalculatedAttributeLibrary,
         );
         setTimeout(() => {
-            if ( hasScenario) {
+            if ( hasScenario.value) {
                  resetGridData();
                  clearChanges();
                  resetPage();
@@ -1449,8 +1465,8 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
              updatedPairs.size > 0 || 
              addedCalcAttr.length > 0 ||
              defaultEquations.size > 0 ||
-            ( hasScenario &&  hasSelectedLibrary) ||
-            ( hasSelectedLibrary && hasUnsavedChangesCore('',  selectedCalculatedAttributeLibrary,  stateSelectedCalculatedAttributeLibrary))
+            ( hasScenario.value &&  hasSelectedLibrary.value) ||
+            ( hasSelectedLibrary.value && hasUnsavedChangesCore('',  selectedCalculatedAttributeLibrary,  stateSelectedCalculatedAttributeLibrary))
          setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -1471,7 +1487,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
              updatedCalcAttrMap.size > 0 || 
              updatedPairs.size > 0 || 
              addedCalcAttr.length > 0 ||
-            ( hasSelectedLibrary && ! hasScenario && hasUnsavedChangesCore('',  selectedCalculatedAttributeLibrary,  stateSelectedCalculatedAttributeLibrary))
+            ( hasSelectedLibrary.value && ! hasScenario.value && hasUnsavedChangesCore('',  selectedCalculatedAttributeLibrary,  stateSelectedCalculatedAttributeLibrary))
         if (hasUnsavedChanges &&  unsavedDialogAllowed) {
 
             confirm.require({
@@ -1520,7 +1536,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
                         //add library user to an array
                         libraryUserData.push(libraryUser);
                     });
-                    if (!isNullOrUndefined( selectedCalculatedAttributeLibrary.id) ) {
+                    if (!isNil( selectedCalculatedAttributeLibrary.id) ) {
                          getIsSharedLibraryAction( selectedCalculatedAttributeLibrary).then(()=>isShared = isSharedLibrary.value)
                     }
                     //update calculated attribute library sharing
@@ -1568,7 +1584,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
             attributeId:  stateCalculatedAttributes.value.find(_ => _.name ===  selectedAttribute.attribute)!.id
         };
         
-        if((! hasSelectedLibrary &&  hasScenario) &&  selectedScenarioId !==  uuidNIL){
+        if((! hasSelectedLibrary.value &&  hasScenario.value) &&  selectedScenarioId !==  uuidNIL){
             CalculatedAttributeService.getScenarioCalculatedAttrbiutetPage( selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as calculcatedAttributePagingPageModel;
@@ -1589,7 +1605,7 @@ let isSharedLibrary = ref<boolean>(store.state.calculatedAttributeModule.isShare
                  initializing = false;
             });
         }            
-        else if( hasSelectedLibrary)
+        else if( hasSelectedLibrary.value)
             CalculatedAttributeService.getLibraryCalculatedAttributePage( librarySelectItemValue.value !== null ?  librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as calculcatedAttributePagingPageModel;

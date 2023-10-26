@@ -549,7 +549,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
         checkHasUnsavedChanges();
         if(!isNil(event))
             pagination.value.page = event.page + 1;
-        const { sortBy, descending, page, rowsPerPage } = pagination.value;
+        const { sort, descending, page, rowsPerPage } = pagination.value;
         const request: PagingRequest<CashFlowRule>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -560,8 +560,8 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
                 addedRows: addedRows.value,
                 isModified: scenarioLibraryIsModified
             },           
-            sortColumn: sortBy,
-            isDescending: descending != null ? descending : false,
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: currentSearch
         };
         if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
@@ -1001,20 +1001,20 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     }
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
-        if (hasUnsavedChanges && unsavedDialogAllowed) {
+        // if (hasUnsavedChanges && unsavedDialogAllowed) {
 
-            confirm.require({
-                message: "You have unsaved changes. Are you sure you wish to continue?",
-                header: "Unsaved Changes",
-                icon: 'pi pi-question-circle',
-                accept: ()=>next(),
-                reject: ()=>otherwise()
-            });
-        } 
-        else {
-            unsavedDialogAllowed = true;
-            next();
-        }
+        //     confirm.require({
+        //         message: "You have unsaved changes. Are you sure you wish to continue?",
+        //         header: "Unsaved Changes",
+        //         icon: 'pi pi-question-circle',
+        //         accept: ()=>next(),
+        //         reject: ()=>otherwise()
+        //     });
+        // } 
+        // else {
+        //     unsavedDialogAllowed = true;
+        //     next();
+        // }
     };
 
     function setParentLibraryName(libraryId: string) {

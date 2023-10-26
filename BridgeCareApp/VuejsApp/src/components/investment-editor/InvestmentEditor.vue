@@ -539,7 +539,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         if(initializing)
             return;
         checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = pagination;
+        const { sort, descending, page, rowsPerPage } = pagination;
         const request: InvestmentPagingRequestModel= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -560,8 +560,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 firstYearAnalysisBudgetShift: firstYearOfAnalysisPeriodShift.value,
                 isModified: scenarioLibraryIsModified
             },           
-            sortColumn: sortBy === '' ? 'year' : sortBy,
-            isDescending: descending != null ? descending : false,
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: currentSearch
         };
         
@@ -1236,7 +1236,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         else { scenarioLibraryIsModified = false; }
 
         const sync: InvestmentPagingSyncModel = {
-            libraryId: selectedBudgetLibrary.id === uuidNIL ? null : selectedBudgetLibrary.id,
+            libraryId: selectedBudgetLibrary.value.id === uuidNIL ? null : selectedBudgetLibrary.value.id,
             updatedBudgets: Array.from(updatedBudgetsMap.values()).map(r => r[1]),
             budgetsForDeletion: deletionBudgetIds,
             addedBudgets: addedBudgets,

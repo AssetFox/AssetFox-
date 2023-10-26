@@ -52,7 +52,7 @@ import { getPropertyValues } from '@/shared/utils/getter-utils';
 
     const emit = defineEmits(['submit', 'onModifyBudget'])
     let store = useStore();
-    let stateScenarioSimpleBudgetDetails = computed<SimpleBudgetDetail[]>(() => store.state.adminDataModule.stateAttributes);
+    let stateScenarioSimpleBudgetDetails = computed<SimpleBudgetDetail[]>(() => store.state.investmentModule.scenarioSimpleBudgetDetails);
 
     const props = defineProps<{
          selectedTreatmentBudgets: string[],

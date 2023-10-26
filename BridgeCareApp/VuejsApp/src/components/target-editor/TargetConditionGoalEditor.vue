@@ -679,7 +679,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
                     let data = response.data as PagingPage<TargetConditionGoal>;
                     currentPage.value = data.items;
                     rowCache.value = clone(currentPage.value)
-                    totalItems = data.totalItems;
+                    totalItems.value = data.totalItems;
                 }
             });
         else if(hasSelectedLibrary.value)
@@ -695,7 +695,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
                     let data = response.data as PagingPage<TargetConditionGoal>;
                     currentPage.value = data.items;
                     rowCache.value = clone(currentPage.value)
-                    totalItems = data.totalItems;
+                    totalItems.value = data.totalItems;
                     if (!isNil(selectedTargetConditionGoalLibrary.value.id) ) {
                         getIsSharedLibraryAction(selectedTargetConditionGoalLibrary).then(() => isShared = isSharedLibrary.value);
                         
@@ -724,7 +724,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }
 
     function checkLibraryEditPermission() {
-        hasLibraryEditPermission.value = hasAdminAccess.value || (hasPermittedAccess.value && checkUserIsLibraryOwner());
+        setHasUnsavedChangesAction(hasAdminAccess.value || (hasPermittedAccess.value && checkUserIsLibraryOwner()))
     }
 
     function checkUserIsLibraryOwner() {

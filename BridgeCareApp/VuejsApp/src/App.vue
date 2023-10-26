@@ -303,7 +303,7 @@ import config from '../public/config.json';
     let username = computed<string>(() => store.state.authenticationModule.username);
     let hasAdminAccess = computed(() => store.state.authenticationModule.hasAdminAccess);
 
-    let refreshing = ref<boolean>(store.state.authenticationModule.refreshing);
+    let refreshing = computed<boolean>(() => store.state.authenticationModule.refreshing);
     //let navigation = ref<any[]>(store.state.breadcrumbModule.navigation);
     let notifications = ref<Notification[]>(store.state.notificationModule.notifications);
     let notificationCounter = ref<number>(store.state.notificationModule.counter);
@@ -476,7 +476,7 @@ import config from '../public/config.json';
             request: AxiosRequestConfig,
         ) {
             request.headers = setContentTypeCharset(request.headers);
-            if (refreshing) {
+            if (refreshing.value) {
                 await new Promise(_ => setTimeout(_, 5000));
             }
 

@@ -132,7 +132,7 @@
             <v-row class="data-table" justify-left>
                 <v-col cols = "12">
                     <v-card class="elevation-0">
-                        <v-data-table
+                        <v-data-table-server
                             id="PerformanceCurveEditor-deteriorationModels-datatable"                    
                             select-all
                             class="fixed-header ghd-table v-table__overflow"
@@ -157,24 +157,24 @@
                             item-value="name"
                             @update:options="onPaginationChanged"
                         >
-                            <template slot="items" slot-scope="props" v-slot:item="{item}">
+                            <template slot="items" slot-scope="props" v-slot:item="item">
                                 <tr>
                                 <td>
                                     <v-checkbox id="PerformanceCurveEditor-deleteModel-vcheckbox" class="ghd-checkbox"
                                         hide-details
                                         primary
-                                        v-model='item.raw.selected'
+                                        v-model='item.isSelected'
                                     >
                                     </v-checkbox>
                                 </td>                                
                                 <td class="text-xs-left">
                                     <v-edit-dialog
-                                        :return-value.sync="item.value.name"
+                                        :return-value.sync="item.item.name"
                                         @save="
                                             onEditPerformanceCurveProperty(
-                                                item.value.id,
+                                                item.item.id,
                                                 'name',
-                                                item.value.name,
+                                                item.item.name,
                                             )
                                         "
                                         size="large"
@@ -184,7 +184,7 @@
                                             readonly
                                             single-line
                                             class="sm-txt equation-name-text-field-output"
-                                            :model-value="item.value.name"
+                                            :model-value="item.item.name"
                                             :rules="[
                                                 rules['generalRules']
                                                     .valueIsNotEmpty,
@@ -194,7 +194,7 @@
                                             <v-text-field
                                                 label="Edit"
                                                 single-line
-                                                v-model="item.value.name"
+                                                v-model="item.item.name"
                                                 :rules="[
                                                     rules['generalRules']
                                                         .valueIsNotEmpty,
@@ -206,13 +206,13 @@
                                 <td class="text-xs-left">
                                     <v-edit-dialog
                                         :return-value.sync="
-                                            item.value.attribute
+                                            item.item.attribute
                                         "
                                         @save="
                                             onEditPerformanceCurveProperty(
-                                                item.value.id,
+                                                item.item.id,
                                                 'attribute',
-                                                item.value.attribute,
+                                                item.item.attribute,
                                             )
                                         "
                                         size="large"
@@ -222,7 +222,7 @@
                                             readonly
                                             single-line
                                             class="sm-txt attribute-text-field-output"
-                                            :model-value="item.value.attribute"
+                                            :model-value="item.item.attribute"
                                             :rules="[
                                                 rules['generalRules']
                                                     .valueIsNotEmpty,
@@ -233,7 +233,7 @@
                                                 :items="attributeSelectItems"
                                                 append-icon=ghd-down
                                                 label="Edit"
-                                                v-model="item.value.attribute"
+                                                v-model="item.item.attribute"
                                                 :rules="[
                                                     rules['generalRules']
                                                         .valueIsNotEmpty,
@@ -250,7 +250,7 @@
                                         min-height="500px"
                                         min-width="500px"
                                         v-show="
-                                            item.value.equation.expression !==
+                                            item.item.equation.expression !==
                                                 ''
                                         "
                                     >
@@ -265,7 +265,7 @@
                                                     id="PerformanceCurveEditor-checkEquation-vtextarea"
                                                     class="sm-txt Montserrat-font-family"
                                                     :model-value="
-                                                        item.value.equation
+                                                        item.item.equation
                                                             .expression
                                                     "
                                                     full-width
@@ -280,7 +280,7 @@
                                     <v-btn id="PerformanceCurveEditor-editEquation-vbtn"
                                         @click="
                                             onShowEquationEditorDialog(
-                                                item.value.id,
+                                                item.item.id,
                                             )
                                         "
                                         class="ghd-blue"
@@ -295,7 +295,7 @@
                                         min-width="500px"
                                         location="right"
                                         v-show="
-                                            item.value.criterionLibrary
+                                            item.item.criterionLibrary
                                                 .mergedCriteriaExpression !== ''
                                         "
                                     >
@@ -310,7 +310,7 @@
                                                     id="PerformanceCurveEditor-checkCriteria-vtextarea"
                                                     class="sm-txt Montserrat-font-family"
                                                     :model-value="
-                                                        item.value
+                                                        item.item
                                                             .criterionLibrary
                                                             .mergedCriteriaExpression
                                                     "
@@ -326,7 +326,7 @@
                                     <v-btn id="PerformanceCurveEditor-editCriteria-vbtn"
                                         @click="
                                             onEditPerformanceCurveCriterionLibrary(
-                                                item.value.id,
+                                                item.item.id,
                                             )
                                         "
                                         class="ghd-blue"
@@ -339,7 +339,7 @@
                                     <v-btn id="PerformanceCurveEditor-deleteModel-vbtn"
                                         @click="
                                             onRemovePerformanceCurve(
-                                                item.value.id,
+                                                item.item.id,
                                             )
                                         "
                                         class="ghd-blue"
@@ -353,7 +353,7 @@
                             <!-- <template v-slot:body.append-inner>
                             <v-btn>Append button</v-btn>
                             </template>                                -->
-                        </v-data-table>
+                        </v-data-table-server>
                         <v-btn style="margin-top:-84px"
                             id="PerformanceCurveEditor-deleteSelected-button"
                             :disabled='selectedPerformanceEquationIds.length === 0 || (!hasLibraryEditPermission && !hasScenario)'
@@ -584,25 +584,25 @@ let currentUserCriteriaFilter = computed<UserCriteriaFilter>(() => store.state.u
 let hasPermittedAccess = computed<boolean>(() => store.state.performanceCurveModule.hasPermittedAccess);
 let isSharedLibrary = computed<boolean>(() => store.state.performanceCurveModule.isSharedLibrary);
 
-async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess');}
-async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedPerformanceCurveLibrary');}
-async function getPerformanceCurveLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getPerformanceCurveLibraries');}
-async function selectPerformanceCurveLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectPerformanceCurveLibrary');}
-async function deletePerformanceCurveLibraryAction(payload?: any): Promise<any> {await store.dispatch('deletePerformanceCurveLibrary');}
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
-async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
-async function updatePerformanceCurveCriterionLibrariesAction(payload?: any): Promise<any> {await store.dispatch('updatePerformanceCurvesCriterionLibraries');}
-async function upsertOrDeletePerformanceCurveLibraryUsersAction(payload?: any): Promise<any> {await store.dispatch('upsertOrDeletePerformanceCurveLibraryUsers');}
-async function importScenarioPerformanceCurvesFileAction(payload?: any): Promise<any> {await store.dispatch('importScenarioPerformanceCurvesFile');}
-async function importLibraryPerformanceCurvesFileAction(payload?: any): Promise<any> {await store.dispatch('importLibraryPerformanceCurvesFileAction');}
-async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification');}
-async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario');}
-async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario');}
-async function setAlertMessageAction(payload?: any): Promise<any> {await store.dispatch('setAlertMessage');}
+async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess', payload);}
+async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedPerformanceCurveLibrary', payload);}
+async function getPerformanceCurveLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getPerformanceCurveLibraries', payload);}
+async function selectPerformanceCurveLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectPerformanceCurveLibrary', payload);}
+async function deletePerformanceCurveLibraryAction(payload?: any): Promise<any> {await store.dispatch('deletePerformanceCurveLibrary', payload);}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+async function updatePerformanceCurveCriterionLibrariesAction(payload?: any): Promise<any> {await store.dispatch('updatePerformanceCurvesCriterionLibraries', payload);}
+async function upsertOrDeletePerformanceCurveLibraryUsersAction(payload?: any): Promise<any> {await store.dispatch('upsertOrDeletePerformanceCurveLibraryUsers', payload);}
+async function importScenarioPerformanceCurvesFileAction(payload?: any): Promise<any> {await store.dispatch('importScenarioPerformanceCurvesFile', payload);}
+async function importLibraryPerformanceCurvesFileAction(payload?: any): Promise<any> {await store.dispatch('importLibraryPerformanceCurvesFileAction', payload);}
+async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification', payload);}
+async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario', payload);}
+async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario', payload);}
+async function setAlertMessageAction(payload?: any): Promise<any> {await store.dispatch('setAlertMessage', payload);}
 
 let getUserNameByIdGetter: any = store.getters.getUserNameById
-function performanceCurveLibraryMutator(payload:any){store.commit('performanceCurveLibraryMutator');}
-function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selectedPerformanceCurveLibraryMutator');}
+function performanceCurveLibraryMutator(payload:any){store.commit('performanceCurveLibraryMutator', payload);}
+function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selectedPerformanceCurveLibraryMutator', payload);}
 
     let addedRows: ShallowRef<PerformanceCurve[]> = ref([]);
     let updatedRowsMap:Map<string, [PerformanceCurve, PerformanceCurve]> = new Map<string, [PerformanceCurve, PerformanceCurve]>();//0: original value | 1: updated value

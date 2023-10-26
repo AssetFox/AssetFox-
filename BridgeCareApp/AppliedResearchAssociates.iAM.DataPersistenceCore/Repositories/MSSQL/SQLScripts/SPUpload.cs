@@ -3,7 +3,8 @@ using System.IO;
 using System.Data.SqlClient;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
-
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using MathNet.Numerics.Optimization;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.SQLScripts
 {
@@ -36,20 +37,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.S
                     StreamReader fileReader = f.OpenText();
                     string fileContent = fileReader.ReadToEnd();
                     SqlCommand command = new SqlCommand(fileContent, conn);
+                    command.CommandTimeout = 600;
                     int rowsAffected = command.ExecuteNonQuery();
                     fileContent = string.Empty;
                 }
 
-
                 // Execute the stored procedure
-                _unitOfWork.Context.Database.ExecuteSqlRaw("EXEC usp_master_procedure");
-
-
+                _unitOfWork.Context.Database.SetCommandTimeout(TimeSpan.FromSeconds(4000));
+                _unitOfWork.Context.Database.ExecuteSqlRaw("EXEC usp_master_procedure;");
             }
             catch (Exception ex)
             {
-                // Handle any exceptions, e.g., database connection error
-                var xxx = "Error: " + ex.Message;
+                System.Diagnostics.Debug.WriteLine(ex.Message + " Error occurred in RunBatch-ExecuteCommand.");
             }
 
         }

@@ -81,7 +81,7 @@ namespace BridgeCareCore.Services
                 combinedValidationMessage = combinedValidationMessageBuilder.ToString();
             }
 
-            var scenarioTreatmentImportResult = new ScenarioTreatmentImportResultDTO
+            var scenarioTreatmentImportResult = new ScenarioTreatmentSupersedeRuleImportResultDTO
             {
                 Treatments = scenarioTreatments,
                 WarningMessage = combinedValidationMessage,
@@ -170,13 +170,13 @@ namespace BridgeCareCore.Services
             return returnValue;
         }
 
-        public ScenarioTreatmentImportResultDTO ImportScenarioTreatmentsFile(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
+        public ScenarioTreatmentSupersedeRuleImportResultDTO ImportScenarioTreatmentsFile(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
             queueLog ??= new DoNothingWorkQueueLog();
             var validationMessages = new List<string>();
             var scenarioTreatments = new List<TreatmentDTO>();
             var scenarioBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
-                return new ScenarioTreatmentImportResultDTO();
+                return new ScenarioTreatmentSupersedeRuleImportResultDTO();
             queueLog.UpdateWorkQueueStatus("Loading Excel");
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {                
@@ -195,7 +195,7 @@ namespace BridgeCareCore.Services
                 combinedValidationMessage = combinedValidationMessageBuilder.ToString();
             }
 
-            var scenarioTreatmentImportResult = new ScenarioTreatmentImportResultDTO
+            var scenarioTreatmentImportResult = new ScenarioTreatmentSupersedeRuleImportResultDTO
             {
                 Treatments = scenarioTreatments,
                 WarningMessage = combinedValidationMessage,
@@ -203,7 +203,7 @@ namespace BridgeCareCore.Services
             if (combinedValidationMessage.Length == 0)
             {
                 if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
-                    return new ScenarioTreatmentImportResultDTO();
+                    return new ScenarioTreatmentSupersedeRuleImportResultDTO();
                 queueLog.UpdateWorkQueueStatus("Upserting Treatments");
                 _unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(scenarioTreatmentImportResult.Treatments, simulationId);
             }
@@ -232,7 +232,47 @@ namespace BridgeCareCore.Services
                 };
             }
             return fileInfoResult;
-        }
+        }
+
+        public ScenarioTreatmentSupersedeRuleImportResultDTO ImportScenarioTreatmentSupersedeRuleFile(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
+        {
+            queueLog ??= new DoNothingWorkQueueLog();
+            var validationMessages = new List<string>();
+            var scenarioTreatments = new List<TreatmentDTO>();
+            var scenarioBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                return new ScenarioTreatmentSupersedeRuleImportResultDTO();
+            queueLog.UpdateWorkQueueStatus("Loading Excel");
+            foreach (var worksheet in excelPackage.Workbook.Worksheets)
+            {
+                var treatmentLoadResult = _treatmentLoader.LoadScenarioTreatment(worksheet, scenarioBudgets);
+                scenarioTreatments.Add(treatmentLoadResult.Treatment);
+                validationMessages.AddRange(treatmentLoadResult.ValidationMessages);
+            }
+            var combinedValidationMessage = string.Empty;
+            if (validationMessages.Any())
+            {
+                var combinedValidationMessageBuilder = new StringBuilder();
+                foreach (var message in validationMessages)
+                {
+                    combinedValidationMessageBuilder.AppendLine(message);
+                }
+                combinedValidationMessage = combinedValidationMessageBuilder.ToString();
+            }
+
+            var scenarioTreatmentImportResult = new ScenarioTreatmentSupersedeRuleImportResultDTO
+            {
+                Treatments = scenarioTreatments,
+                WarningMessage = combinedValidationMessage,
+            };
+            if (combinedValidationMessage.Length == 0)
+            {
+                if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                    return new ScenarioTreatmentSupersedeRuleImportResultDTO();
+                queueLog.UpdateWorkQueueStatus("Upserting Treatments");
+                _unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(scenarioTreatmentImportResult.Treatments, simulationId);
+            }
+            return scenarioTreatmentImportResult;
+        }
         private void SaveToDatabase(
             TreatmentImportResultDTO importResult)
         {

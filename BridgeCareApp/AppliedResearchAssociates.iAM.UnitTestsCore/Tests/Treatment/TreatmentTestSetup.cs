@@ -29,6 +29,35 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
             return dto;
         }
+
+        public static List<TreatmentDTO> ModelWithSupersededTreatmentOfSimulationInDb(IUnitOfWork unitOfWork, Guid simulationId, Guid? id = null, string name = "Treatment name", string criterionExpression = null, List<TreatmentBudgetDTO> budgets = null, List<Guid> budgetIds = null)
+        {
+            budgets ??= new List<TreatmentBudgetDTO>();
+            var firstTreatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(null, "Superseded treatment");
+            firstTreatment.Budgets = budgets;
+            budgetIds ??= new List<Guid>();
+            firstTreatment.BudgetIds = budgetIds;
+            var supersedeTreatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesListsWithSupersedeRule(firstTreatment, id, name);
+            var dtos = new List<TreatmentDTO> { firstTreatment, supersedeTreatment };
+            unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
+            return dtos;
+        }
+
+        public static List<TreatmentDTO> ModelNoSupersededTreatmentOfSimulationInDb(IUnitOfWork unitOfWork, Guid simulationId, Guid? id = null, string name = "Treatment name", string criterionExpression = null, List<TreatmentBudgetDTO> budgets = null, List<Guid> budgetIds = null)
+        {
+            budgets ??= new List<TreatmentBudgetDTO>();
+            var firstTreatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(null, "Superseded treatment");
+            firstTreatment.Budgets = budgets;
+            budgetIds ??= new List<Guid>();
+            firstTreatment.BudgetIds = budgetIds;
+            var supersedeTreatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(null, "Superseded treatment");
+            supersedeTreatment.Budgets = budgets;
+            budgetIds ??= new List<Guid>();
+            supersedeTreatment.BudgetIds = budgetIds;
+            var dtos = new List<TreatmentDTO> { firstTreatment, supersedeTreatment };
+            unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
+            return dtos;
+        }
     }
 
    

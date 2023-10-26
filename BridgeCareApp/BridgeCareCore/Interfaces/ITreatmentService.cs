@@ -24,7 +24,7 @@ namespace BridgeCareCore.Interfaces
            Guid treatmentLibraryId,
            ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
               
-        ScenarioTreatmentImportResultDTO ImportScenarioTreatmentsFile(
+        ScenarioTreatmentSupersedeRuleImportResultDTO ImportScenarioTreatmentsFile(
             Guid simulationId,
             ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
 

@@ -62,5 +62,61 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             };
             return dto;
         }
+
+        public static TreatmentDTO DtoWithEmptyCostsAndConsequencesListsWithSupersedeRule(TreatmentDTO supersededTreatment, Guid? id = null, string name = "Treatment name")
+        {
+
+            var criterionLibrary = CriterionLibraryDtos.Dto();
+            var resolveId = id ?? Guid.NewGuid();
+            var dto = new TreatmentDTO
+            {
+                Id = resolveId,
+                BudgetIds = new List<Guid>(),
+                Name = name,
+                Description = "Treatment description",
+                Costs = new List<TreatmentCostDTO>(),
+                Consequences = new List<TreatmentConsequenceDTO>(),
+                PerformanceFactors = new List<TreatmentPerformanceFactorDTO>(),
+                CriterionLibrary = criterionLibrary,
+                SupersedeRules = new List<TreatmentSupersedeRuleDTO>()               
+            {
+                    new TreatmentSupersedeRuleDTO
+                    {
+                        CriterionLibrary = null,
+                        Id = Guid.NewGuid(),
+                        treatment = supersededTreatment 
+                    },
+                }
+            };
+            return dto;
+        }
+
+        public static TreatmentDTO DtoWithEmptyCostsAndConsequencesListsNoSupersedeRule(TreatmentDTO supersededTreatment, Guid? id = null, string name = "Treatment name")
+        {
+
+            var criterionLibrary = CriterionLibraryDtos.Dto();
+            var resolveId = id ?? Guid.NewGuid();
+            var dto = new TreatmentDTO
+            {
+                Id = resolveId,
+                BudgetIds = new List<Guid>(),
+                Name = name,
+                Description = "Treatment description",
+                Costs = new List<TreatmentCostDTO>(),
+                Consequences = new List<TreatmentConsequenceDTO>(),
+                PerformanceFactors = new List<TreatmentPerformanceFactorDTO>(),
+                CriterionLibrary = criterionLibrary,
+                SupersedeRules = new List<TreatmentSupersedeRuleDTO>()
+            {
+                    new TreatmentSupersedeRuleDTO
+                    {
+                        CriterionLibrary = null,
+                        Id = Guid.NewGuid(),
+                        treatment = supersededTreatment
+                    },
+                }
+            };
+            return dto;
+        }
     }
 }

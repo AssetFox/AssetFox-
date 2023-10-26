@@ -1,36 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Security;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using System.IO;
 using System.Data.SqlClient;
-//using Microsoft.SqlServer.Management.Smo;
-//using Microsoft.SqlServer.Management.Common;
-using Microsoft.SqlServer.Server;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
-using static Humanizer.In;
-using System.Xml.Linq;
-using MathNet.Numerics;
-using AppliedResearchAssociates.iAM.Analysis;
-using System.Data;
+
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.SQLScripts
 {
-    public static class RunBatch
+    public class RunBatch
     {
 
-        private static readonly UnitOfDataPersistenceWork _unitOfWork;
-        public static void ExecuteCommand(string connectionString)
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
+  
+        public RunBatch(UnitOfDataPersistenceWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork ??
+                          throw new ArgumentNullException(nameof(unitOfWork));
+        }
+
+
+        public void ExecuteCommand(string connectionString)
         {
             try
             {

@@ -1060,7 +1060,7 @@ export default class CommittedProjectsEditor extends Vue  {
     CommittedProjectsService.getProjectSources().then((response: AxiosResponse) => {
         if (hasValue(response, 'data')) {
             this.projectSourceOptions = response.data.filter(
-                (option: string) => option !== "None" && option !== "iAMPick"
+                (option: string) => option !== "None" && option !== "ProjectPick"
                 );
         }
     });

@@ -97,9 +97,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         #region Private methods
 
-        private void FillDataToUseInExcel(SimulationOutput reportOutputData, Dictionary<int, Dictionary<string, decimal>> costPerBPNPerYear,
+        private void FillDataToUseInExcel(
+     SimulationOutput reportOutputData, Dictionary<int, Dictionary<string, decimal>> costPerBPNPerYear,
      Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costAndCountPerTreatmentPerYear,
-     Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource)>> yearlyCostCommittedProj, Dictionary<int, Dictionary<string, int>> countForCompletedProject,
+     Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource)>> yearlyCostCommittedProj,
+     Dictionary<int, Dictionary<string, int>> countForCompletedProject,
      Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject)
         {
             var isInitialYear = true;

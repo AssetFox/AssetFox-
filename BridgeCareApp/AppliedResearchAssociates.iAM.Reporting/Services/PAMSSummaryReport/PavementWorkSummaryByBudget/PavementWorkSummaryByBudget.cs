@@ -29,6 +29,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             SimulationOutput reportOutputData,
             List<int> simulationYears,
             Dictionary<string, Budget> yearlyBudgetAmount,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int pavementCount, string projectSource)>> yearlyCostCommittedProj,
             IReadOnlyCollection<SelectableTreatment> selectableTreatments,
             ICollection<CommittedProject> committedProjects)
         {
@@ -53,6 +54,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 {
                     continue;
                 }
+                PopulateYearlyCostCommittedProj(reportOutputData, budgetSummaryModel, yearlyCostCommittedProj);
 
                 // Inside iteration since each section has its own budget analysis section.
                 var costBudgetsWorkSummary = new CostBudgetsWorkSummary();
@@ -107,10 +109,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 }
 
                 var workTypeTotals = _pavementWorkSummaryComputationHelper.CalculateWorkTypeTotals(costAndLengthPerTreatmentPerYear, simulationTreatments);
-
                 costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears,
                     yearlyBudgetAmount,
                     costAndLengthPerTreatmentPerYear,
+                    yearlyCostCommittedProj,
                     costAndLengthPerTreatmentGroupPerYear, // We only care about cost here
                     simulationTreatments, // This should be filtered by budget/year; do we already have this by this point?
                     workTypeTotals,
@@ -172,6 +174,51 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                 AssetType = (AssetCategories)treatmentData.AssetCategory,
                                 SurfaceId = (int)section.ValuePerNumericAttribute["SURFACEID"]
                             });
+                        }
+                    }
+                }
+            }
+        }
+
+            private static void PopulateYearlyCostCommittedProj(
+                                    SimulationOutput reportOutputData,
+                                    WorkSummaryByBudgetModel summaryModel,
+                                    Dictionary<int, Dictionary<string,
+                                    (decimal treatmentCost, int pavementCount,
+                                    string projectSource)>> yearlyCostCommittedProj)
+        {
+            yearlyCostCommittedProj.Clear();
+
+            foreach (var yearData in reportOutputData.Years)
+            {
+                foreach (var section in yearData.Assets)
+                {
+                    if (section.TreatmentConsiderations.Any(tc => tc.BudgetUsages.Any(bu => bu.BudgetName == summaryModel.BudgetName)))
+                    {
+                        if (section.TreatmentCause == TreatmentCause.CommittedProject &&
+                            section.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment)
+                        {
+                            var committedCost = section.TreatmentConsiderations.Sum(_ =>
+                                _.BudgetUsages.Where(b => b.BudgetName == summaryModel.BudgetName).Sum(bu => bu.CoveredCost));
+
+                            // Populating yearlyCostCommittedProj dictionary
+                            if (!yearlyCostCommittedProj.ContainsKey(yearData.Year))
+                            {
+                                yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, (decimal, int, string)>();
+                            }
+
+                            if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(section.AppliedTreatment))
+                            {
+                                yearlyCostCommittedProj[yearData.Year].Add(section.AppliedTreatment, (committedCost, 1, section.ProjectSource));
+                            }
+                            else
+                            {
+                                var currentRecord = yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment];
+                                var treatmentCost = currentRecord.treatmentCost + committedCost;
+                                var pavementCount = currentRecord.pavementCount + 1;
+                                var projectSource = currentRecord.projectSource;
+                                yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment] = (treatmentCost, pavementCount, projectSource);
+                            }
                         }
                     }
                 }

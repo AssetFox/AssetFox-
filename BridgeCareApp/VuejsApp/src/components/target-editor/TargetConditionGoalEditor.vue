@@ -481,9 +481,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
         emptyTargetConditionGoal,
     );
     const showCreateTargetConditionGoalDialog = ref<boolean>(false);
-    let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
-        emptyGeneralCriterionEditorDialogData,
-    );
+    const criterionEditorDialogData = ref<GeneralCriterionEditorDialogData>(clone(emptyGeneralCriterionEditorDialogData));
     const createTargetConditionGoalLibraryDialogData = ref<CreateTargetConditionGoalLibraryDialogData>(clone(emptyCreateTargetConditionGoalLibraryDialogData));
     let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     let rules: InputValidationRules = validationRules; 
@@ -564,7 +562,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     function onLibrarySelectItemValueChanged() {
         trueLibrarySelectItemValue.value = librarySelectItemValue.value;
-        console.log("here");
         selectTargetConditionGoalLibraryAction({
             libraryId: librarySelectItemValue.value,
         });
@@ -592,7 +589,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     watch(selectedGridRows,()=> {
         selectedTargetConditionGoalIds.value = getPropertyValues('id', selectedGridRows.value,) as string[];
-        console.log("selected:  " + selectedTargetConditionGoalIds.value.length);
     });
 
     watch(stateNumericAttributes,()=> onStateNumericAttributesChanged)
@@ -608,13 +604,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }
 
     watch(currentPage,()=> {
-        console.log("current page updated " + currentPage.value.length );
-        currentPage.value.forEach(item => {
-            console.log("cp name: " + item.name);
-            console.log("cp attribute: " + item.attribute);
-            console.log("cp mergedCriteriaExpression: " + item.criterionLibrary.mergedCriteriaExpression);
-            item.criterionLibrary.mergedCriteriaExpression = 'test';
-        });
+
         // Get parent name from library id
         librarySelectItems.value.forEach(library => {pagination
             if (library.value === parentLibraryId) {
@@ -653,7 +643,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 if(response.data){
                     let data = response.data as PagingPage<TargetConditionGoal>;
                     currentPage.value = data.items;
-                    console.log("updated page: " + currentPage.value.length);
                     rowCache.value = clone(currentPage.value)
                     totalItems.value = data.totalItems;
                 }
@@ -772,14 +761,14 @@ import ConfirmDialog from 'primevue/confirmdialog';
             targetConditionGoal,
         );
 
-        criterionEditorDialogData = {
+        criterionEditorDialogData.value = {
             showDialog: true,
             CriteriaExpression: targetConditionGoal.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
     function onEditTargetConditionGoalCriterionLibrary(criterionExpression: string,) {
-        criterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+        criterionEditorDialogData.value = clone(emptyGeneralCriterionEditorDialogData);
 
         if (!isNil(criterionExpression) && selectedTargetConditionGoalForCriteriaEdit.id !== uuidNIL) {
             if(selectedTargetConditionGoalForCriteriaEdit.criterionLibrary.id === getBlankGuid())
@@ -1015,7 +1004,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 if(response.data){
                     let data = response.data as PagingPage<TargetConditionGoal>;
                     currentPage.value = data.items;
-                    console.log("currentPage: " + currentPage.value.length);
                     rowCache.value = clone(currentPage.value)
                     totalItems.value = data.totalItems;
                     setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");

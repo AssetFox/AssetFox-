@@ -81,10 +81,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new TreatmentSupersedeRuleDTO
             {
                 Id = entity.Id,
-                treatment = entity.PreventScenarioSelectableTreatment.ToDto(),
+                treatment = entity.PreventScenarioSelectableTreatment != null ? entity.PreventScenarioSelectableTreatment.ToDto() : new TreatmentDTO(),
                 CriterionLibrary = entity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin != null
                     ? entity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary.ToDto()
-                    : new CriterionLibraryDTO(),                
+                    : new CriterionLibraryDTO(),
             };
 
         public static TreatmentSupersedeRuleDTO ToDto(this TreatmentSupersedeRuleEntity entity) =>

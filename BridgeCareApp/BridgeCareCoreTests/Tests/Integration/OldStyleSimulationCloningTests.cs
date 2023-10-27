@@ -325,6 +325,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             {
                 var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
                 var budgetId = Guid.NewGuid();
+                var treatmentId = Guid.NewGuid();
                 var committedProjectEnity = new CommittedProjectEntity
                 {
                     Id = Guid.NewGuid(),
@@ -574,7 +575,7 @@ namespace BridgeCareCoreTests.Tests.Integration
                 {
                     new ScenarioSelectableTreatmentEntity
                     {
-                        Id = Guid.NewGuid(),
+                        Id = treatmentId,
                         Name = "Treatment",
                         ShadowForAnyTreatment = 1,
                         ShadowForSameTreatment = 1,
@@ -663,6 +664,7 @@ namespace BridgeCareCoreTests.Tests.Integration
                             new ScenarioTreatmentSupersedeRuleEntity
                             {
                                 Id = Guid.NewGuid(),
+                                TreatmentId = treatmentId,                                
                                 CriterionLibraryScenarioTreatmentSupersedeRuleJoin =
                                     new CriterionLibraryScenarioTreatmentSupersedeRuleEntity
                                     {

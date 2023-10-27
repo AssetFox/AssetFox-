@@ -85,8 +85,7 @@
                                     :count="notificationCounter"
                                     :upperLimit="50"
                                     :animated="true"
-                                    left="13px"
-                                    top="6px"
+
                                     fontSize="12px"
                                     counterStyle="round"
                                     counterLocation="upperRight"
@@ -96,8 +95,8 @@
                                     class="hide-bell-svg"
                                 /> 
                             </button>
-                        </template>
-                        <v-card class="mx-auto" max-width="100%">
+                        </template>            
+                        <v-card class="mx-auto"  style="height: 200%; width:1600%;">
                             <v-toolbar 
                                 id = "App-notification-toolbar"
                                 color="#002E6C" dark>
@@ -107,7 +106,7 @@
 
                                 <v-spacer></v-spacer>
                             </v-toolbar>
-                            <v-list>
+                            <v-list class="h-100">
                                 <v-list-group
                                     v-for="notification in notifications"
                                     :key="notification.id"
@@ -153,7 +152,7 @@
                                     </v-list-item>
                                     <v-spacer></v-spacer>
                                 </v-list-group>
-                            </v-list>
+                            </v-list>         
                         </v-card>
                     </v-menu>
                 </v-toolbar-title>

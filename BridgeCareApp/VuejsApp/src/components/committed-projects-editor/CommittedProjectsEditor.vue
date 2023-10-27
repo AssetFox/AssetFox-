@@ -303,7 +303,7 @@ const projectSourceMap = new Map<number, string>([
     [1, "iAMPick"],
     [2, "Committed"],
     [3, "SAP"],
-    [4, "ProjectBuilder"]
+    [4, "Project Builder"]
 ]);
 
 @Component({
@@ -527,10 +527,11 @@ export default class CommittedProjectsEditor extends Vue  {
                     }
                 })
                 await vm.initializePages()
-                if (vm.scenarioId !== undefined) {                
+                    if (vm.scenarioId !== undefined) {                
                             await vm.fetchTreatmentLibrary(vm.scenarioId);
                             await vm.fetchProjectSources();
                         }
+
                 await CommittedProjectsService.getUploadedCommittedProjectTemplates().then(response => {
                     if(!isNil(response.data)){
                             vm.templateSelectItems = response.data;
@@ -1058,7 +1059,9 @@ export default class CommittedProjectsEditor extends Vue  {
     fetchProjectSources() {
     CommittedProjectsService.getProjectSources().then((response: AxiosResponse) => {
         if (hasValue(response, 'data')) {
-            this.projectSourceOptions = response.data.filter((option: string) => option !== "None");
+            this.projectSourceOptions = response.data.filter(
+                (option: string) => option !== "None" && option !== "iAMPick"
+                );
         }
     });
 }

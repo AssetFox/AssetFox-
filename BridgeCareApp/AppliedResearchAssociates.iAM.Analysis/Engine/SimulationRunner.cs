@@ -458,6 +458,11 @@ public sealed class SimulationRunner
                         throw new InvalidOperationException("Analysis failed to fund scheduled event.");
                     }
 
+                    if (treatment is CommittedProject committedProject)
+                    {
+                        context.Detail.ProjectSource = committedProject.ProjectSource.ToString();
+                    }
+
                     context.Detail.TreatmentCause = treatment is CommittedProject
                         ? TreatmentCause.CommittedProject
                         : TreatmentCause.ScheduledTreatment;

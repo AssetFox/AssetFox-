@@ -9,5 +9,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport
         public Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> WorkTypeTotalCulvert;
         public Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> WorkTypeTotalBridge;
         public Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> WorkTypeTotalMPMS;
+        public Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> WorkTypeTotalSAP;
+        public Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> WorkTypeTotalProjectBuilder;
     }
 }

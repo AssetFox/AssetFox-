@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -165,6 +166,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static void CreateCommittedProject(
             this CommittedProjectEntity entity,
             Simulation simulation,
+            IReadOnlyCollection<SelectableTreatment> selectableTreatments,
             Guid maintainableAssetId,
             bool noTreatmentForCommittedProjects,
             double noTreatmentDefaultCost,
@@ -227,6 +229,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             committedProject.Id = entity.Id;
             committedProject.Name = entity.Name;
             committedProject.Cost = entity.Cost;
+            var treatmentName = entity.Name;
+            var treatment = selectableTreatments.FirstOrDefault(t => t.Name == treatmentName);
+
+            committedProject.TemplateTreatment = treatment;
+
+            if (Enum.TryParse(entity.ProjectSource, true, out ProjectSourceDTO parsedProjectSource))
+            {
+                committedProject.ProjectSource = parsedProjectSource;
+            }
             committedProject.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null;
             committedProject.LastModifiedDate = entity.LastModifiedDate;
 

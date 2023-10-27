@@ -39,8 +39,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
             Assert.NotNull(resultEntity);
             Assert.IsType<ScenarioTreatmentSupersedeRuleEntity>(resultEntity);
             Assert.Equal(TestDataForTreatmentSupersedeRules.TreatmentId, resultEntity.TreatmentId);
-            Assert.Equal(TestDataForTreatmentSupersedeRules.PreventTreatmentId, resultEntity.ScenarioSelectableTreatment.Id);
-            Assert.Equal("Prevent Treatment", resultEntity.ScenarioSelectableTreatment.Name);
+            Assert.Equal(TestDataForTreatmentSupersedeRules.PreventTreatmentId, resultEntity.PreventScenarioSelectableTreatment.Id);
+            Assert.Equal("Prevent Treatment", resultEntity.PreventScenarioSelectableTreatment.Name);
             Assert.NotNull(resultEntity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin);
         }
 
@@ -58,7 +58,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
             Assert.NotNull(resultEntity);
             Assert.IsType<ScenarioTreatmentSupersedeRuleEntity>(resultEntity);
             Assert.Equal(treatmentSupersedeRuleDto.treatment.Id, resultEntity.TreatmentId);
-            Assert.Equal("PreventTreatment1", resultEntity.ScenarioSelectableTreatment.Name);
+            Assert.Equal("PreventTreatment1", resultEntity.PreventScenarioSelectableTreatment.Name);
             Assert.NotNull(resultEntity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin);
             Assert.Equal("TestExpression", resultEntity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary.MergedCriteriaExpression);
         }
@@ -97,7 +97,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
             Assert.Equal(treatmentEntity.Id, resultDto.treatment.Id);
             Assert.Equal(scenarioTreatmentSupersedeRuleEntity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary.Name, resultDto.CriterionLibrary.Name);
             Assert.Equal(scenarioTreatmentSupersedeRuleEntity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary.MergedCriteriaExpression, resultDto.CriterionLibrary.MergedCriteriaExpression);
-            Assert.Equal(scenarioTreatmentSupersedeRuleEntity.ScenarioSelectableTreatment.Name, resultDto.treatment.Name);
+            Assert.Equal(scenarioTreatmentSupersedeRuleEntity.PreventScenarioSelectableTreatment.Name, resultDto.treatment.Name);
         }
 
         [Fact]
@@ -115,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
             Assert.Equal(treatmentEntity.Id, resultDto.treatment.Id);
             Assert.Equal(treatmentSupersedeRuleEntity.CriterionLibraryTreatmentSupersedeRuleJoin.CriterionLibrary.Name, resultDto.CriterionLibrary.Name);
             Assert.Equal(treatmentSupersedeRuleEntity.CriterionLibraryTreatmentSupersedeRuleJoin.CriterionLibrary.MergedCriteriaExpression, resultDto.CriterionLibrary.MergedCriteriaExpression);
-            Assert.Equal(treatmentSupersedeRuleEntity.SelectableTreatment.Name, resultDto.treatment.Name);
+            Assert.Equal(treatmentSupersedeRuleEntity.PreventSelectableTreatment.Name, resultDto.treatment.Name);
         }
     }
 }

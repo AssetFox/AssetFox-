@@ -52,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
             var treatmentSupersedeRuleDto = TreatmentSupersedeRuleTestSetup.TreatmentSuperdedeRuleDto;
 
             // Act
-            var resultEntity = treatmentSupersedeRuleDto.ToScenarioTreatmentSupersedeRuleEntity(new BaseEntityProperties(), treatmentSupersedeRuleDto.treatment.Id, simulationSource.Id);
+            var resultEntity = treatmentSupersedeRuleDto.ToScenarioTreatmentSupersedeRuleEntity(treatmentSupersedeRuleDto.treatment.Id, simulationSource.Id);
 
             // Assert
             Assert.NotNull(resultEntity);

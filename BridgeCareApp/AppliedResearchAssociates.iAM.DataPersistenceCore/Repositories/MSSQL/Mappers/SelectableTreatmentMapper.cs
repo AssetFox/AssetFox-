@@ -93,7 +93,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 foreach (var supersedeRule in dto.SupersedeRules)
                 {
-                    var supersedeRuleEntity = supersedeRule.ToScenarioTreatmentSupersedeRuleEntity(baseEntityProperties, dto.Id, simulationId);
+                    var supersedeRuleEntity = supersedeRule.ToScenarioTreatmentSupersedeRuleEntity(dto.Id, simulationId, baseEntityProperties);
                     supersedeRuleEntities.Add(supersedeRuleEntity);
                 }                
             }

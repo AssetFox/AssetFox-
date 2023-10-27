@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        public static ScenarioTreatmentSupersedeRuleEntity ToScenarioTreatmentSupersedeRuleEntity(this TreatmentSupersedeRuleDTO treatmentSupersedeRuleDto, BaseEntityProperties baseEntityProperties, Guid treatmentId, Guid simulationId)
+        public static ScenarioTreatmentSupersedeRuleEntity ToScenarioTreatmentSupersedeRuleEntity(this TreatmentSupersedeRuleDTO treatmentSupersedeRuleDto, Guid treatmentId, Guid simulationId, BaseEntityProperties baseEntityProperties = null)
         {
             var entity = new ScenarioTreatmentSupersedeRuleEntity();
             entity.Id = treatmentSupersedeRuleDto.Id;
@@ -52,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var criterionLibraryDto = treatmentSupersedeRuleDto.CriterionLibrary;
             if (criterionLibraryDto != null) // TODO test this later via UI
             {
-                var criterionLibrary = criterionLibraryDto.ToEntity(baseEntityProperties); // TODO Should ToSingleUseEntity be used?
+                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity(baseEntityProperties);
                 var join = new CriterionLibraryScenarioTreatmentSupersedeRuleEntity
                 {
                     ScenarioTreatmentSupersedeRuleId = entity.Id,

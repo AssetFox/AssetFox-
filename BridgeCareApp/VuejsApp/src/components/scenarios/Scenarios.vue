@@ -445,27 +445,27 @@
                                     @update:options="onWorkQueuePagination"
                                 >                           
                                     <template slot="items" slot-scope="props" v-slot:item="props">
-                                        <td>{{ props.item.queuePosition }}</td>
+                                        <td>{{ props.item.raw.queuePosition }}</td>
                                         <td>
-                                            {{ props.item.name }}
+                                            {{ props.item.raw.name }}
                                         </td>
-                                        <td>{{props.item.workDescription}}</td>
+                                        <td>{{props.item.raw.workDescription}}</td>
                                         <td>
                                             {{
-                                                props.item.queueingUser
-                                                    ? props.item.queueingUser
+                                                props.item.raw.queueingUser
+                                                    ? props.item.raw.queueingUser
                                                     : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
-                                            {{ formatDateWithTime(props.item.queueEntryTimestamp) }}
+                                            {{ formatDateWithTime(props.item.raw.queueEntryTimestamp) }}
                                         </td>
                                         <td>
-                                            {{ formatDateWithTime(props.item.workStartedTimestamp) }}
+                                            {{ formatDateWithTime(props.item.raw.workStartedTimestamp) }}
                                         </td>
-                                        <td>{{ props.item.currentRunTime }}</td>
-                                        <td>{{ props.item.previousRunTime }}</td>
-                                        <td>{{ props.item.status }}</td>  
+                                        <td>{{ props.item.raw.currentRunTime }}</td>
+                                        <td>{{ props.item.raw.previousRunTime }}</td>
+                                        <td>{{ props.item.raw.status }}</td>  
                                         <td>
                                             <v-menu location="left">
                                                 <template
@@ -485,7 +485,7 @@
                                                 <v-list>
                                                     <v-list-tile v-for="(item,i) in actionItemsForWorkQueue"
                                                         :key="i"
-                                                        @click="OnWorkQueueActionTaken(item.action,props.item)"
+                                                        @click="OnWorkQueueActionTaken(item.action,props.item.raw)"
                                                         class="menu-style">
                                                         <v-list-tile-title icon>                                                        
                                                             <img style="padding-right:5px" v-bind:src="item.icon"/>
@@ -524,27 +524,27 @@
                                     @update:options="onFastWorkQueuePagination"
                                 >                           
                                     <template slot="items" slot-scope="props" v-slot:item="props">
-                                        <td>{{ props.item.queuePosition }}</td>
+                                        <td>{{ props.item.raw.queuePosition }}</td>
                                         <td>
-                                            {{ props.item.name }}
+                                            {{ props.item.raw.name }}
                                         </td>
-                                        <td>{{props.item.workDescription}}</td>
+                                        <td>{{props.item.raw.workDescription}}</td>
                                         <td>
                                             {{
-                                                props.item.queueingUser
-                                                    ? props.item.queueingUser
+                                                props.item.raw.queueingUser
+                                                    ? props.item.raw.queueingUser
                                                     : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
-                                            {{ formatDateWithTime(props.item.queueEntryTimestamp) }}
+                                            {{ formatDateWithTime(props.item.raw.queueEntryTimestamp) }}
                                         </td>
                                         <td>
-                                            {{ formatDateWithTime(props.item.workStartedTimestamp) }}
+                                            {{ formatDateWithTime(props.item.raw.workStartedTimestamp) }}
                                         </td>
-                                        <td>{{ props.item.currentRunTime }}</td>
-                                        <td>{{ props.item.previousRunTime }}</td>
-                                        <td>{{ props.item.status }}</td>  
+                                        <td>{{ props.item.raw.currentRunTime }}</td>
+                                        <td>{{ props.item.raw.previousRunTime }}</td>
+                                        <td>{{ props.item.raw.status }}</td>  
                                         <td>
                                             <v-menu  left>
                                                 <template
@@ -564,7 +564,7 @@
                                                 <v-list>
                                                     <v-list-item v-for="(item,i) in actionItemsForFastWorkQueue"
                                                         :key="i"
-                                                        @click="OnWorkQueueActionTaken(item.action,props.item)"
+                                                        @click="OnWorkQueueActionTaken(item.action,props.item.raw)"
                                                         class="menu-style">
                                                         <v-list-item-title icon>                                                        
                                                             <img style="padding-right:5px" v-bind:src="item.icon"/>

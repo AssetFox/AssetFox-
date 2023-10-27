@@ -101,18 +101,18 @@
     </v-row>
   </template>
   <script lang="ts" setup>
-  import Vue from 'vue';
+  import Vue, { computed } from 'vue';
   import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
   import { useStore } from 'vuex';
   import { useRouter } from 'vue-router';
 
   let store = useStore();
-  let implementationName = ref<string>(store.state.adminDataModule.implementationName);
-  let agencyLogo = ref<string>(store.state.adminDataModule.agencyLogo);
-  let implementationLogo = ref<string>(store.state.adminDataModule.implementationLogo);
+  let implementationName = computed<string>(()=>store.state.adminSiteSettingsModule.implementationName);
+  let agencyLogo = computed<string>(()=>store.state.adminSiteSettingsModule.agencyLogo);
+  let implementationLogo = computed<string>(()=>store.state.adminSiteSettingsModule.implementationLogo);
   let ImplementationID:string = '';
   async function getImplementationNameAction(payload?: any): Promise<any> {await store.dispatch('getImplementationName',payload);}
-  async function importImplementationNameAction(implementationName:string): Promise<any> {await store.dispatch('getImplementationName',implementationName);}
+  async function importImplementationNameAction(implementationName:string): Promise<any> {await store.dispatch('importImplementationName',implementationName);}
   async function importAgencyLogoAction(payload?: any): Promise<any> {await store.dispatch('importAgencyLogo',payload);}
   async function importProductLogoAction(payload?: any): Promise<any> {await store.dispatch('importProductLogo',payload);}
 
@@ -127,11 +127,11 @@
       document.getElementById("agencyImageUpload")?.click();
    }
    function handleImplementationLogoUpload(payload: any){
-    const file = payload.files;
+    const file = payload.target.files[0];
     importProductLogoAction(file);  
 }
   function handleAgencyLogoUpload(payload: any){
-    const file = payload.files;
+    const file = payload.target.files[0];
     importAgencyLogoAction(file);
   }
   </script>

@@ -12,21 +12,18 @@
                 <v-list class="ghd-navigation-list">
                     <v-list-item
                         class="settings-list ghd-control-text"
-                        :key="navigationTabs.tabName"
-                        :model-value="navigationTabs"
-                        v-for="navigationTabs in visibleNavigationTabs()"
+                        :key="navigationTab.tabName"
+                        v-for="navigationTab in visibleNavigationTabs()"
                     >
-                        <v-list-tile :to="navigationTabs.navigation" style="border-bottom: 1px solid #CCCCCC;" @click="onNavigate(navigationTabs.navigation)">
-                            <v-list-tile-action>
-                                <v-list-tile-icon class="sidebar-icon">
-                                    <AttributesSvg style="height: 38px; width: 34px"  class="raw-data-icon" v-if="navigationTabs.tabName === 'Security'"/>    
-                                    <DataSourceSvg style="height: 30px; width: 36px" class="raw-data-icon" v-if="navigationTabs.tabName === 'Site'"/>
-                                    <NetworksSvg  style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTabs.tabName === 'Data'"/>                            
-                                    <NetworksSvg  style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTabs.tabName === 'RawData'"/>                            
-                                </v-list-tile-icon>
-                            </v-list-tile-action>                            
-                            <v-list-tile-title style="text-decoration: none">{{navigationTabs.tabName}}</v-list-tile-title>                            
-                        </v-list-tile>
+                    <v-list-item id="EditScenario-tabs-vListTile" :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
+                            <template v-slot:prepend>
+                                <AttributesSvg style="height: 38px; width: 34px"  class="raw-data-icon" v-if="navigationTab.tabName === 'Security'"/>    
+                                    <DataSourceSvg style="height: 30px; width: 36px" class="raw-data-icon" v-if="navigationTab.tabName === 'Site'"/>
+                                    <NetworksSvg  style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'Data'"/>                            
+                            </template>
+                            <v-list-item-title style="width: auto;" v-text="navigationTab.tabName"></v-list-item-title>
+                        </v-list-item>
+                        
                     </v-list-item>
                 </v-list>
             </v-card>

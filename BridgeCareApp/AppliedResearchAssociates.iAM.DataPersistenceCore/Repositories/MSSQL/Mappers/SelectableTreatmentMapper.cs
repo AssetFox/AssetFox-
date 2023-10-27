@@ -296,12 +296,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
                 ShadowForSameTreatment = entity.ShadowForSameTreatment,
                 Category = (TreatmentCategory)entity.Category,
-
                 IsModified = entity.IsModified,
                 LibraryId = entity.LibraryId,
-
                 AssetType = (AssetCategories)entity.AssetType,
-
                 IsUnselectable = entity.IsUnselectable,
                 SupersedeRules = entity.ScenarioTreatmentSupersedeRules.Any()
                                 ? entity.ScenarioTreatmentSupersedeRules.Select(_ => _.ToDto()).ToList()

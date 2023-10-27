@@ -128,7 +128,7 @@
                                 </v-edit-dialog>
                             </div>
                             <div v-else>
-                                <v-btn @click="onRemoveBudgetPriority(props.item.id)"  class="ghd-blue" icon>
+                                <v-btn id="BudgetPriorityEditor-deleteBudgetPriority-btn" @click="onRemoveBudgetPriority(props.item.id)"  class="ghd-blue" icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                             </div>

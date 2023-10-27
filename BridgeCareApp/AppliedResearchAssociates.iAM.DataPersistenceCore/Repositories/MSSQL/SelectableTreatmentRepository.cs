@@ -722,13 +722,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .ToDictionary(_ => _.Id, _ => _.PerformanceFactors);
                     _unitOfWork.TreatmentPerformanceFactorRepo.UpsertScenarioTreatmentPerformanceFactors(performancePerTreatmentId, simulationId);
                 }
-                if (scenarioSelectableTreatments.Any(_ => _.SupersedeRules.Any()))
-                {
-                    var supersedeRulePerTreatmentId = scenarioSelectableTreatments.Where(_ => _.SupersedeRules.Any()).ToList()
-                    .ToDictionary(_ => _.Id, _ => _.PerformanceFactors);
-                    _unitOfWork.TreatmentSupersedeRuleRepo.UpsertScenarioTreatmentSupersedeRule(supersedeRulePerTreatmentId, simulationId);
-                }
-
+             
                 if (scenarioSelectableTreatments.Any(_ => _.BudgetIds.Any()))
                 {
                     var treatmentBudgetJoinsToAdd = scenarioSelectableTreatments.Where(_ => _.BudgetIds.Any()).SelectMany(
@@ -847,10 +841,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.SimulationId == simulationId
                     && _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.Id == entityId);
 
-                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentSupersedeRuleEntity>(_ =>
-                    _.ScenarioTreatmentSupersedeRule.ScenarioSelectableTreatment.SimulationId == simulationId
-                    && _.ScenarioTreatmentSupersedeRule.ScenarioSelectableTreatment.Id == entityId);
-
+               
                 // Update last modified date
                 var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
                 _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);

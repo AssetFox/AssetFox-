@@ -11,7 +11,7 @@ public sealed class TreatmentSupersedeRule : WeakEntity, IValidator
 
     public ValidatorBag Subvalidators => new ValidatorBag { Criterion };
 
-    public SelectableTreatment Treatment { get; set; }
+    public SelectableTreatment Treatment { get; set; } // Prevent treatment
 
     public ValidationResultBag GetDirectValidationResults()
     {

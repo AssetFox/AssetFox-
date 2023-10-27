@@ -16,6 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public TreatmentSupersedeRuleRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
+        // TODO add unit test later
         public void CreateTreatmentSupersedeRules(Dictionary<Guid, List<TreatmentSupersedeRule>> treatmentSupersedeRulesPerTreatmentId,
             string simulationName, Guid simulationId)
         {
@@ -52,22 +53,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public void UpsertScenarioTreatmentSupersedeRule(Dictionary<Guid, List<TreatmentSupersedeRule>> scenarioTreatmentSupersedeRulePerTreatmentId, Guid simulationId)
-        {
-            var scenarioTreatmentSupersedeRuleEntities = scenarioTreatmentSupersedeRulePerTreatmentId
-              .SelectMany(_ => _.Value.Select(rule => rule
-                  .ToScenarioEntity(_.Key)))
-              .ToList();
-
-            var entityIds = scenarioTreatmentSupersedeRuleEntities.Select(_ => _.Id).ToList();
-
-            var existingEntityIds = _unitOfWork.Context.ScenarioTreatmentPerformanceFactor.AsNoTracking()
-                .Where(_ => _.ScenarioSelectableTreatment.SimulationId == simulationId && entityIds.Contains(_.Id))
-                .Select(_ => _.Id).ToList();
-
-            _unitOfWork.Context.UpdateAll(scenarioTreatmentSupersedeRuleEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList());
-            _unitOfWork.Context.AddAll(scenarioTreatmentSupersedeRuleEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
-        }
+        
 
     }
 }

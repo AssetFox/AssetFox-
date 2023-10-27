@@ -7,10 +7,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         public Guid Id { get; set; }
 
-        public Guid TreatmentId { get; set; } 
+        public Guid TreatmentId { get; set; }
 
-        public virtual ScenarioSelectableTreatmentEntity ScenarioSelectableTreatment { get; set; } // PreventTreatment
+        public virtual ScenarioSelectableTreatmentEntity ScenarioSelectableTreatment { get; set; }
 
-        public virtual CriterionLibraryScenarioTreatmentSupersedeRuleEntity CriterionLibraryScenarioTreatmentSupersedeRuleJoin { get; set; }        
+        public virtual ScenarioSelectableTreatmentEntity PreventScenarioSelectableTreatment { get; set; }
+
+        public virtual CriterionLibraryScenarioTreatmentSupersedeRuleEntity CriterionLibraryScenarioTreatmentSupersedeRuleJoin { get; set; }
     }
 }

@@ -10,12 +10,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class TreatmentSupersedeRuleMapper
     {
-        public static TreatmentSupersedeRuleEntity ToTreatmentSupersedeRuleEntity(this TreatmentSupersedeRule domain, Guid treatmentId) =>
-            new TreatmentSupersedeRuleEntity
-            {
-                Id = domain.Id,
-                TreatmentId = treatmentId
-            };
+        // TODO update if below is in need
+        //public static TreatmentSupersedeRuleEntity ToTreatmentSupersedeRuleEntity(this TreatmentSupersedeRule domain, Guid treatmentId) =>
+        //    new TreatmentSupersedeRuleEntity
+        //    {
+        //        Id = domain.Id,
+        //        TreatmentId = treatmentId
+        //    };
 
         public static ScenarioTreatmentSupersedeRuleEntity ToScenarioTreatmentSupersedeRuleEntity(this TreatmentSupersedeRule domain, Guid treatmentId, Guid simulationId)
         {
@@ -23,8 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = domain.Id,
                 TreatmentId = treatmentId,
-                ScenarioSelectableTreatment = domain.Treatment.ToScenarioEntity(simulationId),
-
+                PreventScenarioSelectableTreatment = domain.Treatment.ToScenarioEntity(simulationId)
             };
 
             var criterion = domain.Criterion;
@@ -47,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var entity = new ScenarioTreatmentSupersedeRuleEntity();
             entity.Id = treatmentSupersedeRuleDto.Id;
             entity.TreatmentId = treatmentId;
-            entity.ScenarioSelectableTreatment = treatmentSupersedeRuleDto.treatment.ToScenarioEntity(simulationId);
+            entity.PreventScenarioSelectableTreatment = treatmentSupersedeRuleDto.treatment.ToScenarioEntity(simulationId);
 
             // CriterionLibraryDTO.MergedCriteriaExpression can be empty.
             var criterionLibraryDto = treatmentSupersedeRuleDto.CriterionLibrary;
@@ -72,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             SelectableTreatment selectableTreatment, Simulation simulation)
         {
             var supersedeRule = selectableTreatment.AddSupersedeRule();
-            supersedeRule.Treatment = entity.ScenarioSelectableTreatment.CreateSelectableTreatment(simulation);
+            supersedeRule.Treatment = entity.PreventScenarioSelectableTreatment.CreateSelectableTreatment(simulation);
             supersedeRule.Criterion.Expression =
                 entity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin?.CriterionLibrary.MergedCriteriaExpression ??
                 string.Empty;
@@ -82,30 +82,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new TreatmentSupersedeRuleDTO
             {
                 Id = entity.Id,
-                treatment = entity.ScenarioSelectableTreatment.ToDto(),
+                treatment = entity.PreventScenarioSelectableTreatment != null ? entity.PreventScenarioSelectableTreatment.ToDto() : new TreatmentDTO(),
                 CriterionLibrary = entity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin != null
                     ? entity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary.ToDto()
-                    : new CriterionLibraryDTO(),                
+                    : new CriterionLibraryDTO(),
             };
 
         public static TreatmentSupersedeRuleDTO ToDto(this TreatmentSupersedeRuleEntity entity) =>
             new TreatmentSupersedeRuleDTO
             {
                 Id = entity.Id,
-                treatment = entity.SelectableTreatment.ToDto(),
+                treatment = entity.PreventSelectableTreatment.ToDto(),
                 CriterionLibrary = entity.CriterionLibraryTreatmentSupersedeRuleJoin != null
                     ? entity.CriterionLibraryTreatmentSupersedeRuleJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO(),
             };
 
-        public static TreatmentSupersedeRuleDTO ToEntity(this TreatmentSupersedeRuleDTO dto) =>
-         new TreatmentSupersedeRuleEntity
-         {
-             Id = entity.Id,
-             treatment = entity.SelectableTreatment.ToDto(),
-             CriterionLibrary = entity.CriterionLibraryTreatmentSupersedeRuleJoin != null
-                    ? entity.CriterionLibraryTreatmentSupersedeRuleJoin.CriterionLibrary.ToDto()
-                    : new CriterionLibraryDTO(),
-         };
     }
 }

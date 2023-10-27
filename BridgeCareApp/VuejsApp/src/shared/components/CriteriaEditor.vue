@@ -95,7 +95,7 @@
             rows="3"
         >
             <template slot="append">
-                <v-btn
+                <v-btn id="CriteriaEditor-removeSubCriteria-btn"
                     @click="onRemoveSubCriteria(index)"
                     class="ghd-blue"
                     icon

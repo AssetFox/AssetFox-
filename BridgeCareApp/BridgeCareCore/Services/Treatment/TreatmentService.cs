@@ -290,7 +290,7 @@ namespace BridgeCareCore.Services
             if (scenarioTreatments.Any())
             {
                 var dateString = DateTime.Now.ToString("yyyy-MM-dd-HH-mm");
-                var filename = $"Export scenario {scenarioName} treatments {dateString}";
+                var filename = $"Export scenario {scenarioName} treatmentSupersede {dateString}";
                 var fileInfo = new FileInfo(filename);
                 using var package = new ExcelPackage(fileInfo);
                 var workbook = package.Workbook;

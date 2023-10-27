@@ -191,7 +191,7 @@ AS
 						--Delete TOP (@BatchSize) l3
 						SELECT TOP  (@BatchSize) l3.Id  INTO #tempAggregatedResult
 						FROM Network AS l1
-						Join MaintainableAsset AS l2 ON l2.NetworkId = l2.Id
+						Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
 						JOIN AggregatedResult AS l3 ON l3.MaintainableAssetId = l2.Id
 						WHERE l1.Id IN (@NetworkId);
 						

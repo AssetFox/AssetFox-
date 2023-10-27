@@ -80,20 +80,23 @@
                                 icon
                             >
                                 <img style="position:absolute; top:20px; height:25px;" :src="require('@/assets/icons/bell.svg')"/>
-                                <notifications
+                                <v-badge
+                                    overlap
+                                    style="position:relative;"
                                     :size="30"
-                                    :count="notificationCounter"
+                                    :content="notificationCounter"
                                     :upperLimit="50"
                                     :animated="true"
-
                                     fontSize="12px"
                                     counterStyle="round"
                                     counterLocation="upperRight"
                                     counterBackgroundColor="#FF0000"
                                     counterTextColor="#FFFFFF"
-                                    iconColor="#002E6C"
+                                    color="#002E6C"
                                     class="hide-bell-svg"
-                                /> 
+                                > 
+                                <v-icon style="bottom: 50%;" size="small"></v-icon>
+                                </v-badge>
                             </button>
                         </template>            
                         <v-card class="mx-auto"  style="height: 200%; width:1600%;">
@@ -305,7 +308,7 @@ import config from '../public/config.json';
     let refreshing = computed<boolean>(() => store.state.authenticationModule.refreshing);
     //let navigation = ref<any[]>(store.state.breadcrumbModule.navigation);
     let notifications = ref<Notification[]>(store.state.notificationModule.notifications);
-    let notificationCounter = ref<number>(store.state.notificationModule.counter);
+    let notificationCounter = computed<number>(() => store.state.notificationModule.counter);
     let stateSelectedScenario = ref<Scenario>(store.state.scenarioModule.selectedScenario);
     let packageVersion = ref<string>(store.state.announcementModule.packageVersion);
     let securityType = ref<string>(store.state.authenticationModule.securityType);

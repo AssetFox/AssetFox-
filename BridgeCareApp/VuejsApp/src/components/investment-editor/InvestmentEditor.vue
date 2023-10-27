@@ -95,7 +95,8 @@
                               @change='onEditInvestmentPlan("shouldAccumulateUnusedBudgetAmounts", $event)' />
                 </v-col>
             </v-row>
-            <v-divider v-show ='hasScenario || hasSelectedLibrary' />
+            <v-divider :thickness="2" class="border-opacity-100" v-show ='hasScenario || hasSelectedLibrary' />
+
             <v-row justify-space-between v-show='hasSelectedLibrary || hasScenario'>
                 <v-col cols = "5">
                     <v-row>
@@ -236,8 +237,9 @@
                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Create as New Library
                 </v-btn>
+           
                 <v-btn id="InvestmentEditor-updateLibrary-btn"
-                       :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
+                :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                        @click='onUpsertBudgetLibrary()'
                        class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                        v-show='!hasScenario'>
@@ -312,6 +314,7 @@ import {
 import { EditBudgetsDialogData, EmitedBudgetChanges, emptyEditBudgetsDialogData } from '@/shared/models/modals/edit-budgets-dialog';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
 import Alert from '@/shared/modals/Alert.vue';
+import ConfirmDeleteAlert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
@@ -370,29 +373,29 @@ let isSuccessfulImport = ref<boolean>(store.state.investmentModule.isSuccessfulI
 let currentUserCriteriaFilter = ref<UserCriteriaFilter>(store.state.userModule.currentUserCriteriaFilter);
 let hasPermittedAccess = ref<boolean>(store.state.investmentModule.hasPermittedAccess);
 
-async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess');}
-async function getInvestmentAction(payload?: any): Promise<any> {await store.dispatch('getInvestment');}
-async function getBudgetLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getBudgetLibraries');}
+async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess', payload);}
+async function getInvestmentAction(payload?: any): Promise<any> {await store.dispatch('getInvestment', payload);}
+async function getBudgetLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getBudgetLibraries', payload);}
 async function selectBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectBudgetLibrary', payload);}
-async function upsertInvestmentAction(payload?: any): Promise<any> {await store.dispatch('upsertInvestment');}
-async function upsertBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertBudgetLibrary');}
-async function deleteBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteBudgetLibrary');}
-async function upsertOrDeleteBudgetLibraryUsersAction(payload: any): Promise<any> {await store.dispatch('upsertOrDeleteBudgetLibraryUsers');}
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
+async function upsertInvestmentAction(payload?: any): Promise<any> {await store.dispatch('upsertInvestment', payload);}
+async function upsertBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertBudgetLibrary', payload);}
+async function deleteBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteBudgetLibrary', payload);}
+async function upsertOrDeleteBudgetLibraryUsersAction(payload: any): Promise<any> {await store.dispatch('upsertOrDeleteBudgetLibraryUsers', payload);}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
 async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
-async function importScenarioInvestmentBudgetsFileAction(payload?: any): Promise<any> {await store.dispatch('importScenarioInvestmentBudgetsFile');}
-async function importLibraryInvestmentBudgetsFileAction(payload?: any): Promise<any> {await store.dispatch('importLibraryInvestmentBudgetsFile');}
-async function getCriterionLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getCriterionLibraries');}
-async function setAlertMessageAction(payload?: any): Promise<any> {await store.dispatch('setAlertMessage');}
-async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification');}
+async function importScenarioInvestmentBudgetsFileAction(payload?: any): Promise<any> {await store.dispatch('importScenarioInvestmentBudgetsFile', payload);}
+async function importLibraryInvestmentBudgetsFileAction(payload?: any): Promise<any> {await store.dispatch('importLibraryInvestmentBudgetsFile', payload);}
+async function getCriterionLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getCriterionLibraries', payload);}
+async function setAlertMessageAction(payload?: any): Promise<any> {await store.dispatch('setAlertMessage', payload);}
+async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification', payload);}
     
 let getModifiedDate = store.getters.getLibraryDateModified;
 let getUserNameByIdGetter = store.getters.getUserNameById;
 
-function budgetLibraryMutator(payload:any){store.commit('budgetLibraryMutator');}
-function selectedBudgetLibraryMutator(payload:any){store.commit('selectedBudgetLibraryMutator');}
-function investmentPlanMutator(payload:any){store.commit('investmentPlanMutator');}
-function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImportMutator');}
+function budgetLibraryMutator(payload:any){store.commit('budgetLibraryMutator', payload);}
+function selectedBudgetLibraryMutator(payload:any){store.commit('selectedBudgetLibraryMutator', payload);}
+function investmentPlanMutator(payload:any){store.commit('investmentPlanMutator', payload);}
+function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImportMutator', payload);}
     let modifiedDate: string;
 
     let addedBudgets = ref<Budget[]>([]);
@@ -440,7 +443,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let createBudgetLibraryDialogData = ref<CreateBudgetLibraryDialogData>(clone(emptyCreateBudgetLibraryDialogData));
     
     let shareBudgetLibraryDialogData = ref<ShareBudgetLibraryDialogData>(clone(emptyShareBudgetLibraryDialogData));
-    let editBudgetsDialogData: EditBudgetsDialogData = clone(emptyEditBudgetsDialogData);
+    let editBudgetsDialogData = ref<EditBudgetsDialogData>(clone(emptyEditBudgetsDialogData));
 
     let showSetRangeForAddingBudgetYearsDialog: boolean = false;
     let showSetRangeForDeletingBudgetYearsDialog: boolean = false;
@@ -1103,7 +1106,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     function onShowEditBudgetsDialog() {
 
         currentPage.value.sort((b1, b2) => b1.budgetOrder - b2.budgetOrder);
-        editBudgetsDialogData = {
+        editBudgetsDialogData.value = {
             showDialog: true,
             budgets: clone(BudgetCache.value),
             scenarioId: selectedScenarioId,
@@ -1111,7 +1114,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function onSubmitEditBudgetsDialogResult(budgetChanges: EmitedBudgetChanges) {        
-        editBudgetsDialogData = clone(emptyEditBudgetsDialogData);
+        editBudgetsDialogData.value = clone(emptyEditBudgetsDialogData);
         if(!isNil(budgetChanges)){
             addedBudgets.value = addedBudgets.value.concat(budgetChanges.addedBudgets);
             budgetChanges.addedBudgets.forEach(budget => {

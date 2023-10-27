@@ -52,20 +52,15 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
 let store = useStore();
-// const props = defineProps<{
-//   dialogData:CreateBudgetLibraryDialogData,
-//   libraryNames: string[];
-// }>()
-// let showDialogComputed = computed(() => props.dialogData.showDialog);
 
 const props = defineProps<{
           dialogData:CreateBudgetLibraryDialogData,
           libraryNames: string[];
         }>();
 const { dialogData } = toRefs(props);
+// let showDialogComputed = computed(() => props.dialogData.showDialog);;
 
 const emit = defineEmits(['submit'])
-
 let getIdByUserNameGetter: any = store.getters.getIdByUserName
 let newBudgetLibrary = ref<BudgetLibrary>({...emptyBudgetLibrary, id: getNewGuid()});
 let rules: InputValidationRules = validationRules;

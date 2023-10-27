@@ -24,7 +24,7 @@
             </v-col>
         </v-col>
         <v-divider />
-        <v-col cols = "12" class="ghd-constant-header">
+        <v-col cols = "12" class="ghd-constant-header" v-show="hasSelectedNetwork.valueOf">
             <v-row>
                     <v-subheader class="ghd-md-gray ghd-control-label" >Key Attribute</v-subheader>
             </v-row>
@@ -261,7 +261,7 @@ import mitt from 'mitt';
     let selectedNetwork: Ref<Network> = ref(clone(emptyNetwork));
     let selectNetworkItemValue = ref<string>('');
     let selectDataSourceId: string = '';
-    let hasSelectedNetwork: boolean = false;
+    let hasSelectedNetwork = ref<boolean>(false);
     let isNewNetwork: boolean = false;
     let hasStartedAggregation: boolean = false;
     let isKeyPropertySelectedAttribute: boolean = false;
@@ -320,9 +320,9 @@ import mitt from 'mitt';
     function onSelectNetworkItemValueChanged() {
         selectNetworkAction(selectNetworkItemValue);
         if(selectNetworkItemValue.value != getBlankGuid() || isNewNetwork)
-            hasSelectedNetwork = true;
+            hasSelectedNetwork.value = true;
         else
-            hasSelectedNetwork = false;
+            hasSelectedNetwork.value = false;
     }
 
     watch(selectedAttributeRows, () => onSelectedAttributeRowsChanged)
@@ -375,7 +375,7 @@ import mitt from 'mitt';
         isNewNetwork = true;
         selectNetworkItemValue.value = network.id;
         selectedNetwork.value = clone(network);
-        hasSelectedNetwork = true;
+        hasSelectedNetwork.value = true;
     }
     function onDiscardChanges() {
         selectedNetwork = clone(stateSelectedNetwork);
@@ -413,7 +413,7 @@ import mitt from 'mitt';
 
     function onDeleteClick(){
         deleteNetworkAction(selectedNetwork.value.id).then(() => {
-            hasSelectedNetwork = false;
+            hasSelectedNetwork.value = false;
             selectNetworkItemValue.value = "";
             selectedNetwork.value = clone(emptyNetwork)
         })       

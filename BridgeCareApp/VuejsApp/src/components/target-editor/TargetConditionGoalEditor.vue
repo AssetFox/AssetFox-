@@ -209,9 +209,7 @@
 
         </v-col>
         <v-col>
-            <!-- <v-row style="margin: 20px;" justify="center"> -->
-                <!-- <v-col cols="6" v-show="hasSelectedLibrary || hasScenario" style="padding: 10px;"> -->
-            <v-row align="center" justify="end">
+            <v-row align="center" v-show="hasSelectedLibrary || hasScenario" style="padding: 10px;" justify="end">
                 <v-btn flat
                     id="TargetConditionGoalEditor-deleteLibrary-btn"
                     @click="onShowConfirmDeleteAlert"

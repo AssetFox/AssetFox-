@@ -41,7 +41,7 @@
                                 </v-row>                          
                             </td>
                             <td xs5>
-                                <v-row  rows = "6"align-center>
+                                <v-row  rows = "6" align-center>
                                     <v-subheader class="ghd-control-label ghd-md-gray" style="width:95%">Criteria</v-subheader>
                                     <v-btn
                                         @click="

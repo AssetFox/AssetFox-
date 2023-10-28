@@ -102,11 +102,9 @@ import { useStore } from 'vuex';
   onMounted(() => mounted);
   function mounted() {
     setNumericAttributeNames();
-    console.log("showdialog: " + showDialog.value);
   }
 
   watch(stateNumericAttributes,()=> {
-    console.log("state numeric:  " + stateNumericAttributes.value.length);
     setNumericAttributeNames();
   });
 

@@ -1,13 +1,8 @@
 <template>
-    <div class="criteria-editor-card-text">
-    <v-row style="padding:1em">
-        <div>
-            <v-row justify-space-between style="padding: 10px; width: 100em; height: 48em;">
-                <v-col > 
-                    <v-row justify-start style="padding: 10px"> 
-                        <h3 class="ghd-dialog">Output</h3>
-                    </v-row>
-                    <v-card class="elevation-0" style="border: 1px solid;">
+    <v-row>
+        <v-col cols="6" >
+            <h3 class="ghd-dialog">Output</h3>
+            <v-card class="elevation-0" style="border: 1px solid;" width="600px">
                         <div class="conjunction-and-messages-container" >
                             <v-row
                                 :class="{
@@ -16,12 +11,14 @@
                                         criteriaEditorData.isLibraryContext,
                                 }"
                             >
-                            <v-col cols = "2">
+                            <v-col cols = "4">
                                 <v-row style="padding: 15px;">
                                 <v-select
                                     :items="conjunctionSelectListItems"
                                     class="ghd-control-border ghd-control-text ghd-select"
                                     v-model="selectedConjunction"
+                                    item-title="text"
+                                    item-value="value"
                                     density="compact"
                                     variant="outlined"
                                 >
@@ -36,7 +33,7 @@
                                             </v-row>
                                             </v-list-item-title>
                                         </v-list-item>
-                                    </template>                                    
+                                    </template>
                                 </v-select>
                                 </v-row>
                             </v-col>
@@ -44,8 +41,8 @@
                                 <v-btn
                                     id="CriteriaEditor-addSubCriteria-btn"
                                     @click="onAddSubCriteria"
-                                    class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"    
-                                    variant = "flat"                                
+                                    class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
+                                    variant = "flat"
                                     >Add Subcriteria
                                 </v-btn>
                             </div>
@@ -60,23 +57,15 @@
                             }"
                         >
                             <div v-for="(clause, index) in subCriteriaClauses">
-                                <v-textarea style="padding-left:0px;"
-                                    :class="{
-                                        'textarea-focused':
-                                            index ===
-                                            selectedSubCriteriaClauseIndex,
-                                        'clause-textarea':
-                                            index !=
-                                            selectedSubCriteriaClauseIndex,
-                                    }"
-                                    :model-value="clause"
+                                <v-textarea
+                                    :v-model="clause"
                                     @click="
                                         onClickSubCriteriaClauseTextarea(
                                             clause,
                                             index,
                                         )
                                     "
-                                    box
+                                    variant="outlined"
                                     class="ghd-control-text"
                                     full-width
                                     no-resize
@@ -87,7 +76,7 @@
                                         <v-btn
                                             @click="onRemoveSubCriteria(index)"
                                             class="ghd-blue"
-                                            icon
+                                            flat
                                         >
                                             <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                         </v-btn>
@@ -135,14 +124,11 @@
                                 </div>
                             </v-row>
                         </v-card-actions>
-                    </v-card>
-                </v-col>
-                <v-col>
-                    <v-row justify-start style="padding: 10px;"
-                    >
-                        <h3 class="ghd-dialog">Criteria Editor</h3>
-                    </v-row>
-                    <v-card class="elevation-0" style="border: 1px solid;">                  
+            </v-card>
+        </v-col>
+        <v-col>
+            <h3 class="ghd-dialog">Criteria Editor</h3>
+            <v-card class="elevation-0" style="border: 1px solid;" width="600px" height="685px">
                         <v-card-text
                             :class="{
                                 'criteria-editor-card-dialog':
@@ -157,8 +143,8 @@
                                     'justify-end':
                                         criteriaEditorData.isLibraryContext,
                                 }"
-                            >                        
-                            </v-row>                     
+                            >
+                            </v-row>
                             <v-tabs class="ghd-control-text" style="margin-left:4px;margin-right:4px;"
                                 v-if="selectedSubCriteriaClauseIndex !== -1" v-model="tab"
                             >
@@ -171,24 +157,23 @@
                            </v-tabs>
                             <v-window v-model="tab">
                                 <v-window-item value="tree">
-                                    query here
-                                    <!-- <VueQueryBuilder
+                                    <vue-query-builder
                                         id="CriteriaEditor-criteria-vuequerybuilder"
                                         :labels="queryBuilderLabels"
                                         :maxDepth="25"
                                         :rules="queryBuilderRules"
-                                        :styled="true"
+                                        
                                         v-if="queryBuilderRules.length > 0"
                                         v-model="selectedSubCriteriaClause"
                                     >
-                                    </VueQueryBuilder> -->
+                                    </vue-query-builder>
                                 </v-window-item>
                                 <v-window-item value="raw">
                                     <v-textarea
                                         id="CriteriaEditor-rawText-vtextarea"
                                         no-resize
                                         variant="outlined"
-                                        rows="23"
+                                        rows="20"
                                         v-model="selectedRawSubCriteriaClause"
                                         class="ghd-control-text"
                                     ></v-textarea>
@@ -202,7 +187,7 @@
                                     criteriaEditorData.isLibraryContext,
                             }"
                         >
-                            <v-row column>          
+                            <v-row column>
                                 <div class="validation-messages-container">
                                     <p
                                         class="invalid-message"
@@ -220,50 +205,45 @@
                                     >
                                         {{ validSubCriteriaMessage }}
                                     </p>
-                                </div>        
-                                <div class="validation-check-btn-container" style="height:64px;margin-top:4px;">
-                                    <v-btn 
+                                </div>
+                                <div class="validation-check-btn-container">
+                                    <v-btn
                                         id="CriteriaEditor-updateSubcriteria-btn"
-                                        :disabled="
-                                            onDisableCheckCriteriaButton()
-                                        "
+                                        :disabled="onDisableCheckCriteriaButton()"
                                         @click="onCheckSubCriteria"
                                         class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
                                         variant = "flat"
                                     >
                                         Update Subcriteria
                                     </v-btn>
-                                </div>                                                         
+                                </div>
                             </v-row>
                         </v-card-actions>
-                    </v-card>
-                </v-col>
-            </v-row>
-        </div>
-        <div class="main-criteria-check-output-container">
-            <v-col
-                v-show="!criteriaEditorData.isLibraryContext"
-                class="save-cancel-flex"
-            >
-                <v-row justify-center wrap>
-                    <v-btn
-                        id="CriteriaEditor-save-btn"
-                        :disabled="cannotSubmit"
-                        @click="onSubmitCriteriaEditorResult(true)"
-                        class="ara-blue-bg text-white"
-                    >
-                        Save
-                    </v-btn>
-                    <v-btn
-                        id="CriteriaEditor-cancel-btn"
-                        @click="onSubmitCriteriaEditorResult(false)"
-                        class="ara-orange-bg text-white"
-                        >Cancel</v-btn>
-                </v-row>
-            </v-col>
-        </div>
+            </v-card>
+        </v-col>
     </v-row>
-</div>
+    <div class="main-criteria-check-output-container">
+        <v-col
+            v-show="!criteriaEditorData.isLibraryContext"
+            class="save-cancel-flex"
+        >
+            <v-row justify-center wrap>
+                <v-btn
+                    id="CriteriaEditor-save-btn"
+                    :disabled="cannotSubmit"
+                    @click="onSubmitCriteriaEditorResult(true)"
+                    class="ara-blue-bg text-white"
+                >
+                    Save
+                </v-btn>
+                <v-btn
+                    id="CriteriaEditor-cancel-btn"
+                    @click="onSubmitCriteriaEditorResult(false)"
+                    class="ara-orange-bg text-white"
+                    >Cancel</v-btn>
+            </v-row>
+        </v-col>
+    </div>
 </template>
 
 <script lang="ts" setup>
@@ -327,7 +307,7 @@ async function getAttributesAction(payload?: any): Promise<any> {await store.dis
 async function getAttributeSelectValuesAction(payload?: any): Promise<any> {await store.dispatch('getAttributeSelectValues');}
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
 const tab = ref<any>(null);
-    let queryBuilderRules: any[] = [];
+    const queryBuilderRules = ref<any[]>([]);
     let queryBuilderLabels: object = {
         matchType: '',
         matchTypes: [
@@ -352,27 +332,28 @@ const tab = ref<any>(null);
     const selectedConjunction = ref<string>('OR');
     const subCriteriaClauses= ref<string[]>([]);
     const selectedSubCriteriaClauseIndex = ref<number>(-1);
-    const selectedSubCriteriaClause= ref<Criteria |null>(null);
+    const selectedSubCriteriaClause= ref<Criteria |null>(emptyCriteria);
     const selectedRawSubCriteriaClause = ref<string>('');
     let activeTab = 'tree-view';
     const checkOutput = ref<boolean>(false);
 
     onMounted(()=> {
+        
         if (hasValue(stateAttributes)) {
             setQueryBuilderRules();
-            
-        }     
+        }
+        console.log("here");
     });
 
-    watch(()=>criteriaEditorData,() => {
+    watch(criteriaEditorData,() => {
         //TODO
         /*const mainCriteria: Criteria = parseCriteriaString(
       this.criteriaEditorData.mergedCriteriaExpression != null ? this.criteriaEditorData.mergedCriteriaExpression : ''
       ) as Criteria;*/
         selectedSubCriteriaClauseIndex.value = -1;
         const mainCriteria: Criteria = convertCriteriaExpressionToCriteriaObject(
-            props.criteriaEditorData.mergedCriteriaExpression != null
-                ? props.criteriaEditorData.mergedCriteriaExpression
+            criteriaEditorData.value.mergedCriteriaExpression != null
+                ? criteriaEditorData.value.mergedCriteriaExpression
                 : '',
             addErrorNotificationAction,
         ) as Criteria;
@@ -389,7 +370,7 @@ const tab = ref<any>(null);
 
         if (
             !equals(
-                props.criteriaEditorData.mergedCriteriaExpression,
+                criteriaEditorData.value.mergedCriteriaExpression,
                 mergedCriteriaExpression,
             ) &&
             mainCriteria
@@ -400,8 +381,8 @@ const tab = ref<any>(null);
 
             selectedConjunction.value = mainCriteria.logicalOperator;
 
-             const andArray = props.criteriaEditorData.mergedCriteriaExpression ? props.criteriaEditorData.mergedCriteriaExpression.split(' AND ') : [];
-            const orArray  = props.criteriaEditorData.mergedCriteriaExpression ? props.criteriaEditorData.mergedCriteriaExpression.split(' OR ') : [];
+             const andArray = criteriaEditorData.value.mergedCriteriaExpression ? criteriaEditorData.value.mergedCriteriaExpression.split(' AND ') : [];
+            const orArray  = criteriaEditorData.value.mergedCriteriaExpression ? criteriaEditorData.value.mergedCriteriaExpression.split(' OR ') : [];
 
             setSubCriteriaClauses(mainCriteria);
         }
@@ -418,9 +399,11 @@ const tab = ref<any>(null);
     });
 
     watch(selectedSubCriteriaClause,()=> {
+        console.log("selectedSubCriteriaClause: " + selectedSubCriteriaClause);
+
         resetSubCriteriaValidationProperties();
         if (
-            hasValue(selectedSubCriteriaClause) &&
+            hasValue(selectedSubCriteriaClause.value) &&
             hasValue(selectedSubCriteriaClause.value!.children)
         ) {
             let missingAttributes: string[] = [];
@@ -450,7 +433,7 @@ const tab = ref<any>(null);
 
     watch(stateAttributesSelectValues,()=> {
         if (
-            hasValue(queryBuilderRules) &&
+            hasValue(queryBuilderRules.value) &&
             hasValue(stateAttributesSelectValues)
         ) {
             const filteredAttributesSelectValues: AttributeSelectValues[] = stateAttributesSelectValues.value.filter(
@@ -459,10 +442,10 @@ const tab = ref<any>(null);
             if (hasValue(filteredAttributesSelectValues)) {
                 filteredAttributesSelectValues.forEach(
                     (asv: AttributeSelectValues) => {
-                        queryBuilderRules = update(
+                        queryBuilderRules.value = update(
                             findIndex(
                                 propEq('id', asv.attribute),
-                                queryBuilderRules,
+                                queryBuilderRules.value,
                             ),
                             {
                                 type: 'select',
@@ -474,7 +457,7 @@ const tab = ref<any>(null);
                                     value: value,
                                 })),
                             },
-                            queryBuilderRules,
+                            queryBuilderRules.value,
                         );
                     },
                 );
@@ -482,7 +465,7 @@ const tab = ref<any>(null);
         }
     });
     function setQueryBuilderRules() {
-        queryBuilderRules = stateAttributes.value.map(
+        queryBuilderRules.value = stateAttributes.value.map(
             (attribute: Attribute) => ({
                 type: 'text',
                 label: attribute.name,
@@ -554,7 +537,7 @@ const tab = ref<any>(null);
                 subCriteriaClause,
                 addErrorNotificationAction,
             );
-            if (selectedSubCriteriaClause) {
+            if (selectedSubCriteriaClause.value) {
                 if (!hasValue(selectedSubCriteriaClause.value?.logicalOperator)) {
                     selectedSubCriteriaClause.value!.logicalOperator = 'AND';
                 }
@@ -599,7 +582,7 @@ const tab = ref<any>(null);
 
         resetCriteriaValidationProperties();
 
-        if (props.criteriaEditorData.isLibraryContext) {
+        if (criteriaEditorData.value.isLibraryContext) {
             if (!hasValue(subCriteriaClauses)) {
                 emit('submitCriteriaEditorResult', {
                     validated: true,
@@ -683,7 +666,7 @@ const tab = ref<any>(null);
                         validCriteriaMessage.value = message;
                         cannotSubmit.value = false;
 
-                        if (props.criteriaEditorData.isLibraryContext) {
+                        if (criteriaEditorData.value.isLibraryContext) {
                             const parsedCriteria = convertCriteriaObjectToCriteriaExpression(
                                 getMainCriteria(),
                             );
@@ -709,7 +692,7 @@ const tab = ref<any>(null);
                             }
                         });
 
-                        if (props.criteriaEditorData.isLibraryContext) {
+                        if (criteriaEditorData.value.isLibraryContext) {
                             emit('submitCriteriaEditorResult', {
                                 validated: false,
                                 criteria: null,
@@ -737,7 +720,7 @@ const tab = ref<any>(null);
                         validCriteriaMessage.value = message;
                         cannotSubmit.value = false;
 
-                        if (props.criteriaEditorData.isLibraryContext) {
+                        if (criteriaEditorData.value.isLibraryContext) {
                             const parsedCriteria = convertCriteriaObjectToCriteriaExpression(
                                 getMainCriteria(),
                             );
@@ -763,7 +746,7 @@ const tab = ref<any>(null);
                             }
                         });
 
-                        if (props.criteriaEditorData.isLibraryContext) {
+                        if (criteriaEditorData.value.isLibraryContext) {
                             emit('submitCriteriaEditorResult', {
                                 validated: false,
                                 criteria: null,
@@ -795,7 +778,7 @@ const tab = ref<any>(null);
         checkOutput.value = true;
         resetSubCriteriaValidationProperties();
 
-        if (props.criteriaEditorData.isLibraryContext) {
+        if (criteriaEditorData.value.isLibraryContext) {
             emit('submitCriteriaEditorResult', {
                 validated: false,
                 criteria: null,
@@ -813,7 +796,7 @@ const tab = ref<any>(null);
             }
             return null;
         }
-        return selectedRawSubCriteriaClause;
+        return selectedRawSubCriteriaClause.value;
     }
 
     function onSubmitCriteriaEditorResult(submit: boolean) {
@@ -876,7 +859,7 @@ const tab = ref<any>(null);
             (parsedSelectedSubCriteriaClause &&
                 isEmpty(parsedSelectedSubCriteriaClause.join(''))) ||
             (activeTab === 'raw-criteria' &&
-                (isEmpty(selectedRawSubCriteriaClause) ||
+                (isEmpty(selectedRawSubCriteriaClause.value) ||
                     parsedSelectedRawSubCriteriaClause === null ||
                     (parsedSelectedRawSubCriteriaClause &&
                         isEmpty(parsedSelectedRawSubCriteriaClause.join('')))));
@@ -997,15 +980,15 @@ const tab = ref<any>(null);
 .clause-textarea textarea {
     border: 1px solid #999999;
     margin-left:-12px;
-    padding-left:12px;  
-    border-radius: 4px;    
+    padding-left:12px;
+    border-radius: 4px;
 }
 
 
 .textarea-focused textarea {
     background-color: #ffffff !important;
     margin-left:-12px;
-    padding-left:12px;  
+    padding-left:12px;
     border: 2px solid #2A578D;
     border-radius: 4px;
 }
@@ -1045,9 +1028,9 @@ button.btn.btn-default {
     border: 1px solid #99999980 !important;
     padding-left: 5px;
     padding-right: 5px;
-    background-color: #FFFFFF !important;   
+    background-color: #FFFFFF !important;
     color: #2A578D !important;
-    font-weight: 600 !important;    
+    font-weight: 600 !important;
 }
 
 </style>

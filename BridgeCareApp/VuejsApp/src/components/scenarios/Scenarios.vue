@@ -18,7 +18,7 @@
                     <v-spacer></v-spacer>
                     <v-col cols = "1"></v-col>
                 </v-tabs>
-                <v-window v-model="tab" style="background-color: #d9e0ed;">
+                <v-window v-model="tab" style="background-color: #d9e7f2;">
                     <v-window-item value="My scenarios">
                          <v-col cols = "12">
                             <v-card elevation="5">
@@ -445,6 +445,7 @@
                                     @update:options="onWorkQueuePagination"
                                 >                           
                                     <template slot="items" slot-scope="props" v-slot:item="props">
+                                        <tr>
                                         <td>{{ props.item.queuePosition }}</td>
                                         <td>
                                             {{ props.item.name }}
@@ -495,6 +496,7 @@
                                                 </v-list>
                                             </v-menu>
                                         </td>
+                                        </tr>
                                     </template>                                         
                                     <template v-slot:no-data>
                                         {{ getEmptyWorkQueueMessage() }}
@@ -1166,7 +1168,7 @@ import { onBeforeMount } from 'vue';
         if(initializing)
             return;
 
-        const { sortBy, descending, page, rowsPerPage } = userScenariosPagination;
+        const { sort, descending, page, rowsPerPage } = userScenariosPagination;
         const request: PagingRequest<Scenario>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -1177,8 +1179,8 @@ import { onBeforeMount } from 'vue';
                 addedRows: [],
                 isModified: false,
             },           
-            sortColumn: sortBy != null ? sortBy : '',
-            isDescending: descending != null ? descending : false,
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: currentSearchMine.value
         };
 
@@ -1201,7 +1203,7 @@ import { onBeforeMount } from 'vue';
     function doWorkQueuePagination() {
         if(initializingWorkQueue)
             return;
-        const { sortBy, descending, page, rowsPerPage } = workQueuePagination;
+        const { sort, descending, page, rowsPerPage } = workQueuePagination;
 
         const workQueueRequest: PagingRequest<QueuedWork>= {
             page: page,
@@ -1213,8 +1215,8 @@ import { onBeforeMount } from 'vue';
                 addedRows: [],
                 isModified: false,
             },           
-            sortColumn: sortBy != null ? sortBy : '',
-            isDescending: descending != null ? descending : false,
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: ""
         };
         getWorkQueuePageAction(workQueueRequest);    
@@ -1223,7 +1225,7 @@ import { onBeforeMount } from 'vue';
     function doFastQueuePagination() {
         if(initializingWorkQueue)
             return;
-        const { sortBy, descending, page, rowsPerPage } = fastWorkQueuePagination;
+        const { sort, descending, page, rowsPerPage } = fastWorkQueuePagination;
 
         const workQueueRequest: PagingRequest<QueuedWork>= {
             page: page,
@@ -1235,8 +1237,8 @@ import { onBeforeMount } from 'vue';
                 addedRows: [],
                 isModified: false,
             },           
-            sortColumn: sortBy != null ? sortBy : '',
-            isDescending: descending != null ? descending : false,
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: ""
         };
         getFastWorkQueuePageAction(workQueueRequest);    
@@ -1399,7 +1401,7 @@ import { onBeforeMount } from 'vue';
     }); 
 
     function initializeScenarioPages(){
-        const { sortBy, descending, page, rowsPerPage } = sharedScenariosPagination;
+        const { sort, descending, page, rowsPerPage } = sharedScenariosPagination;
 
         const request: PagingRequest<Scenario> = {
             page: 1,

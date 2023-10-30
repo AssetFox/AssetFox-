@@ -1,8 +1,9 @@
 // import Vue from 'vue';
 // import Vuetify from 'vuetify/lib';
 // import 'vuetify/src/stylus/app.styl';
-// This is from forums, can be removed if not of use: // import '@mdi/font/css/materialdesignicons.css'
-// This is from forums, can be removed if not of use: // import * as styles from 'vuetify/styles'
+import '@mdi/font/css/materialdesignicons.css'
+import 'vuetify/styles'
+import { mdi, aliases } from 'vuetify/iconsets/mdi'
 import { IconProps, IconSet, createVuetify } from 'vuetify';
 import { fa } from 'vuetify/iconsets/fa'
 import * as components from "vuetify/components";
@@ -50,7 +51,8 @@ const vuetify = createVuetify({
   },
     icons: { 
       defaultSet: 'fa', 
-      sets: { fa, ghdSearchIconSet, ghdTableSortIconSet, ghdDownIconSet },  
+      aliases,
+      sets: { mdi, fa, ghdSearchIconSet, ghdTableSortIconSet, ghdDownIconSet },  
     },
     directives,
     

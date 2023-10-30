@@ -157,7 +157,7 @@
                            </v-tabs>
                             <v-window v-model="tab">
                                 <v-window-item value="tree">
-                                    <vue-query-builder
+                                    <!-- <vue-query-builder
                                         id="CriteriaEditor-criteria-vuequerybuilder"
                                         :labels="queryBuilderLabels"
                                         :maxDepth="25"
@@ -166,7 +166,7 @@
                                         v-if="queryBuilderRules.length > 0"
                                         v-model="selectedSubCriteriaClause"
                                     >
-                                    </vue-query-builder>
+                                    </vue-query-builder> -->
                                 </v-window-item>
                                 <v-window-item value="raw">
                                     <v-textarea
@@ -342,7 +342,6 @@ const tab = ref<any>(null);
         if (hasValue(stateAttributes)) {
             setQueryBuilderRules();
         }
-        console.log("here");
     });
 
     watch(criteriaEditorData,() => {
@@ -399,8 +398,6 @@ const tab = ref<any>(null);
     });
 
     watch(selectedSubCriteriaClause,()=> {
-        console.log("selectedSubCriteriaClause: " + selectedSubCriteriaClause);
-
         resetSubCriteriaValidationProperties();
         if (
             hasValue(selectedSubCriteriaClause.value) &&

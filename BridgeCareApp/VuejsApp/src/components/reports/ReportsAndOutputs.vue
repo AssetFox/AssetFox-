@@ -94,15 +94,17 @@ import {
     rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router'; 
 import Dialog from 'primevue/dialog';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 
     let store = useStore();
+    const router = useRouter(); 
     const stateSimulationReportNames = computed<string[]>(() => store.state.adminDataModule.simulationReportNames);
-    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification');} 
-    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification');} 
-    async function getSimulationReportsAction(payload?: any): Promise<any> { await store.dispatch('getSimulationReports');} 
+    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification',payload);} 
+    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification',payload);} 
+    async function getSimulationReportsAction(payload?: any): Promise<any> { await store.dispatch('getSimulationReports',payload);} 
 
     let editShow = ref<boolean>(false);
 
@@ -121,7 +123,22 @@ import Column from 'primevue/column';
     let selectedReport = ref<Report>(emptyReport); 
 
     onMounted(() => {
+
+        selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
+        simulationName = router.currentRoute.value.query.scenarioName as string;
+        networkName = router.currentRoute.value.query.networkName as string;
+        networkId = router.currentRoute.value.query.networkId as string;
+        if (selectedScenarioId === getBlankGuid()) {
+                // set 'no selected scenario' error message, then redirect user to Scenarios UI
+                addErrorNotificationAction({
+                    message: 'Found no selected scenario for edit',
+                });
+                router.push('/Scenarios/');
+            }
+
+        //selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
         getSimulationReportsAction();
+        
     });
     watch(stateSimulationReportNames, () => {
         stateSimulationReportNames.value.forEach(reportName => {
@@ -145,21 +162,21 @@ import Column from 'primevue/column';
     function showEditDialog(): void {
         editShow.value = !editShow.value;
     }
-    function beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            vm.selectedScenarioId = to.query.scenarioId;
-            vm.simulationName = to.query.scenarioName;
-            vm.networkName = to.query.networkName;
-            vm.networkId = to.query.networkId;
-            if (vm.selectedScenarioId === getBlankGuid()) {
-                // set 'no selected scenario' error message, then redirect user to Scenarios UI
-                vm.addErrorNotificationAction({
-                    message: 'Found no selected scenario for edit',
-                });
-                vm.$router.push('/Scenarios/');
-            }
-        });
-    }
+    // function beforeRouteEnter(to: any, from: any, next: any) {
+    //     next((vm: any) => {
+    //         vm.selectedScenarioId = to.query.scenarioId;
+    //         vm.simulationName = to.query.scenarioName;
+    //         vm.networkName = to.query.networkName;
+    //         vm.networkId = to.query.networkId;
+    //         if (vm.selectedScenarioId === getBlankGuid()) {
+    //             // set 'no selected scenario' error message, then redirect user to Scenarios UI
+    //             vm.addErrorNotificationAction({
+    //                 message: 'Found no selected scenario for edit',
+    //             });
+    //             vm.$router.push('/Scenarios/');
+    //         }
+    //     });
+    // }
     function onShowCriterionEditorDialog(reportId: string) {
         selectedReport.value = find(
             propEq('id', reportId),
@@ -218,7 +235,7 @@ import Column from 'primevue/column';
                 if (response.status == 200) {
                     if (hasValue(response, 'data')) {
                         const resultId: string = response.data as string;
-                        reportIndexID = resultId;
+                        //reportIndexID = resultId;
                     }
                     addSuccessNotificationAction({
                         message: selectedReport.value.name +  ' report generation started for ' + simulationName + '.',

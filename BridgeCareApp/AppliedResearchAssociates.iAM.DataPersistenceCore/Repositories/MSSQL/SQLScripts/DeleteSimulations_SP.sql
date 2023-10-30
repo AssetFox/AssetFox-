@@ -1847,7 +1847,7 @@ AS
 			FROM  Simulation  AS l1
 			JOIN SimulationOutput AS l2 ON l2.SimulationId = l1.Id
 			JOIN SimulationYearDetail AS l3 ON l3.SimulationOutputId = l2.Id
-			JOIN BudgetDetail AS l4 ON l4.SimulationYearDetailId = l2.Id
+			JOIN BudgetDetail AS l4 ON l4.SimulationYearDetailId = l3.Id
 			WHERE l1.Id IN (SELECT Guid FROM #SimTempGuids);
 
             ALTER TABLE BudgetDetail WITH CHECK CHECK CONSTRAINT all
@@ -1877,7 +1877,7 @@ AS
 			FROM  Simulation  AS l1
 			JOIN SimulationOutput AS l2 ON l2.SimulationId = l1.Id
 			JOIN SimulationYearDetail AS l3 ON l3.SimulationOutputId = l2.Id
-			JOIN DeficientConditionGoalDetail AS l4 ON l4.SimulationYearDetailId = l2.Id
+			JOIN DeficientConditionGoalDetail AS l4 ON l4.SimulationYearDetailId = l3.Id
 			WHERE l1.Id IN (SELECT Guid FROM #SimTempGuids);
 
             ALTER TABLE DeficientConditionGoalDetail WITH CHECK CHECK CONSTRAINT all
@@ -1907,7 +1907,7 @@ AS
 			FROM  Simulation  AS l1
 			JOIN SimulationOutput AS l2 ON l2.SimulationId = l1.Id
 			JOIN SimulationYearDetail AS l3 ON l3.SimulationOutputId = l2.Id
-			JOIN TargetConditionGoalDetail AS l4 ON l4.SimulationYearDetailId = l2.Id
+			JOIN TargetConditionGoalDetail AS l4 ON l4.SimulationYearDetailId = l3.Id
 			WHERE l1.Id IN (SELECT Guid FROM #SimTempGuids);
 
             ALTER TABLE TargetConditionGoalDetail WITH CHECK CHECK CONSTRAINT all

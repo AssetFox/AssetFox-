@@ -763,7 +763,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
                 }
 
-                if (scenarioSelectableTreatments.Any(_ => _.SupersedeRules.Any()))
+                if (scenarioSelectableTreatments.Any(_ => _.SupersedeRules != null && _.SupersedeRules.Any()))
                 {
                     var supersedeRulesPerTreatmentId = scenarioSelectableTreatments.Where(_ => _.SupersedeRules.Any()).ToList()
                     .ToDictionary(_ => _.Id, _ => _.SupersedeRules);

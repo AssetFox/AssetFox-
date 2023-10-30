@@ -9,14 +9,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class TreatmentSupersedeRuleMapper
     {
-        // TODO update if below is in need
-        //public static TreatmentSupersedeRuleEntity ToTreatmentSupersedeRuleEntity(this TreatmentSupersedeRule domain, Guid treatmentId) =>
-        //    new TreatmentSupersedeRuleEntity
-        //    {
-        //        Id = domain.Id,
-        //        TreatmentId = treatmentId
-        //    };
-
         public static ScenarioTreatmentSupersedeRuleEntity ToScenarioTreatmentSupersedeRuleEntity(this TreatmentSupersedeRule domain, Guid treatmentId, Guid simulationId)
         {
             var entity = new ScenarioTreatmentSupersedeRuleEntity

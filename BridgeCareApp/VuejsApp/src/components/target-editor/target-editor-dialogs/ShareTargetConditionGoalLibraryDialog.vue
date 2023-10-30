@@ -1,53 +1,73 @@
 <template>
-  <v-dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
-    <v-card>
+  <v-dialog style="width: 40%;" persistent v-model="dialogData.showDialog">
+    <v-card style="padding: 10px;">
       <v-card-title>
-        <v-row justify-center>
-          <h3>Target Condition Goal Library Sharing</h3>
-        </v-row>
+        <v-row justify="space-between" align="center">
+          <h5>Target Condition Goal Library Sharing</h5>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
+        </v-row>
       </v-card-title>
       <v-card-text>
         <v-data-table id="ShareTargetConditionGoalLibraryDialog-table-vdatatable" :headers="targetConditionGoalLibraryUserGridHeaders"
                       :items="targetConditionGoalLibraryUserGridRows"
-                      sort-icon=$vuetify.icons.ghd-table-sort
-                      :search="searchTerm">
-          <template slot="items" slot-scope="props" v-slot:item="{item}">
+                      :search="searchTerm"
+                      :rows-per-page-items=[5,10,25]
+                      :items-per-page-options="[
+                                        {value: 5, title: '5'},
+                                        {value: 10, title: '10'},
+                                        {value: 25, title: '25'},
+                                    ]">
+          <template v-slot:item="{item}">
+            <tr>
             <td>
-              {{ item.value.username }}
+              {{ item.username }}
             </td>
             <td>
-              <v-checkbox id="ShareTargetConditionGoalLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.raw.isShared"
-                          @change="removeUserModifyAccess(item.value.id, item.value.isShared)"/>
+              <v-checkbox 
+                id="ShareTargetConditionGoalLibraryDialog-isShared-vcheckbox" 
+                label="Is Shared" 
+                v-model="item.isShared" 
+                @update:model-value="removeUserModifyAccess(item.id, item.isShared)" />
             </td>
             <td>
               <v-checkbox id="ShareTargetConditionGoalLibraryDialog-canModify-vcheckbox" :disabled="!item.value.isShared" label="Can Modify" v-model="item.raw.canModify"/>
             </td>
+          </tr>
           </template>
-          <v-alert :model-value="true"
+          <!-- <v-alert value="true"
                    class="ara-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
-          </v-alert>
+          </v-alert> -->
         </v-data-table>
       </v-card-text>
-      <v-card-actions>
-        <v-row row justify-center>
-          <v-btn id="ShareTargetConditionGoalLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
-          <v-btn id="ShareTargetConditionGoalLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
+        <v-row justify="center">
+          <div style="margin: 10px; padding: 10px;">
+          <v-btn
+            id="ShareTargetConditionGoalLibraryDialog-cancel-vbtn" 
+            @click="onSubmit(false)" 
+            class="ghd-white-bg ghd-blue ghd-button-text" 
+            flat>
+              Cancel
+          </v-btn>
+          <v-btn 
+            id="ShareTargetConditionGoalLibraryDialog-save-vbtn"
+            variant="outlined"
+            @click="onSubmit(true)" 
+            class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
             Save
           </v-btn>
+        </div>
         </v-row>
-      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script lang="ts" setup>
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { ref, onMounted, toRefs, watch, computed } from 'vue';
 
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {TargetConditionGoalLibraryUser } from '@/shared/models/iAM/target-condition-goal';
@@ -56,41 +76,39 @@ import {User} from '@/shared/models/iAM/user';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getUserName} from '@/shared/utils/get-user-info';
 import {setItemPropertyValueInList} from '@/shared/utils/setter-utils';
-import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {TargetConditionGoalLibraryUserGridRow, ShareTargetConditionGoalLibraryDialogData } from '@/shared/models/modals/share-target-condition-goals-data';
 import TargetConditionGoalService from '@/services/target-condition-goal.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
 
   let store = useStore();
   const emit = defineEmits(['submit'])
   const props = defineProps<{dialogData: ShareTargetConditionGoalLibraryDialogData}>()
+  const { dialogData } = toRefs(props);
 
-  let stateUsers = ref<User[]>(store.state.userModule.users);
+  const stateUsers = computed<User[]>(() => store.state.userModule.users);
 
-  let targetConditionGoalLibraryUserGridHeaders: DataTableHeader[] = [
-    {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
+  let targetConditionGoalLibraryUserGridHeaders: any[] = [
+    {title: 'Username', key: 'username', align: 'start', sortable: true},
+    {title: 'Shared With', key: 'Shared With', align: 'left', sortable: true},
+    {title: 'Can Modify', key: 'Can Modify', align: 'left', sortable: true}
   ];
-  let targetConditionGoalLibraryUserGridRows: TargetConditionGoalLibraryUserGridRow[] = [];
-  let currentUserAndOwner: TargetConditionGoalLibraryUser[] = [];
+  const targetConditionGoalLibraryUserGridRows = ref<TargetConditionGoalLibraryUserGridRow[]>([]);
+  const currentUserAndOwner = ref<TargetConditionGoalLibraryUser[]>([]);
   let searchTerm: string = '';
   
 
-  watch(()=> props.dialogData, () => onDialogDataChanged)
-  function onDialogDataChanged() {
-    if (props.dialogData.showDialog) {
+  watch(dialogData, () => {
+    if (dialogData.value.showDialog) {
       onSetGridData();
       onSetUsersSharedWith();
     }
-  }
+  });
 
   function onSetGridData() {
     const currentUser: string = getUserName();
 
-    targetConditionGoalLibraryUserGridRows = stateUsers.value
+    targetConditionGoalLibraryUserGridRows.value = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -132,18 +150,18 @@ import { useRouter } from 'vue-router';
                 const isCurrentUserOrOwner = (targetConditionGoalLibraryUser: TargetConditionGoalLibraryUser) => targetConditionGoalLibraryUser.username === currentUser || targetConditionGoalLibraryUser.isOwner;
                 const isNotCurrentUserOrOwner = (targetConditionGoalLibraryUser: TargetConditionGoalLibraryUser) => targetConditionGoalLibraryUser.username !== currentUser && !targetConditionGoalLibraryUser.isOwner;
 
-                currentUserAndOwner = filter(isCurrentUserOrOwner, targetConditionGoalLibraryUsers) as TargetConditionGoalLibraryUser[];
+                currentUserAndOwner.value = filter(isCurrentUserOrOwner, targetConditionGoalLibraryUsers) as TargetConditionGoalLibraryUser[];
                 const otherUsers: TargetConditionGoalLibraryUser[] = filter(isNotCurrentUserOrOwner, targetConditionGoalLibraryUsers) as TargetConditionGoalLibraryUser[];
 
                 otherUsers.forEach((targetConditionGoalLibraryUser: TargetConditionGoalLibraryUser) => {
-                    if (any(propEq('id', targetConditionGoalLibraryUser.userId), targetConditionGoalLibraryUserGridRows)) {
+                    if (any(propEq('id', targetConditionGoalLibraryUser.userId), targetConditionGoalLibraryUserGridRows.value)) {
                         const targetConditionGoalLibraryUserGridRow: TargetConditionGoalLibraryUserGridRow = find(
-                            propEq('id', targetConditionGoalLibraryUser.userId), targetConditionGoalLibraryUserGridRows) as TargetConditionGoalLibraryUserGridRow;
+                            propEq('id', targetConditionGoalLibraryUser.userId), targetConditionGoalLibraryUserGridRows.value) as TargetConditionGoalLibraryUserGridRow;
 
-                        targetConditionGoalLibraryUserGridRows = update(
-                            findIndex(propEq('id', targetConditionGoalLibraryUser.userId), targetConditionGoalLibraryUserGridRows),
+                        targetConditionGoalLibraryUserGridRows.value = update(
+                            findIndex(propEq('id', targetConditionGoalLibraryUser.userId), targetConditionGoalLibraryUserGridRows.value),
                             { ...targetConditionGoalLibraryUserGridRow, isShared: true, canModify: targetConditionGoalLibraryUser.canModify },
-                            targetConditionGoalLibraryUserGridRows
+                            targetConditionGoalLibraryUserGridRows.value
                         );
                     }
                 });
@@ -153,10 +171,23 @@ import { useRouter } from 'vue-router';
 
   function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      targetConditionGoalLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), targetConditionGoalLibraryUserGridRows),
-          'canModify', false, targetConditionGoalLibraryUserGridRows);
+      targetConditionGoalLibraryUserGridRows.value = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), targetConditionGoalLibraryUserGridRows.value),
+          'canModify', false, targetConditionGoalLibraryUserGridRows.value);
     }
+  }
+
+  function getTargetConditionGoalLibraryUsers() {
+    const usersSharedWith: TargetConditionGoalLibraryUser[] = targetConditionGoalLibraryUserGridRows.value
+        .filter((targetConditionGoalLibraryUserGridRow: TargetConditionGoalLibraryUserGridRow) => targetConditionGoalLibraryUserGridRow.isShared)
+        .map((targetConditionGoalLibraryUserGridRow: TargetConditionGoalLibraryUserGridRow) => ({
+          userId: targetConditionGoalLibraryUserGridRow.id,
+          username: targetConditionGoalLibraryUserGridRow.username,
+          canModify: targetConditionGoalLibraryUserGridRow.canModify,
+          isOwner: false
+        }));
+
+    return [...currentUserAndOwner.value, ...usersSharedWith];
   }
 
   function onSubmit(submit: boolean) {
@@ -166,20 +197,7 @@ import { useRouter } from 'vue-router';
        emit('submit', null);
     }
 
-    targetConditionGoalLibraryUserGridRows = [];
-  }
-
-  function getTargetConditionGoalLibraryUsers() {
-    const usersSharedWith: TargetConditionGoalLibraryUser[] = targetConditionGoalLibraryUserGridRows
-        .filter((targetConditionGoalLibraryUserGridRow: TargetConditionGoalLibraryUserGridRow) => targetConditionGoalLibraryUserGridRow.isShared)
-        .map((targetConditionGoalLibraryUserGridRow: TargetConditionGoalLibraryUserGridRow) => ({
-          userId: targetConditionGoalLibraryUserGridRow.id,
-          username: targetConditionGoalLibraryUserGridRow.username,
-          canModify: targetConditionGoalLibraryUserGridRow.canModify,
-          isOwner: false
-        }));
-
-    return [...currentUserAndOwner, ...usersSharedWith];
+    targetConditionGoalLibraryUserGridRows.value = [];
   }
 
 </script>

@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
 
         public static TreatmentDTO DtoWithEmptyCostsAndConsequencesLists(
             Guid? id = null,
-            string name = "Treatment name",
+            string name = "Bridge Replacement",
             string treatmentCriterionExpression = null)
         {
             var resolveId = id ?? Guid.NewGuid();
@@ -80,7 +80,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             return dto;
         }
 
-        public static TreatmentDTO DtoWithEmptyCostsAndConsequencesListsWithSupersedeRule(TreatmentDTO supersededTreatment, Guid? id = null, string name = "Treatment name")
+        public static TreatmentDTO DtoWithEmptyCostsAndConsequencesListsWithSupersedeRule(TreatmentDTO supersededTreatment, Guid? id = null, string name = "Treatment name", string mergedCriteriaExpression = null)
         {
 
             var criterionLibrary = CriterionLibraryDtos.Dto();
@@ -99,7 +99,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             {
                     new TreatmentSupersedeRuleDTO
                     {
-                        CriterionLibrary = null,
+                        CriterionLibrary = new CriterionLibraryDTO
+                        {
+                           MergedCriteriaExpression = "[AGE] > 10",
+                           IsSingleUse = true,
+                           Id = new Guid(),
+                        },
                         Id = Guid.NewGuid(),
                         treatment = supersededTreatment
                     },

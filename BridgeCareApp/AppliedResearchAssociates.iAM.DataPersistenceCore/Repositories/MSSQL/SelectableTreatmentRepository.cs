@@ -310,11 +310,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var existingEntityIds = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
                 .Where(_ => _.TreatmentLibraryId == libraryId && entityIds.Contains(_.Id)).Select(_ => _.Id)
                 .ToList();
-    
+
 
             _unitOfWork.Context.AddAll(selectableTreatmentEntities.Where(_ => !existingEntityIds.Contains(_.Id))
                 .ToList());
-           
+
             if (treatments.Any(_ => _.Costs.Any()))
             {
                 var costsPerTreatmentId =
@@ -358,7 +358,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
-            }           
+            }
         }
 
         public void UpsertOrDeleteTreatments(List<TreatmentDTO> treatments, Guid libraryId)
@@ -501,9 +501,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.ScenarioTreatmentPerformanceFactors)
-                .Include(_=>_.ScenarioTreatmentSupersedeRules)
-                .ThenInclude(_=>_.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
-                .ThenInclude(_=>_.CriterionLibrary)
+                .Include(_ => _.ScenarioTreatmentSupersedeRules)
+                .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
                 .Select(_ => _.ToDto())
                 .ToList();
         }
@@ -547,9 +547,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.CriterionLibrarySelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_=>_.TreatmentSupersedeRules)
-                .ThenInclude(_=>_.CriterionLibraryTreatmentSupersedeRuleJoin)
-                .ThenInclude(_=>_.CriterionLibrary)
+                .Include(_ => _.TreatmentSupersedeRules)
+                .ThenInclude(_ => _.CriterionLibraryTreatmentSupersedeRuleJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
                 .Where(_ => _.TreatmentLibraryId == libraryId)
                 .Select(_ => _.ToDto())
                 .ToList();
@@ -572,11 +572,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
             _unitOfWork.AsTransaction(() =>
             {
-                
+
                 _unitOfWork.Context.AddAll(scenarioSelectableTreatmentEntities.Where(_ => !existingEntityIds.Contains(_.Id))
                     .ToList());
 
-             
+
                 if (scenarioSelectableTreatments.Any(_ => _.Costs.Any()))
                 {
                     var costsPerTreatmentId =
@@ -670,6 +670,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
                     _.ScenarioSelectableTreatment.SimulationId == simulationId);
 
+                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentSupersedeRuleEntity>(_ =>
+                 _.ScenarioTreatmentSupersedeRule.ScenarioSelectableTreatment.SimulationId == simulationId);
+
                 _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentEntity>(_ =>
                     _.SimulationId == simulationId && !entityIds.Contains(_.Id));
 
@@ -698,8 +701,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>(_ =>
                     _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.SimulationId == simulationId);
 
-                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentSupersedeRuleEntity>(_ =>
-                 _.ScenarioTreatmentSupersedeRule.ScenarioSelectableTreatment.SimulationId == simulationId);
+                
 
                 if (scenarioSelectableTreatments.Any(_ => _.Costs.Any()))
                 {
@@ -722,7 +724,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .ToDictionary(_ => _.Id, _ => _.PerformanceFactors);
                     _unitOfWork.TreatmentPerformanceFactorRepo.UpsertScenarioTreatmentPerformanceFactors(performancePerTreatmentId, simulationId);
                 }
-             
+
                 if (scenarioSelectableTreatments.Any(_ => _.BudgetIds.Any()))
                 {
                     var treatmentBudgetJoinsToAdd = scenarioSelectableTreatments.Where(_ => _.BudgetIds.Any()).SelectMany(
@@ -767,7 +769,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
                 }
 
-                if (scenarioSelectableTreatments.Any(_ => _.SupersedeRules.Any()))
+                if (scenarioSelectableTreatments.Any(_ => _.SupersedeRules != null && _.SupersedeRules.Any()))
                 {
                     var supersedeRulesPerTreatmentId = scenarioSelectableTreatments.Where(_ => _.SupersedeRules.Any()).ToList()
                     .ToDictionary(_ => _.Id, _ => _.SupersedeRules);
@@ -823,8 +825,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.AsTransaction(() =>
             {
-                 _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
-                    _.ScenarioSelectableTreatment.SimulationId == simulationId && _.ScenarioSelectableTreatment.Id == entityId);
+                _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
+                   _.ScenarioSelectableTreatment.SimulationId == simulationId && _.ScenarioSelectableTreatment.Id == entityId);
 
                 _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentEntity>(_ =>
                     _.SimulationId == simulationId && _.Id == entityId);
@@ -848,7 +850,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.SimulationId == simulationId
                     && _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.Id == entityId);
 
-               
+
                 // Update last modified date
                 var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
                 _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
@@ -1031,10 +1033,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     var factorsToBeRemoved = _.PerformanceFactors.Where(p => !distinctPerformanceCurves.Contains(p.Attribute)).Select(__ => __.Attribute).ToList();
                     var factorsToBeAdded = distinctPerformanceCurves.Where(dpc => _.PerformanceFactors.FirstOrDefault(__ => __.Attribute == dpc) == null).ToList();
-                    if(factorsToBeAdded.Count > 0)
-                        _.PerformanceFactors =  _.PerformanceFactors.Concat(factorsToBeAdded.Select(__ => new TreatmentPerformanceFactorDTO() { Attribute = __, Id = Guid.NewGuid(), PerformanceFactor = 1 })).ToList();
-                    if(factorsToBeRemoved.Count > 0)
-                        _.PerformanceFactors.RemoveAll(__ => factorsToBeRemoved.Contains(__.Attribute));                  
+                    if (factorsToBeAdded.Count > 0)
+                        _.PerformanceFactors = _.PerformanceFactors.Concat(factorsToBeAdded.Select(__ => new TreatmentPerformanceFactorDTO() { Attribute = __, Id = Guid.NewGuid(), PerformanceFactor = 1 })).ToList();
+                    if (factorsToBeRemoved.Count > 0)
+                        _.PerformanceFactors.RemoveAll(__ => factorsToBeRemoved.Contains(__.Attribute));
                 });
             }
         }

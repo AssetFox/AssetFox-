@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using System.Data;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -101,5 +102,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }
         }
+
+
+        public List<TreatmentSupersedeRuleDTO> GetScenarioTreatmentSupersedeRuleByTreatmentId(Guid treatmentId)
+        {
+            if (!_unitOfWork.Context.ScenarioTreatmentSupersedeRule.Any(_ => _.Id == treatmentId))
+            {
+                throw new RowNotInTableException("The specified scenario treamtment was not found");
+            }
+
+            return _unitOfWork.Context.ScenarioTreatmentSupersedeRule
+                .Include(_ => _.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
+                .ThenInclude(_ => _.CriterionLibrary).Select(_ => _.ToDto()).ToList();
+        }
+
     }
 }

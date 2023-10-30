@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;using System.Threading;
+using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -281,30 +283,56 @@ namespace BridgeCareCore.Services
             _unitOfWork.SelectableTreatmentRepo.ReplaceTreatmentLibrary(libraryId, importedTreatments);
         }
 
-   
+
         public FileInfoDTO ExportScenarioTreatmentSupersedeRuleExcelFile(Guid simulationId)
         {
-            var fileInfoResult = new FileInfoDTO();
-            var scenarioName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
-            var scenarioTreatments = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
-            if (scenarioTreatments.Any())
-            {
-                var dateString = DateTime.Now.ToString("yyyy-MM-dd-HH-mm");
-                var filename = $"Export scenario {scenarioName} treatmentSupersede {dateString}";
-                var fileInfo = new FileInfo(filename);
-                using var package = new ExcelPackage(fileInfo);
-                var workbook = package.Workbook;
-                TreatmentWorksheetGenerator.Fill(workbook, scenarioTreatments);
-                var bytes = package.GetAsByteArray();
-                var fileData = Convert.ToBase64String(bytes);
-                fileInfoResult = new FileInfoDTO
-                {
-                    FileData = fileData,
-                    FileName = filename,
-                    MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                };
-            }
-            return fileInfoResult;
+            var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
+            var simulationName = simulation.Name;
+            var scenarioTreatments = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+
+            
+            var fileName = $"TreatmentSupersedeRules_{simulationName.Trim().Replace(" ", "_")}.xlsx";
+
+            return CreateExportScenarioTreatmentRuleExportFile(scenarioTreatments, fileName);
+
         }
+        private static FileInfoDTO CreateExportScenarioTreatmentRuleExportFile(List<TreatmentDTO> Treatments, string fileName)
+        {
+            using var excelPackage = new ExcelPackage(new FileInfo(fileName));
+            var worksheet = excelPackage.Workbook.Worksheets.Add("Treatment Supersede Rules");
+
+            // headers
+            var startRow = worksheet.Cells.Start.Row;
+            var startColumn = worksheet.Cells.Start.Column;
+            var headerColumn = startColumn;
+            worksheet.Cells[startRow, headerColumn++].Value = "Treatment Name (selected treatment)";
+            worksheet.Cells[startRow, headerColumn++].Value = "Superseded treatment";
+            worksheet.Cells[startRow, headerColumn++].Value = "Criteria";
+            
+
+            // data rows
+            var dataRow = startRow + 1;
+            foreach (var treatment in Treatments)
+            {
+                foreach (var rule in treatment.SupersedeRules)
+                {
+                    var dataColumn = startColumn;
+                    worksheet.Cells[dataRow, dataColumn++].Value = treatment.Name;
+                    worksheet.Cells[dataRow, dataColumn++].Value = rule.treatment.Name;
+                    worksheet.Cells[dataRow, dataColumn++].Value = rule.CriterionLibrary?.MergedCriteriaExpression;
+                    dataRow++;
+                }               
+            }
+            worksheet.Cells.AutoFitColumns();
+
+            return new FileInfoDTO
+            {
+                FileName = fileName,
+                FileData = Convert.ToBase64String(excelPackage.GetAsByteArray()),
+                MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            };
+        }
+   
+
     }
 }

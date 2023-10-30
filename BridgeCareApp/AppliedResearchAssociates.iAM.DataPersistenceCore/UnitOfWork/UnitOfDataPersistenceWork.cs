@@ -64,7 +64,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private ITreatmentCostRepository _treatmentCostRepo;
         private ITreatmentPerformanceFactorRepository _treatmentPerformanceFactorRepo;
         private ITreatmentSchedulingRepository _treatmentSchedulingRepo;
-        private ITreatmentSupersessionRepository _treatmentSupersessionRepo;
+        private ITreatmentSupersedeRuleRepository _treatmentSupersedeRuleRepo;
         private IUserRepository _userRepo;
         private IAdminSettingsRepository _adminSettingsRepo;
         private ISimulationReportDetailRepository _simulationReportDetailRepo;
@@ -141,7 +141,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public ITreatmentSchedulingRepository TreatmentSchedulingRepo => _treatmentSchedulingRepo ??= new TreatmentSchedulingRepository(this);
 
-        public ITreatmentSupersessionRepository TreatmentSupersessionRepo => _treatmentSupersessionRepo ??= new TreatmentSupersessionRepository(this);
+        public ITreatmentSupersedeRuleRepository TreatmentSupersedeRuleRepo => _treatmentSupersedeRuleRepo ??= new TreatmentSupersedeRuleRepository(this);
 
         public IUserRepository UserRepo => _userRepo ??= new UserRepository(this);
 

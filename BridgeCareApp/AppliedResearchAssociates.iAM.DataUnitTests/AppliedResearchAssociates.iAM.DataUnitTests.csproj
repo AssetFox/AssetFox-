@@ -58,6 +58,9 @@
     <None Update="DataTestSetup\SampleAttributeData.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="DataTestSetup\SqlScripts\DeleteAggregations_SP.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="testConnections.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

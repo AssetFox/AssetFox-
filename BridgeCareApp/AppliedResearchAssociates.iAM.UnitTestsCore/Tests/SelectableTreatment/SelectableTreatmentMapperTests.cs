@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         }
 
         [Fact]
-        public void ToScenarioEntityWithCriterionLibraryWithChildren()
+        public void ToScenarioEntityOnValidTreatmentDTOWthScenarioTreatmentSupersedeRules()
         {
             // Act
             var resultEntity = treatmentDto.ToScenarioEntityWithCriterionLibraryWithChildren(testSimulation.Id, TestEntitiesForSelectableTreatments.AttribureEntities);
@@ -38,14 +38,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
             Assert.NotNull(resultEntity);
             Assert.IsType<ScenarioSelectableTreatmentEntity>(resultEntity);
             Assert.Equal("Test Treatment2", resultEntity.Name);
-            Assert.True(resultEntity.ScenarioTreatmentSupersedeRules.Count() == 1);
-            Assert.True(resultEntity.ScenarioTreatmentCosts.Count() == 0);
-            Assert.True(resultEntity.ScenarioTreatmentConsequences.Count() == 0);
-            Assert.True(resultEntity.ScenarioSelectableTreatmentScenarioBudgetJoins.Count() == 0);
+            Assert.True(resultEntity.ScenarioTreatmentSupersedeRules.Count == 1);
+            Assert.True(resultEntity.ScenarioTreatmentCosts.Count == 0);
+            Assert.True(resultEntity.ScenarioTreatmentConsequences.Count == 0);
+            Assert.True(resultEntity.ScenarioSelectableTreatmentScenarioBudgetJoins.Count == 0);
         }
 
         [Fact]
-        public void CreateSelectableTreatment()
+        public void CreateSelectableTreatmentAnalysisObjectForNoTreatment()
         {
             // Arrange
             var treatmentEntity = simulationSource.SelectableTreatments.First();
@@ -58,14 +58,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
             Assert.IsType<Analysis.SelectableTreatment>(selectableTreatment);
             Assert.Equal("No Treatment", selectableTreatment.Name);
             Assert.Equal(treatmentEntity.Id, selectableTreatment.Id);
-            Assert.True(selectableTreatment.Costs.Count() == 1);
-            Assert.True(selectableTreatment.Budgets.Count() == 0);
-            Assert.True(testSimulation.Treatments.Count() == 1);
-            Assert.True(selectableTreatment.SupersedeRules.Count() == 0);
+            Assert.True(selectableTreatment.Costs.Count == 1);
+            Assert.True(selectableTreatment.Budgets.Count == 0);
+            Assert.True(testSimulation.Treatments.Count == 1);
+            Assert.True(selectableTreatment.SupersedeRules.Count == 0);
         }
 
         [Fact]
-        public void ToDomain()
+        public void ToDomainOnTestTreatmentWithSupersedeRulesCosts()
         {
             // Arrange
             var treatmentEntity = simulationSource.SelectableTreatments.FirstOrDefault(_ => _.Name == "TestTreatmentWithRules");
@@ -78,15 +78,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
             Assert.IsType<Analysis.SelectableTreatment>(selectableTreatment);
             Assert.Equal("TestTreatmentWithRules", selectableTreatment.Name);
             Assert.Equal(treatmentEntity.Id, selectableTreatment.Id);
-            Assert.True(selectableTreatment.Costs.Count() == 1);
-            Assert.True(selectableTreatment.Budgets.Count() == 0);
-            Assert.True(selectableTreatment.PerformanceCurveAdjustmentFactors.Count() == 0);
-            Assert.True(testSimulation.Treatments.Count() == 1);
-            Assert.True(selectableTreatment.SupersedeRules.Count() == 1);            
+            Assert.True(selectableTreatment.Costs.Count == 1);
+            Assert.True(selectableTreatment.Budgets.Count == 0);
+            Assert.True(selectableTreatment.PerformanceCurveAdjustmentFactors.Count == 0);
+            Assert.True(testSimulation.Treatments.Count == 1);
+            Assert.True(selectableTreatment.SupersedeRules.Count == 1);            
         }                
 
         [Fact]
-        public void ScenarioSelectableTreatmentEntityToDto()
+        public void ScenarioSelectableTreatmentEntityToDtoWithCorrectProperties()
         {
             // Arrange
             var treatmentEntity = simulationSource.SelectableTreatments.FirstOrDefault(_ => _.Name == "TestTreatmentWithRules");
@@ -98,15 +98,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
             Assert.NotNull(resultDto);
             Assert.IsType<TreatmentDTO>(resultDto);
             Assert.Equal(Guid.Empty, resultDto.LibraryId);
-            Assert.True(resultDto.Costs.Count() == 1 && resultDto.Costs.FirstOrDefault().Equation.Expression.Equals("100"));
-            Assert.True(resultDto.Budgets.Count() == 1);
-            Assert.True(resultDto.PerformanceFactors.Count() == 0);
-            Assert.True(resultDto.Consequences.Count() == 0);
-            Assert.True(resultDto.SupersedeRules.Count() == 1 && resultDto.SupersedeRules.FirstOrDefault().treatment.Name.Equals("PreventTreatment1"));
+            Assert.True(resultDto.Costs.Count == 1 && resultDto.Costs.FirstOrDefault().Equation.Expression.Equals("100"));
+            Assert.True(resultDto.Budgets.Count == 1);
+            Assert.True(resultDto.PerformanceFactors.Count == 0);
+            Assert.True(resultDto.Consequences.Count == 0);
+            Assert.True(resultDto.SupersedeRules.Count == 1 && resultDto.SupersedeRules.FirstOrDefault().treatment.Name.Equals("PreventTreatment1"));
         }
 
         [Fact]
-        public void SelectableTreatmentEntityToDto()
+        public void SelectableTreatmentEntityToDtoWithCorrectProperties()
         {
             // Arrange
             var treatmentEntity = TestEntitiesForSelectableTreatments.Treatment("SelectableTreatment", Guid.NewGuid());
@@ -118,10 +118,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
             Assert.NotNull(resultDto);
             Assert.IsType<TreatmentDTO>(resultDto);
             Assert.Equal(Guid.Empty, resultDto.LibraryId);
-            Assert.True(resultDto.Costs.Count() == 1 && resultDto.Costs.FirstOrDefault().Equation.Expression.Equals("TestEquationExpression"));
-            Assert.True(resultDto.PerformanceFactors.Count() == 0);
-            Assert.True(resultDto.Consequences.Count() == 0);
-            Assert.True(resultDto.SupersedeRules.Count() == 1 && resultDto.SupersedeRules.FirstOrDefault().treatment.Name.Equals("PreventTreatment2"));
+            Assert.True(resultDto.Costs.Count == 1 && resultDto.Costs.FirstOrDefault().Equation.Expression.Equals("TestEquationExpression"));
+            Assert.True(resultDto.PerformanceFactors.Count == 0);
+            Assert.True(resultDto.Consequences.Count == 0);
+            Assert.True(resultDto.SupersedeRules.Count == 1 && resultDto.SupersedeRules.FirstOrDefault().treatment.Name.Equals("PreventTreatment2"));
         }
     }
 }

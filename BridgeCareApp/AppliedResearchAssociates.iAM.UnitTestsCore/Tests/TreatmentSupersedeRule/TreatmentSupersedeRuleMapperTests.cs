@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
         }
 
         [Fact]
-        public void ToScenarioTreatmentSupersedeRuleEntityOnDomain()
+        public void ToScenarioTreatmentSupersedeRuleEntityOnValidDomain()
         {
             // Arrange            
             var treatmentSupersedeRule = TreatmentSupersedeRuleTestSetup.TreatmentSupersedeRuleDomain(simulationSource, testSimulation);
@@ -44,9 +44,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
             Assert.NotNull(resultEntity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin);
         }
 
-
         [Fact]
-        public void ToScenarioTreatmentSupersedeRuleEntityOnDto()
+        public void ToScenarioTreatmentSupersedeRuleEntityOnValidDto()
         {
             // Arrange            
             var treatmentSupersedeRuleDto = TreatmentSupersedeRuleTestSetup.TreatmentSuperdedeRuleDto;
@@ -64,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
         }
 
         [Fact]
-        public void CreateTreatmentSupersedeRule()
+        public void CreateTreatmentSupersedeRuleWithCorrectProperties()
         {
             // Arrange
             var treatmentEntity = simulationSource.SelectableTreatments.FirstOrDefault(_ => _.Name == "TestTreatmentWithRules");
@@ -82,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
         }
 
         [Fact]
-        public void ToDtoOnScenarioTreatmentSupersedeRuleEntity()
+        public void ToDtoOnScenarioTreatmentSupersedeRuleEntityWithCorrectProperties()
         {
             // Arrange
             var treatmentEntity = simulationSource.SelectableTreatments.FirstOrDefault(_ => _.Name == "Prevent Treatment");
@@ -101,7 +100,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
         }
 
         [Fact]
-        public void ToDtoOnTreatmentSupersedeRuleEntity()
+        public void ToDtoOnTreatmentSupersedeRuleEntityWithCorrectProperties()
         {
             var treatmentEntity = TestEntitiesForTreatmentSupersedeRules.SelectablePreventTreatment();
             var treatmentSupersedeRuleEntity = TestEntitiesForTreatmentSupersedeRules.TreatmentSupersedeRule(treatmentDtoWithEmptyLists.Id, treatmentEntity);

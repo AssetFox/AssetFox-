@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using MathNet.Numerics.Optimization;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.SQLScripts
+namespace AppliedResearchAssociates.iAM.UnitTestsCore
 {
     public class RunBatch
     {
@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.S
             {
                 SqlConnection conn = new SqlConnection(connectionString);
                 conn.Open();
-
+                var folder = Directory.GetCurrentDirectory();
                 DirectoryInfo dirInfo = new DirectoryInfo(@"C:\BridgeCareAppRepository\Infrastructure Asset Management\BridgeCareApp\AppliedResearchAssociates.iAM.DataPersistenceCore\Repositories\MSSQL\SQLScripts\");
                 FileInfo[] files = null;
                 files = dirInfo.GetFiles("*.sql");
@@ -53,5 +53,4 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.S
 
         }
     }
-
 }

@@ -2,13 +2,22 @@
     <v-app class="paper-white-bg">
         <v-main>
             <v-toolbar app class="paper-white-bg">
-                <v-toolbar-title >
-                    <v-row no-gutters>
-                        <img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')"  />
-                        <img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')"  />
+                <v-toolbar-title  >
+                    <v-row  >
+
+                        <v-col  ><img v-bind:src="agencyLogo"  @click="onNavigate('/Scenarios/')"></v-col>                    
                     </v-row>
                 </v-toolbar-title>
-                <v-toolbar-items>
+
+                <v-toolbar-title >
+                    <v-row justify="start">
+                        <v-col cols ="1">
+                            <img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')"  /></v-col>
+                        
+                        
+                    </v-row>
+                </v-toolbar-title>
+                <v-toolbar-items >
                     <v-btn
                         id="App-scenarios-btn"
                         @click="onNavigate('/Scenarios/')"
@@ -62,8 +71,11 @@
                         <v-icon v-if="hasUnreadNewsItem" size="13" class="news-notification">fas fa-exclamation-circle</v-icon>
                     </v-btn>
                 </v-toolbar-items>
+                
                 <v-spacer></v-spacer>
+                    
                 <v-toolbar-title class="white--text">
+                    
                     <v-menu
                         offset-
                         min-width="20%"
@@ -71,6 +83,7 @@
                         max-height="75%"
                         :close-on-content-click="false"
                     >
+                    
                         <template v-slot:activator="{ props }">
                             <button
                                 id="App-notification-button"
@@ -236,11 +249,11 @@
             <v-container fluid v-bind="container">
                 <router-view></router-view>
             </v-container>
-            <v-footer app class="ara-blue-pantone-289-bg white--text" fixed>
+            <v-footer app color ="#00204B"  fixed>
                 <v-spacer></v-spacer>
-                <v-col cols = "2">
-                    <div class="dev-and-ver-div">
-                        <div class="font-weight-light">iAM</div>
+                <v-col cols = "1">
+                    <div class="dev-and-ver-div" >
+                        <div class="font-weight-light"  >iAM</div>
                         <div>{{implementationName}}</div>
                         <div>{{ packageVersion }}</div>
                     </div>
@@ -314,7 +327,7 @@ import config from '../public/config.json';
     let securityType = ref<string>(store.state.authenticationModule.securityType);
     let announcements = computed(() => store.state.announcementModule.announcements);
     let currentUser = ref<User>(store.state.userModule.currentUser);
-    let stateImplementationName = ref<string>(store.state.adminSiteSettingsModule.implementationName);
+    let stateImplementationName = computed<string>(()=>store.state.adminSiteSettingsModule.implementationName);
     let agencyLogoBase64 = computed(() => store.state.adminSiteSettingsModule.agencyLogo);
     let productLogoBase64 = computed(() => store.state.adminSiteSettingsModule.productLogo);
     let stateInventoryReportNames = ref<string[]>(store.state.adminDataModule.inventoryReportNames);
@@ -373,9 +386,9 @@ import config from '../public/config.json';
     let hasUnreadNewsItem: boolean = false;
     let currentURL: any = '';
     let unauthorizedError: string = '';
-    let implementationName: string = '';
-    let agencyLogo: string = '';
-    let productLogo: string = '';
+    const implementationName =ref<string>('');
+    const agencyLogo= ref<string>('');
+    const productLogo= ref<string>('');
     let inventoryReportName: string = '';
     let alert: Ref<boolean> = ref(false);   
 
@@ -435,20 +448,17 @@ import config from '../public/config.json';
         checkLastNewsAccessDate();
     });
 
-    watch(stateImplementationName, () => onimplementationNameChange)
-    function onimplementationNameChange() {
-        implementationName = stateImplementationName.value;
-    }
+    watch(stateImplementationName, () =>  {
+        implementationName.value = stateImplementationName.value;
+    })
 
-    watch(agencyLogoBase64, () => onAgencyLogoBase64Change)
-    function onAgencyLogoBase64Change() {
-        agencyLogo = agencyLogoBase64.value;
-    }
+    watch(agencyLogoBase64, () => {
+        agencyLogo.value = agencyLogoBase64.value;
+    })
 
-    watch(productLogoBase64, () => onProductLogoBase64Change)
-    function onProductLogoBase64Change() {
-        productLogo = productLogoBase64.value;
-    }
+    watch(productLogoBase64, () =>  {
+        productLogo.value = productLogoBase64.value;
+    })
 
     watch(stateInventoryReportNames, () => onStateInventoryReportNamesChanged)
     function onStateInventoryReportNamesChanged(){
@@ -594,19 +604,19 @@ import config from '../public/config.json';
         currentURL = router.currentRoute.value.name;
 
         if(config.agencyLogo.trim() === "")
-            agencyLogo = new URL(`assets/images/generic/IAM_Main.jpg`, import.meta.url).href;
+            agencyLogo.value = new URL(`assets/images/generic/IAM_Main.jpg`, import.meta.url).href;
         else
-            agencyLogo = config.agencyLogo
+            agencyLogo.value = agencyLogoBase64.value
 
         if(config.productLogo.trim() === "")
-            productLogo = new URL(`assets/images/generic/IAM_Banner.jpg`, import.meta.url).href;
+            productLogo.value = new URL(`assets/images/generic/IAM_Banner.jpg`, import.meta.url).href;
         else
-            productLogo = config.productLogo
+            productLogo.value = productLogoBase64.value
 
-        if(implementationName === "")
-            implementationName = "BridgeCare"
+        if(implementationName.value === "")
+            implementationName.value = "BridgeCare"
         else
-            implementationName = config.implementationName
+            implementationName.value = stateImplementationName.value
     }
 
     onBeforeUnmount(() => beforeDestroy());
@@ -814,5 +824,13 @@ html {
 .hide-bell-svg svg{
     visibility: collapse;
 }
-
+.image{
+    width:350px;
+    height:60px;
+    margin-right: 10px;
+    display: inline-block;
+}
+.custom-toolbar{
+   width: 800px ; 
+}
 </style>

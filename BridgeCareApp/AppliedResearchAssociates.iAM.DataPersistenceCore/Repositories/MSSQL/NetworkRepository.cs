@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Network = AppliedResearchAssociates.iAM.Data.Networking.Network;
 using System.Threading;
 using AppliedResearchAssociates.iAM.Common.Logging;
+using Microsoft.Data.SqlClient;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -243,8 +244,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 queueLog.UpdateWorkQueueStatus("Deleting Maintainable Assets");
 
                 //Slow Starts here
-                _unitOfWork.Context.DeleteEntity<NetworkEntity>(_ => _.Id == networkId);
-                
+                // _unitOfWork.Context.DeleteEntity<NetworkEntity>(_ => _.Id == networkId);
+
+                _unitOfWork.Context.Database.SetCommandTimeout(TimeSpan.FromSeconds(18000));
+
+                // Create parameters for the stored procedure
+                var retMessageParam = new SqlParameter("@RetMessage", SqlDbType.VarChar, 250);
+                string retMessage = "";
+                var networkGuidParam = new SqlParameter("@NetworkGuid", networkId);
+                retMessageParam.Direction = ParameterDirection.Output;
+
+                // Execute the stored procedure
+                _unitOfWork.Context.Database.ExecuteSqlRaw("EXEC usp_delete_network @NetworkGuid, @RetMessage OUTPUT", networkGuidParam, retMessageParam);
+
+                // Capture the success output value
+                retMessage = retMessageParam.Value as string;
+
                 if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                 {
                     _unitOfWork.Rollback();

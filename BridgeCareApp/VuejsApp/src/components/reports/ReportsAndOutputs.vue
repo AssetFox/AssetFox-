@@ -9,51 +9,66 @@
             <v-row class="data-table" justify-left>
                 <v-col>
                     <v-card class="elevation-0">
-                        <DataTable
-                        striped-rows
-                        :rows="5"
-                        :rows-per-page-options="[5,10,25]"
-                        id="ReportsAndOutputs-datatable"
-                        class="fixed-header ghd-table v-table__overflow"
-                        :value="currentPage"
-                        paginator
-                        paginator-template="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-                        currentPageReportTemplate="{first} to {last} of {totalRecords}"
-                        @row-select="onRowSelect"
-                        selection-mode="single"
-                        table-style="min-width: 50rem"
+                        <v-data-table
+                            id="ReportsAndOutputs-datatable"
+                            :headers="reportsGridHeaders"
+                            :items="currentPage"                       
+                            :rows-per-page-items=[5,10,25]
+                            class="fixed-header ghd-table v-table__overflow"
+                            item-key="id"
                         >
-                            <Column sortable field="name" header="Name"></Column>
-                            <Column field="mergedExpression" header="Criteria">
-                                <template #body="slotProps">
-                                    <v-btn v-if="slotProps.data.name.includes('Summary')" flat style="background-color: transparent;">
-                                      <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')" @click="showEditDialog">
-                                      <Dialog v-model:visible="editShow" :style="{ width: 'auto', height: 'auto'}" :closable="false">
-                                        <v-textarea>
-                                            Test
-                                        </v-textarea>
-                                      </Dialog>
+                            <template slot="items" slot-scope="props" v-slot:item="props">
+                                <tr>
+                                <td class="text-xs-left">
+                                    <div>
+                                        <span class='lg-txt'>{{props.item.name}}</span>
+                                    </div>
+                                </td>
+                                <td class="text-xs-left">
+                                    <v-btn v-if="props.item.name.includes('Summary')" class="ghd-blue" tooltip flat icon>
+                                                <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')" @click="showEditDialog">
+                                                <Dialog v-model:visible="editShow">
+                                                    <v-card>
+                                                <v-textarea
+                                                    class="sm-txt Montserrat-font-family"
+                                                    :value="props.item.mergedExpression"
+                                                    full-width
+                                                    no-resize
+                                                    variant="outlined"
+                                                    readonly
+                                                    rows="5"
+                                                />
+                                            </v-card>
+                                                </Dialog>
+
+                                            </v-btn>
+                                    <v-btn v-if="props.item.name.includes('Summary')"
+                                        @click="onShowCriterionEditorDialog(props.item.id)"
+                                        class="ghd-blue"
+                                        flat
+                                    >
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')">
                                     </v-btn>
-                                    <v-btn 
-                                        flat 
-                                        v-if="slotProps.data.name.includes('Summary')" 
-                                        @click="onShowCriterionEditorDialog(selectedReport.id)" 
-                                        style="background-color: transparent;">
-                                      <img class='img-general' :src="require('@/assets/icons/edit.svg')">
+                                </td>
+                                <td class="text-xs-left">
+                                    <v-btn
+                                        @click="onGenerateReport(props.item.id, true)"
+                                        class="ghd-blue"
+                                        flat
+                                    >
+                                        <img class="img-general" :src="require('@/assets/icons/attributes-dark.svg')"/>
+
                                     </v-btn>
-                                </template>
-                            </Column>
-                            <Column field="actions" header="Actions">
-                                <template #body="slotProps">
-                                    <v-btn flat @click="onGenerateReport(selectedReport.id, true)" style="background-color: transparent;">
-                                      <img class="img-general" :src="require('@/assets/icons/attributes-dark.svg')"/>
+                                    <v-btn
+                                        @click="onDownloadReport(props.item.id)"
+                                        flat
+                                    >
+                                        <img class='img-general' :src="require('@/assets/icons/download.svg')"/>
                                     </v-btn>
-                                    <v-btn flat @click="onDownloadReport(selectedReport.id)" style="background-color: transparent;">
-                                      <img class='img-general' :src="require('@/assets/icons/download.svg')"/>
-                                    </v-btn>
-                                </template>
-                            </Column>
-                        </DataTable>
+                                </td>
+                            </tr>
+                            </template>
+                        </v-data-table>
                     </v-card>
                 </v-col>
             </v-row>
@@ -120,12 +135,34 @@ import Column from 'primevue/column';
     let rules: InputValidationRules = clone(validationRules);
 
     const criterionEditorDialogData = ref<GeneralCriterionEditorDialogData>(clone(emptyGeneralCriterionEditorDialogData));
-    // let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
-    //     emptyGeneralCriterionEditorDialogData,
-    // );
     const currentPage = ref<Report[]>([]);
     let selectedReport = ref<Report>(emptyReport); 
-
+    const reportsGridHeaders: any[] = [
+        {
+            title: 'Name',
+            key: 'name',
+            align: 'left',
+            sortable: true,
+            class: '',
+            width: '',
+        },
+        {
+            title: 'Criteria',
+            key: 'criterionLibrary',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+        {
+            title: 'Actions',
+            key: 'actions',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+    ];
     onMounted(() => {
 
         selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
@@ -166,21 +203,6 @@ import Column from 'primevue/column';
     function showEditDialog(): void {
         editShow.value = !editShow.value;
     }
-    // function beforeRouteEnter(to: any, from: any, next: any) {
-    //     next((vm: any) => {
-    //         vm.selectedScenarioId = to.query.scenarioId;
-    //         vm.simulationName = to.query.scenarioName;
-    //         vm.networkName = to.query.networkName;
-    //         vm.networkId = to.query.networkId;
-    //         if (vm.selectedScenarioId === getBlankGuid()) {
-    //             // set 'no selected scenario' error message, then redirect user to Scenarios UI
-    //             vm.addErrorNotificationAction({
-    //                 message: 'Found no selected scenario for edit',
-    //             });
-    //             vm.$router.push('/Scenarios/');
-    //         }
-    //     });
-    // }
     function onShowCriterionEditorDialog(reportId: string) {
         selectedReport.value = find(
             propEq('id', reportId),

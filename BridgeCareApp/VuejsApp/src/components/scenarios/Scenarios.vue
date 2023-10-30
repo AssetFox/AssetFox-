@@ -102,7 +102,7 @@
                                     item-value="name"
                                     @update:options="onUserScenariosPagination"
                                 >
-                                    <template v-slot:item="props">
+                                    <template slot="items" slot-scope="props" v-slot:item="props">
                                         <tr>
                                         <td>
                                         
@@ -111,21 +111,21 @@
                                                 lazy
                                                 persistent
                                                 :return-value.sync="
-                                                    props.item.raw.name
+                                                    props.item.name
                                                 "
                                                 @save="
                                                     onEditScenarioName(
-                                                        props.item.raw,
+                                                        props.item,
                                                         nameUpdate,
                                                     )
                                                 "
                                                 @open="
                                                     prepareForNameEdit(
-                                                        props.item.raw.name,
+                                                        props.item.name,
                                                     )
                                                 "
                                             >
-                                                {{ props.item.raw.name }}
+                                                {{ props.item.name }}
                                                 <template v-slot:input>
                                                     <v-text-field
                                                         label="Edit"
@@ -142,45 +142,45 @@
                                         </td>
                                         <td>
                                             {{
-                                                props.item.raw.creator
-                                                    ? props.item.raw.creator
+                                                props.item.creator
+                                                    ? props.item.creator
                                                     : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
                                             {{
-                                                props.item.raw.owner
-                                                    ? props.item.raw.owner
+                                                props.item.owner
+                                                    ? props.item.owner
                                                     : '[ No Owner ]'
                                             }}
                                         </td>
                                         <td>
                                             {{
-                                                props.item.raw.networkName
-                                                    ? props.item.raw.networkName
+                                                props.item.networkName
+                                                    ? props.item.networkName
                                                     : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
                                             {{
                                                 formatDate(
-                                                    props.item.raw.createdDate,
+                                                    props.item.createdDate,
                                                 )
                                             }}
                                         </td>
                                         <td>
                                             {{
                                                 formatDate(
-                                                    props.item.raw.lastModifiedDate,
+                                                    props.item.lastModifiedDate,
                                                 )
                                             }}
                                         </td>
                                         <td>
-                                            {{ formatDate(props.item.raw.lastRun) }}
+                                            {{ formatDate(props.item.lastRun) }}
                                         </td>
-                                        <td>{{ props.item.raw.status }}</td>
-                                        <td>{{ props.item.raw.runTime }}</td>
-                                        <td>{{ props.item.raw.reportStatus }}</td>
+                                        <td>{{ props.item.status }}</td>
+                                        <td>{{ props.item.runTime }}</td>
+                                        <td>{{ props.item.reportStatus }}</td>
                                         <td>
                                             <v-menu  location="left">
                                                 <template
@@ -205,8 +205,8 @@
                                                         :key="i"
                                                         @click="OnActionTaken(
                                                                 item.action,
-                                                                props.item.raw.users,
-                                                                props.item.raw,
+                                                                props.item.users,
+                                                                props.item,
                                                                 true) "
                                                         class="menu-style">
                                                         <v-list-item-title icon>
@@ -311,21 +311,21 @@
                                                 lazy
                                                 persistent
                                                 :return-value.sync="
-                                                    props.item.raw.name
+                                                    props.item.name
                                                 "
                                                 @save="
                                                     onEditScenarioName(
-                                                        props.item.raw,
+                                                        props.item,
                                                         nameUpdate,
                                                     )
                                                 "
                                                 @open="
                                                     prepareForNameEdit(
-                                                        props.item.raw.name,
+                                                        props.item.name,
                                                     )
                                                 "
                                             >
-                                                {{ props.item.raw.name }}
+                                                {{ props.item.name }}
                                                 <template v-slot:input>
                                                     <v-text-field
                                                         label="Edit"
@@ -342,45 +342,45 @@
                                         </td>
                                         <td>
                                             {{
-                                                props.item.raw.creator
-                                                    ? props.item.raw.creator
+                                                props.item.creator
+                                                    ? props.item.creator
                                                     : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
                                             {{
-                                                props.item.raw.owner
-                                                    ? props.item.raw.owner
+                                                props.item.owner
+                                                    ? props.item.owner
                                                     : '[ No Owner ]'
                                             }}
                                         </td>
                                         <td>
                                             {{
-                                                props.item.raw.networkName
-                                                    ? props.item.raw.networkName
+                                                props.item.networkName
+                                                    ? props.item.networkName
                                                     : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
                                             {{
                                                 formatDate(
-                                                    props.item.raw.createdDate,
+                                                    props.item.createdDate,
                                                 )
                                             }}
                                         </td>
                                         <td>
                                             {{
                                                 formatDate(
-                                                    props.item.raw.lastModifiedDate,
+                                                    props.item.lastModifiedDate,
                                                 )
                                             }}
                                         </td>
                                         <td>
-                                            {{ formatDate(props.item.raw.lastRun) }}
+                                            {{ formatDate(props.item.lastRun) }}
                                         </td>
-                                        <td>{{ props.item.raw.status }}</td>
-                                        <td>{{ props.item.raw.runTime }}</td>
-                                        <td>{{ props.item.raw.reportStatus }}</td>
+                                        <td>{{ props.item.status }}</td>
+                                        <td>{{ props.item.runTime }}</td>
+                                        <td>{{ props.item.reportStatus }}</td>
                                         <td>
                                             <v-menu >
                                                 <template
@@ -401,7 +401,7 @@
                                                 <v-list>
                                                     <v-list-item v-for="(item,i) in actionItemsForSharedScenario"
                                                         :key="i"
-                                                        @click="OnActionTaken(item.action,props.item.raw.users,props.item.raw,false)"
+                                                        @click="OnActionTaken(item.action,props.item.users,props.item,false)"
                                                         class="menu-style">
                                                         <v-list-item-title icon>                                                        
                                                             <img v-if="item.isCustomIcon" style="padding-right:5px" v-bind:src="item.icon"/>
@@ -445,27 +445,27 @@
                                     @update:options="onWorkQueuePagination"
                                 >                           
                                     <template slot="items" slot-scope="props" v-slot:item="props">
-                                        <td>{{ props.item.raw.queuePosition }}</td>
+                                        <td>{{ props.item.queuePosition }}</td>
                                         <td>
-                                            {{ props.item.raw.name }}
+                                            {{ props.item.name }}
                                         </td>
-                                        <td>{{props.item.raw.workDescription}}</td>
+                                        <td>{{props.item.workDescription}}</td>
                                         <td>
                                             {{
-                                                props.item.raw.queueingUser
-                                                    ? props.item.raw.queueingUser
+                                                props.item.queueingUser
+                                                    ? props.item.queueingUser
                                                     : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
-                                            {{ formatDateWithTime(props.item.raw.queueEntryTimestamp) }}
+                                            {{ formatDateWithTime(props.item.queueEntryTimestamp) }}
                                         </td>
                                         <td>
-                                            {{ formatDateWithTime(props.item.raw.workStartedTimestamp) }}
+                                            {{ formatDateWithTime(props.item.workStartedTimestamp) }}
                                         </td>
-                                        <td>{{ props.item.raw.currentRunTime }}</td>
-                                        <td>{{ props.item.raw.previousRunTime }}</td>
-                                        <td>{{ props.item.raw.status }}</td>  
+                                        <td>{{ props.item.currentRunTime }}</td>
+                                        <td>{{ props.item.previousRunTime }}</td>
+                                        <td>{{ props.item.status }}</td>  
                                         <td>
                                             <v-menu location="left">
                                                 <template
@@ -485,7 +485,7 @@
                                                 <v-list>
                                                     <v-list-tile v-for="(item,i) in actionItemsForWorkQueue"
                                                         :key="i"
-                                                        @click="OnWorkQueueActionTaken(item.action,props.item.raw)"
+                                                        @click="OnWorkQueueActionTaken(item.action,props.item)"
                                                         class="menu-style">
                                                         <v-list-tile-title icon>                                                        
                                                             <img style="padding-right:5px" v-bind:src="item.icon"/>
@@ -524,27 +524,27 @@
                                     @update:options="onFastWorkQueuePagination"
                                 >                           
                                     <template slot="items" slot-scope="props" v-slot:item="props">
-                                        <td>{{ props.item.raw.queuePosition }}</td>
+                                        <td>{{ props.item.queuePosition }}</td>
                                         <td>
-                                            {{ props.item.raw.name }}
+                                            {{ props.item.name }}
                                         </td>
-                                        <td>{{props.item.raw.workDescription}}</td>
+                                        <td>{{props.item.workDescription}}</td>
                                         <td>
                                             {{
-                                                props.item.raw.queueingUser
-                                                    ? props.item.raw.queueingUser
+                                                props.item.queueingUser
+                                                    ? props.item.queueingUser
                                                     : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
-                                            {{ formatDateWithTime(props.item.raw.queueEntryTimestamp) }}
+                                            {{ formatDateWithTime(props.item.queueEntryTimestamp) }}
                                         </td>
                                         <td>
-                                            {{ formatDateWithTime(props.item.raw.workStartedTimestamp) }}
+                                            {{ formatDateWithTime(props.item.workStartedTimestamp) }}
                                         </td>
-                                        <td>{{ props.item.raw.currentRunTime }}</td>
-                                        <td>{{ props.item.raw.previousRunTime }}</td>
-                                        <td>{{ props.item.raw.status }}</td>  
+                                        <td>{{ props.item.currentRunTime }}</td>
+                                        <td>{{ props.item.previousRunTime }}</td>
+                                        <td>{{ props.item.status }}</td>  
                                         <td>
                                             <v-menu  left>
                                                 <template
@@ -564,7 +564,7 @@
                                                 <v-list>
                                                     <v-list-item v-for="(item,i) in actionItemsForFastWorkQueue"
                                                         :key="i"
-                                                        @click="OnWorkQueueActionTaken(item.action,props.item.raw)"
+                                                        @click="OnWorkQueueActionTaken(item.action,props.item)"
                                                         class="menu-style">
                                                         <v-list-item-title icon>                                                        
                                                             <img style="padding-right:5px" v-bind:src="item.icon"/>

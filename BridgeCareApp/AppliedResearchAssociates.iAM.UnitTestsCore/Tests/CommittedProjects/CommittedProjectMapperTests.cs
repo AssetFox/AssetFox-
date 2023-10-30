@@ -16,6 +16,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using AppliedResearchAssociates.iAM.Analysis;
 using Newtonsoft.Json;
+using Antlr4.Runtime.Misc;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 {
@@ -41,10 +42,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var providedCommittedProject = simulationSource.CommittedProjects.First(_ => _.Year == 2025);
             var testAssetId = simulationSource.Network.MaintainableAssets.First().Id;
             var noTreatment = TestEntitiesForCommittedProjects.FourYearScenarioNoTreatment();
+            AppliedResearchAssociates.iAM.Analysis.SelectableTreatment myTreatment = new AppliedResearchAssociates.iAM.Analysis.SelectableTreatment(testSimulation);
+            IReadOnlyCollection<AppliedResearchAssociates.iAM.Analysis.SelectableTreatment> selectableTreatments = new List<AppliedResearchAssociates.iAM.Analysis.SelectableTreatment> { myTreatment };
+
 
             // Act
             providedCommittedProject.CreateCommittedProject(
                 testSimulation,
+                selectableTreatments,
                 testAssetId,
                 true,
                 0,
@@ -62,10 +67,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Arrange
             var providedCommittedProject = simulationSource.CommittedProjects.First();
             var testAssetId = simulationSource.Network.MaintainableAssets.First().Id;
+            AppliedResearchAssociates.iAM.Analysis.SelectableTreatment myTreatment = new AppliedResearchAssociates.iAM.Analysis.SelectableTreatment(testSimulation);
+            IReadOnlyCollection<AppliedResearchAssociates.iAM.Analysis.SelectableTreatment> selectableTreatments = new List<AppliedResearchAssociates.iAM.Analysis.SelectableTreatment> { myTreatment };
+
 
             // Act
             providedCommittedProject.CreateCommittedProject(
                 testSimulation,
+                selectableTreatments,
                 testAssetId,
                 false,
                 0,
@@ -84,10 +93,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             secondCommittedProject.Name = "Something Else";
             var testAssetId = simulationSource.Network.MaintainableAssets.First().Id;
             var noTreatment = TestEntitiesForCommittedProjects.FourYearScenarioNoTreatment();
+            AppliedResearchAssociates.iAM.Analysis.SelectableTreatment myTreatment = new AppliedResearchAssociates.iAM.Analysis.SelectableTreatment(testSimulation);
+            IReadOnlyCollection<AppliedResearchAssociates.iAM.Analysis.SelectableTreatment> selectableTreatments = new List<AppliedResearchAssociates.iAM.Analysis.SelectableTreatment> { myTreatment };
+
 
             // Act
-            firstCommittedProject.CreateCommittedProject(testSimulation, testAssetId, true, 0, noTreatment);
-            secondCommittedProject.CreateCommittedProject(testSimulation, testAssetId, true, 0, noTreatment);
+            firstCommittedProject.CreateCommittedProject(testSimulation, selectableTreatments, testAssetId, true, 0, noTreatment);
+            secondCommittedProject.CreateCommittedProject(testSimulation, selectableTreatments, testAssetId, true, 0, noTreatment);
 
             // Assert
             Assert.Equal(4, testSimulation.CommittedProjects.Count);
@@ -107,9 +119,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var testAssetId = simulationSource.Network.MaintainableAssets.First().Id;
             var noTreatment = TestEntitiesForCommittedProjects.FourYearScenarioNoTreatment();
 
+            AppliedResearchAssociates.iAM.Analysis.SelectableTreatment myTreatment = new AppliedResearchAssociates.iAM.Analysis.SelectableTreatment(testSimulation);
+            IReadOnlyCollection<AppliedResearchAssociates.iAM.Analysis.SelectableTreatment> selectableTreatments = new List<AppliedResearchAssociates.iAM.Analysis.SelectableTreatment> { myTreatment };
+
             // Act
-            firstCommittedProject.CreateCommittedProject(testSimulation, testAssetId, true, 0, noTreatment);
-            secondCommittedProject.CreateCommittedProject(testSimulation, testAssetId, true, 0, noTreatment);
+            firstCommittedProject.CreateCommittedProject(testSimulation, selectableTreatments, testAssetId, true, 0, noTreatment);
+            secondCommittedProject.CreateCommittedProject(testSimulation, selectableTreatments, testAssetId, true, 0, noTreatment);
 
             // Assert
             Assert.Equal(4, testSimulation.CommittedProjects.Count);

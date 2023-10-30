@@ -9,30 +9,16 @@ using System.Reflection;
 
 namespace AppliedResearchAssociates.iAM.DataUnitTests
 {
-    public class RunBatch
+    public static class RunBatch
     {
-
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
-  
-        public RunBatch(UnitOfDataPersistenceWork unitOfWork)
-        {
-            _unitOfWork = unitOfWork ??
-                          throw new ArgumentNullException(nameof(unitOfWork));
-        }
-
-
-        public void ExecuteCommand(string connectionString)
+        public static void SetupStoredProcedures(UnitOfDataPersistenceWork unitOfWork, string connectionString)
         {
             try
             {
                 SqlConnection conn = new SqlConnection(connectionString);
                 conn.Open();
-                var assembly = Assembly.GetExecutingAssembly();
-                var assemblyLocation = assembly.Location;
-                var assemblyFolder = Path.GetDirectoryName(assemblyLocation);
-                var folder = Path.Combine(assemblyFolder, "DataTestSetup", "SqlScripts");
-                DirectoryInfo dirInfo = new DirectoryInfo(folder);
-                var files = dirInfo.GetFiles("*.sql");
+                var directoryInfo = GetSqlScriptDirectoryInfo();
+                var files = directoryInfo.GetFiles("*.sql");
 
                 foreach (FileInfo f in files)
                 {
@@ -46,8 +32,8 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests
                 }
 
                 // Execute the stored procedure
-                _unitOfWork.Context.Database.SetCommandTimeout(TimeSpan.FromSeconds(4000));
-                _unitOfWork.Context.Database.ExecuteSqlRaw("EXEC usp_master_procedure;");
+                unitOfWork.Context.Database.SetCommandTimeout(TimeSpan.FromSeconds(4000));
+                unitOfWork.Context.Database.ExecuteSqlRaw("EXEC usp_master_procedure;");
             }
             catch (Exception ex)
             {
@@ -55,6 +41,15 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests
             }
 
         }
-    }
 
+        private static DirectoryInfo GetSqlScriptDirectoryInfo()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var assemblyLocation = assembly.Location;
+            var assemblyFolder = Path.GetDirectoryName(assemblyLocation);
+            var folder = Path.Combine(assemblyFolder, "DataTestSetup", "SqlScripts");
+            DirectoryInfo dirInfo = new DirectoryInfo(folder);
+            return dirInfo;
+        }
+    }
 }

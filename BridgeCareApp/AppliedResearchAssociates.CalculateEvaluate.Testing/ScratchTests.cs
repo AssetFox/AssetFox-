@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using Xunit;
+﻿using Xunit;
 
 namespace AppliedResearchAssociates.CalculateEvaluate.Testing
 {
@@ -16,7 +15,8 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
         public void WhatHappensWhenParameterIsParenthesized()
         {
             var compiler = new CalculateEvaluateCompiler();
-            var e = Assert.Throws<CalculateEvaluateParsingException>(() => compiler.GetEvaluator("(foobar)=42"));
+            compiler.ParameterTypes["foobar"] = CalculateEvaluateParameterType.Number;
+            _ = compiler.GetEvaluator("(foobar)=42");
         }
 
         [Fact]
@@ -24,12 +24,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
         {
             const string input = @"((([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CTRNCRK1])>|50|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CTRNCRK1])>|50|)) AND ((([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CFLTJNT3])>|30|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CFLTJNT3])>|30|) OR (([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CBRKSLB2])>|30|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CBRKSLB2])>|30|) OR (([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CBRKSLB3])>|30|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CBRKSLB3])>|30|) OR (([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CTRNJNT3])>|40|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CTRNJNT3])>|40|) OR (([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CTRNCRK2])>|40|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CTRNCRK2])>|40|) OR (([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CTRNCRK3])>|40|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CTRNCRK3])>|40|) OR (([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CLNGCRK2])>|40|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CLNGCRK2])>|40|) OR (([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CLNGCRK3])>|40|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CLNGCRK3])>|40|))";
             var compiler = new CalculateEvaluateCompiler();
-            var parsingException = Assert.Throws<CalculateEvaluateParsingException>(() => compiler.GetEvaluator(input));
-
-            const string parameterNamePattern = "[A-Za-z_][A-Za-z_0-9]*";
-            var parenthesizedParameterPattern = new Regex($@"\((\[{parameterNamePattern}\]|{parameterNamePattern})\)");
-            var fixedInput = parenthesizedParameterPattern.Replace(input, "$1");
-            var compilationException = Assert.Throws<CalculateEvaluateCompilationException>(() => compiler.GetEvaluator(fixedInput));
+            var compilationException = Assert.Throws<CalculateEvaluateCompilationException>(() => compiler.GetEvaluator(input));
 
             compiler.ParameterTypes["BUSIPLAN"] = CalculateEvaluateParameterType.Number;
             compiler.ParameterTypes["CBRKSLB2"] = CalculateEvaluateParameterType.Number;
@@ -43,7 +38,28 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             compiler.ParameterTypes["CTRNJNT3"] = CalculateEvaluateParameterType.Number;
             compiler.ParameterTypes["EXP_IND"] = CalculateEvaluateParameterType.Text;
             compiler.ParameterTypes["SURFACEID"] = CalculateEvaluateParameterType.Number;
-            _ = compiler.GetEvaluator(fixedInput);
+            _ = compiler.GetEvaluator(input);
+        }
+
+        [Fact]
+        public void QuestionFromLaxAndTyler_2023_10_11_Part1()
+        {
+            const string input = "[CTRNJNT3]*100/[CJOINTCT]>'50'";
+            var compiler = new CalculateEvaluateCompiler();
+            compiler.ParameterTypes["CTRNJNT3"] = CalculateEvaluateParameterType.Number;
+            compiler.ParameterTypes["CJOINTCT"] = CalculateEvaluateParameterType.Number;
+            _ = compiler.GetEvaluator(input);
+        }
+
+        [Fact]
+        public void QuestionFromLaxAndTyler_2023_10_11_Part2()
+        {
+            const string input = "[BFATICR2]+[BFATICR3] <= [SEGMENT_LENGTH] *.3";
+            var compiler = new CalculateEvaluateCompiler();
+            compiler.ParameterTypes["BFATICR2"] = CalculateEvaluateParameterType.Number;
+            compiler.ParameterTypes["BFATICR3"] = CalculateEvaluateParameterType.Number;
+            compiler.ParameterTypes["SEGMENT_LENGTH"] = CalculateEvaluateParameterType.Number;
+            _ = compiler.GetEvaluator(input);
         }
     }
 }

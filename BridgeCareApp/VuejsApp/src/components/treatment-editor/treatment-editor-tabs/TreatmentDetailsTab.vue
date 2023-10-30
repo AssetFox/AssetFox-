@@ -10,6 +10,8 @@
                         no-resize
                         outline
                         rows="3"
+                        item-title="text"
+                        item-value="value" 
                         v-model="selectedTreatmentDetails.description"
                         @update:model-value="onEditTreatmentDetails('description', selectedTreatmentDetails.description)"
                     />
@@ -20,11 +22,13 @@
                         <v-select id="TreatmentDetailsTab-category-vselect"
                         class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                             :items="Array.from(treatmentCategoryMap.keys())"
-                            append-icon=$vuetify.icons.ghd-down
+                            append-icon=ghd-down
                             @update:model-value="onEditTreatmentType('category', treatmentCategoryBinding)"
                             label="Category"
                             variant="outlined"
                             v-model="treatmentCategoryBinding"
+                            item-title="text"
+                            item-value="value" 
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                         />
                     </v-col>
@@ -33,7 +37,7 @@
                         <v-select id="TreatmentDetailsTab-assetType-vselect"
                         class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                         :items="Array.from(assetTypeMap.keys())"
-                        append-icon=$vuetify.icons.ghd-down
+                        append-icon=ghd-down
                         @update:model-value="onEditAssetType('assetType', assetTypeBinding)"
                         label="Asset type"
                         variant="outlined"
@@ -158,7 +162,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { clone, isNil } from 'ramda';
@@ -182,35 +186,36 @@ import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditor
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 
     const emit = defineEmits(['submit', 'onModifyTreatmentDetails'])
-    let store = useStore();
-    let selectedTreatmentDetails = ref<TreatmentDetails>(store.state.TreatmentDetailsTab.selectedTreatmentDetails);
-    let  rules: InputValidationRules;
-    let  callFromScenario: boolean;
-    let  callFromLibrary: boolean;
-    let TreatmentIsUnSelectable = ref<boolean>(store.state.TreatmentDetailsTab.TreatmentIsUnSelectable);
+    const props = defineProps<{
+        selectedTreatmentDetails: TreatmentDetails,
+        rules: InputValidationRules,
+        callFromScenario: boolean,
+        callFromLibrary: boolean
+    }>();
+    let TreatmentIsUnSelectable = ref(false);
 
 
 
-    let treatmentCriterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+    let treatmentCriterionEditorDialogData = ref(clone(
         emptyGeneralCriterionEditorDialogData,
-    );
+    ));
     let uuidNIL: string = getBlankGuid();
 
     let treatmentCategoryMapValue: Map<string, TreatmentCategory> = clone(treatmentCategoryMap);
     let treatmentCategoryReverseMapValue: Map<TreatmentCategory, string> = clone(treatmentCategoryReverseMap);
     let assetTypeReverseMapValue: Map<AssetType, string> = clone(assetTypeReverseMap);
-    let treatmentCategoryBinding: string = '';
+    let treatmentCategoryBinding = ref('');
     let assetTypeMapValue: Map<string, AssetType> = clone(assetTypeMap);
-    let assetTypeBinding: string = '';
+    let assetTypeBinding = ref('');
 
-    watch(selectedTreatmentDetails, () => onSelectedTreatmentDetailsChanged)
+    watch(() => props.selectedTreatmentDetails, () => onSelectedTreatmentDetailsChanged())
     function onSelectedTreatmentDetailsChanged(){
-        treatmentCategoryBinding = treatmentCategoryReverseMap.get(selectedTreatmentDetails.value.category)!;
-        assetTypeBinding = assetTypeReverseMap.get(selectedTreatmentDetails.value.assetType)!;
-        TreatmentIsUnSelectable.value = selectedTreatmentDetails.value.isUnselectable;
+        treatmentCategoryBinding.value = treatmentCategoryReverseMap.get(props.selectedTreatmentDetails.category)!;
+        assetTypeBinding.value = assetTypeReverseMap.get(props.selectedTreatmentDetails.assetType)!;
+        TreatmentIsUnSelectable.value = props.selectedTreatmentDetails.isUnselectable;
     }
 
-    watch(TreatmentIsUnSelectable, () => onToggleIsUnSelectable)
+    watch(TreatmentIsUnSelectable, (newValue, oldValue) => onToggleIsUnSelectable(newValue))
     function onToggleIsUnSelectable(value: boolean) {
         console.log('onToggleIsUnSelectable called with value:', value);
                 emit(
@@ -218,34 +223,34 @@ import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData
                  setItemPropertyValue(
                  'isUnselectable',
                  value,
-                selectedTreatmentDetails,
+                props.selectedTreatmentDetails,
     ),
   );
 }
 
     function onShowTreatmentCriterionEditorDialog() {
-        treatmentCriterionEditorDialogData = {
+        treatmentCriterionEditorDialogData.value = {
             showDialog: true,
-            CriteriaExpression: selectedTreatmentDetails.value.criterionLibrary.mergedCriteriaExpression
+            CriteriaExpression: props.selectedTreatmentDetails.criterionLibrary.mergedCriteriaExpression
         };
     }
 
     function onSubmitTreatmentCriterionEditorDialogResult(
         criterionExpression: string,
     ) {
-        treatmentCriterionEditorDialogData = clone(
+        treatmentCriterionEditorDialogData.value = clone(
             emptyGeneralCriterionEditorDialogData,
         );
 
         if (!isNil(criterionExpression)) {
-            if(selectedTreatmentDetails.value.criterionLibrary.id === getBlankGuid())
-                selectedTreatmentDetails.value.criterionLibrary.id = getNewGuid();
+            if(props.selectedTreatmentDetails.criterionLibrary.id === getBlankGuid())
+                props.selectedTreatmentDetails.criterionLibrary.id = getNewGuid();
             emit(
                 'onModifyTreatmentDetails',
                 setItemPropertyValue(
                     'criterionLibrary',
-                    {...selectedTreatmentDetails.value.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary,
-                     selectedTreatmentDetails,
+                    {...props.selectedTreatmentDetails.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary,
+                     props.selectedTreatmentDetails,
                 ),
             );
         }
@@ -266,7 +271,7 @@ import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData
             setItemPropertyValue(
                 property,
                 value,
-                selectedTreatmentDetails,
+                props.selectedTreatmentDetails,
             ),
         );
     }
@@ -277,7 +282,7 @@ import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData
             setItemPropertyValue(
                 'criterionLibrary',
                 clone(emptyCriterionLibrary),
-                selectedTreatmentDetails,
+                props.selectedTreatmentDetails,
             ),
         );
     }

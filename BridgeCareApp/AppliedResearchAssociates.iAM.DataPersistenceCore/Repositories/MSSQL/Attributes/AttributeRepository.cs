@@ -42,7 +42,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             foreach (var updateEntity in entitiesToUpdate)
             {
                 var updateValidity = AttributeUpdateValidityChecker.CheckUpdateValidity(existingAttributes, updateEntity);
-                if (!updateValidity.Ok) {
+                if (!updateValidity.Ok)
+                {
                     throw new InvalidAttributeUpsertException(updateValidity.Message);
                 };
             }
@@ -218,7 +219,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return attributes;
         }
-        
+
         public Task<List<RuleDefinition>> GetAggregationRules()
         {
             return Task.Factory.StartNew(() =>
@@ -309,9 +310,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             foreach (var id in attributeIdsToDelete)
             {
-                _unitOfWork.BeginTransaction();
-                _unitOfWork.Context.DeleteEntity<AttributeEntity>(_ => _.Id == id);
-                _unitOfWork.Commit();
+                _unitOfWork.AsTransaction(() =>
+                    _unitOfWork.Context.DeleteEntity<AttributeEntity>(_ => _.Id == id)
+                );
             }
         }
 

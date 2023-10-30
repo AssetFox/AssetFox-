@@ -18,7 +18,7 @@
                     <v-spacer></v-spacer>
                     <v-col cols = "1"></v-col>
                 </v-tabs>
-                <v-window v-model="tab" style="background-color: #d9e0ed;">
+                <v-window v-model="tab" style="background-color: #d9e7f2;">
                     <v-window-item value="My scenarios">
                          <v-col cols = "12">
                             <v-card elevation="5">
@@ -445,6 +445,7 @@
                                     @update:options="onWorkQueuePagination"
                                 >                           
                                     <template slot="items" slot-scope="props" v-slot:item="props">
+                                        <tr>
                                         <td>{{ props.item.queuePosition }}</td>
                                         <td>
                                             {{ props.item.name }}
@@ -495,6 +496,7 @@
                                                 </v-list>
                                             </v-menu>
                                         </td>
+                                        </tr>
                                     </template>                                         
                                     <template v-slot:no-data>
                                         {{ getEmptyWorkQueueMessage() }}
@@ -585,11 +587,11 @@
                 </v-window>
             </v-card>
         </v-col>
-        <!-- missing implemtation
-         <ConfirmAnalysisRunAlertPrehecks
-            :dialogDataPreChecks="onSecondConfirmAnalysisRunAlertData"
-            @submit="onSecondConfirmAnalysisRunAlertSubmit"
-        /> -->
+
+         <AlertPreChecks
+            :dialogDataPreChecks="confirmAnalysisPreCheckAlertData"
+            @submit="onConfirmAnalysisPreCheckAlertSubmit"
+        />
        
          <AlertWithButtons
             :dialogDataWithButtons="confirmAnalysisRunAlertData"
@@ -988,6 +990,10 @@ import { onBeforeMount } from 'vue';
 
     let totalUserScenarios: ShallowRef<number> = shallowRef(0);
 
+    let preCheckMessages: any;
+    let preCheckHeading: string;
+    let preCheckStatus: any;
+
     let sharedScenarios: Scenario[] = [];
     let currentSharedScenariosPage: Ref<Scenario[]> = ref([]);
     const sharedScenariosPagination: Pagination = shallowReactive(clone(emptyPagination));    
@@ -1007,6 +1013,7 @@ import { onBeforeMount } from 'vue';
     let reportsDownloaderDialogData= ref(clone(emptyReportsDownloadDialogData));
 
     let confirmAnalysisRunAlertData= ref(clone(emptyAlertDataWithButtons));
+    let confirmAnalysisPreCheckAlertData= ref(clone(emptyAlertPreChecksData));
     let shareScenarioDialogData = ref(clone(emptyShareScenarioDialogData));
     
     let ConfirmConvertJsonToRelationalData = ref(clone(emptyAlertData));
@@ -1015,7 +1022,8 @@ import { onBeforeMount } from 'vue';
     let confirmDeleteAlertData = ref(clone(emptyAlertData));
     let confirmCancelAlertData = ref(clone(emptyAlertData));
     let showCreateScenarioDialog = ref(false);
-    let selectedScenario: Scenario = clone(emptyScenario);   
+    let selectedScenario: Scenario = clone(emptyScenario);
+    let runAnalysisScenario: Scenario = clone(emptyScenario);
     let networkDataAssignmentStatus: string = '';
     let rules: InputValidationRules = validationRules;
     let showMigrateLegacySimulationDialog: boolean = false;
@@ -1160,7 +1168,7 @@ import { onBeforeMount } from 'vue';
         if(initializing)
             return;
 
-        const { sortBy, descending, page, rowsPerPage } = userScenariosPagination;
+        const { sort, descending, page, rowsPerPage } = userScenariosPagination;
         const request: PagingRequest<Scenario>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -1171,8 +1179,8 @@ import { onBeforeMount } from 'vue';
                 addedRows: [],
                 isModified: false,
             },           
-            sortColumn: sortBy != null ? sortBy : '',
-            isDescending: descending != null ? descending : false,
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: currentSearchMine.value
         };
 
@@ -1195,7 +1203,7 @@ import { onBeforeMount } from 'vue';
     function doWorkQueuePagination() {
         if(initializingWorkQueue)
             return;
-        const { sortBy, descending, page, rowsPerPage } = workQueuePagination;
+        const { sort, descending, page, rowsPerPage } = workQueuePagination;
 
         const workQueueRequest: PagingRequest<QueuedWork>= {
             page: page,
@@ -1207,8 +1215,8 @@ import { onBeforeMount } from 'vue';
                 addedRows: [],
                 isModified: false,
             },           
-            sortColumn: sortBy != null ? sortBy : '',
-            isDescending: descending != null ? descending : false,
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: ""
         };
         getWorkQueuePageAction(workQueueRequest);    
@@ -1217,7 +1225,7 @@ import { onBeforeMount } from 'vue';
     function doFastQueuePagination() {
         if(initializingWorkQueue)
             return;
-        const { sortBy, descending, page, rowsPerPage } = fastWorkQueuePagination;
+        const { sort, descending, page, rowsPerPage } = fastWorkQueuePagination;
 
         const workQueueRequest: PagingRequest<QueuedWork>= {
             page: page,
@@ -1229,8 +1237,8 @@ import { onBeforeMount } from 'vue';
                 addedRows: [],
                 isModified: false,
             },           
-            sortColumn: sortBy != null ? sortBy : '',
-            isDescending: descending != null ? descending : false,
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: ""
         };
         getFastWorkQueuePageAction(workQueueRequest);    
@@ -1393,7 +1401,7 @@ import { onBeforeMount } from 'vue';
     }); 
 
     function initializeScenarioPages(){
-        const { sortBy, descending, page, rowsPerPage } = sharedScenariosPagination;
+        const { sort, descending, page, rowsPerPage } = sharedScenariosPagination;
 
         const request: PagingRequest<Scenario> = {
             page: 1,
@@ -1505,8 +1513,93 @@ import { onBeforeMount } from 'vue';
         };
     }
 
-    function onConfirmAnalysisRunAlertSubmit(submit: boolean) {
+    async function onConfirmAnalysisRunAlertSubmit(submit: string) {
         confirmAnalysisRunAlertData.value = clone(emptyAlertDataWithButtons);
+        runAnalysisScenario = selectedScenario;
+
+        if (submit == "pre-checks") {
+                if (submit && selectedScenario.id !== getBlankGuid()) 
+                {
+                    await ScenarioService.upsertValidateSimulation(selectedScenario.networkId, selectedScenario.id).then((response: AxiosResponse) => {
+                        if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                            addSuccessNotificationAction({message: "Simulation pre-checks completed",});
+                            if(response.data.length > 0)
+                            {
+                                preCheckStatus = response.data[0].status;
+                                for(const item of response.data)
+                                {
+                                    if (item.message != '') {
+                                    preCheckMessages += item.message;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                preCheckStatus = 3;
+                            }
+                        }
+                    });
+
+                }
+                secondRunAnalysisModal();
+        }
+        else if(submit == "continue") {
+            if (submit && selectedScenario.id !== getBlankGuid()) {
+                runSimulationAction({
+                    networkId: selectedScenario.networkId,
+                    scenarioId: selectedScenario.id,
+                }).then(() => (selectedScenario = clone(emptyScenario)));
+            }
+        }
+
+    }
+
+    function secondRunAnalysisModal() {
+        confirmAnalysisPreCheckAlertData.value = clone(emptyAlertPreChecksData);
+
+            if(preCheckStatus == 0)
+            {
+                preCheckHeading = 'Error';
+            }
+            else if(preCheckStatus == 1)
+            {
+                preCheckHeading = 'Warning';
+            }
+            else if(preCheckStatus == 2)
+            {
+                preCheckHeading = 'Information';
+            }
+            else if(preCheckStatus == 3)
+            {
+                preCheckHeading = 'Success';
+                preCheckMessages += 'No warnings have been returned.' + 'No errors have been returned';
+            }
+
+            if(preCheckStatus == 0)
+            {
+                (selectedScenario = clone(emptyScenario));
+                confirmAnalysisPreCheckAlertData.value = {
+                showDialog: true,
+                heading: (preCheckHeading),
+                choice: false,
+                message:(preCheckMessages),
+                }
+            }
+            else{
+                (selectedScenario = clone(emptyScenario));
+                confirmAnalysisPreCheckAlertData.value = {
+                showDialog: true,
+                heading: (preCheckHeading),
+                choice: true,
+                message:(preCheckMessages),
+                }
+            }
+    }
+
+    function onConfirmAnalysisPreCheckAlertSubmit(submit: boolean) {
+        confirmAnalysisPreCheckAlertData.value = clone(emptyAlertPreChecksData);
+
+        selectedScenario = runAnalysisScenario;
 
         if (submit && selectedScenario.id !== getBlankGuid()) {
             runSimulationAction({

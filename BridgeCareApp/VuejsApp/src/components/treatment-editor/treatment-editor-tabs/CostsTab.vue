@@ -3,9 +3,9 @@
         <v-col cols = "12">              
             <div class="costs-data-table">                
                 <v-data-table
-                    hide-default-header             
+                    hide-default-header id="CostsTab-vdatatable"
                     :headers="costsGridHeaders"
-                    sort-icon=$vuetify.icons.ghd-table-sort
+                    sort-icon=ghd-table-sort
                     :items="costsGridData"
                     class="elevation-1 v-table__overflow ghd-padding-top"
                     hide-actions
@@ -15,7 +15,7 @@
                             <td xs5>                            
                                 <v-row  rows = "6"  align-center>                                
                                     <v-subheader class="ghd-control-label ghd-md-gray" style="width:95%">Equation</v-subheader>
-                                    <v-btn
+                                    <v-btn id="TreatmentCostsTab-EquationEditorBtn"
                                         @click="
                                             onShowCostEquationEditorDialog(
                                                 props.item,
@@ -30,6 +30,7 @@
                                 <v-row  rows = "6" align-center>  
                                     <v-textarea
                                         class="ghd-control-border ghd-control-text-sm"
+                                        id="TreatmentCostsTab-Equation-TextArea"
                                         full-width
                                         no-resize
                                         outline
@@ -43,7 +44,7 @@
                             <td xs5>
                                 <v-row  rows = "6" align-center>
                                     <v-subheader class="ghd-control-label ghd-md-gray" style="width:95%">Criteria</v-subheader>
-                                    <v-btn
+                                    <v-btn id="TreatmentCostsTab-CriteriaEditorBtn"
                                         @click="
                                             onShowCostCriterionEditorDialog(
                                                 props.item,
@@ -58,6 +59,7 @@
                                 <v-row  rows = "6" align-center>              
                                     <v-textarea
                                         class="ghd-control-border ghd-control-text-sm"
+                                        id="TreatmentCostsTab-Criteria-TextArea"
                                         full-width
                                         no-resize
                                         outline
@@ -73,7 +75,7 @@
                             </td>     
                             <td xs2>
                                 <v-row align-start>
-                                    <v-btn
+                                    <v-btn id="TreatmentCostsTab-DeleteCostBtn"
                                         @click="onRemoveCost(props.item.id)"
                                         icon
                                     >
@@ -91,7 +93,7 @@
             </v-chip>            
         </v-col>
 
-        <CostEquationEditorDialog
+        <EquationEditorDialog
             :dialogData="costEquationEditorDialogData"
             :isFromPerformanceCurveEditor=false
             @submit="onSubmitCostEquationEditorDialogResult"
@@ -107,7 +109,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { shallowRef } from 'vue';
+import Vue, { ShallowRef, shallowRef } from 'vue';
 import { emptyCost, TreatmentCost } from '@/shared/models/iAM/treatment';
 import {
     emptyEquationEditorDialogData,
@@ -129,50 +131,52 @@ import { useStore } from 'vuex';
 
     const emit = defineEmits(['submit', 'onAddCost', 'onModifyCost', 'onRemoveCost'])
     let store = useStore();
-    let selectedTreatmentCosts = shallowRef<TreatmentCost[]>();
-    let  callFromScenario: boolean;
-    let  callFromLibrary: boolean;
+    const props = defineProps<{
+        selectedTreatmentCosts:TreatmentCost[],
+         callFromScenario: boolean,
+         callFromLibrary: boolean  
+    }>(); 
 
-    let costsGridHeaders: DataTableHeader[] = [
+    let costsGridHeaders: any[] = [
         {
-            text: '',
-            value: 'equation',
+            title: '',
+            key: 'equation',
             align: 'left',
             sortable: false,
             class: '',
             width: '',
         },
         {
-            text: '',
-            value: 'criterionLibrary',
+            title: '',
+            key: 'criterionLibrary',
             align: 'left',
             sortable: false,
             class: '',
             width: '',
         },
         {
-            text: '',
-            value: '',
+            title: '',
+            key: '',
             align: 'left',
             sortable: false,
             class: '',
             width: '100px',
         },
     ];
-    let costsGridData: TreatmentCost[] | undefined = [];
-    let costEquationEditorDialogData: EquationEditorDialogData = clone(
+    let costsGridData: ShallowRef<TreatmentCost[] | undefined> = shallowRef([]);
+    let costEquationEditorDialogData = shallowRef(clone(
         emptyEquationEditorDialogData,
-    );
-    let costCriterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+    ));
+    let costCriterionEditorDialogData = shallowRef(clone(
         emptyGeneralCriterionEditorDialogData,
-    );
+    ));
     let selectedCostForEquationOrCriteriaEdit: TreatmentCost = clone(emptyCost);
     let uuidNIL: string = getBlankGuid();
-    let alertData: AlertData = clone(emptyAlertData);
+    let alertData = shallowRef(clone(emptyAlertData));
 
-    watch(selectedTreatmentCosts, () => onSelectedTreatmentCostsChanged)
+    watch(() => props.selectedTreatmentCosts, () => onSelectedTreatmentCostsChanged())
     function onSelectedTreatmentCostsChanged() {
-        costsGridData = clone(selectedTreatmentCosts.value);
+        costsGridData.value = clone(props.selectedTreatmentCosts);
     }
 
     function onAddCost() {
@@ -183,14 +187,14 @@ import { useStore } from 'vuex';
     function onShowCostEquationEditorDialog(cost: TreatmentCost) {
         selectedCostForEquationOrCriteriaEdit = clone(cost);
 
-        costEquationEditorDialogData = {
+        costEquationEditorDialogData.value = {
             showDialog: true,
             equation: clone(cost.equation),
         };
     }
 
     function onSubmitCostEquationEditorDialogResult(equation: Equation) {
-        costEquationEditorDialogData = clone(
+        costEquationEditorDialogData.value = clone(
             emptyEquationEditorDialogData,
         );
 
@@ -214,7 +218,7 @@ import { useStore } from 'vuex';
     function onShowCostCriterionEditorDialog(cost: TreatmentCost) {
         selectedCostForEquationOrCriteriaEdit = clone(cost);
 
-        costCriterionEditorDialogData = {
+        costCriterionEditorDialogData.value = {
             showDialog: true,
             CriteriaExpression: cost.criterionLibrary.mergedCriteriaExpression,
         };
@@ -223,7 +227,7 @@ import { useStore } from 'vuex';
     function onSubmitCostCriterionEditorDialogResult(
         criterionExpression: string,
     ) {
-        costCriterionEditorDialogData = clone(
+        costCriterionEditorDialogData.value = clone(
             emptyGeneralCriterionEditorDialogData,
         );
 
@@ -254,7 +258,7 @@ import { useStore } from 'vuex';
      * Shows the Alert
      */
      function showExampleFunction() {
-        alertData = {
+        alertData.value = {
             showDialog: true,
             heading: 'Example',
             choice: false,
@@ -265,7 +269,7 @@ import { useStore } from 'vuex';
     }
 
     function onSubmitAlertResult(dummy: boolean) {
-        alertData = clone(emptyAlertData);
+        alertData.value = clone(emptyAlertData);
     }
 
 </script>

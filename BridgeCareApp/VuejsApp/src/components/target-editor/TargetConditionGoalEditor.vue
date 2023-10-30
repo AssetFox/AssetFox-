@@ -31,6 +31,13 @@
                         </v-divider>
                         <v-btn @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario' rounded="0">
+                        <!-- <v-badge v-show="isShared" style="padding: 10px">
+                            <template v-slot: badge>
+                                <span>Shared</span>
+                            </template>
+                        </v-badge>
+                        <v-btn id="TargetConditionGoalEditor-ShareLibrary-btn" @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                            v-show='!hasScenario'> -->
                             Share Library
                         </v-btn>
                     </v-row>
@@ -78,7 +85,7 @@
                     @update:options="onPaginationChanged"
                     class="elevation-1 fixed-header v-table__overflow"
                     item-key="id"
-                    select-all
+                    show-select
                     v-model="selectedGridRows"
                 >
                     <template v-slot:item="{item}">
@@ -678,7 +685,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }
 
     function checkLibraryEditPermission() {
-        hasLibraryEditPermission.value = hasAdminAccess.value || (hasPermittedAccess.value && checkUserIsLibraryOwner());
+        setHasUnsavedChangesAction(hasAdminAccess.value || (hasPermittedAccess.value && checkUserIsLibraryOwner()))
     }
 
     function checkUserIsLibraryOwner() {

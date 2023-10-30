@@ -52,30 +52,32 @@
         </v-col>
         <v-col v-show='hasSelectedLibrary || hasScenario' cols="12">
             <div class='priorities-data-table'>
-                <v-data-table :header='budgetPriorityGridHeaders' 
-                              :items='budgetPriorityGridRows'
-                              :pagination.sync="pagination"
-                              :must-sort='true'
-                              :total-items="totalItems"
-                              :rows-per-page-items=[5,10,25]
-                              id = "BudgetPriority-priorities-vdatatable"
-                              class='v-table__overflow ghd-table' item-key='id' select-all
-                              sort-icon=ghd-table-sort                              
-                              v-model='selectedBudgetPriorityGridRows' >
-                              <template v-slot:headers="props">
-                                <tr>
-                                    <th
-                                    v-for="header in budgetPriorityGridHeaders"
-                                    :key="header.title"
-                                    >
-                                        {{header.title}}
-                                    </th>
-                                </tr>
-                            </template>
+                <v-data-table-server 
+                    :headers='budgetPriorityGridHeaders' 
+                    :items='budgetPriorityGridRows'
+                    :pagination.sync="pagination"
+                    :must-sort='true'
+                    :rows-per-page-items=[5,10,25]
+                    show-select
+                    return-object
+                    id = "BudgetPriority-priorities-vdatatable"
+                    class='v-table__overflow ghd-table' :item-value="'id'"
+                    sort-icon=ghd-table-sort                              
+                    v-model='selectedBudgetPriorityGridRows'                                
+                    :items-length="totalItems"
+                    :items-per-page-options="[
+                        {value: 5, title: '5'},
+                        {value: 10, title: '10'},
+                        {value: 25, title: '25'},
+                    ]"
+                    v-model:sort-by="pagination.sort"
+                    v-model:page="pagination.page"
+                    v-model:items-per-page="pagination.rowsPerPage"
+                    @update:options="onPaginationChanged">
                     <template v-slot:item="item">
                         <tr>
                         <td>
-                            <v-checkbox id="BudgetPriorityEditor-deleteBudgetPriority-vcheckbox" hide-details primary v-model='item.isSelected'></v-checkbox>
+                            <v-checkbox id="BudgetPriorityEditor-deleteBudgetPriority-vcheckbox" hide-details primary  v-model="selectedBudgetPriorityGridRows" :value="item.item"></v-checkbox>
                         </td>
                         <td v-for='header in budgetPriorityGridHeaders'>
                             <div v-if="header.key === 'priorityLevel' || header.key === 'year'">
@@ -148,7 +150,7 @@
                         </td>
                         </tr>
                     </template>
-                </v-data-table>
+                </v-data-table-server>
                 <v-btn :disabled='selectedBudgetPriorityIds.length === 0' @click='onRemoveBudgetPriorities'
                     class='ghd-blue ghd-button' variant = "flat">
                     Delete Selected
@@ -309,7 +311,7 @@
     let unsavedDialogAllowed: boolean = true;
     let trueLibrarySelectItemValue: string | null = ''
     let librarySelectItemValueAllowedChanged: boolean = true;
-    let librarySelectItemValue: ShallowRef<string | null> = shallowRef(null);
+    let librarySelectItemValue = ref<string | null>(null);
 
     let selectedScenarioId: string = getBlankGuid();
     let hasSelectedLibrary = ref(false);
@@ -318,7 +320,7 @@
     let isShared: boolean = false;
     let dateModified: string;
 
-    let selectedBudgetPriorityLibrary: BudgetPriorityLibrary = clone(emptyBudgetPriorityLibrary);
+    let selectedBudgetPriorityLibrary = shallowRef(clone(emptyBudgetPriorityLibrary));
     let budgetPriorityGridRows = ref<BudgetPriorityGridDatum[]>([]);
     let actionHeader: any = { title: 'Action', key: '', align: 'left', sortable: false, class: '', width: ''}
     let budgetPriorityGridHeaders: any[] = [
@@ -327,7 +329,7 @@
         { title: 'Criteria', key: 'criteria', align: 'left', sortable: false, class: '', width: '' },
         actionHeader
     ];
-    let selectedBudgetPriorityGridRows: ShallowRef<BudgetPriorityGridDatum[]> = shallowRef([]);
+    let selectedBudgetPriorityGridRows = ref<BudgetPriorityGridDatum[]>([]);
     let selectedBudgetPriorityIds: string[] = [];
     let selectedBudgetPriorityForCriteriaEdit: BudgetPriority = clone(emptyBudgetPriority);
     let showCreateBudgetPriorityDialog: boolean = false;
@@ -405,15 +407,15 @@
     }
     function onSelectItemValueChanged() {
         trueLibrarySelectItemValue = librarySelectItemValue.value;
-        selectBudgetPriorityLibraryAction({ libraryId: librarySelectItemValue });
+        selectBudgetPriorityLibraryAction({ libraryId: librarySelectItemValue.value });
     }
     watch(stateSelectedBudgetPriorityLibrary, onStateSelectedPriorityLibraryChanged)
     function onStateSelectedPriorityLibraryChanged() {
-        selectedBudgetPriorityLibrary = clone(stateSelectedBudgetPriorityLibrary.value);
+        selectedBudgetPriorityLibrary.value = clone(stateSelectedBudgetPriorityLibrary.value);
     }
     watch(selectedBudgetPriorityLibrary, onSelectedPriorityLibraryChanged)
     function onSelectedPriorityLibraryChanged() {
-        hasSelectedLibrary.value = selectedBudgetPriorityLibrary.id !== uuidNIL;
+        hasSelectedLibrary.value = selectedBudgetPriorityLibrary.value.id !== uuidNIL;
 
         if (hasSelectedLibrary.value) {
             checkLibraryEditPermission();
@@ -504,8 +506,8 @@
                     rowCache = clone(currentPage.value)
                     totalItems = data.totalItems;
 
-                    if (!isNil(selectedBudgetPriorityLibrary.id) ) {
-                        getIsSharedLibraryAction(selectedBudgetPriorityLibrary).then(() => isShared = isSharedLibrary.value);
+                    if (!isNil(selectedBudgetPriorityLibrary.value.id) ) {
+                        getIsSharedLibraryAction(selectedBudgetPriorityLibrary.value).then(() => isShared = isSharedLibrary.value);
                     }           
                 }
             });     
@@ -578,7 +580,7 @@
             if (hasValue(budgetNames)) {
                 const budgetHeaders: any[] = budgetNames.map((budgetName: string) => ({
                     title: `${budgetName} %`,
-                    value: budgetName,
+                    key: budgetName,
                     align: 'left',
                     sortable: true,
                     class: '',
@@ -617,7 +619,7 @@
     function getOwnerUserName(): string {
 
         if (!hasCreatedLibrary) {
-        return getUserNameByIdGetter(selectedBudgetPriorityLibrary.owner);
+        return getUserNameByIdGetter(selectedBudgetPriorityLibrary.value.owner);
         }
         
         return getUserName();
@@ -628,7 +630,7 @@
     }
 
     function checkUserIsLibraryOwner() {
-        return getUserNameByIdGetter(selectedBudgetPriorityLibrary.owner) == getUserName();
+        return getUserNameByIdGetter(selectedBudgetPriorityLibrary.value.owner) == getUserName();
     }
 
     function onShowCreateBudgetPriorityLibraryDialog(createAsNewLibrary: boolean) {
@@ -645,7 +647,7 @@
                 library: budgetPriorityLibrary,    
                 isNewLibrary: true,           
                 syncModel: {
-                    libraryId: budgetPriorityLibrary.budgetPriorities.length == 0 || !hasSelectedLibrary.value ? null : selectedBudgetPriorityLibrary.id,
+                    libraryId: budgetPriorityLibrary.budgetPriorities.length == 0 || !hasSelectedLibrary.value ? null : selectedBudgetPriorityLibrary.value.id,
                     rowsForDeletion: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : deletionIds.value,
                     updateRows: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : Array.from(updatedRowsMap.values()).map(r => r[1]),
                     addedRows: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : addedRows.value,
@@ -746,11 +748,11 @@
 
     function onUpsertScenarioBudgetPriorities() {
 
-        if (selectedBudgetPriorityLibrary.id === uuidNIL || hasUnsavedChanges && newLibrarySelection ===false) {scenarioLibraryIsModified = true;}
+        if (selectedBudgetPriorityLibrary.value.id === uuidNIL || hasUnsavedChanges && newLibrarySelection ===false) {scenarioLibraryIsModified = true;}
         else { scenarioLibraryIsModified = false; }
 
         BudgetPriorityService.upsertScenarioBudgetPriorities({
-            libraryId: selectedBudgetPriorityLibrary.id === uuidNIL ? null : selectedBudgetPriorityLibrary.id,
+            libraryId: selectedBudgetPriorityLibrary.value.id === uuidNIL ? null : selectedBudgetPriorityLibrary.value.id,
             rowsForDeletion: deletionIds.value,
             updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
             addedRows: addedRows.value,
@@ -769,16 +771,16 @@
 
     function onUpsertBudgetPriorityLibrary() {
         const budgetPriorityLibrary: BudgetPriorityLibrary = {
-            ...clone(selectedBudgetPriorityLibrary),
+            ...clone(selectedBudgetPriorityLibrary.value),
             budgetPriorities: clone(currentPage.value),
         };
         upsertBudgetPriorityLibraryAction(budgetPriorityLibrary);
 
         const upsertRequest: LibraryUpsertPagingRequest<BudgetPriorityLibrary, BudgetPriority> = {
-                library: selectedBudgetPriorityLibrary,
+                library: selectedBudgetPriorityLibrary.value,
                 isNewLibrary: false,
                  syncModel: {
-                    libraryId: selectedBudgetPriorityLibrary.id === uuidNIL ? null : selectedBudgetPriorityLibrary.id,
+                    libraryId: selectedBudgetPriorityLibrary.value.id === uuidNIL ? null : selectedBudgetPriorityLibrary.value.id,
                     rowsForDeletion: deletionIds.value,
                     updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
                     addedRows: addedRows.value,
@@ -789,8 +791,8 @@
         BudgetPriorityService.upsertBudgetPriorityLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 clearChanges()               
-                budgetPriorityLibraryMutator(selectedBudgetPriorityLibrary);
-                selectedBudgetPriorityLibraryMutator(selectedBudgetPriorityLibrary.id);                
+                budgetPriorityLibraryMutator(selectedBudgetPriorityLibrary.value);
+                selectedBudgetPriorityLibraryMutator(selectedBudgetPriorityLibrary.value.id);                
                 addSuccessNotificationAction({message: "Updated budget priority library",});
             }
         });
@@ -846,7 +848,7 @@
         confirmDeleteAlertData = clone(emptyAlertData);
 
         if (submit) {
-            deleteBudgetPriorityLibraryAction(selectedBudgetPriorityLibrary.id)
+            deleteBudgetPriorityLibraryAction(selectedBudgetPriorityLibrary.value.id)
                 .then(() => librarySelectItemValue.value = null);
         }
     }
@@ -867,7 +869,7 @@
         })
 
         if (hasSelectedLibrary.value) {
-            return !(rules['generalRules'].valueIsNotEmpty(selectedBudgetPriorityLibrary.name) === true && allDataIsValid);
+            return !(rules['generalRules'].valueIsNotEmpty(selectedBudgetPriorityLibrary.value.name) === true && allDataIsValid);
         }
         disableCrudButtonsResult = !allDataIsValid;
         return !allDataIsValid;
@@ -913,7 +915,7 @@
             addedRows.value.length > 0 ||
             updatedRowsMap.size > 0 || 
             (hasScenario.value && hasSelectedLibrary.value) ||
-            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedBudgetPriorityLibrary, stateSelectedBudgetPriorityLibrary))
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedBudgetPriorityLibrary.value, stateSelectedBudgetPriorityLibrary.value))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -942,7 +944,7 @@
     function onShareBudgetPriorityLibraryDialogSubmit(budgetPriorityLibraryUsers: BudgetPriorityLibraryUser[]) {
             shareBudgetPriorityLibraryDialogData = clone(emptyShareBudgetPriorityLibraryDialogData);
 
-            if (!isNil(budgetPriorityLibraryUsers) && selectedBudgetPriorityLibrary.id !== getBlankGuid())
+            if (!isNil(budgetPriorityLibraryUsers) && selectedBudgetPriorityLibrary.value.id !== getBlankGuid())
             {
                 let libraryUserData: LibraryUser[] = [];
 
@@ -965,11 +967,11 @@
                     libraryUserData.push(libraryUser);
                 });
 
-                if (!isNil(selectedBudgetPriorityLibrary.id) ) {
-                            getIsSharedLibraryAction(selectedBudgetPriorityLibrary).then(() => isShared = isSharedLibrary.value);
+                if (!isNil(selectedBudgetPriorityLibrary.value.id) ) {
+                            getIsSharedLibraryAction(selectedBudgetPriorityLibrary.value).then(() => isShared = isSharedLibrary.value);
                 }
                 //update budget library sharing
-                BudgetPriorityService.upsertOrDeleteBudgetPriorityLibraryUsers(selectedBudgetPriorityLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+                BudgetPriorityService.upsertOrDeleteBudgetPriorityLibraryUsers(selectedBudgetPriorityLibrary.value.id, libraryUserData).then((response: AxiosResponse) => {
                     if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
                     {
                         resetPage();

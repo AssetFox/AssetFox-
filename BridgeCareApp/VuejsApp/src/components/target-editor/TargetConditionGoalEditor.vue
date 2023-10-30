@@ -82,7 +82,7 @@
                     @update:options="onPaginationChanged"
                     class="elevation-1 fixed-header v-table__overflow"
                     item-key="id"
-                    select-all
+                    show-select
                     v-model="selectedGridRows"
                 >
                     <template slot="items" slot-scope="props" v-slot:item="{item}">

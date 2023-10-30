@@ -133,9 +133,9 @@
         </v-col>
         <!-- data table -->
         <v-col cols="12" v-show="hasSelectedLibrary || hasScenario">
-            <v-data-table
+            <v-data-table-server
                 id="CalculatedAttribute-equation-table"    
-                :header="calculatedAttributeGridHeaders"
+                :headers="calculatedAttributeGridHeaders"
                 :items="selectedGridItem"
                 :pagination.sync="pagination"
                 class="v-table__overflow ghd-table"
@@ -155,6 +155,7 @@
                 @update:options="onPaginationChanged"
                 >
                 <template slot="items" slot-scope="props" v-slot:item="props">
+                    <tr>
                     <td class="text-xs-center">
                         <v-text-field
                             readonly
@@ -199,8 +200,9 @@
                             <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </td>
+                    </tr>
                 </template>
-            </v-data-table>
+            </v-data-table-server>
             <v-btn
                 @click="onAddCriterionEquationSet()"
                 class='ghd-blue ghd-button'
@@ -296,7 +298,7 @@
     </v-row>
 </template>
 <script lang="ts" setup>
-import Vue, { shallowRef } from 'vue';
+import Vue, { shallowReactive, shallowRef } from 'vue';
 import Alert from '@/shared/modals/Alert.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
 import CreateCalculatedAttributeLibraryDialog from './calculated-attribute-editor-dialogs/CreateCalculatedAttributeLibraryDialog.vue';
@@ -407,7 +409,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     let defaultEquations: Map<string, CriterionAndEquationSet> = new Map<string, CriterionAndEquationSet>()
     let gridSearchTerm = '';
     let currentSearch = '';
-    let pagination: Pagination = clone(emptyPagination);
+    const pagination: Pagination = shallowReactive(clone(emptyPagination));
     let isPageInit = false;
     let totalItems = 0;
     let currentPage: CalculatedAttribute = clone(emptyCalculatedAttribute);
@@ -451,7 +453,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     let isAttributeSelectedItemValue: boolean = false;
     let isTimingSelectedItemValue: boolean = false;
     let attributeTimingSelectItems: SelectItem[] = [];
-    let attributeTimingSelectItemValue= shallowRef<string>('');
+    let attributeTimingSelectItemValue= ref('');
     let currentCriteriaEquationSetSelectedId: string | null = '';
 
     let selectedCalculatedAttributeLibrary: CalculatedAttributeLibrary = clone(
@@ -468,7 +470,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     );
     let calculatedAttributeGridData = shallowRef<CalculatedAttribute[]>([]);
     let activeCalculatedAttributeId: string = getBlankGuid();
-    let selectedGridItem: CalculatedAttributeGridModel[] = [];
+    let selectedGridItem  = shallowRef<CalculatedAttributeGridModel[]>([]);
     let selectedAttribute: CalculatedAttribute = clone(emptyCalculatedAttribute)
     let hasCreatedLibrary: boolean = false;
 
@@ -545,7 +547,6 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     }
 
     // Watchers
-    watch(pagination,() => onPaginationChanged)
     async function onPaginationChanged() {
         if( initializing)
             return;
@@ -578,18 +579,19 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                      pairsCache =  currentPage.equations;
                      totalItems = data.totalItems;
                      defaultEquation = data.defaultEquation;
-                     selectedGridItem =  calculatedAttributeGridModelConverter( currentPage)
+                     selectedGridItem.value =  calculatedAttributeGridModelConverter( currentPage)
                 }
             });
         }            
-        else if(hasSelectedLibrary.value)
-        initializing = true;
-        await CalculatedAttributeService.getCalculatedLibraryModifiedDate(selectedCalculatedAttributeLibrary.id).then(response => {
+        else if(hasSelectedLibrary.value){
+            initializing = true;
+            await CalculatedAttributeService.getCalculatedLibraryModifiedDate(selectedCalculatedAttributeLibrary.id).then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
                       modifiedDate = data.slice(0, 10);
                    }
+                   initializing = false;
              });
 
              await CalculatedAttributeService.getLibraryCalculatedAttributePage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
@@ -600,12 +602,16 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                      pairsCache =  currentPage.equations;
                      totalItems = data.totalItems;
                      defaultEquation = data.defaultEquation;
-                     selectedGridItem =  calculatedAttributeGridModelConverter( currentPage);
+                     selectedGridItem.value =  calculatedAttributeGridModelConverter( currentPage);
                     if (!isNil( selectedCalculatedAttributeLibrary.id) ) {
                          getIsSharedLibraryAction( selectedCalculatedAttributeLibrary).then(() => isShared = isSharedLibrary.value);
                     }
+                    initializing = false;
                 }
             });     
+        }
+        
+        
     }
 
     watch(deletionPairsIds,()=> onDeletionPairsIdsChanged())
@@ -613,25 +619,25 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         checkHasUnsavedChanges();
     }
 
-    watch(addedCalcPairs,()=> onAddedPairsChanged)
+    watch(addedCalcPairs,()=> onAddedPairsChanged())
     function onAddedPairsChanged(){
         checkHasUnsavedChanges();
     }
 
     function onSelectedAttributeChanged(){
-        selectedGridItem = calculatedAttributeGridModelConverter(currentPage)
+        selectedGridItem.value = calculatedAttributeGridModelConverter(currentPage)
     }
 
-    watch(isDefaultBool,() => onIsDefaultBoolChanged)
+    watch(isDefaultBool,() => onIsDefaultBoolChanged())
     function onIsDefaultBoolChanged(){
         selectedCalculatedAttributeLibrary.isDefault = isDefaultBool.value;
         checkHasUnsavedChanges()
     }
-    watch(stateCalculatedAttributes,()=>onStateCalculatedAttributesChanged)
+    watch(stateCalculatedAttributes,()=>onStateCalculatedAttributesChanged())
     function onStateCalculatedAttributesChanged() {
         setAttributeSelectItems();
     }
-    watch(currentPage,() => onCurrentPageChanged)
+    watch(currentPage,() => onCurrentPageChanged())
     function onCurrentPageChanged() {
         // Get parent name from library id
         librarySelectItems.forEach(library => {
@@ -641,7 +647,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         });
     }
     function setAttributeSelectItems() {
-        if (hasValue(stateCalculatedAttributes)) {
+        if (hasValue(stateCalculatedAttributes.value)) {
             attributeSelectItems = stateCalculatedAttributes.value.map(
                 (attribute: Attribute) => ({
                     text: attribute.name,
@@ -659,8 +665,8 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                     calculationTiming: Timing.OnDemand,
                     equations: [] as CriterionAndEquationSet[],
                 };
-                if (calculatedAttributeGridData == undefined) {
-                    calculatedAttributeGridData as CalculatedAttribute[];
+                if (calculatedAttributeGridData.value == undefined) {
+                    calculatedAttributeGridData.value as CalculatedAttribute[];
                 }
                 calculatedAttributeGridData.value.push(tempItem);
             });
@@ -684,7 +690,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     }
     // is so that a user is asked wether or not to continue when switching libraries after they have made changes
     //but only when in libraries
-    watch(librarySelectItemValue,() => onLibrarySelectItemValueChangedCheckUnsaved)
+    watch(librarySelectItemValue,() => onLibrarySelectItemValueChangedCheckUnsaved())
     function onLibrarySelectItemValueChangedCheckUnsaved(){
         if(hasScenario.value){
             onLibrarySelectItemValueChanged();
@@ -709,7 +715,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     }
 
     // is so that users are asked wether or not to continue when switching attributes after making changes
-    watch(attributeSelectItemValue,()=> onAttributeSelectItemValueChangedCheckUnsaved)
+    watch(attributeSelectItemValue,()=> onAttributeSelectItemValueChangedCheckUnsaved())
     function onAttributeSelectItemValueChangedCheckUnsaved(){
         if(attributeSelectItemValueAllowedChanged)
             CheckUnsavedDialog(onAttributeSelectItemValueChanged, () => {
@@ -786,7 +792,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         }
     }
 
-    watch(stateSelectedCalculatedAttributeLibrary,() => onStateSelectedCalculatedAttributeLibraryChanged)
+    watch(stateSelectedCalculatedAttributeLibrary,() => onStateSelectedCalculatedAttributeLibraryChanged())
     function onStateSelectedCalculatedAttributeLibraryChanged() {
         
         selectedCalculatedAttributeLibrary.calculatedAttributes = clone(stateSelectedCalculatedAttributeLibrary.value.calculatedAttributes)
@@ -799,7 +805,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
 
         isDefaultBool.value = selectedCalculatedAttributeLibrary.isDefault;
     }
-    watch(stateScenarioCalculatedAttributes,() => onStateScenarioCalculatedAttributeChanged)
+    watch(stateScenarioCalculatedAttributes,() => onStateScenarioCalculatedAttributeChanged())
     function onStateScenarioCalculatedAttributeChanged() {
         if (hasScenario.value) {
             if (
@@ -812,13 +818,13 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
             resetGridData();
         }
     }
-    watch(calculatedAttributeGridData,() => onCalculatedAttributeGridDataChanged)
+    watch(calculatedAttributeGridData,() => onCalculatedAttributeGridDataChanged())
     function onCalculatedAttributeGridDataChanged() {
-        if (hasAdminAccess) {
+        if (hasAdminAccess.value) {
             checkHasUnsavedChanges();
         }
     }
-    watch(selectedCalculatedAttributeLibrary, ()=>onSelectedCalculatedAttributeLibraryChanged)
+    watch(selectedCalculatedAttributeLibrary, ()=>onSelectedCalculatedAttributeLibraryChanged())
     function onSelectedCalculatedAttributeLibraryChanged() {
         
         // change in library multiselect
@@ -835,13 +841,13 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         if (hasScenario.value && hasSelectedLibrary.value) {
             getSelectedLibraryCalculatedAttributesAction(selectedCalculatedAttributeLibrary.id).then(() =>{
                 // we need new ids for the object which is assigned to a scenario.
-                calculatedAttributeGridData = clone(
-                    stateSelectedLibraryCalculatedAttributes,
+                calculatedAttributeGridData.value = clone(
+                    stateSelectedLibraryCalculatedAttributes.value,
                 );
                 
                 // Set the default values in Calculated attribute multi select, if we have data in calculatedAttributeGridData           
                 if (
-                    calculatedAttributeGridData != undefined &&
+                    calculatedAttributeGridData.value != undefined &&
                     calculatedAttributeGridData.value.length > 0
                 ) {
                     setDefaultAttributeOnLoad(
@@ -850,7 +856,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                 } 
                 else {
                     isAttributeSelectedItemValue = false;
-                    selectedGridItem = [];
+                    selectedGridItem.value = [];
                 }
                 onCalculatedAttributeGridDataChanged();
             })
@@ -864,11 +870,11 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         else if (!hasScenario.value && hasSelectedLibrary.value) {
             // If a user is in Lirabry page
             getSelectedLibraryCalculatedAttributesAction(selectedCalculatedAttributeLibrary.id).then(() =>{
-                calculatedAttributeGridData = clone(
-                    stateSelectedLibraryCalculatedAttributes,
+                calculatedAttributeGridData.value = clone(
+                    stateSelectedLibraryCalculatedAttributes.value,
                 );
                 if (
-                    calculatedAttributeGridData != undefined &&
+                    calculatedAttributeGridData.value != undefined &&
                     calculatedAttributeGridData.value.length > 0
                 ) {
                     attributeSelectItemValue.value = clone(
@@ -889,14 +895,14 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                     attributeSelectItemValue.value = '';
                     attributeTimingSelectItemValue.value = '';
                      isTimingSelectedItemValue = false;
-                     selectedGridItem = [];
+                     selectedGridItem.value = [];
                 }
                  onCalculatedAttributeGridDataChanged();
             })          
         }         
     }
     
-    watch(isSharedLibrary,()=> onStateSharedAccessChanged)
+    watch(isSharedLibrary,()=> onStateSharedAccessChanged())
     function onStateSharedAccessChanged() {
          isShared =  isSharedLibrary.value;
          if (!isNil( selectedCalculatedAttributeLibrary) ) {
@@ -922,7 +928,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
 
     function onUpsertScenarioCalculatedAttribute() {
 
-        if ( selectedCalculatedAttributeLibrary.id ===  uuidNIL ||  hasUnsavedChanges &&  newLibrarySelection ===false) { scenarioLibraryIsModified = true;}
+        if ( selectedCalculatedAttributeLibrary.id ===  uuidNIL ||  hasUnsavedChanges.value &&  newLibrarySelection ===false) { scenarioLibraryIsModified = true;}
         else {  scenarioLibraryIsModified = false; }
 
         const syncModel: CalculatedAttributePagingSyncModel = {
@@ -1047,7 +1053,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     }
 
     function disableCrudButton() {
-        if ( calculatedAttributeGridData == undefined) {
+        if ( calculatedAttributeGridData.value == undefined) {
             return false;
         }
 
@@ -1286,11 +1292,11 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     }
 
     function resetGridData() {
-         calculatedAttributeGridData = clone(
-             stateScenarioCalculatedAttributes,
+         calculatedAttributeGridData.value = clone(
+             stateScenarioCalculatedAttributes.value,
         );
 
-        if ( calculatedAttributeGridData != undefined) {
+        if ( calculatedAttributeGridData.value != undefined) {
             var currItem =  calculatedAttributeGridData.value.find(
                 _ => _.id ==  activeCalculatedAttributeId,
             )!;
@@ -1466,7 +1472,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
              addedCalcAttr.length > 0 ||
              defaultEquations.size > 0 ||
             ( hasScenario.value &&  hasSelectedLibrary.value) ||
-            ( hasSelectedLibrary.value && hasUnsavedChangesCore('',  selectedCalculatedAttributeLibrary,  stateSelectedCalculatedAttributeLibrary))
+            ( hasSelectedLibrary.value && hasUnsavedChangesCore('',  selectedCalculatedAttributeLibrary,  stateSelectedCalculatedAttributeLibrary.value))
          setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -1487,7 +1493,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
              updatedCalcAttrMap.size > 0 || 
              updatedPairs.size > 0 || 
              addedCalcAttr.length > 0 ||
-            ( hasSelectedLibrary.value && ! hasScenario.value && hasUnsavedChangesCore('',  selectedCalculatedAttributeLibrary,  stateSelectedCalculatedAttributeLibrary))
+            ( hasSelectedLibrary.value && ! hasScenario.value && hasUnsavedChangesCore('',  selectedCalculatedAttributeLibrary,  stateSelectedCalculatedAttributeLibrary.value))
         if (hasUnsavedChanges &&  unsavedDialogAllowed) {
 
             confirm.require({
@@ -1594,7 +1600,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                      totalItems = data.totalItems;
                      defaultEquation = data.defaultEquation;
                      defaultEquationCache = clone( defaultEquation);
-                     selectedGridItem =  calculatedAttributeGridModelConverter( currentPage)
+                     selectedGridItem.value =  calculatedAttributeGridModelConverter( currentPage)
                      setTimingsMultiSelect( currentPage.calculationTiming);
 
                      setParentLibraryName(data.libraryId);
@@ -1615,7 +1621,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                      totalItems = data.totalItems;
                      defaultEquation = data.defaultEquation;
                      defaultEquationCache = clone( defaultEquation);
-                     selectedGridItem =  calculatedAttributeGridModelConverter( currentPage)
+                     selectedGridItem.value =  calculatedAttributeGridModelConverter( currentPage)
                      setTimingsMultiSelect( currentPage.calculationTiming);
                 }
                  initializing = false;

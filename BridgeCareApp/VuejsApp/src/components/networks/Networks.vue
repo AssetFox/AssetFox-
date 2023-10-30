@@ -131,7 +131,7 @@
                                 </v-btn>
                             </v-row>
                             <v-data-table id="Networks-Attributes-vdatatable" :header='dataSourceGridHeaders' :items='attributeRows'
-                                class='v-table__overflow ghd-table' item-key='id' select-all
+                                class='v-table__overflow ghd-table' item-key='id' show-select
                                 v-model="selectedAttributeRows"
                                 :must-sort='true'
                                 hide-actions

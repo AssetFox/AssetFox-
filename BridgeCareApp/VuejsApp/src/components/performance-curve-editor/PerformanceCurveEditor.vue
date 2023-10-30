@@ -15,7 +15,7 @@
                             item-title="text" 
                             item-value="value" 
                         >
-                            <template v-slot:selection="{ item }">
+                            <!-- <template v-slot:selection="{ item }">
                                 <span class="ghd-control-text">{{ item.raw.text }}</span>
                             </template>
                             <template v-slot:item="{ item }">
@@ -26,7 +26,7 @@
                                     </v-row>
                                     </v-list-item-title>
                                 </v-list-item>
-                            </template>
+                            </template> -->
                         </v-select>
                         <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} 
                             
@@ -134,7 +134,7 @@
                     <v-card class="elevation-0">
                         <v-data-table-server
                             id="PerformanceCurveEditor-deteriorationModels-datatable"                    
-                            select-all
+                            show-select
                             class="fixed-header ghd-table v-table__overflow"
                             item-key="id"
 
@@ -143,7 +143,7 @@
                             :must-sort='true'
                             sort-icon=ghd-table-sort
                             v-model="selectedPerformanceEquations"
-
+                            return-object
                             :items="currentPage"                      
                             :items-length="totalItems"
                             :items-per-page-options="[
@@ -153,9 +153,8 @@
                             ]"
                             v-model:sort-by="performancePagination.sort"
                             v-model:page="performancePagination.page"
-                            v-model:items-per-page="performancePagination.rowsPerPage"
-                            item-value="name"
-                            @update:options="onPaginationChanged"
+                            v-model:items-per-page="performancePagination.rowsPerPage"                          
+                            @update:options="onPaginationChanged"                           
                         >
                             <template slot="items" slot-scope="props" v-slot:item="item">
                                 <tr>
@@ -163,7 +162,7 @@
                                     <v-checkbox id="PerformanceCurveEditor-deleteModel-vcheckbox" class="ghd-checkbox"
                                         hide-details
                                         primary
-                                        v-model='item.isSelected'
+                                        v-model="selectedPerformanceEquations" :value="item.item"
                                     >
                                     </v-checkbox>
                                 </td>                                
@@ -613,10 +612,10 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let selectedPerformanceCurveLibrary: ShallowRef<PerformanceCurveLibrary> = shallowRef(clone(
         emptyPerformanceCurveLibrary,
     ));
-    let performancePagination: ShallowRef<Pagination> = shallowRef(clone(emptyPagination));
+    let performancePagination  = ref(clone(emptyPagination));
     let isPageInit = false;
-    let totalItems = 0;
-    let currentPage: ShallowRef<PerformanceCurve[]> = ref([]);
+    let totalItems = ref(0);
+    let currentPage  = ref<PerformanceCurve[]>([]);
     let isRunning: boolean = true;
     let isShared: boolean = false;
     let selectedScenarioId: string = getBlankGuid();
@@ -678,7 +677,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let librarySelectItemValueAllowedChanged: boolean = true;
     let librarySelectItemValue: Ref<string | null> = ref(null);
 
-    let selectedPerformanceEquations: ShallowRef<PerformanceCurve[]> = ref([]);
+    let selectedPerformanceEquations: Ref<PerformanceCurve[]> = ref([]);
     let selectedPerformanceEquationIds: string[] = [];
 
     let createPerformanceCurveLibraryDialogData: CreatePerformanceCurveLibraryDialogData = clone(
@@ -787,19 +786,19 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         };
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL){
             isRunning = true;
+
             await PerformanceCurveService.getPerformanceCurvePage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<PerformanceCurve>;
                     currentPage.value = data.items;
                     rowCache = clone(currentPage.value)
-                    totalItems = data.totalItems;
+                    totalItems.value = data.totalItems;
                     isRunning = false;
                 }
             });
         }          
         else if(hasSelectedLibrary.value){
             isRunning = true;
-
             await PerformanceCurveService.getPerformanceLibraryModifiedDate(selectedPerformanceCurveLibrary.value.id).then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
@@ -813,7 +812,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                     let data = response.data as PagingPage<PerformanceCurve>;
                     currentPage.value = data.items;
                     rowCache = clone(currentPage.value)
-                    totalItems = data.totalItems;
+                    totalItems.value = data.totalItems;
                     isRunning = false;
                     if (!isNil(selectedPerformanceCurveLibrary.value.id) ) {
                         getIsSharedLibraryAction(selectedPerformanceCurveLibrary).then(()=>isShared = isSharedLibrary.value);
@@ -825,6 +824,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
     watch(selectedPerformanceEquations,()=>onSelectedPerformanceEquationsChanged())
     function onSelectedPerformanceEquationsChanged() {
+        console.log('tset')
         selectedPerformanceEquationIds = getPropertyValues('id', selectedPerformanceEquations.value) as string[];
     } 
     
@@ -864,7 +864,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
     function onSelectItemValueChanged() {
         trueLibrarySelectItemValue = librarySelectItemValue.value
-        selectPerformanceCurveLibraryAction(librarySelectItemValue);
+        selectPerformanceCurveLibraryAction(librarySelectItemValue.value);
     }
 
     watch(stateSelectedPerformanceCurveLibrary,()=> onStateSelectedPerformanceCurveLibraryChanged())
@@ -1439,7 +1439,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                     let data = response.data as PagingPage<PerformanceCurve>;
                     currentPage.value = data.items;
                     rowCache = clone(currentPage.value)
-                    totalItems = data.totalItems;
+                    totalItems.value = data.totalItems;
                     setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
                     loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
                     loadedParentName = parentLibraryName; //store original

@@ -160,7 +160,7 @@
                     :items="budgetYearsGridData"
                     class='v-table__overflow ghd-table' 
                     item-key='year' 
-                    select-all 
+                    show-select 
                     sort-icon=$vuetify.icons.ghd-table-sort
                     v-model='selectedBudgetYearsGridData' 
                     :pagination.sync="pagination"

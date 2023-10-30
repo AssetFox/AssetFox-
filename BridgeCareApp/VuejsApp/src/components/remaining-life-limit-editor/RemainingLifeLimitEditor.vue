@@ -70,16 +70,16 @@
             item-value="name"
             @update:options="onPaginationChanged"
             >
-                <template v-slot:headers="props">
-                    <tr>
-                        <th
-                          v-for="header in gridHeaders"
-                          :key="header.text"
-                        >
-                            {{header.text}}
-                        </th>
-                    </tr>
-                </template>
+            <template v-slot:headers="props">
+                <tr>
+                    <th
+                    v-for="header in gridHeaders"
+                    :key="header.title"
+                    >
+                        {{header.title}}
+                    </th>
+                </tr>
+            </template>
                 <template v-slot:item="props">
                     <tr :active="props.item.selected" @click="props.item.selected = !props.item.selected">
                         <td>

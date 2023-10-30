@@ -18,7 +18,7 @@
                                           class='elevation-1 v-table__overflow budgets-data-table ghd-control-text'
                                           sort-icon=ghd-table-sort
                                           hide-actions
-                                          item-key='id' select-all
+                                          item-key='id' show-select
                                           v-model='selectedBudgets'>
                                 <template slot='items' slot-scope='props'  v-slot:item="props">
                                     <td>

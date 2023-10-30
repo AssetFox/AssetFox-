@@ -103,6 +103,7 @@
                                     @update:options="onUserScenariosPagination"
                                 >
                                     <template slot="items" slot-scope="props" v-slot:item="props">
+                                        <tr>
                                         <td>
                                         
                                             <v-edit-dialog
@@ -217,6 +218,7 @@
                                                 </v-list>
                                             </v-menu>
                                         </td>
+                                    </tr>
                                     </template>
                                     <!-- <v-alert
                                         :model-value="hasMineSearch()"

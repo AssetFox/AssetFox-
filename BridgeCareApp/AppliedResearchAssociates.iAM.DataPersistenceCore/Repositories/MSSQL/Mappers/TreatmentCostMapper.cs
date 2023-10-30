@@ -3,6 +3,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
+using AppliedResearchAssociates.iAM.DTOs.Static;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -20,6 +23,43 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static ScenarioTreatmentCostEntity ToScenarioEntity(this TreatmentCostDTO dto, Guid treatmentId) =>
             new ScenarioTreatmentCostEntity { Id = dto.Id, ScenarioSelectableTreatmentId = treatmentId };
+
+
+        public static ScenarioTreatmentCostEntity ToScenarioEntityWithCriterionLibraryJoin(this TreatmentCostDTO dto, Guid simulationId,
+            BaseEntityProperties baseEntityProperties)
+        {
+
+            var entity = ToScenarioEntity(dto, simulationId);
+            var criterionLibraryDto = dto.CriterionLibrary;
+            var isvalid = criterionLibraryDto.IsValid();
+            if (isvalid)
+            {
+                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity(baseEntityProperties);
+
+                var join = new CriterionLibraryScenarioTreatmentCostEntity
+                {
+                    ScenarioTreatmentCostId = entity.Id,
+                    CriterionLibrary = criterionLibrary,
+                };
+                BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+                BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
+                entity.CriterionLibraryScenarioTreatmentCostJoin = join;
+            }
+            var hasEquation = dto.Equation != null && dto.Equation.Id != Guid.Empty;
+            if (hasEquation)
+            {
+                var equation = EquationMapper.ToEntity(dto.Equation, baseEntityProperties);
+                var joinEquation = new ScenarioTreatmentCostEquationEntity
+                {
+                    ScenarioTreatmentCostId = entity.Id,
+                    Equation = equation,
+                };
+                BaseEntityPropertySetter.SetBaseEntityProperties(joinEquation, baseEntityProperties);
+                entity.ScenarioTreatmentCostEquationJoin = joinEquation;
+            }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;          
+        }
 
         public static void CreateTreatmentCost(this ScenarioTreatmentCostEntity entity, SelectableTreatment selectableTreatment)
         {

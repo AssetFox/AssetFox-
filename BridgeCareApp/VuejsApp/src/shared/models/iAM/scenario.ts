@@ -21,6 +21,7 @@ export interface Scenario {
     reportStatus?: string;
     runTime?: string;
 }
+
 export interface CloneScenario {
     id: string;
     name: string;
@@ -38,6 +39,7 @@ export interface CloneScenario {
     reportStatus?: string;
     runTime?: string;
 }
+
 export interface QueuedWork {
     id: string;
     name: string;
@@ -98,6 +100,7 @@ export interface TabItems {
 
 export interface CloneScenarioData {
     scenarioId: string;
+    destinationNetworkId: string;
     networkId: string;
     destinationNetworkId:string;
     scenarioName: string;
@@ -124,6 +127,7 @@ export const emptyCloneScenario: CloneScenario = {
     createdDate: new Date(),
     lastModifiedDate: new Date(),
 };
+
 export const emptyQueuedWork: QueuedWork = {
     id: '',
     name: '',

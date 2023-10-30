@@ -95,5 +95,9 @@ namespace AppliedResearchAssociates.iAM.DTOs
         /// </summary>
         public bool IsUnselectable { get; set; }
 
+        /// <summary>
+        /// List of SupersedeRules for a Treatment
+        /// </summary>
+        public List<TreatmentSupersedeRuleDTO> SupersedeRules { get; set; }
     }
 }

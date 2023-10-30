@@ -36,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public const string AssetDetailSaveOverrideBatchSizeKey = "AssetDetailBatchSizeOverrideForValueSave";
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        
+
         public void CreateSimulationOutputViaRelational(Guid simulationId, SimulationOutput simulationOutput,
             IWorkQueueLog loggerForUserInfo = null, ILog loggerForTechnicalInfo = null, CancellationToken? cancellationToken = null)
         {
@@ -81,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             try
             {
-                if(cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                 {
                     _unitOfWork.Rollback();
                     return;
@@ -101,8 +101,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(family.AssetSummaryDetailValues, batchSize: batchSize);
                 saveMemos.Mark("assetSummaryDetailValues");
                 _unitOfWork.Commit();
-                 foreach (var year in simulationOutput.Years)
-                {                  
+                foreach (var year in simulationOutput.Years)
+                {
                     loggerForUserInfo.UpdateWorkQueueStatus($"Saving year {year.Year}");
                     _unitOfWork.BeginTransaction();
                     if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
@@ -202,7 +202,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 foreach (var item in simulationOutput.Years)
                 {
-                    var  targetGoalsToRemove = item.TargetConditionGoals.Where(_ => double.IsNaN(_.TargetValue) || double.IsNaN(_.ActualValue)).ToList();
+                    var targetGoalsToRemove = item.TargetConditionGoals.Where(_ => double.IsNaN(_.TargetValue) || double.IsNaN(_.ActualValue)).ToList();
                     targetGoalsToRemove.ForEach(_ => item.TargetConditionGoals.Remove(_));
                     var conditionGoalsToRemove = item.DeficientConditionGoals.Where(_ => double.IsNaN(_.DeficientLimit) || double.IsNaN(_.AllowedDeficientPercentage) || double.IsNaN(_.ActualDeficientPercentage)).ToList();
                     conditionGoalsToRemove.ForEach(_ => item.DeficientConditionGoals.Remove(_));
@@ -246,7 +246,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var section = config.GetSection(SimulationOutputLoadKey);
             var overrideSection = section.GetSection(configurationKey);
             var overrideValue = overrideSection.Value;
-            if (overrideValue!=null)
+            if (overrideValue != null)
             {
                 if (int.TryParse(overrideValue, out int overrideInt))
                 {
@@ -394,7 +394,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             domain.Years.Sort((y1, y2) => y1.Year.CompareTo(y2.Year));
             memos.MarkInformation("Load done", loggerForTechinalInfo);
             loggerForUserInfo.Information($"Simulation output load completed");
-            
+
             if (ShouldHackSaveTimingsToFile)
             {
                 var outputFilename = "LoadTimings.txt";
@@ -403,7 +403,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return domain;
         }
 
-        
+
         public SimulationOutput GetSimulationOutputViaJson(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
@@ -459,9 +459,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             queueLogger.UpdateWorkQueueStatus("Starting conversion to relational");
             CreateSimulationOutputViaRelational(simulationId, output, queueLogger, cancellationToken: cancellationToken);
-            try
+            _unitOfWork.AsTransaction(() =>
             {
-                _unitOfWork.BeginTransaction();
                 queueLogger.UpdateWorkQueueStatus("Attaching relational ouput to Json ouput");
                 var outputId = _unitOfWork.Context.SimulationOutput.First(_ => _.SimulationId == simulationId).Id;
                 var outputJsons = _unitOfWork.Context.SimulationOutputJson.Where(_ => _.SimulationId == simulationId).ToList();
@@ -469,16 +468,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     outputJsons.ForEach(_ => _.SimulationOutputId = outputId);
                 }
-                
+
                 _unitOfWork.Context.UpdateAll(outputJsons);
                 _unitOfWork.Commit();
-            }
-            catch(Exception ex)
-            {
-                _unitOfWork.Rollback();
-                throw;
-            }
-            
+            });
         }
 
         private void progressUpdate(Action<string> updateAction, IHubService hubService)

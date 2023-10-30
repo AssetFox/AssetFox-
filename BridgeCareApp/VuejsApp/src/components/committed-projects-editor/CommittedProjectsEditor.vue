@@ -159,7 +159,8 @@
                                                 && header.value !== 'year' 
                                                 && header.value !== 'keyAttr' 
                                                 && header.value !== 'treatment'
-                                                && header.value !== 'cost'"
+                                                && header.value !== 'cost'
+                                                && header.value !== 'projectSource'"
                                                 readonly
                                                 class="sm-txt"
                                                 :model-value="props.item[header.value]"
@@ -482,6 +483,14 @@ import TreatmentService from '@/services/treatment.service';
             class: '',
             width: '10%',
         },
+        { 
+        text: 'Project Source', 
+        value: 'projectSource',
+        align: 'left',
+        sortable: false,
+        class: '',
+        width: '10%'
+      },
         {
             text: 'Actions',
             value: 'actions',

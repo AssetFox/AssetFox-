@@ -60,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             // and non-culvert bridges
             var costPerBPNPerYear = new Dictionary<int, Dictionary<string, decimal>>();
             var costAndCountPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
-            var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
+            var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource)>>();
             var countForCompletedProject = new Dictionary<int, Dictionary<string, int>>();
             var countForCompletedCommittedProject = new Dictionary<int, Dictionary<string, int>>();
 
@@ -98,15 +98,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         #region Private methods
 
         private void FillDataToUseInExcel(SimulationOutput reportOutputData, Dictionary<int, Dictionary<string, decimal>> costPerBPNPerYear,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costAndCountPerTreatmentPerYear,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj, Dictionary<int, Dictionary<string, int>> countForCompletedProject,
-            Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject)
+     Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costAndCountPerTreatmentPerYear,
+     Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource)>> yearlyCostCommittedProj, Dictionary<int, Dictionary<string, int>> countForCompletedProject,
+     Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject)
         {
             var isInitialYear = true;
             foreach (var yearData in reportOutputData.Years)
             {
                 costAndCountPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int bridgeCount)>());
-                yearlyCostCommittedProj.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int bridgeCount)>());
+                yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource)>();
                 costPerBPNPerYear.Add(yearData.Year, new Dictionary<string, decimal>());
                 countForCompletedProject.Add(yearData.Year, new Dictionary<string, int>());
                 countForCompletedCommittedProject.Add(yearData.Year, new Dictionary<string, int>());
@@ -127,16 +127,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                         if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(section.AppliedTreatment))
                         {
-                            yearlyCostCommittedProj[yearData.Year].Add(section.AppliedTreatment, (commitedCost, 1));
+                            yearlyCostCommittedProj[yearData.Year].Add(section.AppliedTreatment, (commitedCost, 1, section.ProjectSource));
                         }
                         else
                         {
-                            var treatmentCost = yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment].treatmentCost + commitedCost;
-                            var bridgeCount = yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment].bridgeCount + 1;
-                            var newCostAndCount = (treatmentCost, bridgeCount);
-                            yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment] = newCostAndCount;
+                            var currentRecord = yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment];
+                            var treatmentCost = currentRecord.treatmentCost + commitedCost;  
+                            var bridgeCount = currentRecord.bridgeCount + 1;  
+                            var projectSource = currentRecord.projectSource;
+                            yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment] = (treatmentCost, bridgeCount, projectSource);
                         }
-
+                 
                         costPerBPNPerYear[yearData.Year][busPlanNetwork] += commitedCost;
 
                         // Adding count for completed committed project

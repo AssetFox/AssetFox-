@@ -26,7 +26,7 @@
                             <Column sortable field="name" header="Name"></Column>
                             <Column field="mergedExpression" header="Criteria">
                                 <template #body="slotProps">
-                                    <v-btn flat>
+                                    <v-btn v-if="selectedReport.name.includes('Summary')" flat>
                                       <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')" @click="showEditDialog">
                                       <Dialog v-model:visible="editShow" :style="{ width: 'auto', height: 'auto'}" :closable="false">
                                         <v-textarea>

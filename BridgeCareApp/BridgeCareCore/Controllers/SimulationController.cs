@@ -40,6 +40,7 @@ namespace BridgeCareCore.Controllers
         private readonly IWorkQueueService _workQueueService;
         private readonly IGeneralWorkQueueService _generalWorkQueueService;
         private readonly IClaimHelper _claimHelper;
+        private readonly ICompleteSimulationCloningService _completeSimulationCloningService;
 
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
@@ -51,12 +52,14 @@ namespace BridgeCareCore.Controllers
             IHubService hubService,
             IHttpContextAccessor httpContextAccessor,
             IClaimHelper claimHelper,
+            ICompleteSimulationCloningService completeSimulationCloningService,
             IGeneralWorkQueueService generalWorkQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
             _workQueueService = workQueueService ?? throw new ArgumentNullException(nameof(workQueueService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
             _generalWorkQueueService = generalWorkQueueService ?? throw new ArgumentNullException(nameof(generalWorkQueueService));
+            _completeSimulationCloningService = completeSimulationCloningService ?? throw new ArgumentNullException(nameof(completeSimulationCloningService));
         }
 
         [HttpPost]
@@ -119,7 +122,8 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => {
+                var result = await Task.Factory.StartNew(() =>
+                {
                     var scenariosToReturn = UnitOfWork.SimulationRepo.GetSharedScenarios(UserInfo.HasAdminAccess, UserInfo.HasSimulationAccess);
                     scenariosToReturn = scenariosToReturn.Concat(UnitOfWork.SimulationRepo.GetUserScenarios()).ToList();
                     return scenariosToReturn;
@@ -139,7 +143,7 @@ namespace BridgeCareCore.Controllers
         public async Task<IActionResult> GetWorkQueuePage([FromBody] PagingRequestModel<QueuedWorkDTO> request)
         {
             try
-            {                
+            {
                 var result = await Task.Factory.StartNew(() => _workQueueService.GetWorkQueuePage(request));
                 return Ok(result);
             }
@@ -213,7 +217,7 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.SimulationRepo.CreateSimulation(networkId, dto);
                     return UnitOfWork.SimulationRepo.GetSimulation(dto.Id);
                 });
-                
+
                 return Ok(result);
             }
             catch (Exception e)
@@ -232,17 +236,31 @@ namespace BridgeCareCore.Controllers
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-
-                    _claimHelper.CheckUserSimulationModifyAuthorization(dto.scenarioId, UserId);
-                    var cloneResult = UnitOfWork.SimulationRepo.CloneSimulation(dto.scenarioId, dto.networkId, dto.scenarioName);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(dto.ScenarioId, UserId);
+                    if (dto.DestinationNetworkId != dto.NetworkId)
+                    {
+                        var isCompatible = _completeSimulationCloningService.CheckCompatibleNetworkAttributes(dto);
+                        if (!isCompatible)
+                        {
+                            //Provide error message when networks are not compatible
+                            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::CloneSimulation - destination network is not compatible.");
+                            return null;
+                        }
+                    }
+                    var cloneResult = _completeSimulationCloningService.Clone(dto);
                     return cloneResult;
                 });
 
-                if (result.WarningMessage != null)
+                if (result == null)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+                    return Ok();
                 }
-                return Ok(result.Simulation);
+                else
+                {
+                    return Ok(result.Simulation);
+                }
+
+
             }
             catch (Exception e)
             {
@@ -289,7 +307,7 @@ namespace BridgeCareCore.Controllers
             var simulationName = "";
             try
             {
-                
+
                 await Task.Factory.StartNew(() =>
                 {
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
@@ -375,9 +393,9 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var work = _workQueueService.GetQueuedWorkByWorkId(workId);
-                if(work == null)
+                if (work == null)
                     return Ok();
-                if(work.WorkType == WorkType.SimulationAnalysis)
+                if (work.WorkType == WorkType.SimulationAnalysis)
                 {
                     _claimHelper.CheckUserSimulationCancelAnalysisAuthorization(work.DomainId, UserInfo.Name, false);
                     var hasBeenRemovedFromQueue = _generalWorkQueueService.Cancel(workId);
@@ -404,11 +422,11 @@ namespace BridgeCareCore.Controllers
                 else
                 {
                     var hasBeenRemovedFromQueue = _generalWorkQueueService.Cancel(workId);
-                    if(hasBeenRemovedFromQueue)
+                    if (hasBeenRemovedFromQueue)
                         HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueUpdate, workId);
                     else
                         HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = workId, Status = "Canceling" });
-                }                           
+                }
 
                 return Ok();
             }
@@ -420,7 +438,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                
+
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(workId);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling simulation analysis for {simulationName}::{e.Message}");
                 throw;
@@ -437,14 +455,14 @@ namespace BridgeCareCore.Controllers
                 var work = _workQueueService.GetFastQueuedWorkByWorkId(workId);
                 if (work == null)
                     return Ok();
-                
-                
-                    var hasBeenRemovedFromQueue = _generalWorkQueueService.CancelInFastQueue(workId);
-                    if (hasBeenRemovedFromQueue)
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, workId);
-                    else
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = workId, Status = "Canceling" });
-                
+
+
+                var hasBeenRemovedFromQueue = _generalWorkQueueService.CancelInFastQueue(workId);
+                if (hasBeenRemovedFromQueue)
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, workId);
+                else
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueStatusUpdate, new QueuedWorkStatusUpdateModel() { Id = workId, Status = "Canceling" });
+
 
                 return Ok();
             }
@@ -489,7 +507,7 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-                
+
         [HttpPost]
         [Route("RemoveNoTreatmentBeforeCommitted/{simulationId}")]
         [Authorize]

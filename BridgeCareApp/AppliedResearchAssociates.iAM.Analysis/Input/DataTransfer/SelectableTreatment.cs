@@ -22,5 +22,5 @@ public sealed class SelectableTreatment : Treatment
 
     public int ShadowForSameTreatment { get; set; }
 
-    public List<TreatmentSupersession> Supersessions { get; init; } = new();
+    public List<TreatmentSupersedeRule> SupersedeRules { get; init; } = new();
 }

@@ -230,7 +230,7 @@ const actions = {
     async cloneScenario({dispatch, commit}: any, payload: any) {
         let cloneScenarioData: CloneScenarioData = {
             scenarioId: payload.scenarioId,
-            destinationNetworkId:payload.destinationNetworkId,
+            destinationNetworkId: payload.destinationNetworkId,
             networkId: payload.networkId,
             scenarioName: payload.scenarioName
         }

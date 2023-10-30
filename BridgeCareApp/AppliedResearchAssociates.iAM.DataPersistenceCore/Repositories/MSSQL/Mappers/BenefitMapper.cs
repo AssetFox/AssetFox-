@@ -16,14 +16,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AttributeId = attributeId
             };
 
-        public static BenefitEntity ToEntity(this BenefitDTO dto, Guid analysisMethodId, Guid attributeId) =>
-            new BenefitEntity
+        public static BenefitEntity ToEntity(this BenefitDTO dto, Guid analysisMethodId, Guid attributeId, BaseEntityProperties baseEntityProperties = null)
+        {
+            var entity = new BenefitEntity
+
             {
                 Id = dto.Id,
                 AnalysisMethodId = analysisMethodId,
                 Limit = dto.Limit,
                 AttributeId = attributeId
             };
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
+        }
 
         public static BenefitDTO ToDto(this BenefitEntity entity) =>
             new BenefitDTO { Id = entity.Id, Limit = entity.Limit, Attribute = entity.Attribute.Name };

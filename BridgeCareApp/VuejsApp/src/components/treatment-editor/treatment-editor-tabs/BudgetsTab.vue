@@ -5,7 +5,7 @@
                 <v-row>
                     <v-col cols = "10">
                         <v-row column v-if='budgets?.values.length === 0'>
-                            <h3>Investment Library Not Found</h3>
+                            <h3 id="ButgetsTab-InvestmentLibraryNotFound-Header">Investment Library Not Found</h3>
                             <div>
                                 No investmentModule library data was found for the selected scenario.
                             </div>
@@ -15,6 +15,7 @@
                         </v-row>
                         <v-row v-else>
                             <v-data-table :headers='budgetHeaders' :items='budgets'
+                                          id="BudgetsTab-Budgets-datatable"
                                           class='elevation-1 v-table__overflow budgets-data-table ghd-control-text'
                                           sort-icon=ghd-table-sort
                                           hide-actions
@@ -22,7 +23,7 @@
                                           v-model='selectedBudgets'>
                                 <template slot='items' slot-scope='props'  v-slot:item="props">
                                     <td>
-                                        <v-checkbox hide-details primary v-model='props.item.selected' />
+                                        <v-checkbox id="BudgetsTab-Budget-checkbox" hide-details primary v-model='props.item.selected' />
                                     </td>
                                     <td style="width:400px;">
                                         {{ props.item.name }}

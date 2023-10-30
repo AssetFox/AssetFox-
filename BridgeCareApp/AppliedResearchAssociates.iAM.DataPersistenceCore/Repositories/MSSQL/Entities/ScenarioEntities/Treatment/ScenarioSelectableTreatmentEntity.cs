@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using static AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums.TreatmentEnum;
 
@@ -14,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             ScenarioTreatmentCosts = new HashSet<ScenarioTreatmentCostEntity>();
             ScenarioTreatmentPerformanceFactors = new HashSet<ScenarioTreatmentPerformanceFactorEntity>();
             ScenarioTreatmentSchedulings = new HashSet<ScenarioTreatmentSchedulingEntity>();
-            ScenarioTreatmentSupersessions = new HashSet<ScenarioTreatmentSupersessionEntity>();
+            ScenarioTreatmentSupersedeRules = new HashSet<ScenarioTreatmentSupersedeRuleEntity>();
         }
         public string Description { get; set; }
 
@@ -38,6 +39,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<ScenarioTreatmentCostEntity> ScenarioTreatmentCosts { get; set; }
         public virtual ICollection<ScenarioTreatmentPerformanceFactorEntity> ScenarioTreatmentPerformanceFactors { get; set; }
         public virtual ICollection<ScenarioTreatmentSchedulingEntity> ScenarioTreatmentSchedulings { get; set; }
-        public virtual ICollection<ScenarioTreatmentSupersessionEntity> ScenarioTreatmentSupersessions { get; set; }
+        public virtual ICollection<ScenarioTreatmentSupersedeRuleEntity> ScenarioTreatmentSupersedeRules { get; set; }
     }
 }

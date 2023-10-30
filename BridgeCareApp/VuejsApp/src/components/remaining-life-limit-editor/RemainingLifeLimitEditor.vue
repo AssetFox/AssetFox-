@@ -31,7 +31,7 @@
                                 <span>Shared</span>
                             </template>
                         </v-badge>
-                        <v-btn @click='onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        <v-btn id="RemainingLifeLimitEditor-shareLibrary-vbtn" @click='onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
                         </v-btn>
@@ -41,7 +41,7 @@
                 <v-row justify-end align-end style="padding-top: 18px !important;">
                     <div>
                         <v-btn id="RemainingLifeLimitEditor-addRemainingLifeLimit-btn" class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" v-show="librarySelectItemValue != null || hasScenario" variant = "outlined">Add Remaining Life Limit</v-btn>
-                        <v-btn class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style ="ri"  @click="onShowCreateRemainingLifeLimitLibraryDialog(false)" v-show="!hasScenario" variant = "outlined">Create New Library</v-btn>
+                        <v-btn id="RemainingLifeLimitEditor-createNewLibrary-vbtn" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style ="ri"  @click="onShowCreateRemainingLifeLimitLibraryDialog(false)" v-show="!hasScenario" variant = "outlined">Create New Library</v-btn>
                     </div>
                 </v-row>
                 </v-col>
@@ -105,7 +105,7 @@
                                     ]"
                                 />
                                 <template v-slot:input>
-                                    <v-select
+                                    <v-select id="RemainingLifeLimitEditor-editAttribute-select"
                                         :items="numericAttributeSelectItems"
                                         item-title="text"
                                         item-value="value"
@@ -163,12 +163,12 @@
                         <td v-else>-
                         </td>
                         <td class="px-0">
-                            <v-btn @click="onShowCriterionLibraryEditorDialog(props.item)" icon>
+                            <v-btn id="RemainingLifeLimitEditor-editCriteria-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)" icon>
                                 <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                             </v-btn>   
                         </td>
                         <td justify-end>
-                            <v-btn @click="onRemoveRemainingLifeLimitIcon(props.item)" icon>
+                            <v-btn id="RemainingLifeLimitEditor-deleteAttribute-btn" @click="onRemoveRemainingLifeLimitIcon(props.item)" icon>
                                 <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>                          
                         </td>

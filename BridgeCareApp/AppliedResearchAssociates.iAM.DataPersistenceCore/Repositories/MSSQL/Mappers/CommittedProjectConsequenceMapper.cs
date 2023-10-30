@@ -28,19 +28,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 PerformanceFactor = entity.PerformanceFactor
             };
 
-        public static CommittedProjectConsequenceEntity ToEntity(this CommittedProjectConsequenceDTO dto, IList<AttributeEntity> attributes)
+        public static CommittedProjectConsequenceEntity ToEntity(this CommittedProjectConsequenceDTO dto, IList<AttributeEntity> attributes, BaseEntityProperties baseEntityProperties=null)
         {
             var attributeEntity = attributes.FirstOrDefault(_ => _.Name == dto.Attribute);
             if (attributeEntity == null)
                 throw new ArgumentException($"Unable to find {dto.Attribute} in the provided list of attributes");
-            return new CommittedProjectConsequenceEntity
+            var entity = new CommittedProjectConsequenceEntity
             {
                 Id = dto.Id,
                 CommittedProjectId = dto.CommittedProjectId,
                 AttributeId = attributeEntity.Id,
                 ChangeValue = dto.ChangeValue,
                 PerformanceFactor = dto.PerformanceFactor
+               
             };
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
         }
     }
 }

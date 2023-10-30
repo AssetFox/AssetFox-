@@ -66,7 +66,7 @@ namespace BridgeCareCore.Services
                 {
                     _log.Information($"Message: {message}");
                 }
-                throw new Exception($"Failed to generate '{reportName}' on simulation '{scenarioName}':: {report.Status}");
+                throw new Exception($"Failed to generate '{reportName}' on simulation '{scenarioName}': {report.Status}");
             }
 
             // Handle an incomplete run without errors
@@ -119,6 +119,7 @@ namespace BridgeCareCore.Services
                 {
                     Id = reportObject.ID,
                     SimulationId = reportObject.SimulationID,
+                    NetworkId = (reportObject.NetworkID != Guid.Empty) ? reportObject.NetworkID : null,
                     Type = reportObject.ReportTypeName,
                     Result = reportObject.Results,
                     ExpirationDate = DateTime.Now.AddDays(30),

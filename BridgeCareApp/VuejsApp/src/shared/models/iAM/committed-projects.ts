@@ -25,7 +25,7 @@ export interface SectionCommittedProjectTableData {
     cost: number;
     errors: string[];
     yearErrors: string[];
-    category: TreatmentCategory;
+    category: string;
     projectSource: string;
 }
 export interface SectionCommittedProject extends BaseCommittedProject{
@@ -62,6 +62,11 @@ export const emptyCommittedProjectConsequence ={
     attribute: '',
     performanceFactor: 1.2,
     changeValue: ''
+}
+
+export interface CommittedProjectTemplates{
+    templateName: string;
+    templateData: string;
 }
 
 export interface CommittedProjectFillTreatmentReturnValues {

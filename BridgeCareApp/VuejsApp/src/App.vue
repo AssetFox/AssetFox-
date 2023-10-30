@@ -229,7 +229,7 @@
                 type="info">
                     {{stateAlertMessage}}
                 </v-alert>
-                <div class="scenario-status" v-if="hasSelectedScenario">
+                <div class="scenario-status" v-if="hasSelectedScenario" style="margin-bottom: 20px; height: auto;">
                         <br>
                         <span>Scenario: </span>
                             <span id = 'App-scenarioName-span' style="font-weight: normal;">{{ selectedScenario.name }}</span>
@@ -318,26 +318,23 @@ import config from '../public/config.json';
     let username = computed<string>(() => store.state.authenticationModule.username);
     let hasAdminAccess = computed(() => store.state.authenticationModule.hasAdminAccess);
 
-    let refreshing = computed<boolean>(() => store.state.authenticationModule.refreshing);
+    const refreshing = computed<boolean>(() => store.state.authenticationModule.refreshing);
     //let navigation = ref<any[]>(store.state.breadcrumbModule.navigation);
-    let notifications = ref<Notification[]>(store.state.notificationModule.notifications);
-    let notificationCounter = computed<number>(() => store.state.notificationModule.counter);
-    let stateSelectedScenario = ref<Scenario>(store.state.scenarioModule.selectedScenario);
-    let packageVersion = ref<string>(store.state.announcementModule.packageVersion);
-    let securityType = ref<string>(store.state.authenticationModule.securityType);
-    let announcements = computed(() => store.state.announcementModule.announcements);
-    let currentUser = ref<User>(store.state.userModule.currentUser);
-    let stateImplementationName = computed<string>(()=>store.state.adminSiteSettingsModule.implementationName);
-    let agencyLogoBase64 = computed(() => store.state.adminSiteSettingsModule.agencyLogo);
-    let productLogoBase64 = computed(() => store.state.adminSiteSettingsModule.productLogo);
-    let stateInventoryReportNames = ref<string[]>(store.state.adminDataModule.inventoryReportNames);
-    let stateAlertMessage = ref<string>(store.state.alertModule.alertMessage);
-    let stateAlert = ref<boolean>(store.state.alertModule.alert);
+    const notifications = computed<Notification[]>(() => store.state.notificationModule.notifications);
+    const notificationCounter = computed<number>(() => store.state.notificationModule.counter);
+    const stateSelectedScenario = computed<Scenario>(() => store.state.scenarioModule.selectedScenario);
+    const packageVersion = computed<string>(() => store.state.announcementModule.packageVersion);
+    const securityType = computed<string>(() => store.state.authenticationModule.securityType);
+    const announcements = computed(() => store.state.announcementModule.announcements);
+    const currentUser = computed<User>(() =>store.state.userModule.currentUser);
+    const stateImplementationName = computed<string>(()=>store.state.adminSiteSettingsModule.implementationName);
+    const agencyLogoBase64 = computed(() => store.state.adminSiteSettingsModule.agencyLogo);
+    const productLogoBase64 = computed(() => store.state.adminSiteSettingsModule.productLogo);
+    const stateInventoryReportNames = computed<string[]>(() => store.state.adminDataModule.inventoryReportNames);
+    const stateAlertMessage = computed<string>(() => store.state.alertModule.alertMessage);
+    const stateAlert = ref<boolean>(store.state.alertModule.alert);
     async function logOutAction(payload?: any): Promise<any> {await store.dispatch('logOut', payload);}
-
     async function setIsBusyAction(payload?: any): Promise<any> { await store.dispatch('setIsBusy', payload);}
-    //async function setIsBusyAction(payload?: any) { () => store.dispatch('setIsBusy');}
-
     async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks', payload);}
     async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes', payload);}
     async function getAnnouncementsAction(payload?: any): Promise<any> { await store.dispatch('getAnnouncements', payload);}
@@ -368,9 +365,9 @@ import config from '../public/config.json';
     let alertDialogData: AlertData = clone(emptyAlertData);
     let pushRouteUpdate: boolean = false;
     let route: any = {};
-    let selectedScenario: Scenario = clone(emptyScenario);
-    let hasSelectedScenario: boolean = false;
-    let selectedScenarioHasStatus: boolean = false;
+    const selectedScenario = ref<Scenario>(clone(emptyScenario));
+    const hasSelectedScenario = ref<boolean>(false);
+    const selectedScenarioHasStatus = ref<boolean>(false);
     let ignoredAPIs: string[] = [
         'SynchronizeLegacySimulation',
         'RunSimulation',
@@ -426,12 +423,11 @@ import config from '../public/config.json';
         return authenticated && hasRole;
     }
     
-    watch(stateSelectedScenario, () => onStateSelectedScenarioChanged)
-    function onStateSelectedScenarioChanged() {
-        selectedScenario = clone(stateSelectedScenario.value);
-        hasSelectedScenario = selectedScenario.id !== getBlankGuid();
-        selectedScenarioHasStatus = hasValue(selectedScenario.status);
-    }
+    watch(stateSelectedScenario, () => {
+        selectedScenario.value = clone(stateSelectedScenario.value);
+        hasSelectedScenario.value= selectedScenario.value.id !== getBlankGuid();
+        selectedScenarioHasStatus.value = hasValue(selectedScenario.value.status);
+    })
 
     watch(authenticated, () => {
         if (authenticated) {
@@ -581,8 +577,7 @@ import config from '../public/config.json';
     }
 
     
-    onMounted(() => mounted());
-    function mounted() {
+    onMounted(() => {
 
         $emitter.on(
             Hub.BroadcastEventType.BroadcastErrorEvent,
@@ -617,7 +612,7 @@ import config from '../public/config.json';
             implementationName.value = "BridgeCare"
         else
             implementationName.value = stateImplementationName.value
-    }
+    });
 
     onBeforeUnmount(() => beforeDestroy());
     function beforeDestroy() {

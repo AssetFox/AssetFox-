@@ -1,50 +1,25 @@
 <template>
     <v-row>
-        <v-col cols = "12">
-           <v-row>
-                <v-col class="ghd-constant-header">
+        <v-col>
+            <v-row class="ghd-constant-header" align="center" justify="space-between">
+                <v-col cols="auto">
                     <div style="margin-bottom: 10px;">
                     <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
                     </div>
-                    <v-row>
-                        <v-col>
-                        <v-select
-                            id="TargetConditionGoalEditor-SelectLibrary-select"
-                            class="ghd-select ghd-text-field ghd-text-field-border"
-                            :items="librarySelectItems"
-                            item-title="text"
-                            item-value="value"
-                            v-model="librarySelectItemValue"
-                            variant="outlined"
-                            density="compact"
-                        >
-                        </v-select>
-                    </v-col>
-                    <v-col>
-                    <v-btn 
-                            id="TargetConditionGoalEditor=CreateLibrary-btn"
-                            @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
-                            class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                            v-show="!hasScenario"
-                            variant = "outlined"
-                        >
-                        Create New Library
-                    </v-btn>
-                    </v-col>
-                    <v-col>
-                        <v-btn variant = "outlined"
-                            id="TargetConditionGoalEditor-addTargetConditionGoal-btn"
-                            @click="showCreateTargetConditionGoalDialog = true"
-                            class="ghd-control-border ghd-blue"
-                            v-show="hasSelectedLibrary || hasScenario" 
-                        >Add Target Condition Goal</v-btn>
-                    </v-col>
-                    </v-row>
+                    <v-select
+                        id="TargetConditionGoalEditor-SelectLibrary-select"
+                        class="ghd-select ghd-text-field ghd-text-field-border"
+                        rounded="0"
+                        :items="librarySelectItems"
+                        item-title="text"
+                        item-value="value"
+                        v-model="librarySelectItemValue"
+                        variant="outlined"
+                        density="compact"
+                    />
+                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
                 </v-col>
-                <v-col cols = "12" >
-                <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
-                </v-col>
-                <v-col cols = "12" class="ghd-constant-header">
+                <v-col cols = "auto" class="ghd-constant-header">
                     <v-row v-if="hasSelectedLibrary && ! hasScenario" style="padding-top: 10px; padding-left: 10px">
                         <div v-if="hasSelectedLibrary && !hasScenario" class="header-text-content owner-padding" style="padding-top: 7px;">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
@@ -54,20 +29,43 @@
                             v-if="hasSelectedLibrary && !hasScenario"
                         >
                         </v-divider>
-                        <v-badge v-show="isShared" style="padding: 10px">
+                        <v-btn @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                            v-show='!hasScenario' rounded="0">
+                        <!-- <v-badge v-show="isShared" style="padding: 10px">
                             <template v-slot: badge>
                                 <span>Shared</span>
                             </template>
                         </v-badge>
                         <v-btn id="TargetConditionGoalEditor-ShareLibrary-btn" @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
-                            v-show='!hasScenario'>
+                            v-show='!hasScenario'> -->
                             Share Library
                         </v-btn>
                     </v-row>
                 </v-col>
-           </v-row>
+                <v-col cols="auto">
+                    <v-btn variant = "outlined"
+                            id="TargetConditionGoalEditor-addTargetConditionGoal-btn"
+                            @click="showCreateTargetConditionGoalDialog = true"
+                            class="ghd-control-border ghd-blue"
+                            style="margin: 5px;"
+                            rounded="0"
+                            v-show="hasSelectedLibrary || hasScenario" 
+                        >Add Target Condition Goal</v-btn>
+                    <v-btn 
+                                id="TargetConditionGoalEditor=CreateLibrary-btn"
+                                @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
+                                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                                style="margin:5px"
+                                v-show="!hasScenario"
+                                variant = "outlined"
+                                rounded="0"
+                            >
+                            Create New Library
+                    </v-btn>
+                </v-col>
+            </v-row>
         </v-col>
-        <div class="targets-data-table" style="width: 85%;height: auto;">
+        <div class="targets-data-table" v-if="hasSelectedLibrary || hasScenario" style="width: 85%;height: auto;">
                 <v-data-table-server
                     id="TargetConditionGoalEditor-targetConditionGoals-vdatatable"
                     :headers="targetConditionGoalGridHeaders"
@@ -191,85 +189,83 @@
                     </tr>
                     </template>
                 </v-data-table-server>
-            </div>
-            <v-divider
-                :thickness="4"
-                class="border-opacity-100"
-            ></v-divider>
-            <v-row v-show="hasSelectedLibrary || hasScenario">
-                <v-col>
-                    <v-btn flat
-                        id="TargetConditionGoalEditor-deleteSelected-vbtn"
-                        class="ghd-control-label ghd-blue"
-                        @click="onRemoveTargetConditionGoals"> 
-                        Delete Selected 
-                    </v-btn>
-                </v-col>
-            </v-row>
-        <v-row>
-            <v-col v-show="hasSelectedLibrary && !hasScenario">
-                <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
+        </div>
+        <v-divider
+            :thickness="4"
+            class="border-opacity-100"
+        ></v-divider>
+        <v-col cols="12">
+            <v-btn flat
+                v-show="hasSelectedLibrary || hasScenario"
+                id="TargetConditionGoalEditor-deleteSelected-vbtn"
+                class="ghd-control-label ghd-blue"
+                @click="onRemoveTargetConditionGoals"> 
+                Delete Selected 
+            </v-btn>
+        </v-col>
+        <v-col cols="12">
+                <v-subheader v-show="hasSelectedLibrary && !hasScenario" class="ghd-control-label ghd-md-gray">Description</v-subheader>
                 <v-textarea
+                    v-show="hasSelectedLibrary && !hasScenario"
                     class="ghd-control-text ghd-control-border"
                     variant="outlined"
+                    density="compact"
                     v-model="selectedTargetConditionGoalLibrary.description"
                     @update:model-value="checkHasUnsavedChanges()">
                 </v-textarea>
-            </v-col>
-            <v-row style="margin: 20px;" justify="center">
-            <v-col cols="6" v-show="hasSelectedLibrary || hasScenario" style="padding: 10px;">
-                <v-row >
-                    <v-btn variant = "outlined"
-                        id="TargetConditionGoalEditor-deleteLibrary-btn"
-                        @click="onShowConfirmDeleteAlert"
-                        class="ghd-white-bg ghd-blue"
 
-                        v-show="!hasScenario"
-                        :disabled="!hasSelectedLibrary"
-                    >
-                        Delete Library
-                    </v-btn>
-                    <v-btn :disabled='!hasUnsavedChanges' flat
-                        @click="onDiscardChanges"
-                        class="ghd-white-bg ghd-blue"
-                        style="margin: 5px;"
-                        v-show="hasScenario"
-                    >
-                        Cancel
-                    </v-btn>
-                    <v-btn
-                        variant="outlined"
-                        id="TargetConditionGoalEditor-CreateAsNewLibrary-btn"
-                        @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                        style="margin: 5px;"
-                        :disabled="disableCrudButtons()"
-                    >
-                        Create as New Library
-                    </v-btn>
-                    <v-btn
-                        @click="onUpsertScenarioTargetConditionGoals"
-                        class="ghd-blue-bg ghd-white"
-                        v-show="hasScenario"
-                        style="margin: 5px;"
-                        :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
-                    >
-                        Save
-                    </v-btn>
-                    <v-btn
-                        id="TargetConditionGoalEditor-UpdateLibrary-btn"
-                        @click="onUpsertTargetConditionGoalLibrary"
-                        class="ghd-blue-bg ghd-white"
-                        v-show="!hasScenario"
-                        :disabled="disableCrudButtons() || !hasUnsavedChanges || !hasLibraryEditPermission"
-                    >
-                        Update Library
-                    </v-btn>
-                </v-row>
-            </v-col>
-        </v-row>
-    </v-row>
-    
+        </v-col>
+        <v-col>
+            <v-row align="center" v-show="hasSelectedLibrary || hasScenario" style="padding: 10px;" justify="end">
+                <v-btn flat
+                    id="TargetConditionGoalEditor-deleteLibrary-btn"
+                    @click="onShowConfirmDeleteAlert"
+                    class="ghd-white-bg ghd-blue"
+                    v-show="!hasScenario"
+                    :disabled="!hasSelectedLibrary"
+                >
+                    Delete Library
+                </v-btn>
+                <v-btn :disabled='!hasUnsavedChanges' flat
+                    @click="onDiscardChanges"
+                    class="ghd-white-bg ghd-blue"
+                    style="margin: 5px;"
+                    v-show="hasScenario"
+                >
+                    Cancel
+                </v-btn>
+                <v-btn
+                    variant="outlined"
+                    id="TargetConditionGoalEditor-CreateAsNewLibrary-btn"
+                    @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                    style="margin: 5px;"
+                    rounded="0"
+                    :disabled="disableCrudButtons()"
+                >
+                    Create as New Library
+                </v-btn>
+                <v-btn
+                    @click="onUpsertScenarioTargetConditionGoals"
+                    class="ghd-blue-bg ghd-white"
+                    v-show="hasScenario"
+                    style="margin: 5px;"
+                    :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
+                >
+                    Save
+                </v-btn>
+                <v-btn
+                    id="TargetConditionGoalEditor-UpdateLibrary-btn"
+                    @click="onUpsertTargetConditionGoalLibrary"
+                    class="ghd-blue-bg ghd-white"
+                    v-show="!hasScenario"
+                    rounded="0"
+                    :disabled="disableCrudButtons() || !hasUnsavedChanges || !hasLibraryEditPermission"
+                >
+                    Update Library
+                </v-btn>
+            </v-row>
+        </v-col>
         <ConfirmDeleteAlert :is="Alert"
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
@@ -404,14 +400,14 @@ import ConfirmDialog from 'primevue/confirmdialog';
     let initializing: boolean = true;
     let dateModified: string;
 
-    let unsavedDialogAllowed: boolean = true;
+    const unsavedDialogAllowed = ref<boolean>(true);
     const trueLibrarySelectItemValue = ref<string|null>(''); 
     let librarySelectItemValueAllowedChanged: boolean = true;
     const librarySelectItemValue = ref<string|null>(null); 
 
     let selectedScenarioId: string = getBlankGuid();
     const librarySelectItems = ref<SelectItem[]>([]);
-    let shareTargetConditionGoalLibraryDialogData: ShareTargetConditionGoalLibraryDialogData = clone(emptyShareTargetConditionGoalLibraryDialogData);
+    const shareTargetConditionGoalLibraryDialogData = ref<ShareTargetConditionGoalLibraryDialogData>(clone(emptyShareTargetConditionGoalLibraryDialogData));
     let isShared: boolean = false;   
     let selectedTargetConditionGoalLibrary = ref<TargetConditionGoalLibrary>(clone(emptyTargetConditionGoalLibrary,));
 
@@ -547,7 +543,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
         if(hasScenario.value){
             onLibrarySelectItemValueChanged();
-            unsavedDialogAllowed = false;
+            unsavedDialogAllowed.value = false;
         }           
         else if(librarySelectItemValueAllowedChanged) {
             CheckUnsavedDialog(onLibrarySelectItemValueChanged, () => {
@@ -956,7 +952,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
-        if (hasUnsavedChanges && unsavedDialogAllowed) {
+        if (hasUnsavedChanges.value && unsavedDialogAllowed.value) {
             
             confirm.require({
                 message: "You have unsaved changes. Are you sure you wish to continue?",
@@ -967,7 +963,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             });
         } 
         else {
-            unsavedDialogAllowed = true;
+            unsavedDialogAllowed.value = true;
             next();
         }
     };
@@ -1015,14 +1011,14 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }
 
     function onShowShareTargetConditionGoalLibraryDialog(targetConditionGoalLibrary: TargetConditionGoalLibrary) {
-        shareTargetConditionGoalLibraryDialogData = {
+        shareTargetConditionGoalLibraryDialogData.value = {
             showDialog:true,
             targetConditionGoalLibrary: clone(targetConditionGoalLibrary)
         }
     }
 
     function onShareTargetConditionGoalDialogSubmit(targetConditionGoalLibraryUsers: TargetConditionGoalLibraryUser[]) {
-            shareTargetConditionGoalLibraryDialogData = clone(emptyShareTargetConditionGoalLibraryDialogData);
+            shareTargetConditionGoalLibraryDialogData.value = clone(emptyShareTargetConditionGoalLibraryDialogData);
 
             if (!isNil(targetConditionGoalLibraryUsers) && selectedTargetConditionGoalLibrary.value.id !== getBlankGuid())
             {
@@ -1048,7 +1044,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 });
 
                 if (!isNil(selectedTargetConditionGoalLibrary.value.id) ) {
-                            getIsSharedLibraryAction(selectedTargetConditionGoalLibrary).then(() => isShared = isSharedLibrary.value);
+                            getIsSharedLibraryAction(selectedTargetConditionGoalLibrary.value).then(() => isShared = isSharedLibrary.value);
                 }
                 //update budget library sharing
                 TargetConditionGoalService.upsertOrDeleteTargetConditionGoalLibraryUsers(selectedTargetConditionGoalLibrary.value.id, libraryUserData).then((response: AxiosResponse) => {

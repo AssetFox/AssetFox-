@@ -37,6 +37,7 @@ import DataTable from 'primevue/datatable';
 import ConfirmationService from 'primevue/confirmationservice';
 import ConfirmDialog from 'primevue/dialog';
 import "primevue/resources/themes/saga-blue/theme.css"; 
+import "primevue/resources/themes/bootstrap4-light-blue/theme.css"
 import 'primevue/resources/primevue.min.css'
 import 'primeicons/primeicons.css';
 import "primeflex/primeflex.css";

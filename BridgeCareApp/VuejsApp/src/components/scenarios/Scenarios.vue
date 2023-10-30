@@ -1665,7 +1665,18 @@ import { onBeforeMount } from 'vue';
             },
         });
     }
-
+    function onNavigateToReportsView(localScenario: Scenario) {
+        selectScenarioAction({scenarioId: localScenario.id });
+        $router.push({
+            path: '/ReportsAndOutputs/Scenario/',
+            query: {
+                scenarioId: localScenario.id,
+                networkId: localScenario.networkId,
+                scenarioName: localScenario.name,
+                networkName: localScenario.networkName,
+            }
+        });
+    }
     function onShowShareScenarioDialog(scenario: Scenario) {
         shareScenarioDialogData.value = {
             showDialog: true,
@@ -2029,7 +2040,7 @@ import { onBeforeMount } from 'vue';
                 }
                 break;
             case availableActions.reports:
-                onShowReportsDownloaderDialog(scenario);
+                onNavigateToReportsView(scenario);
                 break;
             case availableActions.settings:
                 if (canModifySharedScenario(scenarioUsers) || isOwner) {

@@ -34,9 +34,11 @@
                                         </v-textarea>
                                       </Dialog>
                                     </v-btn>
-                                    <v-btn v-else flat style="background-color: transparent;">
-                                    </v-btn>
-                                    <v-btn flat @click="onShowCriterionEditorDialog(selectedReport.id)" style="background-color: transparent;">
+                                    <v-btn 
+                                        flat 
+                                        v-if="slotProps.data.name.includes('Summary')" 
+                                        @click="onShowCriterionEditorDialog(selectedReport.id)" 
+                                        style="background-color: transparent;">
                                       <img class='img-general' :src="require('@/assets/icons/edit.svg')">
                                     </v-btn>
                                 </template>

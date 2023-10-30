@@ -81,7 +81,7 @@
                         </td>
                         <td v-for='header in budgetPriorityGridHeaders'>
                             <div v-if="header.key === 'priorityLevel' || header.key === 'year'">
-                                <v-edit-dialog
+                                <editDialog
                                     :return-value.sync='item.item[header.key]'
                                     @save='onEditBudgetPriority(item.item, header.key, item.item[header.key])'
                                     size="large" lazy>
@@ -99,7 +99,7 @@
                                         <v-text-field v-else label='Edit' single-line :mask="'####'"
                                                       v-model.number='item.item[header.key]' />
                                     </template>
-                                </v-edit-dialog>
+                                </editDialog>
                             </div>
                             <div v-else-if="header.key === 'criteria'">
                                 <v-row align-center row style='flex-wrap:nowrap'>
@@ -129,7 +129,7 @@
                                 </v-row>
                             </div>
                             <div v-else-if="header.title.endsWith('%')">
-                                <v-edit-dialog
+                                <editDialog
                                     :return-value.sync='item.item[header.key]'
                                     @save='onEditBudgetPercentagePair(item.item, header.key, item.item[header.key])'
                                     size="large" lazy>
@@ -140,7 +140,7 @@
                                                       :model-value.number="item.item[header.key]"
                                                       :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.item[header.key], [0, 100])]" />
                                     </template>
-                                </v-edit-dialog>
+                                </editDialog>
                             </div>
                             <div v-else>
                                 <v-btn id="BudgetPriorityEditor-deleteBudgetPriority-btn" @click="onRemoveBudgetPriority(item.item.id)"  class="ghd-blue" icon>
@@ -214,6 +214,7 @@
 
 <script setup lang='ts'>
     import Vue, { Ref, ref, watch, onBeforeUnmount, ShallowRef, shallowRef, computed } from 'vue';
+    import editDialog from '@/shared/modals/Edit-Dialog.vue'
     import {
         BudgetPercentagePair,
         BudgetPriority,

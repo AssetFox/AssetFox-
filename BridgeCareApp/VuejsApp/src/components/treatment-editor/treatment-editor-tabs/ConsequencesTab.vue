@@ -9,7 +9,7 @@
                               hide-actions>
                     <template slot='items' slot-scope='props' v-slot:item="props">
                         <td v-for='header in consequencesGridHeaders'>
-                            <v-edit-dialog
+                            <editDialog
                                 v-if="header.value !== 'equation' && header.value !== 'criterionLibrary' && header.value !== ''"
                                 :return-value.sync='props.item[header.value]'
                                 @save='onEditConsequenceProperty(props.item, header.value, props.item[header.value])'
@@ -32,7 +32,7 @@
                                                   v-model='props.item.changeValue'
                                                   :rules="[rules['treatmentRules'].hasChangeValueOrEquation(props.item.changeValue, props.item.equation.expression)]" />
                                 </template>
-                            </v-edit-dialog>
+                            </editDialog>
 
                             <v-menu
                                 location="left"
@@ -122,6 +122,7 @@
 
 <script lang='ts' setup>
 import Vue, { computed, shallowRef } from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import { any, clone, isNil } from 'ramda';
 import EquationEditorDialog from '../../../shared/modals/EquationEditorDialog.vue';
 import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';

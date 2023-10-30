@@ -83,7 +83,7 @@
                 <template v-slot:item="props">
                     <tr :active="props.item.selected" @click="props.item.selected = !props.item.selected">
                         <td>
-                            <v-edit-dialog
+                            <editDialog
                                 :return-value.sync="props.item.attribute"
                                 size="large"
                                 lazy
@@ -119,10 +119,10 @@
                                         ]"
                                     />
                                 </template>
-                            </v-edit-dialog>
+                            </editDialog>
                         </td>
                         <td>
-                            <v-edit-dialog
+                            <editDialog
                                 :return-value.sync="props.item.value"
                                 size="large"
                                 lazy
@@ -155,7 +155,7 @@
                                         ]"
                                     />
                                 </template>
-                            </v-edit-dialog>
+                            </editDialog>
                         </td>
                         <td v-if="props.item.criterionLibrary.mergedCriteriaExpression != '' && props.item.criterionLibrary.mergedCriteriaExpression != null" >
                             {{ props.item.criterionLibrary.mergedCriteriaExpression}}
@@ -222,6 +222,7 @@
 
 <script setup lang="ts">
 import Vue, { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch } from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import {
     emptyRemainingLifeLimit,
     emptyRemainingLifeLimitLibrary,

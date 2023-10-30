@@ -298,6 +298,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, ref, computed, onMounted, watch } from 'vue'; 
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import {
     emptyTargetConditionGoal,
     emptyTargetConditionGoalLibrary,

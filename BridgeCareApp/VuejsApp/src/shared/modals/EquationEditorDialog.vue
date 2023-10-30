@@ -394,7 +394,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, {ShallowRef, shallowRef} from 'vue';
+import Vue, {ShallowRef, computed, shallowRef} from 'vue';
 import {EquationEditorDialogData} from '@/shared/models/modals/equation-editor-dialog-data';
 import {formulas} from '@/shared/utils/formulas';
 import {AxiosResponse} from 'axios';
@@ -421,7 +421,7 @@ const props = defineProps<{
   isFromPerformanceCurveEditor: Boolean
     }>()
     
-let stateNumericAttributes = ref<Attribute[]>(store.state.attributeModule.numericAttributes);
+let stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributes);
 async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
 
@@ -468,8 +468,8 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
   onMounted(()=>mounted())
    function mounted() {
     textareaInput = document.getElementById('equation_textarea') as HTMLTextAreaElement;
-    //cursorPosition = textareaInput.selectionStart;
-    if (hasValue(stateNumericAttributes)) {
+    // cursorPosition = textareaInput.selectionStart; broken need to fix later
+    if (hasValue(stateNumericAttributes.value)) {
       setAttributesList();
     }
   }
@@ -480,7 +480,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    */
   watch(stateNumericAttributes,()=>onStateNumericAttributesChanged())
   function onStateNumericAttributesChanged() {
-    if (hasValue(stateNumericAttributes)) {
+    if (hasValue(stateNumericAttributes.value)) {
       setAttributesList();
     }
   }

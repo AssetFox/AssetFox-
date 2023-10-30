@@ -87,7 +87,7 @@
                     @update:options="onPaginationChanged"
                     class="elevation-1 fixed-header v-table__overflow"
                     item-key="id"
-                    select-all
+                    show-select
                     v-model="selectedGridRows"
                 >
                     <template slot="items" slot-scope="props" v-slot:item="props">
@@ -689,7 +689,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }
 
     function checkLibraryEditPermission() {
-        hasLibraryEditPermission.value = hasAdminAccess.value || (hasPermittedAccess.value && checkUserIsLibraryOwner());
+        setHasUnsavedChangesAction(hasAdminAccess.value || (hasPermittedAccess.value && checkUserIsLibraryOwner()))
     }
 
     function checkUserIsLibraryOwner() {

@@ -8,7 +8,9 @@
                   <v-select id="RemainingLifeLimitEditor-lifeLimitLibrary-select"
                             class="ghd-select ghd-text-field ghd-text-field-border vs-style"
                             :items="selectListItems"
-                            append-icon=$vuetify.icons.ghd-down
+                            item-title="text"
+                            item-value="value"
+                            append-icon=ghd-down
                             v-model="librarySelectItemValue"
                             variant="outlined"
                             >
@@ -46,28 +48,38 @@
             </v-row>
         </v-col>
         <div v-show="librarySelectItemValue != null || hasScenario">
-            <v-data-table
+            <v-data-table-server
             id="RemainingLifeLimitEditor-attributes-dataTable"
             :headers="gridHeaders"
-            :items="currentPage"  
             :pagination.sync="pagination"
             :must-sort='true'
-            :total-items="totalItems"
-            :rows-per-page-items=[5,10,25]
-            sort-icon=$vuetify.icons.ghd-table-sort
+            sort-icon=ghd-table-sort
             class="elevation-1 fixed-header v-table__overflow"
             v-model="selectedGridRows"
+
+            :items="currentPage"                      
+            :items-length="totalItems"
+            :items-per-page-options="[
+                {value: 5, title: '5'},
+                {value: 10, title: '10'},
+                {value: 25, title: '25'},
+            ]"
+            v-model:sort-by="pagination.sort"
+            v-model:page="pagination.page"
+            v-model:items-per-page="pagination.rowsPerPage"
+            item-value="name"
+            @update:options="onPaginationChanged"
             >
-                <template v-slot:headers="props">
-                    <tr>
-                        <th
-                          v-for="header in props.headers"
-                          :key="header.text"
-                        >
-                            {{header.text}}
-                        </th>
-                    </tr>
-                </template>
+            <template v-slot:headers="props">
+                <tr>
+                    <th
+                    v-for="header in gridHeaders"
+                    :key="header.title"
+                    >
+                        {{header.title}}
+                    </th>
+                </tr>
+            </template>
                 <template v-slot:item="props">
                     <tr :active="props.item.selected" @click="props.item.selected = !props.item.selected">
                         <td>
@@ -95,7 +107,9 @@
                                 <template v-slot:input>
                                     <v-select
                                         :items="numericAttributeSelectItems"
-                                        append-icon=$vuetify.icons.ghd-down
+                                        item-title="text"
+                                        item-value="value"
+                                        append-icon=ghd-down
                                         label="Select an Attribute"
                                         variant="outlined"
                                         v-model="props.item.attribute"
@@ -160,7 +174,7 @@
                         </td>
                     </tr>
                 </template>
-                </v-data-table>
+                </v-data-table-server>
                 <v-row justify-start align-center class="pa-2">
                 </v-row>
                 <v-divider></v-divider>
@@ -250,37 +264,39 @@ import RemainingLifeLimitService from '@/services/remaining-life-limit.service';
 import { emptyShareRemainingLifeLimitLibraryDialogData, ShareRemainingLifeLimitLibraryDialogData } from '@/shared/models/modals/share-remaining-life-limit-data';
 import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
-import { isNullOrUndefined } from 'util';
 import { LibraryUser } from '@/shared/models/iAM/user';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
+import { computed } from 'vue';
+import { onBeforeUnmount } from 'vue';
+import { createDecipheriv } from 'crypto';
 
     let store = useStore();
     const confirm = useConfirm();
     const $router = useRouter();
 
-    const stateRemainingLifeLimitLibraries: RemainingLifeLimitLibrary[] = shallowReactive(store.state.remainingLifeLimitModule.remainingLifeLimitLibraries);
-    const stateSelectedRemainingLifeLimitLibrary: RemainingLifeLimitLibrary = shallowReactive(store.state.remainingLifeLimitModule.selectedRemainingLifeLimitLibrary);
-    let stateNumericAttributes: Attribute[] = shallowReactive(store.state.attributeModule.numericAttributes);
-    let stateScenarioRemainingLifeLimits: RemainingLifeLimit[] = shallowReactive(store.state.remainingLifeLimitModule.scenarioRemainingLifeLimits);
-    let hasUnsavedChanges: boolean = (store.state.unsavedChangesFlagModule.hasUnsavedChanges);
-    let hasAdminAccess: boolean = (store.state.authenticationModule.hasAdminAccess) ;
-    let isSharedLibrary: Ref<boolean> = ref(store.state.remainingLifeLimitModule.isSharedLibrary);
+    const stateRemainingLifeLimitLibraries = computed<RemainingLifeLimitLibrary[]>(() => store.state.remainingLifeLimitModule.remainingLifeLimitLibraries);
+    const stateSelectedRemainingLifeLimitLibrary = computed<RemainingLifeLimitLibrary>(() =>store.state.remainingLifeLimitModule.selectedRemainingLifeLimitLibrary);
+    let stateNumericAttributes = computed<Attribute[]>(() =>store.state.attributeModule.numericAttributes);
+    let stateScenarioRemainingLifeLimits = computed<RemainingLifeLimit[]>(() =>store.state.remainingLifeLimitModule.scenarioRemainingLifeLimits);
+    let hasUnsavedChanges = computed<boolean>(() =>store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+    let hasAdminAccess = computed<boolean>(() =>store.state.authenticationModule.hasAdminAccess) ;
+    let isSharedLibrary = computed<boolean>(() =>store.state.remainingLifeLimitModule.isSharedLibrary);
 
-    async function getIsSharedLibraryAction(payload?: any): Promise<any>{await store.dispatch('getIsSharedRemainingLifeLimitLibrary')}
-    async function getRemainingLifeLimitLibrariesAction(payload?: any): Promise<any>{await store.dispatch('getRemainingLifeLimitLibraries')}
-    async function upsertRemainingLifeLimitLibraryAction(payload?: any): Promise<any>{await store.dispatch('upsertRemainingLifeLimitLibrary')}
-    async function deleteRemainingLifeLimitLibraryAction(payload?: any): Promise<any>{await store.dispatch('deleteRemainingLifeLimitLibrary')}
-    async function selectRemainingLifeLimitLibraryAction(payload?: any): Promise<any>{await store.dispatch('selectRemainingLifeLimitLibrary')}
-    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification')}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any>{await store.dispatch('setHasUnsavedChanges')}
-    async function getScenarioRemainingLifeLimitsAction(payload?: any): Promise<any>{await store.dispatch('getScenarioRemainingLifeLimits')}
-    async function upsertScenarioRemainingLifeLimitsAction(payload?: any): Promise<any>{await store.dispatch('upsertScenarioRemainingLifeLimits')}
-    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification')}
-    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>{await store.dispatch('getCurrentUserOrSharedScenario')}
-    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario')}
+    async function getIsSharedLibraryAction(payload?: any): Promise<any>{await store.dispatch('getIsSharedRemainingLifeLimitLibrary', payload)}
+    async function getRemainingLifeLimitLibrariesAction(payload?: any): Promise<any>{await store.dispatch('getRemainingLifeLimitLibraries', payload)}
+    async function upsertRemainingLifeLimitLibraryAction(payload?: any): Promise<any>{await store.dispatch('upsertRemainingLifeLimitLibrary', payload)}
+    async function deleteRemainingLifeLimitLibraryAction(payload?: any): Promise<any>{await store.dispatch('deleteRemainingLifeLimitLibrary', payload)}
+    async function selectRemainingLifeLimitLibraryAction(payload?: any): Promise<any>{await store.dispatch('selectRemainingLifeLimitLibrary', payload)}
+    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification', payload)}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any>{await store.dispatch('setHasUnsavedChanges', payload)}
+    async function getScenarioRemainingLifeLimitsAction(payload?: any): Promise<any>{await store.dispatch('getScenarioRemainingLifeLimits', payload)}
+    async function upsertScenarioRemainingLifeLimitsAction(payload?: any): Promise<any>{await store.dispatch('upsertScenarioRemainingLifeLimits', payload)}
+    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification', payload)}
+    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>{await store.dispatch('getCurrentUserOrSharedScenario', payload)}
+    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario', payload)}
     
     function addedOrUpdatedRemainingLifeLimitLibraryMutator(payload: any){store.commit('addedOrUpdatedRemainingLifeLimitLibraryMutator');}
     function selectedRemainingLifeLimitLibraryMutator(payload: any){store.commit('selectedRemainingLifeLimitLibraryMutator');}
@@ -293,45 +309,45 @@ import ConfirmDialog from 'primevue/confirmdialog';
     ));
     let selectedGridRows: ShallowRef<RemainingLifeLimit[]> = shallowRef([]);
     let selectedRemainingLifeIds: string[] = [];
-    let selectedScenarioId: string = getBlankGuid();
+    let selectedScenarioId: any = getBlankGuid();
     let selectListItems: SelectItem[] = [];
-    let hasSelectedLibrary: boolean = false;
-    let gridHeaders: DataTableHeader[] = [
+    let hasSelectedLibrary = ref(false);
+    let gridHeaders: any[] = [
         {
-            text: 'Remaining Life Attribute',
-            value: 'attribute',
+            title: 'Remaining Life Attribute',
+            key: 'attribute',
             align: 'left',
             sortable: true,
             class: '',
             width: '',
         },
         {
-            text: 'Limit',
-            value: 'value',
+            title: 'Limit',
+            key: 'value',
             align: 'left',
             sortable: true,
             class: '',
             width: '',
         },
         {
-            text: 'Criteria',
-            value: 'criteria',
+            title: 'Criteria',
+            key: 'criteria',
             align: 'left',
             sortable: false,
             class: '',
             width: '50%',
         },
         {
-            text: '',
-            value: '',
+            title: '',
+            key: '',
             align: 'left',
             sortable: false,
             class:'',
             width: ''
         },
         {
-            text: 'Actions',
-            value: 'Actions',
+            title: 'Actions',
+            key: 'Actions',
             align: 'right',
             sortable: false,
             class: '',
@@ -347,7 +363,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     let currentSearch = '';
     const pagination: Pagination = shallowReactive(clone(emptyPagination));
     let isPageInit = false;
-    let totalItems = 0;
+    let totalItems = ref(0);
     let currentPage: ShallowRef<RemainingLifeLimit[]> = shallowRef([]);
     let initializing: boolean = true;
     let dateModified: string;
@@ -380,7 +396,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     let rules: InputValidationRules = validationRules;
     let uuidNIL: string = getBlankGuid();
-    let hasScenario: boolean = false;
+    let hasScenario = ref(false);
     let currentUrl: string = window.location.href;
     let hasCreatedLibrary: boolean = false;
     let parentLibraryName: string = "None";
@@ -390,29 +406,30 @@ import ConfirmDialog from 'primevue/confirmdialog';
     let loadedParentId: string = "";
     let newLibrarySelection: boolean = false;
 
-    function beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            vm.librarySelectItemValue = null;
-            vm.getRemainingLifeLimitLibrariesAction().then(() => {
-                if (to.path.indexOf(ScenarioRoutePaths.RemainingLifeLimit) !== -1) {
-                    vm.selectedScenarioId = to.query.scenarioId;
-                    if (vm.selectedScenarioId === vm.uuidNIL) {
-                        vm.addErrorNotificationAction({
+    created()
+    function created() {
+
+            librarySelectItemValue.value = null;
+            getRemainingLifeLimitLibrariesAction().then(() => {
+                if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.RemainingLifeLimit) !== -1) {
+                    selectedScenarioId = $router.currentRoute.value.query.scenarioId;
+                    if (selectedScenarioId === uuidNIL) {
+                        addErrorNotificationAction({
                             message: 'Found no selected scenario for edit',
                         });
-                        vm.$router.push('/Scenarios/');
+                        $router.push('/Scenarios/');
                     }
-                    vm.hasScenario = true;
-                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
-                        vm.initializePages();  
+                    hasScenario.value = true;
+                    getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
+                        selectScenarioAction({ scenarioId: selectedScenarioId });        
+                        initializePages();  
                     });                                      
                 }
             });
             
-        });
     }
 
+    onBeforeUnmount(() => beforeDestroy())
     function beforeDestroy() {
         setHasUnsavedChangesAction({ value: false });
     }
@@ -424,7 +441,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     watch(stateRemainingLifeLimitLibraries, onStateRemainingLifeLimitLibrariesChanged )
     function onStateRemainingLifeLimitLibrariesChanged() {
-        selectListItems = stateRemainingLifeLimitLibraries.map(
+        selectListItems = stateRemainingLifeLimitLibraries.value.map(
             (remainingLifeLimitLibrary: RemainingLifeLimitLibrary) => ({
                 text: remainingLifeLimitLibrary.name,
                 value: remainingLifeLimitLibrary.id,
@@ -434,7 +451,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     watch(librarySelectItemValue, onLibrarySelectItemValueChangedCheckUnsaved )
     function onLibrarySelectItemValueChangedCheckUnsaved(){
-        if(hasScenario){
+        if(hasScenario.value){
             onLibrarySelectItemValueChanged();
             unsavedDialogAllowed = false;
         }           
@@ -458,23 +475,23 @@ import ConfirmDialog from 'primevue/confirmdialog';
     watch(stateSelectedRemainingLifeLimitLibrary,  onStateSelectedRemainingLifeLimitLibraryChanged)
     function onStateSelectedRemainingLifeLimitLibraryChanged() {
         selectedRemainingLifeLimitLibrary.value = clone(
-            stateSelectedRemainingLifeLimitLibrary,
+            stateSelectedRemainingLifeLimitLibrary.value,
         );
     }
 
     watch(selectedRemainingLifeLimitLibrary,  onSelectedRemainingLifeLimitLibraryChanged)
     function onSelectedRemainingLifeLimitLibraryChanged() {
-        hasSelectedLibrary =  selectedRemainingLifeLimitLibrary.value.id !== uuidNIL;
+        hasSelectedLibrary.value =  selectedRemainingLifeLimitLibrary.value.id !== uuidNIL;
         clearChanges();
         initializing = false;
-        if(hasSelectedLibrary)
+        if(hasSelectedLibrary.value)
             onPaginationChanged();
     }
 
     watch(stateScenarioRemainingLifeLimits, onStateScenarioRemainingLifeLimitsChanged )
     function onStateScenarioRemainingLifeLimitsChanged() {
-        if (hasScenario) {
-            currentPage.value = clone(stateScenarioRemainingLifeLimits);
+        if (hasScenario.value) {
+            currentPage.value = clone(stateScenarioRemainingLifeLimits.value);
         }
     }
 
@@ -503,7 +520,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
         if(initializing)
             return;
         checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = pagination;
+        const { sort, descending, page, rowsPerPage } = pagination;
         const request: PagingRequest<RemainingLifeLimit>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -514,20 +531,20 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 addedRows: addedRows.value,
                 isModified: scenarioLibraryIsModified
             },           
-            sortColumn: sortBy,
-            isDescending: descending != null ? descending : false,
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: currentSearch
         };
-        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
+        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL)
             await RemainingLifeLimitService.getScenarioRemainingLifeLimitPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<RemainingLifeLimit>;
                     currentPage.value = data.items;
                     rowCache = clone(currentPage.value)
-                    totalItems = data.totalItems;
+                    totalItems.value = data.totalItems;
                 }
             });
-        else if(hasSelectedLibrary)
+        else if(hasSelectedLibrary.value)
             await RemainingLifeLimitService.getRemainingLibraryDate(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '').then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
@@ -540,8 +557,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
                     let data = response.data as PagingPage<RemainingLifeLimit>;
                     currentPage.value = data.items;
                     rowCache = clone(currentPage.value)
-                    totalItems = data.totalItems;
-                    if (!isNullOrUndefined(selectedRemainingLifeLimitLibrary.value.id) ) {
+                    totalItems.value = data.totalItems;
+                    if (!isNil(selectedRemainingLifeLimitLibrary.value.id) ) {
                         getIsSharedLibraryAction(selectedRemainingLifeLimitLibrary.value).then(() => isShared = isSharedLibrary.value);
                     }
                 }
@@ -564,7 +581,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     function setAttributesSelectListItems() {
         if (hasValue(stateNumericAttributes)) {
-            numericAttributeSelectItems = stateNumericAttributes.map(
+            numericAttributeSelectItems = stateNumericAttributes.value.map(
                 (attribute: Attribute) => ({
                     text: attribute.name,
                     value: attribute.name,
@@ -623,13 +640,13 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 library: library,    
                 isNewLibrary: true,           
                  syncModel: {
-                    libraryId: library.remainingLifeLimits.length == 0 || !hasSelectedLibrary ? null : selectedRemainingLifeLimitLibrary.value.id,
+                    libraryId: library.remainingLifeLimits.length == 0 || !hasSelectedLibrary.value ? null : selectedRemainingLifeLimitLibrary.value.id,
                     rowsForDeletion: library.remainingLifeLimits.length == 0 ? [] : deletionIds.value,
                     updateRows: library.remainingLifeLimits.length == 0 ? [] : Array.from(updatedRowsMap.values()).map(r => r[1]),
                     addedRows: library.remainingLifeLimits.length == 0 ? [] : addedRows.value,
                     isModified: false
                  },
-                 scenarioId: hasScenario ? selectedScenarioId : null
+                 scenarioId: hasScenario.value ? selectedScenarioId : null
             }
             RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -749,7 +766,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     function onDiscardChanges() {
         librarySelectItemValue.value = null;
         setTimeout(() => {
-            if (hasScenario) {
+            if (hasScenario.value) {
                 clearChanges();
                 resetPage();
             }
@@ -793,7 +810,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             },
         );
 
-        if (hasSelectedLibrary) {
+        if (hasSelectedLibrary.value) {
             return !(
                 rules['generalRules'].valueIsNotEmpty(
                     selectedRemainingLifeLimitLibrary.value.name,
@@ -845,8 +862,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
             deletionIds.value.length > 0 || 
             addedRows.value.length > 0 ||
             updatedRowsMap.size > 0 || 
-            (hasScenario && hasSelectedLibrary) ||
-            (hasSelectedLibrary && hasUnsavedChangesCore('', stateSelectedRemainingLifeLimitLibrary, selectedRemainingLifeLimitLibrary))
+            (hasScenario.value && hasSelectedLibrary.value) ||
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', stateSelectedRemainingLifeLimitLibrary, selectedRemainingLifeLimitLibrary))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -898,7 +915,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
                         //add library user to an array
                         libraryUserData.push(libraryUser);
                     });
-                    if (!isNullOrUndefined(selectedRemainingLifeLimitLibrary.value.id) ) {
+                    if (!isNil(selectedRemainingLifeLimitLibrary.value.id) ) {
                         getIsSharedLibraryAction(selectedRemainingLifeLimitLibrary).then(() => isShared = isSharedLibrary.value);
                     }
                     //update budget library sharing
@@ -917,7 +934,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             return;
         }
         let foundLibrary: RemainingLifeLimitLibrary = emptyRemainingLifeLimitLibrary;
-        stateRemainingLifeLimitLibraries.forEach(library => {
+        stateRemainingLifeLimitLibraries.value.forEach(library => {
             if (library.id === libraryId ) {
                 foundLibrary = clone(library);
             }
@@ -941,14 +958,14 @@ import ConfirmDialog from 'primevue/confirmdialog';
             isDescending: false,
             search: ''
         };
-        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
+        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL)
             RemainingLifeLimitService.getScenarioRemainingLifeLimitPage(selectedScenarioId, request).then(response => {
                 initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<RemainingLifeLimit>;
                     currentPage.value = data.items;
                     rowCache = clone(currentPage.value)
-                    totalItems = data.totalItems;
+                    totalItems.value = data.totalItems;
                     setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
                     loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
                     loadedParentName = parentLibraryName; //store original

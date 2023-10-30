@@ -29,10 +29,10 @@
                         <v-list-tile-content >
                             <v-list-tile-title v-text="setting.value"></v-list-tile-title>
                         </v-list-tile-content>
-                        <v-radio-group v-if="DialogData.settingName == 'InventoryReports'" class="admin-radio" v-model="setting.networkType" row>
-                            <v-radio  label="RAW" value="(R)"></v-radio>
-                            <v-radio  label="PRIMARY" value="(P)"></v-radio>
-                        </v-radio-group>
+                        <input type ="radio" v-if="DialogData.settingName == 'InventoryReports'" v-model="setting.networkType" value ="(R)"/>
+                        <label v-if="DialogData.settingName == 'InventoryReports'" style="margin-right: 10px;">RAW</label>
+                        <input type ="radio" v-if="DialogData.settingName == 'InventoryReports'" v-model="setting.networkType" value ="(P)"/>
+                        <label v-if="DialogData.settingName == 'InventoryReports'">PRIMARY</label>
                         <v-btn @click="onDeleteSettingClick(setting)"  class="ghd-blue" icon>
                             <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>

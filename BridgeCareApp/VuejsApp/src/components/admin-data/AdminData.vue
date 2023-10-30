@@ -109,7 +109,7 @@
                 <v-col cols="7">
                     <v-btn style="margin-top: -30px !important;" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
-                        @click="onSaveClick" :disabled=' !hasUnsavedChanges' >
+                        @click="onSaveClick" :disabled='!hasUnsavedChanges || !disableCrudButtons()' >
                         Save
                     </v-btn>
                 </v-col>
@@ -147,7 +147,7 @@ import { Console } from 'console';
     let stateRawDataKeyFields = computed<string[]>(()=>store.state.adminDataModule.rawDataKeyFields);
     let stateRawdataNetwork = computed<string>(()=>store.state.adminDataModule.rawdataNetwork);
     let stateConstraintType = computed<string>(()=>store.state.adminDataModule.constraintType);
-    let hasUnsavedChanges = computed<boolean>(()=>store.state.adminDataModule.hasUnsavedChanges);
+    let hasUnsavedChanges = computed<boolean>(()=>store.state.unsavedChangesFlagModule.hasUnsavedChanges) ;
     let stateNetworks = computed<Network[]>(()=>store.state.networkModule.networks);
     let stateAttributes = computed<Attribute[]>(()=>store.state.attributeModule.attributes);
         async function setIsBusyAction(payload?: any): Promise<any> { await store.dispatch('setIsBusy', payload);}
@@ -220,7 +220,7 @@ import { Console } from 'console';
                 getAvailableReportsAction();
                  getSimulationReportsAction();
                 getInventoryReportsAction();
-        
+                
         (() => {
             
             (async () => { 
@@ -484,6 +484,7 @@ import { Console } from 'console';
             && rules['generalRules'].valueIsNotEmpty(selectedInventoryReports.value) === true
             && rules['generalRules'].valueIsNotEmpty(selectedSimulationReports.value) === true
             && rules['generalRules'].valueIsNotEmpty(primaryNetwork.value) === true
+            && rules['generalRules'].valueIsNotEmpty(rawdataNetwork.value) === true
             && rules['generalRules'].valueIsNotEmpty(constraintTypeRadioGroup.value) === true
 
         return allValid;

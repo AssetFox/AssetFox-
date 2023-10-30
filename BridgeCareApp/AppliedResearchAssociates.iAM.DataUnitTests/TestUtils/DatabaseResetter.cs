@@ -15,8 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests
             unitOfWork.Context.Database.EnsureDeleted();
             unitOfWork.Context.Database.EnsureCreated();
             var connectionString = unitOfWork.Context.Database.GetConnectionString();
-            var rb = new RunBatch(unitOfWork);
-            rb.ExecuteCommand(connectionString);
+            RunBatch.SetupStoredProcedures(unitOfWork, connectionString);
         }
 
         public static void EnsureDatabaseExists(UnitOfDataPersistenceWork unitOfWork)

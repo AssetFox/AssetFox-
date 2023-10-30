@@ -5,6 +5,7 @@
                 <v-card-title class="ghd-dialog-box-padding-top">
                     <v-row justify-space-between align-center>
                         <div class="ghd-control-dialog-header">Edit Budget Criteria</div>
+                        <v-spacer></v-spacer>
                         <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                             X
                         </v-btn>
@@ -23,20 +24,20 @@
                                   v-model='selectedGridRows'
                                   class="ghd-table">
                         <template slot='items' slot-scope='props' v-slot:item="props">
+                         <tr>  
                             <td>
-                                <v-row row>
+                                
                                 <v-text-field v-model="props.item.budgetOrder" @change="reorderList(props.item)" @mousedown="setCurrentOrder(props.item)" class='order_input'/>
                                 <v-btn class="ghd-blue" icon>
-                                    <v-row column>
                                     <v-icon title="up" @click="swapItemOrder(props.item, 'up')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-up
                                     </v-icon>
                                     <v-icon title="down" @click="swapItemOrder(props.item, 'down')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-down
                                     </v-icon>
-                                    </v-row>
                                 </v-btn>
-                                </v-row>
+                                
                             </td>
                             <td>
+                               
                                 <v-edit-dialog id="EditBudgetsDialog-budget-editDialog"
                                                :return-value.sync='props.item.name' persistent
                                                @save='onEditBudgetName(props.item)' size="large" lazy>
@@ -48,8 +49,10 @@
                                                       :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].budgetNameIsUnique(props.item, editBudgetsDialogGridData)]" />
                                     </template>
                                 </v-edit-dialog>
+                               
                             </td>
                             <td>
+                               
                                 <v-text-field readonly single-line class='sm-txt'
                                               :model-value='props.item.criterionLibrary.mergedCriteriaExpression'>
                                     <template v-slot:append-inner>
@@ -58,12 +61,16 @@
                                         </v-btn>                                        
                                     </template>
                                 </v-text-field>
+                                
                             </td>
                             <td>
+                                
                                 <v-btn @click="onRemoveBudget(props.item.id)" @mousedown="setCurrentOrder(props.item)" class="ghd-blue" icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
+                             
                             </td>
+                        </tr>    
                         </template>
                     </v-data-table-server>
                     </div>
@@ -74,14 +81,12 @@
                     </v-row>
                 </div>
                 
-                <v-card-actions class="ghd-dialog-box-padding-bottom">
-                    <v-row justify-center>
+                <v-card-actions class="ghd-dialog-box-padding-bottom">                   
                         <v-btn id="EditBudgetsDialog-cancel-btn" @click='onSubmit(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">Cancel</v-btn>
                         <v-btn id="EditBudgetsDialog-save-btn" @click='onSubmit(true)' class='ghd-blue hd-button-text ghd-button' variant = "flat"
                                :disabled='disableSubmitButton()'>
                             Save
                         </v-btn>                        
-                    </v-row>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -125,7 +130,7 @@ let editBudgetsDialogGridHeaders: any[] = [
     ];
 let editBudgetsDialogGridData = ref<Budget[]>([]);
 let totalItems = ref<number>(0);
-let selectedGridRows: Budget[] = [];    
+let selectedGridRows = ref<Budget[]>([]);    
 let criterionLibraryEditorDialogData = ref<GeneralCriterionEditorDialogData>(clone(emptyGeneralCriterionEditorDialogData));
 let selectedBudgetForCriteriaEdit: Budget = clone(emptyBudget);
 let rules: InputValidationRules = validationRules;
@@ -207,16 +212,16 @@ watch(()=>props.dialogData,() => {
             budgetChanges.value.updatedBudgets.push(budget);
     }
     function disableDeleteButton() {
-        return !hasValue(selectedGridRows);
+        return !hasValue(selectedGridRows.value);
     }
 
     function onRemoveBudgets() {
         editBudgetsDialogGridData.value = editBudgetsDialogGridData.value
-            .filter((budget: Budget) => !any(propEq('id', budget.id), selectedGridRows));
-        selectedGridRows.forEach(budget => {
+            .filter((budget: Budget) => !any(propEq('id', budget.id), selectedGridRows.value));
+        selectedGridRows.value.forEach(budget => {
             removeBudget(budget.id)
         })
-        selectedGridRows = [];
+        selectedGridRows.value = [];
     }
 
     function onRemoveBudget(id: string){
@@ -293,7 +298,7 @@ watch(()=>props.dialogData,() => {
         }
 
         editBudgetsDialogGridData.value = [];
-        selectedGridRows = [];
+        selectedGridRows.value = [];
     }
 
     function disableSubmitButton() {
@@ -385,7 +390,7 @@ watch(()=>props.dialogData,() => {
 </script>
 <style>
 .order_input {
-    width: 15px;
+    width: 45px;
     justify-content: center;
     padding: 5px;
 }

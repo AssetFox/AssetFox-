@@ -12,6 +12,8 @@
       <v-card-text class="ghd-dialog-box-padding-center">
         <v-row>
           <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
+        </v-row>
+        <v-row>
           <v-text-field id="CreateBudgetLibraryDialog-name-textField"
                         outline v-model="newBudgetLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].nameIsNotUnique(newBudgetLibrary.name, libraryNames)]"
@@ -19,6 +21,8 @@
         </v-row>
         <v-row>
           <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
+        </v-row>
+        <v-row>
           <v-textarea id="CreateBudgetLibraryDialog-description-textArea"
                       no-resize outline rows="3"
                       v-model="newBudgetLibrary.description"
@@ -26,14 +30,12 @@
           </v-textarea>
         </v-row>
       </v-card-text>
-      <v-card-actions class="ghd-dialog-box-padding-bottom">
-        <v-row>
+      <v-card-actions class="ghd-dialog-box-padding-bottom">       
           <v-btn id="CreateBudgetLibraryDialog-cancel-btn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' variant = "outlined">Cancel</v-btn>
           <v-btn id="CreateBudgetLibraryDialog-save-btn" :disabled="canDisableSave()" @click="onSubmit(true)"
                  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
             Save
-          </v-btn>          
-        </v-row>
+          </v-btn>                 
       </v-card-actions>
     </v-card>
   </v-dialog>

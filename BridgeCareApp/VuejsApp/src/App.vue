@@ -229,7 +229,7 @@
                 type="info">
                     {{stateAlertMessage}}
                 </v-alert>
-                <div class="scenario-status" v-if="hasSelectedScenario">
+                <div class="scenario-status" v-if="hasSelectedScenario" style="margin-bottom: 20px; height: auto;">
                         <br>
                         <span>Scenario: </span>
                             <span id = 'App-scenarioName-span' style="font-weight: normal;">{{ selectedScenario.name }}</span>
@@ -318,49 +318,46 @@ import config from '../public/config.json';
     let username = computed<string>(() => store.state.authenticationModule.username);
     let hasAdminAccess = computed(() => store.state.authenticationModule.hasAdminAccess);
 
-    let refreshing = computed<boolean>(() => store.state.authenticationModule.refreshing);
+    const refreshing = computed<boolean>(() => store.state.authenticationModule.refreshing);
     //let navigation = ref<any[]>(store.state.breadcrumbModule.navigation);
-    let notifications = ref<Notification[]>(store.state.notificationModule.notifications);
-    let notificationCounter = computed<number>(() => store.state.notificationModule.counter);
-    let stateSelectedScenario = ref<Scenario>(store.state.scenarioModule.selectedScenario);
-    let packageVersion = ref<string>(store.state.announcementModule.packageVersion);
-    let securityType = ref<string>(store.state.authenticationModule.securityType);
-    let announcements = computed(() => store.state.announcementModule.announcements);
-    let currentUser = ref<User>(store.state.userModule.currentUser);
-    let stateImplementationName = computed<string>(()=>store.state.adminSiteSettingsModule.implementationName);
-    let agencyLogoBase64 = computed(() => store.state.adminSiteSettingsModule.agencyLogo);
-    let productLogoBase64 = computed(() => store.state.adminSiteSettingsModule.productLogo);
-    let stateInventoryReportNames = ref<string[]>(store.state.adminDataModule.inventoryReportNames);
-    let stateAlertMessage = ref<string>(store.state.alertModule.alertMessage);
-    let stateAlert = ref<boolean>(store.state.alertModule.alert);
-    async function logOutAction(payload?: any): Promise<any> {await store.dispatch('logOut');}
-
+    const notifications = computed<Notification[]>(() => store.state.notificationModule.notifications);
+    const notificationCounter = computed<number>(() => store.state.notificationModule.counter);
+    const stateSelectedScenario = computed<Scenario>(() => store.state.scenarioModule.selectedScenario);
+    const packageVersion = computed<string>(() => store.state.announcementModule.packageVersion);
+    const securityType = computed<string>(() => store.state.authenticationModule.securityType);
+    const announcements = computed(() => store.state.announcementModule.announcements);
+    const currentUser = computed<User>(() =>store.state.userModule.currentUser);
+    const stateImplementationName = computed<string>(()=>store.state.adminSiteSettingsModule.implementationName);
+    const agencyLogoBase64 = computed(() => store.state.adminSiteSettingsModule.agencyLogo);
+    const productLogoBase64 = computed(() => store.state.adminSiteSettingsModule.productLogo);
+    const stateInventoryReportNames = computed<string[]>(() => store.state.adminDataModule.inventoryReportNames);
+    const stateAlertMessage = computed<string>(() => store.state.alertModule.alertMessage);
+    const stateAlert = ref<boolean>(store.state.alertModule.alert);
+    async function logOutAction(payload?: any): Promise<any> {await store.dispatch('logOut', payload);}
     async function setIsBusyAction(payload?: any): Promise<any> { await store.dispatch('setIsBusy', payload);}
-    //async function setIsBusyAction(payload?: any) { () => store.dispatch('setIsBusy');}
-
-    async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks');}
-    async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes');}
-    async function getAnnouncementsAction(payload?: any): Promise<any> { await store.dispatch('getAnnouncements');}
-    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification');}
-    async function addWarningNotificationAction(payload?: any): Promise<any> { await store.dispatch('addWarningNotification');}
-    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification');} 
-    async function addInfoNotificationAction(payload?: any): Promise<any> { await store.dispatch('addInfoNotification');} 
+    async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks', payload);}
+    async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes', payload);}
+    async function getAnnouncementsAction(payload?: any): Promise<any> { await store.dispatch('getAnnouncements', payload);}
+    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification', payload);}
+    async function addWarningNotificationAction(payload?: any): Promise<any> { await store.dispatch('addWarningNotification', payload);}
+    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification', payload);} 
+    async function addInfoNotificationAction(payload?: any): Promise<any> { await store.dispatch('addInfoNotification', payload);} 
     async function addTaskCompletedNotificationAction(payload: any): Promise<any> { await store.dispatch('addTaskCompletedNotification', payload)}
-    async function removeNotificationAction(payload?: any): Promise<any> { await store.dispatch('removeNotification');}
-    async function clearNotificationCounterAction(payload?: any): Promise<any> { await store.dispatch('clearNotificationCounter');} 
-    async function generatePollingSessionIdAction(payload?: any): Promise<any> { await store.dispatch('generatePollingSessionId');}
-    async function getAllUsersAction(payload?: any): Promise<any> { await store.dispatch('getAllUsers');}
-    async function getUserCriteriaFilterAction(payload?: any): Promise<any> { await store.dispatch('getUserCriteriaFilter');} 
-    async function loadNotificationsActions(payload?: any): Promise<any> { await store.dispatch('loadNotifications');} 
-    async function azureB2CLoginAction(payload?: any): Promise<any> { await store.dispatch('azureB2CLogin');} 
-    async function azureB2CLogoutAction(payload?: any): Promise<any> { await store.dispatch('azureB2CLogout');} 
-    async function getCurrentUserByUserNameAction(payload?: any): Promise<any> { await store.dispatch('getCurrentUserByUserName');}
-    async function updateUserLastNewsAccessDateAction(payload?: any): Promise<any> { await store.dispatch('updateUserLastNewsAccessDate');}
-    async function getImplementationNameAction(payload?: any): Promise<any> { await store.dispatch('getImplementationName');}
-    async function getAgencyLogoAction(payload?: any): Promise<any> { await store.dispatch('getAgencyLogo');} 
-    async function getProductLogoAction(payload?: any): Promise<any> { await store.dispatch('getProductLogo');} 
-    async function getInventoryReportsAction(payload?: any): Promise<any> { await store.dispatch('getInventoryReports');} 
-    async function setAlertMessageAction(payload?: any): Promise<any> { await store.dispatch('setAlertMessage');} 
+    async function removeNotificationAction(payload?: any): Promise<any> { await store.dispatch('removeNotification', payload);}
+    async function clearNotificationCounterAction(payload?: any): Promise<any> { await store.dispatch('clearNotificationCounter', payload);} 
+    async function generatePollingSessionIdAction(payload?: any): Promise<any> { await store.dispatch('generatePollingSessionId', payload);}
+    async function getAllUsersAction(payload?: any): Promise<any> { await store.dispatch('getAllUsers', payload);}
+    async function getUserCriteriaFilterAction(payload?: any): Promise<any> { await store.dispatch('getUserCriteriaFilter', payload);} 
+    async function loadNotificationsActions(payload?: any): Promise<any> { await store.dispatch('loadNotifications', payload);} 
+    async function azureB2CLoginAction(payload?: any): Promise<any> { await store.dispatch('azureB2CLogin', payload);} 
+    async function azureB2CLogoutAction(payload?: any): Promise<any> { await store.dispatch('azureB2CLogout', payload);} 
+    async function getCurrentUserByUserNameAction(payload?: any): Promise<any> { await store.dispatch('getCurrentUserByUserName', payload);}
+    async function updateUserLastNewsAccessDateAction(payload?: any): Promise<any> { await store.dispatch('updateUserLastNewsAccessDate', payload);}
+    async function getImplementationNameAction(payload?: any): Promise<any> { await store.dispatch('getImplementationName', payload);}
+    async function getAgencyLogoAction(payload?: any): Promise<any> { await store.dispatch('getAgencyLogo', payload);} 
+    async function getProductLogoAction(payload?: any): Promise<any> { await store.dispatch('getProductLogo', payload);} 
+    async function getInventoryReportsAction(payload?: any): Promise<any> { await store.dispatch('getInventoryReports', payload);} 
+    async function setAlertMessageAction(payload?: any): Promise<any> { await store.dispatch('setAlertMessage', payload);} 
 
     let drawer: boolean = false;
     let latestNewsDate: string = '0001-01-01';
@@ -368,9 +365,9 @@ import config from '../public/config.json';
     let alertDialogData: AlertData = clone(emptyAlertData);
     let pushRouteUpdate: boolean = false;
     let route: any = {};
-    let selectedScenario: Scenario = clone(emptyScenario);
-    let hasSelectedScenario: boolean = false;
-    let selectedScenarioHasStatus: boolean = false;
+    const selectedScenario = ref<Scenario>(clone(emptyScenario));
+    const hasSelectedScenario = ref<boolean>(false);
+    const selectedScenarioHasStatus = ref<boolean>(false);
     let ignoredAPIs: string[] = [
         'SynchronizeLegacySimulation',
         'RunSimulation',
@@ -426,12 +423,11 @@ import config from '../public/config.json';
         return authenticated && hasRole;
     }
     
-    watch(stateSelectedScenario, () => onStateSelectedScenarioChanged)
-    function onStateSelectedScenarioChanged() {
-        selectedScenario = clone(stateSelectedScenario.value);
-        hasSelectedScenario = selectedScenario.id !== getBlankGuid();
-        selectedScenarioHasStatus = hasValue(selectedScenario.status);
-    }
+    watch(stateSelectedScenario, () => {
+        selectedScenario.value = clone(stateSelectedScenario.value);
+        hasSelectedScenario.value= selectedScenario.value.id !== getBlankGuid();
+        selectedScenarioHasStatus.value = hasValue(selectedScenario.value.status);
+    })
 
     watch(authenticated, () => {
         if (authenticated) {
@@ -581,8 +577,7 @@ import config from '../public/config.json';
     }
 
     
-    onMounted(() => mounted());
-    function mounted() {
+    onMounted(() => {
 
         $emitter.on(
             Hub.BroadcastEventType.BroadcastErrorEvent,
@@ -617,7 +612,7 @@ import config from '../public/config.json';
             implementationName.value = "BridgeCare"
         else
             implementationName.value = stateImplementationName.value
-    }
+    });
 
     onBeforeUnmount(() => beforeDestroy());
     function beforeDestroy() {

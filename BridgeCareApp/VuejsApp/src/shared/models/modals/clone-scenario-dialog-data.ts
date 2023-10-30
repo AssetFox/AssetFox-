@@ -1,4 +1,4 @@
-import { emptyScenario, Scenario,CloneScenario, emptyCloneScenario } from '../iAM/scenario';
+import { emptyScenario, Scenario, CloneScenario, emptyCloneScenario } from '../iAM/scenario';
 
 export interface CloneScenarioDialogData {
     showDialog: boolean;
@@ -16,4 +16,13 @@ export const emptyCloneSimulationDialogData: CloneSimulationDialogData = {
 export const emptyCloneScenarioDialogData: CloneScenarioDialogData = {
     showDialog: false,
     scenario: emptyScenario
+}
+export interface CloneSimulationDialogData {
+    showDialog: boolean;
+    scenario: CloneScenario;
+}
+
+export const emptyCloneSimulationDialogData: CloneSimulationDialogData = {
+    showDialog: false,
+    scenario: emptyCloneScenario
 };

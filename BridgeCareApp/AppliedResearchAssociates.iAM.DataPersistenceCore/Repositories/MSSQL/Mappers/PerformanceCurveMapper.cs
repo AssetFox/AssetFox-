@@ -5,6 +5,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
+using AppliedResearchAssociates.iAM.DTOs.Static;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -42,6 +44,43 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Name = dto.Name,
                 Shift = dto.Shift
             };
+
+        public static ScenarioPerformanceCurveEntity ToScenarioEntityWithCriterionLibraryJoinAndEquationJoin(this PerformanceCurveDTO dto, Guid simulationId,
+         Guid attributeId, BaseEntityProperties baseEntityProperties)
+        {
+
+            var entity = ToScenarioEntity(dto, simulationId, attributeId);
+            var criterionLibraryDto = dto.CriterionLibrary;
+            var isvalid = criterionLibraryDto.IsValid();
+            if (isvalid)
+            {
+                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity(baseEntityProperties);
+
+                var join = new CriterionLibraryScenarioPerformanceCurveEntity
+                {
+                    ScenarioPerformanceCurveId = entity.Id,                    
+                    CriterionLibrary = criterionLibrary,
+                };
+                BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
+                entity.CriterionLibraryScenarioPerformanceCurveJoin = join;
+            }
+            var hasEquation = dto.Equation != null && dto.Equation.Id != Guid.Empty;
+            if (hasEquation)
+            {
+                var equation = EquationMapper.ToEntity(dto.Equation, baseEntityProperties);
+                var joinEquation = new ScenarioPerformanceCurveEquationEntity
+                {
+                    ScenarioPerformanceCurveId = entity.Id,
+                    Equation = equation,
+                };
+                BaseEntityPropertySetter.SetBaseEntityProperties(joinEquation, baseEntityProperties);
+                entity.ScenarioPerformanceCurveEquationJoin = joinEquation;
+            }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
+        }
+
+
 
         public static PerformanceCurveLibraryEntity ToEntity(this PerformanceCurveLibraryDTO dto) =>
             new PerformanceCurveLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description, IsShared = dto.IsShared };

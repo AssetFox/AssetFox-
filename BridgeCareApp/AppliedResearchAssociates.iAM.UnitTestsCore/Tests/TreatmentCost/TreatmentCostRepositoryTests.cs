@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentCost
             var treatmentId = Guid.NewGuid();
             var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
                 TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, "treatment");
-            var treatmentCost = TreatmentCostTestSetup.ModelForEntityInDb(
+            var treatmentCost = LibraryTreatmentCostTestSetup.ModelForEntityInDb(
                 TestHelper.UnitOfWork, treatmentId, treatmentLibraryId);
 
             var costs = TestHelper.UnitOfWork.TreatmentCostRepo.GetTreatmentCostsWithEquationJoinsByLibraryIdAndTreatmentName(

@@ -382,5 +382,16 @@ namespace BridgeCareCoreTests.Tests
                 await controller.ImportScenarioInvestmentBudgetsExcelFile());
             Assert.Equal("Request contained no simulation id.", exception.Message);
         }
+
+        [Fact]
+        public async Task DownloadTemplate_IsValidExcelFile()
+        {
+            var unitOfWork = UnitOfWorkMocks.EveryoneExists();
+            var controller = CreateController(unitOfWork);
+            var actionResult = await controller.DownloadInvestmentBudgetsTemplate();
+            var value = ActionResultAssertions.OkObject(actionResult);
+            var fileInfo = value as FileInfoDTO;
+            ExcelPackageAsserts.ValidExcelPackageData(fileInfo);
+        }
     }
 }

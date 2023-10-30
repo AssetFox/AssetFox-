@@ -12,14 +12,14 @@ root
    ;
 
 calculation
-   : IDENTIFIER LEFT_PAREN arguments RIGHT_PAREN                             # invocation
-   | MINUS calculation                                                       # negation
-   | left = calculation operation = (TIMES | DIVIDED_BY) right = calculation # multiplicationOrDivision
-   | left = calculation operation = (PLUS | MINUS) right = calculation       # additionOrSubtraction
-   | NUMBER                                                                  # numberLiteral
-   | IDENTIFIER                                                              # numberReference
-   | LEFT_BRACKET IDENTIFIER RIGHT_BRACKET                                   # numberParameterReference
-   | LEFT_PAREN calculation RIGHT_PAREN                                      # calculationGrouping
+   : IDENTIFIER LEFT_PAREN arguments RIGHT_PAREN                              # invocation
+   | MINUS calculation                                                        # negation
+   | left = calculation operation = (TIMES | DIVIDED_BY) right = calculation  # multiplicationOrDivision
+   | left = calculation operation = (PLUS | MINUS) right = calculation        # additionOrSubtraction
+   | NUMBER                                                                   # numberLiteral
+   | IDENTIFIER                                                               # numberReference
+   | LEFT_BRACKET IDENTIFIER RIGHT_BRACKET                                    # numberParameterReference
+   | LEFT_PAREN calculation RIGHT_PAREN                                       # calculationGrouping
    ;
 
 arguments
@@ -27,26 +27,27 @@ arguments
    ;
 
 evaluation
-   : left = evaluation AND right = evaluation                   # logicalConjunction
-   | left = evaluation OR right = evaluation                    # logicalDisjunction
-   | parameterReference EQUAL comparisonOperand                 # equal
-   | parameterReference NOT_EQUAL comparisonOperand             # notEqual
-   | parameterReference LESS_THAN comparisonOperand             # lessThan
-   | parameterReference LESS_THAN_OR_EQUAL comparisonOperand    # lessThanOrEqual
-   | parameterReference GREATER_THAN_OR_EQUAL comparisonOperand # greaterThanOrEqual
-   | parameterReference GREATER_THAN comparisonOperand          # greaterThan
-   | LEFT_PAREN evaluation RIGHT_PAREN                          # evaluationGrouping
+   : left = comparisonOperand operation = EQUAL right = comparisonOperand                  # equal
+   | left = comparisonOperand operation = NOT_EQUAL right = comparisonOperand              # notEqual
+   | left = comparisonOperand operation = LESS_THAN right = comparisonOperand              # lessThan
+   | left = comparisonOperand operation = LESS_THAN_OR_EQUAL right = comparisonOperand     # lessThanOrEqual
+   | left = comparisonOperand operation = GREATER_THAN_OR_EQUAL right = comparisonOperand  # greaterThanOrEqual
+   | left = comparisonOperand operation = GREATER_THAN right = comparisonOperand           # greaterThan
+   | left = evaluation AND right = evaluation                                              # logicalConjunction
+   | left = evaluation OR right = evaluation                                               # logicalDisjunction
+   | LEFT_PAREN evaluation RIGHT_PAREN                                                     # evaluationGrouping
+   ;
+
+comparisonOperand
+   : parameterReference
+   | calculation
+   | literal
    ;
 
 parameterReference
    : IDENTIFIER
    | LEFT_BRACKET IDENTIFIER RIGHT_BRACKET
-   ;
-
-comparisonOperand
-   : parameterReference
-   | literal
-   | NUMBER
+   | LEFT_PAREN parameterReference RIGHT_PAREN
    ;
 
 literal

@@ -26,25 +26,25 @@ namespace AppliedResearchAssociates.iAM.Data.Networking
             return new AggregatedResult<T>(Guid.NewGuid(), this, aggregationRule.Apply(specifiedData, attribute).ToList());
         }
 
-        public List<DatumLog> AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)
+        public void AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)
         {
-            List<DatumLog> datumLog = new List<DatumLog>();
+            //List<DatumLog> datumLog = new List<DatumLog>();
             foreach (var datum in attributeData)
             {
                 if (datum.Location.MatchOn(Location))
                 {
                     AssignedData.Add(datum);
                 }
-                else
-                {
-                    // return the unmatched datum to be logged and reported
-                        var currentDatumLog = new DatumLog(datum.Attribute.Id, Location.Id, datum.Attribute.Name);
-                        if (datumLog.Find(x => (x.Equals(currentDatumLog))) == null)
-                            datumLog.Add(currentDatumLog);
-                }
+                //else
+                //{
+                //    // return the unmatched datum to be logged and reported
+                //        var currentDatumLog = new DatumLog(datum.Attribute.Id, Location.Id, datum.Attribute.Name);
+                //        if (datumLog.Find(x => (x.Equals(currentDatumLog))) == null)
+                //            datumLog.Add(currentDatumLog);
+                //}
             }
 
-            return datumLog;
+            //return datumLog;
         }
 
         public void AssignAttributeDataFromDataSource(IEnumerable<IAttributeDatum> attributeData) => AssignedData.AddRange(attributeData);

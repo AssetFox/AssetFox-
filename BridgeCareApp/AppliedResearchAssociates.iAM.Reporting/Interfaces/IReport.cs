@@ -21,6 +21,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
         /// </remarks>
         Guid? SimulationID { get; set; }
 
+        Guid? NetworkID { get; set; }
+
         /// <summary>
         /// Runs the report, populating all read only fields
         /// </summary>

@@ -28,7 +28,7 @@
                         <span>Shared</span>
                         </template>
                         </v-badge>
-                        <v-btn @click='onShowShareCashFlowRuleLibraryDialog(selectedCashFlowRuleLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        <v-btn id="CashFlowEditor-shareLibrary-btn" @click='onShowShareCashFlowRuleLibraryDialog(selectedCashFlowRuleLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
                     </v-btn>
@@ -98,6 +98,7 @@
                                     :rules="[inputRules.generalRules.valueIsNotEmpty]"/>
                                 <template v-slot:input>
                                     <v-textarea
+                                    id="CashFlowEditor-editRuleName-textarea"
                                         label="Description"
                                         no-resize
                                         outline

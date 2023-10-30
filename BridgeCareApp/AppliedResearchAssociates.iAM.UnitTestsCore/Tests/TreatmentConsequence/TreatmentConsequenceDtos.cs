@@ -10,14 +10,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class TreatmentConsequenceDtos
     {
-        public static TreatmentConsequenceDTO Dto(Guid? id = null, string attribute = "attribute")
+        public static TreatmentConsequenceDTO Dto(
+            Guid? id = null,
+            string attribute = "attribute",
+            string equation = null,
+            string criterion = null)
         {
             var resolveId = id ?? Guid.NewGuid();
+            var consequenceEquation = equation == null ? null :
+                EquationDtos.WithExpression(Guid.NewGuid(), equation);
+            var consequenceCriterion = criterion == null ? null : CriterionLibraryDtos.Dto(
+                null, criterion);
             var dto = new TreatmentConsequenceDTO
             {
                 Id = resolveId,
                 Attribute = attribute,
+                Equation = consequenceEquation,
                 ChangeValue = "1",
+                CriterionLibrary = consequenceCriterion,
             };
             return dto;
         }

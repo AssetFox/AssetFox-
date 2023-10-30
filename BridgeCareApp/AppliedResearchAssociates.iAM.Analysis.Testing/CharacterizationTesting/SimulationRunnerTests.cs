@@ -26,6 +26,7 @@ public class SimulationRunnerTests
             Cost = 100,
             Name = "Lovecraftian Horror",
             NameOfTemplateTreatment = scenario.SelectableTreatments.Single(t => t.ForCommittedProjectsOnly).Name,
+            ProjectSource = DTOs.ProjectSourceDTO.SAP.ToString(),
         });
 
         return RunTest(scenario);

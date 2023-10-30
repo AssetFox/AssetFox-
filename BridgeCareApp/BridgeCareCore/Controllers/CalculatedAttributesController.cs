@@ -181,6 +181,7 @@ namespace BridgeCareCore.Controllers
                         attributes = _calulatedAttributeService.GetSyncedLibraryDataset(upsertRequest.SyncModel.LibraryId.Value, upsertRequest.SyncModel);
                     else if (!upsertRequest.IsNewLibrary)
                         attributes = _calulatedAttributeService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.SyncModel);
+
                     if (upsertRequest.IsNewLibrary)
                         attributes.ForEach(attribute =>
                         {
@@ -190,7 +191,10 @@ namespace BridgeCareCore.Controllers
                             {
                                 _.Id = Guid.NewGuid();
                                 _.Equation.Id = Guid.NewGuid();
-                                _.CriteriaLibrary.Id = Guid.NewGuid();
+                                if (_.CriteriaLibrary != null)
+                                {
+                                    _.CriteriaLibrary.Id = Guid.NewGuid();
+                                }
                             });
                             attribute.Equations = equations;
                         });
@@ -198,8 +202,8 @@ namespace BridgeCareCore.Controllers
                     dto.CalculatedAttributes = attributes;
                     calculatedAttributesRepo.UpsertCalculatedAttributeLibrary(dto);
                 });
-                return Ok();
 
+                return Ok();
             }
             catch (Exception e)
             {

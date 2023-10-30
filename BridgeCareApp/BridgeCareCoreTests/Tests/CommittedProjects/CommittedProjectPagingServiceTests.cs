@@ -222,9 +222,9 @@ namespace BridgeCareCoreTests.Tests
             sectionCommittedProject1.Treatment = "Simple";
             sectionCommittedProject2.Treatment = "Complicated";
             sectionCommittedProject3.Treatment = "Simple";
-            sectionCommittedProject1.LocationKeys["BRKEY_"] = "1";
-            sectionCommittedProject2.LocationKeys["BRKEY_"] = "2";
-            sectionCommittedProject3.LocationKeys["BRKEY_"] = "1";
+            sectionCommittedProject1.LocationKeys[TestAttributeNames.BrKey] = "1";
+            sectionCommittedProject2.LocationKeys[TestAttributeNames.BrKey] = "2";
+            sectionCommittedProject3.LocationKeys[TestAttributeNames.BrKey] = "1";
             var sectionCommittedProjects = new List<SectionCommittedProjectDTO> { sectionCommittedProject1, sectionCommittedProject2, sectionCommittedProject3 };
 
             var service = CreatePagingService(unitOfWork);
@@ -277,9 +277,9 @@ namespace BridgeCareCoreTests.Tests
                 SimulationId = TestDataForCommittedProjects.SimulationId,
                 LocationKeys = new Dictionary<string, string>()
                 {
-                    { "ID", "f286b7cf-445d-4291-9167-0f225b170cae" },
-                    { "BRKEY_", "1" },
-                    { "BMSID", "12345678" }
+                    { "ID", TestDataForCommittedProjects.MaintainableAssetIdString1 },
+                    { TestAttributeNames.BrKey, "1" },
+                    { TestAttributeNames.BmsId, "12345678" }
                 }
             };
 
@@ -329,9 +329,9 @@ namespace BridgeCareCoreTests.Tests
             sectionCommittedProject1.Treatment = "Simple";
             sectionCommittedProject2.Treatment = "Z Complicated";
             sectionCommittedProject3.Treatment = "Simple";
-            sectionCommittedProject1.LocationKeys["BRKEY_"] = "1";
-            sectionCommittedProject2.LocationKeys["BRKEY_"] = "2";
-            sectionCommittedProject3.LocationKeys["BRKEY_"] = "1";
+            sectionCommittedProject1.LocationKeys[TestAttributeNames.BrKey] = "1";
+            sectionCommittedProject2.LocationKeys[TestAttributeNames.BrKey] = "2";
+            sectionCommittedProject3.LocationKeys[TestAttributeNames.BrKey] = "1";
             var sectionCommittedProjects = new List<SectionCommittedProjectDTO> { sectionCommittedProject1, sectionCommittedProject2, sectionCommittedProject3 };
 
             var newTreament = "updated treatment";

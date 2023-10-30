@@ -291,8 +291,8 @@
                     let otherKeyValue = inventoryItem.keyProperties[i]; 
                     selectedKeys[i] = otherKeyValue;
                     data.keyProperties[i] = otherKeyValue;
+                    }
                 }
-
                  //Create a dictionary of the selected key fields
                 let dictionary: Record<string, string> = {};
 
@@ -301,7 +301,7 @@
                     let dictValues: any = selectedKeys[i];
                     dictionary[dictNames] = dictValues;                     
                 }
-    
+
                 //Set the data equal to the dictionary
                 data.keyProperties = dictionary;
 

@@ -10,7 +10,8 @@
           </v-btn>
       </v-card-title>
       <v-card-text>
-        <v-data-table :headers="shareCalculatedAttributeLibraryUserGridHeaders"
+        <v-data-table id="ShareCalculatedAttributeLibraryDialog-table-vdatatable"
+                      :headers="shareCalculatedAttributeLibraryUserGridHeaders"
                       :items="shareCalculatedAttributeLibraryUserGridRows"
                       sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
@@ -19,11 +20,11 @@
               {{ item.value.username }}
             </td>
             <td>
-              <v-checkbox label="Is Shared" v-model="item.raw.isShared"
+              <v-checkbox label="Is Shared" v-model="item.raw.isShared" id="ShareCalculatedAttributeLibraryDialog-isShared-vcheckbox"
                           @change="removeUserModifyAccess(item.value.id, item.value.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!dialogData.showDialog" label="Can Modify" v-model="item.raw.canModify"/>
+              <v-checkbox :disabled="!dialogData.showDialog" label="Can Modify" v-model="item.raw.canModify" id="ShareCalculatedAttributeLibraryDialog-canModify-vcheckbox"/>
             </td>
           </template>
           <v-alert :model-value="true"
@@ -36,8 +37,8 @@
       </v-card-text>
       <v-card-actions>
         <v-row row justify-center>
-          <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
-          <v-btn @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
+          <v-btn id="ShareCalculatedAttributeLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
+          <v-btn id="ShareCalculatedAttributeLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
             Save
           </v-btn>
         </v-row>

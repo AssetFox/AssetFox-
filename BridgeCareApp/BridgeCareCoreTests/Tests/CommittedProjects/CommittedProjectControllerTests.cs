@@ -358,8 +358,8 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object, generalWorkQueue.Object);
             var deleteList = new List<Guid>()
             {
-                Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
-                Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00")
+                TestDataForCommittedProjects.CommittedProjectId1,
+                TestDataForCommittedProjects.CommittedProjectId2,
             };
 
             // Act
@@ -389,8 +389,8 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object, generalWorkQueue.Object);
             var deleteList = new List<Guid>()
             {
-                Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
-                Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00")
+                TestDataForCommittedProjects.CommittedProjectId1,
+                TestDataForCommittedProjects.CommittedProjectId2,
             };
 
             // Act

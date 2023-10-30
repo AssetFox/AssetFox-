@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
             using (var cells = worksheet.Cells[fromRow, fromColumn, toRow, toColumn])
             {
                 cells.Merge = true;
-                if (makeTextBold == true)
+                if (makeTextBold == true)      
                 {
                     ApplyStyle(cells);
                 }

@@ -39,11 +39,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         [Fact]
         public void SimpleRepoEntityZero_MapToDto_Expected()
         {
-            var entity = TestEntitiesForDataSources.SimpleRepo()[0];
+            var encryptionKey = TestHelper.UnitOfWork.EncryptionKey;
+            var entity = TestEntitiesForDataSources.SimpleRepo(encryptionKey)[0];
             var dto = DataSourceMapper.ToDTO(entity, Aes256GcmTests.Key);
             var expected = new SQLDataSourceDTO
             {
-                ConnectionString = null,
+                ConnectionString = TestEntitiesForDataSources.FakeConnectionString,
                 Name = entity.Name,
                 Id = entity.Id,
             };

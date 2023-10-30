@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Static;
 using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
@@ -31,6 +32,37 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 PriorityLevel = dto.PriorityLevel,
                 Year = dto.Year
             };
+
+        public static ScenarioBudgetPriorityEntity ToScenarioEntityWithCriterionLibraryJoin(this BudgetPriorityDTO dto, Guid simulationId, BaseEntityProperties baseEntityProperties)
+        {
+
+            var entity = ToScenarioEntity(dto, simulationId);
+            var criterionLibraryDto = dto.CriterionLibrary;
+            var isvalid = criterionLibraryDto.IsValid();
+            if (isvalid)
+            {
+                var criterionLibrary = CriterionMapper.ToSingleUseEntity(criterionLibraryDto, baseEntityProperties);
+                var join = new CriterionLibraryScenarioBudgetPriorityEntity
+                {
+                    ScenarioBudgetPriorityId = entity.Id,
+                    CriterionLibrary = criterionLibrary,
+                };
+                BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+                BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
+                entity.CriterionLibraryScenarioBudgetPriorityJoin = join;
+            }
+            var budgetPercentagePairEntities = new List<BudgetPercentagePairEntity>();
+            foreach (var budgetPercentagePair in dto.BudgetPercentagePairs)
+            {
+                var budgetPercentagePairEntity = budgetPercentagePair.ToEntity(entity.Id, baseEntityProperties);
+                budgetPercentagePairEntities.Add(budgetPercentagePairEntity);
+            }
+            entity.BudgetPercentagePairs = budgetPercentagePairEntities;
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
+
+        }
+
 
         public static BudgetPriorityEntity ToLibraryEntity(this BudgetPriorityDTO dto, Guid libraryId) =>
             new BudgetPriorityEntity

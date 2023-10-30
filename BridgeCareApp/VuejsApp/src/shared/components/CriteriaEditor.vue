@@ -84,6 +84,62 @@
                                 </v-textarea>
                             </div>
                         </v-card-text>
+    <!-- :class="{
+        'clauses-card-dialog': 
+            !criteriaEditorData.isLibraryContext,
+        'clauses-card-library': 
+            criteriaEditorData.isLibraryContext,
+    }"
+>
+<v-textarea
+    v-if="isAndConjunction()"
+    style="padding-left:0px;"
+    :class="getClassForTextarea(-1)"
+    :value="getValueForTextarea(-1)"
+    @click="onClickSubCriteriaClauseTextarea(subCriteriaClauses.join(' '), -1)"
+    box
+    class="ghd-control-text"
+    full-width
+    no-resize
+    readonly
+    rows="3"
+>
+    <template slot="append">
+        <v-btn
+            @click="onRemoveSubCriteria(selectedSubCriteriaClauseIndex)"
+            class="ghd-blue"
+            icon
+        >
+            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+        </v-btn>
+    </template>
+</v-textarea>
+<div v-else>
+    <div v-for="(clause, index) in subCriteriaClauses" :key="index">
+        <v-textarea style="padding-left:0px;"
+            :class="getClassForTextarea(index)"
+            :value="getValueForTextarea(index)"
+            @click="onClickSubCriteriaClauseTextarea(clause, index)"
+            box
+            class="ghd-control-text"
+            full-width
+            no-resize
+            readonly
+            rows="3"
+        >
+            <template slot="append">
+                <v-btn id="CriteriaEditor-removeSubCriteria-btn"
+                    @click="onRemoveSubCriteria(index)"
+                    class="ghd-blue"
+                    icon
+                >
+                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                </v-btn>
+            </template>
+        </v-textarea>
+    </div>
+</div>
+</v-card-text> -->
                         <v-card-actions
                             :class="{
                                 'validation-actions':
@@ -347,7 +403,7 @@ const tab = ref<any>(null);
     watch(criteriaEditorData,() => {
         //TODO
         /*const mainCriteria: Criteria = parseCriteriaString(
-      this.criteriaEditorData.mergedCriteriaExpression != null ? this.criteriaEditorData.mergedCriteriaExpression : ''
+      criteriaEditorData.mergedCriteriaExpression != null ? criteriaEditorData.mergedCriteriaExpression : ''
       ) as Criteria;*/
         selectedSubCriteriaClauseIndex.value = -1;
         const mainCriteria: Criteria = convertCriteriaExpressionToCriteriaObject(
@@ -460,7 +516,30 @@ const tab = ref<any>(null);
                 );
             }
         }
-    });
+    })
+
+    function isAndConjunction() {
+        return selectedConjunction.value === 'AND';
+    }
+
+    function getClassForTextarea(index: number) {
+        if (isAndConjunction()) {
+            return {
+                'textarea-focused': selectedSubCriteriaClauseIndex.value === -1,
+                'clause-textarea': selectedSubCriteriaClauseIndex.value !== -1
+            };
+        } else {
+            return {
+                'textarea-focused': index === selectedSubCriteriaClauseIndex.value,
+                'clause-textarea': index !== selectedSubCriteriaClauseIndex.value
+            };
+        }
+    }
+
+    function getValueForTextarea(index: number) {
+        return isAndConjunction() ? subCriteriaClauses.value.join(' ') : subCriteriaClauses.value[index];
+    }
+
     function setQueryBuilderRules() {
         queryBuilderRules.value = stateAttributes.value.map(
             (attribute: Attribute) => ({

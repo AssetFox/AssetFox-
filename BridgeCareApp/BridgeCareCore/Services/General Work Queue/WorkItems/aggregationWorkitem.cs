@@ -18,6 +18,7 @@ using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs.Services;
 using Microsoft.CodeAnalysis;
+using System.Diagnostics;
 
 namespace BridgeCareCore.Services
 {
@@ -157,6 +158,7 @@ namespace BridgeCareCore.Services
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
 
+            Debug.WriteLine($"Aggregation completed at {DateTime.Now}");
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Network aggregation on {NetworkName} has completed");
         }
 

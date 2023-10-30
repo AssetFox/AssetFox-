@@ -561,8 +561,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
 
             var result = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatmentByLibraryIdAndName(treatmentLibraryId, treatmentName);
 
-            treatment.BudgetIds = new List<Guid>();
-            ObjectAssertions.EquivalentExcluding(treatment, result, x => x.CriterionLibrary);
+            treatment.BudgetIds = new List<Guid>();            
+            ObjectAssertions.EquivalentExcluding(treatment, result, x => x.CriterionLibrary, _ => _.SupersedeRules);
 
         }
 

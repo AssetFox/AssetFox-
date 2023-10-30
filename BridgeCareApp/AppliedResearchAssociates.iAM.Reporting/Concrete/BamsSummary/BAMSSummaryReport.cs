@@ -48,6 +48,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public Guid? SimulationID { get; set; }
 
+        public Guid? NetworkID { get; set; }
+
         public string Results { get; private set; }
 
         public ReportType Type => ReportType.File;

@@ -10,7 +10,7 @@
         </v-row>
       </v-card-title>
       <v-card-text>
-        <v-data-table :headers="targetConditionGoalLibraryUserGridHeaders"
+        <v-data-table id="ShareTargetConditionGoalLibraryDialog-table-vdatatable" :headers="targetConditionGoalLibraryUserGridHeaders"
                       :items="targetConditionGoalLibraryUserGridRows"
                       :search="searchTerm"
                       :rows-per-page-items=[5,10,25]
@@ -22,13 +22,17 @@
           <template v-slot:item="{item}">
             <tr>
             <td>
-              {{ item.raw.username }}
+              {{ item.username }}
             </td>
             <td>
-              <v-checkbox label="Is Shared" v-model="item.raw.isShared" @change="removeUserModifyAccess(item.raw.id, item.raw.isShared)" />
+              <v-checkbox 
+                id="ShareTargetConditionGoalLibraryDialog-isShared-vcheckbox" 
+                label="Is Shared" 
+                v-model="item.isShared" 
+                @update:model-value="removeUserModifyAccess(item.id, item.isShared)" />
             </td>
             <td>
-              <v-checkbox :disabled="!item.value.isShared" label="Can Modify" v-model="item.raw.canModify"/>
+              <v-checkbox id="ShareTargetConditionGoalLibraryDialog-canModify-vcheckbox" :disabled="!item.value.isShared" label="Can Modify" v-model="item.raw.canModify"/>
             </td>
           </tr>
           </template>
@@ -42,8 +46,15 @@
       </v-card-text>
         <v-row justify="center">
           <div style="margin: 10px; padding: 10px;">
-          <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" flat>Cancel</v-btn>
+          <v-btn
+            id="ShareTargetConditionGoalLibraryDialog-cancel-vbtn" 
+            @click="onSubmit(false)" 
+            class="ghd-white-bg ghd-blue ghd-button-text" 
+            flat>
+              Cancel
+          </v-btn>
           <v-btn 
+            id="ShareTargetConditionGoalLibraryDialog-save-vbtn"
             variant="outlined"
             @click="onSubmit(true)" 
             class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">

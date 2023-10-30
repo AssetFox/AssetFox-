@@ -21,8 +21,3 @@ export interface CloneSimulationDialogData {
     showDialog: boolean;
     scenario: CloneScenario;
 }
-
-export const emptyCloneSimulationDialogData: CloneSimulationDialogData = {
-    showDialog: false,
-    scenario: emptyCloneScenario
-};

@@ -60,7 +60,7 @@
     }"
 >
 <v-textarea
-    v-if="isAndConjunction"
+    v-if="isAndConjunction()"
     style="padding-left:0px;"
     :class="getClassForTextarea(-1)"
     :value="getValueForTextarea(-1)"
@@ -380,7 +380,7 @@ const tab = ref<any>(null);
     watch(()=>criteriaEditorData,() => {
         //TODO
         /*const mainCriteria: Criteria = parseCriteriaString(
-      this.criteriaEditorData.mergedCriteriaExpression != null ? this.criteriaEditorData.mergedCriteriaExpression : ''
+      criteriaEditorData.mergedCriteriaExpression != null ? criteriaEditorData.mergedCriteriaExpression : ''
       ) as Criteria;*/
         selectedSubCriteriaClauseIndex.value = -1;
         const mainCriteria: Criteria = convertCriteriaExpressionToCriteriaObject(
@@ -493,32 +493,32 @@ const tab = ref<any>(null);
                 );
             }
         }
+    })
+
+    function isAndConjunction() {
+        return selectedConjunction.value === 'AND';
     }
 
-    get isAndConjunction() {
-        return this.selectedConjunction === 'AND';
-    }
-
-    getClassForTextarea(index: number) {
-        if (this.isAndConjunction) {
+    function getClassForTextarea(index: number) {
+        if (isAndConjunction()) {
             return {
-                'textarea-focused': this.selectedSubCriteriaClauseIndex === -1,
-                'clause-textarea': this.selectedSubCriteriaClauseIndex !== -1
+                'textarea-focused': selectedSubCriteriaClauseIndex.value === -1,
+                'clause-textarea': selectedSubCriteriaClauseIndex.value !== -1
             };
         } else {
             return {
-                'textarea-focused': index === this.selectedSubCriteriaClauseIndex,
-                'clause-textarea': index !== this.selectedSubCriteriaClauseIndex
+                'textarea-focused': index === selectedSubCriteriaClauseIndex.value,
+                'clause-textarea': index !== selectedSubCriteriaClauseIndex.value
             };
         }
     }
 
-    getValueForTextarea(index: number) {
-        return this.isAndConjunction ? this.subCriteriaClauses.join(' ') : this.subCriteriaClauses[index];
+    function getValueForTextarea(index: number) {
+        return isAndConjunction() ? subCriteriaClauses.value.join(' ') : subCriteriaClauses.value[index];
     }
 
-    setQueryBuilderRules() {
-        this.queryBuilderRules = this.stateAttributes.map(
+    function setQueryBuilderRules() {
+        queryBuilderRules = stateAttributes.value.map(
             (attribute: Attribute) => ({
                 type: 'text',
                 label: attribute.name,

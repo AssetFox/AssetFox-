@@ -26,7 +26,7 @@
                             <Column sortable field="name" header="Name"></Column>
                             <Column field="mergedExpression" header="Criteria">
                                 <template #body="slotProps">
-                                    <v-btn v-if="selectedReport.name.includes('Summary')" flat>
+                                    <v-btn v-if="slotProps.data.name.includes('Summary')" flat style="background-color: transparent;">
                                       <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')" @click="showEditDialog">
                                       <Dialog v-model:visible="editShow" :style="{ width: 'auto', height: 'auto'}" :closable="false">
                                         <v-textarea>
@@ -34,17 +34,19 @@
                                         </v-textarea>
                                       </Dialog>
                                     </v-btn>
-                                    <v-btn flat @click="onShowCriterionEditorDialog(selectedReport.id)">
+                                    <v-btn v-else flat style="background-color: transparent;">
+                                    </v-btn>
+                                    <v-btn flat @click="onShowCriterionEditorDialog(selectedReport.id)" style="background-color: transparent;">
                                       <img class='img-general' :src="require('@/assets/icons/edit.svg')">
                                     </v-btn>
                                 </template>
                             </Column>
                             <Column field="actions" header="Actions">
                                 <template #body="slotProps">
-                                    <v-btn flat @click="onGenerateReport(selectedReport.id, true)">
+                                    <v-btn flat @click="onGenerateReport(selectedReport.id, true)" style="background-color: transparent;">
                                       <img class="img-general" :src="require('@/assets/icons/attributes-dark.svg')"/>
                                     </v-btn>
-                                    <v-btn flat @click="onDownloadReport(selectedReport.id)">
+                                    <v-btn flat @click="onDownloadReport(selectedReport.id)" style="background-color: transparent;">
                                       <img class='img-general' :src="require('@/assets/icons/download.svg')"/>
                                     </v-btn>
                                 </template>

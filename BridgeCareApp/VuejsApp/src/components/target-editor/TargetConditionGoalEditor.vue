@@ -90,13 +90,13 @@
                     select-all
                     v-model="selectedGridRows"
                 >
-                    <template v-slot:item="{item}">
+                    <template slot="items" slot-scope="props" v-slot:item="props">
                         <tr>
                         <td>
                             <v-checkbox
                                 id="TargetConditionGoalEditor-selectForDelete-vcheckbox"
                                 hide-details
-                                v-model="item.raw.selected"
+                                v-model="props.item.selected"
                             ></v-checkbox>
                         </td>
                         <td>
@@ -107,7 +107,7 @@
                                 single-line
                                 class="sm-txt"
                                 density="compact"
-                                v-model="item.raw['name']"/>
+                                v-model="props.item['name']"/>
                         </td>
                         <td>
                             <v-text-field style="width: 90px;"
@@ -117,7 +117,7 @@
                                 class="sm-txt"
                                 density="compact"
                                 id="TargetConditionGoalEditor-editTargetConditionGoalAttribute-vselect"
-                                v-model="item.raw['attribute']"
+                                v-model="props.item['attribute']"
                                 :rules="[
                                     rules['generalRules']
                                         .valueIsNotEmpty]"/>
@@ -129,7 +129,7 @@
                                 single-line
                                 class="sm-txt"
                                 density="compact"
-                                v-model="item.raw['target']"
+                                v-model="props.item['target']"
                                 :rules="[
                                     rules['generalRules']
                                         .valueIsNotEmpty]">
@@ -143,7 +143,7 @@
                                 single-line
                                 class="sm-txt"
                                 density="compact"
-                                v-model="item.raw['year']"/>
+                                v-model="props.item['year']"/>
                         </td>
                         <td>
                             <v-row style="margin: 5px;" align="center">
@@ -157,12 +157,12 @@
                                             readonly
                                             class="sm-txt"
                                             density="compact"
-                                            v-model="item.raw.criterionLibrary.mergedCriteriaExpression"/>
+                                            v-model="props.item.criterionLibrary.mergedCriteriaExpression"/>
                                     </template>
                                     <v-card>
                                         <v-card-text>
                                             <v-textarea
-                                                :v-model="item.raw.criterionLibrary.mergedCriteriaExpression"
+                                                :v-model="props.item.criterionLibrary.mergedCriteriaExpression"
                                                 label="test"
                                                 variant="solo-filled"
                                                 readonly
@@ -172,7 +172,7 @@
                                 </v-menu>
                                 <v-btn
                                     id="TargetConditionGoalEditor-editTargetConditionGoalCriteria-vbtn"
-                                    @click="onShowCriterionLibraryEditorDialog(item.raw)"
+                                    @click="onShowCriterionLibraryEditorDialog(props.item)"
                                     class="ghd-blue"
                                     flat>
                                     <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
@@ -182,7 +182,7 @@
                         <td>
                             <v-btn 
                                 id="TargetConditionGoalEditor-deleteTargetConditionGoal-vbtn" 
-                                @click="onRemoveTargetConditionGoalsIcon(item.raw)"  
+                                @click="onRemoveTargetConditionGoalsIcon(props.item)"  
                                 class="ghd-blue" 
                                 flat>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
@@ -662,7 +662,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
                     rowCache.value = clone(currentPage.value)
                     totalItems.value = data.totalItems;
                     if (!isNil(selectedTargetConditionGoalLibrary.value.id) ) {
-                        getIsSharedLibraryAction(selectedTargetConditionGoalLibrary).then(() => isShared = isSharedLibrary.value);
+                        getIsSharedLibraryAction(selectedTargetConditionGoalLibrary.value).then(() => isShared = isSharedLibrary.value);
                         
                     }
                 }

@@ -45,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
                 Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
                 AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType,
-                ScenarioTreatmentPerformanceFactors = dto.ToScenarioSelectableTreatmentPerformanceFactorEntity(baseEntityProperties),
+                ScenarioTreatmentPerformanceFactors = dto.ToScenarioSelectableTreatmentPerformanceFactorEntity(baseEntityProperties),                
             };
             BaseEntityPropertySetter.SetBaseEntityProperties(treatment, baseEntityProperties);
             return treatment;

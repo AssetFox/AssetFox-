@@ -24,7 +24,7 @@
             </v-col>
         </v-col>
         <v-divider />
-        <v-col cols = "12" class="ghd-constant-header" v-show="hasSelectedNetwork.valueOf">
+        <v-col cols = "12" class="ghd-constant-header" v-show="hasSelectedNetwork">
             <v-row>
                     <v-subheader class="ghd-md-gray ghd-control-label" >Key Attribute</v-subheader>
             </v-row>
@@ -42,7 +42,7 @@
                         </v-select>  
                     </v-row>                         
                 </v-col>
-                <v-col cols = "5" style="align-items: right;">
+                <v-col cols = "5" style="align-items: right;" v-show="!isNewNetwork">
                     <v-row>
                     <v-subheader class="ghd-md-gray ghd-control-label" >Data Source</v-subheader>
                     </v-row>
@@ -65,7 +65,7 @@
             </v-row>
         </v-col>
         <!-- Data source combobox -->
-        <v-col cols = "12">
+        <v-col cols = "12" v-show="hasSelectedNetwork">
             <v-row justify-space-between>
                 <v-col cols = "5" >
                     <v-row column>
@@ -117,7 +117,7 @@
                 </v-col>
                 <v-col cols = "5">
                     <v-row column>
-                        <div class='priorities-data-table' >
+                        <div class='priorities-data-table' v-show="!isNewNetwork">
                             <v-row justify-center>
                                 <v-btn id="Networks-AddAll-vbtn" variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                                     @click="onAddAll">
@@ -156,7 +156,7 @@
             </v-row>
         </v-col>
         <!-- The Buttons  -->
-        <v-col cols = "12">        
+        <v-col cols = "12"  v-show="hasSelectedNetwork">        
             <v-row justify-center style="padding-top: 30px !important">
                 <v-btn id="Networks-Cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges'
                 variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
@@ -212,7 +212,7 @@ import mitt from 'mitt';
 
     let store = useStore();
     let stateNetworks = computed<Network[]>(()=>store.state.networkModule.networks);
-    let stateSelectedNetwork: ShallowRef<Network> = (store.state.networkModule.selectedNetwork) ;
+    let stateSelectedNetwork = computed<Network> (() => store.state.networkModule.selectedNetwork) ;
     let stateAttributes: ShallowRef<Attribute[]> = (store.state.attributeModule.attributes) ;
     let stateDataSources: ShallowRef<Datasource[]> = (store.state.datasourceModule.dataSources) ;
     let hasUnsavedChanges: boolean = (store.state.unsavedChangesFlagModule.hasUnsavedChanges);
@@ -316,14 +316,13 @@ import mitt from 'mitt';
         }));
     }
 
-    watch(selectNetworkItemValue, () => onSelectNetworkItemValueChanged)
-    function onSelectNetworkItemValueChanged() {
+    watch(selectNetworkItemValue, () =>  {
         selectNetworkAction(selectNetworkItemValue);
         if(selectNetworkItemValue.value != getBlankGuid() || isNewNetwork)
             hasSelectedNetwork.value = true;
         else
             hasSelectedNetwork.value = false;
-    }
+    })
 
     watch(selectedAttributeRows, () => onSelectedAttributeRowsChanged)
     function onSelectedAttributeRowsChanged()

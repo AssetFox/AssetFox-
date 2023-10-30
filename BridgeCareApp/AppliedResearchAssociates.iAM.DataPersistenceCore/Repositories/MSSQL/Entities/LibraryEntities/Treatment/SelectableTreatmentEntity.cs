@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             TreatmentCosts = new HashSet<TreatmentCostEntity>();
             TreatmentPerformanceFactors = new HashSet<TreatmentPerformanceFactorEntity>();
             TreatmentSchedulings = new HashSet<TreatmentSchedulingEntity>();
-            TreatmentSupersessions = new HashSet<TreatmentSupersessionEntity>();
+            TreatmentSupersedeRules = new HashSet<TreatmentSupersedeRuleEntity>();
         }
 
         public string Description { get; set; }
@@ -36,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ICollection<TreatmentSchedulingEntity> TreatmentSchedulings { get; set; }
 
-        public virtual ICollection<TreatmentSupersessionEntity> TreatmentSupersessions { get; set; }
+        public virtual ICollection<TreatmentSupersedeRuleEntity> TreatmentSupersedeRules { get; set; }
 
         public bool IsUnselectable { get; set; }
     }

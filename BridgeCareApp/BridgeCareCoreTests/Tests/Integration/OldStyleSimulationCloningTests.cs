@@ -124,8 +124,8 @@ namespace BridgeCareCoreTests.Tests.Integration
                 .Include(_ => _.SelectableTreatments)
                 .ThenInclude(_ => _.ScenarioTreatmentSchedulings)
                 .Include(_ => _.SelectableTreatments)
-                .ThenInclude(_ => _.ScenarioTreatmentSupersessions)
-                .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentSupersessionJoin)
+                .ThenInclude(_ => _.ScenarioTreatmentSupersedeRules)
+                .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.SelectableTreatments)
                 .ThenInclude(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
@@ -204,8 +204,8 @@ namespace BridgeCareCoreTests.Tests.Integration
                 .Include(_ => _.SelectableTreatments)
                 .ThenInclude(_ => _.ScenarioTreatmentSchedulings)
                 .Include(_ => _.SelectableTreatments)
-                .ThenInclude(_ => _.ScenarioTreatmentSupersessions)
-                .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentSupersessionJoin)
+                .ThenInclude(_ => _.ScenarioTreatmentSupersedeRules)
+                .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.SelectableTreatments)
                 .ThenInclude(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
@@ -223,7 +223,7 @@ namespace BridgeCareCoreTests.Tests.Integration
 
             foreach (var treatment in originalSimulation.SelectableTreatments)
             {
-                treatment.ScenarioTreatmentSupersessions = new List<ScenarioTreatmentSupersessionEntity>();
+                treatment.ScenarioTreatmentSupersedeRules = new List<ScenarioTreatmentSupersedeRuleEntity>();
                 treatment.ScenarioTreatmentSchedulings = new List<ScenarioTreatmentSchedulingEntity>();
             }
 
@@ -325,6 +325,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             {
                 var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
                 var budgetId = Guid.NewGuid();
+                var treatmentId = Guid.NewGuid();
                 var committedProjectEnity = new CommittedProjectEntity
                 {
                     Id = Guid.NewGuid(),
@@ -574,7 +575,7 @@ namespace BridgeCareCoreTests.Tests.Integration
                 {
                     new ScenarioSelectableTreatmentEntity
                     {
-                        Id = Guid.NewGuid(),
+                        Id = treatmentId,
                         Name = "Treatment",
                         ShadowForAnyTreatment = 1,
                         ShadowForSameTreatment = 1,
@@ -658,13 +659,14 @@ namespace BridgeCareCoreTests.Tests.Integration
                             {
                                 new ScenarioTreatmentSchedulingEntity {Id = Guid.NewGuid(), OffsetToFutureYear = 1}
                             },
-                        ScenarioTreatmentSupersessions = new List<ScenarioTreatmentSupersessionEntity>
+                        ScenarioTreatmentSupersedeRules = new List<ScenarioTreatmentSupersedeRuleEntity>
                         {
-                            new ScenarioTreatmentSupersessionEntity
+                            new ScenarioTreatmentSupersedeRuleEntity
                             {
                                 Id = Guid.NewGuid(),
-                                CriterionLibraryScenarioTreatmentSupersessionJoin =
-                                    new CriterionLibraryScenarioTreatmentSupersessionEntity
+                                TreatmentId = treatmentId,                                
+                                CriterionLibraryScenarioTreatmentSupersedeRuleJoin =
+                                    new CriterionLibraryScenarioTreatmentSupersedeRuleEntity
                                     {
                                         CriterionLibrary = new CriterionLibraryEntity
                                         {

@@ -500,8 +500,8 @@ AS
 			FROM Network AS l1
 			Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
 			Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-			JOIN TreatmentConsiderationDetail AS l4 ON l4.AssetDetailId = l2.Id
-			JOIN BudgetUsageDetail AS l5 ON l5.TreatmentConsiderationDetailId = l3.Id
+			JOIN TreatmentConsiderationDetail AS l4 ON l4.AssetDetailId = l3.Id
+			JOIN BudgetUsageDetail AS l5 ON l5.TreatmentConsiderationDetailId = l4.Id
 			WHERE l1.Id IN (@NetworkId);
 
 		    SET @RowsDeleted = @@ROWCOUNT;
@@ -536,8 +536,8 @@ AS
 				FROM Network AS l1
 				Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
 				Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-				JOIN TreatmentConsiderationDetail AS l4 ON l4.AssetDetailId = l2.Id
-				JOIN CashFlowConsiderationDetail AS l5 ON l5.TreatmentConsiderationDetailId = l3.Id
+				JOIN TreatmentConsiderationDetail AS l4 ON l4.AssetDetailId = l3.Id
+				JOIN CashFlowConsiderationDetail AS l5 ON l5.TreatmentConsiderationDetailId = l4.Id
 				WHERE l1.Id IN (@NetworkId);
 
 				SET @RowsDeleted = @@ROWCOUNT;
@@ -573,7 +573,7 @@ AS
 			FROM Network AS l1
 			Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
 			Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-			JOIN TreatmentConsiderationDetail AS l4 ON l4.AssetDetailId = l2.Id
+			JOIN TreatmentConsiderationDetail AS l4 ON l4.AssetDetailId = l3.Id
 			WHERE l1.Id IN (@NetworkId);
 			
 			SET @RowsDeleted = @@ROWCOUNT;
@@ -609,7 +609,7 @@ AS
 			FROM Network AS l1
 			Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
 			Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-			JOIN AssetDetailValueIntId AS l4 ON l4.AssetDetailId = l2.Id
+			JOIN AssetDetailValueIntId AS l4 ON l4.AssetDetailId = l3.Id
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
@@ -644,7 +644,7 @@ AS
 			FROM Network AS l1
 			Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
 			Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-			JOIN TreatmentOptionDetail AS l4 ON l4.AssetDetailId = l2.Id
+			JOIN TreatmentOptionDetail AS l4 ON l4.AssetDetailId = l3.Id
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
@@ -699,7 +699,7 @@ AS
 				FROM Network AS l1
 				Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
 				Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-				JOIN TreatmentRejectionDetail AS l4 ON l4.AssetDetailId = l1.Id
+				JOIN TreatmentRejectionDetail AS l4 ON l4.AssetDetailId = l3.Id
 				WHERE l1.Id IN (@NetworkId);
 
 				--DELETE tr
@@ -760,7 +760,7 @@ AS
 			FROM Network AS l1
 			Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
 			Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-			JOIN TreatmentSchedulingCollisionDetail AS l4 ON l4.AssetDetailId = l1.Id
+			JOIN TreatmentSchedulingCollisionDetail AS l4 ON l4.AssetDetailId = l3.Id
 			WHERE l1.Id IN (@NetworkId);
 
  			SET @RowsDeleted = @@ROWCOUNT;
@@ -885,7 +885,7 @@ AS
 			FROM Network AS l1
 			Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
 			Join CommittedProject  AS l3 ON l3.MaintainableAssetEntityId = l2.Id
-			JOIN CommittedProjectConsequence AS l4 ON l4.CommittedProjectId = l2.Id
+			JOIN CommittedProjectConsequence AS l4 ON l4.CommittedProjectId = l3.Id
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
@@ -920,7 +920,7 @@ AS
 			FROM Network AS l1
 			Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
 			Join CommittedProject  AS l3 ON l3.MaintainableAssetEntityId = l2.Id
-			JOIN CommittedProjectLocation AS l4 ON l4.CommittedProjectId = l2.Id
+			JOIN CommittedProjectLocation AS l4 ON l4.CommittedProjectId = l3.Id
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
@@ -2166,7 +2166,7 @@ AS
 			ALTER TABLE CriterionLibrary_TreatmentSupersession NOCHECK CONSTRAINT all
 
 			--Network --> Simulation --> ScenarioSelectableTreatment --> ScenarioTreatmentSupersession --> CriterionLibrary_ScenarioTreatmentSupersession --> TreatmentSupersession 
---> CriterionLibrary_ScenarioTreatmentSupersession --> CriterionLibrary_TreatmentSupersession --> TreatmentSupersession -->  --> 
+			--> CriterionLibrary_ScenarioTreatmentSupersession --> CriterionLibrary_TreatmentSupersession --> TreatmentSupersession -->  --> 
 
 
 			Delete l7  
@@ -2410,7 +2410,7 @@ AS
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
 			JOIN ScenarioSelectableTreatment AS l3 ON l3.SimulationId = l2.Id
 			JOIN ScenarioTreatmentCost AS l4 ON l4.ScenarioSelectableTreatmentId = l3.Id
-			JOIN  ScenarioTreatmentCost_Equation AS l5 ON l5.ScenarioTreatmentCostId = l4.Id
+			JOIN ScenarioTreatmentCost_Equation AS l5 ON l5.ScenarioTreatmentCostId = l4.Id
 			WHERE l1.Id IN (@NetworkId);
 
 			--ALTER TABLE ScenarioTreatmentCost_Equation WITH CHECK CHECK CONSTRAINT all
@@ -2446,7 +2446,7 @@ AS
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
 			JOIN ScenarioSelectableTreatment AS l3 ON l3.SimulationId = l2.Id
 			JOIN ScenarioTreatmentCost AS l4 ON l4.ScenarioSelectableTreatmentId = l3.Id
-			JOIN  CriterionLibrary_ScenarioTreatmentCost AS l5 ON l5.ScenarioTreatmentCostId = l4.Id
+			JOIN CriterionLibrary_ScenarioTreatmentCost AS l5 ON l5.ScenarioTreatmentCostId = l4.Id
 			WHERE l1.Id IN (@NetworkId);
 
 			ALTER TABLE CriterionLibrary_ScenarioTreatmentCost WITH CHECK CHECK CONSTRAINT all
@@ -3406,7 +3406,7 @@ AS
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
 			JOIN SimulationOutput AS l3 ON l3.SimulationId = l2.Id
 			JOIN SimulationYearDetail AS l4 ON l4.SimulationOutputId = l3.Id
-			JOIN DeficientConditionGoalDetail AS l5 ON l5.SimulationYearDetailId = l3.Id
+			JOIN DeficientConditionGoalDetail AS l5 ON l5.SimulationYearDetailId = l4.Id
 			WHERE l1.Id IN (@NetworkId);
 
             ALTER TABLE DeficientConditionGoalDetail WITH CHECK CHECK CONSTRAINT all
@@ -3442,7 +3442,7 @@ AS
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
 			JOIN SimulationOutput AS l3 ON l3.SimulationId = l2.Id
 			JOIN SimulationYearDetail AS l4 ON l4.SimulationOutputId = l3.Id
-			JOIN TargetConditionGoalDetail AS l5 ON l5.SimulationYearDetailId = l3.Id
+			JOIN TargetConditionGoalDetail AS l5 ON l5.SimulationYearDetailId = l4.Id
 			WHERE l1.Id IN (@NetworkId);
 
             ALTER TABLE TargetConditionGoalDetail WITH CHECK CHECK CONSTRAINT all
@@ -3509,7 +3509,7 @@ AS
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
 			Join SimulationOutput AS l3 ON l3.SimulationId = l2.Id
-			JOIN SimulationOutputJson AS l4 ON l4.SimulationOutputId = l2.Id
+			JOIN SimulationOutputJson AS l4 ON l4.SimulationOutputId = l3.Id
 			WHERE l1.Id IN (@NetworkId);
 
 			ALTER TABLE SimulationOutputJson WITH CHECK CHECK CONSTRAINT all

@@ -4,20 +4,11 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using MathNet.Numerics.Statistics.Mcmc;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
     public static class TreatmentSupersedeRuleMapper
     {
-        // TODO update if below is in need
-        //public static TreatmentSupersedeRuleEntity ToTreatmentSupersedeRuleEntity(this TreatmentSupersedeRule domain, Guid treatmentId) =>
-        //    new TreatmentSupersedeRuleEntity
-        //    {
-        //        Id = domain.Id,
-        //        TreatmentId = treatmentId
-        //    };
-
         public static ScenarioTreatmentSupersedeRuleEntity ToScenarioTreatmentSupersedeRuleEntity(this TreatmentSupersedeRule domain, Guid treatmentId, Guid simulationId)
         {
             var entity = new ScenarioTreatmentSupersedeRuleEntity
@@ -97,6 +88,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     ? entity.CriterionLibraryTreatmentSupersedeRuleJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO(),
             };
-
     }
 }

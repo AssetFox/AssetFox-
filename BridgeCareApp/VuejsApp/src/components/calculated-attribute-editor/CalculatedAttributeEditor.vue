@@ -36,7 +36,7 @@
                                     style="margin-top:20px !important">
                         </v-text-field>
                         <v-btn id="CalculatedAttribute-search-btn" style="position: relative; top: 3px; margin-right: 1px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" @click="onSearchClick()">Search</v-btn>
-                        <v-btn
+                        <v-btn id="CalculatedAttribute-createNewLibrary-btn"
                             @click="onShowCreateCalculatedAttributeLibraryDialog(false)"
                             class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             variant = "outlined"
@@ -59,7 +59,7 @@
                         <span>Shared</span>
                     </template>
                     </v-badge>
-                    <v-btn @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                    <v-btn id="CalculatedAttribute-shareLibrary-btn" @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                 v-show='!hasScenario'>
                 Share Library
             </v-btn>
@@ -158,12 +158,14 @@
                     <tr>
                     <td class="text-xs-center">
                         <v-text-field
+                            id="CalculatedAttribute-equation-textfield"
                             readonly
                             class="sm-txt"
                             :model-value="props.item.equation"
                             :disabled="!hasAdminAccess">
                             <template v-slot:append>
                                 <v-btn
+                                    id="CalculatedAttribute-editEquation-btn"
                                     @click="onShowEquationEditorDialog(props.item.id)"
                                     class="ghd-blue"
                                     icon
@@ -174,13 +176,14 @@
                         </v-text-field>
                     </td>
                     <td class="text-xs-center">
-                        <v-text-field 
+                        <v-text-field id="CalculatedAttribute-EquationCriteria-textfield"
                             readonly
                             class="sm-txt"
                             :model-value="props.item.criteriaExpression"
                             :disabled="!hasAdminAccess">
                             <template v-slot:append>
                                 <v-btn
+                                    id="CalculatedAttribute-changeEquationCriteria-btn"
                                     @click="onEditCalculatedAttributeCriterionLibrary(props.item.id)"
                                     class="ghd-blue"
                                     icon
@@ -192,6 +195,7 @@
                     </td>
                     <td class="text-xs-center">
                         <v-btn
+                            id="CalculatedAttribute-RemoveEquation-btn"
                             @click="
                                 onRemoveCalculatedAttribute(props.item.id)"
                             class="ghd-blue"
@@ -204,6 +208,7 @@
                 </template>
             </v-data-table-server>
             <v-btn
+                id="CalculatedAttribute-AddNewEquation-btn"
                 @click="onAddCriterionEquationSet()"
                 class='ghd-blue ghd-button'
                 variant = "outlined"
@@ -238,7 +243,7 @@
                     Cancel
                 </v-btn>
                 
-                <v-btn
+                <v-btn id="CalculatedAttribute-deleteLibrary-btn"
                     @click="onShowConfirmDeleteAlert"
                     class='ghd-blue ghd-button-text ghd-button'
                     variant = "flat"
@@ -246,7 +251,7 @@
                     :disabled="!hasSelectedLibrary">
                     Delete Library
                 </v-btn>
-                <v-btn
+                <v-btn id="CalculatedAttribute-createAsNewLibrary-btn"
                     :disabled="disableCrudButton()"
                     v-if="hasAdminAccess"
                     @click="onShowCreateCalculatedAttributeLibraryDialog(true)"
@@ -254,7 +259,7 @@
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                     Create as New Library
                 </v-btn>
-                <v-btn
+                <v-btn id="CalculatedAttribute-updateLibrary-btn"
                     :disabled="disableCrudButton() || !hasUnsavedChanges"
                     @click="onUpsertCalculatedAttributeLibrary"
                     class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
@@ -692,6 +697,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     //but only when in libraries
     watch(librarySelectItemValue,() => onLibrarySelectItemValueChangedCheckUnsaved())
     function onLibrarySelectItemValueChangedCheckUnsaved(){
+        defaultEquation.equation.expression = "";
         if(hasScenario.value){
             onLibrarySelectItemValueChanged();
             unsavedDialogAllowed = false;

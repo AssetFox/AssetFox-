@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
@@ -9,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     {
         private List<AttributeEntity> _attributeLibrary;
         private List<AdminSettingsEntity> _adminSettingsLibrary;
+        private List<AdminSettingsEntity> _failedAdminSettingsLibrary;
         private List<MaintainableAssetLocationEntity> _maintainableAssetLocationLibrary;
 
         public NetworkEntity TestNetwork { get; private set; }
@@ -16,6 +18,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public IQueryable<MaintainableAssetEntity> MaintainableAssetsLibrary => TestNetwork.MaintainableAssets.AsQueryable();
         public IQueryable<AggregatedResultEntity> AggregatedResultsLibrary => TestNetwork.MaintainableAssets.SelectMany(_ => _.AggregatedResults).AsQueryable();
         public IQueryable<AdminSettingsEntity> AdminSettingsLibrary => _adminSettingsLibrary.AsQueryable();
+        public IQueryable<AdminSettingsEntity> FailedAdminSettingsLibrary => _failedAdminSettingsLibrary.AsQueryable();
         public IQueryable<MaintainableAssetLocationEntity> MaintainableAssetLocationLibrary => _maintainableAssetLocationLibrary.AsQueryable();
 
         public TestDataForMaintainableAssetRepo()
@@ -23,6 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             _attributeLibrary = CreateTestAttributes();
             _adminSettingsLibrary = CreateAdminSettingsLibrary();
             TestNetwork = CreateTestNetwork();
+            _failedAdminSettingsLibrary = CreateFalseAdminSettingsLibrary();
         }
 
         private List<AdminSettingsEntity> CreateAdminSettingsLibrary()
@@ -35,8 +39,50 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Value = "BRKEY_,BMSID"
             };
             entities.Add(KeyFields);
+
+            var RawDataKeyFields = new AdminSettingsEntity()
+            {
+                Key = "RawDataKeyFields",
+                Value = "BRKEY_,BMSID"
+            };
+            entities.Add(RawDataKeyFields);
+
+            var inventoryReportKey = new AdminSettingsEntity()
+            {
+                Key = "InventoryReportNames",
+                Value = "BAMSInventoryLookup(P)"
+            };
+            entities.Add(inventoryReportKey);
             return entities;
         }
+
+        private List<AdminSettingsEntity> CreateFalseAdminSettingsLibrary()
+        {
+            var entities = new List<AdminSettingsEntity>();
+            // entities will need to be added here.
+            var KeyFields = new AdminSettingsEntity()
+            {
+                Key = "KeyFields",
+                Value = "BRKEY_,BMSID"
+            };
+            entities.Add(KeyFields);
+
+            var RawDataKeyFields = new AdminSettingsEntity()
+            {
+                Key = "RawDataKeyFields",
+                Value = "BRKEY_,BMSID"
+            };
+            entities.Add(RawDataKeyFields);
+
+            var inventoryReportKey = new AdminSettingsEntity()
+            {
+                Key = "InventoryReportNames",
+                Value = ""
+            };
+            entities.Add(inventoryReportKey);
+            return entities;
+        }
+
 
         private NetworkEntity CreateTestNetwork()
         {
@@ -128,14 +174,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             attributeLibrary.Add(new AttributeEntity
             {
                 Id = new Guid("2e3ae9ac-c14c-46ab-8e4b-f93312bc8637"),
-                Name = "BMSID",
+                Name = TestAttributeNames.BmsId,
                 DataType = "STRING",
                 AggregationRuleType = "PREDOMINANT"
             });
             attributeLibrary.Add(new AttributeEntity
             {
                 Id = new Guid("104bd958-8e0a-403c-b065-07d5e91eb27b"),
-                Name = "BRKEY_",
+                Name = TestAttributeNames.BrKey,
                 DataType = "NUMBER",
                 AggregationRuleType = "AVERAGE"
             });
@@ -239,7 +285,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         private void AssignKeyAttributes(MaintainableAssetEntity asset)
         {
-            var brkeyAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BRKEY_");
+            var brkeyAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == TestAttributeNames.BrKey);
             var brKey = new AggregatedResultEntity
             {
                 Id = Guid.NewGuid(),
@@ -253,7 +299,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             };
             asset.AggregatedResults.Add(brKey);
 
-            var bmsidAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BMSID");
+            var bmsidAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == TestAttributeNames.BmsId);
             var bmsid = new AggregatedResultEntity
             {
                 Id = Guid.NewGuid(),

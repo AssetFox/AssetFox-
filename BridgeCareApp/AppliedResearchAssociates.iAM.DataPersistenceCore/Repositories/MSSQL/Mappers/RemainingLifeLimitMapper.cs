@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Static;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -50,6 +51,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 IsModified = dto.IsModified,
                 Value = dto.Value,
             };
+
+        public static ScenarioRemainingLifeLimitEntity ToScenarioEntityWithCriterionLibraryJoin(this RemainingLifeLimitDTO dto, Guid simulationId,
+            Guid attributeId, BaseEntityProperties baseEntityProperties)
+        {
+            
+            var entity = ToScenarioEntity(dto, simulationId,attributeId);
+            var criterionLibraryDto = dto.CriterionLibrary;
+            var isvalid = criterionLibraryDto.IsValid();
+            if (isvalid)
+            {
+                var criterionLibrary  = criterionLibraryDto.ToSingleUseEntity(baseEntityProperties);
+
+                var join = new CriterionLibraryScenarioRemainingLifeLimitEntity
+                {
+                    ScenarioRemainingLifeLimitId = entity.Id,
+                    CriterionLibrary = criterionLibrary,
+                };
+                BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+                BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
+                entity.CriterionLibraryScenarioRemainingLifeLimitJoin = join;
+            }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
+        }
+
 
         public static RemainingLifeLimitLibraryEntity ToEntity(this RemainingLifeLimitLibraryDTO dto) =>
             new RemainingLifeLimitLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description, IsShared = dto.IsShared };

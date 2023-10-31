@@ -17,9 +17,9 @@
                     >
                     <v-list-item id="EditScenario-tabs-vListTile" :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
                             <template v-slot:prepend>
-                                <AttributesSvg style="height: 38px; width: 34px"  class="raw-data-icon" v-if="navigationTab.tabName === 'Security'"/>    
-                                    <DataSourceSvg style="height: 30px; width: 36px" class="raw-data-icon" v-if="navigationTab.tabName === 'Site'"/>
-                                    <NetworksSvg  style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'Data'"/>                            
+                                <AttributesSvg id="EditAdmin-security-btn" style="height: 38px; width: 34px"  class="raw-data-icon" v-if="navigationTab.tabName === 'Security'"/>    
+                                    <DataSourceSvg id="EditAdmin-site-btn" style="height: 30px; width: 36px" class="raw-data-icon" v-if="navigationTab.tabName === 'Site'"/>
+                                    <NetworksSvg id="EditAdmin-data-btn" style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'Data'"/>                            
                             </template>
                             <v-list-item-title style="width: auto;" v-text="navigationTab.tabName"></v-list-item-title>
                         </v-list-item>

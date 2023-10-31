@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, treatmentName
                 );
             var equationId = Guid.NewGuid();
-            var consequence = TreatmentConsequenceTestSetup.ModelForEntityInDb(
+            var consequence = LibraryTreatmentConsequenceTestSetup.ModelForEntityInDb(
                 TestHelper.UnitOfWork, treatmentLibraryId, treatmentId,
                 consequenceId, attributeName, equationId);
 
@@ -53,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
                 TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, treatmentName
                 );
-            var consequence = TreatmentConsequenceTestSetup.ModelForEntityInDb(
+            var consequence = LibraryTreatmentConsequenceTestSetup.ModelForEntityInDb(
                 TestHelper.UnitOfWork, treatmentLibraryId, treatmentId,
                 consequenceId, attributeName);
             Assert.NotEqual(Guid.Empty, consequence.Equation.Id);

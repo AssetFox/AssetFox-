@@ -18,7 +18,7 @@
               <div class="validation-message-div">
                 <v-row justify-center>
                   <p class="invalid-message" v-if="invalidExpressionMessage !== ''">{{ invalidExpressionMessage }}</p>
-                  <p class="valid-message" v-if="validExpressionMessage !== ''">{{ validExpressionMessage }}</p>
+                  <p id="EquationEditor-validEquatiionMsg-p" class="valid-message" v-if="validExpressionMessage !== ''">{{ validExpressionMessage }}</p>
                 </v-row>
               </div>
             </v-col>
@@ -267,7 +267,7 @@
             <v-col cols = "12">
               <div>
                  <v-row justify-center row>
-                  <v-btn :disabled="disableEquationCheck()" @click="onCheckEquation" variant = "flat" class="ghd-blue check-eq ghd-button ghd-button-text">Check Equation</v-btn>
+                  <v-btn id="EquationEditor-checkEquation-btn" :disabled="disableEquationCheck()" @click="onCheckEquation" variant = "flat" class="ghd-blue check-eq ghd-button ghd-button-text">Check Equation</v-btn>
                 </v-row>
                 <v-row justify-center row>
                   <v-btn @click="onSubmit(false)" variant = "outlined" class='ghd-blue ghd-button ghd-button-text' id="EquationEditorDialog-Cancel-Btn">Cancel</v-btn>

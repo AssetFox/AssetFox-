@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using TNetwork = AppliedResearchAssociates.iAM.Data.Networking.Network;
 
@@ -31,7 +32,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public static NetworkEntity TestNetwork() => new NetworkEntity
         {
             Id = NetworkId,
-            Name = "Test Network"
+            Name = "Test Network",
+            KeyAttributeId = TestAttributeIds.BrKeyId,
         };
 
         private static readonly object NetworkCreationLock = new object();
@@ -65,7 +67,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var name = RandomStrings.WithPrefix("Network");
             var resolveNetworkId = networkId ?? Guid.NewGuid();
-            var attribute = AttributeTestSetup.CreateSingleTextAttribute(unitOfWork, keyAttributeId, keyAttributeName);
+            var attribute = AttributeTestSetup.CreateSingleTextAttribute(unitOfWork, keyAttributeId, keyAttributeName, Data.ConnectionType.EXCEL, keyAttributeName);
             var network = new TNetwork(maintainableAssets, resolveNetworkId, name);
             network.KeyAttributeId = attribute.Id;
             unitOfWork.NetworkRepo.CreateNetwork(network);

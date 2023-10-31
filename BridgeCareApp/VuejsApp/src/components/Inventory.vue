@@ -10,10 +10,9 @@
      </div>
     <v-layout>
         <v-row>
-            <v-row justify-space-between row>
-           </v-row>
-            <v-row justify-space-between row>
-                <v-row>
+            <v-row justify="space-between"></v-row>
+            <v-row justify="space-between">
+                <v-row style="display: flex; align-items: center; justify-content: center">
                     <div class="flex xs4" v-for="(key, index) in inventoryDetails">
                         <v-autocomplete
                         style="margin-top: 50px; width: 250px; margin-right: 20px"
@@ -21,6 +20,7 @@
                         :items="reactiveData[index]"
                         v-model="selectedInventoryIndex[index]"
                         :label="`Select by ${key}`"
+                        :disabled="isDisabled(index)"
                         variant="outlined"
                         density="compact"
                         ></v-autocomplete>
@@ -33,10 +33,10 @@
                     Reset Key Fields
                     </v-btn>
            </v-row>
-           <div style="margin: auto; margin-top: 50px" v-html="staticHTMLForInventory"></div>
             <v-divider></v-divider>
         </v-row>
     </v-layout>
+    <div style="margin: auto; margin-top: 25px; display: flex; align-items: center; justify-content: center" v-html="staticHTMLForInventory"></div>
 </template>
 
 <script lang="ts" setup>
@@ -81,6 +81,7 @@
 
     let htmlResponse = ref();
 
+    let queryLength: number;
     let reactValue: any[] = [];
 
     const inventoryDetails = ref<string[]>([]);
@@ -157,7 +158,7 @@
                 inventoryDetails.value = clone(stateKeyFields.value);
                 inventoryDetails.value.forEach(_ => selectedKeys.push(""));
 
-                getInventoryAction(inventoryDetails);
+                getInventoryAction(inventoryDetails.value);
             }
         });
 
@@ -175,7 +176,7 @@
         });
 
         watch(querySet,()=>{
-                keyAttributeValues.value = [];
+            reactiveData.value = [[],[]];
                 for(let i = 0; i < inventoryDetails.value.length; i++) 
                 {
                     queryValue = querySet.value[i].values;
@@ -189,7 +190,7 @@
                             return 0; // Preserve the original order if the data types are different
                         }
                     });
-                    keyAttributeValues.value[i] = queryValue;
+                    reactiveData.value[i] = queryValue;
                 }
         });
         /**
@@ -229,18 +230,13 @@
         }
         
         async function initializeLists() {
-            const keys: any[][] = [];
-
-            const response = await coreAxiosInstance.get("/api/Inventory/GetKeyProperties");
-            inventoryDetails.value = response.data;
-
-            getInventoryAction(inventoryDetails.value);
         }
 
         async function resetDropdowns() {
-            keyAttributeValues.value = [];
+            selectedInventoryIndex.value = [];
+            reactiveData.value = [[],[]];
             //Reset selected key fields
-            selectedKeys.forEach((value: string, index: number, array: string[]) => {
+            selectedInventoryIndex.value.forEach((value: string, index: number, array: string[]) => {
                 selectedKeys[index] = '';
             })
             selectedInventoryIndex.value = [];
@@ -260,7 +256,7 @@
 
                 //Check if any dropdowns are empty
                 for(let i = 0; i < inventoryDetails.value.length; i++) {
-                    if(selectedKeys[i] !== '') {
+                    if(selectedInventoryIndex.value[i]) {
                         selectedCounter++;
                     }
                 }
@@ -282,6 +278,8 @@
                 }
                 };
 
+            if(reportType === 'P')
+            {
                 for(let i = 0; i < inventoryDetails.value.length; i++){
                     if(i === index){
                         data.keyProperties[i] = key;
@@ -292,6 +290,7 @@
                     selectedKeys[i] = otherKeyValue;
                     data.keyProperties[i] = otherKeyValue;
                 }
+            }
 
                  //Create a dictionary of the selected key fields
                 let dictionary: Record<string, string> = {};
@@ -301,7 +300,7 @@
                     let dictValues: any = selectedKeys[i];
                     dictionary[dictNames] = dictValues;                     
                 }
-    
+
                 //Set the data equal to the dictionary
                 data.keyProperties = dictionary;
 
@@ -313,14 +312,14 @@
 
             if(querySelectedData.length === 0 || querySelectedData.length === 2) 
             {
-                for(let i = 0; i < inventoryDetails.value.length - 1; i++) 
+                for(let i = 0; i < selectedInventoryIndex.value.length; i++) 
                     {
-                        if(selectedKeys[i] !== '') 
+                        if(selectedInventoryIndex.value[i] !== '') 
                         {
-                            if(!querySelectedData.includes(inventoryDetails.value[i]) && !querySelectedData.includes(selectedKeys[i]))
+                            if(!querySelectedData.includes(inventoryDetails.value[i]) && !querySelectedData.includes(selectedInventoryIndex.value[i]))
                             {
                                 querySelectedData.push(inventoryDetails.value[i]);
-                                querySelectedData.push(selectedKeys[i]);
+                                querySelectedData.push(selectedInventoryIndex.value[i]);
                             }
                         }
                     }

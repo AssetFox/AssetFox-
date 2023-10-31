@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
@@ -69,6 +66,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             Name = "Something",
             ShadowForAnyTreatment = 1,
             ShadowForSameTreatment = 1,
+            ProjectSource = "Committed",
             Cost = 10000,
             SimulationId = simulationId,
             ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Local").Id,
@@ -84,14 +82,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public static List<CommittedProjectEntity> CommittedProjectEntities => new List<CommittedProjectEntity>()
         {
-            SomethingEntity(Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"), TestDataForCommittedProjects.SimulationId, 2022),
+            SomethingEntity(TestDataForCommittedProjects.CommittedProjectId1, TestDataForCommittedProjects.SimulationId, 2022),
             SomethingFourYear2025(),
             SimpleEntity(),
         };
 
         private static CommittedProjectEntity SimpleEntity() => new CommittedProjectEntity()
         {
-            Id = Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"),
+            Id = TestDataForCommittedProjects.CommittedProjectId2,
             Year = 2023,
             Name = "Simple",
             ShadowForAnyTreatment = 1,
@@ -117,14 +115,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public static List<MaintainableAssetEntity> MaintainableAssetEntities => new List<MaintainableAssetEntity>()
         {
             new MaintainableAssetEntity() {
-                Id = Guid.Parse("f286b7cf-445d-4291-9167-0f225b170cae"),
+                Id = TestDataForCommittedProjects.MaintainableAssetId1,
                 NetworkId = TestDataForCommittedProjects.NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"1"),
                 SpatialWeighting = "[DECK_AREA]",
                 AggregatedResults = new List<AggregatedResultEntity>()
             },
             new MaintainableAssetEntity() {
-                Id = Guid.Parse("46f5da89-5e65-4b8a-9b36-03d9af0302f7"),
+                Id = TestDataForCommittedProjects.MaintainableAssetId2,
                 NetworkId = TestDataForCommittedProjects.NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"2"),
                 SpatialWeighting = "[DECK_AREA]",
@@ -159,13 +157,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             new AttributeEntity()
             {
                 Id = Guid.Parse("c31ea5bb-3d48-45bb-a68f-01ee75f17f0c"),
-                Name = "BRKEY_",
+                Name = TestAttributeNames.BrKey,
                 DataType = "NUMBER"
             },
             new AttributeEntity()
             {
                 Id = Guid.Parse("cbdc2aac-f2b7-405e-8ff8-21f2785330c1"),
-                Name = "BMSID",
+                Name = TestAttributeNames.BmsId,
                 DataType = "STRING"
             },
             new AttributeEntity()
@@ -213,7 +211,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             new AttributeEntity()
             {
                 Id = Guid.Parse("f7693cfe-8705-4f58-8d16-9be6e5d9a2af"),
-                Name = "CULV_DURATION_N",
+                Name = TestAttributeNames.CulvDurationN,
                 DataType = "NUMBER"
             }
         };

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 
@@ -146,6 +147,7 @@ public sealed class Scenario
         NameOfUsableBudget = source.Budget.Name,
         NameOfTemplateTreatment = source.TemplateTreatment.Name,
         Year = source.Year,
+        ProjectSource = source.ProjectSource.ToString()
     };
 
     private static ConditionalTreatmentConsequence Convert(Analysis.ConditionalTreatmentConsequence source) => new()
@@ -244,7 +246,7 @@ public sealed class Scenario
         Schedulings = source.Schedulings.Select(Convert).ToList(),
         ShadowForAnyTreatment = source.ShadowForAnyTreatment,
         ShadowForSameTreatment = source.ShadowForSameTreatment,
-        Supersessions = source.Supersessions.Select(Convert).ToList(),
+        SupersedeRules = source.SupersedeRules.Select(Convert).ToList(),
         NamesOfUsableBudgets = source.Budgets.Select(budget => budget.Name).ToList(),
     };
 
@@ -269,7 +271,7 @@ public sealed class Scenario
         TreatmentName = source.Treatment.Name,
     };
 
-    private static TreatmentSupersession Convert(Analysis.TreatmentSupersession source) => new()
+    private static TreatmentSupersedeRule Convert(Analysis.TreatmentSupersedeRule source) => new()
     {
         CriterionExpression = source.Criterion.Expression,
         TreatmentName = source.Treatment.Name,
@@ -370,15 +372,15 @@ public sealed class Scenario
                 Convert(item, result);
             }
 
-            foreach (var item in source.Supersessions)
+            foreach (var item in source.SupersedeRules)
             {
                 Convert(item, result);
             }
         }
 
-        private void Convert(TreatmentSupersession source, Analysis.SelectableTreatment target)
+        private void Convert(TreatmentSupersedeRule source, Analysis.SelectableTreatment target)
         {
-            var result = target.AddSupersession();
+            var result = target.AddSupersedeRule();
 
             result.Criterion.Expression = source.CriterionExpression;
 
@@ -566,6 +568,9 @@ public sealed class Scenario
                 Name = source.Name,
                 treatmentCategory = source.Category,
                 TemplateTreatment = TreatmentByName[source.NameOfTemplateTreatment],
+                ProjectSource = Enum.TryParse<ProjectSourceDTO>(source.ProjectSource, out var projectSourceEnum)
+                            ? projectSourceEnum
+                            : ProjectSourceDTO.None
             };
 
             return result;

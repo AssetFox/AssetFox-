@@ -167,7 +167,7 @@
                                     </v-checkbox>
                                 </td>                                
                                 <td class="text-xs-left">
-                                    <v-edit-dialog
+                                    <editDialog
                                         :return-value.sync="item.item.name"
                                         @save="
                                             onEditPerformanceCurveProperty(
@@ -200,10 +200,10 @@
                                                 ]"
                                             />
                                         </template>
-                                    </v-edit-dialog>
+                                    </editDialog>
                                 </td>
                                 <td class="text-xs-left">
-                                    <v-edit-dialog
+                                    <editDialog
                                         :return-value.sync="
                                             item.item.attribute
                                         "
@@ -241,7 +241,7 @@
                                                 item-value="value" 
                                             />
                                         </template>
-                                    </v-edit-dialog>
+                                    </editDialog>
                                 </td>
                                 <td class="text-xs-left">
                                     <v-menu
@@ -490,6 +490,7 @@
 
 <script  lang="ts" setup>
 import Vue from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import CreatePerformanceCurveLibraryDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveLibraryDialog.vue';
 import CreatePerformanceCurveDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveDialog.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';

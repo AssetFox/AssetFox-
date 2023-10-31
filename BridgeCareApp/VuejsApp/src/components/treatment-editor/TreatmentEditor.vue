@@ -299,6 +299,7 @@
                 </v-btn>
                 <v-btn justify-center
                     @click='onUpsertScenarioTreatments'
+                    id="TreatmentEditor-SaveScenarioTreatments-btn"
                     class='ghd-blue-bg ghd-white ghd-button-text'
                     variant = "flat"
                     v-show='hasScenario'
@@ -619,9 +620,9 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     let treatmentCache: Treatment[] = [];
 
     let unsavedDialogAllowed: boolean = true;
-    let trueLibrarySelectItemValue: string | null = '';
+    let trueLibrarySelectItemValue: string = '';
     let librarySelectItemValueAllowedChanged: boolean = true;
-    let librarySelectItemValue  = ref<string | null>('');
+    let librarySelectItemValue  = ref<string>('');
 
     let shareTreatmentLibraryDialogData: ShareTreatmentLibraryDialogData = clone(emptyShareTreatmentLibraryDialogData);
     let loadedScenarioId: string = '';
@@ -1050,7 +1051,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 clearChanges();
                 if(hasSelectedLibrary.value){
-                    librarySelectItemValue.value = null;
+                    librarySelectItemValue.value = "";
                     getSimpleScenarioSelectableTreatmentsAction(selectedScenarioId)
                 }
                 treatmentCache.push(selectedTreatment.value);

@@ -28,7 +28,7 @@
                         <span>Shared</span>
                         </template>
                         </v-badge>
-                        <v-btn @click='onShowShareCashFlowRuleLibraryDialog(selectedCashFlowRuleLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        <v-btn id="CashFlowEditor-shareLibrary-btn" @click='onShowShareCashFlowRuleLibraryDialog(selectedCashFlowRuleLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
                     </v-btn>
@@ -83,7 +83,7 @@
                             <v-checkbox hide-details primary v-model="selectedCashRuleGridRows" :value="item.item"></v-checkbox>
                         </td>
                         <td>
-                            <v-edit-dialog
+                            <editDialog
                                 :return-value.sync="item.item.name"
                                 large
                                 lazy
@@ -98,6 +98,7 @@
                                     :rules="[inputRules.generalRules.valueIsNotEmpty]"/>
                                 <template v-slot:input>
                                     <v-textarea
+                                    id="CashFlowEditor-editRuleName-textarea"
                                         label="Description"
                                         no-resize
                                         outline
@@ -105,7 +106,7 @@
                                         :rules="[inputRules.generalRules.valueIsNotEmpty]"
                                         v-model="item.item.name"/>
                                 </template>
-                            </v-edit-dialog>
+                            </editDialog>
                         </td>
                         <td>
                             <v-row align-center style='flex-wrap:nowrap'>
@@ -262,6 +263,7 @@
 
 <script lang="ts" setup>
 import { watch, nextTick, shallowRef, onBeforeUnmount, ref, computed, onMounted, onBeforeMount} from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import { SelectItem } from '@/shared/models/vue/select-item';
 import {
     clone,

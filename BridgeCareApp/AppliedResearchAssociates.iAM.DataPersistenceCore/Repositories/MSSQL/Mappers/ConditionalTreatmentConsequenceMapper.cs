@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Attribute = AppliedResearchAssociates.iAM.Analysis.Attribute;
+using AppliedResearchAssociates.iAM.DTOs.Static;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -29,15 +30,53 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ChangeValue = dto.ChangeValue
             };
 
-        public static ScenarioConditionalTreatmentConsequenceEntity ToScenarioEntity(this TreatmentConsequenceDTO dto, Guid treatmentId,
-            Guid attributeId) =>
-            new ScenarioConditionalTreatmentConsequenceEntity
+        public static ScenarioConditionalTreatmentConsequenceEntity ToScenarioEntity(this TreatmentConsequenceDTO dto, Guid treatmentId, Guid attributeId, BaseEntityProperties baseEntityProperties = null)
+        {
+            var entity = new ScenarioConditionalTreatmentConsequenceEntity
             {
                 Id = dto.Id,
                 ScenarioSelectableTreatmentId = treatmentId,
                 AttributeId = attributeId,
                 ChangeValue = dto.ChangeValue
             };
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
+        }
+
+        public static ScenarioConditionalTreatmentConsequenceEntity ToScenarioEntityWithCriterionLibraryJoin(this TreatmentConsequenceDTO dto, Guid treatmentId, Guid attributeId, BaseEntityProperties baseEntityProperties)
+        {
+
+            var entity = ToScenarioEntity(dto, treatmentId, attributeId, baseEntityProperties);
+            var criterionLibraryDto = dto.CriterionLibrary;
+            var isvalid = criterionLibraryDto.IsValid();
+            if (isvalid)
+            {
+                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity(baseEntityProperties);
+                var join = new CriterionLibraryScenarioConditionalTreatmentConsequenceEntity
+                {
+                    ScenarioConditionalTreatmentConsequenceId = entity.Id,
+                    CriterionLibrary = criterionLibrary,
+                };
+                BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+                BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
+                entity.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin = join;
+            }
+            if (dto.Equation != null && dto.Equation.Id != Guid.Empty)
+            {
+                var equationEntity = EquationMapper.ToEntity(dto.Equation, baseEntityProperties);
+                var equationJoin = new ScenarioConditionalTreatmentConsequenceEquationEntity
+                {
+                    Equation = equationEntity,
+                    ScenarioConditionalTreatmentConsequenceId = entity.Id,
+                };
+                BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+                BaseEntityPropertySetter.SetBaseEntityProperties(equationJoin, baseEntityProperties);
+                entity.ScenarioConditionalTreatmentConsequenceEquationJoin = equationJoin;
+            }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
+        }
+
 
         public static void CreateConditionalTreatmentConsequence(this ScenarioConditionalTreatmentConsequenceEntity entity, SelectableTreatment treatment, IEnumerable<Attribute> attributes)
         {

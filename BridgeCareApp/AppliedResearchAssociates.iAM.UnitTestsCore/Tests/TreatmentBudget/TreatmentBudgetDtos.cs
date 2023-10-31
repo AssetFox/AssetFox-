@@ -9,12 +9,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class TreatmentBudgetDtos
     {
-        public static TreatmentBudgetDTO Dto()
+        public static TreatmentBudgetDTO Dto(string name = "Budget Test 1")
         {
             var testBudget = new TreatmentBudgetDTO
             {
                 Id = Guid.NewGuid(),
-                Name = "Budget Test 1"
+                Name = name,
             };
             return testBudget;
         }

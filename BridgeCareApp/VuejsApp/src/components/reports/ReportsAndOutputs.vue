@@ -9,47 +9,66 @@
             <v-row class="data-table" justify-left>
                 <v-col>
                     <v-card class="elevation-0">
-                        <DataTable
-                        striped-rows
-                        :rows="5"
-                        :rows-per-page-options="[5,10,25]"
-                        id="ReportsAndOutputs-datatable"
-                        class="fixed-header ghd-table v-table__overflow"
-                        :value="currentPage"
-                        paginator
-                        paginator-template="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-                        currentPageReportTemplate="{first} to {last} of {totalRecords}"
-                        @row-select="onRowSelect"
-                        selection-mode="single"
-                        table-style="min-width: 50rem"
+                        <v-data-table
+                            id="ReportsAndOutputs-datatable"
+                            :headers="reportsGridHeaders"
+                            :items="currentPage"                       
+                            :rows-per-page-items=[5,10,25]
+                            class="fixed-header ghd-table v-table__overflow"
+                            item-key="id"
                         >
-                            <Column sortable field="name" header="Name"></Column>
-                            <Column field="mergedExpression" header="Criteria">
-                                <template #body="slotProps">
-                                    <v-btn flat>
-                                      <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')" @click="showEditDialog">
-                                      <Dialog v-model:visible="editShow" :style="{ width: 'auto', height: 'auto'}" :closable="false">
-                                        <v-textarea>
-                                            Test
-                                        </v-textarea>
-                                      </Dialog>
+                            <template slot="items" slot-scope="props" v-slot:item="props">
+                                <tr>
+                                <td class="text-xs-left">
+                                    <div>
+                                        <span class='lg-txt'>{{props.item.name}}</span>
+                                    </div>
+                                </td>
+                                <td class="text-xs-left">
+                                    <v-btn v-if="props.item.name.includes('Summary')" class="ghd-blue" tooltip flat icon>
+                                                <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')" @click="showEditDialog">
+                                                <Dialog v-model:visible="editShow">
+                                                    <v-card>
+                                                <v-textarea
+                                                    class="sm-txt Montserrat-font-family"
+                                                    :value="props.item.mergedExpression"
+                                                    full-width
+                                                    no-resize
+                                                    variant="outlined"
+                                                    readonly
+                                                    rows="5"
+                                                />
+                                            </v-card>
+                                                </Dialog>
+
+                                            </v-btn>
+                                    <v-btn v-if="props.item.name.includes('Summary')"
+                                        @click="onShowCriterionEditorDialog(props.item.id)"
+                                        class="ghd-blue"
+                                        flat
+                                    >
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')">
                                     </v-btn>
-                                    <v-btn flat @click="onShowCriterionEditorDialog(selectedReport.id)">
-                                      <img class='img-general' :src="require('@/assets/icons/edit.svg')">
+                                </td>
+                                <td class="text-xs-left">
+                                    <v-btn
+                                        @click="onGenerateReport(props.item.id, true)"
+                                        class="ghd-blue"
+                                        flat
+                                    >
+                                        <img class="img-general" :src="require('@/assets/icons/attributes-dark.svg')"/>
+
                                     </v-btn>
-                                </template>
-                            </Column>
-                            <Column field="actions" header="Actions">
-                                <template #body="slotProps">
-                                    <v-btn flat @click="onGenerateReport(selectedReport.id, true)">
-                                      <img class="img-general" :src="require('@/assets/icons/attributes-dark.svg')"/>
+                                    <v-btn
+                                        @click="onDownloadReport(props.item.id)"
+                                        flat
+                                    >
+                                        <img class='img-general' :src="require('@/assets/icons/download.svg')"/>
                                     </v-btn>
-                                    <v-btn flat @click="onDownloadReport(selectedReport.id)">
-                                      <img class='img-general' :src="require('@/assets/icons/download.svg')"/>
-                                    </v-btn>
-                                </template>
-                            </Column>
-                        </DataTable>
+                                </td>
+                            </tr>
+                            </template>
+                        </v-data-table>
                     </v-card>
                 </v-col>
             </v-row>
@@ -94,15 +113,17 @@ import {
     rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router'; 
 import Dialog from 'primevue/dialog';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 
     let store = useStore();
+    const router = useRouter(); 
     const stateSimulationReportNames = computed<string[]>(() => store.state.adminDataModule.simulationReportNames);
-    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification');} 
-    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification');} 
-    async function getSimulationReportsAction(payload?: any): Promise<any> { await store.dispatch('getSimulationReports');} 
+    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification',payload);} 
+    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification',payload);} 
+    async function getSimulationReportsAction(payload?: any): Promise<any> { await store.dispatch('getSimulationReports',payload);} 
 
     let editShow = ref<boolean>(false);
 
@@ -114,14 +135,51 @@ import Column from 'primevue/column';
     let rules: InputValidationRules = clone(validationRules);
 
     const criterionEditorDialogData = ref<GeneralCriterionEditorDialogData>(clone(emptyGeneralCriterionEditorDialogData));
-    // let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
-    //     emptyGeneralCriterionEditorDialogData,
-    // );
     const currentPage = ref<Report[]>([]);
     let selectedReport = ref<Report>(emptyReport); 
-
+    const reportsGridHeaders: any[] = [
+        {
+            title: 'Name',
+            key: 'name',
+            align: 'left',
+            sortable: true,
+            class: '',
+            width: '',
+        },
+        {
+            title: 'Criteria',
+            key: 'criterionLibrary',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+        {
+            title: 'Actions',
+            key: 'actions',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+    ];
     onMounted(() => {
+
+        selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
+        simulationName = router.currentRoute.value.query.scenarioName as string;
+        networkName = router.currentRoute.value.query.networkName as string;
+        networkId = router.currentRoute.value.query.networkId as string;
+        if (selectedScenarioId === getBlankGuid()) {
+                // set 'no selected scenario' error message, then redirect user to Scenarios UI
+                addErrorNotificationAction({
+                    message: 'Found no selected scenario for edit',
+                });
+                router.push('/Scenarios/');
+            }
+
+        //selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
         getSimulationReportsAction();
+        
     });
     watch(stateSimulationReportNames, () => {
         stateSimulationReportNames.value.forEach(reportName => {
@@ -144,21 +202,6 @@ import Column from 'primevue/column';
     };
     function showEditDialog(): void {
         editShow.value = !editShow.value;
-    }
-    function beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            vm.selectedScenarioId = to.query.scenarioId;
-            vm.simulationName = to.query.scenarioName;
-            vm.networkName = to.query.networkName;
-            vm.networkId = to.query.networkId;
-            if (vm.selectedScenarioId === getBlankGuid()) {
-                // set 'no selected scenario' error message, then redirect user to Scenarios UI
-                vm.addErrorNotificationAction({
-                    message: 'Found no selected scenario for edit',
-                });
-                vm.$router.push('/Scenarios/');
-            }
-        });
     }
     function onShowCriterionEditorDialog(reportId: string) {
         selectedReport.value = find(
@@ -218,7 +261,7 @@ import Column from 'primevue/column';
                 if (response.status == 200) {
                     if (hasValue(response, 'data')) {
                         const resultId: string = response.data as string;
-                        reportIndexID = resultId;
+                        //reportIndexID = resultId;
                     }
                     addSuccessNotificationAction({
                         message: selectedReport.value.name +  ' report generation started for ' + simulationName + '.',

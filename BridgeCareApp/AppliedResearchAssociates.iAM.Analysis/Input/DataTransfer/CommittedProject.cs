@@ -1,4 +1,5 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 
@@ -13,4 +14,6 @@ public sealed class CommittedProject : Treatment
     public string NameOfUsableBudget { get; set; }
 
     public int Year { get; set; }
+
+    public string ProjectSource { get; set; }
 }

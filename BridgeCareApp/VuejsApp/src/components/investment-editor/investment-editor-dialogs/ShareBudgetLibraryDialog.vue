@@ -46,7 +46,6 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { computed } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import { BudgetLibraryUser } from '@/shared/models/iAM/investment';
 import { LibraryUser } from '@/shared/models/iAM/user';

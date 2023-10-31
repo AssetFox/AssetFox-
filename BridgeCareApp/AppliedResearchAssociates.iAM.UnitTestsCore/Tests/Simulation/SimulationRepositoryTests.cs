@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return returnValue;
         }
 
-        [Fact (Skip ="Broken due to ongoing work to delete via stored procedure. Harold should unskip this when that branch is ready.")] 
+        [Fact] 
         public void DeleteSimulation_Does()
         {
             SimulationRepositoryTestSetup.Setup();
@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
 
             // Act
-           // TestHelper.UnitOfWork.SimulationRepo.DeleteSimulation(simulation.Id);
+            TestHelper.UnitOfWork.SimulationRepo.DeleteSimulation(simulation.Id);
             // Assert
             Assert.False(TestHelper.UnitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id));
         }

@@ -20,6 +20,8 @@ public sealed class AssetDetail : AssetSummaryDetail
     {
     }
 
+    public string ProjectSource { get; set; }
+
     /// <summary>
     ///     A specific treatment that has been applied to this asset. Can be the default treatment
     ///     (e.g., "No Treatment").
@@ -66,6 +68,7 @@ public sealed class AssetDetail : AssetSummaryDetail
         AppliedTreatment = original.AppliedTreatment;
         TreatmentCause = original.TreatmentCause;
         TreatmentStatus = original.TreatmentStatus;
+        ProjectSource = original.ProjectSource;
         TreatmentFundingIgnoresSpendingLimit = original.TreatmentFundingIgnoresSpendingLimit;
 
         TreatmentRejections.AddRange(original.TreatmentRejections.Select(_ => new TreatmentRejectionDetail(_)));

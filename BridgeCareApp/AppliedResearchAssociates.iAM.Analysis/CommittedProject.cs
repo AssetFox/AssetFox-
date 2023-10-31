@@ -60,11 +60,6 @@ public sealed class CommittedProject : Treatment
             results.Add(ValidationStatus.Error, "Cost is less than zero.", this, nameof(Cost));
         }
 
-        if (ProjectSource == ProjectSourceDTO.None)
-        {
-            results.Add(ValidationStatus.Error, "ProjectSource is unset.", this, nameof(ProjectSource));
-        }
-
         return results;
     }
 

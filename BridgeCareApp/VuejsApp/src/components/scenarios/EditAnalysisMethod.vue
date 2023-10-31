@@ -407,16 +407,22 @@ import { useRouter } from 'vue-router';
     }    
 
     async function onUpsertAnalysisMethod() {
-        const form: any = $refs.form;
 
-        await(form.validate(), () =>{
-            if(form.result.valid){
-                upsertAnalysisMethodAction({
-                analysisMethod: analysisMethod,
-                scenarioId: selectedScenarioId,
+        upsertAnalysisMethodAction({
+                analysisMethod: analysisMethod.value,
+                scenarioId: selectedScenarioId.value,
             });
-            }
-        })
+
+        // const form: any = $refs.form;
+
+        // await(form.validate(), () =>{
+        //     if(form.result.valid){
+        //         upsertAnalysisMethodAction({
+        //         analysisMethod: analysisMethod,
+        //         scenarioId: selectedScenarioId,
+        //     });
+        //     }
+        // })
          
     }
 

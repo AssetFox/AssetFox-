@@ -22,18 +22,18 @@
                                     density="compact"
                                     variant="outlined"
                                 >
-                                    <template v-slot:selection="{ item }">
-                                        <span class="ghd-control-text">{{ item.raw.text }}</span>
+                                    <!-- <template v-slot:selection="{ item }">
+                                        <span class="ghd-control-text">{{ item.text }}</span>
                                     </template>
                                     <template v-slot:item="{ item }">
                                         <v-list-item class="ghd-control-text" v-bind="props">
                                             <v-list-item-title>
                                             <v-row no-gutters align="center">
-                                            <span>{{ item.raw.text }}</span>
+                                            <span>{{ item.text }}</span>
                                             </v-row>
                                             </v-list-item-title>
                                         </v-list-item>
-                                    </template>
+                                    </template> -->
                                 </v-select>
                                 </v-row>
                             </v-col>
@@ -56,16 +56,34 @@
                                     criteriaEditorData.isLibraryContext,
                             }"
                         >
-                            <div v-for="(clause, index) in subCriteriaClauses">
-                                <v-textarea
-                                    :v-model="clause"
-                                    @click="
-                                        onClickSubCriteriaClauseTextarea(
-                                            clause,
-                                            index,
-                                        )
-                                    "
+                        <v-textarea
+                            v-if="isAndConjunction()"
+                            style="padding-left:0px;"
+                            variant="outlined"
+                            :value="getValueForTextarea(-1)"
+                            @click="onClickSubCriteriaClauseTextarea(subCriteriaClauses.join(' '), -1)"
+                            class="ghd-control-text"
+                            full-width
+                            no-resize
+                            readonly
+                            rows="3"
+                        >
+                            <template v-slot:append>
+                                <v-btn
+                                    @click="onRemoveSubCriteria(selectedSubCriteriaClauseIndex)"
+                                    class="ghd-blue"
+                                    flat
+                                >
+                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                </v-btn>
+                            </template>
+                        </v-textarea>
+                        <div v-else>
+                            <div v-for="(clause, index) in subCriteriaClauses" :key="index">
+                                <v-textarea style="padding-left:0px;"
+                                    :value="getValueForTextarea(index)"
                                     variant="outlined"
+                                    @click="onClickSubCriteriaClauseTextarea(clause, index)"
                                     class="ghd-control-text"
                                     full-width
                                     no-resize
@@ -73,7 +91,7 @@
                                     rows="3"
                                 >
                                     <template v-slot:append>
-                                        <v-btn
+                                        <v-btn id="CriteriaEditor-removeSubCriteria-btn"
                                             @click="onRemoveSubCriteria(index)"
                                             class="ghd-blue"
                                             flat
@@ -83,63 +101,8 @@
                                     </template>
                                 </v-textarea>
                             </div>
-                        </v-card-text>
-    <!-- :class="{
-        'clauses-card-dialog': 
-            !criteriaEditorData.isLibraryContext,
-        'clauses-card-library': 
-            criteriaEditorData.isLibraryContext,
-    }"
->
-<v-textarea
-    v-if="isAndConjunction()"
-    style="padding-left:0px;"
-    :class="getClassForTextarea(-1)"
-    :value="getValueForTextarea(-1)"
-    @click="onClickSubCriteriaClauseTextarea(subCriteriaClauses.join(' '), -1)"
-    box
-    class="ghd-control-text"
-    full-width
-    no-resize
-    readonly
-    rows="3"
->
-    <template slot="append">
-        <v-btn
-            @click="onRemoveSubCriteria(selectedSubCriteriaClauseIndex)"
-            class="ghd-blue"
-            icon
-        >
-            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-        </v-btn>
-    </template>
-</v-textarea>
-<div v-else>
-    <div v-for="(clause, index) in subCriteriaClauses" :key="index">
-        <v-textarea style="padding-left:0px;"
-            :class="getClassForTextarea(index)"
-            :value="getValueForTextarea(index)"
-            @click="onClickSubCriteriaClauseTextarea(clause, index)"
-            box
-            class="ghd-control-text"
-            full-width
-            no-resize
-            readonly
-            rows="3"
-        >
-            <template slot="append">
-                <v-btn id="CriteriaEditor-removeSubCriteria-btn"
-                    @click="onRemoveSubCriteria(index)"
-                    class="ghd-blue"
-                    icon
-                >
-                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-                </v-btn>
-            </template>
-        </v-textarea>
-    </div>
-</div>
-</v-card-text> -->
+                        </div>
+                    </v-card-text>
                         <v-card-actions
                             :class="{
                                 'validation-actions':
@@ -204,10 +167,10 @@
                             <v-tabs class="ghd-control-text" style="margin-left:4px;margin-right:4px;"
                                 v-if="selectedSubCriteriaClauseIndex !== -1" v-model="tab"
                             >
-                                <v-tab @click="onParseRawSubCriteria"   id="CriteriaEditor-treeView-tab" value="tree">
+                                <v-tab @click="onParseRawSubCriteria" id="CriteriaEditor-treeView-tab" value="tree">
                                     Tree View
                                 </v-tab>
-                                <v-tab @click="onParseSubCriteriaJson"  id="CriteriaEditor-rawView-tab" value="raw">
+                                <v-tab @click="onParseSubCriteriaJson" id="CriteriaEditor-rawView-tab" value="raw">
                                     Raw Criteria
                                 </v-tab>
                            </v-tabs>
@@ -232,6 +195,7 @@
                                         rows="20"
                                         v-model="selectedRawSubCriteriaClause"
                                         class="ghd-control-text"
+                                        
                                     ></v-textarea>
                                 </v-window-item>
                             </v-window>
@@ -359,9 +323,9 @@ const stateAttributesSelectValues = computed<AttributeSelectValues[]>(() => stor
 const stateNetworks = computed<Network[]>(() => store.state.networkModule.networks);
 const currentUserCriteriaFilter = computed<UserCriteriaFilter>(() => store.state.userModule.currentUserCriteriaFilter);
 
-async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
-async function getAttributeSelectValuesAction(payload?: any): Promise<any> {await store.dispatch('getAttributeSelectValues');}
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
+async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes', payload);}
+async function getAttributeSelectValuesAction(payload?: any): Promise<any> {await store.dispatch('getAttributeSelectValues',payload);}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification',payload);}
 const tab = ref<any>(null);
     const queryBuilderRules = ref<any[]>([]);
     let queryBuilderLabels: object = {
@@ -394,7 +358,15 @@ const tab = ref<any>(null);
     const checkOutput = ref<boolean>(false);
 
     onMounted(()=> {
-        
+        const mainCriteria: Criteria = convertCriteriaExpressionToCriteriaObject(
+            criteriaEditorData.value.mergedCriteriaExpression != null
+                ? criteriaEditorData.value.mergedCriteriaExpression
+                : '',
+            addErrorNotificationAction,
+        ) as Criteria;
+        setSubCriteriaClauses(mainCriteria);
+
+
         if (hasValue(stateAttributes)) {
             setQueryBuilderRules();
         }
@@ -405,6 +377,7 @@ const tab = ref<any>(null);
         /*const mainCriteria: Criteria = parseCriteriaString(
       criteriaEditorData.mergedCriteriaExpression != null ? criteriaEditorData.mergedCriteriaExpression : ''
       ) as Criteria;*/
+      
         selectedSubCriteriaClauseIndex.value = -1;
         const mainCriteria: Criteria = convertCriteriaExpressionToCriteriaObject(
             criteriaEditorData.value.mergedCriteriaExpression != null
@@ -450,6 +423,7 @@ const tab = ref<any>(null);
     });
 
     watch(subCriteriaClauses,()=> {
+        console.log("subCriteriaClauses: " + subCriteriaClauses.value.length);
         resetCriteriaValidationProperties();
     });
 
@@ -487,7 +461,7 @@ const tab = ref<any>(null);
     watch(stateAttributesSelectValues,()=> {
         if (
             hasValue(queryBuilderRules.value) &&
-            hasValue(stateAttributesSelectValues)
+            hasValue(stateAttributesSelectValues.value)
         ) {
             const filteredAttributesSelectValues: AttributeSelectValues[] = stateAttributesSelectValues.value.filter(
                 (asv: AttributeSelectValues) => hasValue(asv.values),

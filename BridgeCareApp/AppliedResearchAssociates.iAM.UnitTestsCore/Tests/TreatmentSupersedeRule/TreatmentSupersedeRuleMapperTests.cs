@@ -39,8 +39,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
             Assert.NotNull(resultEntity);
             Assert.IsType<ScenarioTreatmentSupersedeRuleEntity>(resultEntity);
             Assert.Equal(TestDataForTreatmentSupersedeRules.TreatmentId, resultEntity.TreatmentId);
-            Assert.Equal(TestDataForTreatmentSupersedeRules.PreventTreatmentId, resultEntity.PreventScenarioSelectableTreatment.Id);
-            Assert.Equal("Prevent Treatment", resultEntity.PreventScenarioSelectableTreatment.Name);
+            Assert.Equal(TestDataForTreatmentSupersedeRules.PreventTreatmentId, resultEntity.PreventTreatmentId);           
             Assert.NotNull(resultEntity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin);
         }
 
@@ -51,13 +50,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
             var treatmentSupersedeRuleDto = TreatmentSupersedeRuleTestSetup.TreatmentSuperdedeRuleDto;
 
             // Act
-            var resultEntity = treatmentSupersedeRuleDto.ToScenarioTreatmentSupersedeRuleEntity(treatmentSupersedeRuleDto.treatment.Id, simulationSource.Id);
+            var resultEntity = treatmentSupersedeRuleDto.ToScenarioTreatmentSupersedeRuleEntity(simulationSource.SelectableTreatments.FirstOrDefault().Id);
 
             // Assert
             Assert.NotNull(resultEntity);
             Assert.IsType<ScenarioTreatmentSupersedeRuleEntity>(resultEntity);
-            Assert.Equal(treatmentSupersedeRuleDto.treatment.Id, resultEntity.TreatmentId);
-            Assert.Equal("PreventTreatment1", resultEntity.PreventScenarioSelectableTreatment.Name);
+            Assert.Equal(treatmentSupersedeRuleDto.treatment.Id, resultEntity.PreventTreatmentId);
             Assert.NotNull(resultEntity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin);
             Assert.Equal("TestExpression", resultEntity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary.MergedCriteriaExpression);
         }
@@ -77,7 +75,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
             // Assert on selectableTreatment
             Assert.True(cntBefore == 0);
             Assert.True(selectableTreatment.SupersedeRules.Any());
-            Assert.Equal("PreventTreatment1", selectableTreatment.SupersedeRules.FirstOrDefault().Treatment.Name);
+            Assert.Equal("Prevent Treatment", selectableTreatment.SupersedeRules.FirstOrDefault().Treatment.Name);
         }
 
         [Fact]
@@ -86,9 +84,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
             // Arrange
             var treatmentEntity = simulationSource.SelectableTreatments.FirstOrDefault(_ => _.Name == "Prevent Treatment");
             var scenarioTreatmentSupersedeRuleEntity = TestEntitiesForTreatmentSupersedeRules.ScenarioTreatmentSupersedeRule(treatmentDtoWithEmptyLists.Id, treatmentEntity);
+            var treatmentDtos = TreatmentSupersedeRuleTestSetup.TreatmentDtos;
 
             // Act
-            var resultDto = scenarioTreatmentSupersedeRuleEntity.ToDto();
+            var resultDto = scenarioTreatmentSupersedeRuleEntity.ToDto(treatmentDtos);
 
             // Assert
             Assert.NotNull(resultDto);
@@ -96,7 +95,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
             Assert.Equal(treatmentEntity.Id, resultDto.treatment.Id);
             Assert.Equal(scenarioTreatmentSupersedeRuleEntity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary.Name, resultDto.CriterionLibrary.Name);
             Assert.Equal(scenarioTreatmentSupersedeRuleEntity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary.MergedCriteriaExpression, resultDto.CriterionLibrary.MergedCriteriaExpression);
-            Assert.Equal(scenarioTreatmentSupersedeRuleEntity.PreventScenarioSelectableTreatment.Name, resultDto.treatment.Name);
+            Assert.Equal(scenarioTreatmentSupersedeRuleEntity.PreventTreatmentId, resultDto.treatment.Id);
         }
 
         [Fact]
@@ -104,9 +103,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
         {
             var treatmentEntity = TestEntitiesForTreatmentSupersedeRules.SelectablePreventTreatment();
             var treatmentSupersedeRuleEntity = TestEntitiesForTreatmentSupersedeRules.TreatmentSupersedeRule(treatmentDtoWithEmptyLists.Id, treatmentEntity);
+            var treatmentDtos = TreatmentSupersedeRuleTestSetup.TreatmentDtos;
 
-            // Act
-            var resultDto = treatmentSupersedeRuleEntity.ToDto();
+            // Act // // TODO dto List
+            var resultDto = treatmentSupersedeRuleEntity.ToDto(treatmentDtos);
 
             // Assert
             Assert.NotNull(resultDto);
@@ -114,7 +114,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
             Assert.Equal(treatmentEntity.Id, resultDto.treatment.Id);
             Assert.Equal(treatmentSupersedeRuleEntity.CriterionLibraryTreatmentSupersedeRuleJoin.CriterionLibrary.Name, resultDto.CriterionLibrary.Name);
             Assert.Equal(treatmentSupersedeRuleEntity.CriterionLibraryTreatmentSupersedeRuleJoin.CriterionLibrary.MergedCriteriaExpression, resultDto.CriterionLibrary.MergedCriteriaExpression);
-            Assert.Equal(treatmentSupersedeRuleEntity.PreventSelectableTreatment.Name, resultDto.treatment.Name);
+            Assert.Equal(treatmentSupersedeRuleEntity.PreventTreatmentId, resultDto.treatment.Id);
         }
     }
 }

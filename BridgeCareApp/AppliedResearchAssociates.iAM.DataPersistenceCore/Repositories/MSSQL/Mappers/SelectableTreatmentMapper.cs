@@ -94,7 +94,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 foreach (var supersedeRule in dto.SupersedeRules)
                 {
-                    var supersedeRuleEntity = supersedeRule.ToScenarioTreatmentSupersedeRuleEntity(dto.Id, simulationId, baseEntityProperties);
+                    var supersedeRuleEntity = supersedeRule.ToScenarioTreatmentSupersedeRuleEntity(dto.Id, baseEntityProperties);
                     supersedeRuleEntities.Add(supersedeRuleEntity);
                 }                
             }
@@ -188,8 +188,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
         }
 
-        public static TreatmentDTO ToDto(this SelectableTreatmentEntity entity) =>
-            new TreatmentDTO
+        public static TreatmentDTO ToDto(this SelectableTreatmentEntity entity, List<TreatmentDTO> treatmentList = null)
+        {
+            var result = new TreatmentDTO
             {
                 Id = entity.Id,
                 Name = entity.Name,
@@ -198,25 +199,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = entity.ShadowForSameTreatment,
                 BudgetIds = new List<Guid>(),
                 PerformanceFactors = entity.TreatmentPerformanceFactors.Any()
-                    ? entity.TreatmentPerformanceFactors.Select(_ => _.ToDto()).ToList()
-                    : new List<TreatmentPerformanceFactorDTO>(),
+                     ? entity.TreatmentPerformanceFactors.Select(_ => _.ToDto()).ToList()
+                     : new List<TreatmentPerformanceFactorDTO>(),
                 Costs = entity.TreatmentCosts.Any()
-                    ? entity.TreatmentCosts.Select(_ => _.ToDto()).ToList()
-                    : new List<TreatmentCostDTO>(),
+                     ? entity.TreatmentCosts.Select(_ => _.ToDto()).ToList()
+                     : new List<TreatmentCostDTO>(),
                 Consequences = entity.TreatmentConsequences.Any()
-                    ? entity.TreatmentConsequences.Select(_ => _.ToDto()).ToList()
-                    : new List<TreatmentConsequenceDTO>(),
+                     ? entity.TreatmentConsequences.Select(_ => _.ToDto()).ToList()
+                     : new List<TreatmentConsequenceDTO>(),
                 CriterionLibrary = entity.CriterionLibrarySelectableTreatmentJoin != null
-                    ? entity.CriterionLibrarySelectableTreatmentJoin.CriterionLibrary.ToDto()
-                    : new CriterionLibraryDTO(),
-                SupersedeRules = entity.TreatmentSupersedeRules.Any()
-                    ? entity.TreatmentSupersedeRules.Select(_ => _.ToDto()).ToList()
-                    : new List<TreatmentSupersedeRuleDTO>(),
+                     ? entity.CriterionLibrarySelectableTreatmentJoin.CriterionLibrary.ToDto()
+                     : new CriterionLibraryDTO(),                
                 Category = (TreatmentCategory)entity.Category,
                 AssetType = (AssetCategories)entity.AssetType,
 
                 IsUnselectable = entity.IsUnselectable
             };
+
+            if (treatmentList != null)
+            {
+                result.SupersedeRules = entity.TreatmentSupersedeRules.Any()
+                                ? entity.TreatmentSupersedeRules.Select(_ => _.ToDto(treatmentList)).ToList()
+                                : new List<TreatmentSupersedeRuleDTO>();
+            }
+
+            return result;
+        }
 
         public static TreatmentDTOWithSimulationId ToDtoWithSimulationId(this ScenarioSelectableTreatmentEntity entity)
         {
@@ -269,8 +277,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity.ToDto();
         }
 
-        public static TreatmentDTO ToDto(this ScenarioSelectableTreatmentEntity entity) =>
-            new TreatmentDTO
+        public static TreatmentDTO ToDto(this ScenarioSelectableTreatmentEntity entity, List<TreatmentDTO> treatmentList = null)
+        {
+           var result = new TreatmentDTO
             {
                 Id = entity.Id,
                 Name = entity.Name,
@@ -300,10 +309,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 IsModified = entity.IsModified,
                 LibraryId = entity.LibraryId,
                 AssetType = (AssetCategories)entity.AssetType,
-                IsUnselectable = entity.IsUnselectable,
-                SupersedeRules = entity.ScenarioTreatmentSupersedeRules.Any()
-                                ? entity.ScenarioTreatmentSupersedeRules.Select(_ => _.ToDto()).ToList()
-                                : new List<TreatmentSupersedeRuleDTO>()
+                IsUnselectable = entity.IsUnselectable
             };
+
+            if (treatmentList != null)
+            {
+                result.SupersedeRules = entity.ScenarioTreatmentSupersedeRules.Any()
+                                ? entity.ScenarioTreatmentSupersedeRules.Select(_ => _.ToDto(treatmentList)).ToList()
+                                : new List<TreatmentSupersedeRuleDTO>();
+            }
+
+            return result;
+        }
     }
 }

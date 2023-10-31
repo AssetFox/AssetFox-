@@ -106,7 +106,7 @@
                                         <tr>
                                         <td>
                                         
-                                            <v-edit-dialog
+                                            <editDialog
                                                 size="large"
                                                 lazy
                                                 persistent
@@ -138,7 +138,7 @@
                                                         ]"
                                                     />
                                                 </template>
-                                            </v-edit-dialog>
+                                            </editDialog>
                                         </td>
                                         <td>
                                             {{
@@ -306,7 +306,7 @@
                                     <template slot="items" slot-scope="props" v-slot:item="props">
                                     <tr>
                                         <td>
-                                            <v-edit-dialog
+                                            <editDialog
                                                 size="large"
                                                 lazy
                                                 persistent
@@ -338,7 +338,7 @@
                                                         ]"
                                                     />
                                                 </template>
-                                            </v-edit-dialog>
+                                            </editDialog>
                                         </td>
                                         <td>
                                             {{
@@ -677,6 +677,7 @@ import {
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AlertData, AlertDataWithButtons, AlertPreChecksData, emptyAlertData, emptyAlertDataWithButtons, emptyAlertPreChecksData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import AlertWithButtons from '@/shared/modals/AlertWithButtons.vue';
 import AlertPreChecks from '@/shared/modals/AlertPreChecks.vue';
 import { emptyAlertButton } from '@/shared/models/modals/alert-data';
@@ -980,7 +981,7 @@ import { onBeforeMount } from 'vue';
     let tab = ref('');
     let availableActions: any;
     let availableSimulationActions: any;
-    let nameUpdate: string = '';
+    let nameUpdate = ref('');
 
     let scenarios: Scenario[] = [];
 
@@ -1496,7 +1497,7 @@ import { onBeforeMount } from 'vue';
     }
 
     function prepareForNameEdit(name: string) {
-        nameUpdate = name;
+        nameUpdate.value = name;
     }
 
     function onShowConfirmAnalysisRunAlert(scenario: Scenario) {

@@ -149,7 +149,7 @@
                                             @change="onEditCommittedProjectProperty(props.item, header.value, props.item.projectSource)"
                                             
                                         ></v-combobox>
-                                        <v-edit-dialog v-if="header.value !== 'actions' && header.value !== 'selection'"
+                                        <editDialog v-if="header.value !== 'actions' && header.value !== 'selection'"
                                             :return-value.sync="props.item[header.value]"
                                             @save="onEditCommittedProjectProperty(props.item,header.value,props.item[header.value])"
                                             size="large"
@@ -223,7 +223,7 @@
                                                     :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
                                             </template>
-                                        </v-edit-dialog>
+                                        </editDialog>
                                 
                                         <div v-if="header.value === 'actions'">
                                             <v-row style='flex-wrap:nowrap'>
@@ -286,6 +286,7 @@
 </template>
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import { watch, ref, onMounted, onBeforeUnmount, shallowRef, computed } from 'vue'
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { CommittedProjectFillTreatmentReturnValues, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';

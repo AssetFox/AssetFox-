@@ -35,7 +35,7 @@
                                 </v-row>
                             </td>
                             <td>
-                                <v-edit-dialog id="EditBudgetsDialog-budget-editDialog"
+                                <editDialog id="EditBudgetsDialog-budget-editDialog"
                                                :return-value.sync='props.item.name' persistent
                                                @save='onEditBudgetName(props.item)' size="large" lazy>
                                     <v-text-field id="EditBudgetsDialog-budget-textField"
@@ -45,7 +45,7 @@
                                         <v-text-field label='Edit' single-line v-model='props.item.name'
                                                       :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].budgetNameIsUnique(props.item, editBudgetsDialogGridData)]" />
                                     </template>
-                                </v-edit-dialog>
+                                </editDialog>
                             </td>
                             <td>
                                 <v-text-field readonly single-line class='sm-txt'
@@ -90,6 +90,7 @@
 
 <script lang='ts' setup>
 import Vue from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import { hasValue } from '@/shared/utils/has-value-util';
 import { any, clone, isNil, update, findIndex, propEq, isEmpty } from 'ramda';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';

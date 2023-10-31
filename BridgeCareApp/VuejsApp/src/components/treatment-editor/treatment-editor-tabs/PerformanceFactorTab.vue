@@ -8,7 +8,7 @@
                               hide-actions>
                     <template slot='items' slot-scope='props' v-slot:item="props">
                         <td v-for='header in factorGridHeaders'>
-                            <v-edit-dialog
+                            <editDialog
                                 v-if="header.key !== 'equation' && header.key !== 'criterionLibrary' && header.key !== ''"
                                 :return-value.sync='props.item[header.key]'
                                 @save='onEditPerformanceFactorProperty(props.item, header.key, props.item[header.key])'
@@ -31,7 +31,7 @@
                                                   v-model='props.item.performanceFactor'
                                                   :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                 </template>
-                            </v-edit-dialog>
+                            </editDialog>
                         </td>
                     </template>
                 </v-data-table>
@@ -50,7 +50,7 @@ import { Attribute } from '@/shared/models/iAM/attribute';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { InputValidationRules } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import {
     PerformanceCurve,
 } from '@/shared/models/iAM/performance';

@@ -1,25 +1,34 @@
 <template>
-  <v-dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
     <v-card>
-            <v-card-title class="ghd-dialog-padding-top-title">
-        <v-row justify-start>
-          <div class="dialog-header"><h5>Create New Target Condition Goal Library</h5></div>
+      <v-card-title class="ghd-dialog-padding-top-title">
+        <v-row>
+          <div class="dialog-header">Create New Target Condition Goal Library</div>
+          <v-spacer></v-spacer>
+          <v-btn id="CreateRemainingLifeLimitDialog-x-btn" @click="onSubmit(false)" icon>
+                      <i class="fas fa-times fa-2x"></i>
+          </v-btn>
         </v-row>
-        <v-btn id="CreateRemainingLifeLimitDialog-x-btn" @click="onSubmit(false)" icon>
-                    <i class="fas fa-times fa-2x"></i>
-        </v-btn>
       </v-card-title>
       <v-card-text class="ghd-dialog-text-field-padding">
-        <v-row column>
+        <v-row>
           <v-subheader class="ghd-control-label ghd-md-gray">Select an Attribute</v-subheader>
+        </v-row>
+        <v-row>
           <v-select id="CreateRemainingLifeLimitDialog-selectAnAttribute-select"
                     :items="dialogData.numericAttributeSelectItems"
-                    append-icon=$vuetify.icons.ghd-down
+                    append-icon=ghd-down
+                    item-title="text"
+                    item-value="value"
                     v-model="newRemainingLifeLimit.attribute"
                     :rules="[rules['generalRules'].valueIsNotEmpty]"
                     variant="outlined"
                     class="ghd-select ghd-control-text ghd-text-field ghd-text-field-border"/>
+        </v-row>
+        <v-row>
           <v-subheader class="ghd-control-label ghd-md-gray">Limit</v-subheader>
+        </v-row>
+        <v-row>
           <v-text-field id="CreateRemainingLifeLimitDialog-limit-textField"
                         outline :mask="'##########'"
                         v-model.number="newRemainingLifeLimit.value"
@@ -40,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { computed, toRef, watch } from 'vue';
+import Vue, { computed, ref, toRefs, watch } from 'vue';
 import {emptyRemainingLifeLimit, RemainingLifeLimit} from '@/shared/models/iAM/remaining-life-limit';
 import {CreateRemainingLifeLimitDialogData} from '@/shared/models/modals/create-remaining-life-limit-dialog-data';
 import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
@@ -51,30 +60,31 @@ import {clone} from 'ramda';
   const props = defineProps<{
     dialogData: CreateRemainingLifeLimitDialogData
   }>();
+  const { dialogData } = toRefs(props);
+
   const emit = defineEmits(['submit']);
 
-  let newRemainingLifeLimit: RemainingLifeLimit = {...emptyRemainingLifeLimit, id: getNewGuid()};
+  let newRemainingLifeLimit = ref<RemainingLifeLimit>({...emptyRemainingLifeLimit, id: getNewGuid()});
   let rules: InputValidationRules = clone(validationRules);
   
-  watch((() => props.dialogData), onDialogDataChanged )
-  function onDialogDataChanged() {
-    newRemainingLifeLimit.attribute = hasValue(props.dialogData.numericAttributeSelectItems)
+  watch(()=> props.dialogData,()=> {
+    newRemainingLifeLimit.value.attribute = hasValue(props.dialogData.numericAttributeSelectItems)
         ? props.dialogData.numericAttributeSelectItems[0].value.toString() : '';
-  }
+  });
 
   function disableSubmitAction() {
-    return rules['generalRules'].valueIsNotEmpty(newRemainingLifeLimit.attribute) !== true ||
+    return rules['generalRules'].valueIsNotEmpty(newRemainingLifeLimit.value.attribute) !== true ||
         rules['generalRules'].valueIsNotEmpty(newRemainingLifeLimit.value) !== true;
   }
 
   function onSubmit(submit: boolean) {
     if (submit) {
-      emit('submit', newRemainingLifeLimit);
+      emit('submit', newRemainingLifeLimit.value);
     } else {
       emit('submit', null);
     }
 
-    newRemainingLifeLimit = {...emptyRemainingLifeLimit, id: getNewGuid()};
+    newRemainingLifeLimit.value = {...emptyRemainingLifeLimit, id: getNewGuid()};
   }
 
 </script>

@@ -103,7 +103,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
                         {
                            MergedCriteriaExpression = "[AGE] > 10",
                            IsSingleUse = true,
-                           Id = new Guid(),
+                           Id = Guid.NewGuid(),
                         },
                         Id = Guid.NewGuid(),
                         treatment = supersededTreatment

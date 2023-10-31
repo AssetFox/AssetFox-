@@ -139,8 +139,7 @@ namespace BridgeCareCoreTests.Tests.Integration
               var treatmentBudget = TreatmentBudgetDtos.Dto(budget.Name);
             var treatmentBudgets = new List<TreatmentBudgetDTO> { treatmentBudget };
             var budgetIds = new List<Guid> { budget.Id };
-            //var sourceTreatments = TreatmentTestSetup.ModelWithSupersededTreatmentOfSimulationInDb(TestHelper.UnitOfWork, simulationId, treatmentId, criterionExpression: "Treatment Source", budgets: treatmentBudgets, budgetIds: budgetIds);
-
+          
             var treatmentsWithSupersede = TreatmentTestSetup.ModelWithSupersededTreatmentOfSimulationInDb(TestHelper.UnitOfWork, simulationId, treatmentId, criterionExpression: "treatment criterion", budgets: treatmentBudgets, budgetIds: budgetIds);
             var treatmentsNoSupersede = TreatmentTestSetup.ModelNoSupersededTreatmentOfSimulationInDb(TestHelper.UnitOfWork, simulationId, treatmentId, criterionExpression: "treatment criterion", budgets: treatmentBudgets, budgetIds: budgetIds);
 
@@ -151,7 +150,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var consequence = ScenarioTreatmentConsequenceTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, treatmentId,
                 attribute: "AGE", equation: "[AGE]", criterion: "[AGE] > 10");
             
-            var treatments1 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+             var treatments1 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
             var service = CreateTreatmentService(TestHelper.UnitOfWork);
             var fileInfo = service.ExportScenarioTreatmentSupersedeRuleExcelFile(simulationId);
             var dataAsString = fileInfo.FileData;
@@ -163,7 +162,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatments(treatmentsWithSupersede, simulationId);
             var treatments2 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
             Assert.Empty(treatments2);
-            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(treatmentsNoSupersede, simulationId);
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatments(treatmentsNoSupersede, simulationId);
             service.ImportScenarioTreatmentSupersedeRuleFile(simulationId, excelPackage);
             var treatments3 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
             var treatment1 = treatments1.Single();

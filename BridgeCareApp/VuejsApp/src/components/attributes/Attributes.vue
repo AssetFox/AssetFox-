@@ -8,6 +8,8 @@
                 <v-row>
                     <v-row column>
                         <v-select :items='selectAttributeItems'
+                            item-title="text"
+                            item-value="value"
                             id="Attributes-selectAttribute-vselect"
                             variant="outlined"
                             style="margin-left:1%;"
@@ -21,8 +23,8 @@
                 </v-row>
             </v-col>
         </v-col>
-        <v-divider/>
-        <v-col cols="12"  class="ghd-constant-header" >
+        <v-divider style="background-color: #798899 !important;" v-if="hasSelectedAttribute"/>
+        <v-col cols="12" v-if="hasSelectedAttribute" class="ghd-constant-header" >
             <v-row>
                 <v-col cols="2"> 
                     <v-subheader class="ghd-md-gray ghd-control-label" style="margin-left:2%;">Attribute</v-subheader>
@@ -32,6 +34,8 @@
                 <v-col cols="2">
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Type</v-subheader>
                     <v-select
+                          item-title="text"
+                            item-value="value"
                         id="Attributes-attributeDataType-vselect"
                         variant="outlined"
                         class="ghd-select ghd-text-field ghd-text-field-border"
@@ -44,6 +48,8 @@
                         Aggregation Rule
                     </v-subheader>
                     <v-select
+                            item-title="text"
+                            item-value="value"
                         id="Attributes-attributeAggregationRule-vselect"
                         variant="outlined"
                         class="ghd-select ghd-text-field ghd-text-field-border"
@@ -53,7 +59,7 @@
                 </v-col>
             </v-row>
         </v-col>
-        <v-col cols="12" >
+        <v-col cols="12" v-if="hasSelectedAttribute">
             <v-col cols="10">
                 <v-row>
                     <v-col cols="2">
@@ -62,19 +68,19 @@
                             v-model='selectedAttribute.defaultValue'/>
                         <v-text-field id="Attributes-attributeDefaultNumber-vtextfield" v-if="selectedAttribute.type != 'STRING'" outline class="ghd-text-field-border ghd-text-field"
                             v-model.number='selectedAttribute.defaultValue'
-                            :mask="'#############'"/>
+                            />
                     </v-col>
                     <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Minimum Value</v-subheader>
                         <v-text-field id="Attributes-attributeMinimumValue-vtextfield" outline class="ghd-text-field-border ghd-text-field"                            
                             v-model.number='selectedAttribute.minimum'
-                            :mask="'#############'"/>
+                            />
                     </v-col>
                     <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Maximum Value</v-subheader>
                         <v-text-field id="Attributes-attributeMaximumValue-vtextfield" outline class="ghd-text-field-border ghd-text-field"
                             v-model.number='selectedAttribute.maximum'
-                            :mask="'#############'"/>
+                            />
                     </v-col>
                     <v-col cols="4" style="padding-top:50px;">
                         <v-row>
@@ -88,13 +94,15 @@
             </v-col>
         </v-col>
         <!-- Data source combobox -->
-        <v-col cols="12">
+        <v-col cols="12" v-if="hasSelectedAttribute">
             <v-col cols="6">
                 <v-row>
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Source</v-subheader>
                 </v-row>
                 <v-row column>
                     <v-select
+                            item-title="text"
+                            item-value="value"
                         id="Attributes-attributeDataSource-vselect"
                         variant="outlined"
                         v-model='selectDatasourceItemValue'
@@ -125,7 +133,7 @@
             </v-row>
         </v-col>
         <!-- Data source combobox -->
-        <v-col cols="12">
+        <v-col cols="12" v-if="hasSelectedAttribute && selectedAttribute.dataSource.type == 'Excel'">
             <v-row>
                 <v-subheader class="ghd-md-gray ghd-control-label" style="margin-left:1%; margin-bottom:0.75%;">Column Name</v-subheader>
             </v-row>
@@ -142,7 +150,7 @@
             </v-col>
         </v-col>
         <!-- The Buttons  -->
-        <v-col cols="12">        
+        <v-col cols="12" v-if="hasSelectedAttribute">        
             <v-row justify-center>
                 <v-btn id="Attributes-cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Cancel
@@ -173,17 +181,15 @@ import { TestStringData } from '@/shared/models/iAM/test-string';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { AxiosResponse } from 'axios';
 import { any, clone, find, isNil, propEq } from 'ramda';
-import Vue, { onBeforeMount, onBeforeUnmount, Ref, ref, shallowRef, ShallowRef, watch } from 'vue';
+import Vue, { computed, onBeforeMount, onBeforeUnmount, Ref, ref, shallowRef, ShallowRef, watch } from 'vue';
 import { Console } from 'console';
 import { useStore } from 'vuex';
 
     let store = useStore();
-    let hasSelectedAttribute: boolean = false;
+    let hasSelectedAttribute = ref<boolean>(false);
     let hasEmptyDataSource: boolean = true;
     let selectAttributeItemValue: ShallowRef<string | null> = shallowRef(null);
     let selectDatasourceItemValue: ShallowRef<string | null> = shallowRef(null);
-    let selectAttributeItems: SelectItem[] = [];
-    let selectDatasourceItems: SelectItem[] = [];
     let selectAggregationRuleTypeItems: SelectItem[] = [];
     let selectExcelColumns: SelectItem[] = [];
     let selectedAttribute: Ref<Attribute> = ref(clone(emptyAttribute));
@@ -194,21 +200,23 @@ import { useStore } from 'vuex';
     let commandIsValid: boolean = true;
     let checkedCommand = '';
 
-    let aggregationRuleSelectValues: SelectItem[] = []    
-    let typeSelectValues: SelectItem[] = [
+    let aggregationRuleSelectValues = ref<SelectItem[]>([]);    
+    let typeSelectValues = ref<SelectItem[]>([
         {text: 'STRING', value: 'STRING'},
         {text: 'NUMBER', value: 'NUMBER'}
-    ];
+    ]);
 
-    let stateAttributes = shallowRef<Attribute[]>(store.state.attributeModule.attributes) ;
-    let stateDataSources = shallowRef<Datasource[]>(store.state.datasourceModule.dataSources) ;    
-    let stateAggregationRules = shallowRef<RuleDefinition[]>(store.state.attributeModule.aggregationRules) ;
-    let stateAggregationRulesForType = shallowRef<string[]>(store.state.attributeModule.aggregationRulesForType) ;
-    let stateAttributeDataSourceTypes = shallowRef<string[]>(store.state.attributeModule.attributeDataSourceTypes) ;
-    let excelColumns = shallowRef<RawDataColumns>(store.state.datasourceModule.excelColumns) ;
-    let stateSelectedAttribute = shallowRef<Attribute>(store.state.attributeModule.selectedAttribute) ;
-    let hasUnsavedChanges = shallowRef<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges) ;
-    let hasAdminAccess = shallowRef<boolean>(store.state.authenticationModule.hasAdminAccess) ;
+    let stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes) ;
+    let stateDataSources = computed<Datasource[]>(() => store.state.datasourceModule.dataSources) ;    
+    let stateAggregationRules = computed<RuleDefinition[]>(() => store.state.attributeModule.aggregationRules) ;
+    let stateAggregationRulesForType = computed<string[]>(() => store.state.attributeModule.aggregationRulesForType) ;
+    let stateAttributeDataSourceTypes = computed<string[]>(() => store.state.attributeModule.attributeDataSourceTypes) ;
+    let excelColumns = computed<RawDataColumns>(() => store.state.datasourceModule.excelColumns) ;
+    let stateSelectedAttribute = computed<Attribute>(() => store.state.attributeModule.selectedAttribute) ;
+    let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges) ;
+    let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess) ;
+    let selectAttributeItems = ref<SelectItem[]>([]);
+    let selectDatasourceItems: SelectItem[] = [];
     
     async function logOutAction(payload?: any): Promise<any> {await store.dispatch('logOut');}
     async function getAttributes(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
@@ -236,46 +244,42 @@ import { useStore } from 'vuex';
         setHasUnsavedChangesAction({ value: false });
     }
 
-    watch(stateAttributes, () => onStateAttributesChanged)
-    function onStateAttributesChanged() {
-        selectAttributeItems = stateAttributes.value.map((attribute: Attribute) => ({
+    watch(stateAttributes, () =>  {
+            selectAttributeItems.value = stateAttributes.value.map((attribute: Attribute) => ({
             text: attribute.name,
             value: attribute.id,
         }));
-    }
+    })
 
-    watch(stateDataSources, () => onStateDataSourcesChanged)
-    function onStateDataSourcesChanged() {
+    watch(stateDataSources, () => {
         selectDatasourceItems = stateDataSources.value.map((datasource: Datasource) => ({
             text: datasource.name + ' (' + datasource.type + ')',
             value: datasource.id,
         }));
-    }
+    })
 
-    watch(selectAttributeItemValue, () => onSelectAttributeItemValueChanged)
-    function onSelectAttributeItemValueChanged() {
+    watch(selectAttributeItemValue, () =>  {
         selectAttributeAction(selectAttributeItemValue);
-        hasSelectedAttribute = true;
+        hasSelectedAttribute.value = true;
         checkedCommand = "";
         commandIsValid = false;
-        getAggregationRulesForTypeAction(selectedAttribute.value.type)
-        aggregationRuleSelectValues = stateAggregationRulesForType.value.map((rule: string) => ({
-            text: rule,
-            value: rule,
-        }));
-    }
-    
-    watch(() => selectedAttribute.value.type, () => onSelectedAttributeTypeChanged)
-    function onSelectedAttributeTypeChanged() {
-        getAggregationRulesForTypeAction(selectedAttribute.value.type)
-        aggregationRuleSelectValues = stateAggregationRulesForType.value.map((rule: string) => ({
-            text: rule,
-            value: rule,
-        }));
-    }
 
-    watch(selectDatasourceItemValue, () => onSelectDatasourceItemValue)
-    function onSelectDatasourceItemValue(){
+        getAggregationRulesForTypeAction(selectedAttribute.value.type)
+        aggregationRuleSelectValues.value = stateAggregationRulesForType.value.map((rule: string) => ({
+            text: rule,
+            value: rule,
+        }));
+    })
+    
+    watch(() => selectedAttribute.value.type, () =>  {
+        getAggregationRulesForTypeAction(selectedAttribute.value.type)
+        aggregationRuleSelectValues.value = stateAggregationRulesForType.value.map((rule: string) => ({
+            text: rule,
+            value: rule,
+        }));
+    })
+
+    watch(selectDatasourceItemValue, () => {
         if (any(propEq('id', selectDatasourceItemValue), stateDataSources.value)) {
             let ds = find(
                 propEq('id', selectDatasourceItemValue),
@@ -293,15 +297,14 @@ import { useStore } from 'vuex';
         } else {
             selectedAttribute.value.dataSource = clone(emptyDatasource)
         }
-    }
+    })
 
-    watch(excelColumns, () => onExcelColumnsChanged)
-    function onExcelColumnsChanged(){
+    watch(excelColumns, () => {
         selectExcelColumns = excelColumns.value.columnHeaders.map((header: string) => ({
             text: header,
             value: header,
         }));
-    }
+    })
 
     watch(stateSelectedAttribute, () => onStateSelectedAttributeChanged)
     function onStateSelectedAttributeChanged() {

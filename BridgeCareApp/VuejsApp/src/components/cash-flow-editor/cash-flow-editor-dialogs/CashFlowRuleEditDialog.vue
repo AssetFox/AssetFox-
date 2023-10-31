@@ -19,7 +19,7 @@
                 class="ghd-table v-table__overflow">
                 <template v-slot:item ="{item}" slot="items" slot-scope="props">
                     <td>
-                        <v-edit-dialog
+                        <editDialog
                             :return-value.sync="item.value.durationInYears"
                             @save="onEditSelectedLibraryListData(item,'durationInYears')"
                             full-width
@@ -55,10 +55,10 @@
                                         )
                                     ]"/>
                             </template>
-                        </v-edit-dialog>
+                        </editDialog>
                     </td>
                     <td>
-                        <v-edit-dialog
+                        <editDialog
                             :return-value.sync="item.value.costCeiling"
                             size="large"
                             lazy
@@ -110,10 +110,10 @@
                                         )
                                     ]"/>
                             </template>
-                        </v-edit-dialog>
+                        </editDialog>
                     </td>
                     <td>
-                        <v-edit-dialog
+                        <editDialog
                             :return-value.sync="item.value.yearlyPercentages"
                             @save="onEditSelectedLibraryListData(item,'yearlyPercentages')"
                             full-width
@@ -148,7 +148,7 @@
                                             .doesTotalOfPercentsEqualOneHundred
                                     ]"/>
                             </template>
-                        </v-edit-dialog>
+                        </editDialog>
                     </td>
                     <td>
                         <v-btn
@@ -187,6 +187,7 @@
 
 <script lang="ts" setup>
 import { nextTick, ref, watch, Ref } from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import {
   CashFlowDistributionRule,
   CashFlowRule,

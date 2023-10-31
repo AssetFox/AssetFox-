@@ -10,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
     /// </summary>
     public class CompleteSimulationDTO : SimulationDTO
     {
+               
         /// <summary>
         /// The Analysis repository of a simulation.
         /// </summary>
@@ -33,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         /// <summary>
         /// The Performance Curve repository of a simulation.
         /// </summary>
-        public IList<ScenarioPerformanceCurvesImportResultDTO> PerformanceCurves { get; set; }
+        public IList<PerformanceCurveDTO> PerformanceCurves { get; set; }
 
         /// <summary>
         /// The Attribute repository of a simulation.

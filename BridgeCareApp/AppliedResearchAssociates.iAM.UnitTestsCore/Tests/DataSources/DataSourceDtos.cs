@@ -26,5 +26,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             };
             return dto;
         }
+
+        public static ExcelDataSourceDTO TestConfigurationExcel(string locationColumn, Guid? id = null)
+        {
+
+            var resolveId = id ?? Guid.NewGuid();
+            var name = RandomStrings.WithPrefix("dataSource");
+            var dataSource = new ExcelDataSourceDTO
+            {
+                LocationColumn = locationColumn,
+                Id = resolveId,
+                Name = name,
+            };
+            return dataSource;
+        }
     }
 }

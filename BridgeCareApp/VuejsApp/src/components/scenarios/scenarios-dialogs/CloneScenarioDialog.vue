@@ -14,12 +14,11 @@
 
             <v-card-text>
               <v-select
-                    :items="stateCompatibleNetworks"
-                    label="Select a compatible network"
+                    :items="stateNetworks"
+                    label="Select a network"
                     item-title="name"
                     v-model="networkMetaData"
                     return-object
-                    v-if="hasCompatibleNetworks"
                     @update:modelValue="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
                     density="default"
                     variant="outlined"
@@ -62,26 +61,28 @@ import {
     emptyScenario,
     Scenario,
     ScenarioUser,
+    CloneScenario,
+    emptyCloneScenario,
 } from '@/shared/models/iAM/scenario';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { find, isNil, propEq, clone } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
-import {CloneScenarioDialogData} from '@/shared/models/modals/clone-scenario-dialog-data';
+import {CloneScenarioDialogData,CloneSimulationDialogData} from '@/shared/models/modals/clone-scenario-dialog-data';
 import { useStore } from 'vuex'; 
 
     let store = useStore(); 
-    const props = defineProps<{dialogData: CloneScenarioDialogData}>();
+    const props = defineProps<{dialogData: CloneSimulationDialogData}>();
     const emit = defineEmits(['submit']);
 
     let showDialogComputed = computed(() => props.dialogData.showDialog);
 
     const stateUsers =  computed<User[]>(() => store.state.userModule.users);
-    const stateCompatibleNetworks = computed<Network[]>(() => store.state.networkModule.compatibleNetworks);  
+    const stateNetworks = computed<Network[]>(() => store.state.networkModule.networks);  
     let shared =  ref<boolean>(false);
-
+    async function cloneScenarioWithDestinationNetworkAction(payload?:any): Promise<any>{await store.dispatch('cloneScenarioWithDestinationNetwork',payload)};
     async function getCompatibleNetworksAction(payload?: any): Promise<any>{await store.dispatch('getCompatibleNetworks')}
 
-    let newScenario: Scenario = { ...emptyScenario, id: getNewGuid() };
+    let newScenario: CloneScenario = { ...emptyCloneScenario, id: getNewGuid() };
     let selectedNetworkId: string = getBlankGuid();
     let isNetworkSelected = ref(false);
     let networkMetaData = ref<Network>({...emptyNetwork})
@@ -93,15 +94,14 @@ import { useStore } from 'vuex';
         onModifyScenarioUserAccess();
     }
 
-    watch(stateCompatibleNetworks, ()=> onStateCompatibleNetworksChanged())
-    function onStateCompatibleNetworksChanged() {
+    watch(stateNetworks, ()=>  {
 
         selectedNetworkId = props.dialogData.scenario.networkId;
         selectedNetworkName = props.dialogData.scenario.networkName;
-         networkMetaData.value =  stateCompatibleNetworks.value.find(_ => _.id == props.dialogData.scenario.networkId) ||  networkMetaData.value;
+         networkMetaData.value =  stateNetworks.value.find(_ => _.id == props.dialogData.scenario.networkId) ||  networkMetaData.value;
          isNetworkSelected.value = true;
         hasCompatibleNetworks = true;
-    }
+    })
 
     watch(shared, ()=> onSetPublic())
     function onSetPublic() {
@@ -134,7 +134,8 @@ import { useStore } from 'vuex';
 
             newScenario = {
                 ...props.dialogData.scenario,
-                networkId: selectedNetworkId,
+                destinationNetworkId: selectedNetworkId,
+                networkId: props.dialogData.scenario.networkId,
                 users: shared
                     ? [
                           owner,
@@ -159,15 +160,17 @@ import { useStore } from 'vuex';
 
     function onSubmit(submit: boolean) {
         if (submit) {
-            newScenario.networkId = selectedNetworkId;
+            newScenario.destinationNetworkId = selectedNetworkId;
+            newScenario.networkId = props.dialogData.scenario.networkId
             newScenario.networkName = selectedNetworkName;      
             newScenario.name = props.dialogData.scenario.name;
+            cloneScenarioWithDestinationNetworkAction(newScenario);
             emit('submit', newScenario);
         } else {
             emit('submit', null);
         }
 
-        newScenario = { ...emptyScenario, id: getNewGuid() };
+        newScenario = { ...emptyCloneScenario, id: getNewGuid() };
         shared = ref(false);
         hasCompatibleNetworks = false;
     }

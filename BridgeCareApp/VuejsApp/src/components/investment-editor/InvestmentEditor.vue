@@ -165,7 +165,7 @@
                     :items="budgetYearsGridData"
                     :items-length="totalItems"
                     class='v-table__overflow ghd-table' 
-                    item-value='year' 
+                    item-key='year' 
                     show-select 
                     sort-icon=$vuetify.icons.ghd-table-sort
                     v-model='selectedBudgetYearsGridData' 
@@ -182,12 +182,12 @@
                                 <span class='sm-txt'>{{ item.year + firstYearOfAnalysisPeriodShift}}</span>
                             </div>       
                             <div v-if="header.key === 'action'">
-                                <v-btn @click="onRemoveBudgetYear(item.year)" class="ghd-blue" icon>
+                                <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(item.year)" class="ghd-blue" icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')" />
                                 </v-btn>
                             </div>
                             <div v-if="header.key !== 'year' && header.key !== 'action'">
-                                <v-edit-dialog :return-value.sync='item[header.key]'
+                                <editDialog :return-value.sync='item[header.key]'
                                                 @save='onEditBudgetYearValue(item.year, header.key, item[header.key])'
                                                 size="large" lazy>
                                     <v-text-field readonly single-line class='sm-txt'
@@ -199,7 +199,7 @@
                                                         v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
                                                         :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     </template>
-                                </v-edit-dialog>
+                                </editDialog>
                             </div>
                         </td>
                     </tr>
@@ -300,6 +300,7 @@
 
 <script setup lang='ts'>
 import { shallowRef } from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import SetRangeForAddingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForAddingBudgetYearsDialog.vue';
 import SetRangeForDeletingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForDeletingBudgetYearsDialog.vue';
 import EditBudgetsDialog from './investment-editor-dialogs/EditBudgetsDialog.vue';
@@ -600,10 +601,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 firstYearAnalysisBudgetShift: firstYearOfAnalysisPeriodShift.value,
                 isModified: scenarioLibraryIsModified
             },           
-            //sortColumn: sortBy === '' ? 'year' : sortBy,
-            //isDescending: descending != null ? descending : false,
-            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '', 
-            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false, 
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: currentSearch
         };
         

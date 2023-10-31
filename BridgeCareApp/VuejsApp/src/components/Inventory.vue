@@ -1,11 +1,12 @@
 <template> 
-     <div v-if="stateInventoryReportNames.length > 1" style="width: 250px; margin-left:700px">
-        <v-select
+     <div v-if="stateInventoryReportNames.length > 1" style="width: 300px; margin-left:650px">
+        <v-autocomplete
             v-model="inventoryReportName" 
             :items="stateInventoryReportNames"
             variant="outlined"
+            density="compact"
             class="ghd-select ghd-text-field ghd-text-field-border">
-        </v-select>
+        </v-autocomplete>
      </div>
     <v-layout>
         <v-row>
@@ -14,38 +15,25 @@
             <v-row justify-space-between row>
                 <v-row>
                     <div class="flex xs4" v-for="(key, index) in inventoryDetails">
-                        <!-- <v-autocomplete :items="reactiveData[index]" @change="onSelectInventoryItem(index)"
-                                        :label="`Select by ${key} Key`" outline
-                                        v-model="selectedKeys[index]"
-                                        :disabled = "isDisabled(index)">
-                            <template v-slot:item="data" slot="item" slot-scope="data">
-                                <template v-if="typeof data.item !== 'object'">
-                                    <v-list-tile-content v-text="data.item"></v-list-tile-content>
-                                </template>
-                                <template v-else>
-                                    <v-list-tile-content>
-                                        <v-list-tile-title v-html="data.item.value"></v-list-tile-title>
-                                    </v-list-tile-content>
-                                </template>
-                            </template>
-                        </v-autocomplete> -->
-                        <v-select
-                        style="margin-top: 50px; width: 250px; margin-right: 30px"
+                        <v-autocomplete
+                        style="margin-top: 50px; width: 250px; margin-right: 20px"
                         class="ghd-select ghd-text-field ghd-text-field-border ghd-button-text"
                         :items="reactiveData[index]"
                         v-model="selectedInventoryIndex[index]"
                         :label="`Select by ${key}`"
-                        outline
-                        ></v-select>
+                        variant="outlined"
+                        density="compact"
+                        ></v-autocomplete>
                     </div>
                 </v-row>
                 <v-spacer></v-spacer>
-                    <v-btn style="margin-right: 75px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                    <v-btn style="margin-right: 75px; margin-top: 40px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
                     variant ="outlined" 
                     @click="resetDropdowns()">
                     Reset Key Fields
                     </v-btn>
            </v-row>
+           <div style="margin: auto; margin-top: 50px" v-html="staticHTMLForInventory"></div>
             <v-divider></v-divider>
         </v-row>
     </v-layout>
@@ -86,9 +74,14 @@
     const reactiveData: Ref<[string[], string[]]> = ref([[], []]);
     let inventoryItem: any[][] = [];
 
-    const selectedKeys: string[] = [];
+    let selectedKeys: string[] = [];
 
     const selectedInventoryIndex = ref([]);
+
+
+    let htmlResponse = ref();
+
+    let reactValue: any[] = [];
 
     const inventoryDetails = ref<string[]>([]);
     let constraintDetails: string = '';
@@ -114,16 +107,18 @@
             keyAttributeValues.value = await setupSelectLists();
         });
 
-        watch(selectedInventoryIndex, (newValues, oldValues) => {
+        watch(selectedInventoryIndex, (newValues: any, oldValues) => {
             let index: number;
-            if(newValues.length < 5){
-                index = reactiveData.value[1].indexOf(newValues[0]);
+            if(reactValue[0] != newValues[0] && newValues[0] != undefined){
+                reactValue[0] = newValues[0];
+                index = 0;
             }
-            else (newValues.length < 5)
+            else
             {
-                index = reactiveData.value[0].indexOf(newValues[0]);
+                reactValue[1] = newValues[1];
+                index = 1;
             }
-        onSelectInventoryItem(index);
+            onSelectInventoryItem(index);
         }, { deep: true });
 
         watch(InventoryStateKeys, ()=>{
@@ -134,25 +129,20 @@
             for(let i = 0; i < keyAttributeValues.value.length; i++)
             {
                 let j = 0;
-                reactiveData.value[1].push(keyAttributeValues.value[i][j])
+                reactiveData.value[0].push(keyAttributeValues.value[i][j])
             }
 
             for(let i = 0; i < keyAttributeValues.value.length; i++)
             {
                 let j = 1;
-                reactiveData.value[0].push(keyAttributeValues.value[i][j])
+                reactiveData.value[1].push(keyAttributeValues.value[i][j])
             }
-
-/*                 let index = 1;
-                onSelectInventoryItem(index);
- */ 
 
         })
 
-        watch(staticHTMLForInventory,()=>onStaticHTMLForInventory())
-        function onStaticHTMLForInventory(){
+        watch(staticHTMLForInventory,()=>{
            // sanitizedHTML = $sanitize(staticHTMLForInventory.value);
-        }
+        })
 
         watch(stateInventoryReportNames,()=>{
             if(stateInventoryReportNames.value.length > 0)
@@ -245,29 +235,7 @@
             inventoryDetails.value = response.data;
 
             getInventoryAction(inventoryDetails.value);
-            //setupSelectLists();
-
-
-/*             console.log(inventoryDetails);
-            if (inventoryItems.value && inventoryItems.value.length > 0) {
-                const data = inventoryItems.value;
-                
-                for (let i = 0; i < inventoryDetails.length; i++) {
-                    keys.push([]);
-                    keys[i].push({ header: `${inventoryDetails[i]}'s` });
-                }
-
-                for (const item of data) {
-                    for (let i = 0; i < inventoryDetails.length; i++) {
-                        keys[i].push({
-                            identifier: item.keyProperties[i],
-                            group: inventoryDetails[i],
-                        });
-                    }
-                }
-            }
-            return { keys };
- */        }
+        }
 
         async function resetDropdowns() {
             keyAttributeValues.value = [];
@@ -275,6 +243,7 @@
             selectedKeys.forEach((value: string, index: number, array: string[]) => {
                 selectedKeys[index] = '';
             })
+            selectedInventoryIndex.value = [];
             selectedKeys[0] = "";
             keyAttributeValues.value = await setupSelectLists();
         }
@@ -303,9 +272,9 @@
             }       
         }
 
-        function HandleSelectedItems(index: number) {
-            selectedKeys[index] = "2";
-            let key = selectedKeys[index];
+         function HandleSelectedItems(index: number) {
+            selectedKeys = selectedInventoryIndex.value;
+            let key = selectedInventoryIndex.value[index];
                 let data: InventoryParam = {
                 keyProperties: {},
                 values: function (values: any): unknown {
@@ -322,28 +291,21 @@
                     let otherKeyValue = inventoryItem.keyProperties[i]; 
                     selectedKeys[i] = otherKeyValue;
                     data.keyProperties[i] = otherKeyValue;
+                    }
                 }
-
                  //Create a dictionary of the selected key fields
                 let dictionary: Record<string, string> = {};
-
-                for(let i = 0; i < inventoryDetails.value.length; i++)
-                {
-                    let temp = inventoryDetails.value[1];
-                    inventoryDetails.value[1] = inventoryDetails.value[0];
-                    inventoryDetails.value[0] = temp;
-                }
 
                 for(let i = 0; i < inventoryDetails.value.length; i++) {
                     let dictNames: any = inventoryDetails.value[i];
                     let dictValues: any = selectedKeys[i];
                     dictionary[dictNames] = dictValues;                     
                 }
-    
+
                 //Set the data equal to the dictionary
                 data.keyProperties = dictionary;
 
-                getStaticInventoryHTMLAction({reportType: inventoryReportName, filterData: data.keyProperties}); 
+                 getStaticInventoryHTMLAction({reportType: inventoryReportName, filterData: data.keyProperties}); 
         }
 
         function QueryAccess() {

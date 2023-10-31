@@ -24,7 +24,7 @@
             </v-col>
         </v-col>
         <v-divider />
-        <v-col cols = "12" class="ghd-constant-header">
+        <v-col cols = "12" class="ghd-constant-header" v-show="hasSelectedNetwork">
             <v-row>
                     <v-subheader class="ghd-md-gray ghd-control-label" >Key Attribute</v-subheader>
             </v-row>
@@ -32,6 +32,8 @@
                 <v-col cols = "6" sm="5">
                     <v-row column>
                         <v-select
+                        item-title="text"
+                        item-value="value"
                             id="Networks-KeyAttribute-vselect"
                             variant="outlined"
                             class="ghd-select ghd-text-field ghd-text-field-border"
@@ -42,7 +44,7 @@
                         </v-select>  
                     </v-row>                         
                 </v-col>
-                <v-col cols = "5" style="align-items: right;">
+                <v-col cols = "5" style="align-items: right;" v-show="!isNewNetwork">
                     <v-row>
                     <v-subheader class="ghd-md-gray ghd-control-label" >Data Source</v-subheader>
                     </v-row>
@@ -50,6 +52,8 @@
                     <v-select
                         id="Networks-DataSource-vselect"
                         variant="outlined"
+                        item-title="text"
+                        item-value="value"
                         :items="selectDataSourceItems"                       
                         class="ghd-select ghd-text-field ghd-text-field-border shifted-label"
                         v-model="selectDataSourceId">
@@ -65,7 +69,7 @@
             </v-row>
         </v-col>
         <!-- Data source combobox -->
-        <v-col cols = "12">
+        <v-col cols = "12" v-show="hasSelectedNetwork">
             <v-row justify-space-between>
                 <v-col cols = "5" >
                     <v-row column>
@@ -117,7 +121,7 @@
                 </v-col>
                 <v-col cols = "5">
                     <v-row column>
-                        <div class='priorities-data-table' >
+                        <div class='priorities-data-table' v-show="!isNewNetwork">
                             <v-row justify-center>
                                 <v-btn id="Networks-AddAll-vbtn" variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                                     @click="onAddAll">
@@ -137,11 +141,18 @@
                                 hide-actions
                                 :pagination.sync="pagination">
                                 <template slot='items' slot-scope='props' v-slot:item="{item}">
+                                    <tr>
                                     <td>
                                         <v-checkbox id="Networks-SelectAttribute-vcheckbox" hide-details primary v-model='item.raw.selected'></v-checkbox>
                                     </td>
-                                    <td>{{ item.name }}</td> 
-                                    <td>{{ item.dataSource.type }}</td> 
+                                    <td>
+                                        {{
+                                            item.name 
+                                        }}
+                                    </td> 
+
+                                    <td>{{ item.dataSource.type}}</td> 
+                                </tr>
                                 </template>
                             </v-data-table>    
                             <div class="text-xs-center pt-2">
@@ -156,7 +167,7 @@
             </v-row>
         </v-col>
         <!-- The Buttons  -->
-        <v-col cols = "12">        
+        <v-col cols = "12"  v-show="hasSelectedNetwork">        
             <v-row justify-center style="padding-top: 30px !important">
                 <v-btn id="Networks-Cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges'
                 variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
@@ -212,9 +223,9 @@ import mitt from 'mitt';
 
     let store = useStore();
     let stateNetworks = computed<Network[]>(()=>store.state.networkModule.networks);
-    let stateSelectedNetwork: ShallowRef<Network> = (store.state.networkModule.selectedNetwork) ;
-    let stateAttributes: ShallowRef<Attribute[]> = (store.state.attributeModule.attributes) ;
-    let stateDataSources: ShallowRef<Datasource[]> = (store.state.datasourceModule.dataSources) ;
+    let stateSelectedNetwork = computed<Network> (() => store.state.networkModule.selectedNetwork) ;
+    let stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
+    let stateDataSources = computed<Datasource[]>(() => store.state.datasourceModule.dataSources) ;
     let hasUnsavedChanges: boolean = (store.state.unsavedChangesFlagModule.hasUnsavedChanges);
     let isAdmin: boolean = (store.state.authenticationModule.isAdmin) ;
     
@@ -243,7 +254,7 @@ import mitt from 'mitt';
     const selectNetworkItems = ref<SelectItem[]>([]);
     let selectKeyAttributeItems = ref<SelectItem[]>([]);
     let selectDataSourceItems = ref<SelectItem[]>([]);
-    let attributeRows: Attribute[] =[];
+    let attributeRows = ref<Attribute[]>([]);
     let cleanAttributes: Attribute[] = [];
     let attributes: Attribute[] = [];
     let selectedAttributeRows = ref<Attribute[]>([]);
@@ -261,7 +272,7 @@ import mitt from 'mitt';
     let selectedNetwork: Ref<Network> = ref(clone(emptyNetwork));
     let selectNetworkItemValue = ref<string>('');
     let selectDataSourceId: string = '';
-    let hasSelectedNetwork: boolean = false;
+    let hasSelectedNetwork = ref<boolean>(false);
     let isNewNetwork: boolean = false;
     let hasStartedAggregation: boolean = false;
     let isKeyPropertySelectedAttribute: boolean = false;
@@ -299,34 +310,29 @@ import mitt from 'mitt';
         });
     })
 
-    watch(stateAttributes, () => onStateAttributesChanged)
-    function onStateAttributesChanged() {
-        attributeRows = clone(stateAttributes.value);
-        selectKeyAttributeItems.value = stateAttributes.value.map((attribute: Attribute) => ({
-            text: attribute.name,
-            value: attribute.id,
-        }));
-    }
+    watch(stateAttributes, () => { 
+        attributeRows.value = clone(stateAttributes.value);
+        stateAttributes.value.forEach(_ => {
+        selectKeyAttributeItems.value.push({text:_.name,value:_.name})
+        })
+        });
 
-    watch(stateDataSources, () => onStateDataSourcesChanges)
-    function onStateDataSourcesChanges() {
-        selectDataSourceItems.value = stateDataSources.value.map((dataSource: Datasource) => ({
-            text: dataSource.name,
-            value: dataSource.id,
-        }));
-    }
+    watch(stateDataSources, () => {  
+        stateDataSources.value.forEach(_ => {
+            selectDataSourceItems.value.push({text:_.name,value:_.id})
+        })
+    })
 
-    watch(selectNetworkItemValue, () => onSelectNetworkItemValueChanged)
-    function onSelectNetworkItemValueChanged() {
+    watch(selectNetworkItemValue, () =>  {
         selectNetworkAction(selectNetworkItemValue);
+        console.log(attributeRows);
         if(selectNetworkItemValue.value != getBlankGuid() || isNewNetwork)
-            hasSelectedNetwork = true;
+            hasSelectedNetwork.value = true;
         else
-            hasSelectedNetwork = false;
-    }
+            hasSelectedNetwork.value = false;
+    })
 
-    watch(selectedAttributeRows, () => onSelectedAttributeRowsChanged)
-    function onSelectedAttributeRowsChanged()
+    watch(selectedAttributeRows, () => 
     {
         if(any(propEq('id', selectedNetwork.value.keyAttribute), selectedAttributeRows.value)) {
             isKeyPropertySelectedAttribute = true;
@@ -334,7 +340,7 @@ import mitt from 'mitt';
         else {
             isKeyPropertySelectedAttribute = false;
         }
-    }
+    })
     
     watch(stateSelectedNetwork, () => onStateSelectedNetworkChanged)
     function onStateSelectedNetworkChanged() {
@@ -355,11 +361,10 @@ import mitt from 'mitt';
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    watch(selectedKeyAttributeItem, () => onSelectedKeyAttributeItemChanged)
-    function onSelectedKeyAttributeItemChanged()
+    watch(selectedKeyAttributeItem, () => 
     {
-        selectedKeyAttribute = attributeRows.find((attr: Attribute) => attr.id === selectedKeyAttributeItem.value) || clone(emptyAttribute);
-    }
+        selectedKeyAttribute = attributeRows.value.find((attr: Attribute) => attr.id === selectedKeyAttributeItem.value) || clone(emptyAttribute);
+    })
 
     function onAddNetworkDialog() {
         addNetworkDialogData.showDialog = true;
@@ -375,7 +380,7 @@ import mitt from 'mitt';
         isNewNetwork = true;
         selectNetworkItemValue.value = network.id;
         selectedNetwork.value = clone(network);
-        hasSelectedNetwork = true;
+        hasSelectedNetwork.value = true;
     }
     function onDiscardChanges() {
         selectedNetwork = clone(stateSelectedNetwork);
@@ -397,7 +402,7 @@ import mitt from 'mitt';
         selectedAttributeRows.value = clone(stateAttributes.value.filter((attr: Attribute) => attr.dataSource.id == selectDataSourceId));
     }
     function onAddAll(){
-        selectedAttributeRows.value = clone(attributeRows)
+        selectedAttributeRows.value = clone(attributeRows.value)
     }
     function onRemoveAll(){
         selectedAttributeRows.value = [];
@@ -413,7 +418,7 @@ import mitt from 'mitt';
 
     function onDeleteClick(){
         deleteNetworkAction(selectedNetwork.value.id).then(() => {
-            hasSelectedNetwork = false;
+            hasSelectedNetwork.value = false;
             selectNetworkItemValue.value = "";
             selectedNetwork.value = clone(emptyNetwork)
         })       
@@ -460,7 +465,7 @@ import mitt from 'mitt';
     }
     
     function pages() {
-        pagination.totalItems = attributeRows.length
+        pagination.totalItems = attributeRows.value.length
         if (pagination.rowsPerPage == null || pagination.totalItems == null) 
             return 0
 

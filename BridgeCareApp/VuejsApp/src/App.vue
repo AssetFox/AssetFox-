@@ -2,13 +2,22 @@
     <v-app class="paper-white-bg">
         <v-main>
             <v-toolbar app class="paper-white-bg">
-                <v-toolbar-title >
-                    <v-row no-gutters>
-                        <img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')"  />
-                        <img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')"  />
+                <v-toolbar-title  >
+                    <v-row  >
+
+                        <v-col  ><img v-bind:src="agencyLogo"  @click="onNavigate('/Scenarios/')"></v-col>                    
                     </v-row>
                 </v-toolbar-title>
-                <v-toolbar-items>
+
+                <v-toolbar-title >
+                    <v-row justify="start">
+                        <v-col cols ="1">
+                            <img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')"  /></v-col>
+                        
+                        
+                    </v-row>
+                </v-toolbar-title>
+                <v-toolbar-items >
                     <v-btn
                         id="App-scenarios-btn"
                         @click="onNavigate('/Scenarios/')"
@@ -62,8 +71,13 @@
                         <v-icon v-if="hasUnreadNewsItem" size="13" class="news-notification">fas fa-exclamation-circle</v-icon>
                     </v-btn>
                 </v-toolbar-items>
+                
                 <v-spacer></v-spacer>
+                <v-spacer></v-spacer>
+                
+                    
                 <v-toolbar-title class="white--text">
+                    
                     <v-menu
                         offset-
                         min-width="20%"
@@ -71,8 +85,10 @@
                         max-height="75%"
                         :close-on-content-click="false"
                     >
+                    
                         <template v-slot:activator="{ props }">
                             <button
+                                style="margin-left: 170%;"  
                                 id="App-notification-button"
                                 v-bind="props"
                                 @click="onNotificationMenuSelect"
@@ -80,41 +96,43 @@
                                 icon
                             >
                                 <img style="position:absolute; top:20px; height:25px;" :src="require('@/assets/icons/bell.svg')"/>
-                                <notifications
+                                <v-badge
+                                    v-if="notificationCounter > 0"
+                                    overlap
+                                    style="position: absolute;"
                                     :size="30"
-                                    :count="notificationCounter"
-                                    :upperLimit="50"
+                                    :content="notificationCounter"
                                     :animated="true"
-                                    left="13px"
-                                    top="6px"
                                     fontSize="12px"
                                     counterStyle="round"
                                     counterLocation="upperRight"
                                     counterBackgroundColor="#FF0000"
                                     counterTextColor="#FFFFFF"
-                                    iconColor="#002E6C"
+                                    color="#002E6C"
                                     class="hide-bell-svg"
-                                /> 
+                                   
+                                > 
+                                <v-icon style="bottom: 50%;" size="small"></v-icon>
+                                </v-badge>
                             </button>
-                        </template>
-                        <v-card class="mx-auto" max-width="100%">
+                        </template>            
+                        <v-card class="mx-auto" style="width: 1800%; min-height: 500%;">
                             <v-toolbar 
                                 id = "App-notification-toolbar"
                                 color="#002E6C" dark>
-                                <v-app-bar-nav-icon></v-app-bar-nav-icon>
+
 
                                 <v-toolbar-title>Notifications</v-toolbar-title>
 
-                                <v-spacer></v-spacer>
                             </v-toolbar>
-                            <v-list>
+                            <v-list class="h-100">
                                 <v-list-group
                                     v-for="notification in notifications"
                                     :key="notification.id"
                                     v-model="notification.active"
                                     append-icon=""
                                     class="notification-message"
-                                    style="border-bottom: 1px solid;"
+                                    style="border-bottom: 1px solid; padding:5%;"
                                 >
                                     <v-icon
                                         slot="prependIcon"
@@ -122,15 +140,15 @@
                                         >{{ notification.icon }}</v-icon
                                     >
                                     <template v-slot:activator>
-                                        <v-list-tile
+                                        <v-list-tile 
                                             id="App-notification-vListTile">
                                             <v-list-tile-content
-                                                style="font-size: 85%"
+                                                style="margin-bottom: 10px;"
                                                 v-text="
                                                     notification.shortMessage
                                                 "
                                             ></v-list-tile-content>
-                                            <v-btn icon size="small" end position="absolute">
+                                            <v-btn icon size="16" end position="absolute" style="margin-left:10%;">
                                                 <v-icon
                                                     size="small"
                                                     @click="
@@ -153,12 +171,12 @@
                                     </v-list-item>
                                     <v-spacer></v-spacer>
                                 </v-list-group>
-                            </v-list>
+                            </v-list>         
                         </v-card>
                     </v-menu>
                 </v-toolbar-title>
                 <v-toolbar-title>
-                    <v-divider class="mx-1 navbar-divider" vertical color="#798899"/>
+                    <v-divider class="mx-1 navbar-divider" vertical style="background-color: #798899; margin-left:90% !important;"/>
                 </v-toolbar-title>
                 <v-toolbar-title style="margin-left:2px !important" class="navbar-gray" v-if="authenticated">
                     <img style="height:40px; position:relative; top:2px" :src="require('@/assets/icons/user-no-circle.svg')"/>
@@ -168,42 +186,46 @@
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="!authenticated">
                     <v-btn
+                        style="background-color: #002E6C;"
                         v-if="securityType === b2cSecurityType"
                         @click="onAzureLogin"
                         class="mx-2"
                         icon
-                        color="#002E6C"
+                        color="#FFFFFF"
                     >
                         <v-icon size="small" color="white">fas fa-sign-in-alt</v-icon>
                     </v-btn>
                     <v-btn
+                        style="background-color: #002E6C;"
                         v-if="securityType === esecSecurityType && currentURL != 'AuthenticationStart'"
                         @click="onNavigate('/AuthenticationStart/')"
                         class="mx-2"
                         icon
-                        color="#002E6C"
+                        color="#FFFFFF"
                     >
                         <font-awesome-icon :icon="['fas','sign-in-alt']"/>
                     </v-btn>
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="authenticated">
                     <v-btn
+                        style="background-color: #002E6C;"
                         id="App-b2cLogout-vbtn"
                         v-if="securityType === b2cSecurityType"
                         @click="onAzureLogout"
                         class="mx-2"
                         icon
-                        color="#002E6C"
+                        color="#ffffff"
                     >
                     <font-awesome-icon :icon="['fas', 'sign-out-alt']"/>
                     </v-btn>
                     <v-btn
+                        style="background-color: #002E6C;"  
                         id="App-esecLogout-vbtn"
                         v-if="securityType === esecSecurityType"
                         @click="onLogout"
                         class="mx-2"
                         icon                        
-                        color="#002E6C"
+                        color="#ffffff"
                     >
                         <font-awesome-icon :icon="['fas', 'sign-out-alt']"/>
                     </v-btn>
@@ -214,7 +236,7 @@
                 type="info">
                     {{stateAlertMessage}}
                 </v-alert>
-                <div class="scenario-status" v-if="hasSelectedScenario">
+                <div class="scenario-status" v-if="hasSelectedScenario" style="margin-bottom: 20px; height: auto;">
                         <br>
                         <span>Scenario: </span>
                             <span id = 'App-scenarioName-span' style="font-weight: normal;">{{ selectedScenario.name }}</span>
@@ -234,11 +256,11 @@
             <v-container fluid v-bind="container">
                 <router-view></router-view>
             </v-container>
-            <v-footer app class="ara-blue-pantone-289-bg white--text" fixed>
+            <v-footer app color ="#00204B"  fixed>
                 <v-spacer></v-spacer>
-                <v-col cols = "2">
-                    <div class="dev-and-ver-div">
-                        <div class="font-weight-light">iAM</div>
+                <v-col cols = "1">
+                    <div class="dev-and-ver-div" >
+                        <div class="font-weight-light"  >iAM</div>
                         <div>{{implementationName}}</div>
                         <div>{{ packageVersion }}</div>
                     </div>
@@ -303,49 +325,46 @@ import config from '../public/config.json';
     let username = computed<string>(() => store.state.authenticationModule.username);
     let hasAdminAccess = computed(() => store.state.authenticationModule.hasAdminAccess);
 
-    let refreshing = computed<boolean>(() => store.state.authenticationModule.refreshing);
+    const refreshing = computed<boolean>(() => store.state.authenticationModule.refreshing);
     //let navigation = ref<any[]>(store.state.breadcrumbModule.navigation);
-    let notifications = ref<Notification[]>(store.state.notificationModule.notifications);
-    let notificationCounter = ref<number>(store.state.notificationModule.counter);
-    let stateSelectedScenario = ref<Scenario>(store.state.scenarioModule.selectedScenario);
-    let packageVersion = ref<string>(store.state.announcementModule.packageVersion);
-    let securityType = ref<string>(store.state.authenticationModule.securityType);
-    let announcements = computed(() => store.state.announcementModule.announcements);
-    let currentUser = ref<User>(store.state.userModule.currentUser);
-    let stateImplementationName = ref<string>(store.state.adminSiteSettingsModule.implementationName);
-    let agencyLogoBase64 = computed(() => store.state.adminSiteSettingsModule.agencyLogo);
-    let productLogoBase64 = computed(() => store.state.adminSiteSettingsModule.productLogo);
-    let stateInventoryReportNames = ref<string[]>(store.state.adminDataModule.inventoryReportNames);
-    let stateAlertMessage = ref<string>(store.state.alertModule.alertMessage);
-    let stateAlert = ref<boolean>(store.state.alertModule.alert);
-    async function logOutAction(payload?: any): Promise<any> {await store.dispatch('logOut');}
-
+    const notifications = computed<Notification[]>(() => store.state.notificationModule.notifications);
+    const notificationCounter = computed<number>(() => store.state.notificationModule.counter);
+    const stateSelectedScenario = computed<Scenario>(() => store.state.scenarioModule.selectedScenario);
+    const packageVersion = computed<string>(() => store.state.announcementModule.packageVersion);
+    const securityType = computed<string>(() => store.state.authenticationModule.securityType);
+    const announcements = computed(() => store.state.announcementModule.announcements);
+    const currentUser = computed<User>(() =>store.state.userModule.currentUser);
+    const stateImplementationName = computed<string>(()=>store.state.adminSiteSettingsModule.implementationName);
+    const agencyLogoBase64 = computed(() => store.state.adminSiteSettingsModule.agencyLogo);
+    const productLogoBase64 = computed(() => store.state.adminSiteSettingsModule.productLogo);
+    const stateInventoryReportNames = computed<string[]>(() => store.state.adminDataModule.inventoryReportNames);
+    const stateAlertMessage = computed<string>(() => store.state.alertModule.alertMessage);
+    const stateAlert = ref<boolean>(store.state.alertModule.alert);
+    async function logOutAction(payload?: any): Promise<any> {await store.dispatch('logOut', payload);}
     async function setIsBusyAction(payload?: any): Promise<any> { await store.dispatch('setIsBusy', payload);}
-    //async function setIsBusyAction(payload?: any) { () => store.dispatch('setIsBusy');}
-
-    async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks');}
-    async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes');}
-    async function getAnnouncementsAction(payload?: any): Promise<any> { await store.dispatch('getAnnouncements');}
-    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification');}
-    async function addWarningNotificationAction(payload?: any): Promise<any> { await store.dispatch('addWarningNotification');}
-    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification');} 
-    async function addInfoNotificationAction(payload?: any): Promise<any> { await store.dispatch('addInfoNotification');} 
+    async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks', payload);}
+    async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes', payload);}
+    async function getAnnouncementsAction(payload?: any): Promise<any> { await store.dispatch('getAnnouncements', payload);}
+    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification', payload);}
+    async function addWarningNotificationAction(payload?: any): Promise<any> { await store.dispatch('addWarningNotification', payload);}
+    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification', payload);} 
+    async function addInfoNotificationAction(payload?: any): Promise<any> { await store.dispatch('addInfoNotification', payload);} 
     async function addTaskCompletedNotificationAction(payload: any): Promise<any> { await store.dispatch('addTaskCompletedNotification', payload)}
-    async function removeNotificationAction(payload?: any): Promise<any> { await store.dispatch('removeNotification');}
-    async function clearNotificationCounterAction(payload?: any): Promise<any> { await store.dispatch('clearNotificationCounter');} 
-    async function generatePollingSessionIdAction(payload?: any): Promise<any> { await store.dispatch('generatePollingSessionId');}
-    async function getAllUsersAction(payload?: any): Promise<any> { await store.dispatch('getAllUsers');}
-    async function getUserCriteriaFilterAction(payload?: any): Promise<any> { await store.dispatch('getUserCriteriaFilter');} 
-    async function loadNotificationsActions(payload?: any): Promise<any> { await store.dispatch('loadNotifications');} 
-    async function azureB2CLoginAction(payload?: any): Promise<any> { await store.dispatch('azureB2CLogin');} 
-    async function azureB2CLogoutAction(payload?: any): Promise<any> { await store.dispatch('azureB2CLogout');} 
-    async function getCurrentUserByUserNameAction(payload?: any): Promise<any> { await store.dispatch('getCurrentUserByUserName');}
-    async function updateUserLastNewsAccessDateAction(payload?: any): Promise<any> { await store.dispatch('updateUserLastNewsAccessDate');}
-    async function getImplementationNameAction(payload?: any): Promise<any> { await store.dispatch('getImplementationName');}
-    async function getAgencyLogoAction(payload?: any): Promise<any> { await store.dispatch('getAgencyLogo');} 
-    async function getProductLogoAction(payload?: any): Promise<any> { await store.dispatch('getProductLogo');} 
-    async function getInventoryReportsAction(payload?: any): Promise<any> { await store.dispatch('getInventoryReports');} 
-    async function setAlertMessageAction(payload?: any): Promise<any> { await store.dispatch('setAlertMessage');} 
+    async function removeNotificationAction(payload?: any): Promise<any> { await store.dispatch('removeNotification', payload);}
+    async function clearNotificationCounterAction(payload?: any): Promise<any> { await store.dispatch('clearNotificationCounter', payload);} 
+    async function generatePollingSessionIdAction(payload?: any): Promise<any> { await store.dispatch('generatePollingSessionId', payload);}
+    async function getAllUsersAction(payload?: any): Promise<any> { await store.dispatch('getAllUsers', payload);}
+    async function getUserCriteriaFilterAction(payload?: any): Promise<any> { await store.dispatch('getUserCriteriaFilter', payload);} 
+    async function loadNotificationsActions(payload?: any): Promise<any> { await store.dispatch('loadNotifications', payload);} 
+    async function azureB2CLoginAction(payload?: any): Promise<any> { await store.dispatch('azureB2CLogin', payload);} 
+    async function azureB2CLogoutAction(payload?: any): Promise<any> { await store.dispatch('azureB2CLogout', payload);} 
+    async function getCurrentUserByUserNameAction(payload?: any): Promise<any> { await store.dispatch('getCurrentUserByUserName', payload);}
+    async function updateUserLastNewsAccessDateAction(payload?: any): Promise<any> { await store.dispatch('updateUserLastNewsAccessDate', payload);}
+    async function getImplementationNameAction(payload?: any): Promise<any> { await store.dispatch('getImplementationName', payload);}
+    async function getAgencyLogoAction(payload?: any): Promise<any> { await store.dispatch('getAgencyLogo', payload);} 
+    async function getProductLogoAction(payload?: any): Promise<any> { await store.dispatch('getProductLogo', payload);} 
+    async function getInventoryReportsAction(payload?: any): Promise<any> { await store.dispatch('getInventoryReports', payload);} 
+    async function setAlertMessageAction(payload?: any): Promise<any> { await store.dispatch('setAlertMessage', payload);} 
 
     let drawer: boolean = false;
     let latestNewsDate: string = '0001-01-01';
@@ -353,9 +372,9 @@ import config from '../public/config.json';
     let alertDialogData: AlertData = clone(emptyAlertData);
     let pushRouteUpdate: boolean = false;
     let route: any = {};
-    let selectedScenario: Scenario = clone(emptyScenario);
-    let hasSelectedScenario: boolean = false;
-    let selectedScenarioHasStatus: boolean = false;
+    const selectedScenario = ref<Scenario>(clone(emptyScenario));
+    const hasSelectedScenario = ref<boolean>(false);
+    const selectedScenarioHasStatus = ref<boolean>(false);
     let ignoredAPIs: string[] = [
         'SynchronizeLegacySimulation',
         'RunSimulation',
@@ -371,9 +390,9 @@ import config from '../public/config.json';
     let hasUnreadNewsItem: boolean = false;
     let currentURL: any = '';
     let unauthorizedError: string = '';
-    let implementationName: string = '';
-    let agencyLogo: string = '';
-    let productLogo: string = '';
+    const implementationName =ref<string>('');
+    const agencyLogo= ref<string>('');
+    const productLogo= ref<string>('');
     let inventoryReportName: string = '';
     let alert: Ref<boolean> = ref(false);   
 
@@ -411,12 +430,11 @@ import config from '../public/config.json';
         return authenticated && hasRole;
     }
     
-    watch(stateSelectedScenario, () => onStateSelectedScenarioChanged)
-    function onStateSelectedScenarioChanged() {
-        selectedScenario = clone(stateSelectedScenario.value);
-        hasSelectedScenario = selectedScenario.id !== getBlankGuid();
-        selectedScenarioHasStatus = hasValue(selectedScenario.status);
-    }
+    watch(stateSelectedScenario, () => {
+        selectedScenario.value = clone(stateSelectedScenario.value);
+        hasSelectedScenario.value= selectedScenario.value.id !== getBlankGuid();
+        selectedScenarioHasStatus.value = hasValue(selectedScenario.value.status);
+    })
 
     watch(authenticated, () => {
         if (authenticated) {
@@ -433,20 +451,17 @@ import config from '../public/config.json';
         checkLastNewsAccessDate();
     });
 
-    watch(stateImplementationName, () => onimplementationNameChange)
-    function onimplementationNameChange() {
-        implementationName = stateImplementationName.value;
-    }
+    watch(stateImplementationName, () =>  {
+        implementationName.value = stateImplementationName.value;
+    })
 
-    watch(agencyLogoBase64, () => onAgencyLogoBase64Change)
-    function onAgencyLogoBase64Change() {
-        agencyLogo = agencyLogoBase64.value;
-    }
+    watch(agencyLogoBase64, () => {
+        agencyLogo.value = agencyLogoBase64.value;
+    })
 
-    watch(productLogoBase64, () => onProductLogoBase64Change)
-    function onProductLogoBase64Change() {
-        productLogo = productLogoBase64.value;
-    }
+    watch(productLogoBase64, () =>  {
+        productLogo.value = productLogoBase64.value;
+    })
 
     watch(stateInventoryReportNames, () => onStateInventoryReportNamesChanged)
     function onStateInventoryReportNamesChanged(){
@@ -569,8 +584,7 @@ import config from '../public/config.json';
     }
 
     
-    onMounted(() => mounted());
-    function mounted() {
+    onMounted(() => {
 
         $emitter.on(
             Hub.BroadcastEventType.BroadcastErrorEvent,
@@ -592,20 +606,20 @@ import config from '../public/config.json';
         currentURL = router.currentRoute.value.name;
 
         if(config.agencyLogo.trim() === "")
-            agencyLogo = new URL(`assets/images/generic/IAM_Main.jpg`, import.meta.url).href;
+            agencyLogo.value = new URL(`assets/images/generic/IAM_Main.jpg`, import.meta.url).href;
         else
-            agencyLogo = config.agencyLogo
+            agencyLogo.value = agencyLogoBase64.value
 
         if(config.productLogo.trim() === "")
-            productLogo = new URL(`assets/images/generic/IAM_Banner.jpg`, import.meta.url).href;
+            productLogo.value = new URL(`assets/images/generic/IAM_Banner.jpg`, import.meta.url).href;
         else
-            productLogo = config.productLogo
+            productLogo.value = productLogoBase64.value
 
-        if(implementationName === "")
-            implementationName = "BridgeCare"
+        if(implementationName.value === "")
+            implementationName.value = "BridgeCare"
         else
-            implementationName = config.implementationName
-    }
+            implementationName.value = stateImplementationName.value
+    });
 
     onBeforeUnmount(() => beforeDestroy());
     function beforeDestroy() {
@@ -812,5 +826,17 @@ html {
 .hide-bell-svg svg{
     visibility: collapse;
 }
-
+.image{
+    width:350px;
+    height:60px;
+    margin-right: 10px;
+    display: inline-block;
+}
+.custom-toolbar{
+   width: 800px ; 
+}
+.scroll-container {
+    max-height: 100%;
+    overflow: hidden;
+  }
 </style>

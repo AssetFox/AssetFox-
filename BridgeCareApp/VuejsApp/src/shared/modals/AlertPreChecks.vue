@@ -4,28 +4,28 @@
             <v-card>
                 <v-card-title class="ghd-dialog-box-padding-top">
                     <v-row justify-space-between align-center>
-                        <div class="ghd-control-dialog-header">Interactive pre-checks</div>
-                        <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
+                        <div style="margin-left: 250px" class="ghd-control-dialog-header">Interactive pre-checks</div>
+                        <v-btn style='margin-left:241px; font-size: 17px' @click="onSubmit(false)" variant = "flat">
                             X
                         </v-btn>
                     </v-row>
                 </v-card-title>
-                    <v-row justify-center style="font-weight: 500">
+                    <div justify-center style="font-weight: 500; margin-left:50px; margin-top: 0px">
                         {{dialogDataPreChecks.heading}}
-                    </v-row>
+                    </div>
                 <div style='height: 100%; max-width:100%' class="ghd-dialog-box-padding-center">
                     <div style='max-height: 450px; overflow-y:auto;'>
                         <v-card-text style="border:1px solid black;" class="px-4">
                             <ul>
-                                <li class="text--primary" v-for="(key, index) in dialogDataPreChecks.message" :key="index">
-                                {{key}}
+                                <li class="text--primary" v-for="(key, index) in filteredMessages" :key="index">
+                                    {{ key }}                                
                                 </li>
                             </ul>
                          </v-card-text>
                     </div>
                 </div>
                 <v-card-actions>
-                    <v-row justify-center row v-if="dialogDataPreChecks.choice">
+                    <v-row style="margin-left:20px" justify-center row v-if="dialogDataPreChecks.choice">
                         <v-btn 
                         id="Alert-Cancel-vbtn"
                         @click="onSubmit(false)" 
@@ -40,7 +40,7 @@
                         </v-btn>
                     </v-row>
                     <v-row justify-center v-if="!dialogDataPreChecks.choice">
-                        <v-btn @click="onSubmit(true)" class="ara-blue-bg text-white">
+                        <v-btn @click="onSubmit(false)" class="ara-blue-bg text-white">
                             OK
                         </v-btn>
                     </v-row>
@@ -61,9 +61,23 @@
         dialogDataPreChecks: AlertPreChecksData
     }>()
     let showDialogComputed = computed(() => props.dialogDataPreChecks.showDialog);
-const emit = defineEmits(['submit'])
+    const emit = defineEmits(['submit'])
 
-        /**
+
+    const filteredMessages = computed(() => {
+    const message = props.dialogDataPreChecks.message;
+
+    if (props.dialogDataPreChecks.message) {
+        // Remove the first 9 characters
+        const remainingMessage = message.substring(9);
+
+        // Split the message by periods and filter out empty strings
+        const sentences = remainingMessage.split('.').filter(sentence => sentence.trim() !== '');
+
+        return sentences;
+    }
+    return [];
+});        /**
          * Emits a boolean result to the parent component
          * @param submit
          */

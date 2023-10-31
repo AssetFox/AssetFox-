@@ -5,6 +5,8 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Common.Logging;
 using System.Threading;
+using AppliedResearchAssociates.iAM.Common;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -36,19 +38,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpdateSimulationAndPossiblyUsers(SimulationDTO dto);
 
         void DeleteSimulation(Guid simulationId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
-
         void DeleteSimulationsByNetworkId(Guid networkId);
 
         void UpdateLastModifiedDate(SimulationEntity entity);
 
         string GetSimulationName(Guid simulationId);
-
         SimulationDTO GetCurrentUserOrSharedScenario(Guid simulationId, bool hasAdminAccess, bool hasSimulationAccess);
         
         bool GetNoTreatmentBeforeCommitted(Guid simulationId);
 
         void SetNoTreatmentBeforeCommitted(Guid simulationId);
 
-        void RemoveNoTreatmentBeforeCommitted(Guid simulationId);
+        void RemoveNoTreatmentBeforeCommitted(Guid simulationId);
+
+        SimulationCloningResultDTO CreateSimulation(CompleteSimulationDTO completeSimulationDTO, string keyAttribute, SimulationCloningCommittedProjectErrors simulationCloningCommittedProjectErrors, BaseEntityProperties baseEntityProperties);
     }
 }

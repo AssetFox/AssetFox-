@@ -181,7 +181,7 @@
                                 </v-btn>
                             </div>
                             <div v-if="header.value !== 'year' && header.value !== 'action'">
-                                <v-edit-dialog :return-value.sync='item.value.values[header.value]'
+                                <editDialog :return-value.sync='item.value.values[header.value]'
                                                @save='onEditBudgetYearValue(item.value.year, header.value, item.value.values[header.value])'
                                                size="large" lazy>
                                     <v-text-field readonly single-line class='sm-txt'
@@ -193,7 +193,7 @@
                                                       v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
                                                       :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     </template>
-                                </v-edit-dialog>
+                                </editDialog>
                             </div>
 
                         </td>
@@ -282,6 +282,7 @@
 
 <script setup lang='ts'>
 import { shallowRef } from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import SetRangeForAddingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForAddingBudgetYearsDialog.vue';
 import SetRangeForDeletingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForDeletingBudgetYearsDialog.vue';
 import EditBudgetsDialog from './investment-editor-dialogs/EditBudgetsDialog.vue';

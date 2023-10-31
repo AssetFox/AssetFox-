@@ -22,18 +22,6 @@
                                     density="compact"
                                     variant="outlined"
                                 >
-                                    <!-- <template v-slot:selection="{ item }">
-                                        <span class="ghd-control-text">{{ item.text }}</span>
-                                    </template>
-                                    <template v-slot:item="{ item }">
-                                        <v-list-item class="ghd-control-text" v-bind="props">
-                                            <v-list-item-title>
-                                            <v-row no-gutters align="center">
-                                            <span>{{ item.text }}</span>
-                                            </v-row>
-                                            </v-list-item-title>
-                                        </v-list-item>
-                                    </template> -->
                                 </v-select>
                                 </v-row>
                             </v-col>
@@ -423,7 +411,6 @@ const tab = ref<any>(null);
     });
 
     watch(subCriteriaClauses,()=> {
-        console.log("subCriteriaClauses: " + subCriteriaClauses.value.length);
         resetCriteriaValidationProperties();
     });
 

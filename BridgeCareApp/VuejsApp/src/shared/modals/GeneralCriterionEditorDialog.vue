@@ -67,7 +67,6 @@ let CriteriaExpressionToReturn: string | null = "";
   watch(dialogData,()=> {
         // const htmlTag: HTMLCollection = document.getElementsByTagName('html') as HTMLCollection;
         // const criteriaEditorCard: HTMLCollection = document.getElementsByClassName('criteria-editor-card') as HTMLCollection;
-        console.log("general->criteria expression: " + dialogData.value.CriteriaExpression);
         if (dialogData.value.showDialog) {    
             criteriaEditorData.value = {
                     ...criteriaEditorData.value,

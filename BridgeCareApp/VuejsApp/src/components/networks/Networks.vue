@@ -355,7 +355,7 @@ import mitt from 'mitt';
 
     watch(selectedKeyAttributeItem, () => 
     {
-        selectedKeyAttribute = attributeRows.value.find((attr: Attribute) => attr.id === selectedKeyAttributeItem.value) || clone(emptyAttribute);
+        selectedKeyAttribute.value = attributeRows.value.find((attr: Attribute) => attr.id === selectedKeyAttributeItem.value) || clone(emptyAttribute);
     })
 
     function onAddNetworkDialog() {

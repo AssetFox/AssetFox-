@@ -32,8 +32,8 @@
                 <v-col cols = "6" sm="5">
                     <v-row column>
                         <v-select
-                        item-title="text"
-                        item-value="value"
+                            item-title="text"
+                            item-value="value"
                             id="Networks-KeyAttribute-vselect"
                             variant="outlined"
                             class="ghd-select ghd-text-field ghd-text-field-border"
@@ -143,7 +143,7 @@
                                 <template slot='items' slot-scope='props' v-slot:item="{item}">
                                     <tr>
                                     <td>
-                                        <v-checkbox id="Networks-SelectAttribute-vcheckbox" hide-details primary v-model='item.raw.selected'></v-checkbox>
+                                        <v-checkbox id="Networks-SelectAttribute-vcheckbox" hide-details primary></v-checkbox>
                                     </td>
                                     <td>
                                         {{
@@ -155,12 +155,6 @@
                                 </tr>
                                 </template>
                             </v-data-table>    
-                            <div class="text-xs-center pt-2">
-                                <v-pagination id="Networks-ChangeTablePage-vpagination" class="ghd-pagination ghd-button-text" 
-                                    v-model="pagination.page" 
-                                    :length="pages()"
-                                    ></v-pagination>
-                            </div>
                         </div>               
                     </v-row>
                 </v-col>
@@ -267,9 +261,9 @@ import mitt from 'mitt';
     let networkDataAssignmentPercentage = 0;
     let networkDataAssignmentStatus: string = 'Waiting on server.';
 
-    let selectedKeyAttributeItem: Ref<string> = ref('');
-    let selectedKeyAttribute: Attribute = clone(emptyAttribute);
-    let selectedNetwork: Ref<Network> = ref(clone(emptyNetwork));
+    let selectedKeyAttributeItem = ref<string>('');
+    let selectedKeyAttribute = ref<Attribute>(clone(emptyAttribute));
+    let selectedNetwork = ref<Network>(clone(emptyNetwork));
     let selectNetworkItemValue = ref<string>('');
     let selectDataSourceId: string = '';
     let hasSelectedNetwork = ref<boolean>(false);
@@ -342,15 +336,13 @@ import mitt from 'mitt';
         }
     })
     
-    watch(stateSelectedNetwork, () => onStateSelectedNetworkChanged)
-    function onStateSelectedNetworkChanged() {
+    watch(stateSelectedNetwork, () => {
         if (!isNewNetwork) {
             selectedNetwork = clone(stateSelectedNetwork);
         }
-    }
+    })
 
-    watch(selectedNetwork, () => onSelectedNetworkChanged)
-    function onSelectedNetworkChanged() {
+    watch(selectedNetwork, () => { 
         selectedAttributeRows.value = [];
         hasStartedAggregation = false;
         selectNetworkItemValue.value = selectedNetwork.value.id;
@@ -359,7 +351,7 @@ import mitt from 'mitt';
 
         const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', selectedNetwork, stateSelectedNetwork);
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
-    }
+    })
 
     watch(selectedKeyAttributeItem, () => 
     {

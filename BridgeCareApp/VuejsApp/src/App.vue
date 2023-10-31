@@ -73,6 +73,8 @@
                 </v-toolbar-items>
                 
                 <v-spacer></v-spacer>
+                <v-spacer></v-spacer>
+                
                     
                 <v-toolbar-title class="white--text">
                     
@@ -86,6 +88,7 @@
                     
                         <template v-slot:activator="{ props }">
                             <button
+                                style="margin-left: 170%;"  
                                 id="App-notification-button"
                                 v-bind="props"
                                 @click="onNotificationMenuSelect"
@@ -94,11 +97,11 @@
                             >
                                 <img style="position:absolute; top:20px; height:25px;" :src="require('@/assets/icons/bell.svg')"/>
                                 <v-badge
+                                    v-if="notificationCounter > 0"
                                     overlap
-                                    style="position:relative;"
+                                    style="position: absolute;"
                                     :size="30"
                                     :content="notificationCounter"
-                                    :upperLimit="50"
                                     :animated="true"
                                     fontSize="12px"
                                     counterStyle="round"
@@ -107,20 +110,20 @@
                                     counterTextColor="#FFFFFF"
                                     color="#002E6C"
                                     class="hide-bell-svg"
+                                   
                                 > 
                                 <v-icon style="bottom: 50%;" size="small"></v-icon>
                                 </v-badge>
                             </button>
                         </template>            
-                        <v-card class="mx-auto"  style="height: 200%; width:1600%;">
+                        <v-card class="mx-auto" style="width: 1800%; min-height: 500%;">
                             <v-toolbar 
                                 id = "App-notification-toolbar"
                                 color="#002E6C" dark>
-                                <v-app-bar-nav-icon></v-app-bar-nav-icon>
+
 
                                 <v-toolbar-title>Notifications</v-toolbar-title>
 
-                                <v-spacer></v-spacer>
                             </v-toolbar>
                             <v-list class="h-100">
                                 <v-list-group
@@ -129,7 +132,7 @@
                                     v-model="notification.active"
                                     append-icon=""
                                     class="notification-message"
-                                    style="border-bottom: 1px solid;"
+                                    style="border-bottom: 1px solid; padding:5%;"
                                 >
                                     <v-icon
                                         slot="prependIcon"
@@ -137,15 +140,15 @@
                                         >{{ notification.icon }}</v-icon
                                     >
                                     <template v-slot:activator>
-                                        <v-list-tile
+                                        <v-list-tile 
                                             id="App-notification-vListTile">
                                             <v-list-tile-content
-                                                style="font-size: 85%"
+                                                style="margin-bottom: 10px;"
                                                 v-text="
                                                     notification.shortMessage
                                                 "
                                             ></v-list-tile-content>
-                                            <v-btn icon size="small" end position="absolute">
+                                            <v-btn icon size="16" end position="absolute" style="margin-left:10%;">
                                                 <v-icon
                                                     size="small"
                                                     @click="
@@ -173,7 +176,7 @@
                     </v-menu>
                 </v-toolbar-title>
                 <v-toolbar-title>
-                    <v-divider class="mx-1 navbar-divider" vertical color="#798899"/>
+                    <v-divider class="mx-1 navbar-divider" vertical style="background-color: #798899; margin-left:90% !important;"/>
                 </v-toolbar-title>
                 <v-toolbar-title style="margin-left:2px !important" class="navbar-gray" v-if="authenticated">
                     <img style="height:40px; position:relative; top:2px" :src="require('@/assets/icons/user-no-circle.svg')"/>
@@ -183,42 +186,46 @@
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="!authenticated">
                     <v-btn
+                        style="background-color: #002E6C;"
                         v-if="securityType === b2cSecurityType"
                         @click="onAzureLogin"
                         class="mx-2"
                         icon
-                        color="#002E6C"
+                        color="#FFFFFF"
                     >
                         <v-icon size="small" color="white">fas fa-sign-in-alt</v-icon>
                     </v-btn>
                     <v-btn
+                        style="background-color: #002E6C;"
                         v-if="securityType === esecSecurityType && currentURL != 'AuthenticationStart'"
                         @click="onNavigate('/AuthenticationStart/')"
                         class="mx-2"
                         icon
-                        color="#002E6C"
+                        color="#FFFFFF"
                     >
                         <font-awesome-icon :icon="['fas','sign-in-alt']"/>
                     </v-btn>
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="authenticated">
                     <v-btn
+                        style="background-color: #002E6C;"
                         id="App-b2cLogout-vbtn"
                         v-if="securityType === b2cSecurityType"
                         @click="onAzureLogout"
                         class="mx-2"
                         icon
-                        color="#002E6C"
+                        color="#ffffff"
                     >
                     <font-awesome-icon :icon="['fas', 'sign-out-alt']"/>
                     </v-btn>
                     <v-btn
+                        style="background-color: #002E6C;"  
                         id="App-esecLogout-vbtn"
                         v-if="securityType === esecSecurityType"
                         @click="onLogout"
                         class="mx-2"
                         icon                        
-                        color="#002E6C"
+                        color="#ffffff"
                     >
                         <font-awesome-icon :icon="['fas', 'sign-out-alt']"/>
                     </v-btn>
@@ -828,4 +835,8 @@ html {
 .custom-toolbar{
    width: 800px ; 
 }
+.scroll-container {
+    max-height: 100%;
+    overflow: hidden;
+  }
 </style>

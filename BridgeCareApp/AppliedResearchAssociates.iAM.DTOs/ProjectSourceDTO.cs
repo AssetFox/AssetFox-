@@ -4,8 +4,8 @@
     {
         None,
         iAMPick,
-        Committed,
-        SAP,
+        Committed, //default
+        Maintenance,
         ProjectBuilder
     }
 }

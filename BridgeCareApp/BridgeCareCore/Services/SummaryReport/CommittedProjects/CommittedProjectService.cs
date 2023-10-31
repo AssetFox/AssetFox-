@@ -383,7 +383,7 @@ namespace BridgeCareCore.Services
                 }
                 catch
                 {
-                    convertedCategory = TreatmentCategory.Other;
+                    convertedCategory = TreatmentCategory.Other; 
                 }
 
                 // Build the committed project object

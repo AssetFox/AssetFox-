@@ -529,6 +529,7 @@ import TreatmentService from '@/services/treatment.service';
                             await fetchTreatmentLibrary(scenarioId);
                             await fetchProjectSources();
                         }
+
                 await CommittedProjectsService.getUploadedCommittedProjectTemplates().then(response => {
                     if(!isNil(response.data)){
                             templateSelectItems = response.data;
@@ -1050,12 +1051,14 @@ import TreatmentService from '@/services/treatment.service';
     }
 
     function fetchProjectSources() {
-        CommittedProjectsService.getProjectSources().then((response: AxiosResponse) => {
-            if (hasValue(response, 'data')) {
-                projectSourceOptions = response.data.filter((option: string) => option !== "None");
-            }
-        });
-    }
+    CommittedProjectsService.getProjectSources().then((response: AxiosResponse) => {
+        if (hasValue(response, 'data')) {
+            projectSourceOptions = response.data.filter(
+                (option: string) => option !== "None" && option !== "iAMPick"
+                );
+        }
+    });
+}
 
     function checkExistenceOfAssets(){//todo: refine this
         const uncheckKeys = currentPage.value.map(scp => scp.keyAttr).filter(key => isNil(isKeyAttributeValidMap.get(key)))

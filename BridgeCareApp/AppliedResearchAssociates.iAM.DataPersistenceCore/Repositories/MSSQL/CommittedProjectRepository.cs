@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using Microsoft.Extensions.DependencyModel;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -33,8 +34,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void GetSimulationCommittedProjects(Simulation simulation)
         {
+            Guid guid = simulation.Id;
             double noTreatmentDefaultCost = 0.0;
             var selectableTreatmentRepository = _unitOfWork.SelectableTreatmentRepo;
+            var selectableTreatments = simulation.Treatments;
 
             var simulationEntity = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulation.Id)
                 ?? throw new RowNotInTableException("No simulation was found for the given scenario.");
@@ -64,8 +67,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         var defaultNoTreatment = selectableTreatmentRepository.GetDefaultNoTreatment(simulation.Id);
                         noTreatmentDefaultCost = GetDefaultNoTreatmentCost(defaultNoTreatment, asset.Id);
                     }
-
-                    project.CreateCommittedProject(simulation, asset.Id, simulationEntity.NoTreatmentBeforeCommittedProjects, noTreatmentDefaultCost, noTreatmentEntity, keyPropertyNames);
+                    project.CreateCommittedProject(simulation, selectableTreatments, asset.Id, simulationEntity.NoTreatmentBeforeCommittedProjects, noTreatmentDefaultCost, noTreatmentEntity, keyPropertyNames);
                 }
             }
         }

@@ -442,6 +442,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }
+
+            if (treatments.Any(_ => _.SupersedeRules != null && _.SupersedeRules.Any()))
+            {
+                var supersedeRulesPerTreatmentId = treatments.Where(_ => _.SupersedeRules.Any()).ToList()
+                .ToDictionary(_ => _.Id, _ => _.SupersedeRules);
+                _unitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteTreatmentSupersedeRules(supersedeRulesPerTreatmentId, libraryId);
+            }
         }
 
         public void ReplaceTreatmentLibrary(Guid libraryId, List<TreatmentDTO> treatments)

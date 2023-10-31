@@ -116,7 +116,7 @@
                                 </v-badge>
                             </button>
                         </template>            
-                        <v-card class="mx-auto" style="width: 1600%;">
+                        <v-card class="mx-auto" style="width: 1800%; min-height: 500%;">
                             <v-toolbar 
                                 id = "App-notification-toolbar"
                                 color="#002E6C" dark>
@@ -132,7 +132,7 @@
                                     v-model="notification.active"
                                     append-icon=""
                                     class="notification-message"
-                                    style="border-bottom: 1px solid;"
+                                    style="border-bottom: 1px solid; padding:5%;"
                                 >
                                     <v-icon
                                         slot="prependIcon"
@@ -140,15 +140,15 @@
                                         >{{ notification.icon }}</v-icon
                                     >
                                     <template v-slot:activator>
-                                        <v-list-tile
+                                        <v-list-tile 
                                             id="App-notification-vListTile">
                                             <v-list-tile-content
-                                                style="font-size: 85%"
+                                                style="margin-bottom: 10px;"
                                                 v-text="
                                                     notification.shortMessage
                                                 "
                                             ></v-list-tile-content>
-                                            <v-btn icon size="16" end position="absolute" style="margin-left:20%;">
+                                            <v-btn icon size="16" end position="absolute" style="margin-left:10%;">
                                                 <v-icon
                                                     size="small"
                                                     @click="

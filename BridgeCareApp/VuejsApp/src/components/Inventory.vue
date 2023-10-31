@@ -10,10 +10,9 @@
      </div>
     <v-layout>
         <v-row>
-            <v-row justify-space-between row></v-row>
-           
-            <v-row justify-space-between row>
-                <v-row>
+            <v-row justify="space-between"></v-row>
+            <v-row justify="space-between">
+                <v-row style="display: flex; align-items: center; justify-content: center">
                     <div class="flex xs4" v-for="(key, index) in inventoryDetails">
                         <v-autocomplete
                         style="margin-top: 50px; width: 250px; margin-right: 20px"
@@ -234,7 +233,8 @@
         }
 
         async function resetDropdowns() {
-            keyAttributeValues.value = [];
+            selectedInventoryIndex.value = [];
+            reactiveData.value = [[],[]];
             //Reset selected key fields
             selectedInventoryIndex.value.forEach((value: string, index: number, array: string[]) => {
                 selectedKeys[index] = '';

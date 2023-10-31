@@ -75,7 +75,7 @@
                         />
                     </v-col>
                 </v-row>                
-                <v-col class="criteria-flex">
+                <v-col cols="20">
                     <v-menu
                         full-width
                         location="bottom"
@@ -83,9 +83,9 @@
                         min-width="1000px"
                     >   
                         <template v-slot:activator>                                                                                       
-                            <v-row column class="ghd-left-padding">  
-                                <v-row  rows = "12" align-center style="height:50px;">                                    
-                                    <v-col cols = "11">
+                            <v-row justify="space-between" class="ghd-left-padding">  
+                                <v-row  align-center style="height:50px;">                                    
+                                    <v-col cols = "9">
                                         <v-subheader class="ghd-control-label ghd-md-gray">Treatment Criteria</v-subheader>    
                                     </v-col>
                                     <v-col cols = "2">                                 
@@ -110,8 +110,12 @@
                                         </v-btn>   
                                     </v-col>                                    
                                 </v-row>       
-                                <v-row align-center class="ghd-right-padding">  
-                                    <v-col>
+                                
+                                                          
+                            </v-row>   
+                            
+                            <v-row  class="ghd-right-padding">  
+                                    <v-col cols ="26">
                                         <v-textarea
                                             class="ghd-control-border sm-txt"                                            
                                             no-resize
@@ -125,8 +129,8 @@
                                         >
                                         </v-textarea>         
                                     </v-col>      
-                                </v-row>                            
-                            </v-row>        
+                                </v-row>
+                                       
                         </template>                
                         <v-card>
                             <v-card-text>

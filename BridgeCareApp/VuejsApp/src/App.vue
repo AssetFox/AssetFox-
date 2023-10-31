@@ -88,7 +88,7 @@
                     
                         <template v-slot:activator="{ props }">
                             <button
-                                style="margin-left: 90%;"  
+                                style="margin-left: 170%;"  
                                 id="App-notification-button"
                                 v-bind="props"
                                 @click="onNotificationMenuSelect"
@@ -97,11 +97,11 @@
                             >
                                 <img style="position:absolute; top:20px; height:25px;" :src="require('@/assets/icons/bell.svg')"/>
                                 <v-badge
+                                    v-if="notificationCounter > 0"
                                     overlap
-                                    style="position:relative;"
+                                    style="position: absolute;"
                                     :size="30"
                                     :content="notificationCounter"
-                                    
                                     :animated="true"
                                     fontSize="12px"
                                     counterStyle="round"
@@ -116,11 +116,11 @@
                                 </v-badge>
                             </button>
                         </template>            
-                        <v-card class="mx-auto"  style="height: 200%; width:1600%;">
+                        <v-card class="mx-auto" style="width: 1600%;">
                             <v-toolbar 
                                 id = "App-notification-toolbar"
                                 color="#002E6C" dark>
-                                <v-app-bar-nav-icon></v-app-bar-nav-icon>
+
 
                                 <v-toolbar-title>Notifications</v-toolbar-title>
 
@@ -148,7 +148,7 @@
                                                     notification.shortMessage
                                                 "
                                             ></v-list-tile-content>
-                                            <v-btn icon size="16" end position="absolute">
+                                            <v-btn icon size="16" end position="absolute" style="margin-left:20%;">
                                                 <v-icon
                                                     size="small"
                                                     @click="
@@ -835,4 +835,8 @@ html {
 .custom-toolbar{
    width: 800px ; 
 }
+.scroll-container {
+    max-height: 100%;
+    overflow: hidden;
+  }
 </style>

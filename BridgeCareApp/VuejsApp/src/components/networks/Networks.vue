@@ -135,12 +135,10 @@
                                 </v-btn>
                             </v-row>
                             <v-data-table id="Networks-Attributes-vdatatable" :header='dataSourceGridHeaders' :items='attributeRows'
-                                class='v-table__overflow ghd-table' item-key='id' show-select
+                                class='v-table__overflow ghd-table' item-key='id' select-all
                                 v-model="selectedAttributeRows"
                                 :must-sort='true'
                                 hide-actions
-                                item-value="value"
-                                item-title="text"
                                 :pagination.sync="pagination">
                                 <template slot='items' slot-scope='props' v-slot:item="{item}">
                                     <tr>

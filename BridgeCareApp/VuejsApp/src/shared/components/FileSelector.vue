@@ -32,9 +32,12 @@
             </div>
         </v-row>        
         <div class="files-table">
-            <v-data-table :headers="tableHeaders" :items="files" class="elevation-1 fixed-header v-table__overflow Montserrat-font-family"
-                        sort-icon=$vuetify.icons.ghd-table-sort
-                          hide-actions>
+            <v-data-table-server :headers="tableHeaders"
+                                 :items="files"
+                                 :items-length="files.length"
+                                 class="elevation-1 fixed-header v-table__overflow Montserrat-font-family"
+                                 sort-icon=$vuetify.icons.ghd-table-sort
+                                 hide-actions>
                 <template slot="items" slot-scope="props" v-slot:item="props">
                     <td>
                         {{props.item.name}}
@@ -48,7 +51,7 @@
                         </v-btn>
                     </td>
                 </template>
-            </v-data-table>
+            </v-data-table-server>
         </div>
     </v-row>
 </template>
@@ -60,7 +63,7 @@ import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {clone, prop} from 'ramda';
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import { formatBytes } from '@/shared/utils/math-utils';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import {inject, reactive, ref, toRefs, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -70,13 +73,14 @@ const props = defineProps<{
     closed: boolean,
     useTreatment: boolean
     }>()
+const { useTreatment } = toRefs(props);
 
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
 async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('setIsBusy');}
 
     let applyNoTreatment= shallowRef<boolean>(true);
     let fileSelect: HTMLInputElement = {} as HTMLInputElement;
-    let tableHeaders: DataTableHeader[] = [
+    let tableHeaders: any[] = [
         {text: 'Name', value: 'name', align: 'left', sortable: false, class: '', width: '50%'},
         {text: 'Size', value: 'size', align: 'left', sortable: false, class: '', width: '35%'},
         {text: 'Action', value: 'action', align: 'left', sortable: false, class: '', width: ''}
@@ -92,31 +96,29 @@ async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatc
         }
     }
 
-    watch(file,()=>onFileChanged())
-    function onFileChanged() {        
+    watch(file,()=>{        
         files = hasValue(file.value) ? [file.value as File] : [];                                   
         emit('submit', file);
         (<HTMLInputElement>document.getElementById('file-select')!).value = '';
-    }
+    });
 
-    watch(closed,()=>onClose())
-    function onClose() {
+    watch(closed,()=>{
         if (closed) {
             files = [];
             file.value = null;
             fileSelect.value = '';
             (<HTMLInputElement>document.getElementById('file-select')!).value = '';
         }
-    }
-    watch(applyNoTreatment,()=>onTreatmentChanged())
-    function onTreatmentChanged() {
+    });
+
+    watch(applyNoTreatment,()=>{
         emit('treatment', applyNoTreatment);
-    }
-    onMounted(()=>mounted())
-    function mounted() {
+    });
+    
+    onMounted(() => {
         // couple fileSelect object with #file-select input element
         fileSelect = document.getElementById('file-select') as HTMLInputElement;        
-    }    
+    });   
 
     /**
      * File input change event handler

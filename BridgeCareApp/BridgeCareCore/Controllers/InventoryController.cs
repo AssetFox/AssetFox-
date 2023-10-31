@@ -101,14 +101,15 @@ namespace BridgeCareCore.Controllers
                 }
             }
             List<InventoryItem> inventoryItems = new List<InventoryItem>();
+
             var reportTypeParam = _adminSettingsRepository.GetInventoryReports();
-            if(reportTypeParam != null)
+            if (reportTypeParam != null)
             {
-                if(reportTypeParam.Count() > 0)
+                if (reportTypeParam.Count() > 0)
                 {
                     if (reportTypeParam[0].Contains("(R)"))
                     {
-                        var assetKeyDataValues = assetKeyData.Select(_ => _.Value.FirstOrDefault()).ToList();
+                        var assetKeyDataValues = assetKeyData.Select(_ => _.Value.FirstOrDefault()).Distinct().ToList();
                         foreach (var assetKeyDataValue in assetKeyDataValues)
                         {
                             inventoryItems.Add(new InventoryItem { keyProperties = new List<string> { assetKeyDataValue } });

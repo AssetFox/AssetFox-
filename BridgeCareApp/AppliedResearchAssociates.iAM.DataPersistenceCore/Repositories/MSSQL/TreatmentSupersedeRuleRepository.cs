@@ -104,17 +104,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
 
-        public List<TreatmentSupersedeRuleDTO> GetScenarioTreatmentSupersedeRuleByTreatmentId(Guid treatmentId)
-        {
-            if (!_unitOfWork.Context.ScenarioTreatmentSupersedeRule.Any(_ => _.Id == treatmentId))
-            {
-                throw new RowNotInTableException("The specified scenario treamtment was not found");
-            }
+        //public List<TreatmentSupersedeRuleDTO> GetScenarioTreatmentSupersedeRuleByTreatmentId(Guid treatmentId)
+        //{
+        //    if (!_unitOfWork.Context.ScenarioTreatmentSupersedeRule.Any(_ => _.Id == treatmentId))
+        //    {
+        //        throw new RowNotInTableException("The specified scenario treamtment was not found");
+        //    }
 
-            return _unitOfWork.Context.ScenarioTreatmentSupersedeRule
-                .Include(_ => _.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
-                .ThenInclude(_ => _.CriterionLibrary).Select(_ => _.ToDto()).ToList();
-        }
+        //    return _unitOfWork.Context.ScenarioTreatmentSupersedeRule
+        //        .Include(_ => _.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
+        //        .ThenInclude(_ => _.CriterionLibrary).Select(_ => _.ToDto()).ToList();
+        //}
 
     }
 }

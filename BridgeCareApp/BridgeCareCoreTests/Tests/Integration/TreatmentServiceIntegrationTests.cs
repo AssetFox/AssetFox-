@@ -159,10 +159,10 @@ namespace BridgeCareCoreTests.Tests.Integration
             File.WriteAllBytes("zzzzz.xlsx", bytes);
             var excelPackage = new ExcelPackage(stream);
             var userCriteria = new UserCriteriaDTO();
-            TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatments(treatmentsWithSupersede, simulationId);
+           // TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatments(treatmentsWithSupersede, simulationId);
             var treatments2 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
             Assert.Empty(treatments2);
-            TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatments(treatmentsNoSupersede, simulationId);
+          //  TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatments(treatmentsNoSupersede, simulationId);
             service.ImportScenarioTreatmentSupersedeRuleFile(simulationId, excelPackage);
             var treatments3 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
             var treatment1 = treatments1.Single();

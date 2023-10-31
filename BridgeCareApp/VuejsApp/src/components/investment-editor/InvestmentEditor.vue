@@ -382,7 +382,7 @@ const stateBudgetLibraries = computed<BudgetLibrary[]>(() => store.state.investm
 const stateSelectedBudgetLibrary = computed<BudgetLibrary>(() => store.state.investmentModule.selectedBudgetLibrary);
 let stateInvestmentPlan = computed<InvestmentPlan>(() => store.state.investmentModule.investmentPlan);
 let stateScenarioBudgets = ref<Budget[]>(store.state.investmentModule.scenarioBudgets);
-let hasUnsavedChanges = ref<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+let hasUnsavedChanges = computed<boolean>(()=>(store.state.unsavedChangesFlagModule.hasUnsavedChanges));
 //let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess); //DOESNT Work
 let hasAdminAccess: boolean = shallowReactive(store.state.authenticationModule.hasAdminAccess) ; 
 
@@ -475,7 +475,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let range: number = 1;
     let parentLibraryName = ref<string>("None");
     let parentLibraryId: string = "";
-    let scenarioLibraryIsModified: boolean = false;
+    let scenarioLibraryIsModified = ref<boolean>(false);
     let loadedParentName: string = "";
     let loadedParentId: string = "";
     let newLibrarySelection: boolean = false;
@@ -599,7 +599,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 } : investmentPlan,
                 addedBudgetAmounts: mapToIndexSignature(addedBudgetAmounts),
                 firstYearAnalysisBudgetShift: firstYearOfAnalysisPeriodShift.value,
-                isModified: scenarioLibraryIsModified
+                isModified: scenarioLibraryIsModified.value
             },           
             sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
             isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
@@ -707,7 +707,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         }
         parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
         newLibrarySelection = true;
-        scenarioLibraryIsModified = false;
+        scenarioLibraryIsModified.value = false;
         librarySelectItemValueAllowedChanged = true;
     });
 
@@ -1040,7 +1040,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function checkLibraryEditPermission() {
-        hasLibraryEditPermission.value = hasAdminAccess || (hasPermittedAccess && checkUserIsLibraryOwner());
+        hasLibraryEditPermission.value = hasAdminAccess || (hasPermittedAccess.value && checkUserIsLibraryOwner());
     }
 
     function checkUserIsLibraryOwner() {
@@ -1273,8 +1273,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     function onUpsertInvestment() {
         const investmentPlanUpsert: InvestmentPlan = clone(investmentPlan.value);
 
-        if (selectedBudgetLibrary.value.id === uuidNIL || hasUnsavedChanges && newLibrarySelection ===false) {scenarioLibraryIsModified = true;}
-        else { scenarioLibraryIsModified = false; }
+        if (selectedBudgetLibrary.value.id === uuidNIL || hasUnsavedChanges.value && newLibrarySelection ===false) {scenarioLibraryIsModified.value = true;}
+        else { scenarioLibraryIsModified.value = false; }
 
         const sync: InvestmentPagingSyncModel = {
             libraryId: selectedBudgetLibrary.value.id === uuidNIL ? null : selectedBudgetLibrary.value.id,
@@ -1291,7 +1291,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             },
             addedBudgetAmounts: mapToIndexSignature(addedBudgetAmounts),
             firstYearAnalysisBudgetShift: firstYearOfAnalysisPeriodShift.value,
-            isModified: scenarioLibraryIsModified,
+            isModified: scenarioLibraryIsModified.value,
         }
         InvestmentService.upsertInvestment(sync ,selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -1610,7 +1610,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
                 loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
                 loadedParentName = parentLibraryName.value; //store original
-                scenarioLibraryIsModified = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
+                scenarioLibraryIsModified.value = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
                 initializing = false;
             });
         }            

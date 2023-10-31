@@ -33,10 +33,12 @@
       </v-card-text>
       <v-card-actions>
         <v-row justify-space-between row>
+          <v-spacer></v-spacer>
           <v-btn id="ShareBudgetLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ara-blue-bg text-white">
             Save
           </v-btn>
           <v-btn id="ShareBudgetLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
+          <v-spacer></v-spacer>
         </v-row>
       </v-card-actions>
     </v-card>

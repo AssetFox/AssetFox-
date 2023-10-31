@@ -100,22 +100,28 @@
             <v-row justify-space-between v-show='hasSelectedLibrary || hasScenario'>
                 <v-col cols = "6">
                     <v-row>
+                        <v-col>
                         <v-btn id="InvestmentEditor-editBudgets-btn"
                             @click='onShowEditBudgetsDialog'
                             variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                             Edit Budgets
                         </v-btn>
+                        </v-col>
+                        <v-col cols="2">
                         <v-text-field id="InvestmentEditor-numberYearsToAdd-textField"
                                       :disabled='currentPage.length === 0' type="number" min=1 :mask="'##########'"
                                       class="ghd-text-field-border ghd-text-field"
                                       v-bind:class="{ 'ghd-blue-text-field': currentPage.length !== 0}"
                                       outline v-model.number="range" />
+                        </v-col>
+                        <v-col>
                         <v-btn id="InvestmentEditor-addBudgetYearRange-btn"
                                :disabled='currentPage.length === 0'
                                @click='onSubmitAddBudgetYearRange'
                                class='ghd-right-paired-button ghd-blue ghd-button-text ghd-outline-button-padding ' variant = "outlined">
                             Add Year(s)
                         </v-btn>
+                        </v-col>
                     </v-row>
                     <v-row>
                         <div class = "ghd-md-gray ghd-control-subheader" style="margin-left:2% !important;"> 
@@ -148,64 +154,64 @@
                         </v-btn>
                     </v-row>
                 </v-col>
-            </v-row> <!--ENDS-->
+            </v-row>
         </v-col>
 
-    <v-col v-show='hasSelectedLibrary || hasScenario' xs12>             
-        <v-col>
-            <v-data-table-server
-                id="InvestmentEditor-investmentsDataTable-dataTable"
-                :headers='budgetYearsGridHeaders' 
-                :items="budgetYearsGridData"
-                :items-length="totalItems"
-                class='v-table__overflow ghd-table' 
-                item-value='year' 
-                show-select 
-                sort-icon=$vuetify.icons.ghd-table-sort
-                v-model='selectedBudgetYearsGridData' 
-                :pagination.sync="pagination"               
-                :rows-per-page-items=[5,10,25]
-                :must-sort='true'>
-                <template slot='items' slot-scope='props' v-slot:item="{item}">
-                <tr>
-                    <td>
-                        <v-checkbox hide-details primary v-model="selectedBudgetYearsGridData" :value="item"></v-checkbox>
-                    </td>
-                    <td v-for='header in budgetYearsGridHeaders'>
-                        <div v-if="header.key === 'year'">
-                            <span class='sm-txt'>{{ item.year + firstYearOfAnalysisPeriodShift}}</span>
-                        </div>       
-                        <div v-if="header.key === 'action'">
-                            <v-btn @click="onRemoveBudgetYear(item.year)" class="ghd-blue" icon>
-                                <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')" />
-                            </v-btn>
-                        </div>
-                        <div v-if="header.key !== 'year' && header.key !== 'action'">
-                            <v-edit-dialog :return-value.sync='item[header.key]'
-                                            @save='onEditBudgetYearValue(item.year, header.key, item[header.key])'
-                                            size="large" lazy>
-                                <v-text-field readonly single-line class='sm-txt'
-                                                :model-value='formatAsCurrency(item[header.key])'
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                <template v-slot:input>
-                                    <v-text-field label='Edit' single-line
-                                                    v-model.number='item[header.key]'
-                                                    v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
+        <v-col v-show='hasSelectedLibrary || hasScenario' xs12>             
+            <v-col>
+                <v-data-table-server
+                    id="InvestmentEditor-investmentsDataTable-dataTable"
+                    :headers='budgetYearsGridHeaders' 
+                    :items="budgetYearsGridData"
+                    :items-length="totalItems"
+                    class='v-table__overflow ghd-table' 
+                    item-value='year' 
+                    show-select 
+                    sort-icon=$vuetify.icons.ghd-table-sort
+                    v-model='selectedBudgetYearsGridData' 
+                    :pagination.sync="pagination"               
+                    :rows-per-page-items=[5,10,25]
+                    :must-sort='true'>
+                    <template slot='items' slot-scope='props' v-slot:item="{item}">
+                    <tr>
+                        <td>
+                            <v-checkbox hide-details primary v-model="selectedBudgetYearsGridData" :value="item"></v-checkbox>
+                        </td>
+                        <td v-for='header in budgetYearsGridHeaders'>
+                            <div v-if="header.key === 'year'">
+                                <span class='sm-txt'>{{ item.year + firstYearOfAnalysisPeriodShift}}</span>
+                            </div>       
+                            <div v-if="header.key === 'action'">
+                                <v-btn @click="onRemoveBudgetYear(item.year)" class="ghd-blue" icon>
+                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')" />
+                                </v-btn>
+                            </div>
+                            <div v-if="header.key !== 'year' && header.key !== 'action'">
+                                <v-edit-dialog :return-value.sync='item[header.key]'
+                                                @save='onEditBudgetYearValue(item.year, header.key, item[header.key])'
+                                                size="large" lazy>
+                                    <v-text-field readonly single-line class='sm-txt'
+                                                    :model-value='formatAsCurrency(item[header.key])'
                                                     :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                </template>
-                            </v-edit-dialog>
-                        </div>
-                    </td>
-                </tr>
-                </template>
-            </v-data-table-server>
-            <v-btn id="InvestmentEditor-deleteSelected-btn"
-                    :disabled='selectedBudgetYears.length === 0' @click='onRemoveBudgetYears'
-                    class='ghd-blue ghd-button' variant = "flat">
-                Delete Selected
-            </v-btn>
+                                    <template v-slot:input>
+                                        <v-text-field label='Edit' single-line
+                                                        v-model.number='item[header.key]'
+                                                        v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
+                                                        :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                    </template>
+                                </v-edit-dialog>
+                            </div>
+                        </td>
+                    </tr>
+                    </template>
+                </v-data-table-server>
+                <v-btn id="InvestmentEditor-deleteSelected-btn"
+                        :disabled='selectedBudgetYears.length === 0' @click='onRemoveBudgetYears'
+                        class='ghd-blue ghd-button' variant = "flat">
+                    Delete Selected
+                </v-btn>
+            </v-col>
         </v-col>
-    </v-col>
     
         <v-col v-show='hasSelectedLibrary && !hasScenario' cols = "12">
             <v-row justify-center>
@@ -219,39 +225,50 @@
                 </v-col>
             </v-row>
         </v-col>
-        <v-col cols = "12">
+        <v-col cols = "12">          
             <v-row style="padding-bottom: 40px;" v-show='hasSelectedLibrary || hasScenario'>
-                <v-btn id="InvestmentEditor-cancel-btn"
-                       :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "flat" class='ghd-blue ghd-button-text ghd-button'
-                       v-show='hasScenario'>
-                    Cancel
-                </v-btn>
-                <v-btn outline id="InvestmentEditor-deleteLibrary-btn"
-                       @click='onShowConfirmDeleteAlert' variant = "outlined" class='ghd-blue ghd-button-text ghd-button' v-show='!hasScenario'
-                       :disabled='!hasLibraryEditPermission'>
-                    Delete Library
-                </v-btn>
-                <v-btn id="InvestmentEditor-createAsNewLibrary-btn"
-                       :disabled='disableCrudButton()'
-                       @click='onShowCreateBudgetLibraryDialog(true)'
-                       class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
-                    Create as New Library
-                </v-btn>
-           
-                <v-btn id="InvestmentEditor-updateLibrary-btn"
-                :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
-                       @click='onUpsertBudgetLibrary()'
-                       class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
-                       v-show='!hasScenario'>
-                    Update Library
-                </v-btn>
-                <v-btn id="InvestmentEditor-save-btn"
-                       :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
-                       @click='onUpsertInvestment()'
-                       class='ghd-blue-bg text-white ghd-button-text ghd-button'
-                       v-show='hasScenario'>
-                    Save
-                </v-btn>
+                <v-spacer></v-spacer>
+                <v-col>
+                    <v-btn id="InvestmentEditor-cancel-btn"
+                        :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "flat" class='ghd-blue ghd-button-text ghd-button'
+                        v-show='hasScenario'>
+                        Cancel
+                    </v-btn>
+                </v-col>
+                <v-col>
+                    <v-btn outline id="InvestmentEditor-deleteLibrary-btn"
+                        @click='onShowConfirmDeleteAlert' variant = "outlined" class='ghd-blue ghd-button-text ghd-button' v-show='!hasScenario'
+                        :disabled='!hasLibraryEditPermission'>
+                        Delete Library
+                    </v-btn>
+                </v-col>
+                <v-col>
+                    <v-btn id="InvestmentEditor-createAsNewLibrary-btn"
+                        :disabled='disableCrudButton()'
+                        @click='onShowCreateBudgetLibraryDialog(true)'
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
+                        Create as New Library
+                    </v-btn>
+               </v-col>
+               <v-col>
+                    <v-btn id="InvestmentEditor-updateLibrary-btn"
+                    :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
+                        @click='onUpsertBudgetLibrary()'
+                        class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
+                        v-show='!hasScenario'>
+                        Update Library
+                    </v-btn>
+                </v-col>
+                <v-col>
+                    <v-btn id="InvestmentEditor-save-btn"
+                        :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
+                        @click='onUpsertInvestment()'
+                        class='ghd-blue-bg text-white ghd-button-text ghd-button'
+                        v-show='hasScenario'>
+                        Save
+                    </v-btn>
+                </v-col>
+                <v-spacer></v-spacer>
             </v-row>
         </v-col>
 
@@ -358,8 +375,7 @@ const confirm = useConfirm();
 const emit = defineEmits(['submit'])
 const $router = useRouter();
 const $emitter = mitt()
-
-//let stateBudgetLibraries = ref<BudgetLibrary[]>(store.state.investmentModule.budgetLibraries);       
+      
 const stateBudgetLibraries = computed<BudgetLibrary[]>(() => store.state.investmentModule.budgetLibraries) ;  
 
 const stateSelectedBudgetLibrary = computed<BudgetLibrary>(() => store.state.investmentModule.selectedBudgetLibrary);
@@ -424,8 +440,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let selectedScenarioId: string = getBlankGuid();
     let hasSelectedLibrary = ref<boolean>(false);
 
-    //let librarySelectItems: SelectItem[] = [];
-    //let librarySelectItemNames: string[] = [];
     const librarySelectItems = ref<SelectItem[]>([]);
     const librarySelectItemNames = ref<string[]>([]);
     let librarySelectItemValue = ref<string|null>('');
@@ -439,7 +453,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let selectedBudgetYearsGridData = ref<BudgetYearsGridData[]>([]);
     let selectedBudgetYears = ref<number[]>([]);
 
-    //let createBudgetLibraryDialogData: CreateBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
     let createBudgetLibraryDialogData = ref<CreateBudgetLibraryDialogData>(clone(emptyCreateBudgetLibraryDialogData));
     
     let shareBudgetLibraryDialogData = ref<ShareBudgetLibraryDialogData>(clone(emptyShareBudgetLibraryDialogData));

@@ -73,6 +73,8 @@
                 </v-toolbar-items>
                 
                 <v-spacer></v-spacer>
+                <v-spacer></v-spacer>
+                
                     
                 <v-toolbar-title class="white--text">
                     
@@ -86,6 +88,7 @@
                     
                         <template v-slot:activator="{ props }">
                             <button
+                                style="margin-left: 170%;"  
                                 id="App-notification-button"
                                 v-bind="props"
                                 @click="onNotificationMenuSelect"
@@ -94,11 +97,11 @@
                             >
                                 <img style="position:absolute; top:20px; height:25px;" :src="require('@/assets/icons/bell.svg')"/>
                                 <v-badge
+                                    v-if="notificationCounter > 0"
                                     overlap
-                                    style="position:relative;"
+                                    style="position: absolute;"
                                     :size="30"
                                     :content="notificationCounter"
-                                    :upperLimit="50"
                                     :animated="true"
                                     fontSize="12px"
                                     counterStyle="round"
@@ -107,20 +110,20 @@
                                     counterTextColor="#FFFFFF"
                                     color="#002E6C"
                                     class="hide-bell-svg"
+                                   
                                 > 
                                 <v-icon style="bottom: 50%;" size="small"></v-icon>
                                 </v-badge>
                             </button>
                         </template>            
-                        <v-card class="mx-auto"  style="height: 200%; width:1600%;">
+                        <v-card class="mx-auto" style="width: 1800%; min-height: 500%;">
                             <v-toolbar 
                                 id = "App-notification-toolbar"
                                 color="#002E6C" dark>
-                                <v-app-bar-nav-icon></v-app-bar-nav-icon>
+
 
                                 <v-toolbar-title>Notifications</v-toolbar-title>
 
-                                <v-spacer></v-spacer>
                             </v-toolbar>
                             <v-list class="h-100">
                                 <v-list-group
@@ -129,7 +132,7 @@
                                     v-model="notification.active"
                                     append-icon=""
                                     class="notification-message"
-                                    style="border-bottom: 1px solid;"
+                                    style="border-bottom: 1px solid; padding:5%;"
                                 >
                                     <v-icon
                                         slot="prependIcon"
@@ -137,15 +140,15 @@
                                         >{{ notification.icon }}</v-icon
                                     >
                                     <template v-slot:activator>
-                                        <v-list-tile
+                                        <v-list-tile 
                                             id="App-notification-vListTile">
                                             <v-list-tile-content
-                                                style="font-size: 85%"
+                                                style="margin-bottom: 10px;"
                                                 v-text="
                                                     notification.shortMessage
                                                 "
                                             ></v-list-tile-content>
-                                            <v-btn icon size="small" end position="absolute">
+                                            <v-btn icon size="16" end position="absolute" style="margin-left:10%;">
                                                 <v-icon
                                                     size="small"
                                                     @click="
@@ -173,7 +176,7 @@
                     </v-menu>
                 </v-toolbar-title>
                 <v-toolbar-title>
-                    <v-divider class="mx-1 navbar-divider" vertical color="#798899"/>
+                    <v-divider class="mx-1 navbar-divider" vertical style="background-color: #798899; margin-left:90% !important;"/>
                 </v-toolbar-title>
                 <v-toolbar-title style="margin-left:2px !important" class="navbar-gray" v-if="authenticated">
                     <img style="height:40px; position:relative; top:2px" :src="require('@/assets/icons/user-no-circle.svg')"/>
@@ -183,42 +186,46 @@
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="!authenticated">
                     <v-btn
+                        style="background-color: #002E6C;"
                         v-if="securityType === b2cSecurityType"
                         @click="onAzureLogin"
                         class="mx-2"
                         icon
-                        color="#002E6C"
+                        color="#FFFFFF"
                     >
                         <v-icon size="small" color="white">fas fa-sign-in-alt</v-icon>
                     </v-btn>
                     <v-btn
+                        style="background-color: #002E6C;"
                         v-if="securityType === esecSecurityType && currentURL != 'AuthenticationStart'"
                         @click="onNavigate('/AuthenticationStart/')"
                         class="mx-2"
                         icon
-                        color="#002E6C"
+                        color="#FFFFFF"
                     >
                         <font-awesome-icon :icon="['fas','sign-in-alt']"/>
                     </v-btn>
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="authenticated">
                     <v-btn
+                        style="background-color: #002E6C;"
                         id="App-b2cLogout-vbtn"
                         v-if="securityType === b2cSecurityType"
                         @click="onAzureLogout"
                         class="mx-2"
                         icon
-                        color="#002E6C"
+                        color="#ffffff"
                     >
                     <font-awesome-icon :icon="['fas', 'sign-out-alt']"/>
                     </v-btn>
                     <v-btn
+                        style="background-color: #002E6C;"  
                         id="App-esecLogout-vbtn"
                         v-if="securityType === esecSecurityType"
                         @click="onLogout"
                         class="mx-2"
                         icon                        
-                        color="#002E6C"
+                        color="#ffffff"
                     >
                         <font-awesome-icon :icon="['fas', 'sign-out-alt']"/>
                     </v-btn>
@@ -229,7 +236,7 @@
                 type="info">
                     {{stateAlertMessage}}
                 </v-alert>
-                <div class="scenario-status" v-if="hasSelectedScenario">
+                <div class="scenario-status" v-if="hasSelectedScenario" style="margin-bottom: 20px; height: auto;">
                         <br>
                         <span>Scenario: </span>
                             <span id = 'App-scenarioName-span' style="font-weight: normal;">{{ selectedScenario.name }}</span>
@@ -318,26 +325,23 @@ import config from '../public/config.json';
     let username = computed<string>(() => store.state.authenticationModule.username);
     let hasAdminAccess = computed(() => store.state.authenticationModule.hasAdminAccess);
 
-    let refreshing = computed<boolean>(() => store.state.authenticationModule.refreshing);
+    const refreshing = computed<boolean>(() => store.state.authenticationModule.refreshing);
     //let navigation = ref<any[]>(store.state.breadcrumbModule.navigation);
-    let notifications = ref<Notification[]>(store.state.notificationModule.notifications);
-    let notificationCounter = computed<number>(() => store.state.notificationModule.counter);
-    let stateSelectedScenario = ref<Scenario>(store.state.scenarioModule.selectedScenario);
-    let packageVersion = ref<string>(store.state.announcementModule.packageVersion);
-    let securityType = ref<string>(store.state.authenticationModule.securityType);
-    let announcements = computed(() => store.state.announcementModule.announcements);
-    let currentUser = ref<User>(store.state.userModule.currentUser);
-    let stateImplementationName = computed<string>(()=>store.state.adminSiteSettingsModule.implementationName);
-    let agencyLogoBase64 = computed(() => store.state.adminSiteSettingsModule.agencyLogo);
-    let productLogoBase64 = computed(() => store.state.adminSiteSettingsModule.productLogo);
-    let stateInventoryReportNames = ref<string[]>(store.state.adminDataModule.inventoryReportNames);
-    let stateAlertMessage = ref<string>(store.state.alertModule.alertMessage);
-    let stateAlert = ref<boolean>(store.state.alertModule.alert);
+    const notifications = computed<Notification[]>(() => store.state.notificationModule.notifications);
+    const notificationCounter = computed<number>(() => store.state.notificationModule.counter);
+    const stateSelectedScenario = computed<Scenario>(() => store.state.scenarioModule.selectedScenario);
+    const packageVersion = computed<string>(() => store.state.announcementModule.packageVersion);
+    const securityType = computed<string>(() => store.state.authenticationModule.securityType);
+    const announcements = computed(() => store.state.announcementModule.announcements);
+    const currentUser = computed<User>(() =>store.state.userModule.currentUser);
+    const stateImplementationName = computed<string>(()=>store.state.adminSiteSettingsModule.implementationName);
+    const agencyLogoBase64 = computed(() => store.state.adminSiteSettingsModule.agencyLogo);
+    const productLogoBase64 = computed(() => store.state.adminSiteSettingsModule.productLogo);
+    const stateInventoryReportNames = computed<string[]>(() => store.state.adminDataModule.inventoryReportNames);
+    const stateAlertMessage = computed<string>(() => store.state.alertModule.alertMessage);
+    const stateAlert = ref<boolean>(store.state.alertModule.alert);
     async function logOutAction(payload?: any): Promise<any> {await store.dispatch('logOut', payload);}
-
     async function setIsBusyAction(payload?: any): Promise<any> { await store.dispatch('setIsBusy', payload);}
-    //async function setIsBusyAction(payload?: any) { () => store.dispatch('setIsBusy');}
-
     async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks', payload);}
     async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes', payload);}
     async function getAnnouncementsAction(payload?: any): Promise<any> { await store.dispatch('getAnnouncements', payload);}
@@ -368,9 +372,9 @@ import config from '../public/config.json';
     let alertDialogData: AlertData = clone(emptyAlertData);
     let pushRouteUpdate: boolean = false;
     let route: any = {};
-    let selectedScenario: Scenario = clone(emptyScenario);
-    let hasSelectedScenario: boolean = false;
-    let selectedScenarioHasStatus: boolean = false;
+    const selectedScenario = ref<Scenario>(clone(emptyScenario));
+    const hasSelectedScenario = ref<boolean>(false);
+    const selectedScenarioHasStatus = ref<boolean>(false);
     let ignoredAPIs: string[] = [
         'SynchronizeLegacySimulation',
         'RunSimulation',
@@ -426,12 +430,11 @@ import config from '../public/config.json';
         return authenticated && hasRole;
     }
     
-    watch(stateSelectedScenario, () => onStateSelectedScenarioChanged)
-    function onStateSelectedScenarioChanged() {
-        selectedScenario = clone(stateSelectedScenario.value);
-        hasSelectedScenario = selectedScenario.id !== getBlankGuid();
-        selectedScenarioHasStatus = hasValue(selectedScenario.status);
-    }
+    watch(stateSelectedScenario, () => {
+        selectedScenario.value = clone(stateSelectedScenario.value);
+        hasSelectedScenario.value= selectedScenario.value.id !== getBlankGuid();
+        selectedScenarioHasStatus.value = hasValue(selectedScenario.value.status);
+    })
 
     watch(authenticated, () => {
         if (authenticated) {
@@ -581,8 +584,7 @@ import config from '../public/config.json';
     }
 
     
-    onMounted(() => mounted());
-    function mounted() {
+    onMounted(() => {
 
         $emitter.on(
             Hub.BroadcastEventType.BroadcastErrorEvent,
@@ -617,7 +619,7 @@ import config from '../public/config.json';
             implementationName.value = "BridgeCare"
         else
             implementationName.value = stateImplementationName.value
-    }
+    });
 
     onBeforeUnmount(() => beforeDestroy());
     function beforeDestroy() {
@@ -833,4 +835,8 @@ html {
 .custom-toolbar{
    width: 800px ; 
 }
+.scroll-container {
+    max-height: 100%;
+    overflow: hidden;
+  }
 </style>

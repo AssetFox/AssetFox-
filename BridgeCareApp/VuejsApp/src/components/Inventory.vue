@@ -300,7 +300,7 @@
                     let dictValues: any = selectedKeys[i];
                     dictionary[dictNames] = dictValues;                     
                 }
-    
+
                 //Set the data equal to the dictionary
                 data.keyProperties = dictionary;
 

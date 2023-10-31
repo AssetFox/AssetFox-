@@ -12,7 +12,7 @@
           <v-divider style='margin: 0' />
           <div v-for='user in unassignedUsersCriteriaFilter'>
             <v-row row class='unassigned-user-layout'>
-              <v-col class='unassigned-user-layout-username-flex' xs3>
+              <v-col id="UserCriteria-unassignedUser-flex" class='unassigned-user-layout-username-flex' xs3>
                 {{ user.userName }}
               </v-col>
               <v-col cols = "3">
@@ -20,7 +20,7 @@
               </v-col>
               <v-col style='padding: 0' xs4>
                 <v-row align-center>
-                  <v-btn @click='onEditCriteria(user)' class='ara-blue-bg text-white' 
+                  <v-btn id="UserCriteria-assignUnassignedUserCriteria-btn" @click='onEditCriteria(user)' class='ara-blue-bg text-white' 
                           title='Give the user limited access to the bridge inventory'>
                     <v-icon size='1.5em' style='padding-right: 0.5em'>fas fa-edit</v-icon>
                     Assign Criteria Filter
@@ -43,6 +43,7 @@
         </v-card-title>
         <div>
           <v-text-field
+            id="UserCriteria-search-textfield"
             v-model='search'
             append-icon='mdi-magnify'
             label='Search'
@@ -51,7 +52,7 @@
           ></v-text-field>
         </div>
         <div>
-          <!-- <v-data-table
+          <!-- <v-data-table id="UserCriteria-users-datatable"
             :header='userCriteriaGridHeaders'
             :items='filteredUsersCriteriaFilter'
             :items-per-page='5'
@@ -74,7 +75,7 @@
                   <v-menu bottom 
                       min-height='500px' min-width='500px' v-if='props.item.hasCriteria' style='width: 100%'>
                     <template v-slot:activator>
-                      <v-text-field class='sm-txt' :model-value='props.item.criteria' readonly style='width: 100%' type='text' />
+                      <v-text-field id="UserCriteria-userCriteria-textfield" class='sm-txt' :model-value='props.item.criteria' readonly style='width: 100%' type='text' />
                     </template>
                     <v-card>
                       <v-card-text>
@@ -85,11 +86,11 @@
                       </v-card-text>
                     </v-card>
                   </v-menu>
-                  <div style='font-size: 1.2em; font-weight: bold; padding-top: 0.4em; padding-right: 1em' 
+                  <div id="UserCriteria-userHasAllAssets-div" style='font-size: 1.2em; font-weight: bold; padding-top: 0.4em; padding-right: 1em' 
                       v-if='!props.item.hasCriteria'>
                     All Assets
                   </div>
-                  <v-btn @click='onEditCriteria(props.item)' class='edit-icon' icon 
+                  <v-btn id="UserCriteria-editUserCriteria-btn" @click='onEditCriteria(props.item)' class='edit-icon' icon 
                           title='Edit Criteria' 
                           v-if='props.item.hasCriteria'>
                     <v-icon>fas fa-edit</v-icon>
@@ -97,21 +98,21 @@
                 </v-row>
               </td>
               <td class='d-flex'>
-                <v-btn @click='onEditCriteria(props.item)' class='ara-blue' icon 
+                <v-btn id="UserCriteria-restrictUserAccess-btn" @click='onEditCriteria(props.item)' class='ara-blue' icon 
                         title='Restrict Access with Criteria Filter' 
                         v-if='!props.item.hasCriteria'>
                   <v-icon>fas fa-lock</v-icon>
                 </v-btn>
-                <v-btn @click='onGiveUnrestrictedAccess(props.item)' class='ara-blue' icon 
+                <v-btn id="UserCriteria-allowUserAllAccess-btn" @click='onGiveUnrestrictedAccess(props.item)' class='ara-blue' icon 
                         title='Allow All Assets' 
                         v-if='props.item.hasCriteria'>
                   <v-icon>fas fa-lock-open</v-icon>
                 </v-btn>
-                <v-btn @click='onRevokeAccess(props.item)' class='ara-orange' icon 
+                <v-btn id="UserCriteria-revokeUserAccess-btn" @click='onRevokeAccess(props.item)' class='ara-orange' icon 
                         title='Revoke Access'>
                   <v-icon>fas fa-times-circle</v-icon>
                 </v-btn>
-                <v-btn @click='onDeleteUser(props.item)' class='ara-orange' icon 
+                <v-btn id="UserCriteria-deleteUser-btn" @click='onDeleteUser(props.item)' class='ara-orange' icon 
                         title='Delete User'>
                   <v-icon>fas fa-trash</v-icon>
                 </v-btn>
@@ -119,12 +120,12 @@
               <td>
                 <v-menu bottom min-height='200px' min-width='200px'>
                   <template v-slot:activator="{ props }">
-                    <v-text-field v-model='props.item.name' :readonly='!props.item.hasCriteria' style='width: 15em' type='text' class='text-center' />
+                    <v-text-field id="UserCriteria-userName-textfield" v-model='props.item.name' :readonly='!props.item.hasCriteria' style='width: 15em' type='text' class='text-center' />
                   </template>
                   <v-card>
                     <v-card-text>
-                      <v-text-field v-model='props.item.name' label='Edit Name' single-line @click.stop />
-                      <v-btn @click='updateName(props.item)'>Update</v-btn>
+                      <v-text-field id="UserCriteria-editUserName-textfield" v-model='props.item.name' label='Edit Name' single-line @click.stop />
+                      <v-btn id="UserCriteria-updateUserName-btn" @click='updateName(props.item)'>Update</v-btn>
                     </v-card-text>
                   </v-card>
                 </v-menu>
@@ -132,12 +133,12 @@
               <td>
                 <v-menu bottom min-height='200px' min-width='200px'>
                   <template v-slot:activator>
-                    <v-text-field v-model='props.item.description' :readonly='!props.item.hasCriteria' style='width: 15em' type='text' class='text-center' />
+                    <v-text-field id="UserCriteria-userDescription-textfield" v-model='props.item.description' :readonly='!props.item.hasCriteria' style='width: 15em' type='text' class='text-center' />
                   </template>
                   <v-card>
                     <v-card-text>
-                      <v-text-field v-model='props.item.description' label='Edit Description' single-line @click.stop />
-                      <v-btn @click='updateDescription(props.item)'>Update</v-btn>
+                      <v-text-field id="UserCriteria-editUserDescription-textfield" v-model='props.item.description' label='Edit Description' single-line @click.stop />
+                      <v-btn id="UserCriteria-updateUserDescription-btn" @click='updateDescription(props.item)'>Update</v-btn>
                     </v-card-text>
                   </v-card>
                 </v-menu>

@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class BudgetTestSetup
     {
-        public static void AddBudgetToLibrary(
+        public static BudgetDTO AddBudgetToLibrary(
             UnitOfDataPersistenceWork unitOfWork,
             Guid libraryId,
             Guid? budgetId = null,
@@ -47,6 +47,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
             var budgets = new List<BudgetDTO> { budget };
             unitOfWork.BudgetRepo.UpsertOrDeleteBudgets(budgets, libraryId);
+            return budget;
         }
     }
 }

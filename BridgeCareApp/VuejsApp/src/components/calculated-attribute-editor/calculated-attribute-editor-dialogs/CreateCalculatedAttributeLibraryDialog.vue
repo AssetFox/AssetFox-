@@ -12,13 +12,13 @@
             <v-card-text class="ghd-dialog-box-padding-center">
                 <v-row column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
-                    <v-text-field
+                    <v-text-field id="CreateCalculatedAttributeLibraryDialog-name-textfield"
                         v-model="newCalculatedAttributeLibrary.name"
                         :rules="rules['generalRules'].valueIsNotEmpty"
                         outline
                         class="ghd-text-field-border ghd-text-field"/>
                     <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
-                    <v-textarea
+                    <v-textarea id="CreateCalculatedAttributeLibraryDialog-description-textfield"
                         v-model="newCalculatedAttributeLibrary.description"
                         no-resize
                       outline
@@ -28,13 +28,13 @@
             </v-card-text>
             <v-card-actions class="ghd-dialog-box-padding-bottom">
                 <v-row justify-center>
-                    <v-btn
+                    <v-btn id="CreateCalculatedAttributeLibraryDialog-cancel-btn"
                     variant = "outlined" 
                         class='ghd-blue ghd-button-text ghd-button'
                         @click="onSubmit(false)">
                         Cancel
                     </v-btn>
-                    <v-btn
+                    <v-btn id="CreateCalculatedAttributeLibraryDialog-save-btn"
                         :disabled="newCalculatedAttributeLibrary.name === ''"
                         variant = "outlined" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'

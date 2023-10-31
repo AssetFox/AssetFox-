@@ -105,7 +105,7 @@
                         </td>
                         <td v-for="header in deficientConditionGoalGridHeaders">
                             <div>
-                                <v-edit-dialog v-if="header.key !== 'criterionLibrary' && header.key !== 'action'"
+                                <editDialog v-if="header.key !== 'criterionLibrary' && header.key !== 'action'"
                                     :return-value.sync="item.item[header.key]"
                                     @save="onEditDeficientConditionGoalProperty(item.item,header.key,item.item[header.key])"
                                     size="large"
@@ -160,7 +160,7 @@
                                                 rules['generalRules'].valueIsWithinRange(
                                                     item.item[header.key],[0, 100])]"/>
                                     </template>
-                                </v-edit-dialog>
+                                </editDialog>
                                 
                                 <v-row
                                     v-if="header.key === 'criterionLibrary'"
@@ -310,6 +310,7 @@
 
 <script setup lang="ts">
 import Vue, { computed, onBeforeUnmount, ref, Ref, ShallowRef, shallowRef, watch } from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import {
     DeficientConditionGoal,
     DeficientConditionGoalLibrary,

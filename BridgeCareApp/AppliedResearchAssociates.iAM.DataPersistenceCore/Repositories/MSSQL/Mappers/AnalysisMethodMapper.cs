@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using MoreLinq;
+using System.Collections.Generic;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -69,8 +70,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 .ForEach(_ => _.CreateRemainingLifeLimit(simulation));
         }
 
-        public static AnalysisMethodEntity ToEntity(this AnalysisMethodDTO dto, Guid simulationId, Guid? attributeId = null) =>
-            new AnalysisMethodEntity
+        public static AnalysisMethodEntity ToEntity(this AnalysisMethodDTO dto, Guid simulationId, Guid? attributeId = null, BaseEntityProperties baseEntityProperties = null)
+        {
+            var entity = new AnalysisMethodEntity
             {
                 Id = dto.Id,
                 SimulationId = simulationId,
@@ -81,7 +83,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShouldDeteriorateDuringCashFlow = dto.ShouldDeteriorateDuringCashFlow,
                 ShouldUseExtraFundsAcrossBudgets = dto.ShouldUseExtraFundsAcrossBudgets,
                 AttributeId = attributeId,
-            };
+
+            };            
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
+        }
+            
+
+        public static AnalysisMethodEntity ToEntityWithBenefit(this AnalysisMethodDTO dto, Guid simulationId, List<AttributeEntity> attributes, Guid? attributeId = null, BaseEntityProperties baseEntityProperties = null)
+        {
+            var entity = dto.ToEntity(simulationId, attributeId, baseEntityProperties);
+            var benefit = dto.Benefit;
+            if (benefit != null&&benefit.Id!=Guid.Empty)
+            {
+                var benefitAttribute = attributes.First(a => a.Name == benefit.Attribute);
+                var benefitEntity = benefit.ToEntity(dto.Id, benefitAttribute.Id, baseEntityProperties);
+                entity.Benefit = benefitEntity;                
+            }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+            return entity;
+         }
 
         public static AnalysisMethodDTO ToDto(this AnalysisMethodEntity entity) =>
             new AnalysisMethodDTO

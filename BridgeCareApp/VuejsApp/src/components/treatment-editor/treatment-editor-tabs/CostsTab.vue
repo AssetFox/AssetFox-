@@ -3,7 +3,7 @@
         <v-col cols = "12">              
             <div class="costs-data-table">                
                 <v-data-table
-                    hide-default-header             
+                    hide-default-header id="CostsTab-vdatatable"
                     :headers="costsGridHeaders"
                     sort-icon=ghd-table-sort
                     :items="costsGridData"
@@ -15,7 +15,7 @@
                             <td xs5>                            
                                 <v-row  rows = "6"  align-center>                                
                                     <v-subheader class="ghd-control-label ghd-md-gray" style="width:95%">Equation</v-subheader>
-                                    <v-btn
+                                    <v-btn id="TreatmentCostsTab-EquationEditorBtn"
                                         @click="
                                             onShowCostEquationEditorDialog(
                                                 props.item,
@@ -30,6 +30,7 @@
                                 <v-row  rows = "6" align-center>  
                                     <v-textarea
                                         class="ghd-control-border ghd-control-text-sm"
+                                        id="TreatmentCostsTab-Equation-TextArea"
                                         full-width
                                         no-resize
                                         outline
@@ -43,7 +44,7 @@
                             <td xs5>
                                 <v-row  rows = "6" align-center>
                                     <v-subheader class="ghd-control-label ghd-md-gray" style="width:95%">Criteria</v-subheader>
-                                    <v-btn
+                                    <v-btn id="TreatmentCostsTab-CriteriaEditorBtn"
                                         @click="
                                             onShowCostCriterionEditorDialog(
                                                 props.item,
@@ -58,6 +59,7 @@
                                 <v-row  rows = "6" align-center>              
                                     <v-textarea
                                         class="ghd-control-border ghd-control-text-sm"
+                                        id="TreatmentCostsTab-Criteria-TextArea"
                                         full-width
                                         no-resize
                                         outline
@@ -73,7 +75,7 @@
                             </td>     
                             <td xs2>
                                 <v-row align-start>
-                                    <v-btn
+                                    <v-btn id="TreatmentCostsTab-DeleteCostBtn"
                                         @click="onRemoveCost(props.item.id)"
                                         icon
                                     >

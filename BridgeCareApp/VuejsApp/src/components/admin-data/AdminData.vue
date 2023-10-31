@@ -6,7 +6,7 @@
                 <v-row style="margin-bottom: 20px;">
                     <v-row column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Primary Network</v-subheader>
-                        <v-select :items="selectPrimaryNetworkItems"                           
+                        <v-select :items="selectPrimaryNetworkItems"  id="AdminData-PrimaryNetwork-select"                       
                             variant="outlined"
                             item-title="text"  
                             item-value="value"
@@ -36,7 +36,7 @@
                         <v-subheader class="ghd-md-gray ghd-control-label">Key Field(s): </v-subheader> 
                     </v-col>
                     <v-col cols="5" style="margin-top:5px">
-                        <div class="ghd-md-gray ghd-control-label elipsisList">{{keyFieldsDelimited}}</div>  
+                        <div id="AdminData-keyFields-div" class="ghd-md-gray ghd-control-label elipsisList">{{keyFieldsDelimited}}</div>  
                     </v-col>                        
                     <v-btn style="margin-left: 20px;margin-top:10px !important" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"

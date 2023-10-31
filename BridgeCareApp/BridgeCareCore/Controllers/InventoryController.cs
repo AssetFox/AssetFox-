@@ -67,18 +67,16 @@ namespace BridgeCareCore.Controllers
             return Ok(_assetData.KeyProperties[propertyName].Select(_ => _.KeyValue.Value).ToList());
         }
 
-
-        [HttpGet]
+        [HttpPost]
         [Route("GetInventory")]
         [Authorize]
-        public async Task<IActionResult> GetInventory(string keyProperties)
+        public async Task<IActionResult> GetInventory([FromBody] List<string> keyProperties)
         {
             var assetKeyData = new Dictionary<Guid, List<string>>();
             var keySegmentDatums = new List<List<KeySegmentDatum>>();
             var dictionaryProperties = new Dictionary<Guid, List<string>>();
-
-            var keyPropertiesList = JsonConvert.DeserializeObject<List<string>>(keyProperties);
-            foreach (var keyProperty in keyPropertiesList)
+                        
+            foreach (var keyProperty in keyProperties)
             {
                 if (_assetData.KeyProperties.ContainsKey(keyProperty))
                 {
@@ -101,8 +99,7 @@ namespace BridgeCareCore.Controllers
                         assetKeyData[assetId].Add(value);
                     }
                 }
-            }            
-
+            }
             List<InventoryItem> inventoryItems = new List<InventoryItem>();
 
             var reportTypeParam = _adminSettingsRepository.GetInventoryReports();
@@ -127,7 +124,6 @@ namespace BridgeCareCore.Controllers
                     }
                 }
             }
-
             return Ok(inventoryItems);
         }
 

@@ -106,7 +106,7 @@
                                         <tr>
                                         <td>
                                         
-                                            <v-edit-dialog
+                                            <editDialog
                                                 size="large"
                                                 lazy
                                                 persistent
@@ -138,7 +138,7 @@
                                                         ]"
                                                     />
                                                 </template>
-                                            </v-edit-dialog>
+                                            </editDialog>
                                         </td>
                                         <td>
                                             {{
@@ -192,7 +192,7 @@
                                                     <v-btn
                                                         id="Scenarios-actionMenu-vbtn"
                                                         color="text-green darken-1"
-                                                        icon
+                                                        flat
                                                         v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
@@ -306,7 +306,7 @@
                                     <template slot="items" slot-scope="props" v-slot:item="props">
                                     <tr>
                                         <td>
-                                            <v-edit-dialog
+                                            <editDialog
                                                 size="large"
                                                 lazy
                                                 persistent
@@ -338,7 +338,7 @@
                                                         ]"
                                                     />
                                                 </template>
-                                            </v-edit-dialog>
+                                            </editDialog>
                                         </td>
                                         <td>
                                             {{
@@ -391,7 +391,7 @@
                                                     <v-btn
                                                         id="Scenarios-shared-actionMenu-vbtn"
                                                         color="text-green darken-1"
-                                                        icon
+                                                        flat
                                                         v-bind="props"
                                                     >
                                                         <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
@@ -677,6 +677,7 @@ import {
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AlertData, AlertDataWithButtons, AlertPreChecksData, emptyAlertData, emptyAlertDataWithButtons, emptyAlertPreChecksData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import AlertWithButtons from '@/shared/modals/AlertWithButtons.vue';
 import AlertPreChecks from '@/shared/modals/AlertPreChecks.vue';
 import { emptyAlertButton } from '@/shared/models/modals/alert-data';
@@ -980,7 +981,7 @@ import { onBeforeMount } from 'vue';
     let tab = ref('');
     let availableActions: any;
     let availableSimulationActions: any;
-    let nameUpdate: string = '';
+    let nameUpdate = ref('');
 
     let scenarios: Scenario[] = [];
 
@@ -1496,7 +1497,7 @@ import { onBeforeMount } from 'vue';
     }
 
     function prepareForNameEdit(name: string) {
-        nameUpdate = name;
+        nameUpdate.value = name;
     }
 
     function onShowConfirmAnalysisRunAlert(scenario: Scenario) {
@@ -1665,7 +1666,18 @@ import { onBeforeMount } from 'vue';
             },
         });
     }
-
+    function onNavigateToReportsView(localScenario: Scenario) {
+        selectScenarioAction({scenarioId: localScenario.id });
+        $router.push({
+            path: '/ReportsAndOutputs/Scenario/',
+            query: {
+                scenarioId: localScenario.id,
+                networkId: localScenario.networkId,
+                scenarioName: localScenario.name,
+                networkName: localScenario.networkName,
+            }
+        });
+    }
     function onShowShareScenarioDialog(scenario: Scenario) {
         shareScenarioDialogData.value = {
             showDialog: true,
@@ -2029,7 +2041,7 @@ import { onBeforeMount } from 'vue';
                 }
                 break;
             case availableActions.reports:
-                onShowReportsDownloaderDialog(scenario);
+                onNavigateToReportsView(scenario);
                 break;
             case availableActions.settings:
                 if (canModifySharedScenario(scenarioUsers) || isOwner) {

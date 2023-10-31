@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -123,5 +124,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public ReportIndexDTO Get(Guid reportId) => _unitOfDataPersistenceWork.Context.ReportIndex.FirstOrDefault(_ => _.Id == reportId).ToDTONullPropagating();
         public List<ReportIndexDTO> GetAllForScenario(Guid simulationId) =>
             _unitOfDataPersistenceWork.Context.ReportIndex.Where(_ => _.SimulationID == simulationId).Select(_ => _.ToDTO()).ToList();
+
+        public List<ReportIndexDTO> GetAllForNetwork(Guid? networkId) =>
+            _unitOfDataPersistenceWork.Context.ReportIndex.Where(_ => _.NetworkID == networkId).Select(_ => _.ToDTO()).ToList();
     }
 }

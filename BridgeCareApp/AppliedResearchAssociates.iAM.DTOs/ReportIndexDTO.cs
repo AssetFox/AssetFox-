@@ -34,5 +34,10 @@ namespace AppliedResearchAssociates.iAM.DTOs
         /// Date when the report was run
         /// </summary>
         public DateTime CreationDate { get; set; }
+
+        /// <summary>
+        /// The network of the simulation
+        /// </summary>
+        public Guid? NetworkId { get; set; }
     }
 }

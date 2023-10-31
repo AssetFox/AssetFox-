@@ -45,10 +45,10 @@ public partial class CalculateEvaluateParser : Parser {
 		LITERAL_CLOSING_DELIMITER_2=25, LITERAL_CONTENT_2=26;
 	public const int
 		RULE_root = 0, RULE_calculation = 1, RULE_arguments = 2, RULE_evaluation = 3, 
-		RULE_parameterReference = 4, RULE_comparisonOperand = 5, RULE_literal = 6;
+		RULE_comparisonOperand = 4, RULE_parameterReference = 5, RULE_literal = 6;
 	public static readonly string[] ruleNames = {
-		"root", "calculation", "arguments", "evaluation", "parameterReference", 
-		"comparisonOperand", "literal"
+		"root", "calculation", "arguments", "evaluation", "comparisonOperand", 
+		"parameterReference", "literal"
 	};
 
 	private static readonly string[] _LiteralNames = {
@@ -599,13 +599,16 @@ public partial class CalculateEvaluateParser : Parser {
 		}
 	}
 	public partial class EqualContext : EvaluationContext {
-		public ParameterReferenceContext parameterReference() {
-			return GetRuleContext<ParameterReferenceContext>(0);
+		public ComparisonOperandContext left;
+		public IToken operation;
+		public ComparisonOperandContext right;
+		public ComparisonOperandContext[] comparisonOperand() {
+			return GetRuleContexts<ComparisonOperandContext>();
+		}
+		public ComparisonOperandContext comparisonOperand(int i) {
+			return GetRuleContext<ComparisonOperandContext>(i);
 		}
 		public ITerminalNode EQUAL() { return GetToken(CalculateEvaluateParser.EQUAL, 0); }
-		public ComparisonOperandContext comparisonOperand() {
-			return GetRuleContext<ComparisonOperandContext>(0);
-		}
 		public EqualContext(EvaluationContext context) { CopyFrom(context); }
 		public override void EnterRule(IParseTreeListener listener) {
 			ICalculateEvaluateParserListener typedListener = listener as ICalculateEvaluateParserListener;
@@ -647,13 +650,16 @@ public partial class CalculateEvaluateParser : Parser {
 		}
 	}
 	public partial class LessThanContext : EvaluationContext {
-		public ParameterReferenceContext parameterReference() {
-			return GetRuleContext<ParameterReferenceContext>(0);
+		public ComparisonOperandContext left;
+		public IToken operation;
+		public ComparisonOperandContext right;
+		public ComparisonOperandContext[] comparisonOperand() {
+			return GetRuleContexts<ComparisonOperandContext>();
+		}
+		public ComparisonOperandContext comparisonOperand(int i) {
+			return GetRuleContext<ComparisonOperandContext>(i);
 		}
 		public ITerminalNode LESS_THAN() { return GetToken(CalculateEvaluateParser.LESS_THAN, 0); }
-		public ComparisonOperandContext comparisonOperand() {
-			return GetRuleContext<ComparisonOperandContext>(0);
-		}
 		public LessThanContext(EvaluationContext context) { CopyFrom(context); }
 		public override void EnterRule(IParseTreeListener listener) {
 			ICalculateEvaluateParserListener typedListener = listener as ICalculateEvaluateParserListener;
@@ -670,13 +676,16 @@ public partial class CalculateEvaluateParser : Parser {
 		}
 	}
 	public partial class LessThanOrEqualContext : EvaluationContext {
-		public ParameterReferenceContext parameterReference() {
-			return GetRuleContext<ParameterReferenceContext>(0);
+		public ComparisonOperandContext left;
+		public IToken operation;
+		public ComparisonOperandContext right;
+		public ComparisonOperandContext[] comparisonOperand() {
+			return GetRuleContexts<ComparisonOperandContext>();
+		}
+		public ComparisonOperandContext comparisonOperand(int i) {
+			return GetRuleContext<ComparisonOperandContext>(i);
 		}
 		public ITerminalNode LESS_THAN_OR_EQUAL() { return GetToken(CalculateEvaluateParser.LESS_THAN_OR_EQUAL, 0); }
-		public ComparisonOperandContext comparisonOperand() {
-			return GetRuleContext<ComparisonOperandContext>(0);
-		}
 		public LessThanOrEqualContext(EvaluationContext context) { CopyFrom(context); }
 		public override void EnterRule(IParseTreeListener listener) {
 			ICalculateEvaluateParserListener typedListener = listener as ICalculateEvaluateParserListener;
@@ -739,13 +748,16 @@ public partial class CalculateEvaluateParser : Parser {
 		}
 	}
 	public partial class NotEqualContext : EvaluationContext {
-		public ParameterReferenceContext parameterReference() {
-			return GetRuleContext<ParameterReferenceContext>(0);
+		public ComparisonOperandContext left;
+		public IToken operation;
+		public ComparisonOperandContext right;
+		public ComparisonOperandContext[] comparisonOperand() {
+			return GetRuleContexts<ComparisonOperandContext>();
+		}
+		public ComparisonOperandContext comparisonOperand(int i) {
+			return GetRuleContext<ComparisonOperandContext>(i);
 		}
 		public ITerminalNode NOT_EQUAL() { return GetToken(CalculateEvaluateParser.NOT_EQUAL, 0); }
-		public ComparisonOperandContext comparisonOperand() {
-			return GetRuleContext<ComparisonOperandContext>(0);
-		}
 		public NotEqualContext(EvaluationContext context) { CopyFrom(context); }
 		public override void EnterRule(IParseTreeListener listener) {
 			ICalculateEvaluateParserListener typedListener = listener as ICalculateEvaluateParserListener;
@@ -762,13 +774,16 @@ public partial class CalculateEvaluateParser : Parser {
 		}
 	}
 	public partial class GreaterThanOrEqualContext : EvaluationContext {
-		public ParameterReferenceContext parameterReference() {
-			return GetRuleContext<ParameterReferenceContext>(0);
+		public ComparisonOperandContext left;
+		public IToken operation;
+		public ComparisonOperandContext right;
+		public ComparisonOperandContext[] comparisonOperand() {
+			return GetRuleContexts<ComparisonOperandContext>();
+		}
+		public ComparisonOperandContext comparisonOperand(int i) {
+			return GetRuleContext<ComparisonOperandContext>(i);
 		}
 		public ITerminalNode GREATER_THAN_OR_EQUAL() { return GetToken(CalculateEvaluateParser.GREATER_THAN_OR_EQUAL, 0); }
-		public ComparisonOperandContext comparisonOperand() {
-			return GetRuleContext<ComparisonOperandContext>(0);
-		}
 		public GreaterThanOrEqualContext(EvaluationContext context) { CopyFrom(context); }
 		public override void EnterRule(IParseTreeListener listener) {
 			ICalculateEvaluateParserListener typedListener = listener as ICalculateEvaluateParserListener;
@@ -785,13 +800,16 @@ public partial class CalculateEvaluateParser : Parser {
 		}
 	}
 	public partial class GreaterThanContext : EvaluationContext {
-		public ParameterReferenceContext parameterReference() {
-			return GetRuleContext<ParameterReferenceContext>(0);
+		public ComparisonOperandContext left;
+		public IToken operation;
+		public ComparisonOperandContext right;
+		public ComparisonOperandContext[] comparisonOperand() {
+			return GetRuleContexts<ComparisonOperandContext>();
+		}
+		public ComparisonOperandContext comparisonOperand(int i) {
+			return GetRuleContext<ComparisonOperandContext>(i);
 		}
 		public ITerminalNode GREATER_THAN() { return GetToken(CalculateEvaluateParser.GREATER_THAN, 0); }
-		public ComparisonOperandContext comparisonOperand() {
-			return GetRuleContext<ComparisonOperandContext>(0);
-		}
 		public GreaterThanContext(EvaluationContext context) { CopyFrom(context); }
 		public override void EnterRule(IParseTreeListener listener) {
 			ICalculateEvaluateParserListener typedListener = listener as ICalculateEvaluateParserListener;
@@ -833,9 +851,9 @@ public partial class CalculateEvaluateParser : Parser {
 				Context = _localctx;
 				_prevctx = _localctx;
 
-				State = 61; parameterReference();
-				State = 62; Match(EQUAL);
-				State = 63; comparisonOperand();
+				State = 61; ((EqualContext)_localctx).left = comparisonOperand();
+				State = 62; ((EqualContext)_localctx).operation = Match(EQUAL);
+				State = 63; ((EqualContext)_localctx).right = comparisonOperand();
 				}
 				break;
 			case 2:
@@ -843,9 +861,9 @@ public partial class CalculateEvaluateParser : Parser {
 				_localctx = new NotEqualContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 65; parameterReference();
-				State = 66; Match(NOT_EQUAL);
-				State = 67; comparisonOperand();
+				State = 65; ((NotEqualContext)_localctx).left = comparisonOperand();
+				State = 66; ((NotEqualContext)_localctx).operation = Match(NOT_EQUAL);
+				State = 67; ((NotEqualContext)_localctx).right = comparisonOperand();
 				}
 				break;
 			case 3:
@@ -853,9 +871,9 @@ public partial class CalculateEvaluateParser : Parser {
 				_localctx = new LessThanContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 69; parameterReference();
-				State = 70; Match(LESS_THAN);
-				State = 71; comparisonOperand();
+				State = 69; ((LessThanContext)_localctx).left = comparisonOperand();
+				State = 70; ((LessThanContext)_localctx).operation = Match(LESS_THAN);
+				State = 71; ((LessThanContext)_localctx).right = comparisonOperand();
 				}
 				break;
 			case 4:
@@ -863,9 +881,9 @@ public partial class CalculateEvaluateParser : Parser {
 				_localctx = new LessThanOrEqualContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 73; parameterReference();
-				State = 74; Match(LESS_THAN_OR_EQUAL);
-				State = 75; comparisonOperand();
+				State = 73; ((LessThanOrEqualContext)_localctx).left = comparisonOperand();
+				State = 74; ((LessThanOrEqualContext)_localctx).operation = Match(LESS_THAN_OR_EQUAL);
+				State = 75; ((LessThanOrEqualContext)_localctx).right = comparisonOperand();
 				}
 				break;
 			case 5:
@@ -873,9 +891,9 @@ public partial class CalculateEvaluateParser : Parser {
 				_localctx = new GreaterThanOrEqualContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 77; parameterReference();
-				State = 78; Match(GREATER_THAN_OR_EQUAL);
-				State = 79; comparisonOperand();
+				State = 77; ((GreaterThanOrEqualContext)_localctx).left = comparisonOperand();
+				State = 78; ((GreaterThanOrEqualContext)_localctx).operation = Match(GREATER_THAN_OR_EQUAL);
+				State = 79; ((GreaterThanOrEqualContext)_localctx).right = comparisonOperand();
 				}
 				break;
 			case 6:
@@ -883,9 +901,9 @@ public partial class CalculateEvaluateParser : Parser {
 				_localctx = new GreaterThanContext(_localctx);
 				Context = _localctx;
 				_prevctx = _localctx;
-				State = 81; parameterReference();
-				State = 82; Match(GREATER_THAN);
-				State = 83; comparisonOperand();
+				State = 81; ((GreaterThanContext)_localctx).left = comparisonOperand();
+				State = 82; ((GreaterThanContext)_localctx).operation = Match(GREATER_THAN);
+				State = 83; ((GreaterThanContext)_localctx).right = comparisonOperand();
 				}
 				break;
 			case 7:
@@ -918,9 +936,9 @@ public partial class CalculateEvaluateParser : Parser {
 						((LogicalConjunctionContext)_localctx).left = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_evaluation);
 						State = 91;
-						if (!(Precpred(Context, 9))) throw new FailedPredicateException(this, "Precpred(Context, 9)");
+						if (!(Precpred(Context, 3))) throw new FailedPredicateException(this, "Precpred(Context, 3)");
 						State = 92; Match(AND);
-						State = 93; ((LogicalConjunctionContext)_localctx).right = evaluation(10);
+						State = 93; ((LogicalConjunctionContext)_localctx).right = evaluation(4);
 						}
 						break;
 					case 2:
@@ -929,9 +947,9 @@ public partial class CalculateEvaluateParser : Parser {
 						((LogicalDisjunctionContext)_localctx).left = _prevctx;
 						PushNewRecursionContext(_localctx, _startState, RULE_evaluation);
 						State = 94;
-						if (!(Precpred(Context, 8))) throw new FailedPredicateException(this, "Precpred(Context, 8)");
+						if (!(Precpred(Context, 2))) throw new FailedPredicateException(this, "Precpred(Context, 2)");
 						State = 95; Match(OR);
-						State = 96; ((LogicalDisjunctionContext)_localctx).right = evaluation(9);
+						State = 96; ((LogicalDisjunctionContext)_localctx).right = evaluation(3);
 						}
 						break;
 					}
@@ -954,75 +972,16 @@ public partial class CalculateEvaluateParser : Parser {
 		return _localctx;
 	}
 
-	public partial class ParameterReferenceContext : ParserRuleContext {
-		public ITerminalNode IDENTIFIER() { return GetToken(CalculateEvaluateParser.IDENTIFIER, 0); }
-		public ITerminalNode LEFT_BRACKET() { return GetToken(CalculateEvaluateParser.LEFT_BRACKET, 0); }
-		public ITerminalNode RIGHT_BRACKET() { return GetToken(CalculateEvaluateParser.RIGHT_BRACKET, 0); }
-		public ParameterReferenceContext(ParserRuleContext parent, int invokingState)
-			: base(parent, invokingState)
-		{
-		}
-		public override int RuleIndex { get { return RULE_parameterReference; } }
-		public override void EnterRule(IParseTreeListener listener) {
-			ICalculateEvaluateParserListener typedListener = listener as ICalculateEvaluateParserListener;
-			if (typedListener != null) typedListener.EnterParameterReference(this);
-		}
-		public override void ExitRule(IParseTreeListener listener) {
-			ICalculateEvaluateParserListener typedListener = listener as ICalculateEvaluateParserListener;
-			if (typedListener != null) typedListener.ExitParameterReference(this);
-		}
-		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			ICalculateEvaluateParserVisitor<TResult> typedVisitor = visitor as ICalculateEvaluateParserVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitParameterReference(this);
-			else return visitor.VisitChildren(this);
-		}
-	}
-
-	[RuleVersion(0)]
-	public ParameterReferenceContext parameterReference() {
-		ParameterReferenceContext _localctx = new ParameterReferenceContext(Context, State);
-		EnterRule(_localctx, 8, RULE_parameterReference);
-		try {
-			State = 106;
-			ErrorHandler.Sync(this);
-			switch (TokenStream.LA(1)) {
-			case IDENTIFIER:
-				EnterOuterAlt(_localctx, 1);
-				{
-				State = 102; Match(IDENTIFIER);
-				}
-				break;
-			case LEFT_BRACKET:
-				EnterOuterAlt(_localctx, 2);
-				{
-				State = 103; Match(LEFT_BRACKET);
-				State = 104; Match(IDENTIFIER);
-				State = 105; Match(RIGHT_BRACKET);
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			ErrorHandler.ReportError(this, re);
-			ErrorHandler.Recover(this, re);
-		}
-		finally {
-			ExitRule();
-		}
-		return _localctx;
-	}
-
 	public partial class ComparisonOperandContext : ParserRuleContext {
 		public ParameterReferenceContext parameterReference() {
 			return GetRuleContext<ParameterReferenceContext>(0);
 		}
+		public CalculationContext calculation() {
+			return GetRuleContext<CalculationContext>(0);
+		}
 		public LiteralContext literal() {
 			return GetRuleContext<LiteralContext>(0);
 		}
-		public ITerminalNode NUMBER() { return GetToken(CalculateEvaluateParser.NUMBER, 0); }
 		public ComparisonOperandContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -1046,29 +1005,99 @@ public partial class CalculateEvaluateParser : Parser {
 	[RuleVersion(0)]
 	public ComparisonOperandContext comparisonOperand() {
 		ComparisonOperandContext _localctx = new ComparisonOperandContext(Context, State);
-		EnterRule(_localctx, 10, RULE_comparisonOperand);
+		EnterRule(_localctx, 8, RULE_comparisonOperand);
 		try {
-			State = 111;
+			State = 105;
+			ErrorHandler.Sync(this);
+			switch ( Interpreter.AdaptivePredict(TokenStream,8,Context) ) {
+			case 1:
+				EnterOuterAlt(_localctx, 1);
+				{
+				State = 102; parameterReference();
+				}
+				break;
+			case 2:
+				EnterOuterAlt(_localctx, 2);
+				{
+				State = 103; calculation(0);
+				}
+				break;
+			case 3:
+				EnterOuterAlt(_localctx, 3);
+				{
+				State = 104; literal();
+				}
+				break;
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			ErrorHandler.ReportError(this, re);
+			ErrorHandler.Recover(this, re);
+		}
+		finally {
+			ExitRule();
+		}
+		return _localctx;
+	}
+
+	public partial class ParameterReferenceContext : ParserRuleContext {
+		public ITerminalNode IDENTIFIER() { return GetToken(CalculateEvaluateParser.IDENTIFIER, 0); }
+		public ITerminalNode LEFT_BRACKET() { return GetToken(CalculateEvaluateParser.LEFT_BRACKET, 0); }
+		public ITerminalNode RIGHT_BRACKET() { return GetToken(CalculateEvaluateParser.RIGHT_BRACKET, 0); }
+		public ITerminalNode LEFT_PAREN() { return GetToken(CalculateEvaluateParser.LEFT_PAREN, 0); }
+		public ParameterReferenceContext parameterReference() {
+			return GetRuleContext<ParameterReferenceContext>(0);
+		}
+		public ITerminalNode RIGHT_PAREN() { return GetToken(CalculateEvaluateParser.RIGHT_PAREN, 0); }
+		public ParameterReferenceContext(ParserRuleContext parent, int invokingState)
+			: base(parent, invokingState)
+		{
+		}
+		public override int RuleIndex { get { return RULE_parameterReference; } }
+		public override void EnterRule(IParseTreeListener listener) {
+			ICalculateEvaluateParserListener typedListener = listener as ICalculateEvaluateParserListener;
+			if (typedListener != null) typedListener.EnterParameterReference(this);
+		}
+		public override void ExitRule(IParseTreeListener listener) {
+			ICalculateEvaluateParserListener typedListener = listener as ICalculateEvaluateParserListener;
+			if (typedListener != null) typedListener.ExitParameterReference(this);
+		}
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ICalculateEvaluateParserVisitor<TResult> typedVisitor = visitor as ICalculateEvaluateParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitParameterReference(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+
+	[RuleVersion(0)]
+	public ParameterReferenceContext parameterReference() {
+		ParameterReferenceContext _localctx = new ParameterReferenceContext(Context, State);
+		EnterRule(_localctx, 10, RULE_parameterReference);
+		try {
+			State = 115;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
-			case LEFT_BRACKET:
 			case IDENTIFIER:
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 108; parameterReference();
+				State = 107; Match(IDENTIFIER);
 				}
 				break;
-			case LITERAL_OPENING_DELIMITER_1:
-			case LITERAL_OPENING_DELIMITER_2:
+			case LEFT_BRACKET:
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 109; literal();
+				State = 108; Match(LEFT_BRACKET);
+				State = 109; Match(IDENTIFIER);
+				State = 110; Match(RIGHT_BRACKET);
 				}
 				break;
-			case NUMBER:
+			case LEFT_PAREN:
 				EnterOuterAlt(_localctx, 3);
 				{
-				State = 110; Match(NUMBER);
+				State = 111; Match(LEFT_PAREN);
+				State = 112; parameterReference();
+				State = 113; Match(RIGHT_PAREN);
 				}
 				break;
 			default:
@@ -1120,39 +1149,39 @@ public partial class CalculateEvaluateParser : Parser {
 		EnterRule(_localctx, 12, RULE_literal);
 		int _la;
 		try {
-			State = 123;
+			State = 127;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case LITERAL_OPENING_DELIMITER_1:
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 113; Match(LITERAL_OPENING_DELIMITER_1);
-				State = 115;
+				State = 117; Match(LITERAL_OPENING_DELIMITER_1);
+				State = 119;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 				if (_la==LITERAL_CONTENT_1) {
 					{
-					State = 114; _localctx.content = Match(LITERAL_CONTENT_1);
+					State = 118; _localctx.content = Match(LITERAL_CONTENT_1);
 					}
 				}
 
-				State = 117; Match(LITERAL_CLOSING_DELIMITER_1);
+				State = 121; Match(LITERAL_CLOSING_DELIMITER_1);
 				}
 				break;
 			case LITERAL_OPENING_DELIMITER_2:
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 118; Match(LITERAL_OPENING_DELIMITER_2);
-				State = 120;
+				State = 122; Match(LITERAL_OPENING_DELIMITER_2);
+				State = 124;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 				if (_la==LITERAL_CONTENT_2) {
 					{
-					State = 119; _localctx.content = Match(LITERAL_CONTENT_2);
+					State = 123; _localctx.content = Match(LITERAL_CONTENT_2);
 					}
 				}
 
-				State = 122; Match(LITERAL_CLOSING_DELIMITER_2);
+				State = 126; Match(LITERAL_CLOSING_DELIMITER_2);
 				}
 				break;
 			default:
@@ -1186,15 +1215,15 @@ public partial class CalculateEvaluateParser : Parser {
 	}
 	private bool evaluation_sempred(EvaluationContext _localctx, int predIndex) {
 		switch (predIndex) {
-		case 2: return Precpred(Context, 9);
-		case 3: return Precpred(Context, 8);
+		case 2: return Precpred(Context, 3);
+		case 3: return Precpred(Context, 2);
 		}
 		return true;
 	}
 
 	private static char[] _serializedATN = {
 		'\x3', '\x608B', '\xA72A', '\x8133', '\xB9ED', '\x417C', '\x3BE7', '\x7786', 
-		'\x5964', '\x3', '\x1C', '\x80', '\x4', '\x2', '\t', '\x2', '\x4', '\x3', 
+		'\x5964', '\x3', '\x1C', '\x84', '\x4', '\x2', '\t', '\x2', '\x4', '\x3', 
 		'\t', '\x3', '\x4', '\x4', '\t', '\x4', '\x4', '\x5', '\t', '\x5', '\x4', 
 		'\x6', '\t', '\x6', '\x4', '\a', '\t', '\a', '\x4', '\b', '\t', '\b', 
 		'\x3', '\x2', '\x3', '\x2', '\x3', '\x2', '\x3', '\x2', '\x3', '\x2', 
@@ -1215,60 +1244,61 @@ public partial class CalculateEvaluateParser : Parser {
 		'\x3', '\x5', '\x5', '\x5', '\\', '\n', '\x5', '\x3', '\x5', '\x3', '\x5', 
 		'\x3', '\x5', '\x3', '\x5', '\x3', '\x5', '\x3', '\x5', '\a', '\x5', '\x64', 
 		'\n', '\x5', '\f', '\x5', '\xE', '\x5', 'g', '\v', '\x5', '\x3', '\x6', 
-		'\x3', '\x6', '\x3', '\x6', '\x3', '\x6', '\x5', '\x6', 'm', '\n', '\x6', 
-		'\x3', '\a', '\x3', '\a', '\x3', '\a', '\x5', '\a', 'r', '\n', '\a', '\x3', 
-		'\b', '\x3', '\b', '\x5', '\b', 'v', '\n', '\b', '\x3', '\b', '\x3', '\b', 
-		'\x3', '\b', '\x5', '\b', '{', '\n', '\b', '\x3', '\b', '\x5', '\b', '~', 
-		'\n', '\b', '\x3', '\b', '\x2', '\x4', '\x4', '\b', '\t', '\x2', '\x4', 
-		'\x6', '\b', '\n', '\f', '\xE', '\x2', '\x4', '\x3', '\x2', '\b', '\t', 
-		'\x3', '\x2', '\n', '\v', '\x2', '\x8F', '\x2', '\x16', '\x3', '\x2', 
-		'\x2', '\x2', '\x4', ')', '\x3', '\x2', '\x2', '\x2', '\x6', '\x36', '\x3', 
-		'\x2', '\x2', '\x2', '\b', '[', '\x3', '\x2', '\x2', '\x2', '\n', 'l', 
-		'\x3', '\x2', '\x2', '\x2', '\f', 'q', '\x3', '\x2', '\x2', '\x2', '\xE', 
-		'}', '\x3', '\x2', '\x2', '\x2', '\x10', '\x11', '\x5', '\x4', '\x3', 
-		'\x2', '\x11', '\x12', '\a', '\x2', '\x2', '\x3', '\x12', '\x17', '\x3', 
-		'\x2', '\x2', '\x2', '\x13', '\x14', '\x5', '\b', '\x5', '\x2', '\x14', 
-		'\x15', '\a', '\x2', '\x2', '\x3', '\x15', '\x17', '\x3', '\x2', '\x2', 
-		'\x2', '\x16', '\x10', '\x3', '\x2', '\x2', '\x2', '\x16', '\x13', '\x3', 
-		'\x2', '\x2', '\x2', '\x17', '\x3', '\x3', '\x2', '\x2', '\x2', '\x18', 
-		'\x19', '\b', '\x3', '\x1', '\x2', '\x19', '\x1A', '\a', '\x15', '\x2', 
-		'\x2', '\x1A', '\x1B', '\a', '\x6', '\x2', '\x2', '\x1B', '\x1C', '\x5', 
-		'\x6', '\x4', '\x2', '\x1C', '\x1D', '\a', '\a', '\x2', '\x2', '\x1D', 
-		'*', '\x3', '\x2', '\x2', '\x2', '\x1E', '\x1F', '\a', '\v', '\x2', '\x2', 
-		'\x1F', '*', '\x5', '\x4', '\x3', '\t', ' ', '*', '\a', '\x16', '\x2', 
-		'\x2', '!', '*', '\a', '\x15', '\x2', '\x2', '\"', '#', '\a', '\x13', 
-		'\x2', '\x2', '#', '$', '\a', '\x15', '\x2', '\x2', '$', '*', '\a', '\x14', 
-		'\x2', '\x2', '%', '&', '\a', '\x6', '\x2', '\x2', '&', '\'', '\x5', '\x4', 
-		'\x3', '\x2', '\'', '(', '\a', '\a', '\x2', '\x2', '(', '*', '\x3', '\x2', 
-		'\x2', '\x2', ')', '\x18', '\x3', '\x2', '\x2', '\x2', ')', '\x1E', '\x3', 
-		'\x2', '\x2', '\x2', ')', ' ', '\x3', '\x2', '\x2', '\x2', ')', '!', '\x3', 
-		'\x2', '\x2', '\x2', ')', '\"', '\x3', '\x2', '\x2', '\x2', ')', '%', 
-		'\x3', '\x2', '\x2', '\x2', '*', '\x33', '\x3', '\x2', '\x2', '\x2', '+', 
-		',', '\f', '\b', '\x2', '\x2', ',', '-', '\t', '\x2', '\x2', '\x2', '-', 
-		'\x32', '\x5', '\x4', '\x3', '\t', '.', '/', '\f', '\a', '\x2', '\x2', 
-		'/', '\x30', '\t', '\x3', '\x2', '\x2', '\x30', '\x32', '\x5', '\x4', 
-		'\x3', '\b', '\x31', '+', '\x3', '\x2', '\x2', '\x2', '\x31', '.', '\x3', 
-		'\x2', '\x2', '\x2', '\x32', '\x35', '\x3', '\x2', '\x2', '\x2', '\x33', 
-		'\x31', '\x3', '\x2', '\x2', '\x2', '\x33', '\x34', '\x3', '\x2', '\x2', 
-		'\x2', '\x34', '\x5', '\x3', '\x2', '\x2', '\x2', '\x35', '\x33', '\x3', 
-		'\x2', '\x2', '\x2', '\x36', ';', '\x5', '\x4', '\x3', '\x2', '\x37', 
-		'\x38', '\a', '\x12', '\x2', '\x2', '\x38', ':', '\x5', '\x4', '\x3', 
-		'\x2', '\x39', '\x37', '\x3', '\x2', '\x2', '\x2', ':', '=', '\x3', '\x2', 
-		'\x2', '\x2', ';', '\x39', '\x3', '\x2', '\x2', '\x2', ';', '<', '\x3', 
-		'\x2', '\x2', '\x2', '<', '\a', '\x3', '\x2', '\x2', '\x2', '=', ';', 
-		'\x3', '\x2', '\x2', '\x2', '>', '?', '\b', '\x5', '\x1', '\x2', '?', 
-		'@', '\x5', '\n', '\x6', '\x2', '@', '\x41', '\a', '\f', '\x2', '\x2', 
-		'\x41', '\x42', '\x5', '\f', '\a', '\x2', '\x42', '\\', '\x3', '\x2', 
-		'\x2', '\x2', '\x43', '\x44', '\x5', '\n', '\x6', '\x2', '\x44', '\x45', 
-		'\a', '\r', '\x2', '\x2', '\x45', '\x46', '\x5', '\f', '\a', '\x2', '\x46', 
-		'\\', '\x3', '\x2', '\x2', '\x2', 'G', 'H', '\x5', '\n', '\x6', '\x2', 
-		'H', 'I', '\a', '\xE', '\x2', '\x2', 'I', 'J', '\x5', '\f', '\a', '\x2', 
-		'J', '\\', '\x3', '\x2', '\x2', '\x2', 'K', 'L', '\x5', '\n', '\x6', '\x2', 
-		'L', 'M', '\a', '\xF', '\x2', '\x2', 'M', 'N', '\x5', '\f', '\a', '\x2', 
-		'N', '\\', '\x3', '\x2', '\x2', '\x2', 'O', 'P', '\x5', '\n', '\x6', '\x2', 
-		'P', 'Q', '\a', '\x10', '\x2', '\x2', 'Q', 'R', '\x5', '\f', '\a', '\x2', 
-		'R', '\\', '\x3', '\x2', '\x2', '\x2', 'S', 'T', '\x5', '\n', '\x6', '\x2', 
-		'T', 'U', '\a', '\x11', '\x2', '\x2', 'U', 'V', '\x5', '\f', '\a', '\x2', 
+		'\x3', '\x6', '\x3', '\x6', '\x5', '\x6', 'l', '\n', '\x6', '\x3', '\a', 
+		'\x3', '\a', '\x3', '\a', '\x3', '\a', '\x3', '\a', '\x3', '\a', '\x3', 
+		'\a', '\x3', '\a', '\x5', '\a', 'v', '\n', '\a', '\x3', '\b', '\x3', '\b', 
+		'\x5', '\b', 'z', '\n', '\b', '\x3', '\b', '\x3', '\b', '\x3', '\b', '\x5', 
+		'\b', '\x7F', '\n', '\b', '\x3', '\b', '\x5', '\b', '\x82', '\n', '\b', 
+		'\x3', '\b', '\x2', '\x4', '\x4', '\b', '\t', '\x2', '\x4', '\x6', '\b', 
+		'\n', '\f', '\xE', '\x2', '\x4', '\x3', '\x2', '\b', '\t', '\x3', '\x2', 
+		'\n', '\v', '\x2', '\x94', '\x2', '\x16', '\x3', '\x2', '\x2', '\x2', 
+		'\x4', ')', '\x3', '\x2', '\x2', '\x2', '\x6', '\x36', '\x3', '\x2', '\x2', 
+		'\x2', '\b', '[', '\x3', '\x2', '\x2', '\x2', '\n', 'k', '\x3', '\x2', 
+		'\x2', '\x2', '\f', 'u', '\x3', '\x2', '\x2', '\x2', '\xE', '\x81', '\x3', 
+		'\x2', '\x2', '\x2', '\x10', '\x11', '\x5', '\x4', '\x3', '\x2', '\x11', 
+		'\x12', '\a', '\x2', '\x2', '\x3', '\x12', '\x17', '\x3', '\x2', '\x2', 
+		'\x2', '\x13', '\x14', '\x5', '\b', '\x5', '\x2', '\x14', '\x15', '\a', 
+		'\x2', '\x2', '\x3', '\x15', '\x17', '\x3', '\x2', '\x2', '\x2', '\x16', 
+		'\x10', '\x3', '\x2', '\x2', '\x2', '\x16', '\x13', '\x3', '\x2', '\x2', 
+		'\x2', '\x17', '\x3', '\x3', '\x2', '\x2', '\x2', '\x18', '\x19', '\b', 
+		'\x3', '\x1', '\x2', '\x19', '\x1A', '\a', '\x15', '\x2', '\x2', '\x1A', 
+		'\x1B', '\a', '\x6', '\x2', '\x2', '\x1B', '\x1C', '\x5', '\x6', '\x4', 
+		'\x2', '\x1C', '\x1D', '\a', '\a', '\x2', '\x2', '\x1D', '*', '\x3', '\x2', 
+		'\x2', '\x2', '\x1E', '\x1F', '\a', '\v', '\x2', '\x2', '\x1F', '*', '\x5', 
+		'\x4', '\x3', '\t', ' ', '*', '\a', '\x16', '\x2', '\x2', '!', '*', '\a', 
+		'\x15', '\x2', '\x2', '\"', '#', '\a', '\x13', '\x2', '\x2', '#', '$', 
+		'\a', '\x15', '\x2', '\x2', '$', '*', '\a', '\x14', '\x2', '\x2', '%', 
+		'&', '\a', '\x6', '\x2', '\x2', '&', '\'', '\x5', '\x4', '\x3', '\x2', 
+		'\'', '(', '\a', '\a', '\x2', '\x2', '(', '*', '\x3', '\x2', '\x2', '\x2', 
+		')', '\x18', '\x3', '\x2', '\x2', '\x2', ')', '\x1E', '\x3', '\x2', '\x2', 
+		'\x2', ')', ' ', '\x3', '\x2', '\x2', '\x2', ')', '!', '\x3', '\x2', '\x2', 
+		'\x2', ')', '\"', '\x3', '\x2', '\x2', '\x2', ')', '%', '\x3', '\x2', 
+		'\x2', '\x2', '*', '\x33', '\x3', '\x2', '\x2', '\x2', '+', ',', '\f', 
+		'\b', '\x2', '\x2', ',', '-', '\t', '\x2', '\x2', '\x2', '-', '\x32', 
+		'\x5', '\x4', '\x3', '\t', '.', '/', '\f', '\a', '\x2', '\x2', '/', '\x30', 
+		'\t', '\x3', '\x2', '\x2', '\x30', '\x32', '\x5', '\x4', '\x3', '\b', 
+		'\x31', '+', '\x3', '\x2', '\x2', '\x2', '\x31', '.', '\x3', '\x2', '\x2', 
+		'\x2', '\x32', '\x35', '\x3', '\x2', '\x2', '\x2', '\x33', '\x31', '\x3', 
+		'\x2', '\x2', '\x2', '\x33', '\x34', '\x3', '\x2', '\x2', '\x2', '\x34', 
+		'\x5', '\x3', '\x2', '\x2', '\x2', '\x35', '\x33', '\x3', '\x2', '\x2', 
+		'\x2', '\x36', ';', '\x5', '\x4', '\x3', '\x2', '\x37', '\x38', '\a', 
+		'\x12', '\x2', '\x2', '\x38', ':', '\x5', '\x4', '\x3', '\x2', '\x39', 
+		'\x37', '\x3', '\x2', '\x2', '\x2', ':', '=', '\x3', '\x2', '\x2', '\x2', 
+		';', '\x39', '\x3', '\x2', '\x2', '\x2', ';', '<', '\x3', '\x2', '\x2', 
+		'\x2', '<', '\a', '\x3', '\x2', '\x2', '\x2', '=', ';', '\x3', '\x2', 
+		'\x2', '\x2', '>', '?', '\b', '\x5', '\x1', '\x2', '?', '@', '\x5', '\n', 
+		'\x6', '\x2', '@', '\x41', '\a', '\f', '\x2', '\x2', '\x41', '\x42', '\x5', 
+		'\n', '\x6', '\x2', '\x42', '\\', '\x3', '\x2', '\x2', '\x2', '\x43', 
+		'\x44', '\x5', '\n', '\x6', '\x2', '\x44', '\x45', '\a', '\r', '\x2', 
+		'\x2', '\x45', '\x46', '\x5', '\n', '\x6', '\x2', '\x46', '\\', '\x3', 
+		'\x2', '\x2', '\x2', 'G', 'H', '\x5', '\n', '\x6', '\x2', 'H', 'I', '\a', 
+		'\xE', '\x2', '\x2', 'I', 'J', '\x5', '\n', '\x6', '\x2', 'J', '\\', '\x3', 
+		'\x2', '\x2', '\x2', 'K', 'L', '\x5', '\n', '\x6', '\x2', 'L', 'M', '\a', 
+		'\xF', '\x2', '\x2', 'M', 'N', '\x5', '\n', '\x6', '\x2', 'N', '\\', '\x3', 
+		'\x2', '\x2', '\x2', 'O', 'P', '\x5', '\n', '\x6', '\x2', 'P', 'Q', '\a', 
+		'\x10', '\x2', '\x2', 'Q', 'R', '\x5', '\n', '\x6', '\x2', 'R', '\\', 
+		'\x3', '\x2', '\x2', '\x2', 'S', 'T', '\x5', '\n', '\x6', '\x2', 'T', 
+		'U', '\a', '\x11', '\x2', '\x2', 'U', 'V', '\x5', '\n', '\x6', '\x2', 
 		'V', '\\', '\x3', '\x2', '\x2', '\x2', 'W', 'X', '\a', '\x6', '\x2', '\x2', 
 		'X', 'Y', '\x5', '\b', '\x5', '\x2', 'Y', 'Z', '\a', '\a', '\x2', '\x2', 
 		'Z', '\\', '\x3', '\x2', '\x2', '\x2', '[', '>', '\x3', '\x2', '\x2', 
@@ -1276,29 +1306,32 @@ public partial class CalculateEvaluateParser : Parser {
 		'\x2', '\x2', '[', 'K', '\x3', '\x2', '\x2', '\x2', '[', 'O', '\x3', '\x2', 
 		'\x2', '\x2', '[', 'S', '\x3', '\x2', '\x2', '\x2', '[', 'W', '\x3', '\x2', 
 		'\x2', '\x2', '\\', '\x65', '\x3', '\x2', '\x2', '\x2', ']', '^', '\f', 
-		'\v', '\x2', '\x2', '^', '_', '\a', '\x4', '\x2', '\x2', '_', '\x64', 
-		'\x5', '\b', '\x5', '\f', '`', '\x61', '\f', '\n', '\x2', '\x2', '\x61', 
+		'\x5', '\x2', '\x2', '^', '_', '\a', '\x4', '\x2', '\x2', '_', '\x64', 
+		'\x5', '\b', '\x5', '\x6', '`', '\x61', '\f', '\x4', '\x2', '\x2', '\x61', 
 		'\x62', '\a', '\x5', '\x2', '\x2', '\x62', '\x64', '\x5', '\b', '\x5', 
-		'\v', '\x63', ']', '\x3', '\x2', '\x2', '\x2', '\x63', '`', '\x3', '\x2', 
+		'\x5', '\x63', ']', '\x3', '\x2', '\x2', '\x2', '\x63', '`', '\x3', '\x2', 
 		'\x2', '\x2', '\x64', 'g', '\x3', '\x2', '\x2', '\x2', '\x65', '\x63', 
 		'\x3', '\x2', '\x2', '\x2', '\x65', '\x66', '\x3', '\x2', '\x2', '\x2', 
 		'\x66', '\t', '\x3', '\x2', '\x2', '\x2', 'g', '\x65', '\x3', '\x2', '\x2', 
-		'\x2', 'h', 'm', '\a', '\x15', '\x2', '\x2', 'i', 'j', '\a', '\x13', '\x2', 
-		'\x2', 'j', 'k', '\a', '\x15', '\x2', '\x2', 'k', 'm', '\a', '\x14', '\x2', 
-		'\x2', 'l', 'h', '\x3', '\x2', '\x2', '\x2', 'l', 'i', '\x3', '\x2', '\x2', 
-		'\x2', 'm', '\v', '\x3', '\x2', '\x2', '\x2', 'n', 'r', '\x5', '\n', '\x6', 
-		'\x2', 'o', 'r', '\x5', '\xE', '\b', '\x2', 'p', 'r', '\a', '\x16', '\x2', 
-		'\x2', 'q', 'n', '\x3', '\x2', '\x2', '\x2', 'q', 'o', '\x3', '\x2', '\x2', 
-		'\x2', 'q', 'p', '\x3', '\x2', '\x2', '\x2', 'r', '\r', '\x3', '\x2', 
-		'\x2', '\x2', 's', 'u', '\a', '\x17', '\x2', '\x2', 't', 'v', '\a', '\x1A', 
-		'\x2', '\x2', 'u', 't', '\x3', '\x2', '\x2', '\x2', 'u', 'v', '\x3', '\x2', 
-		'\x2', '\x2', 'v', 'w', '\x3', '\x2', '\x2', '\x2', 'w', '~', '\a', '\x19', 
-		'\x2', '\x2', 'x', 'z', '\a', '\x18', '\x2', '\x2', 'y', '{', '\a', '\x1C', 
-		'\x2', '\x2', 'z', 'y', '\x3', '\x2', '\x2', '\x2', 'z', '{', '\x3', '\x2', 
-		'\x2', '\x2', '{', '|', '\x3', '\x2', '\x2', '\x2', '|', '~', '\a', '\x1B', 
-		'\x2', '\x2', '}', 's', '\x3', '\x2', '\x2', '\x2', '}', 'x', '\x3', '\x2', 
-		'\x2', '\x2', '~', '\xF', '\x3', '\x2', '\x2', '\x2', '\xF', '\x16', ')', 
-		'\x31', '\x33', ';', '[', '\x63', '\x65', 'l', 'q', 'u', 'z', '}',
+		'\x2', 'h', 'l', '\x5', '\f', '\a', '\x2', 'i', 'l', '\x5', '\x4', '\x3', 
+		'\x2', 'j', 'l', '\x5', '\xE', '\b', '\x2', 'k', 'h', '\x3', '\x2', '\x2', 
+		'\x2', 'k', 'i', '\x3', '\x2', '\x2', '\x2', 'k', 'j', '\x3', '\x2', '\x2', 
+		'\x2', 'l', '\v', '\x3', '\x2', '\x2', '\x2', 'm', 'v', '\a', '\x15', 
+		'\x2', '\x2', 'n', 'o', '\a', '\x13', '\x2', '\x2', 'o', 'p', '\a', '\x15', 
+		'\x2', '\x2', 'p', 'v', '\a', '\x14', '\x2', '\x2', 'q', 'r', '\a', '\x6', 
+		'\x2', '\x2', 'r', 's', '\x5', '\f', '\a', '\x2', 's', 't', '\a', '\a', 
+		'\x2', '\x2', 't', 'v', '\x3', '\x2', '\x2', '\x2', 'u', 'm', '\x3', '\x2', 
+		'\x2', '\x2', 'u', 'n', '\x3', '\x2', '\x2', '\x2', 'u', 'q', '\x3', '\x2', 
+		'\x2', '\x2', 'v', '\r', '\x3', '\x2', '\x2', '\x2', 'w', 'y', '\a', '\x17', 
+		'\x2', '\x2', 'x', 'z', '\a', '\x1A', '\x2', '\x2', 'y', 'x', '\x3', '\x2', 
+		'\x2', '\x2', 'y', 'z', '\x3', '\x2', '\x2', '\x2', 'z', '{', '\x3', '\x2', 
+		'\x2', '\x2', '{', '\x82', '\a', '\x19', '\x2', '\x2', '|', '~', '\a', 
+		'\x18', '\x2', '\x2', '}', '\x7F', '\a', '\x1C', '\x2', '\x2', '~', '}', 
+		'\x3', '\x2', '\x2', '\x2', '~', '\x7F', '\x3', '\x2', '\x2', '\x2', '\x7F', 
+		'\x80', '\x3', '\x2', '\x2', '\x2', '\x80', '\x82', '\a', '\x1B', '\x2', 
+		'\x2', '\x81', 'w', '\x3', '\x2', '\x2', '\x2', '\x81', '|', '\x3', '\x2', 
+		'\x2', '\x2', '\x82', '\xF', '\x3', '\x2', '\x2', '\x2', '\xF', '\x16', 
+		')', '\x31', '\x33', ';', '[', '\x63', '\x65', 'k', 'u', 'y', '~', '\x81',
 	};
 
 	public static readonly ATN _ATN =

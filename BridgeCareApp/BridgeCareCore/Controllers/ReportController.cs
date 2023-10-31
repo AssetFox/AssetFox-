@@ -108,7 +108,7 @@ namespace BridgeCareCore.Controllers
         public async Task<IActionResult> GetFile(string reportName)
         {
             try
-            { 
+            {
                 var parameters = await GetParameters();
                 var scenarioName = "";
                 var scenarioId = new Guid();
@@ -122,7 +122,7 @@ namespace BridgeCareCore.Controllers
                 }
                 else
                     scenarioId = Guid.NewGuid();
-                                
+
                 ReportGenerationWorkitem workItem = new ReportGenerationWorkitem(parameters, UserInfo.Name, scenarioName, reportName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
 

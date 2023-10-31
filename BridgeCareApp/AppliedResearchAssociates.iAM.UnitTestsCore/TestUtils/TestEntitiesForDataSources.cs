@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 
@@ -10,16 +11,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public static class TestEntitiesForDataSources
     {
-        public static List<DataSourceEntity> SimpleRepo()
+        public const string FakeConnectionString = "FakeConnectionString";
+        public static List<DataSourceEntity> SimpleRepo(string encryptionKey)
         {
             var repo = new List<DataSourceEntity>();
+            var encryptionBytes = Encoding.UTF8.GetBytes(encryptionKey);
+            var encryptedConnectionString = AES256GCM.Encrypt(FakeConnectionString, encryptionBytes);
             repo.Add(new DataSourceEntity
             {
                 Id = TestDataForDataSources.SqlDatasourceId,
                 Name = TestDataForDataSources.SqlServerDatasourceName,
                 Secure = true,
                 Type = DataSourceTypeStrings.SQL.ToString(),
-                Details = "Fj6y4slHYqm2PAw/MyIepQLXxHU87hg87svgP5MaqwxQqLtZBmDi1f5rHyj0s35LNWCELke1cmb2p9iV/GyQxjxsNzbfHKyZdI5m5HlSiMWEihoS1aoFnKoiMUDrb8mD6+B+lXFQ5e/G3SqUvgRTLfQTjBoQ1CvEnklT7SnqWvJBB6sVXdXhcYiBQWjkCzXFHDVMPueOTFn6eiZd/8QE+Uwk6smc7hIihQb+OxcpYiZ7Qoy/NtXowmgI/IkJOjaJklo28B3zAg=="
+                Details = encryptedConnectionString,
             });
             repo.Add(new DataSourceEntity
             {
@@ -40,7 +44,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return repo;
         }
 
-        public static List<AttributeEntity> SimpleAttributeRepo()
+        public static List<AttributeEntity> SimpleAttributeRepo(string encryptionKey)
         {
             var repo = new List<AttributeEntity>();
             repo.Add(new AttributeEntity
@@ -49,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Name = "Location",
                 DataType = "STRING",
                 AggregationRuleType = "PREDOMINANT",
-                DataSource = SimpleRepo().First(_ => _.Type == "SQL")
+                DataSource = SimpleRepo(encryptionKey).First(_ => _.Type == "SQL")
             });
             repo.Add(new AttributeEntity
             {
@@ -57,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Name = "AssetSize",
                 DataType = "NUMBER",
                 AggregationRuleType = "AVERAGE",
-                DataSource = SimpleRepo().First(_ => _.Type == "SQL")
+                DataSource = SimpleRepo(encryptionKey).First(_ => _.Type == "SQL")
             });
             repo.Add(new AttributeEntity
             {

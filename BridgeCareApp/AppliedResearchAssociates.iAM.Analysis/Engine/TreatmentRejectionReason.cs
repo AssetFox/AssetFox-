@@ -28,7 +28,7 @@ public enum TreatmentRejectionReason
     NotFeasible,
 
     /// <summary>
-    ///     Indicates a treatment rejected due to a user-defined treatment "supersession".
+    ///     Indicates a treatment rejected due to a user-defined treatment "supersedeRule".
     /// </summary>
     Superseded,
 

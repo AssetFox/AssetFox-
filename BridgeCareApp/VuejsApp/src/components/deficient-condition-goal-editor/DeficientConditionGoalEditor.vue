@@ -8,9 +8,11 @@
                     <v-select
                         id="DeficientConditionGoalEditor-librarySelect-vselect"
                         :items="librarySelectItems"
-                        append-icon=$vuetify.icons.ghd-down
+                        append-icon=ghd-down
                         variant="outlined"
                         v-model="librarySelectItemValue"
+                        item-title="text"
+                        item-value="value" 
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
                     <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
@@ -68,90 +70,100 @@
         </v-col>
         <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
             <div class="deficients-data-table">
-                <v-data-table
+                <v-data-table-server
                     id="DeficientConditionGoalEditor-deficientConditionGoals-vdatatable"
                     :headers="deficientConditionGoalGridHeaders"
                     :items="currentPage"  
                     :pagination.sync="pagination"
                     :must-sort='true'
-                    :total-items="totalItems"
-                    :rows-per-page-items=[5,10,25]
-                    sort-icon=$vuetify.icons.ghd-table-sort
+                    sort-icon=ghd-table-sort
                     class=" ghd-table v-table__overflow"
                     item-key="id"
-                    select-all
-                    v-model="selectedGridRows"
+                    show-select
+                    v-model="selectedGridRows"                
+                    :items-length="totalItems"
+                    :items-per-page-options="[
+                        {value: 5, title: '5'},
+                        {value: 10, title: '10'},
+                        {value: 25, title: '25'},
+                    ]"
+                    v-model:sort-by="pagination.sort"
+                    v-model:page="pagination.page"
+                    v-model:items-per-page="pagination.rowsPerPage"
+                    item-value="name"
+                    return-object
+                    @update:options="onPaginationChanged"
                 >
-                    <template slot="items" slot-scope="props" v-slot:item="{item}">
+                    <template  v-slot:item="item">
                         <td>
                             <v-checkbox
                                 id="DeficientConditionGoalEditor-selectForDelete-vcheckbox"
                                 hide-details
                                 primary
-                                v-model="item.raw.selected"
+                                v-model="selectedGridRows" :value="item.item"
                             ></v-checkbox>
                         </td>
                         <td v-for="header in deficientConditionGoalGridHeaders">
                             <div>
-                                <v-edit-dialog v-if="header.value !== 'criterionLibrary' && header.value !== 'action'"
-                                    :return-value.sync="item.value[header.value]"
-                                    @save="onEditDeficientConditionGoalProperty(item.value,header.value,item.value[header.value])"
+                                <editDialog v-if="header.key !== 'criterionLibrary' && header.key !== 'action'"
+                                    :return-value.sync="item.item[header.key]"
+                                    @save="onEditDeficientConditionGoalProperty(item.item,header.key,item.item[header.key])"
                                     size="large"
                                     lazy>
-                                    <v-text-field v-if="header.value !== 'allowedDeficientPercentage'"
+                                    <v-text-field v-if="header.key !== 'allowedDeficientPercentage'"
                                         readonly
                                         class="sm-txt"
-                                        :model-value="item.value[header.value]"
+                                        :model-value="item.item[header.key]"
                                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
-                                    <v-text-field v-if="header.value === 'allowedDeficientPercentage'"
+                                    <v-text-field v-if="header.key === 'allowedDeficientPercentage'"
                                         readonly
                                         class="sm-txt"
-                                        :model-value="item.value[header.value]"
+                                        :model-value="item.item[header.key]"
                                         :rules="[rules['generalRules'].valueIsNotEmpty,
-                                            rules['generalRules'].valueIsWithinRange(item.value[header.value],[0, 100])]"/>
+                                            rules['generalRules'].valueIsWithinRange(item.item[header.key],[0, 100])]"/>
 
                                     <template v-slot:input>
-                                        <v-text-field v-if="header.value === 'name'"
+                                        <v-text-field v-if="header.key === 'name'"
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalName-vtextfield"
                                             label="Edit"
                                             single-line
-                                            v-model="item.value[header.value]"
+                                            v-model="item.item[header.key]"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
-                                        <v-select v-if="header.value === 'attribute'"
+                                        <v-select v-if="header.key === 'attribute'"
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalAttribute-vselect"
                                             :items="numericAttributeNames"
-                                            append-icon=$vuetify.icons.ghd-down
+                                            append-icon=ghd-down
                                             label="Select an Attribute"
-                                            v-model="item.value[header.value]"
+                                            v-model="item.item[header.key]"
                                             :rules="[
                                                 rules['generalRules'].valueIsNotEmpty]">
                                         </v-select>
 
-                                        <v-text-field v-if="header.value === 'deficientLimit'"
+                                        <v-text-field v-if="header.key === 'deficientLimit'"
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalLimit-vtextfield"
                                             label="Edit"
                                             single-line
-                                            v-model="item.value[header.value]"
+                                            v-model="item.item[header.key]"
                                             :mask="'##########'"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
-                                        <v-text-field v-if="header.value === 'allowedDeficientPercentage'"
+                                        <v-text-field v-if="header.key === 'allowedDeficientPercentage'"
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalPercentage-vtextfield"
                                             label="Edit"
                                             single-line
-                                            v-model.number="item.value[header.value]"
+                                            v-model.number="item.item[header.key]"
                                             :mask="'###'"
                                             :rules="[
                                                 rules['generalRules'].valueIsNotEmpty,
                                                 rules['generalRules'].valueIsWithinRange(
-                                                    item.value[header.value],[0, 100])]"/>
+                                                    item.item[header.key],[0, 100])]"/>
                                     </template>
-                                </v-edit-dialog>
+                                </editDialog>
                                 
                                 <v-row
-                                    v-if="header.value === 'criterionLibrary'"
+                                    v-if="header.key === 'criterionLibrary'"
                                     align-center
                                     style="flex-wrap:nowrap">
                                     <v-menu
@@ -162,12 +174,12 @@
                                             <v-text-field
                                                 readonly
                                                 class="sm-txt"
-                                                :model-value="item.value.criterionLibrary.mergedCriteriaExpression"/>
+                                                :model-value="item.item.criterionLibrary.mergedCriteriaExpression"/>
                                         </template>
                                         <v-card>
                                             <v-card-text>
                                                 <v-textarea
-                                                    :model-value="item.value.criterionLibrary.mergedCriteriaExpression"
+                                                    :model-value="item.item.criterionLibrary.mergedCriteriaExpression"
                                                     full-width
                                                     no-resize
                                                     variant="outlined"
@@ -178,21 +190,21 @@
                                     </v-menu>
                                     <v-btn
                                         id="DeficientConditionGoalEditor-editDeficientConditionGoalCriteria-vbtn"
-                                        @click="onShowCriterionLibraryEditorDialog(item.value)"
+                                        @click="onShowCriterionLibraryEditorDialog(item.item)"
                                         class="ghd-blue"
                                         icon>
                                         <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-row>
-                                <div v-if="header.value === 'action'">
-                                    <v-btn id="DeficientConditionGoalEditor-deleteDeficientConditionGoal-vbtn" @click="onRemoveSelectedDeficientConditionGoal(item.value.id)"  class="ghd-blue" icon>
+                                <div v-if="header.key === 'action'">
+                                    <v-btn id="DeficientConditionGoalEditor-deleteDeficientConditionGoal-vbtn" @click="onRemoveSelectedDeficientConditionGoal(item.item.id)"  class="ghd-blue" icon>
                                         <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </div>                               
                             </div>
                         </td>
                     </template>
-                </v-data-table> 
+                </v-data-table-server> 
                 <v-btn 
                     id="DeficientConditionGoalEditor-deleteSelected-vbtn"
                     :disabled="selectedDeficientConditionGoalIds.length === 0"
@@ -267,7 +279,7 @@
             </v-row>
         </v-col>
 
-        <ConfirmBeforeDeleteAlert
+        <Alert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
         />
@@ -297,7 +309,8 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { onBeforeUnmount, ref, Ref, ShallowRef, shallowRef, watch } from 'vue';
+import Vue, { computed, onBeforeUnmount, ref, Ref, ShallowRef, shallowRef, watch } from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import {
     DeficientConditionGoal,
     DeficientConditionGoalLibrary,
@@ -341,7 +354,6 @@ import DeficientConditionGoalService from '@/services/deficient-condition-goal.s
 import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
-import { isNullOrUndefined } from 'util';
 import { LibraryUser } from '@/shared/models/iAM/user';
 import { emptyShareDeficientConditionGoalLibraryDialogData, ShareDeficientConditionGoalLibraryDialogData } from '@/shared/models/modals/share-deficient-condition-goal-data';
 import { useStore } from 'vuex';
@@ -352,86 +364,86 @@ import ConfirmDialog from 'primevue/confirmdialog';
     let store = useStore();
     const confirm = useConfirm();
     const $router = useRouter();
-    let stateDeficientConditionGoalLibraries = shallowRef<DeficientConditionGoalLibrary[]>(store.state.deficientConditionGoalModule.deficientConditionGoalLibraries);
-    let stateSelectedDeficientConditionGoalLibrary = shallowRef<DeficientConditionGoalLibrary>(store.state.deficientConditionGoalModule.selectedDeficientConditionGoalLibrary);
-    let stateNumericAttributes = shallowRef<Attribute[]>(store.state.attributeModule.numericAttributeNames);
-    let stateScenarioDeficientConditionGoals = shallowRef<DeficientConditionGoal[]>(store.state.deficientConditionGoalModule.scenarioDeficientConditionGoals);
-    let hasUnsavedChanges = store.state.unsavedChangesFlagModule.hasUnsavedChanges as boolean;
-    let hasAdminAccess = (store.state.authenticationModule.hasAdminAccess) as boolean;
-    let hasPermittedAccess = (store.state.deficientConditionGoalModule.hasPermittedAccess) as boolean;
-    let isSharedLibrary = ref<boolean>(store.state.deficientConditionGoalModule.isSharedLibrary);
+    let stateDeficientConditionGoalLibraries = computed<DeficientConditionGoalLibrary[]>(() => store.state.deficientConditionGoalModule.deficientConditionGoalLibraries);
+    let stateSelectedDeficientConditionGoalLibrary = computed<DeficientConditionGoalLibrary>(() => store.state.deficientConditionGoalModule.selectedDeficientConditionGoalLibrary);
+    let stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributeNames);
+    let stateScenarioDeficientConditionGoals = computed<DeficientConditionGoal[]>(() => store.state.deficientConditionGoalModule.scenarioDeficientConditionGoals);
+    let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+    let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
+    let hasPermittedAccess = computed<boolean>(() => store.state.deficientConditionGoalModule.hasPermittedAccess);
+    let isSharedLibrary = computed<boolean>(() => store.state.deficientConditionGoalModule.isSharedLibrary);
 
-    async function getNetworks(payload?: any): Promise<any> {await store.dispatch('getNetworks');}
-    async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedDeficientConditionGoalLibrary');}
-    async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess');}
-    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
-    async function getDeficientConditionGoalLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getDeficientConditionGoalLibraries');}
-    async function selectDeficientConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectDeficientConditionGoalLibrary');}
-    async function upsertDeficientConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertDeficientConditionGoalLibrary');}
-    async function deleteDeficientConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteDeficientConditionGoalLibrary');}
-    async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
-    async function getScenarioDeficientConditionGoalsAction(payload?: any): Promise<any> {await store.dispatch('getScenarioDeficientConditionGoals');}
-    async function upsertScenarioDeficientConditionGoalsAction(payload?: any): Promise<any> {await store.dispatch('upsertScenarioDeficientConditionGoals');}
-    async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification');}
-    async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario');}
-    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario');}
+    async function getNetworks(payload?: any): Promise<any> {await store.dispatch('getNetworks', payload);}
+    async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedDeficientConditionGoalLibrary', payload);}
+    async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess', payload);}
+    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+    async function getDeficientConditionGoalLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getDeficientConditionGoalLibraries', payload);}
+    async function selectDeficientConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectDeficientConditionGoalLibrary', payload);}
+    async function upsertDeficientConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertDeficientConditionGoalLibrary', payload);}
+    async function deleteDeficientConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteDeficientConditionGoalLibrary', payload);}
+    async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes', payload);}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+    async function getScenarioDeficientConditionGoalsAction(payload?: any): Promise<any> {await store.dispatch('getScenarioDeficientConditionGoals', payload);}
+    async function upsertScenarioDeficientConditionGoalsAction(payload?: any): Promise<any> {await store.dispatch('upsertScenarioDeficientConditionGoals', payload);}
+    async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification', payload);}
+    async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario', payload);}
+    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario', payload);}
     
-    function addedOrUpdatedDeficientConditionGoalLibraryMutator(payload: any){store.commit('addedOrUpdatedDeficientConditionGoalLibraryMutator');}
-    function selectedDeficientConditionGoalLibraryMutator(payload: any){store.commit('selectedDeficientConditionGoalLibraryMutator');}
+    function addedOrUpdatedDeficientConditionGoalLibraryMutator(payload: any){store.commit('addedOrUpdatedDeficientConditionGoalLibraryMutator', payload);}
+    function selectedDeficientConditionGoalLibraryMutator(payload: any){store.commit('selectedDeficientConditionGoalLibraryMutator', payload);}
 
     let getNumericAttributesGetter: any = store.getters.getNumericAttributes;
     let getUserNameByIdGetter: any = store.getters.getUserNameById;
 
     let selectedScenarioId: string = getBlankGuid();
-    let librarySelectItems: SelectItem[] = [];
+    let librarySelectItems  = ref<SelectItem[]>([]);
     let selectedDeficientConditionGoalLibrary: ShallowRef<DeficientConditionGoalLibrary> = shallowRef(clone(emptyDeficientConditionGoalLibrary));
-    let hasSelectedLibrary: boolean = false;
+    let hasSelectedLibrary = ref(false);
     let dateModified: string;
-    let deficientConditionGoalGridHeaders: DataTableHeader[] = [
+    let deficientConditionGoalGridHeaders: any[] = [
         {
-            text: 'Name',
-            value: 'name',
+            title: 'Name',
+            key: 'name',
             align: 'left',
             sortable: false,
             class: '',
             width: '15%',
         },
         {
-            text: 'Attribute',
-            value: 'attribute',
+            title: 'Attribute',
+            key: 'attribute',
             align: 'left',
             sortable: false,
             class: '',
             width: '12%',
         },
         {
-            text: 'Deficient Limit',
-            value: 'deficientLimit',
+            title: 'Deficient Limit',
+            key: 'deficientLimit',
             align: 'left',
             sortable: false,
             class: '',
             width: '8%',
         },
         {
-            text: 'Allowed Deficient Percentage',
-            value: 'allowedDeficientPercentage',
+            title: 'Allowed Deficient Percentage',
+            key: 'allowedDeficientPercentage',
             align: 'left',
             sortable: false,
             class: '',
             width: '11%',
         },
         {
-            text: 'Criteria',
-            value: 'criterionLibrary',
+            title: 'Criteria',
+            key: 'criterionLibrary',
             align: 'left',
             sortable: false,
             class: '',
             width: '40%',
         },
         {
-            text: 'Action',
-            value: 'action',
+            title: 'Action',
+            key: 'action',
             align: 'left',
             sortable: false,
             class: '',
@@ -454,12 +466,12 @@ import ConfirmDialog from 'primevue/confirmdialog';
     let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     let rules: InputValidationRules = validationRules;
     let uuidNIL: string = getBlankGuid();
-    let hasScenario: boolean = false;
+    let hasScenario = ref(false);
     let currentUrl: string = window.location.href;
     let hasCreatedLibrary: boolean = false;
     let disableCrudButtonsResult: boolean = false;
     let hasLibraryEditPermission: boolean = false;
-    let importLibraryDisabled: boolean = true;
+    let importLibraryDisabled = ref(true);
     let scenarioHasCreatedNew: boolean = false;
 
     let addedRows: DeficientConditionGoal[] = [];
@@ -471,7 +483,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     let pagination: ShallowRef<Pagination> = shallowRef(clone(emptyPagination));
     let isPageInit = false;
     let totalItems = 0;
-    let currentPage: ShallowRef<DeficientConditionGoal[]> = ref([]);
+    let currentPage: ShallowRef<DeficientConditionGoal[]> = shallowRef([]);
     let initializing: boolean = true;
     let isShared: boolean = false;
 
@@ -504,7 +516,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
                         $router.push('/Scenarios/');
                     }
 
-                    hasScenario = true;
+                    hasScenario.value = true;
                     getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
                         selectScenarioAction({ scenarioId: selectedScenarioId });        
                         initializePages();
@@ -519,9 +531,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
         setHasUnsavedChangesAction({ value: false });
     }
 
-    watch(stateDeficientConditionGoalLibraries, () => onStateDeficientConditionGoalLibrariesChanged)
+    watch(stateDeficientConditionGoalLibraries, () => onStateDeficientConditionGoalLibrariesChanged())
     function onStateDeficientConditionGoalLibrariesChanged() {
-        librarySelectItems = stateDeficientConditionGoalLibraries.value.map(
+        librarySelectItems.value = stateDeficientConditionGoalLibraries.value.map(
             (library: DeficientConditionGoalLibrary) => ({
                 text: library.name,
                 value: library.id,
@@ -531,9 +543,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
    //this is so that a user is asked wether or not to continue when switching libraries after they have made changes
     //but only when in libraries
-    watch(librarySelectItemValue, () => onLibrarySelectItemValueChangedCheckUnsaved)
+    watch(librarySelectItemValue, () => onLibrarySelectItemValueChangedCheckUnsaved())
     function onLibrarySelectItemValueChangedCheckUnsaved(){
-        if(hasScenario){
+        if(hasScenario.value){
             onSelectItemValueChanged();
             unsavedDialogAllowed = false;
         }           
@@ -544,7 +556,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             });
         }
         librarySelectItemValueAllowedChanged = true;
-        librarySelectItems.forEach(library => {
+        librarySelectItems.value.forEach(library => {
             if (library.value === librarySelectItemValue.value) {
                 parentLibraryName = library.text;
             }
@@ -553,96 +565,96 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     function onSelectItemValueChanged() {
         trueLibrarySelectItemValue = librarySelectItemValue.value
-        if(!hasScenario || isNil(librarySelectItemValue))
+        if(!hasScenario.value || isNil(librarySelectItemValue))
             selectDeficientConditionGoalLibraryAction({
-                libraryId: librarySelectItemValue,
+                libraryId: librarySelectItemValue.value,
             });
-        else if(!isNil(librarySelectItemValue) && !scenarioHasCreatedNew)
+        else if(!isNil(librarySelectItemValue.value) && !scenarioHasCreatedNew)
         {
-            importLibraryDisabled = false;
+            importLibraryDisabled.value = false;
         }
 
         scenarioHasCreatedNew = false;
     }
 
-    watch(stateSelectedDeficientConditionGoalLibrary, () => onStateSelectedDeficientConditionGoalLibraryChanged)
+    watch(stateSelectedDeficientConditionGoalLibrary, () => onStateSelectedDeficientConditionGoalLibraryChanged())
     function onStateSelectedDeficientConditionGoalLibraryChanged() {
         selectedDeficientConditionGoalLibrary.value = clone(
             stateSelectedDeficientConditionGoalLibrary.value,
         );
     }
 
-    watch(selectedDeficientConditionGoalLibrary, () => onSelectedDeficientConditionGoalLibraryChanged)
+    watch(selectedDeficientConditionGoalLibrary, () => onSelectedDeficientConditionGoalLibraryChanged())
     function onSelectedDeficientConditionGoalLibraryChanged() {
-        if (!isNullOrUndefined(selectedDeficientConditionGoalLibrary)) {
-            hasSelectedLibrary = selectedDeficientConditionGoalLibrary.value.id !== uuidNIL;
+        if (!isNil(selectedDeficientConditionGoalLibrary)) {
+            hasSelectedLibrary.value = selectedDeficientConditionGoalLibrary.value.id !== uuidNIL;
             
         }
-        if (hasSelectedLibrary) {
+        if (hasSelectedLibrary.value) {
             checkLibraryEditPermission();
             hasCreatedLibrary = false;
         }
 
         clearChanges();
         initializing = false;
-        if(hasSelectedLibrary)
+        if(hasSelectedLibrary.value)
             onPaginationChanged();
         
         checkHasUnsavedChanges();
     }
 
-    watch(selectedGridRows, () => onSelectedDeficientRowsChanged)
+    watch(selectedGridRows, () => onSelectedDeficientRowsChanged())
     function onSelectedDeficientRowsChanged() {
         selectedDeficientConditionGoalIds = getPropertyValues('id', selectedGridRows.value,) as string[];
     }
 
-    watch(stateNumericAttributes, () => onStateNumericAttributesChanged)
+    watch(stateNumericAttributes, () => onStateNumericAttributesChanged())
     function onStateNumericAttributesChanged() {
         numericAttributeNames = getPropertyValues('name', stateNumericAttributes.value);
     }
 
-    watch(stateScenarioDeficientConditionGoals, () => onStateScenarioDeficientConditionGoalsChanged)
+    watch(stateScenarioDeficientConditionGoals, () => onStateScenarioDeficientConditionGoalsChanged())
     function onStateScenarioDeficientConditionGoalsChanged() {
-        if (hasScenario) {
+        if (hasScenario.value) {
             currentPage.value = clone(stateScenarioDeficientConditionGoals.value);
         }
     }
 
-    watch(currentPage, () => onCurrentPageChanged)
+    watch(currentPage, () => onCurrentPageChanged())
     function onCurrentPageChanged() {
-        librarySelectItems.forEach(library => {
+        librarySelectItems.value.forEach(library => {
             if (library.value === parentLibraryId) {
                 parentLibraryName = library.text;
             }
         });
     }
 
-    watch(isSharedLibrary, () => onStateSharedAccessChanged)
+    watch(isSharedLibrary, () => onStateSharedAccessChanged())
     function onStateSharedAccessChanged() {
         isShared = isSharedLibrary.value;
     }
 
-    watch(pagination, () => onPaginationChanged)
+    watch(pagination, () => onPaginationChanged())
     async function onPaginationChanged() {
         if(initializing)
             return;
         checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = pagination.value;
+        const { sort, descending, page, rowsPerPage } = pagination.value;
         const request: PagingRequest<DeficientConditionGoal>= {
             page: page,
             rowsPerPage: rowsPerPage,
             syncModel: {
-                libraryId: librarySelectItemValue.value !== null && importLibraryDisabled ? librarySelectItemValue.value : null,
+                libraryId: librarySelectItemValue.value !== null && importLibraryDisabled.value ? librarySelectItemValue.value : null,
                 updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: deletionIds,
                 addedRows: addedRows,
                 isModified: scenarioLibraryIsModified
             },           
-            sortColumn: sortBy,
-            isDescending: descending != null ? descending : false,
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: currentSearch
         };
-        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
+        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL)
             await DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<DeficientConditionGoal>;
@@ -651,7 +663,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
                     totalItems = data.totalItems;
                 }
             });
-        else if(hasSelectedLibrary)
+        else if(hasSelectedLibrary.value)
             await DeficientConditionGoalService.getDeficientLibraryDate(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '').then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
@@ -665,7 +677,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
                     currentPage.value = data.items;
                     rowCache = clone(currentPage.value)
                     totalItems = data.totalItems;
-                    if (!isNullOrUndefined(selectedDeficientConditionGoalLibrary.value.id) ) {
+                    if (!isNil(selectedDeficientConditionGoalLibrary.value.id) ) {
                         getIsSharedLibraryAction(selectedDeficientConditionGoalLibrary.value).then(() => isShared = isSharedLibrary.value);
                     }      
 
@@ -676,9 +688,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
     function importLibrary() {
         setParentLibraryName(librarySelectItemValue.value ? librarySelectItemValue.value : "");
         selectDeficientConditionGoalLibraryAction({
-            libraryId: librarySelectItemValue,
+            libraryId: librarySelectItemValue.value,
         });
-        importLibraryDisabled = true;
+        importLibraryDisabled.value = true;
         scenarioLibraryIsModified = false;
         libraryImported = true;
 
@@ -694,7 +706,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }
 
     function checkLibraryEditPermission() {
-        hasLibraryEditPermission = hasAdminAccess || (hasPermittedAccess && checkUserIsLibraryOwner());
+        hasLibraryEditPermission = hasAdminAccess.value || (hasPermittedAccess.value && checkUserIsLibraryOwner());
     }
 
     function checkUserIsLibraryOwner() {
@@ -718,13 +730,13 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 library: library,    
                 isNewLibrary: true,           
                  syncModel: {
-                    libraryId: library.deficientConditionGoals.length == 0 || !hasSelectedLibrary? null : selectedDeficientConditionGoalLibrary.value.id,
+                    libraryId: library.deficientConditionGoals.length == 0 || !hasSelectedLibrary.value? null : selectedDeficientConditionGoalLibrary.value.id,
                     rowsForDeletion: library.deficientConditionGoals.length == 0 ? [] : deletionIds,
                     updateRows: library.deficientConditionGoals.length == 0 ? [] : Array.from(updatedRowsMap.values()).map(r => r[1]),
                     addedRows: library.deficientConditionGoals.length == 0 ? [] : addedRows,
                     isModified: false,
                  },
-                 scenarioId: hasScenario ? selectedScenarioId : null
+                 scenarioId: hasScenario.value ? selectedScenarioId : null
             }
             DeficientConditionGoalService.upsertDeficientConditionGoalLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -735,9 +747,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
                         clearChanges();
                     }
 
-                    if(hasScenario){
+                    if(hasScenario.value){
                         scenarioHasCreatedNew = true;
-                        importLibraryDisabled = true;
+                        importLibraryDisabled.value = true;
                     }
                     
                     addedOrUpdatedDeficientConditionGoalLibraryMutator(library);
@@ -814,7 +826,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }
 
     function onUpsertScenarioDeficientConditionGoals() {
-        if (selectedDeficientConditionGoalLibrary.value.id === uuidNIL || hasUnsavedChanges && libraryImported === false) { scenarioLibraryIsModified = true; }
+        if (selectedDeficientConditionGoalLibrary.value.id === uuidNIL || hasUnsavedChanges.value && libraryImported === false) { scenarioLibraryIsModified = true; }
         else { scenarioLibraryIsModified = false; }
 
         DeficientConditionGoalService.upsertScenarioDeficientConditionGoals({
@@ -830,7 +842,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 librarySelectItemValue.value = null;
                 resetPage();
                 addSuccessNotificationAction({message: "Modified scenario's deficient condition goals"});
-                importLibraryDisabled = true;
+                importLibraryDisabled.value = true;
                 libraryImported = false;
             }           
         });
@@ -839,10 +851,10 @@ import ConfirmDialog from 'primevue/confirmdialog';
     function onDiscardChanges() {
         librarySelectItemValue.value = null;
         setTimeout(() => {
-            if (hasScenario) {
+            if (hasScenario.value) {
                 clearChanges();
                 resetPage();
-                importLibraryDisabled = true;
+                importLibraryDisabled.value = true;
             }
         });
         parentLibraryName = loadedParentName;
@@ -909,7 +921,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             },
         );
 
-        if (hasSelectedLibrary) {
+        if (hasSelectedLibrary.value) {
             return !(
                 rules['generalRules'].valueIsNotEmpty(
                     selectedDeficientConditionGoalLibrary.value.name,
@@ -962,13 +974,13 @@ import ConfirmDialog from 'primevue/confirmdialog';
             deletionIds.length > 0 || 
             addedRows.length > 0 ||
             updatedRowsMap.size > 0 || 
-            (hasScenario && hasSelectedLibrary) ||
-            (hasSelectedLibrary && hasUnsavedChangesCore('', stateSelectedDeficientConditionGoalLibrary, selectedDeficientConditionGoalLibrary))
+            (hasScenario.value && hasSelectedLibrary.value) ||
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', stateSelectedDeficientConditionGoalLibrary.value, selectedDeficientConditionGoalLibrary))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
-        if (hasUnsavedChanges && unsavedDialogAllowed) {
+        if (hasUnsavedChanges.value && unsavedDialogAllowed) {
 
             confirm.require({
                 message: "You have unsaved changes. Are you sure you wish to continue?",
@@ -1016,7 +1028,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
                         //add library user to an array
                         libraryUserData.push(libraryUser);
                     });
-                    if (!isNullOrUndefined(selectedDeficientConditionGoalLibrary.value.id) ) {
+                    if (!isNil(selectedDeficientConditionGoalLibrary.value.id) ) {
                         getIsSharedLibraryAction(selectedDeficientConditionGoalLibrary).then(() => isShared = isSharedLibrary.value);
                     }
                     //update budget library sharing
@@ -1058,7 +1070,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             isDescending: false,
             search: ''
         };
-        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
+        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL)
             DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(selectedScenarioId, request).then(response => {
                 initializing = false
                 if(response.data){

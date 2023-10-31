@@ -102,8 +102,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     CreateCriterionLibraryTreatmentCostJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
 
-                case DataPersistenceConstants.CriterionLibraryJoinEntities.TreatmentSupersession:
-                    CreateCriterionLibraryTreatmentSupersessionJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
+                case DataPersistenceConstants.CriterionLibraryJoinEntities.TreatmentSupersedeRule:
+                    CreateCriterionLibraryTreatmentSupersedeRuleJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
 
                 case DataPersistenceConstants.CriterionLibraryJoinEntities.SelectableTreatment:
@@ -257,13 +257,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.AddAll(joinEntities, _unitOfWork.UserEntity?.Id);
         }
 
-        private void CreateCriterionLibraryTreatmentSupersessionJoins(Guid criterionLibraryId, List<Guid> supersessionIds)
+        private void CreateCriterionLibraryTreatmentSupersedeRuleJoins(Guid criterionLibraryId, List<Guid> supersedeRuleIds)
         {
-            var joinEntities = supersessionIds.Select(supersessionId =>
-                    new CriterionLibraryTreatmentSupersessionEntity
+            var joinEntities = supersedeRuleIds.Select(supersedeRuleId =>
+                    new CriterionLibraryTreatmentSupersedeRuleEntity
                     {
                         CriterionLibraryId = criterionLibraryId,
-                        TreatmentSupersessionId = supersessionId
+                        TreatmentSupersedeRuleId = supersedeRuleId
                     })
                 .ToList();
 

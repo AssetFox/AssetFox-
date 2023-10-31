@@ -24,6 +24,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public Guid ID { get; set; }
         public Guid? SimulationID { get; set; }
+        public Guid? NetworkID { get; set; }
 
         public string Results { get; private set; }
 

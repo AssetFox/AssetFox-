@@ -36,11 +36,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             return dto;
         }
 
-        public static TextAttribute Text(Guid? id = null, string name = null, bool calculated = false)
+        public static TextAttribute Text(Guid? id = null, string name = null, ConnectionType connectionType = ConnectionType.MSSQL, bool calculated = false)
         {
             var resolvedId = id ?? Guid.NewGuid();
             var randomName = name ?? ValidAttributeName();
-            var attribute = new TextAttribute("defaultValue", resolvedId, randomName, "PREDOMINANT", "command", Data.ConnectionType.MSSQL, "connectionString", calculated, true, Guid.Empty);
+            var attribute = new TextAttribute("defaultValue", resolvedId, randomName, "PREDOMINANT", "command", connectionType, "connectionString", calculated, true, Guid.Empty);
             return attribute;
         }
 
@@ -87,14 +87,30 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             return CacheDataSourceForAttributes;
         }
 
+        private static BaseDataSourceDTO GetDataSource(ConnectionType connectionType, string locationColumn = null)
+        {
+            switch (connectionType)
+            {
+            case ConnectionType.MSSQL:
+                return DataSourceDtos.TestConfigurationSql();
+            case ConnectionType.EXCEL:
+                return DataSourceDtos.TestConfigurationExcel(locationColumn);
+            default:
+                throw new NotImplementedException($"Not implemented for {connectionType}");
+            }
+        }
+
         public static AttributeDTO CreateSingleTextAttribute(
             IUnitOfWork unitOfWork,
             Guid? id = null,
-            string name = null)
+            string name = null,
+            ConnectionType connectionType = ConnectionType.MSSQL,
+            string locationColumnIfExcel = null)
         {
             var resolveId = id ?? Guid.NewGuid();
             var resolveName = name ?? RandomStrings.WithPrefix("attribute");
-            var dataSource = DataSourceDtos.TestConfigurationSql();
+
+            var dataSource = GetDataSource(connectionType, locationColumnIfExcel);
             unitOfWork.DataSourceRepo.UpsertDatasource(dataSource);
             var attribute = AttributeDtos.Text(resolveName, resolveId);
             attribute.DataSource = dataSource;

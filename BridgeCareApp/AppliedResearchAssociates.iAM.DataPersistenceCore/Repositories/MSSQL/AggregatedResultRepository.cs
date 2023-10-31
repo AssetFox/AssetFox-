@@ -138,5 +138,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .Where(_ => _.MaintainableAssetId == assetId).ToList().Where(_ => attributeIds.Contains(_.AttributeId)).ToList();
             return entities.Select(AggregatedResultMapper.ToDto).ToList();
         }
+
+        public List<AggregatedResultDTO> GetAllAggregatedResultsForMaintainableAsset(Guid assetId)
+        {
+            var entities = _unitOfWork.Context.AggregatedResult.AsSplitQuery().AsNoTracking().Include(_ => _.Attribute)
+                    .Where(_ => _.MaintainableAssetId == assetId).ToList();
+            return entities.Select(AggregatedResultMapper.ToDto).ToList();
+        }
+
+        public List<AggregatedResultDTO> GetAllAggregatedResultsForNetwork(Guid networkId)
+        {
+            return _unitOfWork.Context.AggregatedResult
+                .Include(_ => _.MaintainableAsset)
+                .Include(_ => _.Attribute)
+                .Where(_ => _.MaintainableAsset.NetworkId == networkId)
+                .Select(e => AggregatedResultMapper.ToDto(e))
+                .AsNoTracking().AsSplitQuery().ToList();
+        }
     }
 }

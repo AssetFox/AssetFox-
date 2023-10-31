@@ -12,7 +12,7 @@
                 </div>
             </v-card-text>
             <v-card-actions>
-                <v-row justify-center row v-if="dialogDataWithButtons.choice">
+                <v-row style="margin-left:10px" justify-center row v-if="dialogDataWithButtons.choice">
                     <v-btn 
                     id="Alert-Cancel-vbtn"
                     @click="onReturn('cancel')" 

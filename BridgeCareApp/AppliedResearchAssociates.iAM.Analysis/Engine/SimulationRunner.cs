@@ -594,9 +594,9 @@ public sealed class SimulationRunner
 
             var supersededTreatmentsQuery =
                 from treatment in feasibleTreatments
-                from supersession in treatment.Supersessions
-                where supersession.Criterion.EvaluateOrDefault(context)
-                select supersession.Treatment;
+                from supersedeRule in treatment.SupersedeRules
+                where supersedeRule.Criterion.EvaluateOrDefault(context)
+                select supersedeRule.Treatment;
 
             var supersededTreatments = supersededTreatmentsQuery.ToHashSet();
 

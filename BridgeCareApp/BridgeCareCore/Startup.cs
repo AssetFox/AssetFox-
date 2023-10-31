@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -93,6 +92,7 @@ namespace BridgeCareCore
 
             services.AddScoped<IReportGenerator, DictionaryBasedReportGenerator>();
             services.AddScoped<IAggregationService, AggregationService>();
+            services.AddScoped<ICompleteSimulationCloningService, CompleteSimulationCloningService>();
 
             services.AddSingleton<IAnalysisEventLoggingService, AnalysisEventLoggingService>();
         }
@@ -106,10 +106,13 @@ namespace BridgeCareCore
             reportFactoryList.Add(new ScenarioOutputReportFactory());
             reportFactoryList.Add(new PAMSSummaryReportFactory());
             reportFactoryList.Add(new BAMSAuditReportFactory());
+            reportFactoryList.Add(new PAMSAuditReportFactory());
             reportFactoryList.Add(new BAMSPBExportReportFactory());
             reportFactoryList.Add(new PAMSPBExportReportFactory());
             reportFactoryList.Add(new PAMSInventorySectionsReportFactory());
             reportFactoryList.Add(new PAMSInventorySegmentsReportFactory());
+            reportFactoryList.Add(new NetworkExportReportFactory());
+            reportFactoryList.Add(new RawDataNetworkExportReportFactory());
             services.AddSingleton<IReportLookupLibrary>(service => new ReportLookupLibrary(reportFactoryList));
         }
 

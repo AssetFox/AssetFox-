@@ -160,7 +160,7 @@
                     :items="budgetYearsGridData"
                     class='v-table__overflow ghd-table' 
                     item-key='year' 
-                    select-all 
+                    show-select 
                     sort-icon=$vuetify.icons.ghd-table-sort
                     v-model='selectedBudgetYearsGridData' 
                     :pagination.sync="pagination"
@@ -176,12 +176,12 @@
                                 <span class='sm-txt'>{{ item.value.year + firstYearOfAnalysisPeriodShift}}</span>
                             </div>       
                             <div v-if="header.value === 'action'">
-                                <v-btn @click="onRemoveBudgetYear(item.value.year)" class="ghd-blue" icon>
+                                <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(item.value.year)" class="ghd-blue" icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')" />
                                 </v-btn>
                             </div>
                             <div v-if="header.value !== 'year' && header.value !== 'action'">
-                                <v-edit-dialog :return-value.sync='item.value.values[header.value]'
+                                <editDialog :return-value.sync='item.value.values[header.value]'
                                                @save='onEditBudgetYearValue(item.value.year, header.value, item.value.values[header.value])'
                                                size="large" lazy>
                                     <v-text-field readonly single-line class='sm-txt'
@@ -193,7 +193,7 @@
                                                       v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
                                                       :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     </template>
-                                </v-edit-dialog>
+                                </editDialog>
                             </div>
 
                         </td>
@@ -282,6 +282,7 @@
 
 <script setup lang='ts'>
 import { shallowRef } from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import SetRangeForAddingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForAddingBudgetYearsDialog.vue';
 import SetRangeForDeletingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForDeletingBudgetYearsDialog.vue';
 import EditBudgetsDialog from './investment-editor-dialogs/EditBudgetsDialog.vue';
@@ -539,7 +540,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         if(initializing)
             return;
         checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = pagination;
+        const { sort, descending, page, rowsPerPage } = pagination;
         const request: InvestmentPagingRequestModel= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -560,8 +561,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 firstYearAnalysisBudgetShift: firstYearOfAnalysisPeriodShift.value,
                 isModified: scenarioLibraryIsModified
             },           
-            sortColumn: sortBy === '' ? 'year' : sortBy,
-            isDescending: descending != null ? descending : false,
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: currentSearch
         };
         
@@ -1236,7 +1237,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         else { scenarioLibraryIsModified = false; }
 
         const sync: InvestmentPagingSyncModel = {
-            libraryId: selectedBudgetLibrary.id === uuidNIL ? null : selectedBudgetLibrary.id,
+            libraryId: selectedBudgetLibrary.value.id === uuidNIL ? null : selectedBudgetLibrary.value.id,
             updatedBudgets: Array.from(updatedBudgetsMap.values()).map(r => r[1]),
             budgetsForDeletion: deletionBudgetIds,
             addedBudgets: addedBudgets,

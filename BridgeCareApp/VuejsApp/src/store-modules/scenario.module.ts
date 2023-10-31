@@ -230,8 +230,27 @@ const actions = {
     async cloneScenario({dispatch, commit}: any, payload: any) {
         let cloneScenarioData: CloneScenarioData = {
             scenarioId: payload.scenarioId,
+            destinationNetworkId: payload.destinationNetworkId,
             networkId: payload.networkId,
             scenarioName: payload.scenarioName
+        }
+
+        return await ScenarioService.cloneScenario(cloneScenarioData)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    dispatch('addSuccessNotification', {
+                        message: 'Cloned scenario ' + cloneScenarioData.scenarioName,
+                    });
+                }
+            },
+        );
+    },
+    async cloneScenarioWithDestinationNetwork({dispatch, commit}: any, payload: any) {
+        let cloneScenarioData: CloneScenarioData = {
+            scenarioId: payload.id,
+            destinationNetworkId: payload.destinationNetworkId,
+            networkId: payload.networkId,
+            scenarioName: payload.name
         }
 
         return await ScenarioService.cloneScenario(cloneScenarioData)

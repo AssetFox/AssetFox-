@@ -9,11 +9,13 @@
                             id="PerformanceCurveEditor-library-select"
                             class="ghd-control-border ghd-control-text ghd-select"
                             :items="librarySelectItems"
-                            append-icon=$vuetify.icons.ghd-down
+                            append-icon=ghd-down
                             variant="outlined"
                             v-model="librarySelectItemValue"
+                            item-title="text" 
+                            item-value="value" 
                         >
-                            <template v-slot:selection="{ item }">
+                            <!-- <template v-slot:selection="{ item }">
                                 <span class="ghd-control-text">{{ item.raw.text }}</span>
                             </template>
                             <template v-slot:item="{ item }">
@@ -24,7 +26,7 @@
                                     </v-row>
                                     </v-list-item-title>
                                 </v-list-item>
-                            </template>
+                            </template> -->
                         </v-select>
                         <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} 
                             
@@ -42,7 +44,7 @@
                             id="PerformanceCurveEditor-searchDeteriorationEquations-textField"
                             class="ghd-text-field-border ghd-text-field search-icon-general"
                             style="margin-top:0px;"
-                            prepend-inner-icon=$vuetify.icons.ghd-search
+                            prepend-inner-icon=ghd-search
                             hide-details
                             label="Search Deterioration Equations"
                             placeholder="Search Deterioration Equations"
@@ -130,36 +132,48 @@
             <v-row class="data-table" justify-left>
                 <v-col cols = "12">
                     <v-card class="elevation-0">
-                        <v-data-table
-                            id="PerformanceCurveEditor-deteriorationModels-datatable"
-                            :headers="performanceCurveGridHeaders"
-                            :items="currentPage"                       
-                            :pagination.sync="performancePagination"
-                            :total-items="totalItems"
-                            :rows-per-page-items=[5,10,25]
-                            sort-icon=$vuetify.icons.ghd-table-sort
-                            select-all
-                            v-model='selectedPerformanceEquations'
+                        <v-data-table-server
+                            id="PerformanceCurveEditor-deteriorationModels-datatable"                    
+                            show-select
                             class="fixed-header ghd-table v-table__overflow"
                             item-key="id"
+
+                            :headers="performanceCurveGridHeaders"
+                            :pagination.sync="performancePagination"
+                            :must-sort='true'
+                            sort-icon=ghd-table-sort
+                            v-model="selectedPerformanceEquations"
+                            return-object
+                            :items="currentPage"                      
+                            :items-length="totalItems"
+                            :items-per-page-options="[
+                                {value: 5, title: '5'},
+                                {value: 10, title: '10'},
+                                {value: 25, title: '25'},
+                            ]"
+                            v-model:sort-by="performancePagination.sort"
+                            v-model:page="performancePagination.page"
+                            v-model:items-per-page="performancePagination.rowsPerPage"                          
+                            @update:options="onPaginationChanged"                           
                         >
-                            <template slot="items" slot-scope="props" v-slot:item="{item}">
+                            <template slot="items" slot-scope="props" v-slot:item="item">
+                                <tr>
                                 <td>
                                     <v-checkbox id="PerformanceCurveEditor-deleteModel-vcheckbox" class="ghd-checkbox"
                                         hide-details
                                         primary
-                                        v-model='item.raw.selected'
+                                        v-model="selectedPerformanceEquations" :value="item.item"
                                     >
                                     </v-checkbox>
                                 </td>                                
                                 <td class="text-xs-left">
-                                    <v-edit-dialog
-                                        :return-value.sync="item.value.name"
+                                    <editDialog
+                                        :return-value.sync="item.item.name"
                                         @save="
                                             onEditPerformanceCurveProperty(
-                                                item.value.id,
+                                                item.item.id,
                                                 'name',
-                                                item.value.name,
+                                                item.item.name,
                                             )
                                         "
                                         size="large"
@@ -169,7 +183,7 @@
                                             readonly
                                             single-line
                                             class="sm-txt equation-name-text-field-output"
-                                            :model-value="item.value.name"
+                                            :model-value="item.item.name"
                                             :rules="[
                                                 rules['generalRules']
                                                     .valueIsNotEmpty,
@@ -179,25 +193,25 @@
                                             <v-text-field
                                                 label="Edit"
                                                 single-line
-                                                v-model="item.value.name"
+                                                v-model="item.item.name"
                                                 :rules="[
                                                     rules['generalRules']
                                                         .valueIsNotEmpty,
                                                 ]"
                                             />
                                         </template>
-                                    </v-edit-dialog>
+                                    </editDialog>
                                 </td>
                                 <td class="text-xs-left">
-                                    <v-edit-dialog
+                                    <editDialog
                                         :return-value.sync="
-                                            item.value.attribute
+                                            item.item.attribute
                                         "
                                         @save="
                                             onEditPerformanceCurveProperty(
-                                                item.value.id,
+                                                item.item.id,
                                                 'attribute',
-                                                item.value.attribute,
+                                                item.item.attribute,
                                             )
                                         "
                                         size="large"
@@ -207,7 +221,7 @@
                                             readonly
                                             single-line
                                             class="sm-txt attribute-text-field-output"
-                                            :model-value="item.value.attribute"
+                                            :model-value="item.item.attribute"
                                             :rules="[
                                                 rules['generalRules']
                                                     .valueIsNotEmpty,
@@ -216,16 +230,18 @@
                                         <template v-slot:input>
                                             <v-select
                                                 :items="attributeSelectItems"
-                                                append-icon=$vuetify.icons.ghd-down
+                                                append-icon=ghd-down
                                                 label="Edit"
-                                                v-model="item.value.attribute"
+                                                v-model="item.item.attribute"
                                                 :rules="[
                                                     rules['generalRules']
                                                         .valueIsNotEmpty,
                                                 ]"
+                                                item-title="text" 
+                                                item-value="value" 
                                             />
                                         </template>
-                                    </v-edit-dialog>
+                                    </editDialog>
                                 </td>
                                 <td class="text-xs-left">
                                     <v-menu
@@ -233,7 +249,7 @@
                                         min-height="500px"
                                         min-width="500px"
                                         v-show="
-                                            item.value.equation.expression !==
+                                            item.item.equation.expression !==
                                                 ''
                                         "
                                     >
@@ -248,7 +264,7 @@
                                                     id="PerformanceCurveEditor-checkEquation-vtextarea"
                                                     class="sm-txt Montserrat-font-family"
                                                     :model-value="
-                                                        item.value.equation
+                                                        item.item.equation
                                                             .expression
                                                     "
                                                     full-width
@@ -263,7 +279,7 @@
                                     <v-btn id="PerformanceCurveEditor-editEquation-vbtn"
                                         @click="
                                             onShowEquationEditorDialog(
-                                                item.value.id,
+                                                item.item.id,
                                             )
                                         "
                                         class="ghd-blue"
@@ -278,7 +294,7 @@
                                         min-width="500px"
                                         location="right"
                                         v-show="
-                                            item.value.criterionLibrary
+                                            item.item.criterionLibrary
                                                 .mergedCriteriaExpression !== ''
                                         "
                                     >
@@ -293,7 +309,7 @@
                                                     id="PerformanceCurveEditor-checkCriteria-vtextarea"
                                                     class="sm-txt Montserrat-font-family"
                                                     :model-value="
-                                                        item.value
+                                                        item.item
                                                             .criterionLibrary
                                                             .mergedCriteriaExpression
                                                     "
@@ -309,7 +325,7 @@
                                     <v-btn id="PerformanceCurveEditor-editCriteria-vbtn"
                                         @click="
                                             onEditPerformanceCurveCriterionLibrary(
-                                                item.value.id,
+                                                item.item.id,
                                             )
                                         "
                                         class="ghd-blue"
@@ -322,7 +338,7 @@
                                     <v-btn id="PerformanceCurveEditor-deleteModel-vbtn"
                                         @click="
                                             onRemovePerformanceCurve(
-                                                item.value.id,
+                                                item.item.id,
                                             )
                                         "
                                         class="ghd-blue"
@@ -331,11 +347,12 @@
                                         <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </td>
+                            </tr>
                             </template>
-                            <template v-slot:body.append-inner>
+                            <!-- <template v-slot:body.append-inner>
                             <v-btn>Append button</v-btn>
-                            </template>                               
-                        </v-data-table>
+                            </template>                                -->
+                        </v-data-table-server>
                         <v-btn style="margin-top:-84px"
                             id="PerformanceCurveEditor-deleteSelected-button"
                             :disabled='selectedPerformanceEquationIds.length === 0 || (!hasLibraryEditPermission && !hasScenario)'
@@ -435,7 +452,7 @@
             </v-row>
         </v-col>
 
-        <ConfirmDeleteAlert
+        <Alert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
         />
@@ -473,6 +490,7 @@
 
 <script  lang="ts" setup>
 import Vue from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import CreatePerformanceCurveLibraryDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveLibraryDialog.vue';
 import CreatePerformanceCurveDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveDialog.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
@@ -540,7 +558,6 @@ import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/
 import { http2XX } from '@/shared/utils/http-utils';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
-import { isNullOrUndefined } from 'util';
 import { Hub } from '@/connectionHub';
 import ScenarioService from '@/services/scenario.service';
 import { WorkType } from '@/shared/models/iAM/scenario';
@@ -551,40 +568,41 @@ import { useRouter } from 'vue-router';
 import mitt from 'mitt';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
+import { computed } from 'vue';
 
 const emit = defineEmits(['submit'])
 let store = useStore();
 const confirm = useConfirm();
 
-let statePerformanceCurveLibraries = ref<PerformanceCurveLibrary[]>(store.state.performanceCurveModule.performanceCurveLibraries);
-let stateSelectedPerformanceCurveLibrary = ref<PerformanceCurveLibrary>(store.state.performanceCurveModule.selectedPerformanceCurveLibrary);
-let stateScenarioPerformanceCurves = ref<PerformanceCurveLibrary[]>(store.state.performanceCurveModule.scenarioPerformanceCurves);
-let stateNumericAttributes = ref<Attribute[]>(store.state.attributeModule.numericAttributes);
-let hasUnsavedChanges = ref<boolean>(store.state.unsavedChangesFlagModule.hasUnsavedChanges);
-let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
-let currentUserCriteriaFilter = ref<UserCriteriaFilter>(store.state.userModule.currentUserCriteriaFilter);
-let hasPermittedAccess = ref<boolean>(store.state.performanceCurveModule.hasPermittedAccess);
-let isSharedLibrary = ref<boolean>(store.state.performanceCurveModule.isSharedLibrary);
+let statePerformanceCurveLibraries = computed<PerformanceCurveLibrary[]>(() => store.state.performanceCurveModule.performanceCurveLibraries);
+let stateSelectedPerformanceCurveLibrary = computed<PerformanceCurveLibrary>(() => store.state.performanceCurveModule.selectedPerformanceCurveLibrary);
+let stateScenarioPerformanceCurves = computed<PerformanceCurveLibrary[]>(() => store.state.performanceCurveModule.scenarioPerformanceCurves);
+let stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributes);
+let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
+let currentUserCriteriaFilter = computed<UserCriteriaFilter>(() => store.state.userModule.currentUserCriteriaFilter);
+let hasPermittedAccess = computed<boolean>(() => store.state.performanceCurveModule.hasPermittedAccess);
+let isSharedLibrary = computed<boolean>(() => store.state.performanceCurveModule.isSharedLibrary);
 
-async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess');}
-async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedPerformanceCurveLibrary');}
-async function getPerformanceCurveLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getPerformanceCurveLibraries');}
-async function selectPerformanceCurveLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectPerformanceCurveLibrary');}
-async function deletePerformanceCurveLibraryAction(payload?: any): Promise<any> {await store.dispatch('deletePerformanceCurveLibrary');}
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
-async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
-async function updatePerformanceCurveCriterionLibrariesAction(payload?: any): Promise<any> {await store.dispatch('updatePerformanceCurvesCriterionLibraries');}
-async function upsertOrDeletePerformanceCurveLibraryUsersAction(payload?: any): Promise<any> {await store.dispatch('upsertOrDeletePerformanceCurveLibraryUsers');}
-async function importScenarioPerformanceCurvesFileAction(payload?: any): Promise<any> {await store.dispatch('importScenarioPerformanceCurvesFile');}
-async function importLibraryPerformanceCurvesFileAction(payload?: any): Promise<any> {await store.dispatch('importLibraryPerformanceCurvesFileAction');}
-async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification');}
-async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario');}
-async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario');}
-async function setAlertMessageAction(payload?: any): Promise<any> {await store.dispatch('setAlertMessage');}
+async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess', payload);}
+async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedPerformanceCurveLibrary', payload);}
+async function getPerformanceCurveLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getPerformanceCurveLibraries', payload);}
+async function selectPerformanceCurveLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectPerformanceCurveLibrary', payload);}
+async function deletePerformanceCurveLibraryAction(payload?: any): Promise<any> {await store.dispatch('deletePerformanceCurveLibrary', payload);}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+async function updatePerformanceCurveCriterionLibrariesAction(payload?: any): Promise<any> {await store.dispatch('updatePerformanceCurvesCriterionLibraries', payload);}
+async function upsertOrDeletePerformanceCurveLibraryUsersAction(payload?: any): Promise<any> {await store.dispatch('upsertOrDeletePerformanceCurveLibraryUsers', payload);}
+async function importScenarioPerformanceCurvesFileAction(payload?: any): Promise<any> {await store.dispatch('importScenarioPerformanceCurvesFile', payload);}
+async function importLibraryPerformanceCurvesFileAction(payload?: any): Promise<any> {await store.dispatch('importLibraryPerformanceCurvesFileAction', payload);}
+async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification', payload);}
+async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario', payload);}
+async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario', payload);}
+async function setAlertMessageAction(payload?: any): Promise<any> {await store.dispatch('setAlertMessage', payload);}
 
 let getUserNameByIdGetter: any = store.getters.getUserNameById
-function performanceCurveLibraryMutator(payload:any){store.commit('performanceCurveLibraryMutator');}
-function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selectedPerformanceCurveLibraryMutator');}
+function performanceCurveLibraryMutator(payload:any){store.commit('performanceCurveLibraryMutator', payload);}
+function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selectedPerformanceCurveLibraryMutator', payload);}
 
     let addedRows: ShallowRef<PerformanceCurve[]> = ref([]);
     let updatedRowsMap:Map<string, [PerformanceCurve, PerformanceCurve]> = new Map<string, [PerformanceCurve, PerformanceCurve]>();//0: original value | 1: updated value
@@ -595,54 +613,54 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let selectedPerformanceCurveLibrary: ShallowRef<PerformanceCurveLibrary> = shallowRef(clone(
         emptyPerformanceCurveLibrary,
     ));
-    let performancePagination: ShallowRef<Pagination> = shallowRef(clone(emptyPagination));
+    let performancePagination  = ref(clone(emptyPagination));
     let isPageInit = false;
-    let totalItems = 0;
-    let currentPage: ShallowRef<PerformanceCurve[]> = ref([]);
+    let totalItems = ref(0);
+    let currentPage  = ref<PerformanceCurve[]>([]);
     let isRunning: boolean = true;
     let isShared: boolean = false;
     let selectedScenarioId: string = getBlankGuid();
-    let hasSelectedLibrary: boolean = false;
-    let hasScenario: boolean = false;
+    let hasSelectedLibrary = ref(false);
+    let hasScenario = ref(false);
     let librarySelectItems: SelectItem[] = [];
     let modifiedDate: string; 
     
-    let performanceCurveGridHeaders: DataTableHeader[] = [
+    let performanceCurveGridHeaders: any[] = [
         {
-            text: 'Name',
-            value: 'name',
+            title: 'Name',
+            key: 'name',
             align: 'left',
             sortable: true,
             class: '',
             width: '',
         },
         {
-            text: 'Attribute',
-            value: 'attribute',
+            title: 'Attribute',
+            key: 'attribute',
             align: 'left',
             sortable: true,
             class: '',
             width: '',
         },
         {
-            text: 'Equation',
-            value: 'equation',
+            title: 'Equation',
+            key: 'equation',
             align: 'left',
             sortable: false,
             class: '',
             width: '',
         },
         {
-            text: 'Criteria',
-            value: 'criterionLibrary',
+            title: 'Criteria',
+            key: 'criterionLibrary',
             align: 'left',
             sortable: false,
             class: '',
             width: '',
         },
         {
-            text: 'Actions',
-            value: '',
+            title: 'Actions',
+            key: '',
             align: 'left',
             sortable: false,
             class: '',
@@ -660,7 +678,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let librarySelectItemValueAllowedChanged: boolean = true;
     let librarySelectItemValue: Ref<string | null> = ref(null);
 
-    let selectedPerformanceEquations: ShallowRef<PerformanceCurve[]> = ref([]);
+    let selectedPerformanceEquations: Ref<PerformanceCurve[]> = ref([]);
     let selectedPerformanceEquationIds: string[] = [];
 
     let createPerformanceCurveLibraryDialogData: CreatePerformanceCurveLibraryDialogData = clone(
@@ -692,10 +710,9 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let newLibrarySelection: boolean = false;
     let modifiedStatus : string = "";
 
-    beforeRouteEnter();
-    function beforeRouteEnter() {
-        (() => {
-            librarySelectItemValue.value= null;           
+    created();
+    function created() {
+        librarySelectItemValue.value= null;           
             getPerformanceCurveLibrariesAction().then(() => {
                 getHasPermittedAccessAction().then(() => {
                     if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.PerformanceCurve) !== -1) {
@@ -708,13 +725,13 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                             $router.push('/Scenarios/');
                         }
 
-                        hasScenario = true;
+                        hasScenario.value = true;
                         ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioPerformanceCurve}).then(response => {
                             if(response.data){
                                 setAlertMessageAction("A performance curve import has been added to the work queue")
                             }
                             initializePages().then(() =>{
-                                hasScenario = true;
+                                hasScenario.value = true;
                                 getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
                                     selectScenarioAction({ scenarioId: selectedScenarioId });        
                             });
@@ -726,8 +743,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
                     
                 });
-            });          
-        });
+            });
     }
     onMounted(()=>mounted())
     function mounted() {
@@ -750,12 +766,11 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         setAlertMessageAction('');
     }
 
-    watch(performancePagination,()=> onPaginationChanged())
     async function onPaginationChanged() {
         if(isRunning)
             return;
         checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = performancePagination.value;
+        const { sort, descending, page, rowsPerPage } = performancePagination.value;
         const request: PagingRequest<PerformanceCurve>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -766,25 +781,25 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 addedRows: addedRows.value,
                 isModified: scenarioLibraryIsModified
             },           
-            sortColumn: sortBy != null ? sortBy : '',
-            isDescending: descending != null ? descending : false,
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: currentSearch
         };
-        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL){
+        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL){
             isRunning = true;
+
             await PerformanceCurveService.getPerformanceCurvePage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<PerformanceCurve>;
                     currentPage.value = data.items;
                     rowCache = clone(currentPage.value)
-                    totalItems = data.totalItems;
+                    totalItems.value = data.totalItems;
                     isRunning = false;
                 }
             });
         }          
-        else if(hasSelectedLibrary){
+        else if(hasSelectedLibrary.value){
             isRunning = true;
-
             await PerformanceCurveService.getPerformanceLibraryModifiedDate(selectedPerformanceCurveLibrary.value.id).then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
@@ -798,9 +813,9 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                     let data = response.data as PagingPage<PerformanceCurve>;
                     currentPage.value = data.items;
                     rowCache = clone(currentPage.value)
-                    totalItems = data.totalItems;
+                    totalItems.value = data.totalItems;
                     isRunning = false;
-                    if (!isNullOrUndefined(selectedPerformanceCurveLibrary.value.id) ) {
+                    if (!isNil(selectedPerformanceCurveLibrary.value.id) ) {
                         getIsSharedLibraryAction(selectedPerformanceCurveLibrary).then(()=>isShared = isSharedLibrary.value);
                     }
                 }
@@ -810,6 +825,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
     watch(selectedPerformanceEquations,()=>onSelectedPerformanceEquationsChanged())
     function onSelectedPerformanceEquationsChanged() {
+        console.log('tset')
         selectedPerformanceEquationIds = getPropertyValues('id', selectedPerformanceEquations.value) as string[];
     } 
     
@@ -832,7 +848,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
    watch(librarySelectItemValue,()=>onLibrarySelectItemValueChangedCheckUnsaved())
     function onLibrarySelectItemValueChangedCheckUnsaved(){
-        if(hasScenario){
+        if(hasScenario.value){
             onSelectItemValueChanged();
             unsavedDialogAllowed = false;
         }           
@@ -849,7 +865,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
     function onSelectItemValueChanged() {
         trueLibrarySelectItemValue = librarySelectItemValue.value
-        selectPerformanceCurveLibraryAction(librarySelectItemValue);
+        selectPerformanceCurveLibraryAction(librarySelectItemValue.value);
     }
 
     watch(stateSelectedPerformanceCurveLibrary,()=> onStateSelectedPerformanceCurveLibraryChanged())
@@ -861,10 +877,10 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
     watch(selectedPerformanceCurveLibrary,()=> onSelectedPerformanceCurveLibraryChanged())
     function onSelectedPerformanceCurveLibraryChanged() { 
-        hasSelectedLibrary =
+        hasSelectedLibrary.value =
             selectedPerformanceCurveLibrary.value.id !== uuidNIL;
 
-        if (hasSelectedLibrary) {
+        if (hasSelectedLibrary.value) {
             checkLibraryEditPermission();
             hasCreatedLibrary = false;
             ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedPerformanceCurveLibrary.value.id, workType: WorkType.ImportLibraryPerformanceCurve}).then(response => {
@@ -891,7 +907,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     watch(stateScenarioPerformanceCurves,()=> onStateScenarioPerformanceCurvesChanged())
     function onStateScenarioPerformanceCurvesChanged() {
         if (
-            hasScenario
+            hasScenario.value
         ) {
             onPaginationChanged();
         }
@@ -926,8 +942,8 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         const hasUnsavedChanges: boolean = 
             deletionIds.value.length > 0 || 
             addedRows.value.length > 0 ||
-            updatedRowsMap.size > 0 || (hasScenario && hasSelectedLibrary) ||
-            (hasSelectedLibrary && hasUnsavedChangesCore('', selectedPerformanceCurveLibrary, stateSelectedPerformanceCurveLibrary))
+            updatedRowsMap.size > 0 || (hasScenario.value && hasSelectedLibrary.value) ||
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedPerformanceCurveLibrary, stateSelectedPerformanceCurveLibrary))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -978,13 +994,13 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 library: performanceCurveLibrary,    
                 isNewLibrary: true,           
                  syncModel: {
-                    libraryId: performanceCurveLibrary.performanceCurves.length == 0 || !hasSelectedLibrary ? null : selectedPerformanceCurveLibrary.value.id,
+                    libraryId: performanceCurveLibrary.performanceCurves.length == 0 || !hasSelectedLibrary.value ? null : selectedPerformanceCurveLibrary.value.id,
                     rowsForDeletion: performanceCurveLibrary.performanceCurves.length == 0 ? [] : deletionIds.value,
                     updateRows: performanceCurveLibrary.performanceCurves.length == 0 ? [] : Array.from(updatedRowsMap.values()).map(r => r[1]),
                     addedRows: performanceCurveLibrary.performanceCurves.length == 0 ? [] : addedRows.value,
                     isModified: scenarioLibraryIsModified
                  },
-                scenarioId: hasScenario ? selectedScenarioId : null
+                scenarioId: hasScenario.value ? selectedScenarioId : null
             }
             PerformanceCurveService.UpsertPerformanceCurveLibrary(upsertRequest).then(() => {
                 hasCreatedLibrary = true;
@@ -1160,7 +1176,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     function onDiscardChanges() {
         librarySelectItemValue.value = null;
         setTimeout(() => {
-            if (hasScenario) {
+            if (hasScenario.value) {
                 deletionIds.value = [];
                 addedRows.value = [];
                 updatedRowsMap.clear();
@@ -1206,7 +1222,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
             },
         );
 
-        if (hasSelectedLibrary) {
+        if (hasSelectedLibrary.value) {
             return !(
                 rules['generalRules'].valueIsNotEmpty(
                     selectedPerformanceCurveLibrary.value.name,
@@ -1230,8 +1246,8 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function exportPerformanceCurves() {
-        const id: string = hasScenario ? selectedScenarioId : selectedPerformanceCurveLibrary.value.id;
-                PerformanceCurveService.exportPerformanceCurves(id, hasScenario)
+        const id: string = hasScenario.value ? selectedScenarioId : selectedPerformanceCurveLibrary.value.id;
+                PerformanceCurveService.exportPerformanceCurves(id, hasScenario.value)
                     .then((response: AxiosResponse) => {
                         if (hasValue(response, 'data')) {
                             const fileInfo: FileInfo = response.data as FileInfo;
@@ -1253,7 +1269,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                     file: result.file
                 };
 
-                if (hasScenario) {
+                if (hasScenario.value) {
                     importScenarioPerformanceCurvesFileAction({
                         ...data,
                         id: selectedScenarioId,
@@ -1305,7 +1321,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 //add library user to an array
                 libraryUserData.push(libraryUser);
             });
-            if (!isNullOrUndefined(selectedPerformanceCurveLibrary.value.id) ) {
+            if (!isNil(selectedPerformanceCurveLibrary.value.id) ) {
                 getIsSharedLibraryAction(selectedPerformanceCurveLibrary).then(()=> isShared = isSharedLibrary.value);
             }
             //update performance curve library sharing
@@ -1393,7 +1409,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     function importCompleted(data: any){
         var importComp = data.importComp as importCompletion
         if( importComp.workType === WorkType.ImportScenarioPerformanceCurve && importComp.id === selectedScenarioId ||
-            hasSelectedLibrary && importComp.workType === WorkType.ImportLibraryPerformanceCurve && importComp.id === selectedPerformanceCurveLibrary.value.id){
+            hasSelectedLibrary.value && importComp.workType === WorkType.ImportLibraryPerformanceCurve && importComp.id === selectedPerformanceCurveLibrary.value.id){
             clearChanges()
             performancePagination.value.page = 1
             onPaginationChanged().then(() => {
@@ -1417,14 +1433,14 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
             isDescending: false,
             search: ''
         };
-        if((!hasSelectedLibrary || hasScenario) && selectedScenarioId !== uuidNIL)
+        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL)
             await PerformanceCurveService.getPerformanceCurvePage(selectedScenarioId, request).then(response => {
                 isRunning = false
                 if(response.data){
                     let data = response.data as PagingPage<PerformanceCurve>;
                     currentPage.value = data.items;
                     rowCache = clone(currentPage.value)
-                    totalItems = data.totalItems;
+                    totalItems.value = data.totalItems;
                     setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
                     loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
                     loadedParentName = parentLibraryName; //store original

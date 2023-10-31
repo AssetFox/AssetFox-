@@ -58,7 +58,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void UpsertOrDeleteScenarioTreatmentSupersedeRules(Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> scenarioTreatmentSupersedeRulesPerTreatmentId, Guid simulationId)
         {
             var scenarioTreatmentSupersedeRuleEntities = scenarioTreatmentSupersedeRulesPerTreatmentId
-                .SelectMany(_ => _.Value.Select(supersedeRule => supersedeRule.ToScenarioTreatmentSupersedeRuleEntity(_.Key, simulationId)))
+                .SelectMany(_ => _.Value.Select(supersedeRule => supersedeRule.ToScenarioTreatmentSupersedeRuleEntity(_.Key)))
                 .ToList();
 
             var entityIds = scenarioTreatmentSupersedeRuleEntities.Select(_ => _.Id).ToList();

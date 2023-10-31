@@ -12,7 +12,6 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq.Extensions;
-using static AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums.TreatmentEnum;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -479,7 +478,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException("No simulation was found for the given scenario");
             }
-
+            var treatments = _unitOfWork.Context.ScenarioSelectableTreatment.Where(_ => _.SimulationId == simulationId).Select(_ => _.ToDto(null));
+            
             return _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
                 .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioTreatmentCosts)
@@ -501,10 +501,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.ScenarioTreatmentPerformanceFactors)
-                .Include(_=>_.ScenarioTreatmentSupersedeRules)
-                .ThenInclude(_=>_.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
-                .ThenInclude(_=>_.CriterionLibrary)
-                .Select(_ => _.ToDto())
+                .Include(_ => _.ScenarioTreatmentSupersedeRules)
+                .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Select(_ => _.ToDto(treatments.ToList()))
                 .ToList();
         }
 
@@ -530,6 +530,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException(TreatmentLibraryNotFoundErrorMessage);
             }
 
+            var treatments = _unitOfWork.Context.SelectableTreatment.Where(_ => _.TreatmentLibraryId == libraryId).Select(_ => _.ToDto(null));
             return _unitOfWork.Context.SelectableTreatment.AsNoTracking()
                 .Include(_ => _.TreatmentCosts)
                 .ThenInclude(_ => _.TreatmentCostEquationJoin)
@@ -551,7 +552,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_=>_.CriterionLibraryTreatmentSupersedeRuleJoin)
                 .ThenInclude(_=>_.CriterionLibrary)
                 .Where(_ => _.TreatmentLibraryId == libraryId)
-                .Select(_ => _.ToDto())
+                .Select(_ => _.ToDto(treatments.ToList()))
                 .ToList();
         }
 

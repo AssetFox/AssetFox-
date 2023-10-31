@@ -1,9 +1,8 @@
 <template>
-    <v-row column class="Montserrat-font-family">
-        <v-col cols = "12">
-            <v-row justify-space-between row >              
-                <v-col cols ="4" class="ghd-constant-header">
-                    <v-row column>
+    <v-row>
+        <v-col cols="12">
+            <v-row >              
+                <v-col cols ="4" class="ghd-constant-header">                  
                         <v-subheader class="ghd-md-gray ghd-control-label">Select Budget Priority Library</v-subheader>
                             <v-select id="BudgetPriorityEditor-library-vselect"
                                 :items='librarySelectItems' 
@@ -13,15 +12,14 @@
                                 item-value="value" 
                                 v-model='librarySelectItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                             </v-select>    
-                             <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>                       
-                    </v-row>
+                            <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>                       
                 </v-col>
                 <v-col cols = "4" class="ghd-constant-header">
                     <v-row row v-show='hasSelectedLibrary || hasScenario' class="shared-owner-flex-padding">
                         <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content owner-padding">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
-                        <v-divider class="owner-shared-divider" inset vertical
+                        <v-divider :thickness="2" class="owner-shared-divider" inset vertical
                             v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
                         </v-divider>
                         <v-badge v-show="isShared" style="padding: 10px">
@@ -48,7 +46,6 @@
                     </v-row>
                 </v-col>
             </v-row>
-
         </v-col>
         <v-col v-show='hasSelectedLibrary || hasScenario' cols="12">
             <div class='priorities-data-table'>
@@ -157,10 +154,9 @@
                 </v-btn>
             </div>
         </v-col>
-        <v-col v-show='hasSelectedLibrary && selectedScenarioId === uuidNIL'
-                xs12>
-            <v-row justify-center>
-                <v-col >
+        <v-col cols="12" v-show='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
+            <v-row>
+                <v-col>
                     <v-subheader class="ghd-subheader ">Description</v-subheader>
                     <v-textarea no-resize outline rows='4' class="ghd-text-field-border"
                                 v-model='selectedBudgetPriorityLibrary.description'
@@ -170,7 +166,7 @@
             </v-row>
         </v-col>
         <v-col cols = "12">           
-            <v-row justify-center row v-show='hasSelectedLibrary || hasScenario'>
+            <v-row style="padding-bottom: 80px;" justify="center" v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn  variant = "flat" @click='onDiscardChanges'
                        v-show='hasScenario' :disabled='!hasUnsavedChanges' class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
@@ -317,7 +313,7 @@
     let selectedScenarioId: string = getBlankGuid();
     let hasSelectedLibrary = ref(false);
     let librarySelectItems  = ref<SelectItem[]>([]);
-    let shareBudgetPriorityLibraryDialogData: ShareBudgetPriorityLibraryDialogData = clone(emptyShareBudgetPriorityLibraryDialogData);
+    let shareBudgetPriorityLibraryDialogData = ref<ShareBudgetPriorityLibraryDialogData>(clone(emptyShareBudgetPriorityLibraryDialogData));
     let isShared: boolean = false;
     let dateModified: string;
 
@@ -333,9 +329,9 @@
     let selectedBudgetPriorityGridRows = ref<BudgetPriorityGridDatum[]>([]);
     let selectedBudgetPriorityIds: string[] = [];
     let selectedBudgetPriorityForCriteriaEdit: BudgetPriority = clone(emptyBudgetPriority);
-    let showCreateBudgetPriorityDialog: boolean = false;
+    let showCreateBudgetPriorityDialog = ref<boolean>(false);
     let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
-    let createBudgetPriorityLibraryDialogData: CreateBudgetPriorityLibraryDialogData = clone(emptyCreateBudgetPriorityLibraryDialogData);
+    let createBudgetPriorityLibraryDialogData = ref<CreateBudgetPriorityLibraryDialogData>(clone(emptyCreateBudgetPriorityLibraryDialogData));
     let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     let rules: InputValidationRules = validationRules;
     let uuidNIL: string = getBlankGuid();
@@ -634,15 +630,15 @@
         return getUserNameByIdGetter(selectedBudgetPriorityLibrary.value.owner) == getUserName();
     }
 
-    function onShowCreateBudgetPriorityLibraryDialog(createAsNewLibrary: boolean) {
-        createBudgetPriorityLibraryDialogData = {
+    function onShowCreateBudgetPriorityLibraryDialog(createAsNewLibrary: boolean) {     
+        createBudgetPriorityLibraryDialogData.value = {
             showDialog: true,
             budgetPriorities: createAsNewLibrary ? currentPage.value : [],
         };
     }
 
     function onSubmitCreateBudgetPriorityLibraryDialogResult(budgetPriorityLibrary: BudgetPriorityLibrary) {
-        createBudgetPriorityLibraryDialogData = clone(emptyCreateBudgetPriorityLibraryDialogData);
+        createBudgetPriorityLibraryDialogData.value = clone(emptyCreateBudgetPriorityLibraryDialogData);
         if (!isNil(budgetPriorityLibrary)) {
             const upsertRequest: LibraryUpsertPagingRequest<BudgetPriorityLibrary, BudgetPriority> = {
                 library: budgetPriorityLibrary,    
@@ -672,7 +668,7 @@
     }
 
     function onAddBudgetPriority(newBudgetPriority: BudgetPriority) {
-        showCreateBudgetPriorityDialog = false;
+        showCreateBudgetPriorityDialog.value = false;
 
         if (!isNil(newBudgetPriority)) {
             if (hasScenario.value && hasValue(stateScenarioSimpleBudgetDetails)) {
@@ -936,14 +932,14 @@
         }
     };
     function onShowShareBudgetPriorityLibraryDialog(budgetPriorityLibrary: BudgetPriorityLibrary) {
-        shareBudgetPriorityLibraryDialogData = {
+        shareBudgetPriorityLibraryDialogData.value = {
             showDialog:true,
             budgetPriorityLibrary: clone(budgetPriorityLibrary)
         }
     }
 
     function onShareBudgetPriorityLibraryDialogSubmit(budgetPriorityLibraryUsers: BudgetPriorityLibraryUser[]) {
-            shareBudgetPriorityLibraryDialogData = clone(emptyShareBudgetPriorityLibraryDialogData);
+            shareBudgetPriorityLibraryDialogData.value = clone(emptyShareBudgetPriorityLibraryDialogData);
 
             if (!isNil(budgetPriorityLibraryUsers) && selectedBudgetPriorityLibrary.value.id !== getBlankGuid())
             {

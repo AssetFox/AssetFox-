@@ -1,27 +1,34 @@
 <template>
-  <v-dialog max-width="450px" persistent v-bind:show="showDialog">
+  <v-dialog max-width="450px" persistent v-model="showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
-        <v-row justify-space-between align-center>
+        <v-row>
           <div class="ghd-control-dialog-header">New Budget Priority</div>
+          <v-spacer></v-spacer>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
             </v-btn>
         </v-row>
       </v-card-title>
       <v-card-text class="ghd-dialog-box-padding-center">
-        <v-row column>
+        <v-row>
           <v-subheader class="ghd-md-gray ghd-control-label">Priority Level</v-subheader>
+        </v-row>
+        <v-row>
           <v-text-field id="CreateBudgetPriorityDialog-priorityLevel-vtextfield" outline v-model.number="newBudgetPriority.priorityLevel"
                         :mask="'##########'" :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-text-field-border ghd-text-field"/>
+        </v-row>
+        <v-row>
           <v-subheader class="ghd-md-gray ghd-control-label">Year</v-subheader>
+        </v-row>
+        <v-row>
           <v-text-field id="CreateBudgetPriorityDialog-year-vtextfield" outline v-model.number="newBudgetPriority.year"
                         :mask="'####'" class="ghd-text-field-border ghd-text-field"/>
         </v-row>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
-        <v-row justify-center row>
+        <v-row justify="center">
           <v-btn id="CreateBudgetPriorityDialog-cancel-vbtn" @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
             Cancel
           </v-btn >
@@ -35,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue from 'vue';
+import Vue, { toRefs, ref } from 'vue';
 import {BudgetPriority, emptyBudgetPriority} from '@/shared/models/iAM/budget-priority';
 import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
@@ -43,22 +50,24 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
   const props = defineProps({
     showDialog: Boolean
   })
+  const { showDialog } = toRefs(props);
+
   const emit = defineEmits(['submit'])
 
-  let newBudgetPriority: BudgetPriority = {...emptyBudgetPriority, id: getNewGuid()};
+  let newBudgetPriority = ref<BudgetPriority>({...emptyBudgetPriority, id: getNewGuid()});
   let rules: InputValidationRules = validationRules;
 
   function disableSubmitButton() {
-    return !(rules['generalRules'].valueIsNotEmpty(newBudgetPriority.priorityLevel) === true);
+    return !(rules['generalRules'].valueIsNotEmpty(newBudgetPriority.value.priorityLevel) === true);
   }
 
   function onSubmit(submit: boolean) {
     if (submit) {
-      emit('submit', newBudgetPriority);
+      emit('submit', newBudgetPriority.value);
     } else {
       emit('submit', null);
     }
 
-    newBudgetPriority = {...emptyBudgetPriority, id: getNewGuid()};
+    newBudgetPriority.value = {...emptyBudgetPriority, id: getNewGuid()};
   }
 </script>

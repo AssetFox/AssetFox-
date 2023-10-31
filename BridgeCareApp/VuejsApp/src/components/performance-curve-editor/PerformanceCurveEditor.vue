@@ -622,7 +622,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let selectedScenarioId: string = getBlankGuid();
     let hasSelectedLibrary = ref(false);
     let hasScenario = ref(false);
-    let librarySelectItems: SelectItem[] = [];
+    let librarySelectItems  = ref<SelectItem[]>([]);
     let modifiedDate: string; 
     
     let performanceCurveGridHeaders: any[] = [
@@ -681,26 +681,26 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let selectedPerformanceEquations: Ref<PerformanceCurve[]> = ref([]);
     let selectedPerformanceEquationIds: string[] = [];
 
-    let createPerformanceCurveLibraryDialogData: CreatePerformanceCurveLibraryDialogData = clone(
+    let createPerformanceCurveLibraryDialogData = ref(clone(
         emptyCreatePerformanceLibraryDialogData,
-    );
-    let equationEditorDialogData: EquationEditorDialogData = clone(
+    ));
+    let equationEditorDialogData = ref(clone(
         emptyEquationEditorDialogData,
-    );
-    let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+    ));
+    let criterionEditorDialogData = ref(clone(
         emptyGeneralCriterionEditorDialogData,
-    );
-    let showCreatePerformanceCurveDialog = false;
-    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    ));
+    let showCreatePerformanceCurveDialog = ref(false);
+    let confirmDeleteAlertData = ref(clone(emptyAlertData));
     let rules: InputValidationRules = validationRules;
     let uuidNIL: string = getBlankGuid();
     let currentUrl: string = window.location.href;
     let hasCreatedLibrary: boolean = false;
     let disableCrudButtonsResult: boolean = false;
     let hasLibraryEditPermission: boolean = false;
-    let showImportExportPerformanceCurvesDialog: boolean = false;    
+    let showImportExportPerformanceCurvesDialog = ref(false);    
 
-    let sharePerformanceCurveLibraryDialogData: SharePerformanceCurveLibraryDialogData = clone(emptySharePerformanceCurveLibraryDialogData);
+    let sharePerformanceCurveLibraryDialogData = ref(clone(emptySharePerformanceCurveLibraryDialogData));
 
     let parentLibraryName: string = "None";
     let parentLibraryId: string = "";
@@ -816,7 +816,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                     totalItems.value = data.totalItems;
                     isRunning = false;
                     if (!isNil(selectedPerformanceCurveLibrary.value.id) ) {
-                        getIsSharedLibraryAction(selectedPerformanceCurveLibrary).then(()=>isShared = isSharedLibrary.value);
+                        getIsSharedLibraryAction(selectedPerformanceCurveLibrary.value).then(()=>isShared = isSharedLibrary.value);
                     }
                 }
             });  
@@ -838,7 +838,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
     watch(statePerformanceCurveLibraries,()=>onStatePerformanceCurveLibrariesChanged())
     function onStatePerformanceCurveLibrariesChanged() {
-        librarySelectItems = statePerformanceCurveLibraries.value.map(
+        librarySelectItems.value = statePerformanceCurveLibraries.value.map(
             (library: PerformanceCurveLibrary) => ({
                 text: library.name,
                 value: library.id,
@@ -925,7 +925,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     watch(currentPage,()=>onCurrentPageChanged())
     function onCurrentPageChanged() {
         // Get parent name from library id
-        librarySelectItems.forEach(library => {
+        librarySelectItems.value.forEach(library => {
             if (library.value === parentLibraryId) {
                 parentLibraryName = library.text;
             }
@@ -943,7 +943,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
             deletionIds.value.length > 0 || 
             addedRows.value.length > 0 ||
             updatedRowsMap.size > 0 || (hasScenario.value && hasSelectedLibrary.value) ||
-            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedPerformanceCurveLibrary, stateSelectedPerformanceCurveLibrary))
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedPerformanceCurveLibrary.value, stateSelectedPerformanceCurveLibrary.value))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -974,7 +974,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function onShowCreatePerformanceCurveLibraryDialog(createAsNewLibrary: boolean) { 
-        createPerformanceCurveLibraryDialogData = {
+        createPerformanceCurveLibraryDialogData.value = {
             showDialog: true,
             performanceCurves: createAsNewLibrary
                 ? currentPage.value
@@ -985,7 +985,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     function onSubmitCreatePerformanceCurveLibraryDialogResult(
         performanceCurveLibrary: PerformanceCurveLibrary,
     ) {
-        createPerformanceCurveLibraryDialogData = clone(
+        createPerformanceCurveLibraryDialogData.value = clone(
             emptyCreatePerformanceLibraryDialogData,
         );
 
@@ -1020,7 +1020,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     function onSubmitCreatePerformanceCurveDialogResult( 
         newPerformanceCurve: PerformanceCurve,
     ) {
-        showCreatePerformanceCurveDialog = false;
+        showCreatePerformanceCurveDialog.value = false;
 
         if (!isNil(newPerformanceCurve)) {
             addedRows.value = prepend(
@@ -1051,7 +1051,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         if (!isNil(selectedPerformanceCurve)) {
             hasSelectedPerformanceCurve = true;
 
-            equationEditorDialogData = {
+            equationEditorDialogData.value = {
                 showDialog: true,
                 equation: selectedPerformanceCurve.equation,
             };
@@ -1059,7 +1059,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function onSubmitEquationEditorDialogResult(equation: Equation) {
-        equationEditorDialogData = clone(emptyEquationEditorDialogData);
+        equationEditorDialogData.value = clone(emptyEquationEditorDialogData);
 
         if (!isNil(equation) && hasSelectedPerformanceCurve) {
             onUpdateRow(selectedPerformanceCurve.id, { ...selectedPerformanceCurve, equation: equation })
@@ -1086,7 +1086,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         if (!isNil(selectedPerformanceCurve)) {
             hasSelectedPerformanceCurve = true;
 
-            criterionEditorDialogData = {
+            criterionEditorDialogData.value = {
                 showDialog: true,
                 CriteriaExpression: selectedPerformanceCurve.criterionLibrary.mergedCriteriaExpression
             };
@@ -1096,7 +1096,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     function onSubmitCriterionEditorDialogResult(
         criterionExpression: string,
     ) {
-        criterionEditorDialogData = clone(
+        criterionEditorDialogData.value = clone(
             emptyGeneralCriterionEditorDialogData,
         );
 
@@ -1129,7 +1129,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
     function onUpsertScenarioPerformanceCurves() {
 
-        if (selectedPerformanceCurveLibrary.value.id === uuidNIL || hasUnsavedChanges && newLibrarySelection ===false) {scenarioLibraryIsModified = true;}
+        if (selectedPerformanceCurveLibrary.value.id === uuidNIL || hasUnsavedChanges.value && newLibrarySelection ===false) {scenarioLibraryIsModified = true;}
         else { scenarioLibraryIsModified = false; }
 
         PerformanceCurveService.UpsertScenarioPerformanceCurves({
@@ -1188,7 +1188,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function onShowConfirmDeleteAlert() {
-        confirmDeleteAlertData = {
+        confirmDeleteAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1197,7 +1197,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        confirmDeleteAlertData = clone(emptyAlertData);
+        confirmDeleteAlertData.value = clone(emptyAlertData);
 
         if (submit) {
             librarySelectItemValue.value = null;
@@ -1257,7 +1257,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function onSubmitImportExportPerformanceCurvesDialogResult(result: ImportExportPerformanceCurvesDialogResult) {
-        showImportExportPerformanceCurvesDialog = false;
+        showImportExportPerformanceCurvesDialog.value = false;
 
         if (hasValue(result)) {
             if (result.isExport) {
@@ -1290,14 +1290,14 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
     function onShowSharePerformanceCurveLibraryDialog(performanceCurveLibrary: PerformanceCurveLibrary)
     {
-        sharePerformanceCurveLibraryDialogData =
+        sharePerformanceCurveLibraryDialogData.value =
         {
             showDialog: true,
             performanceCurveLibrary: clone(performanceCurveLibrary),
         };
     }
     function onSharePerformanceCurveLibraryDialogSubmit(performanceCurveLibraryUsers: PerformanceCurveLibraryUser[]) {
-        sharePerformanceCurveLibraryDialogData = clone(emptySharePerformanceCurveLibraryDialogData);
+        sharePerformanceCurveLibraryDialogData.value = clone(emptySharePerformanceCurveLibraryDialogData);
 
         if (!isNil(performanceCurveLibraryUsers) && selectedPerformanceCurveLibrary.value.id !== getBlankGuid())
         {
@@ -1322,7 +1322,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 libraryUserData.push(libraryUser);
             });
             if (!isNil(selectedPerformanceCurveLibrary.value.id) ) {
-                getIsSharedLibraryAction(selectedPerformanceCurveLibrary).then(()=> isShared = isSharedLibrary.value);
+                getIsSharedLibraryAction(selectedPerformanceCurveLibrary.value).then(()=> isShared = isSharedLibrary.value);
             }
             //update performance curve library sharing
             PerformanceCurveService.upsertOrDeletePerformanceCurveLibraryUsers(selectedPerformanceCurveLibrary.value.id, libraryUserData).then((response: AxiosResponse) => {
@@ -1375,7 +1375,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
-        if (hasUnsavedChanges && unsavedDialogAllowed) {
+        if (hasUnsavedChanges.value && unsavedDialogAllowed) {
 
             confirm.require({
                 message: "You have unsaved changes. Are you sure you wish to continue?",

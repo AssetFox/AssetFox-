@@ -1,5 +1,5 @@
 <template>
-    <v-dialog width="768px" height="540px" persistent v-bind:show='showDialog'>
+    <v-dialog width="768px" height="540px" persistent v-model="showDialogComputed">
         <v-card class="div-padding">
             <v-card-title class="pa-2">
                 <v-row justify-start>
@@ -25,7 +25,7 @@
 </template>
 
 <script lang='ts' setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { ImportExportTreatmentsDialogResult } from '@/shared/models/modals/import-export-treatments-dialog-result';
@@ -33,11 +33,11 @@ import {clone} from 'ramda';
 import { useStore } from 'vuex';
 import TreatmentsFileSelector from '@/shared/components/FileSelector.vue';
 
-    const props = defineProps<{showDialog: Boolean}>()
-    const showDialog = props.showDialog;
+    const props = defineProps<{showDialog: boolean}>()
+    let showDialogComputed = computed(() => props.showDialog);
 
     async function addErrorNotificationAction(payload?: any): Promise<any> {
-        await store.dispatch('addErrorNotification');
+        await store.dispatch('addErrorNotification', payload);
     }
 
     async function setIsBusyAction(payload?: any): Promise<any> {
@@ -50,9 +50,9 @@ import TreatmentsFileSelector from '@/shared/components/FileSelector.vue';
     let store = useStore();
     const emit = defineEmits(['submit'])
 
-    watch(showDialog, () => onShowDialogChanged)
+    watch(() => props.showDialog, () => onShowDialogChanged())
     async function onShowDialogChanged() {
-        if (showDialog) {
+        if (props.showDialog) {
             closed = false;
         } else {
             TreatmentsFile = null;

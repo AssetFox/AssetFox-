@@ -36,7 +36,7 @@
                                  :items="files"
                                  :items-length="files.length"
                                  class="elevation-1 fixed-header v-table__overflow Montserrat-font-family"
-                                 sort-icon=$vuetify.icons.ghd-table-sort
+                                 sort-icon=ghd-table-sort
                                  hide-actions>
                 <template slot="items" slot-scope="props" v-slot:item="props">
                     <td>
@@ -75,15 +75,15 @@ const props = defineProps<{
     }>()
 const { useTreatment } = toRefs(props);
 
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
 async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('setIsBusy');}
 
     let applyNoTreatment= shallowRef<boolean>(true);
     let fileSelect: HTMLInputElement = {} as HTMLInputElement;
     let tableHeaders: any[] = [
-        {text: 'Name', value: 'name', align: 'left', sortable: false, class: '', width: '50%'},
-        {text: 'Size', value: 'size', align: 'left', sortable: false, class: '', width: '35%'},
-        {text: 'Action', value: 'action', align: 'left', sortable: false, class: '', width: ''}
+        {title: 'Name', key: 'name', align: 'left', sortable: false, class: '', width: '50%'},
+        {title: 'Size', key: 'size', align: 'left', sortable: false, class: '', width: '35%'},
+        {title: 'Action', key: 'action', align: 'left', sortable: false, class: '', width: ''}
     ];
     let files: File[] = [];
     let file= shallowRef<File|null>(null);   

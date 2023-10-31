@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="450px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-row justify-space-between align-center>
@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, watch } from 'vue';
+import { computed, reactive, watch } from 'vue';
 import {CreateCashFlowRuleLibraryDialogData} from '@/shared/models/modals/create-cash-flow-rule-library-dialog-data';
 import {
   CashFlowDistributionRule,
@@ -65,6 +65,7 @@ import { useStore } from 'vuex';
   let getIdByUserNameGetter: any = store.getters.getIdByUserName;
 
   const props = defineProps<{dialogData: CreateCashFlowRuleLibraryDialogData}>()
+  let showDialogComputed = computed(() => props.dialogData.showDialog);
   const emit = defineEmits(['submit']);
 
   let newCashFlowRuleLibrary: CashFlowRuleLibrary = {...emptyCashFlowRuleLibrary, id: getNewGuid()};

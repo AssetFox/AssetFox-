@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-bind:show="showDialog">
+  <v-dialog max-width="450px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-row justify-space-between align-center>
@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import {BudgetPriority, emptyBudgetPriority} from '@/shared/models/iAM/budget-priority';
 import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
@@ -43,6 +43,7 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
   const props = defineProps({
     showDialog: Boolean
   })
+  let showDialogComputed = computed(() => props.showDialog);
   const emit = defineEmits(['submit'])
 
   let newBudgetPriority: BudgetPriority = {...emptyBudgetPriority, id: getNewGuid()};

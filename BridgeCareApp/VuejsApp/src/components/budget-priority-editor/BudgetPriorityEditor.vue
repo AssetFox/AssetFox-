@@ -921,7 +921,7 @@
     }
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
-        if (hasUnsavedChanges && unsavedDialogAllowed) {
+        if (hasUnsavedChanges.value && unsavedDialogAllowed) {
             confirm.require({
                 message: "You have unsaved changes. Are you sure you wish to continue?",
                 header: "Unsaved Changes",

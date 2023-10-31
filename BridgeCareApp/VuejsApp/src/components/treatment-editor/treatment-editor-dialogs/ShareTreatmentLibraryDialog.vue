@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="500px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title>
         <v-row justify-center>
@@ -12,7 +12,7 @@
       <v-card-text>
         <v-data-table :headers="treatmentLibraryUserGridHeaders"
                       :items="treatmentLibraryUserGridRows"
-                      sort-icon=$vuetify.icons.ghd-table-sort
+                      sort-icon=ghd-table-sort
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="props">
             <td>
@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
@@ -63,15 +63,15 @@ import TreatmentService from '@/services/treatment.service';
 import { http2XX } from '@/shared/utils/http-utils';
 
     const props = defineProps<{dialogData: ShareTreatmentLibraryDialogData}>()
-    const dialogData = reactive(props.dialogData);
+    let showDialogComputed = computed(() => props.dialogData.showDialog);
     const emit = defineEmits(['submit'])
     let store = useStore();
-    let stateUsers = ref<User[]>(store.state.userModule.users);
+    let stateUsers = computed<User[]>(() => store.state.userModule.users);
 
-  let treatmentLibraryUserGridHeaders: DataTableHeader[] = [
-    {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
+  let treatmentLibraryUserGridHeaders: any[] = [
+    {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Shared With', key: '', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Can Modify', key: '', align: 'left', sortable: true, class: '', width: ''}
   ];
   let treatmentLibraryUserGridRows: TreatmentLibraryUserGridRow[] = [];
   let currentUserAndOwner: TreatmentLibraryUser[] = [];
@@ -79,7 +79,7 @@ import { http2XX } from '@/shared/utils/http-utils';
 
   watch(() => props.dialogData, () => onDialogDataChanged)
   async function onDialogDataChanged() {
-    if (dialogData.showDialog) {
+    if (props.dialogData.showDialog) {
       onSetGridData();
       onSetUsersSharedWith();
     }
@@ -101,7 +101,7 @@ import { http2XX } from '@/shared/utils/http-utils';
    function onSetUsersSharedWith() {
         //treatment library users
         let treatmentLibraryUsers: TreatmentLibraryUser[] = [];
-        TreatmentService.getTreatmentLibraryUsers(dialogData.treatmentLibrary.id).then(response => {
+        TreatmentService.getTreatmentLibraryUsers(props.dialogData.treatmentLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];

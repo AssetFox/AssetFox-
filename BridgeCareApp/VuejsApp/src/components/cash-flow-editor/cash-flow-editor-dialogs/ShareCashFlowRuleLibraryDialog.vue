@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="500px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title>
         <v-row justify-center>
@@ -12,7 +12,7 @@
       <v-card-text>
         <v-data-table id="ShareCashFlowRuleLibraryDialog-table-vdatatable" :headers="shareCashFlowRuleLibraryUserGridHeaders"
                       :items="shareCashFlowRuleLibraryUserGridRows"
-                      sort-icon=$vuetify.icons.ghd-table-sort
+                      sort-icon=ghd-table-sort
                       :search="searchTerm">
           <template v-slot:item="{item}" slot="items" slot-scope="props">
             <td>
@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, watch, ref } from 'vue';
+import { reactive, watch, ref, computed } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {CashFlowRuleLibraryUser } from '@/shared/models/iAM/cash-flow';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -64,15 +64,16 @@ import { useStore } from 'vuex';
   let store = useStore();
 
   const props = defineProps<{dialogData: ShareCashFlowRuleLibraryDialogData}>()
+  let showDialogComputed = computed(() => props.dialogData.showDialog);
   const emit = defineEmits(['submit']);
 
   let stateUsers = ref<User[]>(store.state.userModule.users);
 
-  const shareCashFlowRuleLibraryUserGridHeaders: DataTableHeader[] = [
-    {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
-  ];
+  const shareCashFlowRuleLibraryUserGridHeaders: any[]= [
+    {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Shared With', key: '', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Can Modify', key: '', align: 'left', sortable: true, class: '', width: ''}
+  ] as DataTableHeader[];
   let shareCashFlowRuleLibraryUserGridRows: CashFlowRuleLibraryUserGridRow[] = [];
   let currentUserAndOwner: CashFlowRuleLibraryUser[] = [];
   let searchTerm: string = '';

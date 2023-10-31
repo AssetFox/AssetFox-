@@ -1,5 +1,5 @@
 <template>
-  <v-dialog persistent maximizable v-bind:show="dialogData.showDialog" class="criterion-library-editor-dialog">
+  <v-dialog persistent maximizable v-model="showDialogComputed" class="criterion-library-editor-dialog">
     <v-card>
       <v-card-text>
         <v-row justify-center column>
@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import {CriterionFilterEditorDialogData} from '../models/modals/criterion-filter-editor-dialog-data';
 import {hasValue} from '@/shared/utils/has-value-util';
 import CriterionLibraryEditor from '@/components/criteria-editor/CriterionLibraryEditor.vue';
@@ -56,7 +56,7 @@ const emit = defineEmits(['submitCriteriaEditorDialogResult'])
 const props = defineProps<{
   dialogData: CriterionFilterEditorDialogData
     }>()
-
+    let showDialogComputed = computed(() => props.dialogData.showDialog);
 async function getAvailableReportsAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports');}
 
   let uuidNIL: string = getBlankGuid();

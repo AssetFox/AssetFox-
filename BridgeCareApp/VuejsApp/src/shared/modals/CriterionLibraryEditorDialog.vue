@@ -1,5 +1,5 @@
 <template>
-    <v-dialog persistent maximizable v-bind:show="dialogData.showDialog" class="criterion-library-editor-dialog">
+    <v-dialog persistent maximizable v-model="showDialogComputed" class="criterion-library-editor-dialog">
         <v-card>
             <v-card-text>
                 <v-row justify-center column>
@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import { CriterionLibraryEditorDialogData } from '../models/modals/criterion-library-editor-dialog-data';
 import {
     CriterionLibrary,
@@ -54,7 +54,7 @@ import {
 import { hasValue } from '@/shared/utils/has-value-util';
 import CriterionLibraryEditor from '@/components/criteria-editor/CriterionLibraryEditor.vue';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
-import { clone, isNil } from 'ramda';
+import { ap, clone, isNil } from 'ramda';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
@@ -67,16 +67,16 @@ const emit = defineEmits(['submit'])
 const props = defineProps<{
     dialogData: CriterionLibraryEditorDialogData
     }>()
-
-    let stateCriterionLibraries = ref<CriterionLibrary[]>(store.state.criterionModule.criterionLibraries);
-    let stateSelectedCriterionLibrary = ref<CriterionLibrary>(store.state.criterionModule.selectedCriterionLibrary);
-    let stateSelectedCriterionIsValid = ref<boolean>(store.state.criterionModule.selectedCriterionIsValid);
-    let stateScenarioRelatedCriteria = ref<CriterionLibrary>(store.state.criterionModule.scenarioRelatedCriteria);
-    async function getCriterionLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getCriterionLibraries');}
-    async function setSelectedCriterionIsValidAction(payload?: any): Promise<any> {await store.dispatch('setSelectedCriterionIsValid');}
-    async function selectScenarioRelatedCriterionAction(payload?: any): Promise<any> {await store.dispatch('selectScenarioRelatedCriterion');}
-    async function selectCriterionLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectCriterionLibrary');}
-    async function upsertCriterionLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertCriterionLibrary');}
+    let showDialogComputed = computed(() => props.dialogData.showDialog);
+    let stateCriterionLibraries = computed<CriterionLibrary[]>(() => store.state.criterionModule.criterionLibraries);
+    let stateSelectedCriterionLibrary = computed<CriterionLibrary>(() => store.state.criterionModule.selectedCriterionLibrary);
+    let stateSelectedCriterionIsValid = computed<boolean>(() => store.state.criterionModule.selectedCriterionIsValid);
+    let stateScenarioRelatedCriteria = computed<CriterionLibrary>(() => store.state.criterionModule.scenarioRelatedCriteria);
+    async function getCriterionLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getCriterionLibraries', payload);}
+    async function setSelectedCriterionIsValidAction(payload?: any): Promise<any> {await store.dispatch('setSelectedCriterionIsValid', payload);}
+    async function selectScenarioRelatedCriterionAction(payload?: any): Promise<any> {await store.dispatch('selectScenarioRelatedCriterion', payload);}
+    async function selectCriterionLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectCriterionLibrary', payload);}
+    async function upsertCriterionLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertCriterionLibrary', payload);}
     let criterionLibraryEditorSelectedCriterionLibrary: CriterionLibrary = clone(
         emptyCriterionLibrary,
     );
@@ -134,7 +134,7 @@ const props = defineProps<{
         hasUnsavedChanges = hasUnsavedChangesCore(
             'criterion-library',
             criterionLibraryEditorSelectedCriterionLibrary,
-            stateSelectedCriterionLibrary,
+            stateSelectedCriterionLibrary.value,
         );
     }
 
@@ -170,13 +170,13 @@ const props = defineProps<{
 
     function onSubmit(submit: boolean) {
         if (submit) {
-            if (!isNil(stateScenarioRelatedCriteria)) {
+            if (!isNil(stateScenarioRelatedCriteria.value)) {
                 upsertCriterionLibraryAction({
-                    library: stateScenarioRelatedCriteria,
+                    library: stateScenarioRelatedCriteria.value,
                 })
                 .then((id: string) => {
                     stateScenarioRelatedCriteria.value.id = id;
-                    emit('submit', stateScenarioRelatedCriteria);
+                    emit('submit', stateScenarioRelatedCriteria.value);
                 });
             }
         } else {

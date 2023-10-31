@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="450px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-row justify-space-between align-center >
@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { reactive, watch } from 'vue';
+import Vue, { computed, reactive, watch } from 'vue';
 import {CreateBudgetPriorityLibraryDialogData} from '@/shared/models/modals/create-budget-priority-library-dialog-data';
 import {
   BudgetPercentagePair,
@@ -54,6 +54,7 @@ import { useStore } from 'vuex';
   const props = defineProps<{
     dialogData: CreateBudgetPriorityLibraryDialogData
   }>()
+  let showDialogComputed = computed(() => props.dialogData.showDialog);
   let dialogData = reactive(props.dialogData);
   const emit = defineEmits(['submit'])
   let getIdByUserNameGetter: any = store.getters.getIdByUserName;

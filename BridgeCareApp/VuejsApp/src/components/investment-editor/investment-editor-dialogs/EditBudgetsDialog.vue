@@ -18,7 +18,7 @@
                                   :headers='editBudgetsDialogGridHeaders'
                                   :items="editBudgetsDialogGridData"
                                   :items-length="editBudgetsDialogGridData.length"
-                                  sort-icon=$vuetify.icons.ghd-table-sort
+                                  sort-icon=ghd-table-sort
                                   hide-actions
                                   item-key='id'
                                   v-model='selectedGridRows'
@@ -93,7 +93,7 @@
 </template>
 
 <script lang='ts' setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import { hasValue } from '@/shared/utils/has-value-util';
 import { any, clone, isNil, update, findIndex, propEq, isEmpty } from 'ramda';

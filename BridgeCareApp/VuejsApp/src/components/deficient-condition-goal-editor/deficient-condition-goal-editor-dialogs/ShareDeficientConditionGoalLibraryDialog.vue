@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="500px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title>
         <v-row justify-center>
@@ -13,7 +13,7 @@
         <v-data-table id="ShareDeficientConditionGoalLibraryDialog-table-vdatatable" 
                       :headers="deficientConditionGoalLibraryUserGridHeaders"
                       :items="deficientConditionGoalLibraryUserGridRows"
-                      sort-icon=$vuetify.icons.ghd-table-sort
+                      sort-icon=ghd-table-sort
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="{item}">
             <td>
@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { watch } from 'vue';
+import Vue, { computed, watch } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {DeficientConditionGoalLibraryUser } from '@/shared/models/iAM/deficient-condition-goal';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -67,15 +67,16 @@ let store = useStore();
 const props = defineProps<{
   dialogData: ShareDeficientConditionGoalLibraryDialogData
 }>()
+let showDialogComputed = computed(() => props.dialogData.showDialog);
 const emit = defineEmits(['submit']);
 
 let stateUsers = store.state.userModule.users as User[];
 
-  let deficientConditionGoalLibraryUserGridHeaders: DataTableHeader[] = [
-    {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
-  ];
+  let deficientConditionGoalLibraryUserGridHeaders: any[] = [
+    {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Shared With', key: '', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Can Modify', key: '', align: 'left', sortable: true, class: '', width: ''}
+  ] ;
   let deficientConditionGoalLibraryUserGridRows: DeficientConditionGoalLibraryUserGridRow[] = [];
   let currentUserAndOwner: DeficientConditionGoalLibraryUser[] = [];
   let searchTerm: string = '';

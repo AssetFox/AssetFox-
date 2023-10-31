@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-dialog max-width="450px" persistent v-bind:show="showDialog">
+    <v-dialog max-width="450px" persistent v-model="showDialogComputed">
       <v-card>
         <v-card-title class="ghd-dialog-box-padding-top">
          <v-row justify-space-between align-center>
@@ -23,7 +23,7 @@
               <v-subheader class="ghd-md-gray ghd-control-label">Select Attribute</v-subheader>
               <v-select id="CreateDeficientConditionGoalDialog-attribute-vselect"
                         :items="numericAttributeNames"
-                        append-icon=$vuetify.icons.ghd-down
+                        append-icon=ghd-down
                         variant="outlined"
                         v-model="newDeficientConditionGoal.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-select ghd-text-field ghd-text-field-border">
@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { onMounted, shallowRef, watch } from 'vue';
+import Vue, { computed, onMounted, shallowRef, watch } from 'vue';
 import {DeficientConditionGoal, emptyDeficientConditionGoal} from '@/shared/models/iAM/deficient-condition-goal';
 import {clone} from 'ramda';
 import {Attribute} from '@/shared/models/iAM/attribute';
@@ -82,6 +82,7 @@ import { useStore } from 'vuex';
     currentNumberOfDeficientConditionGoals: number,
     showDialog: boolean
   }>()
+  let showDialogComputed = computed(() => props.showDialog);
   const emit = defineEmits(['submit'])
 
   let stateNumericAttributes = shallowRef<Attribute[]>(store.state.attributeModule.numericAttributes);

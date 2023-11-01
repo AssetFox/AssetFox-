@@ -5,7 +5,7 @@
                 <v-row justify-center>
                     <v-card class="under-construction-card">
                         <div class="under-construction-img-div">
-                            <v-img :src="getUrl('@/assets/images/under-construction.png')"
+                            <v-img :src="getUrl('assets/images/under-construction.png')"
                                    class="under-construction-img">
                             </v-img>
                         </div>

@@ -107,7 +107,7 @@
                                         <template v-slot:activator>
                                             <div v-if='stateScenarioSimpleBudgetDetails.length > 5'>
                                                 <v-btn class='ara-blue ghd-button-text' icon>
-                                                    <img class='img-general' :src="getUrl('@/assets/icons/eye-ghd-blue.svg')"/>
+                                                    <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                                 </v-btn>
                                             </div>
                                             <div v-else class='priority-criteria-output'>
@@ -124,7 +124,7 @@
                                     </v-menu>
                                     <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' class='ghd-blue'
                                            icon>
-                                        <img class='img-general' :src="getUrl('@/assets/icons/edit.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-row>
                             </div>
@@ -144,7 +144,7 @@
                             </div>
                             <div v-else>
                                 <v-btn id="BudgetPriorityEditor-deleteBudgetPriority-btn" @click="onRemoveBudgetPriority(item.item.id)"  class="ghd-blue" icon>
-                                    <img class='img-general' :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
+                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                             </div>
                         </td>

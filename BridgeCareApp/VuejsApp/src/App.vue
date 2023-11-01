@@ -179,7 +179,7 @@
                     <v-divider class="mx-1 navbar-divider" vertical style="background-color: #798899; margin-left:90% !important;"/>
                 </v-toolbar-title>
                 <v-toolbar-title style="margin-left:2px !important" class="navbar-gray" v-if="authenticated">
-                    <img style="height:40px; position:relative; top:2px" :src="getUrl('@/assets/icons/user-no-circle.svg')"/>
+                    <img style="height:40px; position:relative; top:2px" :src="getUrl('assets/icons/user-no-circle.svg')"/>
                     <span
                       id="App-username-span"
                     >{{ username }}</span>

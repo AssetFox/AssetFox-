@@ -123,7 +123,7 @@
                                     class="ghd-blue"
                                     icon
                                     v-if="hasAdminAccess">
-                                    <img class='img-general img-shift' :src="getUrl('@/assets/icons/edit.svg')"/>
+                                    <img class='img-general img-shift' :src="getUrl('assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -170,7 +170,7 @@
                                     class="ghd-blue"
                                     icon
                                     v-if="hasAdminAccess">
-                                    <img class='img-general img-shift' :src="getUrl('@/assets/icons/edit.svg')"/>
+                                    <img class='img-general img-shift' :src="getUrl('assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -188,7 +188,7 @@
                                     class="ghd-blue"
                                     icon
                                     v-if="hasAdminAccess">
-                                    <img class='img-general img-shift' :src="getUrl('@/assets/icons/edit.svg')"/>
+                                    <img class='img-general img-shift' :src="getUrl('assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -201,7 +201,7 @@
                             class="ghd-blue"
                             icon
                             :disabled="!hasAdminAccess">
-                            <img class='img-general' :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
+                            <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </td>
                     </tr>

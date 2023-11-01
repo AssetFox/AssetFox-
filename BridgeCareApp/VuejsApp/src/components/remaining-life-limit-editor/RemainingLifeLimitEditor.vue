@@ -164,12 +164,12 @@
                         </td>
                         <td class="px-0">
                             <v-btn id="RemainingLifeLimitEditor-editCriteria-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)" icon>
-                                <img class='img-general' :src="getUrl('@/assets/icons/edit.svg')"/>
+                                <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                             </v-btn>   
                         </td>
                         <td justify-end>
                             <v-btn id="RemainingLifeLimitEditor-deleteAttribute-btn" @click="onRemoveRemainingLifeLimitIcon(props.item)" icon>
-                                <img class='img-general' :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
+                                <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>                          
                         </td>
                     </tr>

@@ -183,7 +183,7 @@
                             </div>       
                             <div v-if="header.key === 'action'">
                                 <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(item.year)" class="ghd-blue" icon>
-                                    <img class='img-general' :src="getUrl('@/assets/icons/trash-ghd-blue.svg')" />
+                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
                                 </v-btn>
                             </div>
                             <div v-if="header.key !== 'year' && header.key !== 'action'">

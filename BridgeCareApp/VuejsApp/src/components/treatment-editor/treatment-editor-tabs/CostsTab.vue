@@ -24,7 +24,7 @@
                                         class="edit-icon"
                                         icon
                                     >
-                                        <img class='img-general' :src="getUrl('@/assets/icons/edit.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                     </v-btn>                                
                                 </v-row>
                                 <v-row  rows = "6" align-center>  
@@ -53,7 +53,7 @@
                                         class="edit-icon"
                                         icon
                                     >
-                                        <img class='img-general' :src="getUrl('@/assets/icons/edit.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-row> 
                                 <v-row  rows = "6" align-center>              
@@ -79,7 +79,7 @@
                                         @click="onRemoveCost(props.item.id)"
                                         icon
                                     >
-                                        <img class='img-general' :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </v-row>                   
                             </td>

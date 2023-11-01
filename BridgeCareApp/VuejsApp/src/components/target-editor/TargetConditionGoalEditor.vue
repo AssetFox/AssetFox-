@@ -173,7 +173,7 @@
                                     @click="onShowCriterionLibraryEditorDialog(props.item)"
                                     class="ghd-blue"
                                     flat>
-                                    <img class='img-general' :src="getUrl('@/assets/icons/edit.svg')"/>
+                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                 </v-btn>
                             </v-row>
                         </td>
@@ -183,7 +183,7 @@
                                 @click="onRemoveTargetConditionGoalsIcon(props.item)"  
                                 class="ghd-blue" 
                                 flat>
-                                    <img class='img-general' :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
+                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>
                         </td>
                     </tr>

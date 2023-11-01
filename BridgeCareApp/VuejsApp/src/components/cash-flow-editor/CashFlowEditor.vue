@@ -140,7 +140,7 @@
                                 id="CashFlowEditor-editCashFlowRule-btn"
                                 class="ghd-blue"
                                 icon>
-                                <img class='img-general' :src="getUrl('@/assets/icons/edit.svg')"/>
+                                <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                             </v-btn>
                             </v-row>
                                                    
@@ -152,14 +152,14 @@
                                 id="CashFlowEditor-deleteCashFlowRule-btn"
                                 class="ghd-blue"
                                 icon>
-                                <img class='img-general' :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
+                                <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>
                             <v-btn
                                 @click="onSelectCashFlowRule(item.item.id)"
                                 id="CashFlowEditor-editCashFlowRuleDistribution-btn"
                                 class="ghd-blue"
                                 icon>
-                                <img class='img-general' :src="getUrl('@/assets/icons/edit-cash.svg')"/>
+                                <img class='img-general' :src="getUrl('assets/icons/edit-cash.svg')"/>
                             </v-btn>
                             </v-row>                          
                         </td>

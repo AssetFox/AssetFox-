@@ -106,7 +106,7 @@
                                             icon
                                             style="left:25px"
                                         >
-                                            <img class='img-general' :src="getUrl('@/assets/icons/edit.svg')"/>
+                                            <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                         </v-btn>   
                                     </v-col>                                    
                                 </v-row>       

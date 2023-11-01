@@ -128,7 +128,7 @@
                                     class="edit-icon ghd-control-label"
                                     flat
                                 >
-                                    <img class='img-general' :src="getUrl('@/assets/icons/edit.svg')"/>
+                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                 </v-btn>
                                 </v-row>
                                 <v-textarea

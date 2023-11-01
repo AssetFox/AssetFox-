@@ -34,7 +34,7 @@
                         <input type ="radio" v-if="DialogData.settingName == 'InventoryReports'" v-model="setting.networkType" value ="(P)"/>
                         <label v-if="DialogData.settingName == 'InventoryReports'">PRIMARY</label>
                         <v-btn @click="onDeleteSettingClick(setting)"  class="ghd-blue" icon>
-                            <img class='img-general' :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
+                            <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </v-list-tile>
                 </v-list>

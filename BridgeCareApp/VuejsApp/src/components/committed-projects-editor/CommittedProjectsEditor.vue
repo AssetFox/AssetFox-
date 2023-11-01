@@ -204,7 +204,7 @@
                                                 <v-btn 
                                                     id="CommittedProjectsEditor-deleteCommittedProject-vbtn"
                                                     @click="OnDeleteClick(props.item.id)"  class="ghd-blue" icon>
-                                                    <img class='img-general' :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
+                                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                                 </v-btn>
                                             </v-row>
                                         </div>                            

@@ -6,7 +6,7 @@
                     <v-row fill-height justify-center>
                         <div class="drag-drop-area">
                             <v-row fill-height align-center justify-center>
-                                <img :src="require('@/assets/icons/upload.svg')"/>
+                                <img :src="getUrl('assets/icons/upload.svg')"/>
                                 <v-row column align-center>
                                     <span class="span-center Montserrat-font-family">Drag & Drop Files Here </span>
                                     <!--<span class="span-center Montserrat-font-family">or</span>
@@ -47,7 +47,7 @@
                     </td>
                     <td>
                         <v-btn @click="file = null" class="ghd-blue" icon>
-                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                            <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </td>
                 </template>
@@ -66,6 +66,7 @@ import { formatBytes } from '@/shared/utils/math-utils';
 import {inject, reactive, ref, toRefs, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { getUrl } from '../utils/get-url';
 
 let store = useStore();
 const emit = defineEmits(['submit','treatment'])

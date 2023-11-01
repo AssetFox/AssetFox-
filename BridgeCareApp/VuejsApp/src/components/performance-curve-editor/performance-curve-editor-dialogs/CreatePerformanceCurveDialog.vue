@@ -25,19 +25,9 @@
               append-icon=ghd-down
               :rules="[rules['generalRules'].valueIsNotEmpty]"
               variant="outlined"
+              item-title="text"
+              item-value="value"
             >
-              <template v-slot:selection="{ item }">
-                <span class="ghd-control-text">{{ item.raw.text }}</span>
-              </template>
-              <template v-slot:item="{ item }">
-                <v-list-item class="ghd-control-text" v-bind="props">
-                    <v-list-item-title>
-                      <v-row no-gutters align="center">
-                      <span>{{ item.raw.text }}</span>
-                      </v-row>
-                    </v-list-item-title>
-                </v-list-item>
-              </template>
             </v-select>                      
           </v-row>
         </v-card-text>
@@ -86,8 +76,8 @@ const props = defineProps<{
     }>()
     let showDialogComputed = computed(() => props.showDialog);
     let stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributes);
-    let attributeSelectItems: SelectItem[] = [];
-    let newPerformanceCurve: PerformanceCurve = {...emptyPerformanceCurve, id: getNewGuid()};
+    let attributeSelectItems = ref<SelectItem[]>([]);
+    let newPerformanceCurve = ref<PerformanceCurve>({...emptyPerformanceCurve, id: getNewGuid()});
     let rules: InputValidationRules = validationRules;
 
   onMounted(()=>mounted())
@@ -105,7 +95,7 @@ const props = defineProps<{
   }
 
   function setAttributeSelectItems() {
-    attributeSelectItems = stateNumericAttributes.value.map((attribute: Attribute) => ({
+    attributeSelectItems.value = stateNumericAttributes.value.map((attribute: Attribute) => ({
       text: attribute.name,
       value: attribute.name
     }));
@@ -113,11 +103,11 @@ const props = defineProps<{
 
   function onSubmit(submit: boolean) {
     if (submit) {
-      emit('submit', newPerformanceCurve);
+      emit('submit', newPerformanceCurve.value);
     } else {
       emit('submit', null);
     }
 
-    newPerformanceCurve = {...emptyPerformanceCurve, id: getNewGuid()};
+    newPerformanceCurve.value = {...emptyPerformanceCurve, id: getNewGuid()};
   }
 </script>

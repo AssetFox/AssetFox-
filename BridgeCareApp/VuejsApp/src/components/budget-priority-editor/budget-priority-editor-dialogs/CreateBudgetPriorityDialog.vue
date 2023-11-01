@@ -7,7 +7,7 @@
           <v-spacer></v-spacer>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
-            </v-btn>
+          </v-btn>
         </v-row>
       </v-card-title>
       <v-card-text class="ghd-dialog-box-padding-center">

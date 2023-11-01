@@ -1,9 +1,9 @@
 <template>
   <v-dialog max-width="500px" persistent v-model ="dialogData.showDialog">
     <v-card>
-      <v-card-title>
-        <v-row>
-          <h3>Budget Priority Library Sharing</h3>
+      <v-card-title class="ghd-dialog-box-padding-top">
+        <v-row>         
+          <div class="ghd-control-dialog-header">Budget Priority Library Sharing</div>
           <v-spacer></v-spacer>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { toRefs, ref, watch } from 'vue';
+import Vue, { computed, toRefs, ref, watch } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {BudgetPriorityLibraryUser } from '@/shared/models/iAM/budget-priority';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -65,13 +65,15 @@ import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
 
   let store = useStore();
-  let stateUsers = store.state.userModule.users;
+  //let stateUsers = store.state.userModule.users;
+  const stateUsers  = computed<User[]>(()=>store.state.userModule.users);
+
   const props = defineProps<{
     dialogData: ShareBudgetPriorityLibraryDialogData
-  }>()
+  }>();
   const { dialogData } = toRefs(props);
 
-  const emit = defineEmits(['submit'])
+  const emit = defineEmits(['submit']);
 
   let budgetPriorityLibraryUserGridHeaders: any[] = [
     {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
@@ -92,7 +94,7 @@ import { useStore } from 'vuex';
   function onSetGridData() {
     const currentUser: string = getUserName();
 
-    budgetPriorityLibraryUserGridRows.value = stateUsers
+    budgetPriorityLibraryUserGridRows.value = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,

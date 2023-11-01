@@ -102,114 +102,134 @@
                         v-model:page="projectPagination.page"
                         v-model:items-per-page="projectPagination.rowsPerPage"
                         item-value="name"
+                        show-select
+                        return-object
                         @update:options="onPaginationChanged"
                         class=" fixed-header v-table__overflow">
-                            <template slot="items" slot-scope="props" v-slot:item="props">
+                            <template v-slot:item="item">
+                                <tr>
+                                <td>
+                                    <v-checkbox
+                                    id="CommittedProjectsEditor-selectForDelete-vcheckbox"
+                                    hide-details
+                                    primary
+                                    v-model="selectedCpItems" :value="item.item"
+                                    ></v-checkbox>
+                                    </td>
                                 <td v-for="header in cpGridHeaders">
                                     <div>
-                                        <v-combobox v-if="header.value === 'treatment'"
-                                                    :items="treatmentSelectItems"
-                                                    class="ghd-down-small"
-                                                    label="Select a Treatment"
-                                                    v-model="props.item.treatment"
-                                                    :rules="[inputRules['generalRules'].valueIsNotEmpty]"
-                                                    @update:model-value="onEditCommittedProjectProperty(props.item,header.value,props.item[header.value])">
-                                        </v-combobox>
-                                        <v-combobox
-                                            v-else-if="header.value === 'projectSource'"
+                                        <v-select v-if="header.key === 'treatment'"
+                                            :items="treatmentSelectItems"
+                                            class="ghd-down-small"
+                                            label="Select a Treatment"
+                                            density="compact"
+                                            v-model="item.item[header.key]"
+                                            :rules="[inputRules['generalRules'].valueIsNotEmpty]"
+                                            @update:model-value="onEditCommittedProjectProperty(item.item,header.key,item.item[header.key])">
+                                        </v-select>
+                                        <v-select
+                                            v-else-if="header.key === 'projectSource'"
                                             :items="projectSourceOptions"
                                             class="ghd-down-small"
+                                            density="compact"
                                             label="Select Project Source"
-                                            v-model="props.item.projectSource"
+                                            v-model="item.item[header.key]"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"
-                                            @update:model-value="onEditCommittedProjectProperty(props.item, header.value, props.item.projectSource)"
+                                            @update:model-value="onEditCommittedProjectProperty(item.item, header.key, item.item.projectSource)"
                                             
-                                        ></v-combobox>
-                                        <editDialog v-if="header.value !== 'actions' && header.value !== 'selection'"
-                                            :return-value.sync="props.item[header.value]"
-                                            @save="onEditCommittedProjectProperty(props.item,header.value,props.item[header.value])"
+                                        ></v-select>
+                                        <editDialog v-if="header.key !== 'actions' && header.key !== 'selection'"
+                                            :return-value.sync="item.item[header.key]"
+                                            @save="onEditCommittedProjectProperty(item.item,header.key,item.item[header.key])"
                                             size="large"
                                             lazy
                                             >
-                                            <v-text-field v-if="header.value !== 'budget' 
-                                                && header.value !== 'year' 
-                                                && header.value !== 'keyAttr' 
-                                                && header.value !== 'treatment'
-                                                && header.value !== 'cost'
-                                                && header.value !== 'projectSource'"
+                                            <v-text-field v-if="header.key !== 'budget' 
+                                                && header.key !== 'year' 
+                                                && header.key !== 'keyAttr' 
+                                                && header.key !== 'treatment'
+                                                && header.key !== 'cost'
+                                                && header.key !== 'projectSource'"
                                                 readonly
                                                 class="sm-txt"
-                                                :model-value="props.item[header.value]"
+                                                density="compact"
+                                                :model-value="item.item[header.key]"
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
-                                            <v-text-field v-if="header.value === 'budget'"
+                                            <v-text-field v-if="header.key === 'budget'"
                                                 readonly
                                                 class="sm-txt"
-                                                :model-value="props.item[header.value]"/>
+                                                density="compact"
+                                                :model-value="item.item[header.key]"/>
 
-                                            <v-text-field v-if="header.value === 'keyAttr'"
+                                            <v-text-field v-if="header.key === 'keyAttr'"
                                                 readonly
                                                 class="sm-txt"
-                                                :model-value="props.item[header.value]"
+                                                density="compact"
+                                                variant="underlined"
+                                                :model-value="item.item[header.key]"
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"
-                                                :error-messages="props.item.errors"/>
+                                                :error-messages="item.item.errors"/>
 
-                                            <v-text-field v-if="header.value === 'year'"
-                                                :model-value="props.item[header.value]"
+                                            <v-text-field v-if="header.key === 'year'"
+                                                :model-value="item.item[header.key]"
                                                 :mask="'##########'"
-                                                :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), inputRules['generalRules'].valueIsNotEmpty, inputRules['generalRules'].valueIsWithinRange(props.item[header.value], [firstYear, lastYear])]"
-                                                :error-messages="props.item.yearErrors"/>
+                                                density="compact"
+                                                :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), inputRules['generalRules'].valueIsNotEmpty, inputRules['generalRules'].valueIsWithinRange(item.item[header.key], [firstYear, lastYear])]"
+                                                :error-messages="item.item.yearErrors"/>
 
-                                            <v-text-field v-if="header.value === 'cost'"
-                                                :model-value='formatAsCurrency(props.item[header.value])'
+                                            <v-text-field v-if="header.key === 'cost'"
+                                                :model-value='item.item[header.key]'
+                                                density="compact"
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
                                             <template v-slot:input>
-                                                <v-text-field v-if="header.value === 'keyAttr'"
+                                                <v-text-field v-if="header.key === 'keyAttr'"
                                                     label="Edit"
                                                     single-line
-                                                    v-model="props.item[header.value]"
+                                                    v-model="item.item[header.key]"
                                                     :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
-                                                <v-select v-if="header.value === 'budget'"
+                                                <v-select v-if="header.key === 'budget'"
                                                     :items="budgetSelectItems"
                                                     label="Select a Budget"
-                                                    v-model="props.item[header.value]">
+                                                    v-model="item.item[header.key]">
                                                 </v-select>
 
-                                                <v-select v-if="header.value === 'category'"
+                                                <v-select v-if="header.key === 'category'"
                                                     :items="categorySelectItems"
                                                     label="Select a Budget"
-                                                    v-model="props.item[header.value]">
+                                                    v-model="item.item[header.key]">
                                                 </v-select>
                                                 
-                                                <v-text-field v-if="header.value === 'year'"
+                                                <v-text-field v-if="header.key === 'year'"
                                                     label="Edit"
                                                     single-line
-                                                    v-model="props.item[header.value]"
+                                                    v-model="item.item[header.key]"
                                                     :mask="'##########'"
-                                                    :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [firstYear, lastYear])]"/>
+                                                    :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.item[header.key], [firstYear, lastYear])]"/>
 
-                                                <v-text-field v-if="header.value === 'cost'"
+                                                <v-text-field v-if="header.key === 'cost'"
                                                     label="Edit"
                                                     single-line
-                                                    v-model.number="props.item[header.value]"
+                                                    v-model.number="item.item[header.key]"
                                                     v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
                                                     :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
                                             </template>
                                         </editDialog>
                                 
-                                        <div v-if="header.value === 'actions'">
-                                            <v-row style='flex-wrap:nowrap'>
+                                        <div v-if="header.key === 'actions'">
+                                            <v-row justify="center">
                                                 <v-btn 
                                                     id="CommittedProjectsEditor-deleteCommittedProject-vbtn"
-                                                    @click="OnDeleteClick(props.item.id)"  class="ghd-blue" icon>
+                                                    @click="OnDeleteClick(item.item.id)"  class="ghd-blue" flat>
                                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                                 </v-btn>
                                             </v-row>
                                         </div>                            
                                     </div>
                                 </td>
+                            </tr>
                             </template>
                         </v-data-table-server>    
                     </v-row>
@@ -244,10 +264,9 @@
                 </v-col>
             </v-row>
         </v-col>
-        <CommittedProjectsFileUploaderDialog :is="ImportExportCommittedProjectsDialog"
-            :showDialog="showImportExportCommittedProjectsDialog"
+        <ImportExportCommittedProjectsDialog
+            :show-dialog="showImportExportCommittedProjectsDialog"
             @submit="onSubmitImportExportCommittedProjectsDialogResult"
-            @delete="onDeleteCommittedProjects"
         />
         <Alert
             :dialogData="alertDataForDeletingCommittedProjects"
@@ -262,7 +281,7 @@ import { watch, ref, onMounted, onBeforeUnmount, shallowRef, computed } from 'vu
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { CommittedProjectFillTreatmentReturnValues, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
 import { getBlankGuid, getNewGuid } from '../../shared/utils/uuid-utils';
-import { Treatment, treatmentCategoryMap, treatmentCategoryReverseMap, TreatmentLibrary } from '@/shared/models/iAM/treatment';
+import { emptyTreatmentLibrary, Treatment, treatmentCategoryMap, treatmentCategoryReverseMap, TreatmentLibrary } from '@/shared/models/iAM/treatment';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import CommittedProjectsService from '@/services/committed-projects.service';
 import { Attribute } from '@/shared/models/iAM/attribute';
@@ -314,8 +333,8 @@ import TreatmentService from '@/services/treatment.service';
     let hasSelectedLibrary: boolean = false;
     let librarySelectItems: SelectItem[] = [];
     let attributeSelectItems: SelectItem[] = [];
-    let treatmentSelectItems: string[] = [];
-    let projectSourceOptions: string [] = [];
+    const treatmentSelectItems = ref< string[] >([]);
+    const projectSourceOptions = ref< string [] >([]);
     let budgetSelectItems: SelectItem[] = [];
     let categorySelectItems: SelectItem[] = [];
     let categories: string[] = [];
@@ -339,13 +358,13 @@ import TreatmentService from '@/services/treatment.service';
     let updatedRowsMap:Map<string, [SectionCommittedProject, SectionCommittedProject]> = new Map<string, [SectionCommittedProject, SectionCommittedProject]>();//0: original value | 1: updated value
     let deletionIds = ref<string[]>([]);
     const rowCache = ref<SectionCommittedProject[]>([]);
-    let gridSearchTerm = '';
-    let currentSearch = '';
+    const gridSearchTerm = ref('');
+    const currentSearch = ref('');
     let totalItems = 0;
     const currentPage = ref<SectionCommittedProjectTableData[]>([]);
     let isRunning: boolean = true;
 
-    let selectedLibraryTreatments = ref<Treatment[]>([]);
+    const selectedLibraryTreatments = ref<Treatment[]>([]);
     let isKeyAttributeValidMap: Map<string, boolean> = new Map<string, boolean>();
 
     let projectPagination = shallowRef<Pagination>(clone(emptyPagination));
@@ -359,7 +378,7 @@ import TreatmentService from '@/services/treatment.service';
     const stateScenarioSimpleBudgetDetails = computed<SimpleBudgetDetail[]>(() =>store.state.investmentModule.scenarioSimpleBudgetDetails);
     const hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
     const networks = computed<Network[]>(() => store.state.networkModule.networks);
-
+    const selectedStateTreatmentLibrary = computed<TreatmentLibrary>(() => store.state.treatmentModule.selectedTreatmentLibrary);
 
     async function getCommittedProjects(payload?: any): Promise<any> { await store.dispatch('getCommittedProjects', payload); }
     async function getTreatmentLibrariesAction(payload?: any): Promise<any> { await store.dispatch('getTreatmentLibraries', payload); }
@@ -375,7 +394,7 @@ import TreatmentService from '@/services/treatment.service';
         // TODO:Remove this one?
         async function importCommittedProjectTemplate(payload?: any): Promise<any> { await store.dispatch('importComittedProjectTemplate', payload);}
 
-        async function selectTreatmentLibraryAction(payload?: any): Promise<any> { await store.dispatch('selectTreatmentLibrary', payload); }
+    async function selectTreatmentLibraryAction(payload?: any): Promise<any> { await store.dispatch('selectTreatmentLibrary', payload); }
     async function setHasUnsavedChangesAction(payload?: any): Promise<any> { await store.dispatch('setHasUnsavedChanges', payload); }
     async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification', payload); }
     async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification', payload); } 
@@ -389,11 +408,11 @@ import TreatmentService from '@/services/treatment.service';
     let selectedCpItems = ref<SectionCommittedProjectTableData[]>([]);
     let sectionCommittedProjects = ref<SectionCommittedProject[]>([]);
     let committedProjectsCount: number = 0;
-    let showImportExportCommittedProjectsDialog: boolean = false;
+    const showImportExportCommittedProjectsDialog = ref< boolean > (false);
     let selectedCommittedProject = ref<string>('');
     let showCreateCommittedProjectConsequenceDialog: boolean = false;
     let disableCrudButtonsResult: boolean = true;
-    let alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
+    const alertDataForDeletingCommittedProjects = ref<AlertData>({ ...emptyAlertData });
     let reverseCatMap = clone(treatmentCategoryReverseMap);
     let catMap = clone(treatmentCategoryMap);
     
@@ -408,7 +427,7 @@ import TreatmentService from '@/services/treatment.service';
     
     const cpGridHeaders: any[] = [
         {
-            title: '',
+            title: 'Key Attribute',
             key: 'keyAttr',
             align: 'left',
             sortable: true,
@@ -429,7 +448,7 @@ import TreatmentService from '@/services/treatment.service';
             align: 'left',
             sortable: true,
             class: '',
-            width: '10%',
+            width: '15%',
         },
         {
             title: 'Category',
@@ -437,7 +456,7 @@ import TreatmentService from '@/services/treatment.service';
             align: 'left',
             sortable: true,
             class: '',
-            width: '10%',
+            width: '15%',
         },
         {
             title: 'Budget',
@@ -461,7 +480,7 @@ import TreatmentService from '@/services/treatment.service';
             align: 'left',
             sortable: false,
             class: '',
-            width: '10%'
+            width: '15%'
         },
         {
             title: 'Actions',
@@ -525,7 +544,7 @@ import TreatmentService from '@/services/treatment.service';
                 }
             });
             initializePages();
-            if (scenarioId !== undefined) {                
+            if (scenarioId !== undefined) {  
                             await fetchTreatmentLibrary(scenarioId);
                             await fetchProjectSources();
                         }
@@ -582,13 +601,14 @@ import TreatmentService from '@/services/treatment.service';
         }
     });
 
-    watch(selectedLibraryTreatments, onSelectedLibraryTreatmentsChanged)
+    watch(selectedLibraryTreatments, () => onSelectedLibraryTreatmentsChanged)
     function onSelectedLibraryTreatmentsChanged() {
-        treatmentSelectItems = selectedLibraryTreatments.value.map(
+        treatmentSelectItems.value = selectedLibraryTreatments.value.map(
             (treatment: Treatment) => (treatment.name)
         );
     };
-
+    watch(selectedStateTreatmentLibrary, () => {
+    });
     watch(stateScenarioSimpleBudgetDetails, () => {
         budgetSelectItems = stateScenarioSimpleBudgetDetails.value.map(
             (budget: SimpleBudgetDetail) => ({
@@ -638,7 +658,7 @@ import TreatmentService from '@/services/treatment.service';
             },           
             sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
             isDescending: descending != null ? descending : false,
-            search: currentSearch
+            search: currentSearch.value
         };
         if(scenarioId !== uuidNIL)
             CommittedProjectsService.getCommittedProjectsPage(scenarioId, request).then(response => {
@@ -806,7 +826,7 @@ import TreatmentService from '@/services/treatment.service';
      }
 
      function OnDeleteAllClick(){
-        alertDataForDeletingCommittedProjects = {
+        alertDataForDeletingCommittedProjects.value = {
             showDialog: true,
             heading: 'Are you sure?',
             message:
@@ -853,7 +873,7 @@ import TreatmentService from '@/services/treatment.service';
     function onSubmitImportExportCommittedProjectsDialogResult(
         result: ImportExportCommittedProjectsDialogResult,
     ) {
-        showImportExportCommittedProjectsDialog = false;
+        showImportExportCommittedProjectsDialog.value = false;
 
         if (hasValue(result)) {         
             if (hasValue(result.file)) {
@@ -875,7 +895,7 @@ import TreatmentService from '@/services/treatment.service';
     }
 
     function onDeleteCommittedProjects() {
-        alertDataForDeletingCommittedProjects = {
+        alertDataForDeletingCommittedProjects.value = {
             showDialog: true,
             heading: 'Are you sure?',
             message:
@@ -908,7 +928,7 @@ import TreatmentService from '@/services/treatment.service';
     }
 
     function onDeleteCommittedProjectsSubmit(doDelete: boolean) {
-        alertDataForDeletingCommittedProjects = { ...emptyAlertData };
+        alertDataForDeletingCommittedProjects.value = { ...emptyAlertData };
 
         if (doDelete) {
             deleteSimulationCommittedProjectsAction(scenarioId);
@@ -1053,7 +1073,7 @@ import TreatmentService from '@/services/treatment.service';
     function fetchProjectSources() {
     CommittedProjectsService.getProjectSources().then((response: AxiosResponse) => {
         if (hasValue(response, 'data')) {
-            projectSourceOptions = response.data.filter(
+            projectSourceOptions.value = response.data.filter(
                 (option: string) => option !== "None" && option !== "iAMPick"
                 );
         }
@@ -1150,12 +1170,12 @@ import TreatmentService from '@/services/treatment.service';
     }
 
     function onSearchClick(){
-        currentSearch = gridSearchTerm;
+        currentSearch.value = gridSearchTerm.value;
         resetPage();
     }
 
     function onClearClick(){
-        gridSearchTerm = '';
+        gridSearchTerm.value = '';
         onSearchClick();
     }
 
@@ -1218,13 +1238,14 @@ import TreatmentService from '@/services/treatment.service';
 
     async function fetchTreatmentLibrary(simulationId: string) {
         try {
-            const response = await TreatmentService.getTreatmentLibraryBySimulationId(simulationId);
-
-            if (hasValue(response, 'data')) {
-                const treatmentLibrary = response.data as TreatmentLibrary;
-                store.commit('scenarioTreatmentLibraryMutator', treatmentLibrary);
-                handleLibrarySelectChange(treatmentLibrary.id);
-            }
+            const response = await TreatmentService.getTreatmentLibraryBySimulationId(simulationId).then(() => {
+                if (hasValue(response, 'data')) {
+                    const treatmentLibrary = response.data as TreatmentLibrary;
+                    store.commit('scenarioTreatmentLibraryMutator', treatmentLibrary);
+                    handleLibrarySelectChange(treatmentLibrary.id);
+                }
+            });
+            
         } catch (error) {
             addErrorNotificationAction({
                 message: 'Error fetching treatment library.',

@@ -1,83 +1,71 @@
 <template>
-    <v-dialog width="768px" height="540px" persistent v-model="showDialogComputed">
+    <v-dialog persistent style="width: 70%; height: 80%; padding: 1em;" v-model="showDialog">
         <v-card class="div-padding">
-            <v-card-title class="pa-2">
-                <v-row justify-start>
-                    <h3 class="Montserrat-font-family">Committed Projects</h3>
-                </v-row>
-                <v-btn @click="onSubmit(false)" icon>
-                    <i class="fas fa-times fa-2x"></i>
-                </v-btn>
-            </v-card-title>
-            <v-card-text class="pa-0">
-                <v-row column>
-                    <CommittedProjectsFileSelector :closed='closed' useTreatment='true' @treatment='onTreatmentChanged' @submit='onSubmitFileSelectorFile' />
-                    <span class="div-warning-border">
-                        <v-row align-start>
-                            <v-icon class="px-2 icon-color">fas fa-exclamation-triangle</v-icon>
-                            <h3 class="h3-color">Warning</h3>
-                        </v-row>
-                        <p class="Montserrat-font-family">
-                            Uploading new committed projects will override ALL previous commitments.
-                            Committed projects may take a few minutes to process. You will receive an email when this process is complete.
-                        </p>
-                    </span>
-                </v-row>
-            </v-card-text>
-            <v-card-actions>
-                <v-row justify-center row>
-                    <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue Montserrat-font-family' variant = "flat">Cancel</v-btn>
-                    <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>
-                    <!-- <v-tooltip top>
-                        <template slot='activator'>
-                            <v-btn @click='onDelete' class='ara-orange-bg text-white'>Delete</v-btn>
-                        </template>
-                        <span>Delete scenario's current committed projects</span>
-                    </v-tooltip> -->
-                </v-row>
-            </v-card-actions>
+            <v-row class="pa-2">
+                <!-- <v-col> -->
+                    <v-row justify="space-between">
+                        <h3 class="Montserrat-font-family">Committed Projects</h3>
+                        <v-btn @click="onSubmit(false)" flat>
+                        <i class="fas fa-times fa-2x"></i>
+                        </v-btn>
+                    </v-row>
+                        <div style="margin: 50px;">
+                        <CommittedProjectsFileSelector :closed='closed' useTreatment='true' @treatment='onTreatmentChanged' @submit='onSubmitFileSelectorFile' />
+                        </div>
+                        <span class="div-warning-border" style="margin: 10px;">
+                            <v-row align="start" style="padding:5px;">
+                                <v-icon class="px-2 icon-color">fas fa-exclamation-triangle</v-icon>
+                                <h3 class="h3-color">Warning</h3>
+                            </v-row>
+                            <p class="Montserrat-font-family">
+                                Uploading new committed projects will override ALL previous commitments.
+                                Committed projects may take a few minutes to process. You will receive an email when this process is complete.
+                            </p>
+                        </span>
+                    <v-row justify="center" style="margin: 10px;">
+                        <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue Montserrat-font-family' variant = "flat">Cancel</v-btn>
+                        <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>
+                    </v-row>
+            </v-row>
         </v-card>
     </v-dialog>
 </template>
 
-<script lang='ts' setup>
-import {watch, ref, computed} from 'vue';
+<script setup lang='ts'>
+import {watch, ref, computed, toRefs } from 'vue';
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
-import FileSelector from '@/shared/components/FileSelector.vue';
+import CommittedProjectsFileSelector from '@/shared/components/FileSelector.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { clone } from 'ramda';
 import { useStore } from 'vuex';
-import Dialog from 'primevue/dialog';
 
     let store = useStore();
-    const props = defineProps({showDialog: Boolean});
-    let showDialog = ref<boolean>(props.showDialog);
-        let showDialogComputed = computed(() => props.showDialog);
+    const props = defineProps<{showDialog: boolean}>();
+    const { showDialog } = toRefs(props);
     const emit = defineEmits(['submit', 'delete']);
 
-    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification'); }
-    async function setIsBusyAction(payload?: any): Promise<any> { await store.dispatch('setIsBusy'); }
+    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification',payload); }
+    async function setIsBusyAction(payload?: any): Promise<any> { await store.dispatch('setIsBusy',payload); }
 
-    let committedProjectsFile: File | null = null;
-    let applyNoTreatment: boolean = true;
-    let closed: boolean = false;
+    const committedProjectsFile = ref< File | null > ( null );
+    const applyNoTreatment = ref<boolean>(true);
+    const closed = ref<boolean>(false);
 
-    watch(showDialog, () => onShowDialogChanged)
-    function onShowDialogChanged() {
-        if (showDialog) {
-            closed = false;
+    watch(showDialog, () => {
+        if (showDialog.value) {
+            closed.value = false;
         } else {
-            committedProjectsFile = null;
-            closed = true;
+            committedProjectsFile.value = null;
+            closed.value = true;
         }
-    }
+    });
 
     /**
      * FileSelector submit event handler
      */
     function onSubmitFileSelectorFile(file: File, treatment: boolean) {
-        committedProjectsFile = hasValue(file) ? clone(file) : null;
-        applyNoTreatment = treatment;
+        committedProjectsFile.value = hasValue(file) ? clone(file) : null;
+        applyNoTreatment.value = treatment;
     }
 
     /**
@@ -87,8 +75,8 @@ import Dialog from 'primevue/dialog';
         if (submit) {
             //todo: get rid of is export portion
             const result: ImportExportCommittedProjectsDialogResult = {
-                applyNoTreatment: applyNoTreatment,
-                file: committedProjectsFile as File,
+                applyNoTreatment: applyNoTreatment.value,
+                file: committedProjectsFile.value as File,
                 isExport: isExport,
             };
             emit('submit', result);
@@ -100,7 +88,7 @@ import Dialog from 'primevue/dialog';
      * Apply no treatment event handler
      */
     function onTreatmentChanged(treatment: boolean) {
-        applyNoTreatment = treatment;
+        applyNoTreatment.value = treatment;
     }
     /**
      * Dialog delete event handler

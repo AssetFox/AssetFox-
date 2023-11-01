@@ -328,8 +328,8 @@ import TreatmentService from '@/services/treatment.service';
     let totalDataFound = 0;
     let hasScenario: boolean = false;
     let librarySelectItemValue = ref<string>("");
-    let templateSelectItems: string[] = [];
-    let templateItemSelected: string = "";
+    const templateSelectItems = ref<string[]>([]);
+    const templateItemSelected = ref<string>("");
     let hasSelectedLibrary: boolean = false;
     let librarySelectItems: SelectItem[] = [];
     let attributeSelectItems: SelectItem[] = [];
@@ -551,7 +551,7 @@ import TreatmentService from '@/services/treatment.service';
 
                 await CommittedProjectsService.getUploadedCommittedProjectTemplates().then(response => {
                     if(!isNil(response.data)){
-                            templateSelectItems = response.data;
+                            templateSelectItems.value = response.data;
                         }
            });            
         })();                    
@@ -918,10 +918,10 @@ import TreatmentService from '@/services/treatment.service';
     }
     
     function onDownloadSelectedTemplate(){
-        CommittedProjectsService.getSelectedCommittedProjectTemplate(templateItemSelected)
+        CommittedProjectsService.getSelectedCommittedProjectTemplate(templateItemSelected.value)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    FileDownload(convertBase64ToArrayBuffer(response.data), templateItemSelected, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                    FileDownload(convertBase64ToArrayBuffer(response.data), templateItemSelected.value, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                     isAdminTemplateUploaded = true;
                 }
             });

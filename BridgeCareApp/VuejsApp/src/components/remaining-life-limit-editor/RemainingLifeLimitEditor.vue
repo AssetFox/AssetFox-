@@ -164,12 +164,12 @@
                         </td>
                         <td class="px-0">
                             <v-btn id="RemainingLifeLimitEditor-editCriteria-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)" icon>
-                                <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                             </v-btn>   
                         </td>
                         <td justify-end>
                             <v-btn id="RemainingLifeLimitEditor-deleteAttribute-btn" @click="onRemoveRemainingLifeLimitIcon(props.item)" icon>
-                                <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>                          
                         </td>
                     </tr>
@@ -273,6 +273,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import { computed } from 'vue';
 import { onBeforeUnmount } from 'vue';
 import { createDecipheriv } from 'crypto';
+import { getUrl } from '@/shared/utils/get-url';
 
     let store = useStore();
     const confirm = useConfirm();
@@ -299,8 +300,8 @@ import { createDecipheriv } from 'crypto';
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>{await store.dispatch('getCurrentUserOrSharedScenario', payload)}
     async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario', payload)}
     
-    function addedOrUpdatedRemainingLifeLimselectListItemsrefitLibraryMutator(payload: any){store.commit('addedOrUpdatedRemainingLifeLimitLibraryMutator');}
-    function selectedRemainingLifeLimitLibraryMutator(payload: any){store.commit('selectedRemainingLifeLimitLibraryMutator');}
+    function addedOrUpdatedRemainingLifeLimselectListItemsrefitLibraryMutator(payload: any){store.commit('addedOrUpdatedRemainingLifeLimitLibraryMutator', payload);}
+    function selectedRemainingLifeLimitLibraryMutator(payload: any){store.commit('selectedRemainingLifeLimitLibraryMutator', payload);}
 
     let getUserNameByIdGetter: any = store.getters.getUserNameById;
 
@@ -724,7 +725,7 @@ import { createDecipheriv } from 'crypto';
         RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 clearChanges()
-                addedOrUpdatedRemainingLifeLimitLibraryMutator(selectedRemainingLifeLimitLibrary.value);
+                addedOrUpdatedRemainingLifeLimselectListItemsrefitLibraryMutator(selectedRemainingLifeLimitLibrary.value);
                 selectedRemainingLifeLimitLibraryMutator(selectedRemainingLifeLimitLibrary.value.id)
                 addSuccessNotificationAction({message: "Updated remaining life limit library",});               
             }

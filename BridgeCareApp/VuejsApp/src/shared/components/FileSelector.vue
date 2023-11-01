@@ -5,7 +5,7 @@
                 <v-row>
                     <div class="drag-drop-area">
                         <v-row justify="center" align="center" style="padding:10px; margin: 10px;">
-                            <img :src="require('@/assets/icons/upload.svg')" style="margin: 20px;"/>
+                            <img :src="getUrl('assets/icons/upload.svg')" style="margin: 20px;"/>
                                 <span class="span-center Montserrat-font-family">Drag & Drop Files Here </span>
                         </v-row>
                     </div>
@@ -42,7 +42,7 @@
                 </td>
                 <td>
                     <v-btn @click="file = null" class="ghd-blue" flat>
-                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                     </v-btn>
                 </td>
             </template>
@@ -58,6 +58,7 @@ import {clone, prop} from 'ramda';
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import { formatBytes } from '@/shared/utils/math-utils';
 import { useStore } from 'vuex';
+import { getUrl } from '../utils/get-url';
 
 let store = useStore();
 const emit = defineEmits(['submit','treatment'])

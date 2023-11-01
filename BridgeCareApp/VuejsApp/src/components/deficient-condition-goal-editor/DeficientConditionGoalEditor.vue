@@ -184,12 +184,12 @@
                                         class="ghd-blue"
                                         style="margin-top: 10px;"
                                         flat>
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-row>
                                 <div v-if="header.key === 'action'" style="margin-bottom: 20px;">
                                     <v-btn id="DeficientConditionGoalEditor-deleteDeficientConditionGoal-vbtn" @click="onRemoveSelectedDeficientConditionGoal(item.item.id)"  class="ghd-blue" flat>
-                                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </div>                               
                             </div>
@@ -351,6 +351,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
+import { getUrl } from '@/shared/utils/get-url';
 
     let store = useStore();
     const confirm = useConfirm();

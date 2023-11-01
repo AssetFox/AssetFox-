@@ -73,7 +73,7 @@ import { useStore } from 'vuex';
     {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
     {title: 'Shared With', key: '', align: 'left', sortable: true, class: '', width: ''},
     {title: 'Can Modify', key: '', align: 'left', sortable: true, class: '', width: ''}
-  ] as DataTableHeader[];
+  ] ;
   let shareCashFlowRuleLibraryUserGridRows: CashFlowRuleLibraryUserGridRow[] = [];
   let currentUserAndOwner: CashFlowRuleLibraryUser[] = [];
   let searchTerm: string = '';

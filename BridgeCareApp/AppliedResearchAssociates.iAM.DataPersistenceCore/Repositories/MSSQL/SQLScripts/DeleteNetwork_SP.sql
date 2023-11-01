@@ -2325,25 +2325,22 @@ AS
 			------End ScenarioRemainingLifeLimit----------------------------------------------------------
 			------Start ScenarioSelectableTreatment--------------------------------------------------------
 
-            BEGIN TRY
+     
+  --Network --> Simulation --> ScenarioSelectableTreatment --> ScenarioTreatmentSupersedeRule --> CriterionLibrary_ScenarioTreatmentSupersedeRule --> 
 
-			ALTER TABLE CriterionLibrary_TreatmentSupersession NOCHECK CONSTRAINT all
+			BEGIN TRY
 
-			--Network --> Simulation --> ScenarioSelectableTreatment --> ScenarioTreatmentSupersession --> CriterionLibrary_ScenarioTreatmentSupersession --> TreatmentSupersession 
-			--> CriterionLibrary_ScenarioTreatmentSupersession --> CriterionLibrary_TreatmentSupersession --> TreatmentSupersession -->  --> 
+			ALTER TABLE CriterionLibrary_ScenarioTreatmentSupersedeRule NOCHECK CONSTRAINT all
 
-
-			Delete l7  
+			Delete l5
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
 			JOIN ScenarioSelectableTreatment AS l3 ON l3.SimulationId = l2.Id
-			JOIN ScenarioTreatmentSupersession AS l4 ON l4.TreatmentId = l3.Id
-			JOIN CriterionLibrary_ScenarioTreatmentSupersession  AS l5  ON l5.TreatmentSupersessionId = l4.Id
-			JOIN TreatmentSupersession  AS l6  ON l6.CriterionLibraryScenarioTreatmentSupersessionJoinCriterionLibraryId = l5.CriterionLibraryId
-			JOIN CriterionLibrary_TreatmentSupersession  AS l7 ON l7.TreatmentSupersessionId = l6.Id
+			JOIN ScenarioTreatmentSupersedeRule AS l4 ON l4.TreatmentId = l3.Id
+			JOIN CriterionLibrary_ScenarioTreatmentSupersedeRule AS l5  ON l5.ScenarioTreatmentSupersedeRuleId = l4.Id
 			WHERE l1.Id IN (@NetworkId);
 
-			ALTER TABLE CriterionLibrary_TreatmentSupersession WITH CHECK CHECK CONSTRAINT all
+			ALTER TABLE CriterionLibrary_ScenarioTreatmentSupersedeRule WITH CHECK CHECK CONSTRAINT all
  
             END TRY 
 			BEGIN CATCH
@@ -2354,7 +2351,7 @@ AS
                        ,ERROR_LINE() AS ErrorLine
                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_TreatmentSupersession'
+ 		         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTreatmentSupersedeRule'
                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2362,23 +2359,20 @@ AS
 
 			---------------------------------------------------------------------------
 
-		--Simulation --> ScenarioSelectableTreatment --> ScenarioTreatmentSupersession --> CriterionLibrary_ScenarioTreatmentSupersession --> TreatmentSupersession
+   --Network --> Simulation --> ScenarioSelectableTreatment --> ScenarioTreatmentSupersedeRule  
 
-            BEGIN TRY
+         BEGIN TRY
 
-			ALTER TABLE TreatmentSupersession NOCHECK CONSTRAINT all
+			ALTER TABLE ScenarioTreatmentSupersedeRule NOCHECK CONSTRAINT all
 
-			Delete l6 
+			Delete l4
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
 			JOIN ScenarioSelectableTreatment AS l3 ON l3.SimulationId = l2.Id
-			JOIN ScenarioTreatmentSupersession AS l4 ON l4.TreatmentId = l3.Id
-			JOIN  CriterionLibrary_ScenarioTreatmentSupersession  AS l5  ON l5.TreatmentSupersessionId = l4.Id
-			JOIN  TreatmentSupersession  AS l6  ON l6.CriterionLibraryScenarioTreatmentSupersessionJoinTreatmentSupersessionId = l5.TreatmentSupersessionId
-			    OR l6.CriterionLibraryScenarioTreatmentSupersessionJoinCriterionLibraryId = l5.CriterionLibraryId
+			JOIN ScenarioTreatmentSupersedeRule AS l4 ON l4.TreatmentId = l3.Id
 			WHERE l1.Id IN (@NetworkId);
 
-			ALTER TABLE TreatmentSupersession WITH CHECK CHECK CONSTRAINT all
+			ALTER TABLE ScenarioTreatmentSupersedeRule WITH CHECK CHECK CONSTRAINT all
  
             END TRY 
 			BEGIN CATCH
@@ -2389,7 +2383,7 @@ AS
                        ,ERROR_LINE() AS ErrorLine
                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		         SELECT @CustomErrorMessage = 'Query Error in TreatmentSupersession'
+ 		         SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentSupersedeRule'
                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2397,21 +2391,19 @@ AS
 
 			---------------------------------------------------------------------------
 			
-		--Simulation --> ScenarioSelectableTreatment --> ScenarioTreatmentSupersession --> CriterionLibrary_ScenarioTreatmentSupersession
+			   --Network --> Simulation --> ScenarioSelectableTreatment
 
             BEGIN TRY
 
-			ALTER TABLE CriterionLibrary_ScenarioTreatmentSupersession NOCHECK CONSTRAINT all
+			ALTER TABLE ScenarioSelectableTreatment NOCHECK CONSTRAINT all
 
-			Delete l5 
+			Delete l3
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
 			JOIN ScenarioSelectableTreatment AS l3 ON l3.SimulationId = l2.Id
-			JOIN ScenarioTreatmentSupersession AS l4 ON l4.TreatmentId = l3.Id
-			JOIN CriterionLibrary_ScenarioTreatmentSupersession AS l5 ON l5.TreatmentSupersessionId = l4.Id
 			WHERE l1.Id IN (@NetworkId);
 
-			ALTER TABLE CriterionLibrary_ScenarioTreatmentSupersession WITH CHECK CHECK CONSTRAINT all
+			ALTER TABLE ScenarioSelectableTreatment WITH CHECK CHECK CONSTRAINT all
  
             END TRY 
 			BEGIN CATCH
@@ -2422,39 +2414,7 @@ AS
                        ,ERROR_LINE() AS ErrorLine
                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTreatmentSupersession'
-                 RAISERROR  (@CustomErrorMessage, 16, 1);  
-                 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
-
-			-----------------------------------------------------------------------
-
-		--Simulation --> ScenarioSelectableTreatment --> ScenarioTreatmentSupersession 
-
-            BEGIN TRY
-
-			ALTER TABLE ScenarioTreatmentSupersession NOCHECK CONSTRAINT all
-
-			Delete l4 
-			FROM Network AS l1
-			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
-			JOIN ScenarioSelectableTreatment AS l3 ON l3.SimulationId = l2.Id
-			JOIN ScenarioTreatmentSupersession AS l4 ON l4.TreatmentId = l3.Id
-			WHERE l1.Id IN (@NetworkId);
-
-			ALTER TABLE ScenarioTreatmentSupersession WITH CHECK CHECK CONSTRAINT all
- 
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
-
- 		         SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentSupersession'
+ 		         SELECT @CustomErrorMessage = 'Query Error in ScenarioSelectableTreatment'
                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                  Set @RetMessage = @CustomErrorMessage;
 

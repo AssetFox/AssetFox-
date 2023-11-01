@@ -865,20 +865,18 @@ AS
 
 			--------------------------------------------------------------------
 
-            BEGIN TRY
+			BEGIN TRY
 
-			ALTER TABLE CriterionLibrary_TreatmentSupersession NOCHECK CONSTRAINT all
+			ALTER TABLE CriterionLibrary_ScenarioTreatmentSupersedeRule NOCHECK CONSTRAINT all
 
-			Delete l6 
-			FROM  Simulation  AS l1
+			Delete l4
+			FROM Simulation AS l1
 			JOIN ScenarioSelectableTreatment AS l2 ON l2.SimulationId = l1.Id
-			JOIN ScenarioTreatmentSupersession AS l3 ON l3.TreatmentId = l2.Id
-			JOIN  CriterionLibrary_ScenarioTreatmentSupersession  AS l4  ON l4.TreatmentSupersessionId = l3.Id
-			JOIN  TreatmentSupersession  AS l5  ON l5.CriterionLibraryScenarioTreatmentSupersessionJoinCriterionLibraryId = l4.CriterionLibraryId
-			JOIN CriterionLibrary_TreatmentSupersession  AS l6 ON l6.TreatmentSupersessionId = l5.Id
+			JOIN ScenarioTreatmentSupersedeRule AS l3 ON l3.TreatmentId = l2.Id
+			JOIN CriterionLibrary_ScenarioTreatmentSupersedeRule AS l4  ON l4.ScenarioTreatmentSupersedeRuleId = l3.Id
 			WHERE l1.Id IN (SELECT Guid FROM #SimTempGuids);
 
-			ALTER TABLE CriterionLibrary_TreatmentSupersession WITH CHECK CHECK CONSTRAINT all
+			ALTER TABLE CriterionLibrary_ScenarioTreatmentSupersedeRule WITH CHECK CHECK CONSTRAINT all
  
             END TRY 
 			BEGIN CATCH
@@ -889,7 +887,7 @@ AS
                        ,ERROR_LINE() AS ErrorLine
                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_TreatmentSupersession'
+ 		         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTreatmentSupersedeRule'
                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                  Set @RetMessage = @CustomErrorMessage;
 
@@ -897,20 +895,19 @@ AS
 
 			---------------------------------------------------------------------------
 
-            BEGIN TRY
+   --Network --> Simulation --> ScenarioSelectableTreatment --> ScenarioTreatmentSupersedeRule  
 
-			ALTER TABLE TreatmentSupersession NOCHECK CONSTRAINT all
+         BEGIN TRY
 
-			Delete l5 
-			FROM  Simulation  AS l1
+			ALTER TABLE ScenarioTreatmentSupersedeRule NOCHECK CONSTRAINT all
+
+			Delete l3
+			FROM Simulation AS l1
 			JOIN ScenarioSelectableTreatment AS l2 ON l2.SimulationId = l1.Id
-			JOIN ScenarioTreatmentSupersession AS l3 ON l3.TreatmentId = l2.Id
-			JOIN  CriterionLibrary_ScenarioTreatmentSupersession  AS l4  ON l4.TreatmentSupersessionId = l3.Id
-			JOIN  TreatmentSupersession  AS l5  ON l5.CriterionLibraryScenarioTreatmentSupersessionJoinTreatmentSupersessionId = l4.CriterionLibraryId
-				 OR l5.CriterionLibraryScenarioTreatmentSupersessionJoinCriterionLibraryId = l4.CriterionLibraryId
+			JOIN ScenarioTreatmentSupersedeRule AS l3 ON l3.TreatmentId = l2.Id
 			WHERE l1.Id IN (SELECT Guid FROM #SimTempGuids);
 
-			ALTER TABLE TreatmentSupersession WITH CHECK CHECK CONSTRAINT all
+			ALTER TABLE ScenarioTreatmentSupersedeRule WITH CHECK CHECK CONSTRAINT all
  
             END TRY 
 			BEGIN CATCH
@@ -921,7 +918,7 @@ AS
                        ,ERROR_LINE() AS ErrorLine
                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		         SELECT @CustomErrorMessage = 'Query Error in TreatmentSupersession'
+ 		         SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentSupersedeRule'
                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                  Set @RetMessage = @CustomErrorMessage;
 
@@ -929,18 +926,18 @@ AS
 
 			---------------------------------------------------------------------------
 			
+			   --Network --> Simulation --> ScenarioSelectableTreatment
+
             BEGIN TRY
 
-			ALTER TABLE CriterionLibrary_ScenarioTreatmentSupersession NOCHECK CONSTRAINT all
+			ALTER TABLE ScenarioSelectableTreatment NOCHECK CONSTRAINT all
 
-			Delete l4 
-			FROM  Simulation  AS l1
+			Delete l2
+			FROM Simulation AS l1
 			JOIN ScenarioSelectableTreatment AS l2 ON l2.SimulationId = l1.Id
-			JOIN ScenarioTreatmentSupersession AS l3 ON l3.TreatmentId = l2.Id
-			JOIN  CriterionLibrary_ScenarioTreatmentSupersession AS l4 ON l4.TreatmentSupersessionId = l3.Id
 			WHERE l1.Id IN (SELECT Guid FROM #SimTempGuids);
 
-			ALTER TABLE CriterionLibrary_ScenarioTreatmentSupersession WITH CHECK CHECK CONSTRAINT all
+			ALTER TABLE ScenarioSelectableTreatment WITH CHECK CHECK CONSTRAINT all
  
             END TRY 
 			BEGIN CATCH
@@ -951,42 +948,15 @@ AS
                        ,ERROR_LINE() AS ErrorLine
                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTreatmentSupersession'
+ 		         SELECT @CustomErrorMessage = 'Query Error in ScenarioSelectableTreatment'
                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                  Set @RetMessage = @CustomErrorMessage;
 
             END CATCH
-
-			-----------------------------------------------------------------------
-
-            BEGIN TRY
-
-			ALTER TABLE ScenarioTreatmentSupersession NOCHECK CONSTRAINT all
-
-			Delete l3 
-			FROM  Simulation  AS l1
-			JOIN ScenarioSelectableTreatment AS l2 ON l2.SimulationId = l1.Id
-			JOIN ScenarioTreatmentSupersession AS l3 ON l3.TreatmentId = l2.Id
-			WHERE l1.Id IN (SELECT Guid FROM #SimTempGuids);
-
-			ALTER TABLE ScenarioTreatmentSupersession WITH CHECK CHECK CONSTRAINT all
- 
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
-
- 		         SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentSupersession'
-                 RAISERROR  (@CustomErrorMessage, 16, 1);  
-                 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
+	 
 
 			---------------------------------------------------------------------------
+
 
             BEGIN TRY
 

@@ -146,7 +146,7 @@
                                     <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
                                            icon
                                            v-if="props.item.timeValue !== 0">
-                                      <img :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                      <img :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                   </div>
                                 </td>
@@ -213,7 +213,7 @@
                                   <div v-else>
                                     <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
                                            icon>
-                                      <img :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                      <img :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                   </div>
                                 </td>

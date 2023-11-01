@@ -67,7 +67,7 @@
                                                         >
                                                         {{sortedMineCategory}} by {{ sortedMineValue }}
                                                         
-                                                        <img class='img-general' :src="require('@/assets/icons/x-circle.svg')" @click="onMineFilterClearClick()"  >
+                                                        <img class='img-general' :src="getUrl('@/assets/icons/x-circle.svg')" @click="onMineFilterClearClick()"  >
                                                 </v-chip>
                                                 </div>
                                             </span>
@@ -195,7 +195,7 @@
                                                         flat
                                                         v-bind="props"
                                                     >
-                                                        <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
+                                                        <img class='img-general' :src="getUrl('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
                                                 </template>
 
@@ -279,7 +279,7 @@
                                                         >
                                                         {{sortedCategory}} by {{ sortedValue }}
                                                         
-                                                        <img class='img-general' :src="require('@/assets/icons/x-circle.svg')" @click="onSharedFilterClearClick()"  >
+                                                        <img class='img-general' :src="getUrl('@/assets/icons/x-circle.svg')" @click="onSharedFilterClearClick()"  >
                                                 </v-chip>
                                                 </div>
                                             </span>
@@ -394,7 +394,7 @@
                                                         flat
                                                         v-bind="props"
                                                     >
-                                                        <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
+                                                        <img class='img-general' :src="getUrl('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
                                                 </template>
 
@@ -479,7 +479,7 @@
                                                         icon
                                                         v-bind="props"
                                                     >
-                                                        <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
+                                                        <img class='img-general' :src="getUrl('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
                                                 </template>
 
@@ -559,7 +559,7 @@
                                                         icon
                                                         v-bind="props"
                                                     >
-                                                        <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
+                                                        <img class='img-general' :src="getUrl('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
                                                 </template>
 
@@ -662,6 +662,7 @@
 </template>
 
 <script lang="ts" setup>
+import { getUrl } from '@/shared/utils/get-url';
 import { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, onMounted, inject, readonly, computed, reactive } from 'vue'; 
 import moment from 'moment';
 import {
@@ -1299,25 +1300,25 @@ import { onBeforeMount } from 'vue';
             {
                 title: 'Run Analysis',
                 action: availableActions.runAnalysis,
-                icon: require("@/assets/icons/monitor.svg"),
+                icon: getUrl("@/assets/icons/monitor.svg"),
                 isCustomIcon: true
             },
             {
                 title: 'Reports',
                 action: availableActions.reports,
-                icon: require("@/assets/icons/clipboard.svg"),
+                icon: getUrl("@/assets/icons/clipboard.svg"),
                 isCustomIcon: true
             },
             {
                 title: 'Settings',
                 action: availableActions.settings,
-                icon: require("@/assets/icons/gear.svg"),
+                icon: getUrl("@/assets/icons/gear.svg"),
                 isCustomIcon: true
             },
             {
                 title: 'Committed Projects',
                 action: availableActions.commitedProjects,
-                icon: require("@/assets/icons/committed-projects.svg"),
+                icon: getUrl("@/assets/icons/committed-projects.svg"),
                 isCustomIcon: true
             },
             {
@@ -1329,13 +1330,13 @@ import { onBeforeMount } from 'vue';
             {
                 title: 'Clone',
                 action: availableActions.clone,
-                icon: require("@/assets/icons/copy.svg"),
+                icon: getUrl("@/assets/icons/copy.svg"),
                 isCustomIcon: true
             },
             {
                 title: 'Delete',
                 action: availableActions.delete,
-                icon: require("@/assets/icons/trash.svg"),
+                icon: getUrl("@/assets/icons/trash.svg"),
                 isCustomIcon: true
             }           
         ];
@@ -1343,7 +1344,7 @@ import { onBeforeMount } from 'vue';
              {
                 title: 'Cancel Work',
                 action: availableSimulationActions.cancel,
-                icon: require("@/assets/icons/x-circle.svg"),
+                icon: getUrl("@/assets/icons/x-circle.svg"),
                 isCustomIcon: true
             }             
         ];
@@ -1351,7 +1352,7 @@ import { onBeforeMount } from 'vue';
              {
                 title: 'Cancel Work',
                 action: availableSimulationActions.fastCancel,
-                icon: require("@/assets/icons/x-circle.svg"),
+                icon: getUrl("@/assets/icons/x-circle.svg"),
                 isCustomIcon: true
             }             
         ];
@@ -1359,13 +1360,13 @@ import { onBeforeMount } from 'vue';
         actionItems.splice(4, 0, {
             title: 'Share',
             action: availableActions.share,
-            icon: require("@/assets/icons/share-geometric.svg"),
+            icon: getUrl("@/assets/icons/share-geometric.svg"),
                 isCustomIcon: true
         });
         tabItems.push(
-            { name: 'My scenarios', icon: require("@/assets/icons/star-empty.svg"), count: totalUserScenarios.value },
-            { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: totalSharedScenarios.value },
-            { name: 'General work queue', icon: require("@/assets/icons/queue.svg"), count: totalQueuedSimulations.value },
+            { name: 'My scenarios', icon: getUrl("@/assets/icons/star-empty.svg"), count: totalUserScenarios.value },
+            { name: 'Shared with me', icon: getUrl("@/assets/icons/share-empty.svg"), count: totalSharedScenarios.value },
+            { name: 'General work queue', icon: getUrl("@/assets/icons/queue.svg"), count: totalQueuedSimulations.value },
         );
         tab.value = 'My scenarios';
     });

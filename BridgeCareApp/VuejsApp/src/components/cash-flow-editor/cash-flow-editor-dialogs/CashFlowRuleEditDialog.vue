@@ -155,7 +155,7 @@
                             @click="onDeleteCashFlowDistributionRule(item.value.id)"
                             class="ghd-blue"
                             icon>
-                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                            <img class='img-general' :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </td>
                 </template>
@@ -204,6 +204,7 @@ import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 //import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { getLastPropertyValue } from '@/shared/utils/getter-utils';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
+import { getUrl } from '@/shared/utils/get-url';
 
   const props = defineProps<{showDialog: boolean, selectedCashFlowRule: CashFlowRule}>()
   let showDialogComputed = computed(() => props.showDialog);

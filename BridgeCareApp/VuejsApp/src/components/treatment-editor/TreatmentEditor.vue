@@ -138,7 +138,7 @@
                                     <v-list-item-content class ="item-content">
                                         <span>{{treatmentSelectItem.text}}</span>
                                         <v-btn  style="margin-left: 10px;" v-show="treatmentSelectItem.text!='No Treatment'" @click="onShowConfirmDeleteTreatmentAlert" class="ghd-blue">
-                                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                            <img class='img-general' :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
                                         </v-btn>
                                     </v-list-item-content>
 
@@ -440,6 +440,7 @@ import { useRouter } from 'vue-router';
 import mitt from 'mitt';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
+import { getUrl } from '@/shared/utils/get-url';
 
     const emit = defineEmits(['submit'])    
     const $emitter = mitt()

@@ -42,7 +42,7 @@
                             >
                                 <template v-slot:activator>
                                     <v-btn id="TreatmentConsequencesTab-EquationView-btn" class="ghd-blue" icon>
-                                        <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')"/>
+                                        <img class='img-general' :src="getUrl('@/assets/icons/eye-ghd-blue.svg')"/>
                                     </v-btn>
                                 </template>
                                 <v-card>
@@ -63,7 +63,7 @@
                             </v-menu>     
                              <v-btn id="TreatmentConsequencesTab-EquationEditorBtn" v-if="header.value === 'equation'" @click='onShowConsequenceEquationEditorDialog(props.item)' class='edit-icon'
                                     icon>
-                                <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                <img class='img-general' :src="getUrl('@/assets/icons/edit.svg')"/>
                             </v-btn>                       
 
                             <v-menu
@@ -74,7 +74,7 @@
                             >
                                 <template v-slot:activator>
                                     <v-btn id="TreatmentConsequencesTab-CriteriaView-btn" class="ghd-blue" icon>
-                                        <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')"/>
+                                        <img class='img-general' :src="getUrl('@/assets/icons/eye-ghd-blue.svg')"/>
                                     </v-btn>
                                 </template>
                                 <v-card>
@@ -96,12 +96,12 @@
                             </v-menu>
                             <v-btn id="TreatmentConsequencesTab-CriteriaEditorBtn" v-if="header.value === 'criterionLibrary'" @click='onShowConsequenceCriterionEditorDialog(props.item)'
                                     class='edit-icon' icon>
-                                <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                <img class='img-general' :src="getUrl('@/assets/icons/edit.svg')"/>
                             </v-btn>
 
                             <v-row v-if="header.value === ''" align-start>
                                 <v-btn id="TreatmentConquencesTab-DeleteCostBtn" @click='onRemoveConsequence(props.item.id)' icon>
-                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                    <img class='img-general' :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                             </v-row>
                         </td>
@@ -144,6 +144,7 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import { getUrl } from '@/shared/utils/get-url';
 
 const props = defineProps<{
          selectedTreatmentConsequences: TreatmentConsequence[],

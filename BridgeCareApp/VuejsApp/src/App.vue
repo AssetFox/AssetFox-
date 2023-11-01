@@ -95,7 +95,7 @@
                                 class="notification-icon"
                                 icon
                             >
-                                <img style="position:absolute; top:20px; height:25px;" :src="require('@/assets/icons/bell.svg')"/>
+                                <img style="position:absolute; top:20px; height:25px;" :src="getUrl('assets/icons/bell.svg')"/>
                                 <v-badge
                                     v-if="notificationCounter > 0"
                                     overlap
@@ -179,7 +179,7 @@
                     <v-divider class="mx-1 navbar-divider" vertical style="background-color: #798899; margin-left:90% !important;"/>
                 </v-toolbar-title>
                 <v-toolbar-title style="margin-left:2px !important" class="navbar-gray" v-if="authenticated">
-                    <img style="height:40px; position:relative; top:2px" :src="require('@/assets/icons/user-no-circle.svg')"/>
+                    <img style="height:40px; position:relative; top:2px" :src="getUrl('@/assets/icons/user-no-circle.svg')"/>
                     <span
                       id="App-username-span"
                     >{{ username }}</span>
@@ -318,6 +318,7 @@ import router from './router';
 import mitt from 'mitt'
 import vuetify from '@/plugins/vuetify';
 import config from '../public/config.json';
+import { getUrl } from './shared/utils/get-url';
 
     let store = useStore();
     let authenticated = computed(() => store.state.authenticationModule.authenticated);

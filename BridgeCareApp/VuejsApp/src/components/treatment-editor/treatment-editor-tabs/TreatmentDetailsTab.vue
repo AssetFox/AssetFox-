@@ -106,7 +106,7 @@
                                             icon
                                             style="left:25px"
                                         >
-                                            <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                            <img class='img-general' :src="getUrl('@/assets/icons/edit.svg')"/>
                                         </v-btn>   
                                     </v-col>                                    
                                 </v-row>       
@@ -188,6 +188,7 @@ import {
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import { getUrl } from '@/shared/utils/get-url';
 
     const emit = defineEmits(['submit', 'onModifyTreatmentDetails'])
     const props = defineProps<{

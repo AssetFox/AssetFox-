@@ -14,7 +14,7 @@
                     <CommittedProjectsFileSelector :closed='closed' useTreatment='true' @treatment='onTreatmentChanged' @submit='onSubmitFileSelectorFile' />
                     <span class="div-warning-border">
                         <v-row align-start>
-                            <img style="padding-right:5px; height:30px; " :src="require('@/assets/icons/urgent-info.svg')"/>
+                            <img style="padding-right:5px; height:30px; " :src="getUrl('@/assets/icons/urgent-info.svg')"/>
                             <h3 class="h3-color">Warning</h3>
                         </v-row>
                         <p class="Montserrat-font-family">
@@ -43,6 +43,7 @@ import FileSelector from '@/shared/components/FileSelector.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { clone } from 'ramda';
 import { useStore } from 'vuex'; 
+import { getUrl } from '@/shared/utils/get-url';
 
     let store = useStore(); 
     const props = defineProps<{showDialog: boolean}>();

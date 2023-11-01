@@ -34,7 +34,7 @@
                         <input type ="radio" v-if="DialogData.settingName == 'InventoryReports'" v-model="setting.networkType" value ="(P)"/>
                         <label v-if="DialogData.settingName == 'InventoryReports'">PRIMARY</label>
                         <v-btn @click="onDeleteSettingClick(setting)"  class="ghd-blue" icon>
-                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                            <img class='img-general' :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </v-list-tile>
                 </v-list>
@@ -65,6 +65,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { AdminSelectItem } from '@/shared/models/vue/admin-select-item';
 import Dialog from 'primevue/dialog';
+import { getUrl } from '@/shared/utils/get-url';
 
     let InputRules: InputValidationRules = rules;
      const props = defineProps<{

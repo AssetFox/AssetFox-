@@ -62,7 +62,7 @@
                                     class="ghd-blue"
                                     flat
                                 >
-                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                    <img class='img-general' :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                             </template>
                         </v-textarea>
@@ -84,7 +84,7 @@
                                             class="ghd-blue"
                                             flat
                                         >
-                                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                            <img class='img-general' :src="getUrl('@/assets/icons/trash-ghd-blue.svg')"/>
                                         </v-btn>
                                     </template>
                                 </v-textarea>
@@ -298,6 +298,7 @@ import { getBlankGuid } from '../utils/uuid-utils';
 import { ref, onMounted, computed, toRefs, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { getUrl } from "../utils/get-url";
 
 let store = useStore();
 const $router = useRouter();
@@ -323,9 +324,9 @@ const tab = ref<any>(null);
             { id: 'OR', label: 'OR' },
         ],
         addRule: 'Add Rule',
-        removeRule: `<img class='img-general' src="${require("@/assets/icons/trash-ghd-blue.svg")}" style="margin-top:4px;margin-left:4px;"/>`,
+        removeRule: `<img class='img-general' src="${getUrl("@/assets/icons/trash-ghd-blue.svg")}" style="margin-top:4px;margin-left:4px;"/>`,
         addGroup: 'Add Group',
-        removeGroup: `<img class='img-general' src="${require("@/assets/icons/trash-ghd-blue.svg")}"/>`,
+        removeGroup: `<img class='img-general' src="${getUrl("@/assets/icons/trash-ghd-blue.svg")}"/>`,
         textInputPlaceholder: 'value',
     };
     const cannotSubmit = ref<boolean>(true);

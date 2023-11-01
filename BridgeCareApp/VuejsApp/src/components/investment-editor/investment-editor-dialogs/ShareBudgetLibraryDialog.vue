@@ -58,7 +58,7 @@ import { BudgetLibraryUserGridRow, ShareBudgetLibraryDialogData } from '@/shared
 import InvestmentService from '@/services/investment.service';
     import { AxiosResponse } from 'axios';
     import { http2XX } from '@/shared/utils/http-utils';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, computed, watch, Ref} from 'vue';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 

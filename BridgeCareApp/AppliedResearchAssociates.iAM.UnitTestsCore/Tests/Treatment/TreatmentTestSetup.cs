@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -38,6 +39,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             budgetIds ??= new List<Guid>();
             firstTreatment.BudgetIds = budgetIds;
             firstTreatment.SupersedeRules = new List<TreatmentSupersedeRuleDTO>();
+
+            var superBudget = BudgetDtos.New();
+            var superBudgets = new List<BudgetDTO> { superBudget };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, superBudgets, simulationId);
+            var treatmentId = Guid.NewGuid();
+            var treatmentBudget = TreatmentBudgetDtos.Dto(superBudget.Name);
+            var treatmentBudgets = new List<TreatmentBudgetDTO> { treatmentBudget };
+            var superBudgetIds = new List<Guid> { superBudget.Id };
+
             var supersedeTreatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesListsWithSupersedeRule(firstTreatment, id, "Bridge Replacement", "Age > 20");
             var dtos = new List<TreatmentDTO> { firstTreatment, supersedeTreatment };
             unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);

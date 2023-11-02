@@ -7,7 +7,7 @@
                     <input
                     id="committedProjectTemplateUpload"
                     type="file"
-                    @update:model-value="handleCommittedProjectTemplateUpload"
+                    @change="handleCommittedProjectTemplateUpload"
                     accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                     ref="committedProjectTemplateInput"
                     hidden/>
@@ -40,7 +40,7 @@
                     <input
                         id="addCommittedProjectTemplate"
                         type="file"
-                        @update:model-value="handleAddCommittedProjectTemplateUpload"
+                        @change="handleAddCommittedProjectTemplateUpload"
                         accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                         ref="committedProjectTemplateInput"
                         hidden
@@ -123,6 +123,7 @@
                                             class="ghd-down-small"
                                             label="Select a Treatment"
                                             density="compact"
+                                            variant="underlined"
                                             v-model="item.item[header.key]"
                                             :rules="[inputRules['generalRules'].valueIsNotEmpty]"
                                             @update:model-value="onEditCommittedProjectProperty(item.item,header.key,item.item[header.key])">
@@ -132,6 +133,7 @@
                                             :items="projectSourceOptions"
                                             class="ghd-down-small"
                                             density="compact"
+                                            variant="underlined"
                                             label="Select Project Source"
                                             v-model="item.item[header.key]"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"
@@ -153,12 +155,14 @@
                                                 readonly
                                                 class="sm-txt"
                                                 density="compact"
+                                                variant="underlined"
                                                 :model-value="item.item[header.key]"
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
                                             <v-text-field v-if="header.key === 'budget'"
                                                 readonly
                                                 class="sm-txt"
                                                 density="compact"
+                                                variant="underlined"
                                                 :model-value="item.item[header.key]"/>
 
                                             <v-text-field v-if="header.key === 'keyAttr'"
@@ -174,12 +178,14 @@
                                                 :model-value="item.item[header.key]"
                                                 :mask="'##########'"
                                                 density="compact"
+                                                variant="underlined"
                                                 :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), inputRules['generalRules'].valueIsNotEmpty, inputRules['generalRules'].valueIsWithinRange(item.item[header.key], [firstYear, lastYear])]"
                                                 :error-messages="item.item.yearErrors"/>
 
                                             <v-text-field v-if="header.key === 'cost'"
                                                 :model-value='item.item[header.key]'
                                                 density="compact"
+                                                variant="underlined"
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
                                             <template v-slot:input>
@@ -245,7 +251,7 @@
             <v-row justify="center">
                 <v-btn 
                 id="CommittedProjectsEditor-cancel-vbtn"
-                @click="onCancelClick" :disabled='!hasUnsavedChanges' class="ghd-white-bg ghd-blue ghd-button-text" variant="flat">Cancel</v-btn>    
+                @click="onCancelClick" :disabled='!hasUnsavedChanges' class="ghd-white-bg ghd-blue ghd-button-text" variant="outlined">Cancel</v-btn>    
                 <div style="padding:5px"></div>
 
                 <v-btn 
@@ -336,7 +342,7 @@ import { getUrl } from '@/shared/utils/get-url';
     let attributeSelectItems: SelectItem[] = [];
     const treatmentSelectItems = ref< string[] >([]);
     const projectSourceOptions = ref< string [] >([]);
-    let budgetSelectItems: SelectItem[] = [];
+    const budgetSelectItems = ref< any[] >([]);
     let categorySelectItems: SelectItem[] = [];
     let categories: string[] = [];
     let scenarioId: string = getBlankGuid();
@@ -530,8 +536,8 @@ import { getUrl } from '@/shared/utils/get-url';
             });
             await ScenarioService.getNoTreatmentBeforeCommitted(scenarioId).then(response => {
                     if(!isNil(response.data)){
-                        isNoTreatmentBeforeCache = response.data;
-                        isNoTreatmentBefore = response.data;
+                        isNoTreatmentBeforeCache.value = response.data;
+                        isNoTreatmentBefore.value = response.data;
                     }
             });
             await getScenarioSimpleBudgetDetailsAction({scenarioId: scenarioId});
@@ -611,15 +617,15 @@ import { getUrl } from '@/shared/utils/get-url';
     watch(selectedStateTreatmentLibrary, () => {
     });
     watch(stateScenarioSimpleBudgetDetails, () => {
-        budgetSelectItems = stateScenarioSimpleBudgetDetails.value.map(
+        budgetSelectItems.value = stateScenarioSimpleBudgetDetails.value.map(
             (budget: SimpleBudgetDetail) => ({
-                text: budget.name,
-                value: budget.name
+                title: budget.name,
+                key: budget.name
             }),
         );
-        budgetSelectItems.push({
-            text: 'None',
-            value: ''
+        budgetSelectItems.value.push({
+            title: 'None',
+            key: ''
         });
     });
 
@@ -693,7 +699,7 @@ import { getUrl } from '@/shared/utils/get-url';
         clearChanges()
         selectedCommittedProject.value = '';
         selectedCpItems.value = [];
-        isNoTreatmentBefore = isNoTreatmentBeforeCache
+        isNoTreatmentBefore.value = isNoTreatmentBeforeCache.value
         resetPage();
     }
 
@@ -762,7 +768,7 @@ import { getUrl } from '@/shared/utils/get-url';
                         addedRows.value = [];
                         updatedRowsMap.clear();
                     }
-                    if(isNoTreatmentBefore != isNoTreatmentBeforeCache)
+                    if(isNoTreatmentBefore.value != isNoTreatmentBeforeCache.value)
                         updateNoTreatment()
                     else
                         resetPage()
@@ -776,7 +782,7 @@ import { getUrl } from '@/shared/utils/get-url';
                     addedRows.value = [];
                     updatedRowsMap.clear();
                 }
-                if(isNoTreatmentBefore != isNoTreatmentBeforeCache)
+                if(isNoTreatmentBefore.value != isNoTreatmentBeforeCache.value)
                         updateNoTreatment()
                 else
                     resetPage()
@@ -810,17 +816,17 @@ import { getUrl } from '@/shared/utils/get-url';
     }
 
      function updateNoTreatment(){
-        if(isNoTreatmentBefore)
+        if(isNoTreatmentBefore.value)
                 ScenarioService.setNoTreatmentBeforeCommitted(scenarioId).then((response: AxiosResponse) => {
                     if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                        isNoTreatmentBeforeCache = isNoTreatmentBefore
+                        isNoTreatmentBeforeCache.value = isNoTreatmentBefore.value
                     }
                     resetPage()
                 });
             else
                 ScenarioService.removeNoTreatmentBeforeCommitted(scenarioId).then((response: AxiosResponse) => {
                     if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                        isNoTreatmentBeforeCache = isNoTreatmentBefore
+                        isNoTreatmentBeforeCache.value = isNoTreatmentBefore.value
                     }
                     resetPage()
                 });
@@ -1216,7 +1222,7 @@ import { getUrl } from '@/shared/utils/get-url';
     }
 
     function checkHasUnsavedChanges(){
-        const hasUnsavedChanges: boolean = committedProjectsAreChanged() || isNoTreatmentBeforeCache != isNoTreatmentBefore
+        const hasUnsavedChanges: boolean = committedProjectsAreChanged() || isNoTreatmentBeforeCache.value != isNoTreatmentBefore.value
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 

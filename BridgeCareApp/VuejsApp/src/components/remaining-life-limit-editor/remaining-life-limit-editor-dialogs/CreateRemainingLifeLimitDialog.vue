@@ -70,8 +70,8 @@ import {clone} from 'ramda';
   let newRemainingLifeLimit = ref<RemainingLifeLimit>({...emptyRemainingLifeLimit, id: getNewGuid()});
   let rules: InputValidationRules = clone(validationRules);
   
-  watch(()=> props.dialogData,()=> {
-    newRemainingLifeLimit.value.attribute = hasValue(props.dialogData.numericAttributeSelectItems)
+  watch(dialogData,()=> {
+    newRemainingLifeLimit.value.attribute = hasValue(dialogData.value.numericAttributeSelectItems)
         ? props.dialogData.numericAttributeSelectItems[0].value.toString() : '';
   });
 

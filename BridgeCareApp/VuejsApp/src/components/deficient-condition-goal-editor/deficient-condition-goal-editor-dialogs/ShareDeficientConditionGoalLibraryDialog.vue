@@ -91,7 +91,6 @@ const stateUsers = computed(() => store.state.userModule.users as User[]);
 
   function onSetGridData() {
     const currentUser: string = getUserName();
-    console.log("current user: "+ currentUser);
     deficientConditionGoalLibraryUserGridRows.value = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({

@@ -204,7 +204,7 @@
                                                 <v-btn 
                                                     id="CommittedProjectsEditor-deleteCommittedProject-vbtn"
                                                     @click="OnDeleteClick(props.item.id)"  class="ghd-blue" icon>
-                                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                                 </v-btn>
                                             </v-row>
                                         </div>                            
@@ -298,6 +298,7 @@ import mitt from 'mitt';
 import Dialog from 'primevue/dialog';
 import Column from 'primevue/column';
 import TreatmentService from '@/services/treatment.service';
+import { getUrl } from '@/shared/utils/get-url';
 
     let store = useStore();
     const $router = useRouter();    
@@ -529,6 +530,7 @@ import TreatmentService from '@/services/treatment.service';
                             await fetchTreatmentLibrary(scenarioId);
                             await fetchProjectSources();
                         }
+
                 await CommittedProjectsService.getUploadedCommittedProjectTemplates().then(response => {
                     if(!isNil(response.data)){
                             templateSelectItems = response.data;
@@ -1050,12 +1052,14 @@ import TreatmentService from '@/services/treatment.service';
     }
 
     function fetchProjectSources() {
-        CommittedProjectsService.getProjectSources().then((response: AxiosResponse) => {
-            if (hasValue(response, 'data')) {
-                projectSourceOptions = response.data.filter((option: string) => option !== "None");
-            }
-        });
-    }
+    CommittedProjectsService.getProjectSources().then((response: AxiosResponse) => {
+        if (hasValue(response, 'data')) {
+            projectSourceOptions = response.data.filter(
+                (option: string) => option !== "None" && option !== "iAMPick"
+                );
+        }
+    });
+}
 
     function checkExistenceOfAssets(){//todo: refine this
         const uncheckKeys = currentPage.value.map(scp => scp.keyAttr).filter(key => isNil(isKeyAttributeValidMap.get(key)))

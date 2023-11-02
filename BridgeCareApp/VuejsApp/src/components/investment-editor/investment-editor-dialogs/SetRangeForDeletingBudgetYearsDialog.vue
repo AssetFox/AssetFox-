@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="200px" persistent v-bind:show="showDialog">
+  <v-dialog max-width="200px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title>
         <v-row justify-center>
@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup >
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
@@ -35,6 +35,7 @@ const props = defineProps<{
   endYear: number,
   maxRange : number
 }>()
+let showDialogComputed = computed(() => props.showDialog);
 let range : number =1;
 let rules: InputValidationRules = validationRules;
 function rangeLabel() {

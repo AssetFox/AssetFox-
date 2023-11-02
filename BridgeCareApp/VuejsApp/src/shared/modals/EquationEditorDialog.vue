@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-dialog max-width="900px" persistent scrollable v-bind:show="dialogData.showDialog">
+    <v-dialog max-width="900px" persistent scrollable v-model="showDialogComputed">
       <v-card class="equation-container-card Montserrat-font-family">
         <v-card-title class="ghd-dialog-box-padding-top">
           <v-col cols = "12">
@@ -128,7 +128,7 @@
                           <div class="data-points-grid">
                             <v-data-table :headers="piecewiseGridHeaders"
                                           :items="piecewiseGridData"
-                                          sort-icon=$vuetify.icons.ghd-table-sort
+                                          sort-icon=ghd-table-sort
                                           class="v-table__overflow ghd-table"
                                           hide-actions>
                               <template slot="items" slot-scope="props"  v-slot:item="props">
@@ -146,7 +146,7 @@
                                     <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
                                            icon
                                            v-if="props.item.timeValue !== 0">
-                                      <img :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                      <img :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                   </div>
                                 </td>
@@ -199,7 +199,7 @@
                           <div class="data-points-grid">
                             <v-data-table :headers="timeInRatingGridHeaders"
                                           :items="timeInRatingGridData"
-                                          sort-icon=$vuetify.icons.ghd-table-sort
+                                          sort-icon=ghd-table-sort
                                           class="v-table__overflow ghd-table"
                                           hide-actions>
                               <template slot="items" slot-scope="props"  v-slot:item="props">
@@ -213,7 +213,7 @@
                                   <div v-else>
                                     <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
                                            icon>
-                                      <img :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                      <img :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                   </div>
                                 </td>
@@ -281,7 +281,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog max-width="250px" persistent v-bind:show="showAddDataPointPopup">
+    <v-dialog max-width="250px" persistent v-model="showAddDataPointPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
           <v-row column justify-center>
@@ -321,7 +321,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog max-width="400px" persistent v-bind:show="showAddMultipleDataPointsPopup">
+    <v-dialog max-width="400px" persistent v-model="showAddMultipleDataPointsPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
           <v-row column justify-center>
@@ -350,7 +350,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog max-width="250px" persistent v-bind:show="showEditDataPointPopup">
+    <v-dialog max-width="250px" persistent v-model="showEditDataPointPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
           <v-row column justify-center>
@@ -420,6 +420,7 @@ const props = defineProps<{
   dialogData: EquationEditorDialogData,
   isFromPerformanceCurveEditor: Boolean
     }>()
+    let showDialogComputed = computed(() => props.dialogData.showDialog);
     
 let stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributes);
 async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
@@ -435,15 +436,15 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
   let cannotSubmit: boolean = true;
   let invalidExpressionMessage: string = '';
   let validExpressionMessage: string = '';
-  let piecewiseGridHeaders: DataTableHeader[] = [
-    {text: 'Time', value: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {text: 'Condition', value: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {text: 'Action', value: '', align: 'left', sortable: false, class: '', width: '10px'}
+  let piecewiseGridHeaders: any[] = [
+    {title: 'Time', key: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {title: 'Condition', key: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {title: 'Action', key: '', align: 'left', sortable: false, class: '', width: '10px'}
   ];
-  let timeInRatingGridHeaders: DataTableHeader[] = [
-    {text: 'Condition', value: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {text: 'Time', value: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {text: 'Action', value: '', align: 'left', sortable: false, class: '', width: '10px'}
+  let timeInRatingGridHeaders: any[] = [
+    {title: 'Condition', key: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {title: 'Time', key: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {title: 'Action', key: '', align: 'left', sortable: false, class: '', width: '10px'}
   ];
   let piecewiseGridData: TimeConditionDataPoint[] = [];
   let timeInRatingGridData: TimeConditionDataPoint[] = [];

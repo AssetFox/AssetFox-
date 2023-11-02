@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-dialog max-width="450px" persistent v-bind:show="showDialog">
+    <v-dialog max-width="450px" persistent v-model="showDialogComputed">
       <v-card class="ghd-padding">
         <v-card-title>
             <v-row justify-left>
@@ -36,14 +36,14 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import {emptyTreatment, Treatment} from '@/shared/models/iAM/treatment';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 
-const props = defineProps<{showDialog: Boolean}>()
-const showDialog = props.showDialog;
+const props = defineProps<{showDialog: boolean}>()
+let showDialogComputed = computed(() => props.showDialog);
 let newTreatment: Treatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
 let store = useStore();
 const emit = defineEmits(['submit'])

@@ -265,8 +265,8 @@
     import ShareBudgetPriorityLibraryDialog  from '@/components/budget-priority-editor/budget-priority-editor-dialogs/ShareBudgetPriorityLibraryDialog.vue'
     import { useConfirm } from 'primevue/useconfirm';
     import ConfirmDialog from 'primevue/confirmdialog';
+import { getUrl } from '@/shared/utils/get-url';
 
-    const ObjectID = require('bson-objectid');
     let store = useStore();
     const confirm = useConfirm();
     const $router = useRouter();

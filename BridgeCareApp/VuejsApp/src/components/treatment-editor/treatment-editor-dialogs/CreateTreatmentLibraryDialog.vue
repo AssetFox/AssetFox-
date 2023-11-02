@@ -1,6 +1,6 @@
 <template>
     <v-row>
-        <v-dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
+        <v-dialog max-width="450px" persistent v-model="showDialogComputed">
             <v-card class="ghd-padding">
                 <v-card-title>
                     <v-row justify-left>
@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { CreateTreatmentLibraryDialogData } from '@/shared/models/modals/create-treatment-library-dialog-data';
 import {
@@ -64,6 +64,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
     const props = defineProps<{dialogData: CreateTreatmentLibraryDialogData}>()
+    let showDialogComputed = computed(() => props.dialogData.showDialog);
     const dialogData = props.dialogData;
     const emit = defineEmits(['submit'])
     let store = useStore();

@@ -5,7 +5,7 @@
                 <v-row justify-center>
                     <v-card class="logged-out-card">
                         <div class="bridgecare-logo-img-div">
-                            <v-img :src="require('@/assets/images/logos/Banner-logo.jpg')"
+                            <v-img :src="getUrl('assets/images/logos/Banner-logo.jpg')"
                                    class="bridgecare-logo-img">
                             </v-img>
                         </div>
@@ -29,6 +29,7 @@
     import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
     import { useStore } from 'vuex';
     import { useRouter } from 'vue-router';
+import { getUrl } from '@/shared/utils/get-url';
 
     const $router = useRouter();
     let store = useStore();

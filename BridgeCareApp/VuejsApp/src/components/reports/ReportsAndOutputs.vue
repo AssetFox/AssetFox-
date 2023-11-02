@@ -26,7 +26,7 @@
                                 </td>
                                 <td class="text-xs-left">
                                     <v-btn v-if="props.item.name.includes('Summary')" class="ghd-blue" tooltip flat icon>
-                                                <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')" @click="showEditDialog">
+                                                <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')" @click="showEditDialog">
                                                 <Dialog v-model:visible="editShow">
                                                     <v-card>
                                                 <v-textarea
@@ -47,7 +47,7 @@
                                         class="ghd-blue"
                                         flat
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')">
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')">
                                     </v-btn>
                                 </td>
                                 <td class="text-xs-left">
@@ -56,14 +56,14 @@
                                         class="ghd-blue"
                                         flat
                                     >
-                                        <img class="img-general" :src="require('@/assets/icons/attributes-dark.svg')"/>
+                                        <img class="img-general" :src="getUrl('assets/icons/attributes-dark.svg')"/>
 
                                     </v-btn>
                                     <v-btn
                                         @click="onDownloadReport(props.item.id)"
                                         flat
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/download.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/download.svg')"/>
                                     </v-btn>
                                 </td>
                             </tr>
@@ -117,6 +117,7 @@ import { useRouter } from 'vue-router';
 import Dialog from 'primevue/dialog';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import { getUrl } from '@/shared/utils/get-url';
 
     let store = useStore();
     const router = useRouter(); 

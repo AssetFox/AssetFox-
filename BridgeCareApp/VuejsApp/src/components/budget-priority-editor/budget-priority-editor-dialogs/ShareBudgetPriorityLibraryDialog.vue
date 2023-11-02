@@ -14,7 +14,6 @@
         <v-data-table-server id="ShareBudgetPriorityLibraryDialog-table-vdatatable" 
                       :headers="budgetPriorityLibraryUserGridHeaders"
                       :items="budgetPriorityLibraryUserGridRows"
-                      :items-length="budgetPriorityLibraryUserGridRows.length"
                       sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
           <template v-slot:item="{item}" slot="items" slot-scope="props">

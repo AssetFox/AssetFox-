@@ -1,9 +1,9 @@
 <template>
   <v-row>
-    <v-dialog max-width="450px" persistent v-bind:show="showDialog">
+    <v-dialog max-width="450px" persistent v-model="showDialog">
       <v-card>
         <v-card-title class="ghd-dialog-box-padding-top">
-         <v-row justify-space-between align-center>
+         <v-row justify="space-between" align="center">
             <div class="ghd-control-dialog-header">Add New Deficient Condition Goal</div>
             <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
@@ -11,36 +11,30 @@
           </v-row>
         </v-card-title>
         <v-card-text class="ghd-dialog-box-padding-center">
-          <v-row column>
+          <v-row>
             <v-col>
               <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
               <v-text-field id="CreateDeficientConditionGoalDialog-name-vtextfield"
-                            outline v-model="newDeficientConditionGoal.name"
+                            variant="outlined" 
+                            v-model="newDeficientConditionGoal.name"
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                             class="ghd-text-field-border ghd-text-field"></v-text-field>
-            </v-col>
-            <v-col>
               <v-subheader class="ghd-md-gray ghd-control-label">Select Attribute</v-subheader>
               <v-select id="CreateDeficientConditionGoalDialog-attribute-vselect"
                         :items="numericAttributeNames"
-                        append-icon=$vuetify.icons.ghd-down
                         variant="outlined"
                         v-model="newDeficientConditionGoal.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-select ghd-text-field ghd-text-field-border">
               </v-select>
-            </v-col>
-            <v-col>
               <v-subheader class="ghd-md-gray ghd-control-label">Deficient Limit</v-subheader>
               <v-text-field id="CreateDeficientConditionGoalDialog-limit-vtextfield"
-                            outline
+                            variant="outlined"
                             v-model.number="newDeficientConditionGoal.deficientLimit" :mask="'##########'"
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                             class="ghd-text-field-border ghd-text-field"></v-text-field>
-            </v-col>
-            <v-col>
               <v-subheader class="ghd-md-gray ghd-control-label">Allowed Deficient Percentage</v-subheader>
               <v-text-field id="CreateDeficientConditionGoalDialog-percentage-vtextfield"
-                            outline
+                            variant="outlined"
                             v-model.number="newDeficientConditionGoal.allowedDeficientPercentage"
                             :mask="'###'"
                             :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(newDeficientConditionGoal.allowedDeficientPercentage, [0, 100])]"
@@ -50,12 +44,19 @@
           </v-row>
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
-          <v-row justify-center row>
-            <v-btn id="CreateDeficientConditionGoalDialog-cancel-vbtn" @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
+          <v-row justify="center">
+            <v-btn 
+              id="CreateDeficientConditionGoalDialog-cancel-vbtn" 
+              @click="onSubmit(false)" 
+              variant = "flat" 
+              class='ghd-blue ghd-button-text ghd-button'>
               Cancel
             </v-btn>
-            <v-btn id="CreateDeficientConditionGoalDialog-save-vbtn" :disabled="disableSubmitBtn()" @click="onSubmit(true)" 
-            variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+            <v-btn 
+              id="CreateDeficientConditionGoalDialog-save-vbtn" 
+              :disabled="disableSubmitBtn()" 
+              @click="onSubmit(true)" 
+              variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
               Save
             </v-btn>           
           </v-row>
@@ -66,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { onMounted, shallowRef, watch } from 'vue';
+import { onMounted, computed, watch, ref, toRefs } from 'vue';
 import {DeficientConditionGoal, emptyDeficientConditionGoal} from '@/shared/models/iAM/deficient-condition-goal';
 import {clone} from 'ramda';
 import {Attribute} from '@/shared/models/iAM/attribute';
@@ -77,17 +78,17 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { useStore } from 'vuex';
 
   let store = useStore();
-
   const props = defineProps<{
     currentNumberOfDeficientConditionGoals: number,
     showDialog: boolean
   }>()
+  const { showDialog, currentNumberOfDeficientConditionGoals } = toRefs(props);
   const emit = defineEmits(['submit'])
 
-  let stateNumericAttributes = shallowRef<Attribute[]>(store.state.attributeModule.numericAttributes);
+  const stateNumericAttributes = computed<Attribute[]>(() =>store.state.attributeModule.numericAttributes);
 
-  let  newDeficientConditionGoal: DeficientConditionGoal = clone({...emptyDeficientConditionGoal, id: getNewGuid()});
-  let numericAttributeNames: string[] = [];
+  const newDeficientConditionGoal = ref<DeficientConditionGoal>(clone({...emptyDeficientConditionGoal, id: getNewGuid()}));
+  const numericAttributeNames = ref<string[]>([]);
   let rules: InputValidationRules = validationRules;
 
   onMounted(() => mounted); 
@@ -95,59 +96,56 @@ import { useStore } from 'vuex';
     setNumericAttributeNames();
   }
 
-  watch(stateNumericAttributes, () => onStateNumericAttributesChanged)
-  function onStateNumericAttributesChanged() {
+  watch(stateNumericAttributes, () => {
     setNumericAttributeNames();
-  }
+  });
 
-  watch(() => props.showDialog, () => onShowDialogChanged)
-  function onShowDialogChanged() {
-    if (props.showDialog) {
+  watch(showDialog, () => {
+    if (showDialog) {
       setNewDeficientConditionGoalDefaultValues();
     }
-  }
+  });
 
-  watch(() => props.currentNumberOfDeficientConditionGoals, () => onCurrentNumberOfDeficientConditionGoalsChanged)
-  function onCurrentNumberOfDeficientConditionGoalsChanged() {
-    if (props.showDialog) {
+  watch(currentNumberOfDeficientConditionGoals, () => {
+    if (showDialog) {
       setNewDeficientConditionGoalDefaultValues();
     }
-  }
+  });
 
   function setNewDeficientConditionGoalDefaultValues() {
-    newDeficientConditionGoal = {
-      ...newDeficientConditionGoal,
-      attribute: hasValue(numericAttributeNames) ? numericAttributeNames[0] : '',
+    newDeficientConditionGoal.value = {
+      ...newDeficientConditionGoal.value,
+      attribute: hasValue(numericAttributeNames.value) ? numericAttributeNames.value[0] : '',
       name: `Unnamed Deficient Condition Goal ${props.currentNumberOfDeficientConditionGoals + 1}`,
-      deficientLimit: props.currentNumberOfDeficientConditionGoals > 0 ? props.currentNumberOfDeficientConditionGoals + 1 : 1
+      deficientLimit: currentNumberOfDeficientConditionGoals.value > 0 ? currentNumberOfDeficientConditionGoals.value + 1 : 1
     };
   }
 
   function setNumericAttributeNames() {
     if (hasValue(stateNumericAttributes)) {
-      numericAttributeNames = getPropertyValues('name', stateNumericAttributes.value);
+      numericAttributeNames.value = getPropertyValues('name', stateNumericAttributes.value);
 
-      if (props.showDialog) {
+      if (showDialog) {
         setNewDeficientConditionGoalDefaultValues();
       }
     }
   }
 
   function disableSubmitBtn() {
-    return !(rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.name) === true &&
-        rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.attribute) &&
-        rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.deficientLimit) &&
-        rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.allowedDeficientPercentage) &&
-        rules['generalRules'].valueIsWithinRange(newDeficientConditionGoal.allowedDeficientPercentage, [0, 100]));
+    return !(rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.value.name) === true &&
+        rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.value.attribute) &&
+        rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.value.deficientLimit) &&
+        rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.value.allowedDeficientPercentage) &&
+        rules['generalRules'].valueIsWithinRange(newDeficientConditionGoal.value.allowedDeficientPercentage, [0, 100]));
   }
 
   function onSubmit(submit: boolean) {
     if (submit) {
-      emit('submit', newDeficientConditionGoal);
+      emit('submit', newDeficientConditionGoal.value);
     } else {
       emit('submit', null);
     }
 
-    newDeficientConditionGoal = {...emptyDeficientConditionGoal, id: getNewGuid()};
+    newDeficientConditionGoal.value = {...emptyDeficientConditionGoal, id: getNewGuid()};
   }
 </script>

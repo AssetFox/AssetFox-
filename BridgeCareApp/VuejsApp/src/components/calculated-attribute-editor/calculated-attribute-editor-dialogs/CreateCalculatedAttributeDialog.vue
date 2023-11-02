@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-dialog v-bind:show="showDialog" max-width="250px" persistent>
+    <v-dialog v-model="showDialogComputed" max-width="250px" persistent>
       <v-card>
         <v-card-title>
           <v-row justify-center>
@@ -40,7 +40,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import {SelectItem} from '@/shared/models/vue/select-item';
 import {Attribute} from '@/shared/models/iAM/attribute';
 import {hasValue} from '@/shared/utils/has-value-util';
@@ -59,6 +59,10 @@ import { useRouter } from 'vue-router';
   let newCalculatedAttribute: CalculatedAttribute[] = [];
   let rules: InputValidationRules = validationRules;
   const emit = defineEmits(['submit'])
+  const props = defineProps<{
+    showDialog: boolean
+  }>()
+  let showDialogComputed = computed(() => props.showDialog);
   watch(stateNumericAttributes,() => onStateNumericAttributesChanged)
   function onStateNumericAttributesChanged() {
     if (hasValue(stateNumericAttributes)) {

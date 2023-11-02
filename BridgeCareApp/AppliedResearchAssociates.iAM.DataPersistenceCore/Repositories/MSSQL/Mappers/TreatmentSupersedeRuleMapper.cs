@@ -106,7 +106,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new TreatmentSupersedeRuleDTO
             {
                 Id = entity.Id,
-                treatment = entity.PreventTreatmentId != Guid.Empty ? treatmentList.FirstOrDefault(_ => _.Id == entity.PreventTreatmentId) : new TreatmentDTO(),
+                treatment = entity.PreventTreatmentId != Guid.Empty && treatmentList != null ? treatmentList.FirstOrDefault(_ => _.Id == entity.PreventTreatmentId) : new TreatmentDTO(),
                 CriterionLibrary = entity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin != null
                     ? entity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO(),
@@ -116,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new TreatmentSupersedeRuleDTO
             {
                 Id = entity.Id,
-                treatment = entity.PreventTreatmentId != Guid.Empty ? treatmentList.FirstOrDefault(_ => _.Id == entity.PreventTreatmentId) : new TreatmentDTO(),
+                treatment = entity.PreventTreatmentId != Guid.Empty && treatmentList != null ? treatmentList.FirstOrDefault(_ => _.Id == entity.PreventTreatmentId) : new TreatmentDTO(),
                 CriterionLibrary = entity.CriterionLibraryTreatmentSupersedeRuleJoin != null
                     ? entity.CriterionLibraryTreatmentSupersedeRuleJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO(),

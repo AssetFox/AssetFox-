@@ -1,5 +1,5 @@
 <template>
-    <v-row>
+    <v-row style="margin: 5px;">
         <v-row align="center" >
                 <v-col cols="6">
                     <v-subheader class="ghd-md-gray ghd-control-label">Select a Deficient Condition Goal Library</v-subheader>
@@ -14,20 +14,23 @@
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
                 </v-col>
-                <!-- <v-col> -->
+                <v-btn v-if="hasScenario" 
+                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
+                    @click="importLibrary()"
+                    :disabled="importLibraryDisabled"
+                    style="margin-right: 5px;"
+                >
+                    Import
+                </v-btn>
+
+                <v-col>
                 <div
                     v-if="!hasScenario && hasSelectedLibrary"
                     class="header-text-content owner-padding" 
-                    style="padding-top: 7px;"
+                    style="padding-top: 7px;padding-left: 0px;padding-right: 0px;"
                 >
                     Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                 </div>
-                    <!-- <v-divider 
-                        class="owner-shared-divider" 
-                        vertical
-                        v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'
-                    >
-                    </v-divider> -->
                     <v-btn 
                         id="DeficientConditionGoalEditor-shareLibrary-vbtn" 
                         @click='onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)' 
@@ -36,23 +39,24 @@
                         v-show='!hasScenario && hasSelectedLibrary'>
                       Share Library
                     </v-btn>
-                <!-- </v-col> -->
+                </v-col>
         </v-row>
         <v-row justify="end">
-            <v-btn v-if="hasScenario" 
+            <!-- <v-btn v-if="hasScenario" 
                     class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     @click="importLibrary()"
                     :disabled="importLibraryDisabled"
                     style="margin-right: 5px;"
                 >
                     Import
-                </v-btn>
+                </v-btn> -->
             <v-btn
                 id="DeficientConditionGoalEditor-addDeficientConditionGoal-vbtn"
                 @click="showCreateDeficientConditionGoalDialog = true"
                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                 v-show="hasSelectedLibrary || hasScenario"
-                variant = "outlined">
+                variant = "outlined"
+                style="margin-right: 5px;">
                 Add Deficient Condition Goal
             </v-btn>
             <v-btn id="DeficientConditionGoalEditor-createNewLibrary-vbtn" @click="onShowCreateDeficientConditionGoalLibraryDialog(false)"
@@ -91,11 +95,14 @@
                     @update:options="onPaginationChanged"
                 >
                     <template  v-slot:item="item">
+                        <tr>
                         <td>
                             <v-checkbox
                                 id="DeficientConditionGoalEditor-selectForDelete-vcheckbox"
                                 hide-details
                                 primary
+                                density="compact"
+                                style="margin: 5px;"
                                 v-model="selectedGridRows" :value="item.item"
                             ></v-checkbox>
                         </td>
@@ -109,12 +116,16 @@
                                     <v-text-field v-if="header.key !== 'allowedDeficientPercentage'"
                                         readonly
                                         class="sm-txt"
+                                        density="compact"
+                                        variant="underlined"
                                         :model-value="item.item[header.key]"
                                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                     <v-text-field v-if="header.key === 'allowedDeficientPercentage'"
                                         readonly
                                         class="sm-txt"
+                                        density="compact"
+                                        variant="underlined"
                                         :model-value="item.item[header.key]"
                                         :rules="[rules['generalRules'].valueIsNotEmpty,
                                             rules['generalRules'].valueIsWithinRange(item.item[header.key],[0, 100])]"/>
@@ -165,18 +176,16 @@
                                             <v-text-field
                                                 readonly
                                                 class="sm-txt"
+                                                density="compact"
+                                                variant="underlined"
                                                 :model-value="item.item.criterionLibrary.mergedCriteriaExpression"/>
                                         </template>
-                                        <!-- <v-card>
-                                            <v-card-text> -->
-                                                <v-textarea
-                                                    :model-value="item.item.criterionLibrary.mergedCriteriaExpression"
-                                                    no-resize
-                                                    variant="outlined"
-                                                    readonly
-                                                    rows="3"/>
-                                            <!-- </v-card-text>
-                                        </v-card> -->
+                                            <v-textarea
+                                                :model-value="item.item.criterionLibrary.mergedCriteriaExpression"
+                                                no-resize
+                                                variant="outlined"
+                                                readonly
+                                                rows="3"/>
                                     </v-menu>
                                     <v-btn
                                         id="DeficientConditionGoalEditor-editDeficientConditionGoalCriteria-vbtn"
@@ -187,21 +196,23 @@
                                         <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-row>
-                                <div v-if="header.key === 'action'" style="margin-bottom: 20px;">
+                                <div v-if="header.key === 'action'" style="margin-bottom: 10px;">
                                     <v-btn id="DeficientConditionGoalEditor-deleteDeficientConditionGoal-vbtn" @click="onRemoveSelectedDeficientConditionGoal(item.item.id)"  class="ghd-blue" flat>
                                         <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </div>                               
                             </div>
                         </td>
+                    </tr>
                     </template>
                 </v-data-table-server> 
                 <v-btn
-                    variant="flat"
                     id="DeficientConditionGoalEditor-deleteSelected-vbtn"
                     :disabled="selectedDeficientConditionGoalIds.length === 0"
                     @click="onRemoveSelectedDeficientConditionGoals"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                    variant="text">
+
                     Delete Selected
                 </v-btn>              
             </div>
@@ -230,16 +241,17 @@
                     v-show="hasScenario"
                     style="margin-right: 5px;"
                     :disabled="!hasUnsavedChanges"
-                    variant = "flat">
+                    variant = "text">
                     Cancel
                 </v-btn>
                 <v-btn
                     id="DeficientConditionGoalEditor-deleteLibrary-vbtn"
                     @click="onShowConfirmDeleteAlert"
                     class='ghd-blue ghd-button-text ghd-button'
+                    style="margin-right: 5px;"
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission"
-                    variant = "outlined">
+                    variant = "text">
                     Delete Library
                 </v-btn>    
                 <v-btn
@@ -247,6 +259,7 @@
                     @click="onShowCreateDeficientConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     :disabled="disableCrudButtons()"
+                    style="margin-right: 5px; margin-left: 5px;"
                     variant = "outlined">
                     Create as New Library
                 </v-btn>
@@ -263,7 +276,8 @@
                     @click="onUpsertDeficientConditionGoalLibrary"
                     class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario"
-                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges">
+                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
+                    style="margin-left: 5px;">
                     Update Library
                 </v-btn>               
                        
@@ -399,7 +413,7 @@ import { getUrl } from '@/shared/utils/get-url';
             align: 'start',
             sortable: false,
             class: '',
-            width: '15%',
+            width: '30%',
         },
         {
             title: 'Attribute',
@@ -431,7 +445,7 @@ import { getUrl } from '@/shared/utils/get-url';
             align: 'left',
             sortable: false,
             class: '',
-            width: '40%',
+            width: '30%',
         },
         {
             title: 'Action',
@@ -445,13 +459,9 @@ import { getUrl } from '@/shared/utils/get-url';
     let numericAttributeNames: string[] = [];
     let selectedGridRows: ShallowRef<DeficientConditionGoal[]> = ref([]);
     let selectedDeficientConditionGoalIds: string[] = [];
-    let selectedDeficientConditionGoalForCriteriaEdit: DeficientConditionGoal = clone(
-        emptyDeficientConditionGoal,
-    );
+    const selectedDeficientConditionGoalForCriteriaEdit = ref< DeficientConditionGoal >(clone(emptyDeficientConditionGoal));
     const showCreateDeficientConditionGoalDialog = ref<boolean>(false);
-    let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
-        emptyGeneralCriterionEditorDialogData,
-    );
+    const criterionEditorDialogData = ref< GeneralCriterionEditorDialogData >(clone(emptyGeneralCriterionEditorDialogData));
     const createDeficientConditionGoalLibraryDialogData = ref<CreateDeficientConditionGoalLibraryDialogData>(clone(emptyCreateDeficientConditionGoalLibraryDialogData));
     let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     let rules: InputValidationRules = validationRules;
@@ -688,11 +698,10 @@ import { getUrl } from '@/shared/utils/get-url';
     }
 
     function getOwnerUserName(): string {
-        return '';
-        // if (!hasCreatedLibrary) {
-        // return getUserNameByIdGetter(selectedDeficientConditionGoalLibrary.value.owner);
-        // }
-        // return getUserName();
+        if (!hasCreatedLibrary) {
+        return getUserNameByIdGetter(selectedDeficientConditionGoalLibrary.value.owner);
+        }
+        return getUserName();
     }
 
     function checkLibraryEditPermission() {
@@ -765,29 +774,29 @@ import { getUrl } from '@/shared/utils/get-url';
     }
 
     function onShowCriterionLibraryEditorDialog(deficientConditionGoal: DeficientConditionGoal,) {
-        selectedDeficientConditionGoalForCriteriaEdit = clone(
+        selectedDeficientConditionGoalForCriteriaEdit.value = clone(
             deficientConditionGoal,
         );
 
-        criterionEditorDialogData = {
+        criterionEditorDialogData.value = {
             showDialog: true,
             CriteriaExpression: deficientConditionGoal.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
     function onEditDeficientConditionGoalCriterionLibrary(criterionExpression: string,) {
-        criterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+        criterionEditorDialogData.value = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionExpression) && selectedDeficientConditionGoalForCriteriaEdit.id !== uuidNIL) {
-            if(selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary.id === getBlankGuid())
-                selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary.id = getNewGuid();
-            onUpdateRow(selectedDeficientConditionGoalForCriteriaEdit.id,
-             { ...selectedDeficientConditionGoalForCriteriaEdit, 
-                criterionLibrary: {... selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression}})                
+        if (!isNil(criterionExpression) && selectedDeficientConditionGoalForCriteriaEdit.value.id !== uuidNIL) {
+            if(selectedDeficientConditionGoalForCriteriaEdit.value.criterionLibrary.id === getBlankGuid())
+                selectedDeficientConditionGoalForCriteriaEdit.value.criterionLibrary.id = getNewGuid();
+            onUpdateRow(selectedDeficientConditionGoalForCriteriaEdit.value.id,
+             { ...selectedDeficientConditionGoalForCriteriaEdit.value, 
+                criterionLibrary: {... selectedDeficientConditionGoalForCriteriaEdit.value.criterionLibrary, mergedCriteriaExpression: criterionExpression}})                
             onPaginationChanged();
         }
 
-        selectedDeficientConditionGoalForCriteriaEdit = clone(
+        selectedDeficientConditionGoalForCriteriaEdit.value = clone(
             emptyDeficientConditionGoal,
         );
     }
@@ -1080,7 +1089,7 @@ import { getUrl } from '@/shared/utils/get-url';
 
 <style>
 .deficients-data-table {
-    height: 425px;
+    height: 340px;
     overflow-y: auto;
     overflow-x: hidden;
 }

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <v-dialog max-width="290" persistent v-model="dialogData.showDialog">
         <v-card>
             <v-card-title class="headline">
@@ -26,7 +26,7 @@
                         Proceed
                     </v-btn>
                 </v-row>
-                <v-row justify-center v-if="!dialogData.choice">
+                <v-row justify="center" v-if="!dialogData.choice">
                     <v-btn @click="onSubmit(true)" class="ara-blue-bg text-white">
                         OK
                     </v-btn>

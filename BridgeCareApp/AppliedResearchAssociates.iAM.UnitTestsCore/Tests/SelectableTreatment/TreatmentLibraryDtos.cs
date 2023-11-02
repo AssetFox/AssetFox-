@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
 {
     public static class TreatmentLibraryDtos
     {

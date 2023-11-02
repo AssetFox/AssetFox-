@@ -2391,37 +2391,6 @@ AS
 
 			---------------------------------------------------------------------------
 			
-			   --Network --> Simulation --> ScenarioSelectableTreatment
-
-            BEGIN TRY
-
-			ALTER TABLE ScenarioSelectableTreatment NOCHECK CONSTRAINT all
-
-			Delete l3
-			FROM Network AS l1
-			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
-			JOIN ScenarioSelectableTreatment AS l3 ON l3.SimulationId = l2.Id
-			WHERE l1.Id IN (@NetworkId);
-
-			ALTER TABLE ScenarioSelectableTreatment WITH CHECK CHECK CONSTRAINT all
- 
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
-
- 		         SELECT @CustomErrorMessage = 'Query Error in ScenarioSelectableTreatment'
-                 RAISERROR  (@CustomErrorMessage, 16, 1);  
-                 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
-
-			---------------------------------------------------------------------------
-			
 		--Simulation --> ScenarioSelectableTreatment --> ScenarioConditionalTreatmentConsequences   --> CriterionLibrary_ScenarioTreatmentConsequence
 
             BEGIN TRY

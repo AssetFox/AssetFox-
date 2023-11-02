@@ -925,40 +925,8 @@ AS
             END CATCH
 
 			---------------------------------------------------------------------------
-			
-			   --Network --> Simulation --> ScenarioSelectableTreatment
 
-            BEGIN TRY
-
-			ALTER TABLE ScenarioSelectableTreatment NOCHECK CONSTRAINT all
-
-			Delete l2
-			FROM Simulation AS l1
-			JOIN ScenarioSelectableTreatment AS l2 ON l2.SimulationId = l1.Id
-			WHERE l1.Id IN (SELECT Guid FROM #SimTempGuids);
-
-			ALTER TABLE ScenarioSelectableTreatment WITH CHECK CHECK CONSTRAINT all
- 
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
-
- 		         SELECT @CustomErrorMessage = 'Query Error in ScenarioSelectableTreatment'
-                 RAISERROR  (@CustomErrorMessage, 16, 1);  
-                 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
-	 
-
-			---------------------------------------------------------------------------
-
-
-            BEGIN TRY
+		 BEGIN TRY
 
 			ALTER TABLE CriterionLibrary_ScenarioTreatmentConsequence NOCHECK CONSTRAINT all
 
@@ -966,7 +934,7 @@ AS
 			FROM  Simulation  AS l1
 			JOIN ScenarioSelectableTreatment AS l2 ON l2.SimulationId = l1.Id
 			JOIN ScenarioConditionalTreatmentConsequences AS l3 ON l3.ScenarioSelectableTreatmentId = l2.Id
-			JOIN  CriterionLibrary_ScenarioTreatmentConsequence AS l4 ON l4.ScenarioConditionalTreatmentConsequenceId = l3.Id
+			JOIN CriterionLibrary_ScenarioTreatmentConsequence AS l4 ON l4.ScenarioConditionalTreatmentConsequenceId = l3.Id
 			WHERE l1.Id IN (SELECT Guid FROM #SimTempGuids);
 
 			ALTER TABLE CriterionLibrary_ScenarioTreatmentConsequence WITH CHECK CHECK CONSTRAINT all
@@ -1056,7 +1024,7 @@ AS
 			FROM  Simulation  AS l1
 			JOIN ScenarioSelectableTreatment AS l2 ON l2.SimulationId = l1.Id
 			JOIN ScenarioTreatmentCost AS l3 ON l3.ScenarioSelectableTreatmentId = l2.Id
-			JOIN  ScenarioTreatmentCost_Equation AS l4 ON l4.ScenarioTreatmentCostId = l3.Id
+			JOIN ScenarioTreatmentCost_Equation AS l4 ON l4.ScenarioTreatmentCostId = l3.Id
 			WHERE l1.Id IN (SELECT Guid FROM #SimTempGuids);
 
 			--ALTER TABLE ScenarioTreatmentCost_Equation WITH CHECK CHECK CONSTRAINT all
@@ -1255,6 +1223,7 @@ AS
                  Set @RetMessage = @CustomErrorMessage;
 
             END CATCH
+
 
 			---------------------------------------------------------------------------
 

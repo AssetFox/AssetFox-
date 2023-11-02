@@ -1,19 +1,20 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model ="dialogData.showDialog">
+  <v-dialog max-width="60%" persistent v-model ="dialogData.showDialog">
     <v-card>
-      <v-card-title class="ghd-dialog-box-padding-top">
-        <v-row>         
-          <div class="ghd-control-dialog-header">Budget Priority Library Sharing</div>
-          <v-spacer></v-spacer>
+      <v-card-title class="ghd-dialog-padding-top-title">
+        <v-row justify="space-between">         
+          <div class="ghd-control-dialog-header"><h5>Budget Priority Library Sharing</h5></div>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
         </v-row>
       </v-card-title>
+
       <v-card-text>
         <v-data-table-server id="ShareBudgetPriorityLibraryDialog-table-vdatatable" 
                       :headers="budgetPriorityLibraryUserGridHeaders"
-                      :items="budgetPriorityLibraryUserGridRows"
+                      :items="budgetPriorityLibraryUserGridRows" 
+                      :items-length="budgetPriorityLibraryUserGridRows.length"
                       sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
           <template v-slot:item="{item}" slot="items" slot-scope="props">
@@ -38,8 +39,8 @@
       </v-card-text>
       <v-card-actions>
         <v-row justify="center">
-          <v-btn id="ShareBudgetPriorityLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
-          <v-btn id="ShareBudgetPriorityLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
+          <v-btn id="ShareBudgetPriorityLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant="outlined">Cancel</v-btn>
+          <v-btn id="ShareBudgetPriorityLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding" variant="outlined">
             Save
           </v-btn>
         </v-row>

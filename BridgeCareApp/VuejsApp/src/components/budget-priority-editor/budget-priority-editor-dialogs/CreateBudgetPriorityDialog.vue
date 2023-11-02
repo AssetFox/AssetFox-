@@ -1,42 +1,50 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="showDialog">
-    <v-card>
-      <v-card-title class="ghd-dialog-box-padding-top">
-        <v-row>
-          <div class="ghd-control-dialog-header">New Budget Priority</div>
-          <v-spacer></v-spacer>
+  <v-dialog width="50%" persistent v-model="showDialog">
+    <v-card>    
+      <v-card-title class="ghd-dialog-padding-top-title">
+        <v-row justify="space-between">
+          <div class="ghd-control-dialog-header"><h5>New Budget Priority</h5></div>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
           </v-btn>
         </v-row>
       </v-card-title>
+
       <v-card-text class="ghd-dialog-box-padding-center">
         <v-row>
-          <v-subheader class="ghd-md-gray ghd-control-label">Priority Level</v-subheader>
-        </v-row>
-        <v-row>
-          <v-text-field id="CreateBudgetPriorityDialog-priorityLevel-vtextfield" outline v-model.number="newBudgetPriority.priorityLevel"
-                        :mask="'##########'" :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        class="ghd-text-field-border ghd-text-field"/>
-        </v-row>
-        <v-row>
-          <v-subheader class="ghd-md-gray ghd-control-label">Year</v-subheader>
-        </v-row>
-        <v-row>
-          <v-text-field id="CreateBudgetPriorityDialog-year-vtextfield" outline v-model.number="newBudgetPriority.year"
-                        :mask="'####'" class="ghd-text-field-border ghd-text-field"/>
+          <v-col>
+            <v-subheader class="ghd-md-gray ghd-control-label">Priority Level</v-subheader>       
+            <v-text-field id="CreateBudgetPriorityDialog-priorityLevel-vtextfield"
+                          v-model.number="newBudgetPriority.priorityLevel" 
+                          :mask="'##########'" :rules="[rules['generalRules'].valueIsNotEmpty]"
+                          class="ghd-text-field-border ghd-text-field" variant="outlined" density="compact"/>
+          
+            <v-subheader class="ghd-md-gray ghd-control-label">Year</v-subheader>
+          
+            <v-text-field id="CreateBudgetPriorityDialog-year-vtextfield" 
+                          v-model.number="newBudgetPriority.year"
+                          :mask="'####'"
+                          class="ghd-text-field-border ghd-text-field" variant="outlined" density="compact"/>
+          </v-col>
         </v-row>
       </v-card-text>
+
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-row justify="center">
-          <v-btn id="CreateBudgetPriorityDialog-cancel-vbtn" @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
+          <v-btn id="CreateBudgetPriorityDialog-cancel-vbtn"
+                 @click="onSubmit(false)"
+                 class='ghd-blue ghd-button-text ghd-button' variant = "outlined">
             Cancel
           </v-btn >
-          <v-btn id="CreateBudgetPriorityDialog-save-vbtn" :disabled="disableSubmitButton()" @click="onSubmit(true)" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+          <v-btn id="CreateBudgetPriorityDialog-save-vbtn"
+                 :disabled="disableSubmitButton()"
+                 @click="onSubmit(true)"
+                 class='ghd-blue ghd-button-text ghd-button' variant = "outlined" >
             Save
           </v-btn>         
         </v-row>
       </v-card-actions>
+
     </v-card>
   </v-dialog>
 </template>

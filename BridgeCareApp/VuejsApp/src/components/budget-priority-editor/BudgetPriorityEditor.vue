@@ -1,6 +1,6 @@
 <template>
     <v-row>
-        <v-col cols="12">
+        <v-col col="12">
             <v-row align="center" justify="space-between" >              
                 <v-col cols ="auto">   
                     <div style="margin-bottom: 10px;">              
@@ -49,6 +49,7 @@
                 </v-col>
             </v-row>
         </v-col>
+
         <v-col v-show='hasSelectedLibrary || hasScenario' cols="12">
             <div class='priorities-data-table'>
                 <v-data-table-server 
@@ -103,12 +104,12 @@
                                     </editDialog>
                                 </div>
                                 <div v-else-if="header.key === 'criteria'">
-                                    <v-row align-center row style='flex-wrap:nowrap'>
+                                    <v-row align="center" style='flex-wrap:nowrap'>
                                         <v-menu bottom min-height='500px' min-width='500px'>
                                             <template v-slot:activator>
                                                 <div v-if='stateScenarioSimpleBudgetDetails.length > 5'>
                                                     <v-btn class='ara-blue ghd-button-text' icon>
-                                                        <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')"/>
+                                                        <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                                     </v-btn>
                                                 </div>
                                                 <div v-else class='priority-criteria-output'>
@@ -123,9 +124,8 @@
                                                 </v-card-text>
                                             </v-card>
                                         </v-menu>
-                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' class='ghd-blue'
-                                            icon>
-                                            <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' icon>
+                                            <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                         </v-btn>
                                     </v-row>
                                 </div>
@@ -144,8 +144,8 @@
                                     </editDialog>
                                 </div>
                                 <div v-else>
-                                    <v-btn id="BudgetPriorityEditor-deleteBudgetPriority-btn" @click="onRemoveBudgetPriority(item.item.id)"  class="ghd-blue" icon>
-                                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                    <v-btn  id="BudgetPriorityEditor-deleteBudgetPriority-btn" @click="onRemoveBudgetPriority(item.item.id)" icon>
+                                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </div>
                             </td>
@@ -153,6 +153,7 @@
                     </template>
                 </v-data-table-server>
             </div>
+
             <v-divider :thickness="4" class="border-opacity-100"></v-divider>
             <v-btn flat
                 :disabled='selectedBudgetPriorityIds.length === 0'

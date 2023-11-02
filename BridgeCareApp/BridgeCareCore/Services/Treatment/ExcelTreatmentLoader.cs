@@ -335,7 +335,8 @@ namespace BridgeCareCore.Services.Treatment
 
         public TreatmentSupersedeRulesLoadResult LoadTreatmentSupersedeRules(ExcelWorksheet worksheet, List<TreatmentDTO> scenarioTreatments)
         {
-
+            var treatmentSupersedeRuleResult = LoadTreatment(worksheet);
+            var load
             var validationMessages = new List<string>();
 
             // var budgetsLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Budgets, 2);

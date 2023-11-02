@@ -123,7 +123,7 @@
                                     class="ghd-blue"
                                     icon
                                     v-if="hasAdminAccess">
-                                    <img class='img-general img-shift' :src="require('@/assets/icons/edit.svg')"/>
+                                    <img class='img-general img-shift' :src="getUrl('assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -170,7 +170,7 @@
                                     class="ghd-blue"
                                     icon
                                     v-if="hasAdminAccess">
-                                    <img class='img-general img-shift' :src="require('@/assets/icons/edit.svg')"/>
+                                    <img class='img-general img-shift' :src="getUrl('assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -188,7 +188,7 @@
                                     class="ghd-blue"
                                     icon
                                     v-if="hasAdminAccess">
-                                    <img class='img-general img-shift' :src="require('@/assets/icons/edit.svg')"/>
+                                    <img class='img-general img-shift' :src="getUrl('assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -201,7 +201,7 @@
                             class="ghd-blue"
                             icon
                             :disabled="!hasAdminAccess">
-                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                            <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </td>
                     </tr>
@@ -372,6 +372,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import mitt from 'mitt';
 import { computed } from 'vue';
+import { getUrl } from '@/shared/utils/get-url';
 
 let store = useStore();
 const confirm = useConfirm();

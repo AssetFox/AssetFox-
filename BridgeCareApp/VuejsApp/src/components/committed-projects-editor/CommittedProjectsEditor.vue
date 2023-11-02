@@ -204,7 +204,7 @@
                                                 <v-btn 
                                                     id="CommittedProjectsEditor-deleteCommittedProject-vbtn"
                                                     @click="OnDeleteClick(props.item.id)"  class="ghd-blue" icon>
-                                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                                 </v-btn>
                                             </v-row>
                                         </div>                            
@@ -298,6 +298,7 @@ import mitt from 'mitt';
 import Dialog from 'primevue/dialog';
 import Column from 'primevue/column';
 import TreatmentService from '@/services/treatment.service';
+import { getUrl } from '@/shared/utils/get-url';
 
     let store = useStore();
     const $router = useRouter();    

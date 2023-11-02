@@ -55,7 +55,7 @@
                                               :model-value='props.item.criterionLibrary.mergedCriteriaExpression'>
                                     <template v-slot:append-inner>
                                         <v-btn id="EditBudgetsDialog-openCriteriaEditor-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)"  class="ghd-blue" icon style="margin-top:-6px;">
-                                            <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                            <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                         </v-btn>                                        
                                     </template>
                                 </v-text-field>
@@ -63,7 +63,7 @@
                             </td>
                             <td>
                                 <v-btn id="EditBudgetsDialog-removeBudget-btn" @click="onRemoveBudget(props.item.id)" @mousedown="setCurrentOrder(props.item)" class="ghd-blue" icon>
-                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                              
                             </td>
@@ -111,6 +111,7 @@ import { isNull, isNullOrUndefined } from 'util';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, toRefs, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { getUrl } from '@/shared/utils/get-url';
 
 let store = useStore();
 const emit = defineEmits(['submit'])
@@ -269,7 +270,7 @@ watch(()=>props.dialogData,() => {
             if(!isNil(origBudget)){
                 if(origBudget.criterionLibrary.mergedCriteriaExpression !== budget.criterionLibrary.mergedCriteriaExpression){                                                            
                     if(budgetChanges.value.addedBudgets.length !== 0){
-                        budgetChanges.value.add.valueedBudgets[budgetChanges.value.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                        budgetChanges.value.addedBudgets[budgetChanges.value.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
                     }
                     else if(budgetChanges.value.updatedBudgets.length !== 0){                        
                         budgetChanges.value.updatedBudgets[budgetChanges.value.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;

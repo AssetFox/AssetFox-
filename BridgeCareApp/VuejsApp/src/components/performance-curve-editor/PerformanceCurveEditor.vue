@@ -255,7 +255,7 @@
                                     >
                                         <template v-slot:activator>
                                             <v-btn id="PerformanceCurveEditor-checkEquationEye-vbtn" class="ghd-blue" icon>
-                                                <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
+                                                <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
                                         </template>
                                         <v-card>
@@ -285,7 +285,7 @@
                                         class="ghd-blue"
                                         icon
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')">
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')">
                                     </v-btn>
                                 </td>
                                 <td class="text-xs-left">
@@ -300,7 +300,7 @@
                                     >
                                         <template v-slot:activator>
                                             <v-btn id="PerformanceCurveEditor-checkCriteriaEye-vbtn" class="ghd-blue" variant = "flat" icon>
-                                                <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
+                                                <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
                                         </template>
                                         <v-card>
@@ -331,7 +331,7 @@
                                         class="ghd-blue"
                                         icon
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')">
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')">
                                     </v-btn>
                                 </td>
                                 <td class="text-xs-left">
@@ -344,7 +344,7 @@
                                         class="ghd-blue"
                                         icon
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </td>
                             </tr>
@@ -569,6 +569,7 @@ import mitt from 'mitt';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { computed } from 'vue';
+import { getUrl } from '@/shared/utils/get-url';
 
 const emit = defineEmits(['submit'])
 let store = useStore();

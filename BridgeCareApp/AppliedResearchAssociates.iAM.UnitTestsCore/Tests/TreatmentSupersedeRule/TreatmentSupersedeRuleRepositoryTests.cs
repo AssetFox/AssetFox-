@@ -15,6 +15,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
 {
     public class TreatmentSupersedeRuleRepositoryTests
     {
+        private ScenarioSelectableTreatmentEntity _testScenarioTreatment;
+        private ScenarioTreatmentSupersedeRuleEntity _testScenarioTreatmentSupersedeRule;
+        private CriterionLibraryScenarioTreatmentSupersedeRuleEntity CriterionLibraryScenarioTreatmentSupersedeRuleJoin;
+        private CriterionLibraryEntity criterionLibrary;
+        private TreatmentLibraryEntity _testTreatmentLibrary;
+        private SelectableTreatmentEntity _testTreatment;
+        private TreatmentSupersedeRuleEntity _testTreatmentSupersedeRule;
+        private CriterionLibraryTreatmentSupersedeRuleEntity CriterionLibraryTreatmentSupersedeRuleJoin;
+
         private void Setup()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
@@ -40,6 +49,56 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
 
             // Act            
             TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteTreatmentSupersedeRules(dict, dto.Id);
+        }
+
+        [Fact]
+        public void UpsertOrDeleteTreatmentSupersedeRules_ValidInput_SucceedsUpdate()
+        {
+            // Arrange                      
+            CreateLibraryTestData();
+
+            var dtos = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(_testTreatmentLibrary.Id);
+            dtos[0].SupersedeRules = new List<TreatmentSupersedeRuleDTO>() { _testTreatmentSupersedeRule.ToDto(dtos) };
+            dtos[0].SupersedeRules[0].CriterionLibrary.MergedCriteriaExpression = criterionLibrary.MergedCriteriaExpression + " and AGE<10";
+            var supersedeRulesPerTreatmentId = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>>
+            {
+                { _testTreatment.Id, dtos[0].SupersedeRules }
+            };
+
+            // Act
+            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteTreatmentSupersedeRules(supersedeRulesPerTreatmentId, _testTreatmentLibrary.Id);
+
+            // Assert
+            var modifiedDto = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(_testTreatmentLibrary.Id);
+
+            Assert.NotEqual(dtos[0].SupersedeRules[0].CriterionLibrary.Id, modifiedDto[0].SupersedeRules[0].CriterionLibrary.Id);
+            Assert.Equal(dtos[0].SupersedeRules[0].CriterionLibrary.MergedCriteriaExpression, modifiedDto[0].SupersedeRules[0].CriterionLibrary.MergedCriteriaExpression);
+        }
+
+        [Fact]
+        public void UpsertOrDeleteTreatmentSupersedeRules_ValidInput_SucceedsAdd()
+        {
+            // Arrange                      
+            CreateLibraryTestData();
+
+            var dtos = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(_testTreatmentLibrary.Id);
+            // 2nd rule
+            var supersedeRuleDto = _testTreatmentSupersedeRule.ToDto(dtos); ;
+            var supersedeRuleDto2 = new TreatmentSupersedeRuleDTO { CriterionLibrary = new CriterionLibraryDTO(), Id = Guid.NewGuid(), treatment = new TreatmentDTO() };
+            dtos[0].SupersedeRules = new List<TreatmentSupersedeRuleDTO>() { supersedeRuleDto, supersedeRuleDto2 };
+            dtos[0].SupersedeRules[0].Id = Guid.NewGuid();
+            var supersedeRulesPerTreatmentId = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>>
+            {
+                { _testTreatment.Id, dtos[0].SupersedeRules }
+            };
+            var treatmentSupersedeRulesCntBefore = GetSupersedeRulesCount(dtos[0]);
+
+            // Act
+            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteTreatmentSupersedeRules(supersedeRulesPerTreatmentId, _testTreatmentLibrary.Id);
+
+            // Assert
+            var treatmentSupersedeRulesCntAfter = GetSupersedeRulesCount(dtos[0]);
+            Assert.Equal(treatmentSupersedeRulesCntBefore + 1, treatmentSupersedeRulesCntAfter);
         }
 
         [Fact]
@@ -100,66 +159,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
             // Assert
             Assert.IsType<List<TreatmentSupersedeRuleDTO>>(result);
             Assert.Equal(1, result?.Count);
-        }
-
-        [Fact]
-        public void UpsertOrDeleteTreatmentSupersedeRules_ValidInput_SucceedsUpdate()
-        {
-            // Arrange                      
-            CreateLibraryTestData();
-
-            var dtos = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(_testTreatmentLibrary.Id);            
-            dtos[0].SupersedeRules = new List<TreatmentSupersedeRuleDTO>() { _testTreatmentSupersedeRule.ToDto(dtos) };
-            dtos[0].SupersedeRules[0].CriterionLibrary.MergedCriteriaExpression = criterionLibrary.MergedCriteriaExpression + " and AGE<10";
-            var supersedeRulesPerTreatmentId = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>>
-            {
-                { _testTreatment.Id, dtos[0].SupersedeRules }
-            };
-
-            // Act
-            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteTreatmentSupersedeRules(supersedeRulesPerTreatmentId, _testTreatmentLibrary.Id);
-
-            // Assert
-            var modifiedDto = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(_testTreatmentLibrary.Id);
-
-            Assert.NotEqual(dtos[0].SupersedeRules[0].CriterionLibrary.Id, modifiedDto[0].SupersedeRules[0].CriterionLibrary.Id);
-            Assert.Equal(dtos[0].SupersedeRules[0].CriterionLibrary.MergedCriteriaExpression, modifiedDto[0].SupersedeRules[0].CriterionLibrary.MergedCriteriaExpression);
-        }
-
-        [Fact]
-        public void UpsertOrDeleteTreatmentSupersedeRules_ValidInput_SucceedsAdd()
-        {
-            // Arrange                      
-            CreateLibraryTestData();
-
-            var dtos = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(_testTreatmentLibrary.Id);
-            // 2nd rule
-            var supersedeRuleDto = _testTreatmentSupersedeRule.ToDto(dtos); ;
-            var supersedeRuleDto2 = new TreatmentSupersedeRuleDTO { CriterionLibrary = new CriterionLibraryDTO(), Id = Guid.NewGuid(), treatment = new TreatmentDTO() };
-            dtos[0].SupersedeRules = new List<TreatmentSupersedeRuleDTO>() { supersedeRuleDto, supersedeRuleDto2 };
-            dtos[0].SupersedeRules[0].Id = Guid.NewGuid();
-            var supersedeRulesPerTreatmentId = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>>
-            {
-                { _testTreatment.Id, dtos[0].SupersedeRules }
-            };
-            var treatmentSupersedeRulesCntBefore = GetSupersedeRulesCount(dtos[0]);
-
-            // Act
-            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteTreatmentSupersedeRules(supersedeRulesPerTreatmentId, _testTreatmentLibrary.Id);
-
-            // Assert
-            var treatmentSupersedeRulesCntAfter = GetSupersedeRulesCount(dtos[0]);
-            Assert.Equal(treatmentSupersedeRulesCntBefore + 1, treatmentSupersedeRulesCntAfter);
-        }
-
-        private ScenarioSelectableTreatmentEntity _testScenarioTreatment;
-        private ScenarioTreatmentSupersedeRuleEntity _testScenarioTreatmentSupersedeRule;
-        private CriterionLibraryScenarioTreatmentSupersedeRuleEntity CriterionLibraryScenarioTreatmentSupersedeRuleJoin;
-        private CriterionLibraryEntity criterionLibrary;
-        private TreatmentLibraryEntity _testTreatmentLibrary;
-        private SelectableTreatmentEntity _testTreatment;
-        private TreatmentSupersedeRuleEntity _testTreatmentSupersedeRule;
-        private CriterionLibraryTreatmentSupersedeRuleEntity CriterionLibraryTreatmentSupersedeRuleJoin;
+        }                
 
         private void CreateScenarioTestData(Guid simulationId)
         {

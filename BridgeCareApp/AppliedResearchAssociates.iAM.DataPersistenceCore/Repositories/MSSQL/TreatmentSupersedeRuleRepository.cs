@@ -19,43 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public const string TreatmentNotFoundErrorMessage = "The provided treatment was not found";
         public const string ScenarioTreatmentNotFoundErrorMessage = "The provided scenario treatment was not found";
 
-        public TreatmentSupersedeRuleRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-                
-        //public void CreateTreatmentSupersedeRules(Dictionary<Guid, List<TreatmentSupersedeRule>> treatmentSupersedeRulesPerTreatmentId,
-        //    string simulationName, Guid simulationId)
-        //{
-        //    var supersedeRuleEntityIdsPerExpression = new Dictionary<string, List<Guid>>();
-
-        //    var supersedeRuleEntities = treatmentSupersedeRulesPerTreatmentId.SelectMany(_ =>
-        //        _.Value.Select(__ =>
-        //        {
-        //            var entity = __.ToScenarioTreatmentSupersedeRuleEntity(_.Key, simulationId);
-
-        //            if (!__.Criterion.ExpressionIsBlank)
-        //            {
-        //                if (supersedeRuleEntityIdsPerExpression.ContainsKey(__.Criterion.Expression))
-        //                {
-        //                    supersedeRuleEntityIdsPerExpression[__.Criterion.Expression].Add(entity.Id);
-        //                }
-        //                else
-        //                {
-        //                    supersedeRuleEntityIdsPerExpression.Add(__.Criterion.Expression, new List<Guid> { entity.Id });
-        //                }
-        //            }
-
-        //            return entity;
-        //        }))
-        //        .ToList();
-
-        //    _unitOfWork.Context.AddAll(supersedeRuleEntities);
-
-        //    if (supersedeRuleEntityIdsPerExpression.Values.Any())
-        //    {
-        //        _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(
-        //            supersedeRuleEntityIdsPerExpression,
-        //            DataPersistenceConstants.CriterionLibraryJoinEntities.TreatmentSupersedeRule, simulationName);
-        //    }
-        //}
+        public TreatmentSupersedeRuleRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));                
 
         public void UpsertOrDeleteScenarioTreatmentSupersedeRules(Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> scenarioTreatmentSupersedeRulesPerTreatmentId, Guid simulationId)
         {

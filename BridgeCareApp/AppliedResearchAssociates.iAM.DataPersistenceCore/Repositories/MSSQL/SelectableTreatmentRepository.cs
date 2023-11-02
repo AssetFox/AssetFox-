@@ -104,6 +104,54 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
 
+        public void DeleteScenarioSelectableTreatments(List<TreatmentDTO> scenarioSelectableTreatments, Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
+            }
+
+            var scenarioSelectableTreatmentEntities =
+                scenarioSelectableTreatments.Select(_ => _.ToScenarioEntity(simulationId)).ToList();
+
+            var entityIds = scenarioSelectableTreatmentEntities.Select(_ => _.Id).ToList();
+
+            foreach (var entityId in entityIds)
+            {
+                _unitOfWork.AsTransaction(() =>
+                {
+                    _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
+                        _.ScenarioSelectableTreatment.SimulationId == simulationId && _.ScenarioSelectableTreatment.Id == entityId);
+
+                    _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentEntity>(_ =>
+                        _.SimulationId == simulationId && _.Id == entityId);
+
+                    _unitOfWork.Context.DeleteAll<EquationEntity>(_ => (_.ScenarioTreatmentCostEquationJoin.ScenarioTreatmentCost.ScenarioSelectableTreatment.SimulationId == simulationId
+                            && _.ScenarioTreatmentCostEquationJoin.ScenarioTreatmentCost.ScenarioSelectableTreatment.Id == entityId)
+                        ||
+                        (_.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequence
+                            .ScenarioSelectableTreatment.SimulationId == simulationId
+                            && _.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequence
+                            .ScenarioSelectableTreatment.Id == entityId));
+
+                    _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioSelectableTreatmentEntity>(_ =>
+                        _.ScenarioSelectableTreatment.SimulationId == simulationId && _.ScenarioSelectableTreatment.Id == entityId);
+
+                    _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentCostEntity>(_ =>
+                        _.ScenarioTreatmentCost.ScenarioSelectableTreatment.SimulationId == simulationId
+                        && _.ScenarioTreatmentCost.ScenarioSelectableTreatment.Id == entityId);
+
+                    _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>(_ =>
+                        _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.SimulationId == simulationId
+                        && _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.Id == entityId);
+
+                    // Update last modified date
+                    var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+                    _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+                });
+            }
+        }
+
         private void JoinTreatmentsWithBudgets(Dictionary<Guid, List<Guid>> budgetIdsPerTreatmentId)
         {
             var treatmentBudgetJoins = new List<ScenarioSelectableTreatmentScenarioBudgetEntity>();
@@ -442,6 +490,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }
+
+            if (treatments.Any(_ => _.SupersedeRules != null && _.SupersedeRules.Any()))
+            {
+                var supersedeRulesPerTreatmentId = treatments.Where(_ => _.SupersedeRules.Any()).ToList()
+                .ToDictionary(_ => _.Id, _ => _.SupersedeRules);
+                _unitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteTreatmentSupersedeRules(supersedeRulesPerTreatmentId, libraryId);
+            }
         }
 
         public void ReplaceTreatmentLibrary(Guid libraryId, List<TreatmentDTO> treatments)
@@ -497,7 +552,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
-                .ThenInclude(_ => _.ScenarioBudget)
+                .ThenInclude(_ => _.ScenarioBudget)                
                 .Include(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.ScenarioTreatmentPerformanceFactors)

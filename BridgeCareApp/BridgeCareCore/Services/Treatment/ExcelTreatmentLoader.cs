@@ -92,7 +92,7 @@ namespace BridgeCareCore.Services.Treatment
                     var equationValidationResult = ValidateEquation(equation);
                     if (!equationValidationResult.IsValid)
                     {
-                        validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 1)}: { equationValidationResult.ValidationMessage}");
+                        validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 1)}: {equationValidationResult.ValidationMessage}");
                     }
                     var equationDto = new EquationDTO
                     {
@@ -268,7 +268,7 @@ namespace BridgeCareCore.Services.Treatment
 
                 if (!string.IsNullOrEmpty(attribute) && !string.IsNullOrEmpty(pf))
                 {
-                    performanceFactors.Add(new TreatmentPerformanceFactorDTO() { Attribute = attribute, PerformanceFactor = ParseFloat(pf) , Id = Guid.NewGuid()});
+                    performanceFactors.Add(new TreatmentPerformanceFactorDTO() { Attribute = attribute, PerformanceFactor = ParseFloat(pf), Id = Guid.NewGuid() });
                 }
             }
 
@@ -301,7 +301,8 @@ namespace BridgeCareCore.Services.Treatment
                 ShadowForSameTreatment = ParseInt(yearsBeforeSame),
                 Costs = loadCosts.Costs,
                 Consequences = loadConsequences.Consequences,
-                CriterionLibrary = criterion != default ? new CriterionLibraryDTO() {
+                CriterionLibrary = criterion != default ? new CriterionLibraryDTO()
+                {
                     Id = Guid.NewGuid(),
                     MergedCriteriaExpression = criterion,
                     IsSingleUse = true,
@@ -325,10 +326,28 @@ namespace BridgeCareCore.Services.Treatment
             var treatmentLoadResult = LoadTreatment(worksheet);
             var loadBudgets = LoadBudgets(worksheet, scenarioBudgets);
 
-            treatmentLoadResult.Treatment.BudgetIds = loadBudgets.budgetIds;                        
+            treatmentLoadResult.Treatment.BudgetIds = loadBudgets.budgetIds;
             treatmentLoadResult.ValidationMessages.AddRange(loadBudgets.ValidationMessages);
 
             return treatmentLoadResult;
+        }
+
+
+        public TreatmentSupersedeRulesLoadResult LoadTreatmentSupersedeRules(ExcelWorksheet worksheet, List<TreatmentDTO> scenarioTreatments)
+        {
+
+            var validationMessages = new List<string>();
+
+            // var budgetsLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Budgets, 2);
+            //var PfLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.PerformanceFactors, budgetsLineIndex);
+            //if (budgetsLineIndex == 0)
+            //{
+                throw new Exception($"Cell with content {TreatmentExportStringConstants.TreatmentName} not found!");
+           // }
+
+
+
+            //return new TreatmentSupersedeRulesLoadResult {  ValidationMessages = validationMessages };
         }
     }
 }

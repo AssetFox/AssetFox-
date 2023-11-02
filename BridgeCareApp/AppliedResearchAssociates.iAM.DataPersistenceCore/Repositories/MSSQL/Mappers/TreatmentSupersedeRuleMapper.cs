@@ -38,10 +38,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static ScenarioTreatmentSupersedeRuleEntity ToScenarioTreatmentSupersedeRuleEntity(this TreatmentSupersedeRuleDTO treatmentSupersedeRuleDto, Guid treatmentId, BaseEntityProperties baseEntityProperties = null)
         {
-            var entity = new ScenarioTreatmentSupersedeRuleEntity();
-            entity.Id = treatmentSupersedeRuleDto.Id;
-            entity.TreatmentId = treatmentId;
-            entity.PreventTreatmentId = treatmentSupersedeRuleDto.treatment.Id;
+            var entity = new ScenarioTreatmentSupersedeRuleEntity
+            {
+                Id = treatmentSupersedeRuleDto.Id,
+                TreatmentId = treatmentId,
+                PreventTreatmentId = treatmentSupersedeRuleDto.treatment.Id
+            };
 
             // CriterionLibraryDTO.MergedCriteriaExpression can be empty.
             var criterionLibraryDto = treatmentSupersedeRuleDto.CriterionLibrary;
@@ -56,6 +58,34 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
                 BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
                 entity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin = join;
+            }
+            BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+
+            return entity;
+        }
+
+        public static TreatmentSupersedeRuleEntity ToTreatmentSupersedeRuleEntity(this TreatmentSupersedeRuleDTO treatmentSupersedeRuleDto, Guid treatmentId, BaseEntityProperties baseEntityProperties = null)
+        {
+            var entity = new TreatmentSupersedeRuleEntity
+            {
+                Id = treatmentSupersedeRuleDto.Id,
+                TreatmentId = treatmentId,
+                PreventTreatmentId = treatmentSupersedeRuleDto.treatment.Id
+            };
+
+            // CriterionLibraryDTO.MergedCriteriaExpression can be empty.
+            var criterionLibraryDto = treatmentSupersedeRuleDto.CriterionLibrary;
+            if (criterionLibraryDto != null) // TODO test this later via UI
+            {
+                var criterionLibrary = criterionLibraryDto.ToSingleUseEntity(baseEntityProperties);
+                var join = new CriterionLibraryTreatmentSupersedeRuleEntity
+                {
+                    TreatmentSupersedeRuleId = entity.Id,
+                    CriterionLibrary = criterionLibrary,
+                };
+                BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
+                BaseEntityPropertySetter.SetBaseEntityProperties(join, baseEntityProperties);
+                entity.CriterionLibraryTreatmentSupersedeRuleJoin = join;
             }
             BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
 

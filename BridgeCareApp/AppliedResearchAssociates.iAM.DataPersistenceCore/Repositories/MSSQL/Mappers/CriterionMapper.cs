@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Name = entity.Name,
                 Description = entity.Description,
                 Owner = entity.CreatedBy,
-                MergedCriteriaExpression = entity.MergedCriteriaExpression,
+                MergedCriteriaExpression = entity.MergedCriteriaExpression,               
                 IsSingleUse = entity.IsSingleUse
             };
     }

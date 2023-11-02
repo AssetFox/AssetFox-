@@ -12,6 +12,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         public void UpsertOrDeleteScenarioTreatmentSupersedeRules(Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> scenarioTreatmentCostPerTreatmentId, Guid simulationId);
 
-       // public List<TreatmentSupersedeRuleDTO> GetScenarioTreatmentSupersedeRuleByTreatmentId(Guid treatmentId);
+        void UpsertOrDeleteTreatmentSupersedeRules(Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> supersedeRulesPerTreatmentId, Guid libraryId);
     }
 }

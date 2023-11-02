@@ -240,15 +240,16 @@ namespace BridgeCareCore.Services
         {
             queueLog ??= new DoNothingWorkQueueLog();
             var validationMessages = new List<string>();
-            var scenarioTreatments = new List<TreatmentDTO>();
-            var scenarioBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+           
+            var scenarioTreatments = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return new ScenarioTreatmentSupersedeRuleImportResultDTO();
             queueLog.UpdateWorkQueueStatus("Loading Excel");
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {
-                var treatmentLoadResult = _treatmentLoader.LoadScenarioTreatment(worksheet, scenarioBudgets);
-                scenarioTreatments.Add(treatmentLoadResult.Treatment);
-                validationMessages.AddRange(treatmentLoadResult.ValidationMessages);
+                var treatmentLoadResult = _treatmentLoader.LoadTreatmentSupersedeRules(worksheet, scenarioTreatments);
+                //scenarioTreatments.Add(treatmentLoadResult.Treatment);
+                //validationMessages.AddRange(treatmentLoadResult.ValidationMessages);
             }
             var combinedValidationMessage = string.Empty;
             if (validationMessages.Any())

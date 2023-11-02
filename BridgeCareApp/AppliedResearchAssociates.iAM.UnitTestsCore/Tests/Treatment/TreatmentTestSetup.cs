@@ -21,11 +21,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
         public static TreatmentDTO ModelForSingleTreatmentOfSimulationInDb(IUnitOfWork unitOfWork, Guid simulationId, Guid? id = null, string name = "Treatment name", string criterionExpression = null, List<TreatmentBudgetDTO> budgets = null, List<Guid> budgetIds = null)
         {
+            
             budgets ??= new List<TreatmentBudgetDTO>();
             var dto = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(id, name, criterionExpression);
             dto.Budgets = budgets;
             budgetIds ??= new List<Guid>();
             dto.BudgetIds = budgetIds;
+            var treatmentBudget = BudgetDtos.New();
+            var treatmentBudgets = new List<BudgetDTO> { treatmentBudget };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, treatmentBudgets, simulationId);
+
             var dtos = new List<TreatmentDTO> { dto };
             unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
             return dto;

@@ -32,6 +32,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
                 Id = resolveId,
                 Name = name,
                 Description = "Treatment description",
+                BudgetIds = new List<Guid>(),
+                Budgets = new List<TreatmentBudgetDTO>(),
                 Costs = new List<TreatmentCostDTO>(),
                 Consequences = new List<TreatmentConsequenceDTO>(),
                 PerformanceFactors = new List<TreatmentPerformanceFactorDTO>(),

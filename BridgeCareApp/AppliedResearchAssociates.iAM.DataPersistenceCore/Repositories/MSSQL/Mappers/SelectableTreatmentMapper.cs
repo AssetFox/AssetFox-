@@ -289,7 +289,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         : new List<Guid>(),
                 Budgets = entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Any()
                         ? entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Select(_ => new TreatmentBudgetDTO
-                        { Id = _.ScenarioBudgetId, Name = _.ScenarioBudget.Name }).ToList()
+                        { Id = _.ScenarioBudgetId, Name = _.ScenarioBudget?.Name }).ToList()
                         : new List<TreatmentBudgetDTO>(),
                 Consequences = entity.ScenarioTreatmentConsequences.Any()
                         ? entity.ScenarioTreatmentConsequences.Select(_ => _.ToDto()).ToList()
@@ -301,7 +301,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         ? entity.ScenarioTreatmentPerformanceFactors.Select(_ => _.ToDto()).ToList()
                         : new List<TreatmentPerformanceFactorDTO>(),
                 CriterionLibrary = entity.CriterionLibraryScenarioSelectableTreatmentJoin != null
-                        ? entity.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibrary.ToDto()
+                        ? entity.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibrary?.ToDto()
                         : new CriterionLibraryDTO(),
                 ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
                 ShadowForSameTreatment = entity.ShadowForSameTreatment,

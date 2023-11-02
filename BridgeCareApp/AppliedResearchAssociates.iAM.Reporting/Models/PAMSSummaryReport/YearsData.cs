@@ -11,6 +11,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport
         public TreatmentCategory TreatmentCategory { get; set; }
         public AssetCategories AssetType { get; set; }
         public int SurfaceId { get; set; }
+        public string ProjectSource { get; set; }
 
         public double Amount { get; set; }
         public bool isCommitted { get; set; } = false;

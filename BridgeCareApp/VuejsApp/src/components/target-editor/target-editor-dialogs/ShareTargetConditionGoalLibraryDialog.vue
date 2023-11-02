@@ -32,7 +32,7 @@
                 @update:model-value="removeUserModifyAccess(item.id, item.isShared)" />
             </td>
             <td>
-              <v-checkbox id="ShareTargetConditionGoalLibraryDialog-canModify-vcheckbox" :disabled="!item.value.isShared" label="Can Modify" v-model="item.raw.canModify"/>
+              <v-checkbox id="ShareTargetConditionGoalLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" label="Can Modify" v-model="item.canModify"/>
             </td>
           </tr>
           </template>
@@ -66,9 +66,8 @@
   </v-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref, onMounted, toRefs, watch, computed } from 'vue';
-
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {TargetConditionGoalLibraryUser } from '@/shared/models/iAM/target-condition-goal';
 import {LibraryUser } from '@/shared/models/iAM/user';

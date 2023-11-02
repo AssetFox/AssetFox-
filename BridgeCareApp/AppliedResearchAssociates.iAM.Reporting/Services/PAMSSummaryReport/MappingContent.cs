@@ -71,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
             }
         }
 
-        public static string GetNonCashFlowProjectPick(TreatmentCause treatmentCause)
+        public static string GetNonCashFlowProjectPick(TreatmentCause treatmentCause, string projectSource)
         {
             switch (treatmentCause)
             {
@@ -79,13 +79,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
             case TreatmentCause.ScheduledTreatment:
             case TreatmentCause.SelectedTreatment:
                 return "PAMS Pick";
-
             case TreatmentCause.CommittedProject:
-                return "MPMS Pick";
-
+                return projectSource;
             default:
                 return treatmentCause.ToString();
             }
         }
-    }
+}
 }

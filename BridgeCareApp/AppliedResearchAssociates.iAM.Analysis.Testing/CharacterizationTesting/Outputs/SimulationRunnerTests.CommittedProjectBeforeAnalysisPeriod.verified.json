@@ -25,6 +25,7 @@
     {
       "Assets": [
         {
+          "ProjectSource": null,
           "AppliedTreatment": "Forget about it",
           "TreatmentCause": "NoSelection",
           "TreatmentConsiderations": [],

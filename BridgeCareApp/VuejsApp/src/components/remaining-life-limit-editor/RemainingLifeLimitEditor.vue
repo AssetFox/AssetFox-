@@ -1,11 +1,12 @@
 <template>
-    <v-row column>
-      <v-col cols = "12">
-        <v-row justify-space-between>
-          <v-col cols = "3" class="ghd-constant-header">
-              <v-row column>
-                  <v-subheader class="ghd-control-label ghd-md-gray">Remaining Life Limit Library</v-subheader>
-                  <v-select id="RemainingLifeLimitEditor-lifeLimitLibrary-select"
+    <v-row>
+        <v-col>
+            <v-row align="center" justify="space-between">
+                <v-col cols = "auto" class="ghd-constant-header">                   
+                    <div style="margin-bottom: 10px;">
+                        <v-subheader class="ghd-control-label ghd-md-gray">Remaining Life Limit Library</v-subheader>
+                    </div>
+                    <v-select id="RemainingLifeLimitEditor-lifeLimitLibrary-select"
                             class="ghd-select ghd-text-field ghd-text-field-border vs-style"
                             :items="selectListItems"
                             item-title="text"
@@ -13,17 +14,17 @@
                             append-icon=ghd-down
                             v-model="librarySelectItemValue"
                             variant="outlined"
+                            density="compact"
                             >
-                  </v-select>
-                  <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
-              </v-row>
-          </v-col>
-          <v-col cols = "4" class="ghd-constant-header">
-                    <v-row v-if="hasSelectedLibrary && !hasScenario" style="padding-top: 18px; padding-left: 5px" align-center>
+                    </v-select>
+                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>                   
+                </v-col>
+                <v-col cols = "auto" class="ghd-constant-header">
+                    <v-row v-if="hasSelectedLibrary && !hasScenario" style="padding-top: 10px; padding-left: 10px">
                         <div class="header-text-content owner-padding">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
-                        <v-divider  vertical 
+                        <v-divider vertical 
                             v-if="hasSelectedLibrary && !hasScenario">
                         </v-divider>
                         <v-badge v-show="isShared" style="padding: 7px">
@@ -37,17 +38,27 @@
                         </v-btn>
                     </v-row>
                 </v-col>
-                <v-col cols = "4" class="ghd-constant-header">
-                <v-row justify-end align-end style="padding-top: 18px !important;">
-                    <div>
-                        <v-btn id="RemainingLifeLimitEditor-addRemainingLifeLimit-btn" class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" v-show="librarySelectItemValue != null || hasScenario" variant = "outlined">Add Remaining Life Limit</v-btn>
-                        <v-btn id="RemainingLifeLimitEditor-createNewLibrary-vbtn" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style ="ri"  @click="onShowCreateRemainingLifeLimitLibraryDialog(false)" v-show="!hasScenario" variant = "outlined">Create New Library</v-btn>
-                    </div>
-                </v-row>
+                <v-col cols = "auto" class="ghd-constant-header">     
+                    <v-btn 
+                        id="RemainingLifeLimitEditor-addRemainingLifeLimit-btn"
+                        class="ghd-white-bg ghd-blue ghd-button"
+                        style="margin: 5px;"
+                        @click="onShowCreateRemainingLifeLimitDialog"
+                        v-show="librarySelectItemValue != null || hasScenario"
+                        variant = "outlined">Add Remaining Life Limit
+                    </v-btn>
+                    <v-btn
+                        id="RemainingLifeLimitEditor-createNewLibrary-vbtn"
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        style="margin: 5px;"
+                        @click="onShowCreateRemainingLifeLimitLibraryDialog(false)"
+                        v-show="!hasScenario"
+                        variant = "outlined">Create New Library
+                    </v-btn>
                 </v-col>
             </v-row>
         </v-col>
-        <div v-show="librarySelectItemValue != null || hasScenario">
+        <div class="remaininglife-data-table" v-show="librarySelectItemValue != null || hasScenario">
             <v-data-table-server
             id="RemainingLifeLimitEditor-attributes-dataTable"
             :headers="gridHeaders"
@@ -175,29 +186,29 @@
                     </tr>
                 </template>
                 </v-data-table-server>
-                <v-row justify-start align-center class="pa-2">
-                </v-row>
-                <v-divider></v-divider>
-                <v-col v-show="!hasScenario" xs12 class="px-0">
-                    <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
-                    <v-textarea
-                        class="ghd-control-text ghd-control-border"
-                        v-model="selectedRemainingLifeLimitLibrary.description"
-                        @update:model-value="checkHasUnsavedChanges()"
-                        outline
-                    >
-                    </v-textarea>
-                </v-col>
-                <v-row style="padding-bottom: 80px;" align-content="center" justify="center">
-                    <v-btn id="RemainingLifeLimitEditor-cancel-btn" class="ghd-blue" variant = "outlined" v-show="hasScenario" @click="onDiscardChanges" :disabled="!hasUnsavedChanges">Cancel</v-btn>
-                    <v-btn id="RemainingLifeLimitEditor-deleteLibrary-btn" class="ghd-blue" variant = "outlined" v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
-                    <v-btn id="RemainingLifeLimitEditor-createAsNewLibrary-btn" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" variant = "outlined">Create as New Library</v-btn>
-                    <v-btn id="RemainingLifeLimitEditor-save-btn" class="ghd-blue-bg ghd-white ghd-button" v-show="hasScenario" @click="onUpsertScenarioRemainingLifeLimits" :disabled="disableCrudButton() || !hasUnsavedChanges">Save</v-btn>
-                    <v-btn id="RemainingLifeLimitEditor-updateLibrary-btn" class="ghd-blue-bg ghd-white ghd-button" v-show="!hasScenario" :disabled="disableCrudButton() || !hasUnsavedChanges" @click="onUpsertRemainingLifeLimitLibrary">Update Library</v-btn>
-                </v-row>
         </div>
-
-        <ConfirmDeleteAlert 
+        <v-divider :thickness="4" class="border-opacity-100" ></v-divider>
+        <v-col v-show="hasSelectedLibrary && !hasScenario" cols="12">
+            <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
+            <v-textarea
+                class="ghd-control-text ghd-control-border"
+                v-model="selectedRemainingLifeLimitLibrary.description"
+                @update:model-value="checkHasUnsavedChanges()"
+                outline
+            >
+            </v-textarea>
+        </v-col>
+        <v-col>
+            <v-row v-show="hasSelectedLibrary" style="padding-bottom: 80px;" align-content="center" justify="center">
+                <v-btn id="RemainingLifeLimitEditor-cancel-btn" style="margin: 5px;" class="ghd-blue" variant = "outlined" v-show="hasScenario" @click="onDiscardChanges" :disabled="!hasUnsavedChanges">Cancel</v-btn>
+                <v-btn id="RemainingLifeLimitEditor-deleteLibrary-btn" style="margin: 5px;" class="ghd-blue" variant = "outlined" v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
+                <v-btn id="RemainingLifeLimitEditor-createAsNewLibrary-btn" style="margin: 5px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" variant = "outlined">Create as New Library</v-btn>
+                <v-btn id="RemainingLifeLimitEditor-save-btn" style="margin: 5px;" class="ghd-blue-bg ghd-white ghd-button" v-show="hasScenario" @click="onUpsertScenarioRemainingLifeLimits" :disabled="disableCrudButton() || !hasUnsavedChanges">Save</v-btn>
+                <v-btn id="RemainingLifeLimitEditor-updateLibrary-btn" style="margin: 5px;" class="ghd-blue-bg ghd-white ghd-button" v-show="!hasScenario" :disabled="disableCrudButton() || !hasUnsavedChanges" @click="onUpsertRemainingLifeLimitLibrary">Update Library</v-btn>
+            </v-row>
+        </v-col>     
+        <!-- <ConfirmDeleteAlert -->
+        <Alert
           :dialogData="confirmDeleteAlertData"
           @submit="onSubmitConfirmDeleteAlertResult"
         />
@@ -388,12 +399,8 @@ import { createDecipheriv } from 'crypto';
     let selectedRemainingLifeLimit: RemainingLifeLimit = clone(
         emptyRemainingLifeLimit,
     );
-    let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
-        emptyGeneralCriterionEditorDialogData,
-    );
-    let createRemainingLifeLimitLibraryDialogData = ref<CreateRemainingLifeLimitLibraryDialogData>(clone(
-        emptyCreateRemainingLifeLimitLibraryDialogData,
-    ));
+    let criterionEditorDialogData = ref<GeneralCriterionEditorDialogData>(clone(emptyGeneralCriterionEditorDialogData));
+    let createRemainingLifeLimitLibraryDialogData = ref<CreateRemainingLifeLimitLibraryDialogData>(clone(emptyCreateRemainingLifeLimitLibraryDialogData));
     let confirmDeleteAlertData = ref<AlertData>(clone(emptyAlertData));
     let rules: InputValidationRules = validationRules;
     let uuidNIL: string = getBlankGuid();
@@ -478,9 +485,7 @@ import { createDecipheriv } from 'crypto';
         clearChanges();
         initializing = false;
         if(hasSelectedLibrary.value)
-            onPaginationChanged();
-        console.log("hasSelectedLibrary" + hasSelectedLibrary.value)
-        
+            onPaginationChanged(); 
     });
 
     watch(stateScenarioRemainingLifeLimits, ()=> {
@@ -677,7 +682,7 @@ import { createDecipheriv } from 'crypto';
     function onShowCriterionLibraryEditorDialog(remainingLifeLimit: RemainingLifeLimit) {
         selectedRemainingLifeLimit = remainingLifeLimit;
 
-        criterionEditorDialogData = {
+        criterionEditorDialogData.value = {
             showDialog: true,
             CriteriaExpression: remainingLifeLimit.criterionLibrary.mergedCriteriaExpression,           
         };
@@ -686,7 +691,7 @@ import { createDecipheriv } from 'crypto';
     function onEditRemainingLifeLimitCriterionLibrary(
         criteriaExpression: string | null,
     ) {
-        criterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+        criterionEditorDialogData.value = clone(emptyGeneralCriterionEditorDialogData);
 
         if (!isNil(criteriaExpression) && selectedRemainingLifeLimit.id !== uuidNIL) {
             if(selectedRemainingLifeLimit.criterionLibrary.id === getBlankGuid())
@@ -724,7 +729,7 @@ import { createDecipheriv } from 'crypto';
         RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 clearChanges()
-                addedOrUpdatedRemainingLifeLimitLibraryMutator(selectedRemainingLifeLimitLibrary.value);
+                addedOrUpdatedRemainingLifeLimselectListItemsrefitLibraryMutator(selectedRemainingLifeLimitLibrary.value);
                 selectedRemainingLifeLimitLibraryMutator(selectedRemainingLifeLimitLibrary.value.id)
                 addSuccessNotificationAction({message: "Updated remaining life limit library",});               
             }
@@ -964,6 +969,11 @@ import { createDecipheriv } from 'crypto';
     }
 </script>
 <style scoped>
+.remaininglife-data-table {
+    height: 425px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
 .vs-style {
     width: 100%;
 }

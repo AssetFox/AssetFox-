@@ -20,7 +20,7 @@
                 </v-col>
 
                 <v-col cols = "4">
-                    <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
+                    <v-subheader v-show='hasSelectedLibrary' class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
                     <v-select
                     id="TreatmentEditor-treatment-select"
                         :items='treatmentSelectItems'
@@ -31,6 +31,7 @@
                         item-title="text"
                         item-value="value"
                         v-model='treatmentSelectItemValue'
+                        v-show='hasSelectedLibrary'
                     >
                     </v-select>
                       
@@ -458,6 +459,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
     let stateSimpleSelectableTreatments= computed<SimpleTreatment[]>(() => store.state.treatmentModule.simpleSelectableTreatments);
     let isSharedLibrary= computed<boolean>(() => store.state.treatmentModule.isSharedLibrary);
     let stateScenarioPerformanceCurves= computed<PerformanceCurve[]>(() => store.state.performanceCurveModule.scenarioPerformanceCurves);
+    let getUserNameByIdGetter: any = store.getters.getUserNameById;
+
 
  function addSuccessNotificationAction(payload?: any): void {
      store.dispatch('addSuccessNotification', payload);
@@ -556,10 +559,6 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
 
  function setAlertMessageAction(payload?: any): void {
    store.dispatch('setAlertMessage', payload);
-}
-
-async function getUserNameByIdGetter(payload?: any): Promise<any> {
-  return await store.getters.getUserNameById(payload);
 }
 
 async function addedOrUpdatedTreatmentLibraryMutator(payload?: any): Promise<any> {
@@ -765,8 +764,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         isShared = isSharedLibrary.value;
     }
 
-    watch(selectedTreatmentLibrary, () => onSelectedTreatmentLibraryChanged())
-    function onSelectedTreatmentLibraryChanged() {
+    watch(selectedTreatmentLibrary, () =>  {
         hasSelectedLibrary.value = selectedTreatmentLibrary.value.id !== uuidNIL;
         getIsSharedLibraryAction(selectedTreatmentLibrary.value).then(() => isShared = isSharedLibrary.value);
         if (hasSelectedLibrary.value) {
@@ -785,7 +783,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         if(treatmentSelectItemValue.value !== null && !hasScenario.value)
             treatmentCache.push(clone(selectedTreatment.value))
         checkHasUnsavedChanges();
-    }
+    })
 
     watch(simpleTreatments, () => onSimpleTreatments())
     function onSimpleTreatments(){
@@ -875,10 +873,11 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         return isEqual(treatmentSelectItemValue.value, treatmentId.toString());
     }
 
-    async function getOwnerUserName(): Promise<string> {
+     function getOwnerUserName(): string {
 
         if (!hasCreatedLibrary) {
-        return await getUserNameByIdGetter(selectedTreatmentLibrary.value.owner);
+            let username:any = getUserNameByIdGetter(selectedTreatmentLibrary.value.owner)
+        return username ;
         }
         
         return getUserName();

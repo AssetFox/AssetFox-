@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-bind:show="showDialog">
+  <v-dialog max-width="450px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-row justify-space-between align-center>
@@ -21,7 +21,7 @@
             id="CreateCommittedProjectConsequenceDialog-attribute-vFlex">
             <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
             <v-select :items="attributeNames"
-              append-icon=$vuetify.icons.ghd-down
+              append-icon=ghd-down
               variant="outlined"
               v-model="newConsequence.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
               class="ghd-select ghd-text-field ghd-text-field-border">
@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts" setup>
-import {watch, ref, onMounted, reactive} from 'vue';
+import {watch, ref, onMounted, reactive, computed} from 'vue';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { CommittedProjectConsequence, emptyCommittedProjectConsequence } from '@/shared/models/iAM/committed-projects';
@@ -64,6 +64,7 @@ import { useStore } from 'vuex';
   let store = useStore();
   const emit = defineEmits(['submit']);
   const props = defineProps({showDialog: Boolean});
+  let showDialogComputed = computed(() => props.showDialog);
   let showDialog = ref<boolean>(props.showDialog);
 
   onMounted(() => mounted())

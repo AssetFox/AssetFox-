@@ -51,7 +51,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import { ImportExportInvestmentBudgetsDialogResult } from '@/shared/models/modals/import-export-investment-budgets-dialog-result';
 import {clone} from 'ramda';
 import InvestmentBudgetsFileSelector from '@/shared/components/FileSelector.vue';
-import {inject, reactive, ref, toRefs, onMounted, onBeforeUnmount, watch, Ref,shallowRef} from 'vue';
+import {inject, reactive, ref, toRefs, onMounted, onBeforeUnmount, watch, computed, Ref,shallowRef} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -65,7 +65,7 @@ const { showDialog } = toRefs(props);
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports');}
 async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports');}
 function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImportMutator');}
-let isSuccessfulImport = ref<boolean>(store.state.investmentModule.isSuccessfulImport);
+let isSuccessfulImport = computed<boolean>(() => store.state.investmentModule.isSuccessfulImport);
 
 let investmentBudgetsFile = ref<File | null>(null);
 let overwriteBudgets: boolean = true;

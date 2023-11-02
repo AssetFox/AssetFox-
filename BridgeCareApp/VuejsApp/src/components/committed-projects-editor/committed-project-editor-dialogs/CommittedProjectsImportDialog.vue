@@ -1,5 +1,5 @@
 <template>
-    <v-dialog width="768px" height="540px" persistent v-bind:show="showDialog">
+    <v-dialog width="768px" height="540px" persistent v-model="showDialogComputed">
         <v-card class="div-padding">
             <v-card-title class="pa-2">
                 <v-row justify-start>
@@ -41,7 +41,7 @@
 </template>
 
 <script lang='ts' setup>
-import {watch, ref} from 'vue';
+import {watch, ref, computed} from 'vue';
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
 import FileSelector from '@/shared/components/FileSelector.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
@@ -52,6 +52,7 @@ import Dialog from 'primevue/dialog';
     let store = useStore();
     const props = defineProps({showDialog: Boolean});
     let showDialog = ref<boolean>(props.showDialog);
+        let showDialogComputed = computed(() => props.showDialog);
     const emit = defineEmits(['submit', 'delete']);
 
     async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification'); }

@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-bind:show="dialogData.showDialog" max-width="450px" persistent>
+    <v-dialog v-model="showDialogComputed" max-width="450px" persistent>
         <v-card>
             <v-card-title class="ghd-dialog-box-padding-top">
                 <v-row justify-space-between align-center >
@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import {
     InputValidationRules,
     rules as validationRules,
@@ -70,6 +70,7 @@ const props = defineProps<{
     dialogData: CreateCalculatedAttributeLibraryDialogData
 
 }>()
+let showDialogComputed = computed(() => props.dialogData.showDialog);
 let newCalculatedAttributeLibrary: CalculatedAttributeLibrary = {
         ...emptyCalculatedAttributeLibrary,
         id: getNewGuid(),

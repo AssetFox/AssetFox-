@@ -5,7 +5,7 @@
                 <v-row justify-center>
                     <v-card class="under-construction-card">
                         <div class="under-construction-img-div">
-                            <v-img :src="require('@/assets/images/under-construction.png')"
+                            <v-img :src="getUrl('assets/images/under-construction.png')"
                                    class="under-construction-img">
                             </v-img>
                         </div>
@@ -26,6 +26,7 @@
     import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { getUrl } from '@/shared/utils/get-url';
 
 </script>
 

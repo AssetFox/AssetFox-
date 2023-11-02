@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="500px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title>
         <v-row justify-center>
@@ -13,7 +13,7 @@
         <v-data-table id="ShareBudgetPriorityLibraryDialog-table-vdatatable" 
                       :headers="budgetPriorityLibraryUserGridHeaders"
                       :items="budgetPriorityLibraryUserGridRows"
-                      sort-icon=$vuetify.icons.ghd-table-sort
+                      sort-icon=ghd-table-sort
                       :search="searchTerm">
           <template v-slot:item="{item}" slot="items" slot-scope="props">
             <td>
@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { reactive, watch } from 'vue';
+import Vue, { computed, reactive, watch } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {BudgetPriorityLibraryUser } from '@/shared/models/iAM/budget-priority';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -69,11 +69,11 @@ import { useStore } from 'vuex';
   }>()
   let dialogData = reactive(props.dialogData);
   const emit = defineEmits(['submit'])
-
-  let budgetPriorityLibraryUserGridHeaders: DataTableHeader[] = [
-    {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
+  let showDialogComputed = computed(() => props.dialogData.showDialog);
+  let budgetPriorityLibraryUserGridHeaders: any[] = [
+    {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Shared With', key: '', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Can Modify', key: '', align: 'left', sortable: true, class: '', width: ''}
   ];
   let budgetPriorityLibraryUserGridRows: BudgetPriorityLibraryUserGridRow[] = [];
   let currentUserAndOwner: BudgetPriorityLibraryUser[] = [];

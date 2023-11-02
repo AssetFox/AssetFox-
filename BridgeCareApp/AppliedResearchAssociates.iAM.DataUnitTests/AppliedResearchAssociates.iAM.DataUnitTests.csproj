@@ -12,6 +12,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\Repositories\MSSQL\SQLScripts\DeleteNetwork_SP.sql" Link="DataTestSetup\SqlScripts\DeleteNetwork_SP.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\Repositories\MSSQL\SQLScripts\DeleteSimulationOutput_SP.sql" Link="DataTestSetup\SqlScripts\DeleteSimulationOutput_SP.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\Repositories\MSSQL\SQLScripts\DeleteSimulations_SP.sql" Link="DataTestSetup\SqlScripts\DeleteSimulations_SP.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\Repositories\MSSQL\SQLScripts\Master_SP.sql" Link="DataTestSetup\SqlScripts\Master_SP.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\Repositories\MSSQL\SQLScripts\OrphanCleanup_SP.sql" Link="DataTestSetup\SqlScripts\OrphanCleanup_SP.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="..\AppliedResearchAssociates.iAM.TestHelpers\testConnections.json" Link="testConnections.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -41,6 +56,9 @@
 
   <ItemGroup>
     <None Update="DataTestSetup\SampleAttributeData.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="DataTestSetup\SqlScripts\DeleteAggregations_SP.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="testConnections.json">

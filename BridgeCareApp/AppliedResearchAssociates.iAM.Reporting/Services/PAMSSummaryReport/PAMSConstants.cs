@@ -63,6 +63,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
         public const string AsphaltTotal = "PAMS Full Depth Asphalt Total";
         public const string CompositeTotal = "PAMS Composite Total";
         public const string ConcreteTotal = "PAMS Concrete Total";
+        public const string CommittedTotal = "Committed Total";
 
         //Data Variables
         public const string Work = "Work";

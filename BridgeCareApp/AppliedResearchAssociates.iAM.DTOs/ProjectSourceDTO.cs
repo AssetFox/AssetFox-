@@ -3,7 +3,7 @@
     public enum ProjectSourceDTO
     {
         None,
-        iAMPick,
+        ProjectPick,
         Committed, //default
         Maintenance,
         ProjectBuilder

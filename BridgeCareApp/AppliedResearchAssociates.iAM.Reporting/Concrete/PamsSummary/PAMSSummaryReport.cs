@@ -211,7 +211,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     return string.Empty;
                 }
             }
-                        
+
+            var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int pavementCount, string projectSource)>>();
             var simulationYears = new List<int>();
             foreach (var item in reportOutputData.Years) {
                 simulationYears.Add(item.Year);
@@ -278,7 +279,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var pavementWorkSummaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummaryByBudget_Tab);
-            _pavementWorkSummaryByBudget.Fill(pavementWorkSummaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments, simulation.CommittedProjects);
+            _pavementWorkSummaryByBudget.Fill(pavementWorkSummaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, yearlyCostCommittedProj, simulation.Treatments, simulation.CommittedProjects);
 
             checkCancelled(cancellationToken, simulationId);
             // Unfunded Pavement Projects TAB

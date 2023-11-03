@@ -167,7 +167,6 @@
                                         </v-col>
                                     </v-row>
                                         </v-list-tile>
-                                        <v-expand-transition>
                                         <v-list-tile v-if="notification.active">
                                             <v-list-item-title
                                                 class="notification-long-message"
@@ -176,7 +175,6 @@
                                                 "
                                             ></v-list-item-title>
                                     </v-list-tile>
-                                </v-expand-transition>
                                     </template>
                                     
                                     <v-spacer></v-spacer>

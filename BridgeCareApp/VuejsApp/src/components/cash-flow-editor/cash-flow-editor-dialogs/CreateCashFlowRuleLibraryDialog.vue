@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import {CreateCashFlowRuleLibraryDialogData} from '@/shared/models/modals/create-cash-flow-rule-library-dialog-data';
 import {
   CashFlowDistributionRule,
@@ -68,7 +68,7 @@ import { useStore } from 'vuex';
   let showDialogComputed = computed(() => props.dialogData.showDialog);
   const emit = defineEmits(['submit']);
 
-  let newCashFlowRuleLibrary: CashFlowRuleLibrary = {...emptyCashFlowRuleLibrary, id: getNewGuid()};
+  let newCashFlowRuleLibrary = ref<CashFlowRuleLibrary>({...emptyCashFlowRuleLibrary, id: getNewGuid()});
   let inputRules: InputValidationRules = clone(rules);
   const dialogData = reactive(props.dialogData);
 
@@ -76,8 +76,8 @@ import { useStore } from 'vuex';
   function onDialogDataChanged() {
     let currentUser: string = getUserName();
 
-    newCashFlowRuleLibrary = {
-      ...newCashFlowRuleLibrary,
+    newCashFlowRuleLibrary.value = {
+      ...newCashFlowRuleLibrary.value,
       cashFlowRules: hasValue(dialogData.cashFlowRules)
           ? dialogData.cashFlowRules.map((cashFlowRule: CashFlowRule) => ({
             ...cashFlowRule,
@@ -96,11 +96,11 @@ import { useStore } from 'vuex';
 
   function onSubmit(submit: boolean) {
     if (submit) {
-      emit('submit', newCashFlowRuleLibrary);
+      emit('submit', newCashFlowRuleLibrary.value);
     } else {
       emit('submit', null);
     }
 
-    newCashFlowRuleLibrary = {...emptyCashFlowRuleLibrary, id: getNewGuid()};
+    newCashFlowRuleLibrary.value = {...emptyCashFlowRuleLibrary, id: getNewGuid()};
   }
 </script>

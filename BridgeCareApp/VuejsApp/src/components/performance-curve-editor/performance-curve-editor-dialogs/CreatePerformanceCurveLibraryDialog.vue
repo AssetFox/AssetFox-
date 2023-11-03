@@ -61,15 +61,15 @@ const props = defineProps<{
     }>()
     let showDialogComputed = computed(() => props.dialogData.showDialog);
     let getIdByUserNameGetter: any = store.getters.getIdByUserName
-    let newPerformanceCurveLibrary: PerformanceCurveLibrary = {...emptyPerformanceCurveLibrary, id: getNewGuid()};
+    let newPerformanceCurveLibrary = ref<PerformanceCurveLibrary>({...emptyPerformanceCurveLibrary, id: getNewGuid()});
     let rules: InputValidationRules = validationRules;
 
-  watch(()=>props.dialogData,()=>onDialogDataChanged)
+  watch(()=>props.dialogData,()=>onDialogDataChanged())
   function onDialogDataChanged() {
     let currentUser: string = getUserName();
 
-    newPerformanceCurveLibrary = {
-      ...newPerformanceCurveLibrary,
+    newPerformanceCurveLibrary.value = {
+      ...newPerformanceCurveLibrary.value,
       performanceCurves: props.dialogData.performanceCurves.map((performanceCurve: PerformanceCurve) => {
         performanceCurve.id = getNewGuid();
         if (performanceCurve.equation.id !== getBlankGuid()) {
@@ -83,11 +83,11 @@ const props = defineProps<{
 
   function onSubmit(submit: boolean) {
     if (submit) {
-      emit('submit', newPerformanceCurveLibrary);
+      emit('submit', newPerformanceCurveLibrary.value);
     } else {
       emit('submit', null);
     }
 
-    newPerformanceCurveLibrary = {...emptyPerformanceCurveLibrary, id: getNewGuid()};
+    newPerformanceCurveLibrary.value = {...emptyPerformanceCurveLibrary, id: getNewGuid()};
   }
 </script>

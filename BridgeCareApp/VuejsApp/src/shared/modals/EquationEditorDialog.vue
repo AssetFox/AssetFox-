@@ -27,7 +27,8 @@
                 <v-tab :key="0" @click="isPiecewise = false">Equation</v-tab>
                 <v-tab :key="1" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Piecewise</v-tab>
                 <v-tab :key="2" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Time In Rating</v-tab>
-                <v-window-item>
+                <v-window>
+                  <v-window-item>
                   <div class="equation-container-div">
                     <v-row column>
                       <div>
@@ -258,6 +259,8 @@
                     </v-row>
                   </div>
                 </v-window-item>
+                  </v-window>
+                
               </v-tabs>
             </v-col>
           </v-row>
@@ -394,6 +397,7 @@
 </template>
 
 <script lang="ts" setup>
+import { getUrl } from '@/shared/utils/get-url';
 import Vue, {ShallowRef, computed, shallowRef} from 'vue';
 import {EquationEditorDialogData} from '@/shared/models/modals/equation-editor-dialog-data';
 import {formulas} from '@/shared/utils/formulas';

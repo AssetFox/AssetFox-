@@ -333,7 +333,6 @@ import { getUrl } from './shared/utils/get-url';
     let hasRole = computed<boolean>(() => store.state.authenticationModule.hasRole);
     let username = computed<string>(() => store.state.authenticationModule.username);
     let hasAdminAccess = computed(() => store.state.authenticationModule.hasAdminAccess);
-    const expanded = ref(false);
     const refreshing = computed<boolean>(() => store.state.authenticationModule.refreshing);
     //let navigation = ref<any[]>(store.state.breadcrumbModule.navigation);
     const notifications = computed<Notification[]>(() => store.state.notificationModule.notifications);
@@ -592,7 +591,7 @@ import { getUrl } from './shared/utils/get-url';
         }
     }
 
-    const toggleExpand = (temp1:boolean,temp2:number) => {notifications.value[temp2].active=!temp1};
+    
     onMounted(() => {
 
         $emitter.on(
@@ -785,6 +784,7 @@ import { getUrl } from './shared/utils/get-url';
         hasUnreadNewsItem = newsAccessDateComparison(latestNewsDate, currentUserLastNewsAccessDate);
     }
 
+    const toggleExpand = (active:boolean,index:number) => {notifications.value[index].active=!active};
 </script>
 
 <style>

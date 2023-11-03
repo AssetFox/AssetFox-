@@ -333,31 +333,31 @@ namespace BridgeCareCore.Services.Treatment
         }
 
 
-        public TreatmentSupersedeRulesLoadResult LoadTreatmentSupersedeRules(ExcelWorksheet worksheet, List<TreatmentDTO> scenarioTreatments)
+        public  TreatmentSupersedeRulesLoadResult LoadTreatmentSupersedeRules(ExcelWorksheet worksheet, List<TreatmentDTO> scenarioTreatments)
         {
-               
-                var validationMessages = new List<string>();
+            
+            var validationMessages = new List<string>();
 
-                var pfLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.PerformanceFactors, 2);
-                if (pfLineIndex == 0)
-                {
-                    throw new Exception($"Cell with content {TreatmentExportStringConstants.PerformanceFactors} not found!");
-                }
-
-                var height = worksheet.Dimension.End.Row;
-                for (var i = pfLineIndex + 2; i <= height; i++)
-                {
-                    var attribute = worksheet.Cells[i, 1].Text;
-                    var pf = worksheet.Cells[i, 2].Text;
-
-                    if (!string.IsNullOrEmpty(attribute) && !string.IsNullOrEmpty(pf))
-                    {
-                        performanceFactors.Add(new TreatmentPerformanceFactorDTO() { Attribute = attribute, PerformanceFactor = ParseFloat(pf), Id = Guid.NewGuid() });
-                    }
-                }
-
-                return new TreatmentPerformanceFactorLoadResult { PerformanceFactors = performanceFactors, ValidationMessages = validationMessages };
+            var tsLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.SupersedeTreatmentName, 1);
+            if (tsLineIndex == 0)
+            {
+                throw new Exception($"Cell with content {TreatmentExportStringConstants.PerformanceFactors} not found!");
             }
+            var height = worksheet.Dimension.End.Row;
+            for (var i = tsLineIndex + 1; i <= height; i++)
+            {
+                var treatmentName = worksheet.Cells[i, 1].Text;
+                var supersededTreatment = worksheet.Cells[i, 2].Text;
+                var criteria = worksheet.Cells[i, 3].Text;
+
+                if (!string.IsNullOrEmpty(treatmentName) && !string.IsNullOrEmpty(supersededTreatment))
+                {
+                    scenarioTreatments.Add(new  TreatmentDTO() {  sTreatment Name = treatmentName, CriterionLibrary.merge = ParseFloat(pf), Id = Guid.NewGuid() });
+                }
+            }
+
+            return null; //new TreatmentSupersedeRulesLoadResult { PerformanceFactors = performanceFactors, ValidationMessages = validationMessages };
         }
     }
+
 }

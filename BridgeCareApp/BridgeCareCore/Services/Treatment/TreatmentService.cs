@@ -247,7 +247,7 @@ namespace BridgeCareCore.Services
             queueLog.UpdateWorkQueueStatus("Loading Excel");
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {
-                var treatmentLoadResult = _treatmentLoader.LoadTreatmentSupersedeRules(worksheet, scenarioTreatments);
+                var treatmentSupersedeRuleResult = _treatmentLoader.LoadTreatmentSupersedeRules(worksheet, scenarioTreatments);
                 //scenarioTreatments.Add(treatmentLoadResult.Treatment);
                 //validationMessages.AddRange(treatmentLoadResult.ValidationMessages);
             }

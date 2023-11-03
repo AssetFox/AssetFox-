@@ -102,9 +102,7 @@
                         <v-col>
                             <v-subheader class="ghd-control-label ara-black" v-text="networkDataAssignmentStatus" ></v-subheader>
                             <v-progress-linear
-                                            v-model="
-                                                networkDataAssignmentPercentage
-                                            "
+                                            v-model="networkDataAssignmentPercentage"
                                             height="25"
                                             striped
                                         >
@@ -258,7 +256,7 @@ import mitt from 'mitt';
         {text: 'None', value: 'None'}
     ]; 
 
-    let networkDataAssignmentPercentage = 0;
+    let networkDataAssignmentPercentage: number = 0;
     let networkDataAssignmentStatus: string = 'Waiting on server.';
 
     let selectedKeyAttributeItem = ref<string>('');

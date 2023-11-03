@@ -728,6 +728,7 @@ import { useRouter } from 'vue-router';
 import mitt from 'mitt';
 import $vuetify from '@/plugins/vuetify';
 import { onBeforeMount } from 'vue';
+import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 
     let store = useStore(); 
     const $router = useRouter();     
@@ -1281,6 +1282,11 @@ import { onBeforeMount } from 'vue';
             getReportStatus,
         );
 
+        $emitter.on(
+            Hub.BroadcastEventType.BroadcastSimulationDeletionCompletionEvent,
+            importCompleted,
+        );
+
         availableActions = {
             runAnalysis: 'runAnalysis',
             reports: 'reports',
@@ -1399,7 +1405,12 @@ import { onBeforeMount } from 'vue';
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
             getReportStatus,
         );
-    }); 
+
+        $emitter.off(
+            Hub.BroadcastEventType.BroadcastSimulationDeletionCompletionEvent,
+            importCompleted,
+        );
+    });
 
     function initializeScenarioPages(){
         const { sort, descending, page, rowsPerPage } = sharedScenariosPagination;
@@ -1911,6 +1922,13 @@ import { onBeforeMount } from 'vue';
                     workQueueStatusUpdate: updatedQueueItem
                 })
             }                                
+    }
+
+    function importCompleted(data: any){
+        var workType = data as WorkType
+        if(workType == WorkType.DeleteSimulation){
+            onScenariosPagination()
+        }        
     }
 
     function updateFastWorkQueue(data: any) {

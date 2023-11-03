@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" ersistent v-model="dialogData.showDialog">
+  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
         <v-row  justify="space-between" align="center" style="padding: 10px;">

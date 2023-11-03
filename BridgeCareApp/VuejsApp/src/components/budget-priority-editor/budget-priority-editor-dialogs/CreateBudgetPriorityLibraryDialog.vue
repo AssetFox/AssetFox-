@@ -1,32 +1,47 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="showDialogComputed">
+  <v-dialog width="50%" persistent v-model ="dialogData.showDialog">
     <v-card>
-      <v-card-title class="ghd-dialog-box-padding-top">
-        <v-row justify-space-between align-center >
-          <div class="ghd-control-dialog-header">New Budget Priority Library</div>
+      <v-card-title class="ghd-dialog-padding-top-title">
+        <v-row justify="space-between">
+          <div class="ghd-control-dialog-header"><h5>New Budget Priority Library</h5></div>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
         </v-row>
-
       </v-card-title>
+
       <v-card-text class="ghd-dialog-box-padding-center">
-        <v-row column >
-          <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
-          <v-text-field id="CreateBudgetPriorityLibraryDialog-name-vtextfield" outline v-model="newBudgetPriorityLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        class="ghd-text-field-border ghd-text-field"/>
-          <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
-          <v-textarea id="CreateBudgetPriorityLibraryDialog-description-vtextfield" no-resize outline :rows="5"
-                      v-model="newBudgetPriorityLibrary.description"
-                      class="ghd-text-field-border"/>
+        <v-row>
+          <v-col>
+            <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
+          
+            <v-text-field id="CreateBudgetPriorityLibraryDialog-name-vtextfield"
+                          v-model="newBudgetPriorityLibrary.name"
+                          :rules="[rules['generalRules'].valueIsNotEmpty]"
+                          class="ghd-text-field-border ghd-text-field" variant="outlined" density="compact"/>
+          
+            <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
+          
+            <v-textarea id="CreateBudgetPriorityLibraryDialog-description-vtextfield"
+                        no-resize
+                        :rows="5"
+                        v-model="newBudgetPriorityLibrary.description"
+                        class="ghd-control-text ghd-control-border" variant="outlined"  />
+            </v-col>
         </v-row>
       </v-card-text>
+      
       <v-card-actions class="ghd-dialog-box-padding-bottom">
-        <v-row justify-center row >       
-          <v-btn id="CreateBudgetPriorityLibraryDialog-cancel-vbtn" @click="onSubmit(false)" variant = "outlined" class='ghd-blue ghd-button-text ghd-button'>Cancel </v-btn>
-          <v-btn id="CreateBudgetPriorityLibraryDialog-save-vbtn" :disabled="newBudgetPriorityLibrary.name === ''" @click="onSubmit(true)"
-          variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+        <v-row justify="center">       
+          <v-btn id="CreateBudgetPriorityLibraryDialog-cancel-vbtn"
+                 @click="onSubmit(false)" 
+                 class='ghd-blue ghd-button-text ghd-button' variant = "outlined">
+              Cancel
+           </v-btn>
+          <v-btn id="CreateBudgetPriorityLibraryDialog-save-vbtn"
+                 :disabled="newBudgetPriorityLibrary.name === ''"
+                 @click="onSubmit(true)"
+                 class='ghd-blue ghd-button-text ghd-button' variant = "outlined" >
             Save
           </v-btn>
         </v-row>
@@ -36,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { computed, reactive, watch } from 'vue';
+import Vue, { ref, toRefs, watch } from 'vue';
 import {CreateBudgetPriorityLibraryDialogData} from '@/shared/models/modals/create-budget-priority-library-dialog-data';
 import {
   BudgetPercentagePair,
@@ -53,22 +68,21 @@ import { useStore } from 'vuex';
   let store = useStore();
   const props = defineProps<{
     dialogData: CreateBudgetPriorityLibraryDialogData
-  }>()
-  let showDialogComputed = computed(() => props.dialogData.showDialog);
-  let dialogData = reactive(props.dialogData);
+  }>();
+const { dialogData } = toRefs(props);
+
   const emit = defineEmits(['submit'])
   let getIdByUserNameGetter: any = store.getters.getIdByUserName;
 
-  let newBudgetPriorityLibrary: BudgetPriorityLibrary = {...emptyBudgetPriorityLibrary, id: getNewGuid()};
+  let newBudgetPriorityLibrary = ref<BudgetPriorityLibrary>({...emptyBudgetPriorityLibrary, id: getNewGuid()});
   let rules: InputValidationRules = validationRules;
   
-  watch(dialogData, onDialogDataChanged )
-  function onDialogDataChanged() {
+  watch(()=> props.dialogData, ()=> {
     let currentUser: string = getUserName();
 
-    newBudgetPriorityLibrary = {
-      ...newBudgetPriorityLibrary,
-      budgetPriorities: dialogData.budgetPriorities.map((budgetPriority: BudgetPriority) => ({
+    newBudgetPriorityLibrary.value = {
+      ...newBudgetPriorityLibrary.value,
+      budgetPriorities: props.dialogData.budgetPriorities.map((budgetPriority: BudgetPriority) => ({
         ...budgetPriority, id: getNewGuid(),
         budgetPercentagePairs: budgetPriority.budgetPercentagePairs.map((budgetPercentagePair: BudgetPercentagePair) => ({
           ...budgetPercentagePair, id: getNewGuid()
@@ -76,15 +90,15 @@ import { useStore } from 'vuex';
       })),
       owner: getIdByUserNameGetter(currentUser),
     };
-  }
+  });
 
   function onSubmit(submit: boolean) {
     if (submit) {
-      emit('submit', newBudgetPriorityLibrary);
+      emit('submit', newBudgetPriorityLibrary.value);
     } else {
       emit('submit', null);
     }
 
-    newBudgetPriorityLibrary = {...emptyBudgetPriorityLibrary, id: getNewGuid()};
+    newBudgetPriorityLibrary.value = {...emptyBudgetPriorityLibrary, id: getNewGuid()};
   }
 </script>

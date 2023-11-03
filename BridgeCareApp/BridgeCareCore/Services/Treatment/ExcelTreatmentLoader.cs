@@ -335,20 +335,29 @@ namespace BridgeCareCore.Services.Treatment
 
         public TreatmentSupersedeRulesLoadResult LoadTreatmentSupersedeRules(ExcelWorksheet worksheet, List<TreatmentDTO> scenarioTreatments)
         {
-            var treatmentSupersedeRuleResult = LoadTreatment(worksheet);
-            var load
-            var validationMessages = new List<string>();
+               
+                var validationMessages = new List<string>();
 
-            // var budgetsLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Budgets, 2);
-            //var PfLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.PerformanceFactors, budgetsLineIndex);
-            //if (budgetsLineIndex == 0)
-            //{
-                throw new Exception($"Cell with content {TreatmentExportStringConstants.TreatmentName} not found!");
-           // }
+                var pfLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.PerformanceFactors, 2);
+                if (pfLineIndex == 0)
+                {
+                    throw new Exception($"Cell with content {TreatmentExportStringConstants.PerformanceFactors} not found!");
+                }
 
+                var height = worksheet.Dimension.End.Row;
+                for (var i = pfLineIndex + 2; i <= height; i++)
+                {
+                    var attribute = worksheet.Cells[i, 1].Text;
+                    var pf = worksheet.Cells[i, 2].Text;
 
+                    if (!string.IsNullOrEmpty(attribute) && !string.IsNullOrEmpty(pf))
+                    {
+                        performanceFactors.Add(new TreatmentPerformanceFactorDTO() { Attribute = attribute, PerformanceFactor = ParseFloat(pf), Id = Guid.NewGuid() });
+                    }
+                }
 
-            //return new TreatmentSupersedeRulesLoadResult {  ValidationMessages = validationMessages };
+                return new TreatmentPerformanceFactorLoadResult { PerformanceFactors = performanceFactors, ValidationMessages = validationMessages };
+            }
         }
     }
 }

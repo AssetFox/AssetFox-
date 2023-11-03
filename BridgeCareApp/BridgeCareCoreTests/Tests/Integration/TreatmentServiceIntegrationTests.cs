@@ -174,7 +174,7 @@ namespace BridgeCareCoreTests.Tests.Integration
                 t => t.Costs[0].CriterionLibrary.Id,
                 t => t.Consequences[0].Id,
                 t => t.Consequences[0].Equation.Id,
-                t => t.Consequences[0].CriterionLibrary.Id);
+                t => t.Consequences[0].CriterionLibrary.Id); ;
         }
 
     }

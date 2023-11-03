@@ -51,7 +51,7 @@
         </v-col>
 
         <v-col v-show='hasSelectedLibrary || hasScenario' cols="12">
-            <div class='priorities-data-table'>
+            <!-- <div class='priorities-data-table'> -->
                 <v-data-table-server 
                     id = "BudgetPriority-priorities-vdatatable"
                     :headers='budgetPriorityGridHeaders' 
@@ -88,11 +88,15 @@
                                         @save='onEditBudgetPriority(item.item, header.key, item.item[header.key])'
                                         size="large" lazy>
                                         <v-text-field v-if="header.key === 'priorityLevel'" readonly single-line
-                                                    class='sm-txt'
-                                                    :model-value="item.item[header.key]"
-                                                    :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                        <v-text-field v-else readonly single-line class='sm-txt'
-                                                    :model-value='item.item[header.key]' />
+                                            variant="underlined"
+                                            class='sm-txt'
+                                            :model-value="item.item[header.key]"
+                                            :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                        <v-text-field 
+                                            v-else readonly single-line class='sm-txt'
+                                            variant="underlined"
+                                            :model-value='item.item[header.key]' 
+                                        />
                                         <template v-slot:input>
                                             <v-text-field v-if="header.key === 'priorityLevel'" label='Edit' single-line
                                                         v-model.number='item.item[header.key]'
@@ -108,7 +112,7 @@
                                         <v-menu bottom min-height='500px' min-width='500px'>
                                             <template v-slot:activator>
                                                 <div v-if='stateScenarioSimpleBudgetDetails.length > 5'>
-                                                    <v-btn class='ara-blue ghd-button-text' icon>
+                                                    <v-btn class='ara-blue ghd-button-text' flat>
                                                         <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                                     </v-btn>
                                                 </div>
@@ -124,7 +128,7 @@
                                                 </v-card-text>
                                             </v-card>
                                         </v-menu>
-                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' icon>
+                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' flat>
                                             <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                         </v-btn>
                                     </v-row>
@@ -134,7 +138,7 @@
                                         :return-value.sync='item.item[header.key]'
                                         @save='onEditBudgetPercentagePair(item.item, header.key, item.item[header.key])'
                                         size="large" lazy>
-                                        <v-text-field readonly single-line class='sm-txt' :model-value='item.item[header.key]'
+                                        <v-text-field readonly single-line class='sm-txt' :model-value='item.item[header.key]' variant="underlined"
                                                     :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.item[header.key], [0, 100])]" />
                                         <template v-slot:input>
                                             <v-text-field :mask="'###'" label='Edit' single-line
@@ -144,7 +148,7 @@
                                     </editDialog>
                                 </div>
                                 <div v-else>
-                                    <v-btn  id="BudgetPriorityEditor-deleteBudgetPriority-btn" @click="onRemoveBudgetPriority(item.item.id)" icon>
+                                    <v-btn  id="BudgetPriorityEditor-deleteBudgetPriority-btn" @click="onRemoveBudgetPriority(item.item.id)" flat>
                                         <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </div>
@@ -152,13 +156,14 @@
                         </tr>
                     </template>
                 </v-data-table-server>
-            </div>
+            <!-- </div> -->
 
             <v-divider :thickness="4" class="border-opacity-100"></v-divider>
             <v-btn flat
                 :disabled='selectedBudgetPriorityIds.length === 0'
                 @click='onRemoveBudgetPriorities'
-                class="ghd-control-label ghd-blue">
+                class="ghd-control-label ghd-blue"
+                variant="text">
                 Delete Selected
             </v-btn>
         </v-col>
@@ -214,7 +219,7 @@
 </template>
 
 <script setup lang='ts'>
-    import Vue, { Ref, ref, watch, onBeforeUnmount, ShallowRef, shallowRef, computed } from 'vue';
+    import { ref, watch, onBeforeUnmount, ShallowRef, shallowRef, computed } from 'vue';
     import editDialog from '@/shared/modals/Edit-Dialog.vue'
     import {
         BudgetPercentagePair,
@@ -227,8 +232,7 @@
         emptyBudgetPriorityLibraryUsers
     } from '@/shared/models/iAM/budget-priority';
     import { any, clone, contains, find, findIndex, isNil, prepend, propEq, update } from 'ramda';
-    import { DataTableHeader } from '@/shared/models/vue/data-table-header';
-    import { hasValue } from '@/shared/utils/has-value-util';
+        import { hasValue } from '@/shared/utils/has-value-util';
     import { getPropertyValues } from '@/shared/utils/getter-utils';
     import { setItemPropertyValue } from '@/shared/utils/setter-utils';
     import { SelectItem } from '@/shared/models/vue/select-item';
@@ -326,8 +330,8 @@ import { getUrl } from '@/shared/utils/get-url';
     let budgetPriorityGridRows = ref<BudgetPriorityGridDatum[]>([]);
     let actionHeader: any = { title: 'Action', key: '', align: 'left', sortable: false, class: '', width: ''}
     let budgetPriorityGridHeaders: any[] = [
-        { title: 'Priority', key: 'priorityLevel', align: 'left', sortable: true, class: '', width: '' },
-        { title: 'Year', key: 'year', align: 'left', sortable: false, class: '', width: '7%' },
+        { title: 'Priority', key: 'priorityLevel', align: 'left', sortable: true, class: '', width: '5%' },
+        { title: 'Year', key: 'year', align: 'left', sortable: false, class: '', width: '10%' },
         { title: 'Criteria', key: 'criteria', align: 'left', sortable: false, class: '', width: '' },
         actionHeader
     ];

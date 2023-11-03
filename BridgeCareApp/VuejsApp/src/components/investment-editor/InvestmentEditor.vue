@@ -43,12 +43,12 @@
                 </v-col>
             </v-row>
             <!-- only for scenario -->
-            <v-row style="margin-top:80px;" v-if='hasInvestmentPlanForScenario'>
+            <v-row style="margin-top:80px;" v-if='hasInvestmentPlanForScenario' align="center">
                 <!-- text boxes for scenario only -->
                 <v-col cols = "2" class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-label"><span>First Year of Analysis Period</span></v-subheader>
                     <v-text-field id="InvestmentEditor-firstYearAnalysisPeriod-textField"
-                                  outline
+                                  variant="outlined"
                                   @change='onEditInvestmentPlan("firstYearOfAnalysisPeriod", $event)'
                                   :rules="[rules['generalRules'].valueIsNotEmpty]"
                                   :mask="'####'"
@@ -58,7 +58,7 @@
                 <v-col cols = "2" class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-label"><span>Number of Years in Analysis Period</span></v-subheader>
                     <v-text-field id="InvestmentEditor-numberYearsAnalysisPeriod-textField"
-                                  readonly outline
+                                  readonly variant="outlined"
                                   @change='onEditInvestmentPlan("numberOfYearsInAnalysisPeriod", $event)'
                                   v-model='investmentPlan.numberOfYearsInAnalysisPeriod'
                                   class="ghd-text-field-border ghd-text-field" />
@@ -72,12 +72,13 @@
                                   v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: true}"
                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]"
                                   :disabled="!hasAdminAccess"
+                                  variant="outlined"
                                   class="ghd-text-field-border ghd-text-field" />
                 </v-col>
                 <v-col cols = "2" class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-label"><span>Inflation Rate Percentage</span></v-subheader>
                     <v-text-field id="InvestmentEditor-inflationRatePercentage-textField"
-                                  outline
+                                  variant="outlined"
                                   v-model='investmentPlan.inflationRatePercentage'
                                   @change='onEditInvestmentPlan("inflationRatePercentage", $event)'
                                   :mask="'###'"
@@ -112,7 +113,7 @@
                                       :disabled='currentPage.length === 0' type="number" min=1 :mask="'##########'"
                                       class="ghd-text-field-border ghd-text-field"
                                       v-bind:class="{ 'ghd-blue-text-field': currentPage.length !== 0}"
-                                      outline v-model.number="range" />
+                                      variant="outlined" density="compact" v-model.number="range" />
                         </v-col>
                         <v-col>
                         <v-btn id="InvestmentEditor-addBudgetYearRange-btn"
@@ -207,7 +208,7 @@
                 </v-data-table-server>
                 <v-btn id="InvestmentEditor-deleteSelected-btn"
                         :disabled='selectedBudgetYears.length === 0' @click='onRemoveBudgetYears'
-                        class='ghd-blue ghd-button' variant = "flat">
+                        class='ghd-blue ghd-button' variant = "text">
                     Delete Selected
                 </v-btn>
             </v-col>

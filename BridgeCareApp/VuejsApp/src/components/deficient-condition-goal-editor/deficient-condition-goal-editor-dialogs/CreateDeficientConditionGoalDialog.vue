@@ -91,10 +91,9 @@ import { useStore } from 'vuex';
   const numericAttributeNames = ref<string[]>([]);
   let rules: InputValidationRules = validationRules;
 
-  onMounted(() => mounted); 
-  function mounted() {
+  onMounted(() => {
     setNumericAttributeNames();
-  }
+  });
 
   watch(stateNumericAttributes, () => {
     setNumericAttributeNames();

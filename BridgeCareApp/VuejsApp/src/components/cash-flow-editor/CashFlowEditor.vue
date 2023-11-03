@@ -1039,7 +1039,6 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
 
     watch(librarySelectItemValue, () => onLibrarySelectItemValueChangedCheckUnsaved())
     function onLibrarySelectItemValueChangedCheckUnsaved() {
-        console.log('test')
         if(hasScenario.value){
             onLibrarySelectItemValueChanged();
             unsavedDialogAllowed = false;

@@ -826,7 +826,6 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
     watch(selectedPerformanceEquations,()=>onSelectedPerformanceEquationsChanged())
     function onSelectedPerformanceEquationsChanged() {
-        console.log('tset')
         selectedPerformanceEquationIds = getPropertyValues('id', selectedPerformanceEquations.value) as string[];
     } 
     

@@ -183,17 +183,18 @@
                                 <span class='sm-txt'>{{ item.year + firstYearOfAnalysisPeriodShift}}</span>
                             </div>       
                             <div v-if="header.key === 'action'">
-                                <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(item.year)" class="ghd-blue" icon>
+                                <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(item.year)" class="ghd-blue" flat>
                                     <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
                                 </v-btn>
                             </div>
                             <div v-if="header.key !== 'year' && header.key !== 'action'">
                                 <editDialog :return-value.sync='item[header.key]'
-                                                @save='onEditBudgetYearValue(item.year, header.key, item[header.key])'
-                                                size="large" lazy>
+                                    @save='onEditBudgetYearValue(item.year, header.key, item[header.key])'
+                                    size="large" lazy>
                                     <v-text-field readonly single-line class='sm-txt'
-                                                    :model-value='formatAsCurrency(item[header.key])'
-                                                    :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                        variant="underlined"
+                                        :model-value='formatAsCurrency(item[header.key])'
+                                        :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     <template v-slot:input>
                                         <v-text-field label='Edit' single-line
                                                         v-model.number='item[header.key]'
@@ -221,54 +222,48 @@
                     <v-textarea no-resize outline rows='4'
                                 v-model='selectedBudgetLibrary.description'
                                 @update:model-value="checkHasUnsavedChanges()"
+                                variant="outlined"
                                 class="ghd-text-field-border">
                     </v-textarea>
                 </v-col>
             </v-row>
         </v-col>
-        <v-col cols = "12">          
-            <v-row style="padding-bottom: 40px;" v-show='hasSelectedLibrary || hasScenario'>
+        <v-col cols="12">          
+            <v-row style="padding-bottom: 40px;" v-show='hasSelectedLibrary || hasScenario' justify="center">
                 <v-spacer></v-spacer>
-                <v-col>
                     <v-btn id="InvestmentEditor-cancel-btn"
                         :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "flat" class='ghd-blue ghd-button-text ghd-button'
                         v-show='hasScenario'>
                         Cancel
                     </v-btn>
-                </v-col>
-                <v-col>
                     <v-btn outline id="InvestmentEditor-deleteLibrary-btn"
-                        @click='onShowConfirmDeleteAlert' variant = "outlined" class='ghd-blue ghd-button-text ghd-button' v-show='!hasScenario'
+                        @click='onShowConfirmDeleteAlert' variant = "text" class='ghd-blue ghd-button-text ghd-button' v-show='!hasScenario'
                         :disabled='!hasLibraryEditPermission'>
                         Delete Library
                     </v-btn>
-                </v-col>
-                <v-col>
                     <v-btn id="InvestmentEditor-createAsNewLibrary-btn"
                         :disabled='disableCrudButton()'
                         @click='onShowCreateBudgetLibraryDialog(true)'
+                        style="margin-left: 5px;"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                         Create as New Library
                     </v-btn>
-               </v-col>
-               <v-col>
                     <v-btn id="InvestmentEditor-updateLibrary-btn"
                     :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                         @click='onUpsertBudgetLibrary()'
+                        style="margin-left: 5px;"
                         class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show='!hasScenario'>
                         Update Library
                     </v-btn>
-                </v-col>
-                <v-col>
                     <v-btn id="InvestmentEditor-save-btn"
                         :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
                         @click='onUpsertInvestment()'
+                        style="margin-left: 5px;"
                         class='ghd-blue-bg text-white ghd-button-text ghd-button'
                         v-show='hasScenario'>
                         Save
                     </v-btn>
-                </v-col>
                 <v-spacer></v-spacer>
             </v-row>
         </v-col>

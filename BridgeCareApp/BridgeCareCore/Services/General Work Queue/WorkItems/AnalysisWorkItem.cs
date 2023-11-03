@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs.Services;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.WorkQueue;
 using AppliedResearchAssociates.Validation;
@@ -323,12 +324,20 @@ public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserI
         var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var message = new SimulationAnalysisDetailDTO()
         {
-            SimulationId = Guid.Parse(WorkId),
+            SimulationId = SimulationId,
             Status = $"Run Failed. {errorMessage ?? "Unknown status."}",
             LastRun = DateTime.Now
         };
         _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, message);
-        _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(message);
+        _hubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Scenario Error::RunSimulation - {errorMessage}");
+        try
+        {
+            _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(message);
+        }
+        catch (Exception ex)
+        {
+            _hubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Scenario Error::RunSimulation - {ex.Message}");
+        }     
     }
 
     public void OnCompletion(IServiceProvider serviceProvider)

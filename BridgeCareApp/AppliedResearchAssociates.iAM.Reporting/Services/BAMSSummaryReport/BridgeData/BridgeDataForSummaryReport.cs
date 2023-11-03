@@ -510,8 +510,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     i++;
                     if (row % 2 == 0)
                     {
-                        if (section.TreatmentCause != TreatmentCause.CashFlowProject ||
-                            section.TreatmentCause == TreatmentCause.CommittedProject)
+                        var cellColor = worksheet.Cells[row, column, row, column + 1].Style.Fill.BackgroundColor;
+                        if (section.TreatmentCause != TreatmentCause.CashFlowProject &&
+                            !(section.TreatmentCause == TreatmentCause.CommittedProject && previousYearCause == TreatmentCause.CommittedProject && previousYearTreatment.ToLower() != BAMSConstants.NoTreatment))
                         {
                             ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.LightGray);
                         }

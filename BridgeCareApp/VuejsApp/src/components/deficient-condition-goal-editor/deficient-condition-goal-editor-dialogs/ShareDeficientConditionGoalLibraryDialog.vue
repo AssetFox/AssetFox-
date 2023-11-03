@@ -1,13 +1,13 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="showDialogComputed">
+  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
-        <v-row justify-center>
+        <v-row  justify="space-between" align="center" style="padding: 10px;">
           <h5>Deficient Condition Goal Library Sharing</h5>
-        </v-row>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
+        </v-row>
       </v-card-title>
       <v-card-text>
         <v-data-table id="ShareDeficientConditionGoalLibraryDialog-table-vdatatable" 
@@ -15,6 +15,7 @@
                       :items="deficientConditionGoalLibraryUserGridRows"
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="{item}">
+            <tr>
             <td>
               {{ item.username }}
             </td>
@@ -23,21 +24,22 @@
                           @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox id="ShareDeficientConditionGoalLibraryDialog-canModify-vcheckbox" :disabled="!item.value.isShared" label="Can Modify" v-model="item.canModify"/>
+              <v-checkbox id="ShareDeficientConditionGoalLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" label="Can Modify" v-model="item.canModify"/>
             </td>
+          </tr>
           </template>
-          <v-alert :model-value="true"
+          <!-- <v-alert :model-value="true"
                    class="ara-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
-          </v-alert>
+          </v-alert> -->
         </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-row row justify-center>
-          <v-btn id="ShareDeficientConditionGoalLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
-          <v-btn id="ShareDeficientConditionGoalLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
+        <v-row justify="center">
+          <v-btn id="ShareDeficientConditionGoalLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "text">Cancel</v-btn>
+          <v-btn id="ShareDeficientConditionGoalLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding" variant="outlined">
             Save
           </v-btn>
         </v-row>
@@ -78,7 +80,7 @@ const stateUsers = computed(() => store.state.userModule.users as User[]);
   ];
   const deficientConditionGoalLibraryUserGridRows = ref<DeficientConditionGoalLibraryUserGridRow[]>([]);
   const currentUserAndOwner = ref<DeficientConditionGoalLibraryUser[]>([]);
-  let searchTerm: string = '';
+  const searchTerm = ref<string>('');
 
   watch(dialogData, () => {
     if (dialogData.value.showDialog) {
@@ -89,7 +91,6 @@ const stateUsers = computed(() => store.state.userModule.users as User[]);
 
   function onSetGridData() {
     const currentUser: string = getUserName();
-
     deficientConditionGoalLibraryUserGridRows.value = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({

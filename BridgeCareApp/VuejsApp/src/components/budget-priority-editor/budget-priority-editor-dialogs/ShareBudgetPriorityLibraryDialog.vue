@@ -1,19 +1,21 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="showDialogComputed">
+  <v-dialog max-width="60%" persistent v-model ="dialogData.showDialog">
     <v-card>
-      <v-card-title>
-        <v-row justify-center>
-          <h3>Budget Priority Library Sharing</h3>
-        </v-row>
+      <v-card-title class="ghd-dialog-padding-top-title">
+        <v-row justify="space-between">         
+          <div class="ghd-control-dialog-header"><h5>Budget Priority Library Sharing</h5></div>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
+        </v-row>
       </v-card-title>
+
       <v-card-text>
-        <v-data-table id="ShareBudgetPriorityLibraryDialog-table-vdatatable" 
+        <v-data-table-server id="ShareBudgetPriorityLibraryDialog-table-vdatatable" 
                       :headers="budgetPriorityLibraryUserGridHeaders"
-                      :items="budgetPriorityLibraryUserGridRows"
-                      sort-icon=ghd-table-sort
+                      :items="budgetPriorityLibraryUserGridRows" 
+                      :items-length="budgetPriorityLibraryUserGridRows.length"
+                      sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
           <template v-slot:item="{item}" slot="items" slot-scope="props">
             <td>
@@ -33,12 +35,12 @@
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
           </v-alert>
-        </v-data-table>
+        </v-data-table-server>
       </v-card-text>
       <v-card-actions>
-        <v-row row justify-center>
-          <v-btn id="ShareBudgetPriorityLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
-          <v-btn id="ShareBudgetPriorityLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
+        <v-row justify="center">
+          <v-btn id="ShareBudgetPriorityLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant="outlined">Cancel</v-btn>
+          <v-btn id="ShareBudgetPriorityLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding" variant="outlined">
             Save
           </v-btn>
         </v-row>
@@ -48,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { computed, reactive, watch } from 'vue';
+import Vue, { computed, toRefs, ref, watch } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {BudgetPriorityLibraryUser } from '@/shared/models/iAM/budget-priority';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -63,34 +65,36 @@ import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
 
   let store = useStore();
-  let stateUsers = store.state.userModule.users;
+  //let stateUsers = store.state.userModule.users;
+  const stateUsers  = computed<User[]>(()=>store.state.userModule.users);
+
   const props = defineProps<{
     dialogData: ShareBudgetPriorityLibraryDialogData
-  }>()
-  let dialogData = reactive(props.dialogData);
-  const emit = defineEmits(['submit'])
-  let showDialogComputed = computed(() => props.dialogData.showDialog);
+  }>();
+  const { dialogData } = toRefs(props);
+
+  const emit = defineEmits(['submit']);
+
   let budgetPriorityLibraryUserGridHeaders: any[] = [
     {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
     {title: 'Shared With', key: '', align: 'left', sortable: true, class: '', width: ''},
     {title: 'Can Modify', key: '', align: 'left', sortable: true, class: '', width: ''}
   ];
-  let budgetPriorityLibraryUserGridRows: BudgetPriorityLibraryUserGridRow[] = [];
-  let currentUserAndOwner: BudgetPriorityLibraryUser[] = [];
+  let budgetPriorityLibraryUserGridRows = ref<BudgetPriorityLibraryUserGridRow[]>([]);
+  let currentUserAndOwner = ref<BudgetPriorityLibraryUser[]>([]);
   let searchTerm: string = '';
 
-  watch(dialogData, onDialogDataChanged)
-  function onDialogDataChanged() {
-    if (dialogData.showDialog) {
+  watch(()=> props.dialogData, ()=> {
+    if (props.dialogData.showDialog) {
       onSetGridData();
       onSetUsersSharedWith();
     }
-  }
+  });
 
   function onSetGridData() {
     const currentUser: string = getUserName();
 
-    budgetPriorityLibraryUserGridRows = stateUsers
+    budgetPriorityLibraryUserGridRows.value = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -103,7 +107,7 @@ import { useStore } from 'vuex';
     function onSetUsersSharedWith() {
         //budget priority library users
         let budgetPriorityLibraryUsers: BudgetPriorityLibraryUser[] = [];
-        BudgetPriorityService.GetBudgetPriorityLibraryUsers(dialogData.budgetPriorityLibrary.id).then(response => {
+        BudgetPriorityService.GetBudgetPriorityLibraryUsers(props.dialogData.budgetPriorityLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];
@@ -132,18 +136,18 @@ import { useStore } from 'vuex';
                 const isCurrentUserOrOwner = (budgetPriorityLibraryUser: BudgetPriorityLibraryUser) => budgetPriorityLibraryUser.username === currentUser || budgetPriorityLibraryUser.isOwner;
                 const isNotCurrentUserOrOwner = (budgetPriorityLibraryUser: BudgetPriorityLibraryUser) => budgetPriorityLibraryUser.username !== currentUser && !budgetPriorityLibraryUser.isOwner;
 
-                currentUserAndOwner = filter(isCurrentUserOrOwner, budgetPriorityLibraryUsers) as BudgetPriorityLibraryUser[];
+                currentUserAndOwner.value = filter(isCurrentUserOrOwner, budgetPriorityLibraryUsers) as BudgetPriorityLibraryUser[];
                 const otherUsers: BudgetPriorityLibraryUser[] = filter(isNotCurrentUserOrOwner, budgetPriorityLibraryUsers) as BudgetPriorityLibraryUser[];
 
                 otherUsers.forEach((budgetPriorityLibraryUser: BudgetPriorityLibraryUser) => {
-                    if (any(propEq('id', budgetPriorityLibraryUser.userId), budgetPriorityLibraryUserGridRows)) {
+                    if (any(propEq('id', budgetPriorityLibraryUser.userId), budgetPriorityLibraryUserGridRows.value)) {
                         const budgetPriorityLibraryUserGridRow: BudgetPriorityLibraryUserGridRow = find(
-                            propEq('id', budgetPriorityLibraryUser.userId), budgetPriorityLibraryUserGridRows) as BudgetPriorityLibraryUserGridRow;
+                            propEq('id', budgetPriorityLibraryUser.userId), budgetPriorityLibraryUserGridRows.value) as BudgetPriorityLibraryUserGridRow;
 
-                        budgetPriorityLibraryUserGridRows = update(
-                            findIndex(propEq('id', budgetPriorityLibraryUser.userId), budgetPriorityLibraryUserGridRows),
+                        budgetPriorityLibraryUserGridRows.value = update(
+                            findIndex(propEq('id', budgetPriorityLibraryUser.userId), budgetPriorityLibraryUserGridRows.value),
                             { ...budgetPriorityLibraryUserGridRow, isShared: true, canModify: budgetPriorityLibraryUser.canModify },
-                            budgetPriorityLibraryUserGridRows
+                            budgetPriorityLibraryUserGridRows.value
                         );
                     }
                 });
@@ -153,9 +157,9 @@ import { useStore } from 'vuex';
 
   function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      budgetPriorityLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), budgetPriorityLibraryUserGridRows),
-          'canModify', false, budgetPriorityLibraryUserGridRows);
+      budgetPriorityLibraryUserGridRows.value = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), budgetPriorityLibraryUserGridRows.value),
+          'canModify', false, budgetPriorityLibraryUserGridRows.value);
     }
   }
 
@@ -166,11 +170,11 @@ import { useStore } from 'vuex';
       emit('submit', null);
     }
 
-    budgetPriorityLibraryUserGridRows = [];
+    budgetPriorityLibraryUserGridRows.value = [];
   }
 
   function getBudgetPriorityLibraryUsers() {
-    const usersSharedWith: BudgetPriorityLibraryUser[] = budgetPriorityLibraryUserGridRows
+    const usersSharedWith: BudgetPriorityLibraryUser[] = budgetPriorityLibraryUserGridRows.value
         .filter((budgetPriorityLibraryUserGridRow: BudgetPriorityLibraryUserGridRow) => budgetPriorityLibraryUserGridRow.isShared)
         .map((budgetPriorityLibraryUserGridRow: BudgetPriorityLibraryUserGridRow) => ({
           userId: budgetPriorityLibraryUserGridRow.id,
@@ -179,7 +183,7 @@ import { useStore } from 'vuex';
           isOwner: false
         }));
 
-    return [...currentUserAndOwner, ...usersSharedWith];
+    return [...currentUserAndOwner.value, ...usersSharedWith];
   }
 </script>
 

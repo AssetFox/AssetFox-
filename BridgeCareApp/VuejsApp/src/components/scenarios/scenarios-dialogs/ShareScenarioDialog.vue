@@ -7,7 +7,8 @@
         </v-layout>
       </v-card-title>
       <v-card-text>
-        <v-data-table :headers="scenarioUserGridHeaders"
+        <v-data-table id="ShareScenarioDialog-table-vdatatable"
+                      :headers="scenarioUserGridHeaders"
                       :items="scenarioUserGridRows"
                       sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
@@ -16,11 +17,13 @@
               <v-label>{{ props.item.username }}</v-label>
             </td>
             <td>
-              <v-checkbox class="ghd-padding-top bottom-margin-zero" label="Is Shared" v-model="props.item.isShared"
+              <v-checkbox id="ShareScenarioDialog-isShared-vcheckbox" 
+                  class="ghd-padding-top bottom-margin-zero" label="Is Shared" v-model="props.item.isShared"
                   @change="removeUserModifyAccess(props.item.id, props.item.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!props.item.isShared" class="ghd-padding-top bottom-margin-zero" label="Can Modify" v-model="props.item.canModify"/>
+              <v-checkbox id="ShareScenarioDialog-canModify-vcheckbox"
+                          :disabled="!props.item.isShared" class="ghd-padding-top bottom-margin-zero" label="Can Modify" v-model="props.item.canModify"/>
             </td>
           </template>
           <v-alert :value="true"
@@ -33,10 +36,12 @@
       </v-card-text>
       <v-card-actions>
         <v-layout justify-space-between row>
-          <v-btn @click="onSubmit(true)" class="ara-blue-bg white--text">
+          <v-btn id="ShareScenarioDialog-save-vbtn"
+                 @click="onSubmit(true)" class="ara-blue-bg white--text">
             Save
           </v-btn>
-          <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
+          <v-btn id="ShareScenarioDialog-cancel-vbtn"
+                 @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
         </v-layout>
       </v-card-actions>
     </v-card>

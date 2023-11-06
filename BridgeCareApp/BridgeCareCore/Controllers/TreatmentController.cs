@@ -361,7 +361,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 await Task.Factory.StartNew(() =>
-                {
+                {                    
                     var libraryAccess = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(upsertRequest.Library.Id, UserId);
                     if (libraryAccess.LibraryExists == upsertRequest.IsNewLibrary)
                     {

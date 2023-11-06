@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs;
 using BridgeCareCore.Controllers;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
@@ -51,6 +52,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"The simulation {WorkName} has been successfully deleted");
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastSimulationDeletionCompletion, Metadata.WorkType);
         }
 
         public void OnUpdate(IServiceProvider serviceProvider)

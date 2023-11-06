@@ -1,7 +1,7 @@
 <template>
     <div>
         <v-row>
-            <v-col id="EditAnalysisMethod-weightingParent-vflex" xs4>
+            <v-col id="EditAnalysisMethod-weightingParent-vflex">
         <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
         <v-select
             id="EditAnalysisMethod-weighting-vselect"
@@ -115,13 +115,13 @@
                                 </v-textarea>
                             </v-col>
                             <v-col>
-                                <v-row justify="space-between" style="margin: 10px;">
+                                <v-row justify="space-between" style="padding: 10px;">
                                 <v-subheader class="ghd-control-label ghd-md-gray">                             
                                     Criteria
                                 </v-subheader>
                                 <v-btn
                                     id="EditAnalysisMethod-criteriaEditor-btn"
-                                    style="padding-right:30px !important;"
+                                    style="padding-right:30px; padding-bottom: 5px; margin-bottom: 5px; !important;"
                                     @click="
                                         onShowCriterionEditorDialog
                                     "

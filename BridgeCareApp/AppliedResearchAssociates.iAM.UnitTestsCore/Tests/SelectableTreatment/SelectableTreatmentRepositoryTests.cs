@@ -19,7 +19,7 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
 {
     public class SelectableTreatmentRepositoryTests
     {
@@ -561,7 +561,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.SelectableTreatment
 
             var result = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatmentByLibraryIdAndName(treatmentLibraryId, treatmentName);
 
-            treatment.BudgetIds = new List<Guid>();            
+            treatment.BudgetIds = new List<Guid>();
             ObjectAssertions.EquivalentExcluding(treatment, result, x => x.CriterionLibrary, _ => _.SupersedeRules);
 
         }

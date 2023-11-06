@@ -58,5 +58,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         public void AddLibraryIdToScenarioSelectableTreatments(List<TreatmentDTO> treatmentDTOs, Guid? libraryId);
         public void AddModifiedToScenarioSelectableTreatments(List<TreatmentDTO> treatmentDTOs, bool IsModified);
         void AddDefaultPerformanceFactors(Guid scenarioId, List<TreatmentDTO> treatments);
+
+        LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId);
     }
 }

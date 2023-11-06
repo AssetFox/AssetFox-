@@ -110,6 +110,7 @@
                                     readonly
                                     single-line
                                     class="sm-txt"
+                                    variant="underlined"
                                     :model-value="props.item.attribute"
                                     :rules="[
                                         rules['generalRules'].valueIsNotEmpty,
@@ -149,6 +150,7 @@
                                     readonly
                                     single-line
                                     class="sm-txt"
+                                    variant="underlined"
                                     :model-value="props.item.value"
                                     :rules="[
                                         rules['generalRules'].valueIsNotEmpty,
@@ -174,12 +176,12 @@
                         <td v-else>-
                         </td>
                         <td class="px-0">
-                            <v-btn id="RemainingLifeLimitEditor-editCriteria-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)" icon>
+                            <v-btn id="RemainingLifeLimitEditor-editCriteria-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)" flat>
                                 <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                             </v-btn>   
                         </td>
                         <td justify-end>
-                            <v-btn id="RemainingLifeLimitEditor-deleteAttribute-btn" @click="onRemoveRemainingLifeLimitIcon(props.item)" icon>
+                            <v-btn id="RemainingLifeLimitEditor-deleteAttribute-btn" @click="onRemoveRemainingLifeLimitIcon(props.item)" flat>
                                 <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>                          
                         </td>

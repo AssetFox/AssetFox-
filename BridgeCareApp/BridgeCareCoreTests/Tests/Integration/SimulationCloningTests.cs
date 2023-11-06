@@ -22,6 +22,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore;
 using BridgeCareCore.Services;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment;
 
 namespace BridgeCareCoreTests.Tests.Integration
 {

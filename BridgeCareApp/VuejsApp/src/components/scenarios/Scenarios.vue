@@ -33,22 +33,21 @@
                                                 single-line
                                                 v-model="searchMine"
                                                 prepend-inner-icon=ghd-search 
-
-                                                outline
+                                                variant="outlined"
                                                 clearable
                                                 @click:clear="onMineClearClick()"
                                                 class="ghd-text-field-border ghd-text-field search-icon-general"
                                             >
                                             </v-text-field>
                                             <v-btn id="Scenarios-performSearch-button" 
-                                                style="margin-top: 2px;" 
+                                                style="margin-top: 2px;margin-left: 5px; margin-right: 5px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
                                                 variant = "outlined" 
                                                 @click="onMineSearchClick()">
                                                 Search
                                             </v-btn>
                                             <v-btn id="Scenarios-performFilter-button" 
-                                                style="margin-top: 2px;" 
+                                                style="margin-top: 2px; margin-right: 5px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
                                                 variant = "outlined" 
                                                 @click="showFilterScenarioList = true">
@@ -729,6 +728,7 @@ import { useRouter } from 'vue-router';
 import mitt from 'mitt';
 import $vuetify from '@/plugins/vuetify';
 import { onBeforeMount } from 'vue';
+import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 
     let store = useStore(); 
     const $router = useRouter();     
@@ -1282,6 +1282,11 @@ import { onBeforeMount } from 'vue';
             getReportStatus,
         );
 
+        $emitter.on(
+            Hub.BroadcastEventType.BroadcastSimulationDeletionCompletionEvent,
+            importCompleted,
+        );
+
         availableActions = {
             runAnalysis: 'runAnalysis',
             reports: 'reports',
@@ -1400,7 +1405,12 @@ import { onBeforeMount } from 'vue';
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
             getReportStatus,
         );
-    }); 
+
+        $emitter.off(
+            Hub.BroadcastEventType.BroadcastSimulationDeletionCompletionEvent,
+            importCompleted,
+        );
+    });
 
     function initializeScenarioPages(){
         const { sort, descending, page, rowsPerPage } = sharedScenariosPagination;
@@ -1912,6 +1922,13 @@ import { onBeforeMount } from 'vue';
                     workQueueStatusUpdate: updatedQueueItem
                 })
             }                                
+    }
+
+    function importCompleted(data: any){
+        var workType = data as WorkType
+        if(workType == WorkType.DeleteSimulation){
+            onScenariosPagination()
+        }        
     }
 
     function updateFastWorkQueue(data: any) {

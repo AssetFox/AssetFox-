@@ -8,6 +8,8 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Utils;
+using Humanizer;
+using NuGet.Packaging;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.Treatment
@@ -333,15 +335,16 @@ namespace BridgeCareCore.Services.Treatment
         }
 
 
-        public  TreatmentSupersedeRulesLoadResult LoadTreatmentSupersedeRules(ExcelWorksheet worksheet, List<TreatmentDTO> scenarioTreatments)
+        public TreatmentSupersedeRulesLoadResult LoadTreatmentSupersedeRules(ExcelWorksheet worksheet, List<TreatmentDTO> scenarioTreatments)
         {
-            
+            var treatmentSupersedeRules = new List<TreatmentSupersedeRuleDTO>();
+
             var validationMessages = new List<string>();
 
             var tsLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.SupersedeTreatmentName, 1);
             if (tsLineIndex == 0)
             {
-                throw new Exception($"Cell with content {TreatmentExportStringConstants.PerformanceFactors} not found!");
+                throw new Exception($"Cell with content {TreatmentExportStringConstants.TreatmentName} not found!");
             }
             var height = worksheet.Dimension.End.Row;
             for (var i = tsLineIndex + 1; i <= height; i++)
@@ -352,11 +355,42 @@ namespace BridgeCareCore.Services.Treatment
 
                 if (!string.IsNullOrEmpty(treatmentName) && !string.IsNullOrEmpty(supersededTreatment))
                 {
-                    scenarioTreatments.Add(new  TreatmentDTO() {  sTreatment Name = treatmentName, CriterionLibrary.merge = ParseFloat(pf), Id = Guid.NewGuid() });
+                    var criterionLibrary = new CriterionLibraryDTO
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "from Excel import",
+                        MergedCriteriaExpression = criteria,
+                        IsSingleUse = true,
+                    };                    
+                   
+                    var supersededTreatmentRule = new TreatmentDTO
+                    {
+                        Name = supersededTreatment
+                    };
+
+                    var treatmentRules = new List<TreatmentSupersedeRuleDTO>();
+                    var treatmentRule = new TreatmentSupersedeRuleDTO
+                    {
+                        Id = Guid.NewGuid(),
+                        CriterionLibrary = criterionLibrary,
+                        treatment = supersededTreatmentRule,                        
+                    };
+                    treatmentRules.Add(treatmentRule);
+
+                    var treatments = new List<TreatmentDTO>();
+                    var treatment = new TreatmentDTO
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = treatmentName,
+                        SupersedeRules = treatmentRules,
+                    };
+                    treatments.Add(treatment);                          
+                   
+                    scenarioTreatments.Add(treatment);
                 }
             }
 
-            return null; //new TreatmentSupersedeRulesLoadResult { PerformanceFactors = performanceFactors, ValidationMessages = validationMessages };
+            return new TreatmentSupersedeRulesLoadResult { Treatments = scenarioTreatments, ValidationMessages = validationMessages };
         }
     }
 

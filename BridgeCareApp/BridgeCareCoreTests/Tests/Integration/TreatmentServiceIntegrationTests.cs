@@ -141,9 +141,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var budgetIds = new List<Guid> { budget.Id };
           
             var treatmentsWithSupersede = TreatmentTestSetup.ModelWithSupersededTreatmentOfSimulationInDb(TestHelper.UnitOfWork, simulationId, treatmentId, criterionExpression: "treatment criterion", budgets: treatmentBudgets, budgetIds: budgetIds);
-            var treatmentsNoSupersede = TreatmentTestSetup.ModelNoSupersededTreatmentOfSimulationInDb(TestHelper.UnitOfWork, simulationId, treatmentId, criterionExpression: "treatment criterion", budgets: treatmentBudgets, budgetIds: budgetIds);
-
-                       
+                        
             TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(treatmentsWithSupersede, simulationId);
             var cost = ScenarioTreatmentCostTestSetup.CostForTreatmentInDb(TestHelper.UnitOfWork, treatmentId, simulationId);
 

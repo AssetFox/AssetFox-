@@ -826,6 +826,61 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("ImportScenarioTreatmentSupersedeRuleFile")]
+        [Authorize(Policy = Policy.ImportTreatmentSupersedeRuleFromScenario)]
+        public async Task<IActionResult> ImportScenarioTreatmentSupersedeRuleFile()
+        {
+            try
+            {
+                if (!ContextAccessor.HttpContext.Request.HasFormContentType)
+                {
+                    throw new ConstraintException("Request MIME type is invalid.");
+                }
+
+                if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
+                {
+                    throw new ConstraintException("Treatment Supersede Rule file not found.");
+                }
+
+                if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("simulationId", out var id))
+                {
+                    throw new ConstraintException("Request contained no simulation id.");
+                }
+
+                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+                var simulationId = Guid.Parse(id.ToString());
+
+                var simulationName = "";
+                await Task.Factory.StartNew(() =>
+                {
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
+                    simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
+                });
+
+                ImportScenarioTreatmentWorkitem workItem = new ImportScenarioTreatmentWorkitem(simulationId, excelPackage, UserInfo.Name, simulationName);
+                var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
+
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, simulationId.ToString());
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ImportScenarioTreatmentSupersedeRuleFile - {HubService.errorList["Unauthorized"]}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ImportScenarioTreatmentSupersedeRuleFile - {e.Message}");
+                throw;
+            }
+        }
+
+
+
+
+
 
         [HttpGet]
         [Route("ExportScenarioTreatmentSupersedeRuleExcelFile/{simulationId}")]

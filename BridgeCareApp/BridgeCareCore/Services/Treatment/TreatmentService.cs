@@ -248,8 +248,7 @@ namespace BridgeCareCore.Services
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {
                 var treatmentSupersedeRuleResult = _treatmentLoader.LoadTreatmentSupersedeRules(worksheet, scenarioTreatments);
-                //scenarioTreatments.Add(treatmentLoadResult.Treatment);
-                //validationMessages.AddRange(treatmentLoadResult.ValidationMessages);
+                validationMessages.AddRange(treatmentSupersedeRuleResult.ValidationMessages);
             }
             var combinedValidationMessage = string.Empty;
             if (validationMessages.Any())

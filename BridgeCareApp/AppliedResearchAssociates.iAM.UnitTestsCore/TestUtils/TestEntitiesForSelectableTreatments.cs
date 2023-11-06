@@ -143,7 +143,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var rule = new ScenarioTreatmentSupersedeRuleEntity
             {
                 Id = NewGuid,
-                PreventScenarioSelectableTreatment = preventTreatment,
+                PreventTreatmentId = preventTreatment.Id,
                 TreatmentId = testTreatmentWithRulesId,
                 CriterionLibraryScenarioTreatmentSupersedeRuleJoin = new CriterionLibraryScenarioTreatmentSupersedeRuleEntity
                 {
@@ -218,7 +218,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var rule = new TreatmentSupersedeRuleEntity
             {
                 Id = NewGuid,
-                PreventSelectableTreatment = new SelectableTreatmentEntity { Name = "PreventTreatment2", Id = NewGuid },
+                PreventTreatmentId = NewGuid,
                 TreatmentId = treatmentId,
                 CriterionLibraryTreatmentSupersedeRuleJoin = new CriterionLibraryTreatmentSupersedeRuleEntity
                 {

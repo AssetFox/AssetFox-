@@ -83,7 +83,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             // Set simulation id
             string simulationId = ReportHelper.GetSimulationId(parameters);
-            if (!Guid.TryParse(parameters, out Guid _simulationId))
+            if (!Guid.TryParse(simulationId, out Guid _simulationId))
             {
                 Errors.Add("Provided simulation ID is not a GUID");
                 IndicateError();

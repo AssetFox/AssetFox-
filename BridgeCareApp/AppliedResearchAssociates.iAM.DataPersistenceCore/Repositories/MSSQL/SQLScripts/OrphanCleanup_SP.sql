@@ -187,7 +187,7 @@ Delete FROM dbo.[ScenarioTreatmentCost] WHERE NOT EXISTS (SELECT * FROM dbo.[Sce
 Delete FROM dbo.[ScenarioTreatmentCost_Equation] WHERE NOT EXISTS (SELECT * FROM dbo.[ScenarioTreatmentCost] AS parent WHERE parent.Id = [ScenarioTreatmentCost_Equation].ScenarioTreatmentCostId);
 Delete FROM dbo.[ScenarioTreatmentPerformanceFactor] WHERE NOT EXISTS (SELECT * FROM dbo.[ScenarioSelectableTreatment] AS parent WHERE parent.Id = [ScenarioTreatmentPerformanceFactor].ScenarioSelectableTreatmentId);
 Delete FROM dbo.[ScenarioTreatmentScheduling] WHERE NOT EXISTS (SELECT * FROM dbo.[ScenarioSelectableTreatment] AS parent WHERE parent.Id = [ScenarioTreatmentScheduling].TreatmentId);
-Delete FROM dbo.[ScenarioTreatmentSupersedeRule] WHERE NOT EXISTS (SELECT * FROM dbo.[ScenarioSelectableTreatment] AS parent WHERE parent.Id = [ScenarioTreatmentSupersedeRule].PreventScenarioSelectableTreatmentId);
+Delete FROM dbo.[ScenarioTreatmentSupersedeRule] WHERE NOT EXISTS (SELECT * FROM dbo.[ScenarioSelectableTreatment] AS parent WHERE parent.Id = [ScenarioTreatmentSupersedeRule].PreventTreatmentId);
 Delete FROM dbo.[ScenarioTreatmentSupersedeRule] WHERE NOT EXISTS (SELECT * FROM dbo.[ScenarioSelectableTreatment] AS parent WHERE parent.Id = [ScenarioTreatmentSupersedeRule].TreatmentId);
 Delete FROM dbo.[SelectableTreatment] WHERE NOT EXISTS (SELECT * FROM dbo.[TreatmentLibrary] AS parent WHERE parent.Id = [SelectableTreatment].TreatmentLibraryId);
 Delete FROM dbo.[Simulation] WHERE NOT EXISTS (SELECT * FROM dbo.[Network] AS parent WHERE parent.Id = [Simulation].NetworkId);
@@ -224,7 +224,7 @@ Delete FROM dbo.[TreatmentPerformanceFactor] WHERE NOT EXISTS (SELECT * FROM dbo
 Delete FROM dbo.[TreatmentRejectionDetail] WHERE NOT EXISTS (SELECT * FROM dbo.[AssetDetail] AS parent WHERE parent.Id = [TreatmentRejectionDetail].AssetDetailId);
 Delete FROM dbo.[TreatmentScheduling] WHERE NOT EXISTS (SELECT * FROM dbo.[SelectableTreatment] AS parent WHERE parent.Id = [TreatmentScheduling].TreatmentId);
 Delete FROM dbo.[TreatmentSchedulingCollisionDetail] WHERE NOT EXISTS (SELECT * FROM dbo.[AssetDetail] AS parent WHERE parent.Id = [TreatmentSchedulingCollisionDetail].AssetDetailId);
-Delete FROM dbo.[TreatmentSupersedeRule] WHERE NOT EXISTS (SELECT * FROM dbo.[SelectableTreatment] AS parent WHERE parent.Id = [TreatmentSupersedeRule].PreventSelectableTreatmentId);
+Delete FROM dbo.[TreatmentSupersedeRule] WHERE NOT EXISTS (SELECT * FROM dbo.[SelectableTreatment] AS parent WHERE parent.Id = [TreatmentSupersedeRule].PreventTreatmentId);
 Delete FROM dbo.[TreatmentSupersedeRule] WHERE NOT EXISTS (SELECT * FROM dbo.[SelectableTreatment] AS parent WHERE parent.Id = [TreatmentSupersedeRule].TreatmentId);
 Delete FROM dbo.[UserCriteria_Filter] WHERE NOT EXISTS (SELECT * FROM dbo.[User] AS parent WHERE parent.Id = [UserCriteria_Filter].UserId);
 --14 exceptions

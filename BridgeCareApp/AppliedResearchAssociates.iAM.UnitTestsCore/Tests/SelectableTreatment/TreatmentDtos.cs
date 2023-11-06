@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
 {
     public static class TreatmentDtos
     {
@@ -74,7 +74,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
                 PerformanceFactors = new List<TreatmentPerformanceFactorDTO>(),
                 BudgetIds = new List<Guid>(),
                 Budgets = new List<TreatmentBudgetDTO>(),
-                SupersedeRules = new List<TreatmentSupersedeRuleDTO>(),                
+                SupersedeRules = new List<TreatmentSupersedeRuleDTO>(),
                 CriterionLibrary = criterionLibrary
             };
             return dto;

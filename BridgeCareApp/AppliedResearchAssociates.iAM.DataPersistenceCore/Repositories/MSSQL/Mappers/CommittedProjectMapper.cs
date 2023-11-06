@@ -238,6 +238,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 committedProject.ProjectSource = parsedProjectSource;
             }
+            else
+            {
+                committedProject.ProjectSource = ProjectSourceDTO.Committed; 
+            }
+
             committedProject.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null;
             committedProject.LastModifiedDate = entity.LastModifiedDate;
 

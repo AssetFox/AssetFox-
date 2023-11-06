@@ -1081,7 +1081,7 @@ import { getUrl } from '@/shared/utils/get-url';
     CommittedProjectsService.getProjectSources().then((response: AxiosResponse) => {
         if (hasValue(response, 'data')) {
             projectSourceOptions.value = response.data.filter(
-                (option: string) => option !== "None" && option !== "iAMPick"
+                (option: string) => option !== "None" && option !== "ProjectPick"
                 );
         }
     });

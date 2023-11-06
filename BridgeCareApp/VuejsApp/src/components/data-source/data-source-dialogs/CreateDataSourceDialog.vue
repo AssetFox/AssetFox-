@@ -1,27 +1,23 @@
 <template>
-  <v-dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
          <v-row justify-space-between align-center>
             <div class="ghd-control-dialog-header">New Data Source</div>
-            <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-              X
-            </v-btn>
           </v-row>
         </v-card-title>           
       <v-card-text class="ghd-dialog-box-padding-center">
         <v-row column>
-          <div class="ghd-md-gray ghd-control-label">Name</div>
-          <v-text-field outline id="CreateDataSourceDialog-Name-vtextField"
+          <v-text-field label="Name" outline id="CreateDataSourceDialog-Name-vtextField"
             v-model="datasourceName"
             class="ghd-text-field-border ghd-text-field"/>
         </v-row>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-row justify-center row>
-          <v-btn id="CreateDataSourceDialog-Cancel-vbtn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' variant = "flat">Cancel</v-btn>
+          <v-btn id="CreateDataSourceDialog-Cancel-vbtn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-right:auto; margin-left:auto;" variant = "flat">Cancel</v-btn>
           <v-btn id="CreateDataSourceDialog-Save-vbtn" @click="onSubmit(true)"
-                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
+                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-right:auto; margin-left:auto;" variant = "outlined">
             Save
           </v-btn>          
         </v-row>
@@ -38,6 +34,7 @@ import { Datasource, emptyDatasource, DSSQL } from '../../../shared/models/iAM/d
 import { CreateDataSourceDialogData} from '@/shared/models/modals/data-source-dialog-data'
 import { getUserName } from '@/shared/utils/get-user-info';
 import { useStore } from 'vuex';
+import { clone } from 'ramda';
 
   let store = useStore();
   let getIdByUserNameGetter: any = store.getters.getIdByUserName ;
@@ -47,37 +44,34 @@ import { useStore } from 'vuex';
   }>()
   const emit = defineEmits(['submit'])
 
-  let newDataSource: ShallowRef<Datasource> = shallowRef(emptyDatasource);
+   const newDataSource = ref<Datasource>(emptyDatasource);
   let rules: InputValidationRules = validationRules;
   let datasourceName: Ref<string> = ref('New Data Source');
 
-  watch(datasourceName, () => onDataSourceNameChanged)
-  function onDataSourceNameChanged() {
+  watch(datasourceName, () => { 
       newDataSource.value.name = datasourceName.value;
-  }
+  })
 
-  watch(() => props.dialogData, () => onDialogDataChanged)
-  function onDialogDataChanged() {
+  watch(() => props.dialogData, () => {  
     newDataSource.value = {
         id: getNewGuid(),
         createdBy: getIdByUserNameGetter(getUserName()),
         name: datasourceName.value,
         type: DSSQL,
         connectionString: '',
-        dateColumn: '',
+        dateColumn: '', 
         locationColumn: '',
         secure: false
     };
-  }
+  })
 
   function onSubmit(submit: boolean) {
     if (submit) {
-      emit('submit', newDataSource);
+      emit('submit', newDataSource.value);
     } else {
       emit('submit', null);
     }
 
-    newDataSource.value = emptyDatasource;
     props.dialogData.showDialog = false;
   }
 

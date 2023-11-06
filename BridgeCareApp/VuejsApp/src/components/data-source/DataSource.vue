@@ -61,7 +61,7 @@
                         variant = "outlined"
                     ></v-text-field>
                     <v-btn id="DataSource-AddFile-vbtn" v-show="showExcel" class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button Montserrat-font-family" style="margin-left:2%; margin-top: 1%;;" variant = "outlined" @click="chooseFiles()">Add File</v-btn>
-                    <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden />
+                    <input @change="onSelect" id="file-select" type="file" hidden />
                 </v-row>
                 <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Location Column</v-subheader>
                 <v-select
@@ -128,7 +128,7 @@
 </template>
 
 <script setup lang='ts'>
-import Vue, { computed, onMounted, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
+import Vue, { computed, onMounted, reactive, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
 import { clone, isNil, prop } from 'ramda';
 import {
     Datasource, 
@@ -195,7 +195,7 @@ import { useStore } from 'vuex';
     let currentExcelDateColumn = ref<string>('');
     let currentDatasource = ref<Datasource>(clone(emptyDatasource));
     let unmodifiedDatasource = ref<Datasource>(clone(emptyDatasource));
-    let createDataSourceDialogData = ref<CreateDataSourceDialogData>(clone(emptyCreateDataSourceDialogData));
+    const createDataSourceDialogData = reactive<CreateDataSourceDialogData>(emptyCreateDataSourceDialogData);
 
     let selectedConnection = ref<string>('');
     let showMssql = ref<boolean>(false);
@@ -214,6 +214,12 @@ import { useStore } from 'vuex';
     let datColumns: string[] =[];
 
     let connectionStringPlaceHolderMessage: string = '';    
+
+    created();
+    function created() {
+        getDataSourcesAction();
+        getDataSourceTypesAction();
+    }
     
     onMounted(() => mounted)
     function mounted() {
@@ -400,10 +406,7 @@ import { useStore } from 'vuex';
         })
     }
     function onShowCreateDataSourceDialog() {
-        createDataSourceDialogData.showDialog.value = true;
-        //createDataSourceDialogData = {
-            //showDialog: true,
-        //}
+        createDataSourceDialogData.showDialog = true;
     }
     function onCreateNewDataSource(datasource: Datasource) {
         // add to the state
@@ -416,8 +419,8 @@ import { useStore } from 'vuex';
         selectedConnection.value = datasource.connectionString;        
         connectionStringPlaceHolderMessage = 'New connection string';
         datColumns = [];
-        locColumns = [];       
-        }
+        locColumns = [];
+      }
     }
     function allowSave(): boolean {
         let result: boolean = false;
@@ -448,9 +451,10 @@ import { useStore } from 'vuex';
             document.getElementById('file-select')!.click();
         }
     }
-    function onSelect(fileList: FileList) {
-        if (hasValue(fileList)) {
-            const fileName: string = prop('name', fileList[0]) as string;
+    function onSelect(payload: any) {
+        if (hasValue(payload)) {
+            const selectedFile = payload.target.files[0];
+            const fileName: string = prop('name', selectedFile) as string;
 
             if (fileName.indexOf('xlsx') === -1) {
                 addErrorNotificationAction({
@@ -458,7 +462,7 @@ import { useStore } from 'vuex';
                 });
             }
 
-            file.value = clone(fileList[0]);
+            file.value = clone(selectedFile);
         }
 
         fileSelect.value = '';

@@ -9,7 +9,6 @@
                     <v-select
                         id="TargetConditionGoalEditor-SelectLibrary-select"
                         class="ghd-select ghd-text-field ghd-text-field-border"
-                        rounded="0"
                         :items="librarySelectItems"
                         item-title="text"
                         item-value="value"
@@ -30,7 +29,7 @@
                         >
                         </v-divider>
                         <v-btn @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
-                            v-show='!hasScenario' rounded="0">
+                            v-show='!hasScenario'>
                         <!-- <v-badge v-show="isShared" style="padding: 10px">
                             <template v-slot: badge>
                                 <span>Shared</span>
@@ -48,7 +47,6 @@
                             @click="showCreateTargetConditionGoalDialog = true"
                             class="ghd-control-border ghd-blue"
                             style="margin: 5px;"
-                            rounded="0"
                             v-show="hasSelectedLibrary || hasScenario" 
                         >Add Target Condition Goal</v-btn>
                     <v-btn 
@@ -58,14 +56,13 @@
                                 style="margin:5px"
                                 v-show="!hasScenario"
                                 variant = "outlined"
-                                rounded="0"
                             >
                             Create New Library
                     </v-btn>
                 </v-col>
             </v-row>
         </v-col>
-        <div class="targets-data-table" v-if="hasSelectedLibrary || hasScenario" style="width: 85%;height: auto;">
+        <div class="targets-data-table" v-if="hasSelectedLibrary || hasScenario" >
                 <v-data-table-server
                     id="TargetConditionGoalEditor-targetConditionGoals-vdatatable"
                     :headers="targetConditionGoalGridHeaders"
@@ -91,14 +88,14 @@
                     <template slot="items" slot-scope="props" v-slot:item="props">
                         <tr>
                         <td>
-                            <v-checkbox
+                            <v-checkbox 
                                 id="TargetConditionGoalEditor-selectForDelete-vcheckbox"
                                 hide-details
-                                v-model="props.item.selected"
+                                v-model="selectedGridRows" :value="props.item"
                             ></v-checkbox>
                         </td>
                         <td>
-                            <v-text-field style="width: 90px;"
+                            <v-text-field
                                 id="TargetConditionGoalEditor-editTargetConditionGoalName-vtextfield"
                                 readonly
                                 bg-color="white"
@@ -108,7 +105,7 @@
                                 v-model="props.item['name']"/>
                         </td>
                         <td>
-                            <v-text-field style="width: 90px;"
+                            <v-text-field 
                                 readonly
                                 bg-color="white"
                                 single-line
@@ -121,7 +118,7 @@
                                         .valueIsNotEmpty]"/>
                         </td>
                         <td>
-                            <v-text-field style="width: 90px;"
+                            <v-text-field 
                                 id="TargetConditionGoalEditor-editTargetConditionGoalTarget-vtextfield"
                                 bg-color="white"
                                 single-line
@@ -134,7 +131,7 @@
                             </v-text-field>
                         </td>
                         <td>
-                            <v-text-field style="width: 90px;"
+                            <v-text-field 
                                 id="TargetConditionGoalEditor-editTargetConditionGoalYear-vtextfield"
                                 bg-color="white"
                                 readonly
@@ -173,7 +170,7 @@
                                     @click="onShowCriterionLibraryEditorDialog(props.item)"
                                     class="ghd-blue"
                                     flat>
-                                    <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                 </v-btn>
                             </v-row>
                         </td>
@@ -183,7 +180,7 @@
                                 @click="onRemoveTargetConditionGoalsIcon(props.item)"  
                                 class="ghd-blue" 
                                 flat>
-                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>
                         </td>
                     </tr>
@@ -231,6 +228,7 @@
                     class="ghd-white-bg ghd-blue"
                     style="margin: 5px;"
                     v-show="hasScenario"
+                    variant="text"
                 >
                     Cancel
                 </v-btn>
@@ -240,7 +238,6 @@
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     style="margin: 5px;"
-                    rounded="0"
                     :disabled="disableCrudButtons()"
                 >
                     Create as New Library
@@ -259,14 +256,13 @@
                     @click="onUpsertTargetConditionGoalLibrary"
                     class="ghd-blue-bg ghd-white"
                     v-show="!hasScenario"
-                    rounded="0"
                     :disabled="disableCrudButtons() || !hasUnsavedChanges || !hasLibraryEditPermission"
                 >
                     Update Library
                 </v-btn>
             </v-row>
         </v-col>
-        <ConfirmDeleteAlert :is="Alert"
+        <Alert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
         />
@@ -319,7 +315,6 @@ import {
     emptyShareTargetConditionGoalLibraryDialogData
 } from '@/shared/models/modals/share-target-condition-goals-data';
 import ShareTargetConditionGoalLibraryDialog from '@/components/target-editor/target-editor-dialogs/ShareTargetConditionGoalLibraryDialog.vue';
-import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import CreateTargetConditionGoalDialog from '@/components/target-editor/target-editor-dialogs/CreateTargetConditionGoalDialog.vue';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { SelectItem } from '@/shared/models/vue/select-item';
@@ -352,6 +347,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router'; 
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
+import { getUrl } from '@/shared/utils/get-url';
 
     let store = useStore();
     const $router = useRouter(); 
@@ -414,21 +410,13 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     const hasSelectedLibrary = ref<boolean>(false);
     let targetConditionGoalGridHeaders: any[] = [
-        {  
-            title: '',
-            key: 'check',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '',
-        },
         {
             title: 'Name',
             key: 'name',
             align: 'left',
             sortable: false,
             class: '',
-            width: '',
+            width: '30%',
         },
         {
             title: 'Attribute',
@@ -436,7 +424,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             align: 'left',
             sortable: false,
             class: '',
-            width: '',
+            width: '10%',
         },
         {
             title: 'Target',
@@ -444,7 +432,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             align: 'left',
             sortable: false,
             class: '',
-            width: '',
+            width: '10%',
         },
         {
             title: 'Year',
@@ -452,7 +440,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             align: 'left',
             sortable: false,
             class: '',
-            width: '',
+            width: '10%',
         },
         {
             title: 'Criteria',
@@ -460,7 +448,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             align: 'left',
             sortable: false,
             class: '',
-            width: '50%',
+            width: '40%',
         },
         {
             title: 'Actions',
@@ -468,7 +456,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             align: 'left',
             sortable: false,
             class: '',
-            width: '',
+            width: '10%',
         }
     ];
     let numericAttributeNames: string[] = [];
@@ -480,7 +468,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     const showCreateTargetConditionGoalDialog = ref<boolean>(false);
     const criterionEditorDialogData = ref<GeneralCriterionEditorDialogData>(clone(emptyGeneralCriterionEditorDialogData));
     const createTargetConditionGoalLibraryDialogData = ref<CreateTargetConditionGoalLibraryDialogData>(clone(emptyCreateTargetConditionGoalLibraryDialogData));
-    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    const confirmDeleteAlertData = ref<AlertData>(clone(emptyAlertData));
     let rules: InputValidationRules = validationRules; 
     let uuidNIL: string = getBlankGuid();
     const hasScenario = ref<boolean>(false);
@@ -737,8 +725,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     function onAddTargetConditionGoal(newTargetConditionGoal: TargetConditionGoal) {
         showCreateTargetConditionGoalDialog.value = false;
-        newTargetConditionGoal.libraryId = selectedTargetConditionGoalLibrary.value.id;
         if (!isNil(newTargetConditionGoal)) {
+            newTargetConditionGoal.libraryId = selectedTargetConditionGoalLibrary.value.id;
+
             addedRows.value.push(newTargetConditionGoal);
             onPaginationChanged()
         }
@@ -859,7 +848,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
         }  
     }
     function onShowConfirmDeleteAlert() {
-        confirmDeleteAlertData = {
+        confirmDeleteAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -868,7 +857,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }
 
     function onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        confirmDeleteAlertData = clone(emptyAlertData);
+        confirmDeleteAlertData.value = clone(emptyAlertData);
 
         if (submit) {
             librarySelectItemValue.value = null;

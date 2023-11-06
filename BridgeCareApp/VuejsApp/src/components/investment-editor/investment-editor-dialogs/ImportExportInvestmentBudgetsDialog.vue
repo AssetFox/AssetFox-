@@ -1,6 +1,6 @@
 <template>
     <v-row>
-        <v-dialog width="768px" height="540px" persistent v-bind:show='showDialog'>
+        <v-dialog width="768px" height="540px" persistent v-model ='showDialog'>
             <v-card class="div-padding">
                 <v-card-title class="pa-2">
                     <v-row justify-start>
@@ -28,7 +28,7 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
-        <v-dialog max-width='400px' persistent v-bind='isSuccessfulImport'>
+        <v-dialog max-width='400px' persistent v-model='isSuccessfulImport'>
             <v-card>
                 <v-card-title class="title-padding">
                     <v-row justify-center>
@@ -51,7 +51,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import { ImportExportInvestmentBudgetsDialogResult } from '@/shared/models/modals/import-export-investment-budgets-dialog-result';
 import {clone} from 'ramda';
 import InvestmentBudgetsFileSelector from '@/shared/components/FileSelector.vue';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref,shallowRef} from 'vue';
+import {inject, reactive, ref, toRefs, onMounted, onBeforeUnmount, watch, computed, Ref,shallowRef} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -60,36 +60,36 @@ const emit = defineEmits(['submit'])
 const props = defineProps<{
     showDialog: boolean
     }>()
+const { showDialog } = toRefs(props);
 
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports');}
 async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports');}
 function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImportMutator');}
-let isSuccessfulImport = ref<boolean>(store.state.investmentModule.isSuccessfulImport);
+let isSuccessfulImport = computed<boolean>(() => store.state.investmentModule.isSuccessfulImport);
 
-let investmentBudgetsFile: File | null = null;
+let investmentBudgetsFile = ref<File | null>(null);
 let overwriteBudgets: boolean = true;
-let closed: boolean = false;
+let closed = ref<boolean>(false);
 
     function flipVisible(){
         isSuccessfulImportMutator(!isSuccessfulImport.value)
     }
 
-    watch(()=>props.showDialog,()=> onShowDialogChanged)
-    function onShowDialogChanged() {
+    watch(()=>props.showDialog,() => {
         if (props.showDialog) {
-            closed = false;
+            closed.value = false;
         } else {
-            investmentBudgetsFile = null;
-            closed = true;
+            investmentBudgetsFile.value = null;
+            closed.value = true;
         }
-    }   
+    }); 
 
     /**
      * FileSelector submit event handler
      */
 
     function onFileSelectorChange(file: File) {
-        investmentBudgetsFile = hasValue(file) ? clone(file) : null;
+        investmentBudgetsFile.value = hasValue(file) ? clone(file) : null;
     }
 
     /**
@@ -99,7 +99,7 @@ let closed: boolean = false;
         if (submit) {
             const result: ImportExportInvestmentBudgetsDialogResult = {
                 overwriteBudgets: overwriteBudgets,
-                file: investmentBudgetsFile as File,
+                file: investmentBudgetsFile.value as File,
                 isExport: isExport
             };
             emit('submit', result);

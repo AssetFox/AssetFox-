@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-bind:show="dialogData.showDialog" max-width="450px" persistent>
+  <v-dialog v-model="showDialogComputed" max-width="450px" persistent>
     <v-card>
       <v-card-title>
         <v-row justify-left>
@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref, computed} from 'vue';
 import { useStore } from 'vuex';
 import {CreateCriterionLibraryDialogData} from '@/shared/models/modals/create-criterion-library-dialog-data';
 import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
@@ -55,6 +55,7 @@ import {getUserName} from '@/shared/utils/get-user-info';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 
 const props = defineProps<{dialogData: CreateCriterionLibraryDialogData}>()
+let showDialogComputed = computed(() => props.dialogData.showDialog);
 let newCriterionLibrary: CriterionLibrary = {...emptyCriterionLibrary, id: getNewGuid(), isSingleUse: false};
 let store = useStore();
 const emit = defineEmits(['submit'])

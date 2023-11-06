@@ -1,46 +1,52 @@
 <template>
     <v-row>
-        <v-dialog max-width='800px' persistent scrollable v-bind:show='dialogData.showDialog'>
+        <v-dialog max-width='900px' persistent scrollable v-model ='dialogData.showDialog'>
             <v-card>
                 <v-card-title class="ghd-dialog-box-padding-top">
                     <v-row justify-space-between align-center>
                         <div class="ghd-control-dialog-header">Edit Budget Criteria</div>
+                        <v-spacer></v-spacer>
                         <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                             X
                         </v-btn>
                     </v-row>
                 </v-card-title>
-                <div style='height: 500px; max-width:800px' class="ghd-dialog-box-padding-center">
+                <div style='height: 500px; max-width:900px' class="ghd-dialog-box-padding-center">
                     <div style='max-height: 450px; overflow-y:auto;'>
-                    <v-data-table id="EditBudgetsDialog-budgets-dataTable"
+                        <v-data-table-server
+                                  id="EditBudgetsDialog-budgets-dataTable"
                                   :headers='editBudgetsDialogGridHeaders'
-                                  :items='editBudgetsDialogGridData'
-                                  sort-icon=$vuetify.icons.ghd-table-sort
+                                  :items="editBudgetsDialogGridData"
+                                  :items-length="editBudgetsDialogGridData.length"
+                                  sort-icon=ghd-table-sort
                                   hide-actions
                                   item-key='id'
                                   v-model='selectedGridRows'
                                   class="ghd-table">
                         <template slot='items' slot-scope='props' v-slot:item="props">
+                         <tr>  
                             <td>
-                                <v-row row>
-                                <v-text-field v-model="props.item.budgetOrder" @change="reorderList(props.item)" @mousedown="setCurrentOrder(props.item)" class='order_input'/>
-                                <v-btn class="ghd-blue" icon>
-                                    <v-row column>
+                                <v-text-field
+                                    v-model="props.item.budgetOrder" 
+                                    @change="reorderList(props.item)" 
+                                    @mousedown="setCurrentOrder(props.item)" 
+                                    variant="underlined"
+                                    />
+                                <v-btn class="ghd-blue" flat>
                                     <v-icon title="up" @click="swapItemOrder(props.item, 'up')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-up
                                     </v-icon>
                                     <v-icon title="down" @click="swapItemOrder(props.item, 'down')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-down
                                     </v-icon>
-                                    </v-row>
                                 </v-btn>
-                                </v-row>
                             </td>
                             <td>
                                 <editDialog id="EditBudgetsDialog-budget-editDialog"
                                                :return-value.sync='props.item.name' persistent
                                                @save='onEditBudgetName(props.item)' size="large" lazy>
                                     <v-text-field id="EditBudgetsDialog-budget-textField"
-                                                  readonly single-line class='sm-txt' :model-value='props.item.name'
-                                                  :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].budgetNameIsUnique(props.item, editBudgetsDialogGridData)]" />
+                                        variant="underlined"
+                                        readonly single-line class='sm-txt' :model-value='props.item.name'
+                                        :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].budgetNameIsUnique(props.item, editBudgetsDialogGridData)]" />
                                     <template v-slot:input>
                                         <v-text-field label='Edit' single-line v-model='props.item.name'
                                                       :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].budgetNameIsUnique(props.item, editBudgetsDialogGridData)]" />
@@ -48,22 +54,26 @@
                                 </editDialog>
                             </td>
                             <td>
-                                <v-text-field readonly single-line class='sm-txt'
-                                              :model-value='props.item.criterionLibrary.mergedCriteriaExpression'>
+                                <v-text-field 
+                                    readonly single-line class='sm-txt'
+                                    variant="underlined"
+                                    :model-value='props.item.criterionLibrary.mergedCriteriaExpression'>
                                     <template v-slot:append-inner>
-                                        <v-btn id="EditBudgetsDialog-openCriteriaEditor-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)"  class="ghd-blue" icon style="margin-top:-6px;">
-                                            <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                        <v-btn id="EditBudgetsDialog-openCriteriaEditor-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)"  class="ghd-blue" flat>
+                                            <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                         </v-btn>                                        
                                     </template>
                                 </v-text-field>
                             </td>
                             <td>
-                                <v-btn id="EditBudgetsDialog-removeBudget-btn" @click="onRemoveBudget(props.item.id)" @mousedown="setCurrentOrder(props.item)" class="ghd-blue" icon>
-                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                <v-btn id="EditBudgetsDialog-removeBudget-btn" @click="onRemoveBudget(props.item.id)" @mousedown="setCurrentOrder(props.item)" class="ghd-blue" flat>
+                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
                                 </v-btn>
+                             
                             </td>
+                        </tr>    
                         </template>
-                    </v-data-table>
+                    </v-data-table-server>
                     </div>
                     <v-row row align-end style="margin:0 !important">
                         <v-btn id="EditBudgetsDialog-add-btn" @click='onAddBudget' class='ghd-blue ghd-button' variant = "flat">
@@ -71,15 +81,12 @@
                         </v-btn>
                     </v-row>
                 </div>
-                
-                <v-card-actions class="ghd-dialog-box-padding-bottom">
-                    <v-row justify-center>
+                <v-card-actions class="ghd-dialog-box-padding-bottom">                   
                         <v-btn id="EditBudgetsDialog-cancel-btn" @click='onSubmit(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">Cancel</v-btn>
                         <v-btn id="EditBudgetsDialog-save-btn" @click='onSubmit(true)' class='ghd-blue hd-button-text ghd-button' variant = "flat"
                                :disabled='disableSubmitButton()'>
                             Save
                         </v-btn>                        
-                    </v-row>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -88,12 +95,10 @@
     </v-row>
 </template>
 
-<script lang='ts' setup>
-import Vue from 'vue';
+<script setup lang='ts'>
 import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import { hasValue } from '@/shared/utils/has-value-util';
 import { any, clone, isNil, update, findIndex, propEq, isEmpty } from 'ramda';
-import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import {
@@ -103,157 +108,161 @@ import { Budget, emptyBudget } from '@/shared/models/iAM/investment';
 import { rules as validationRules, InputValidationRules } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { emptyCriterionLibrary } from '@/shared/models/iAM/criteria';
-import { isNull, isNullOrUndefined } from 'util';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+
+import { ref, onMounted, onBeforeUnmount, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import { getUrl } from '@/shared/utils/get-url';
 
 let store = useStore();
 const emit = defineEmits(['submit'])
 const props = defineProps<{
     dialogData: EditBudgetsDialogData
 }>()
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
-let ditBudgetsDialogGridHeaders: DataTableHeader[] = [
-        { text: 'Order', value: 'order', sortable: false, align: 'left', class: '', width: '' },
-        { text: 'Budget', value: 'name', sortable: false, align: 'left', class: '', width: '' },
-        { text: 'Criteria', value: 'criterionLibrary', sortable: false, align: 'left', class: '', width: '' },
-        { text: 'Actions', value: 'actions', sortable: false, align: 'left', class: '', width: '' }
+const { dialogData } = toRefs(props);
+
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+
+let editBudgetsDialogGridHeaders: any[] = [
+        { title: 'Order', key: 'order', sortable: false, align: 'left', class: '', width: '10%' },
+        { title: 'Budget', key: 'name', sortable: false, align: 'left', class: '', width: '25%' },
+        { title: 'Criteria', key: 'criterionLibrary', sortable: false, align: 'left', class: '', width: '50%' },
+        { title: 'Actions', key: 'actions', sortable: false, align: 'left', class: '', width: '10%' }
     ];
-let editBudgetsDialogGridData: Budget[] = [];
-let selectedGridRows: Budget[] = [];    
-let criterionLibraryEditorDialogData: GeneralCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+let editBudgetsDialogGridData = ref<Budget[]>([]);
+let totalItems = ref<number>(0);
+let selectedGridRows = ref<Budget[]>([]);    
+let criterionLibraryEditorDialogData = ref<GeneralCriterionEditorDialogData>(clone(emptyGeneralCriterionEditorDialogData));
 let selectedBudgetForCriteriaEdit: Budget = clone(emptyBudget);
 let rules: InputValidationRules = validationRules;
 let uuidNIL: string = getBlankGuid();
 let Up: string = "up";
-let budgetChanges: EmitedBudgetChanges = clone(emptyEmitBudgetChanges);
+let budgetChanges = ref<EmitedBudgetChanges>(clone(emptyEmitBudgetChanges));
     
 let originalOrder: number = 0;
-let currentSelectedBudget: Budget = emptyBudget;
+let currentSelectedBudget = ref<Budget>(emptyBudget);
 
-watch(()=>props.dialogData,()=> onDialogDataChanged)
-    function onDialogDataChanged() {
-        budgetChanges.addedBudgets = [];
-        budgetChanges.updatedBudgets = [];
-        budgetChanges.deletionIds = [];
+watch(dialogData,() => {
+        budgetChanges.value.addedBudgets = [];
+        budgetChanges.value.updatedBudgets = [];
+        budgetChanges.value.deletionIds = [];
 
-        editBudgetsDialogGridData = setDefaultBudgetOrder(props.dialogData.budgets.sort(compareOrder));
-    }
+        editBudgetsDialogGridData.value = setDefaultBudgetOrder(props.dialogData.budgets.sort(compareOrder));
+    });
+
     function setDefaultBudgetOrder(loadedBudgets: Budget[]): Budget[] {
         let inc = 1;
         let cloneBudgets = clone(loadedBudgets);
         // If there is a 0 in the ordering, we need to reset the
         // ordering.
         const budgetCheck = cloneBudgets.find(b => b.budgetOrder === 0);
-        if(!isNil(budgetCheck) && budgetChanges.updatedBudgets.length === 0) {
+        if(!isNil(budgetCheck) && budgetChanges.value.updatedBudgets.length === 0) {
             cloneBudgets.forEach(b => {
                 b.budgetOrder = inc++;
                 // Update order
-                if(any(propEq('id', b.id), budgetChanges.updatedBudgets))
-                    budgetChanges.updatedBudgets[budgetChanges.updatedBudgets.findIndex((budget => budget.id == b.id))] = b;
+                if(any(propEq('id', b.id), budgetChanges.value.updatedBudgets))
+                    budgetChanges.value.updatedBudgets[budgetChanges.value.updatedBudgets.findIndex((budget => budget.id == b.id))] = b;
                 else
-                    budgetChanges.updatedBudgets.push(b);
+                    budgetChanges.value.updatedBudgets.push(b);
 
             });
         }
         return cloneBudgets;
     }
     function onAddBudget() {
-        const unnamedBudgets = editBudgetsDialogGridData
+        const unnamedBudgets = editBudgetsDialogGridData.value
             .filter((budget: Budget) => budget.name.match(/Unnamed Budget/));
     
         const budget: Budget = {
             ...emptyBudget,
             id: getNewGuid(),
-            budgetOrder: editBudgetsDialogGridData.length + 1,
-            name: `Unnamed Budget ${editBudgetsDialogGridData.length + 1}`,
+            budgetOrder: editBudgetsDialogGridData.value.length + 1,
+            name: `Unnamed Budget ${editBudgetsDialogGridData.value.length + 1}`,
             criterionLibrary: clone(emptyCriterionLibrary),
         }
-        editBudgetsDialogGridData.push(budget);
-        budgetChanges.addedBudgets.push(budget);
+        editBudgetsDialogGridData.value.push(budget);
+        budgetChanges.value.addedBudgets.push(budget);
     }
     function onEditBudgetName(budget: Budget) {
-        editBudgetsDialogGridData = update(
-            findIndex(propEq('id', budget.id), editBudgetsDialogGridData),
+        editBudgetsDialogGridData.value = update(
+            findIndex(propEq('id', budget.id), editBudgetsDialogGridData.value),
             clone(budget),
-            editBudgetsDialogGridData,
+            editBudgetsDialogGridData.value,
         );
         const origBudget = props.dialogData.budgets.find((b) => b.id == budget.id)
         if(!isNil(origBudget)){
             if(origBudget.name !== budget.name){
-                if(any(propEq('id', budget.id), budgetChanges.addedBudgets))
-                    budgetChanges.addedBudgets[budgetChanges.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
-                else if(any(propEq('id', budget.id), budgetChanges.updatedBudgets))
-                    budgetChanges.updatedBudgets[budgetChanges.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                if(any(propEq('id', budget.id), budgetChanges.value.addedBudgets))
+                    budgetChanges.value.addedBudgets[budgetChanges.value.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                else if(any(propEq('id', budget.id), budgetChanges.value.updatedBudgets))
+                    budgetChanges.value.updatedBudgets[budgetChanges.value.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
                 else
-                    budgetChanges.updatedBudgets.push(budget);
+                    budgetChanges.value.updatedBudgets.push(budget);
             }
         }          
     }
     function onEditBudgetOrder(budget: Budget) {
-        editBudgetsDialogGridData = update(
-            findIndex(propEq('id', budget.id), editBudgetsDialogGridData),
+        editBudgetsDialogGridData.value = update(
+            findIndex(propEq('id', budget.id), editBudgetsDialogGridData.value),
             clone(budget),
-            editBudgetsDialogGridData,
+            editBudgetsDialogGridData.value,
         );
-        if(any(propEq('id', budget.id), budgetChanges.updatedBudgets))
-            budgetChanges.updatedBudgets[budgetChanges.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
+        if(any(propEq('id', budget.id), budgetChanges.value.updatedBudgets))
+            budgetChanges.value.updatedBudgets[budgetChanges.value.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
         else
-            budgetChanges.updatedBudgets.push(budget);
+            budgetChanges.value.updatedBudgets.push(budget);
     }
     function disableDeleteButton() {
-        return !hasValue(selectedGridRows);
+        return !hasValue(selectedGridRows.value);
     }
 
     function onRemoveBudgets() {
-        editBudgetsDialogGridData = editBudgetsDialogGridData
-            .filter((budget: Budget) => !any(propEq('id', budget.id), selectedGridRows));
-        selectedGridRows.forEach(budget => {
+        editBudgetsDialogGridData.value = editBudgetsDialogGridData.value
+            .filter((budget: Budget) => !any(propEq('id', budget.id), selectedGridRows.value));
+        selectedGridRows.value.forEach(budget => {
             removeBudget(budget.id)
         })
-        selectedGridRows = [];
+        selectedGridRows.value = [];
     }
 
     function onRemoveBudget(id: string){
-        editBudgetsDialogGridData = editBudgetsDialogGridData
+        editBudgetsDialogGridData.value = editBudgetsDialogGridData.value
             .filter((budget: Budget) => budget.id != id);
         removeBudget(id);
         cleanReorderList();
     }
 
     function removeBudget(id: string){
-        if(any(propEq('id', id), budgetChanges.addedBudgets)){
-            budgetChanges.addedBudgets = budgetChanges.addedBudgets.filter((addBudge: Budget) => addBudge.id != id);
-            budgetChanges.deletionIds.push(id);
+        if(any(propEq('id', id), budgetChanges.value.addedBudgets)){
+            budgetChanges.value.addedBudgets = budgetChanges.value.addedBudgets.filter((addBudge: Budget) => addBudge.id != id);
+            budgetChanges.value.deletionIds.push(id);
         }              
-        else if(any(propEq('id', id), budgetChanges.updatedBudgets)) {
-            budgetChanges.updatedBudgets = budgetChanges.updatedBudgets.filter((upBudge: Budget) => upBudge.id != id);
-            budgetChanges.deletionIds.push(id);
+        else if(any(propEq('id', id), budgetChanges.value.updatedBudgets)) {
+            budgetChanges.value.updatedBudgets = budgetChanges.value.updatedBudgets.filter((upBudge: Budget) => upBudge.id != id);
+            budgetChanges.value.deletionIds.push(id);
         }
         else
-            budgetChanges.deletionIds.push(id);
+            budgetChanges.value.deletionIds.push(id);
     }
 
     function onShowCriterionLibraryEditorDialog(budget: Budget) {
         selectedBudgetForCriteriaEdit = clone(budget);
 
-        criterionLibraryEditorDialogData = {
+        criterionLibraryEditorDialogData.value = {
             showDialog: true,
             CriteriaExpression: budget.criterionLibrary.mergedCriteriaExpression
         };
     }
 
     function onSubmitCriterionLibraryEditorDialogResult(criterionExpression: string) {
-        criterionLibraryEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+        criterionLibraryEditorDialogData.value = clone(emptyGeneralCriterionEditorDialogData);
 
         if (!isNil(criterionExpression) && selectedBudgetForCriteriaEdit.id !== uuidNIL) {
             selectedBudgetForCriteriaEdit.criterionLibrary.mergedCriteriaExpression = criterionExpression;           
 
-            editBudgetsDialogGridData = update(
-                findIndex(propEq('id', selectedBudgetForCriteriaEdit.id), editBudgetsDialogGridData),
+            editBudgetsDialogGridData.value = update(
+                findIndex(propEq('id', selectedBudgetForCriteriaEdit.id), editBudgetsDialogGridData.value),
                 { ...selectedBudgetForCriteriaEdit, criterionLibrary: selectedBudgetForCriteriaEdit.criterionLibrary },
-                editBudgetsDialogGridData,
+                editBudgetsDialogGridData.value,
             );
 
             const budget = selectedBudgetForCriteriaEdit;
@@ -261,20 +270,20 @@ watch(()=>props.dialogData,()=> onDialogDataChanged)
 
             if(!isNil(origBudget)){
                 if(origBudget.criterionLibrary.mergedCriteriaExpression !== budget.criterionLibrary.mergedCriteriaExpression){                                                            
-                    if(budgetChanges.addedBudgets.length !== 0){
-                        budgetChanges.addedBudgets[budgetChanges.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                    if(budgetChanges.value.addedBudgets.length !== 0){
+                        budgetChanges.value.addedBudgets[budgetChanges.value.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
                     }
-                    else if(budgetChanges.updatedBudgets.length !== 0){                        
-                        budgetChanges.updatedBudgets[budgetChanges.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                    else if(budgetChanges.value.updatedBudgets.length !== 0){                        
+                        budgetChanges.value.updatedBudgets[budgetChanges.value.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
                     }
                     else
                     {
-                        budgetChanges.updatedBudgets.push(budget);
+                        budgetChanges.value.updatedBudgets.push(budget);
                     }
                 }
             }
             else{
-                budgetChanges.addedBudgets[budgetChanges.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                budgetChanges.value.addedBudgets[budgetChanges.value.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
             }        
 
             selectedBudgetForCriteriaEdit = clone(emptyBudget);
@@ -283,19 +292,19 @@ watch(()=>props.dialogData,()=> onDialogDataChanged)
 
     function onSubmit(submit: boolean) {
         if (submit) {
-            emit('submit', budgetChanges);
+            emit('submit', budgetChanges.value);
         } else {
             emit('submit', null);
         }
 
-        editBudgetsDialogGridData = [];
-        selectedGridRows = [];
+        editBudgetsDialogGridData.value = [];
+        selectedGridRows.value = [];
     }
 
     function disableSubmitButton() {
-        const allDataIsValid: boolean = editBudgetsDialogGridData.every((budget: Budget) => {
+        const allDataIsValid: boolean = editBudgetsDialogGridData.value.every((budget: Budget) => {
             return rules['generalRules'].valueIsNotEmpty(budget.name) === true &&
-                rules['investmentRules'].budgetNameIsUnique(budget, editBudgetsDialogGridData) === true;
+                rules['investmentRules'].budgetNameIsUnique(budget, editBudgetsDialogGridData.value) === true;
         });
 
         return !allDataIsValid;
@@ -309,7 +318,7 @@ watch(()=>props.dialogData,()=> onDialogDataChanged)
 
         if (direction.toLowerCase() === Up) {    
             if (item.budgetOrder <= 1) return;
-            editBudgetsDialogGridData.forEach(element => {
+            editBudgetsDialogGridData.value.forEach(element => {
                 if( element.budgetOrder === (item.budgetOrder-1)) {
                     element.budgetOrder = item.budgetOrder;
                     onEditBudgetOrder(element);
@@ -320,10 +329,10 @@ watch(()=>props.dialogData,()=> onDialogDataChanged)
                 }
             });
         } else {
-            if (item.budgetOrder >= editBudgetsDialogGridData.length) return;
+            if (item.budgetOrder >= editBudgetsDialogGridData.value.length) return;
             let hold: number = item.budgetOrder;
             
-            editBudgetsDialogGridData.forEach(element => {
+            editBudgetsDialogGridData.value.forEach(element => {
                 if( element.budgetOrder === (hold)) {
                     element.budgetOrder = item.budgetOrder + 1;
                     onEditBudgetOrder(element);
@@ -335,40 +344,40 @@ watch(()=>props.dialogData,()=> onDialogDataChanged)
             });
         }
         // sort after the reorder
-        editBudgetsDialogGridData.sort(compareOrder);
+        editBudgetsDialogGridData.value.sort(compareOrder);
         originalOrder = 0;
-        currentSelectedBudget = emptyBudget;
+        currentSelectedBudget.value = emptyBudget;
     }
     function reorderList(item: Budget) {
         const original = originalOrder;
-        const replacement = currentSelectedBudget.budgetOrder;
+        const replacement = currentSelectedBudget.value.budgetOrder;
         if (isNil(replacement) || isEmpty(replacement) || original === 0) return;
 
         const diff = original - replacement;
         if (diff > 0) { // reorder up
-            editBudgetsDialogGridData.forEach(element => {
-                if (element === currentSelectedBudget) { onEditBudgetOrder(element); }
+            editBudgetsDialogGridData.value.forEach(element => {
+                if (element === currentSelectedBudget.value) { onEditBudgetOrder(element); }
                 else if (element.budgetOrder >=replacement && element.budgetOrder <= original) {
                     element.budgetOrder++;
                     onEditBudgetOrder(element);
                 }
             });
         } else { // reorder down
-            editBudgetsDialogGridData.forEach(element => {
-                if (element === currentSelectedBudget) { onEditBudgetOrder(element); }
+            editBudgetsDialogGridData.value.forEach(element => {
+                if (element === currentSelectedBudget.value) { onEditBudgetOrder(element); }
                 else if (element.budgetOrder >=original && element.budgetOrder <= replacement) {
                     element.budgetOrder--;
                     onEditBudgetOrder(element);
                 }
             });
         }
-        editBudgetsDialogGridData.sort(compareOrder);
+        editBudgetsDialogGridData.value.sort(compareOrder);
         originalOrder = 0;
-        currentSelectedBudget = emptyBudget;
+        currentSelectedBudget.value = emptyBudget;
     }
     function cleanReorderList() {
         let count: number = 1;
-        editBudgetsDialogGridData.forEach(element => {
+        editBudgetsDialogGridData.value.forEach(element => {
             element.budgetOrder = count;
             onEditBudgetOrder(element);
             count++;
@@ -376,12 +385,12 @@ watch(()=>props.dialogData,()=> onDialogDataChanged)
     }
     function setCurrentOrder(item: Budget) {
         originalOrder = item.budgetOrder;
-        currentSelectedBudget = item;
+        currentSelectedBudget.value = item;
     }
 </script>
 <style>
 .order_input {
-    width: 15px;
+    width: 45px;
     justify-content: center;
     padding: 5px;
 }

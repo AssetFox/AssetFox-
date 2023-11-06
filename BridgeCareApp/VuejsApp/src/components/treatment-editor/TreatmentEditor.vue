@@ -2,7 +2,7 @@
     <v-row column>
         <v-col style="margin-top: -20px;">
             <v-row>
-                <v-col cols = "6">
+                <v-col cols = "4">
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
                     <v-select
                         id="TreatmentEditor-treatmentLibrary-select"
@@ -16,9 +16,10 @@
                         v-model='librarySelectItemValue' 
                     >
                     </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader treatment-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
+                    <div class="ghd-md-gray ghd-control-subheader treatment-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
                 </v-col>
-                <v-col cols = "6">                       
+
+                <v-col cols = "4">
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
                     <v-select
                     id="TreatmentEditor-treatment-select"
@@ -32,8 +33,9 @@
                         v-model='treatmentSelectItemValue'
                     >
                     </v-select>
+                      
                 </v-col>
-                <v-col style="padding-right: 5px">
+                <v-col cols = "2" style="padding-right: 20px">                       
                     <v-btn
                         @click='showImportTreatmentDialog = true'
                         variant = "flat"
@@ -42,8 +44,9 @@
                     >
                         Import Treatment
                     </v-btn>
+                    
                 </v-col>
-                <v-col style="padding-right: 5px">
+                <v-col cols = "1" style="padding-right: 5px">                       
                     <v-btn
                         @click='onShowConfirmDeleteTreatmentAlert'
                         variant = "flat"
@@ -52,6 +55,10 @@
                     >
                         Delete Treatment
                     </v-btn>
+                    
+                </v-col>
+                <v-col style="padding-right: 5px">
+                    
                 </v-col>
                 <v-col justify-right align-end style="padding-top: 38px !important;" >
                     <v-btn
@@ -67,7 +74,7 @@
                 </v-col>
             </v-row>
 
-            <v-col cols = "6">
+            <v-col cols = "5">
                     <v-row v-if='hasSelectedLibrary && !hasScenario' style="padding-bottom: 50px !important">
                         <div class="ghd-control-label">
                         Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> | Date Modified: {{ modifiedDate }}   
@@ -120,7 +127,7 @@
                     Upload
                 </v-btn>
             </div>    
-        <v-col v-show='hasSelectedLibrary || hasScenario' xs12>
+        <v-col v-show='hasSelectedLibrary || hasScenario' cols="4">
             <v-row>
                 <div xs2>
                     <v-col>
@@ -128,22 +135,28 @@
                             <template v-for='treatmentSelectItem in treatmentSelectItems' :key='treatmentSelectItem.value'>
                                 <v-list-item ripple :class="{'selected-treatment-item': isSelectedTreatmentItem(treatmentSelectItem.value)}"
                                              avatar @click='onSetTreatmentSelectItemValue(treatmentSelectItem.value)'>
-                                    <v-list-item-content>
+                                    <v-list-item-content class ="item-content">
                                         <span>{{treatmentSelectItem.text}}</span>
-                                    </v-list-item-content>
-                                    <v-list-item-action v-show="treatmentSelectItem.text!='No Treatment'">                                        
-                                        <v-btn @click="onShowConfirmDeleteTreatmentAlert" class="ghd-blue" icon>
-                                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                        <v-btn  style="margin-left: 10px;" v-show="treatmentSelectItem.text!='No Treatment'" @click="onShowConfirmDeleteTreatmentAlert" class="ghd-blue">
+                                            <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                         </v-btn>
-                                    </v-list-item-action>
+                                    </v-list-item-content>
+
                                 </v-list-item>
                             </template>
+                            
+                        
+                        
                         </v-list>
                     </v-col>
                 </div>
-                <div class='treatments-div' xs10>
+                
+            </v-row>
+        </v-col>   
+        <v-col>
+            <div class='treatments-div' xs10>
                     <v-row column> 
-                        <v-col cols = "12">               
+                        <v-col cols = "14">               
                             <div v-show='selectedTreatment.id !== uuidNILRef'>                                                
                                 <v-tabs v-model='activeTab' id='TreatmentEditor-treatmenttabs'>
                                     <v-tab 
@@ -238,8 +251,8 @@
                         </v-col>                    
                     </v-row>
                 </div>
-            </v-row>
-        </v-col>        
+                    </v-col>
+             
         <v-col cols = "12">
             <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>
             <v-row justify-center v-show='hasSelectedLibrary && !hasScenario'>
@@ -256,8 +269,9 @@
                 </v-col>
             </v-row>
         </v-col>
-        <v-col cols = "9">
-            <v-row justify-center row v-show='(hasSelectedLibrary || hasScenario)'>
+            <v-col cols="3"></v-col>
+        <v-row justify-center row v-show='(hasSelectedLibrary || hasScenario)'>
+                <v-col justify-center>
                 <v-btn :disabled='!hasUnsavedChanges'
                     @click='onDiscardChanges'
                     class='ghd-white-bg ghd-blue ghd-button-text'
@@ -266,7 +280,7 @@
                 >
                     Cancel
                 </v-btn>
-                <v-btn id='TreatmentEditor-deleteLibrary-btn' variant = "outline"
+                <v-btn id='TreatmentEditor-deleteLibrary-btn' variant = "outlined"
                     @click='onShowConfirmDeleteAlert'
                     class='ghd-white-bg ghd-blue ghd-button-text'
 
@@ -283,7 +297,7 @@
                 >
                     Create as New Library
                 </v-btn>
-                <v-btn
+                <v-btn justify-center
                     @click='onUpsertScenarioTreatments'
                     id="TreatmentEditor-SaveScenarioTreatments-btn"
                     class='ghd-blue-bg ghd-white ghd-button-text'
@@ -302,7 +316,10 @@
                 >
                     Update Library
                 </v-btn>
+            </v-col>
             </v-row>
+        <v-col cols = "10">
+            
         </v-col>
 
         <ConfirmDeleteAlert
@@ -423,6 +440,7 @@ import { useRouter } from 'vue-router';
 import mitt from 'mitt';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
+import { getUrl } from '@/shared/utils/get-url';
 
     const emit = defineEmits(['submit'])    
     const $emitter = mitt()
@@ -1453,5 +1471,10 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
 
 .selected-treatment-item {
     background: lightblue;
+}
+.item-content{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 </style>

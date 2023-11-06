@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="500px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title>
         <v-row justify-center>
@@ -9,7 +9,7 @@
       <v-card-text>
         <v-data-table id="ShareBudgetLibraryDialog-table-vdatatable" :headers="budgetLibraryUserGridHeaders"
                       :items="budgetLibraryUserGridRows"
-                      sort-icon=$vuetify.icons.ghd-table-sort
+                      sort-icon=ghd-table-sort
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="{item}">
             <td>
@@ -33,10 +33,12 @@
       </v-card-text>
       <v-card-actions>
         <v-row justify-space-between row>
+          <v-spacer></v-spacer>
           <v-btn id="ShareBudgetLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ara-blue-bg text-white">
             Save
           </v-btn>
           <v-btn id="ShareBudgetLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
+          <v-spacer></v-spacer>
         </v-row>
       </v-card-actions>
     </v-card>
@@ -44,7 +46,6 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import { BudgetLibraryUser } from '@/shared/models/iAM/investment';
 import { LibraryUser } from '@/shared/models/iAM/user';
@@ -57,27 +58,27 @@ import { BudgetLibraryUserGridRow, ShareBudgetLibraryDialogData } from '@/shared
 import InvestmentService from '@/services/investment.service';
     import { AxiosResponse } from 'axios';
     import { http2XX } from '@/shared/utils/http-utils';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref, computed} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
 let store = useStore();
 const emit = defineEmits(['submit'])
-const props = defineProps<{
-  dialogData: ShareBudgetLibraryDialogData
-}>()
-let stateUsers = ref<User[]>(store.state.userModule.users);
+const props = defineProps<{dialogData: ShareBudgetLibraryDialogData}>()
 
-  let budgetLibraryUserGridHeaders: DataTableHeader[] = [
-    {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
+let showDialogComputed = computed(() => props.dialogData.showDialog);
+let stateUsers = computed<User[]>(() => store.state.userModule.users);
+
+  let budgetLibraryUserGridHeaders: any[] = [
+    {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Shared With', key: '', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Can Modify', key: '', align: 'left', sortable: true, class: '', width: ''}
   ];
-  let budgetLibraryUserGridRows: BudgetLibraryUserGridRow[] = [];
+  let budgetLibraryUserGridRows = ref<BudgetLibraryUserGridRow[]>([]);
   let currentUserAndOwner: BudgetLibraryUser[] = [];
   let searchTerm: string = '';
 
-  watch(props.dialogData,()=>onDialogDataChanged)
+  watch(()=>props.dialogData,()=>onDialogDataChanged)
   function onDialogDataChanged() {
     if (props.dialogData.showDialog) {
       onSetGridData();
@@ -88,7 +89,7 @@ let stateUsers = ref<User[]>(store.state.userModule.users);
   function onSetGridData() {
     const currentUser: string = getUserName();
 
-    budgetLibraryUserGridRows = stateUsers.value
+    budgetLibraryUserGridRows.value = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -134,14 +135,14 @@ let stateUsers = ref<User[]>(store.state.userModule.users);
                 const otherUsers: BudgetLibraryUser[] = filter(isNotCurrentUserOrOwner, budgetLibraryUsers) as BudgetLibraryUser[];
 
                 otherUsers.forEach((budgetLibraryUser: BudgetLibraryUser) => {
-                    if (any(propEq('id', budgetLibraryUser.userId), budgetLibraryUserGridRows)) {
+                    if (any(propEq('id', budgetLibraryUser.userId), budgetLibraryUserGridRows.value)) {
                         const budgetLibraryUserGridRow: BudgetLibraryUserGridRow = find(
-                            propEq('id', budgetLibraryUser.userId), budgetLibraryUserGridRows) as BudgetLibraryUserGridRow;
+                            propEq('id', budgetLibraryUser.userId), budgetLibraryUserGridRows.value) as BudgetLibraryUserGridRow;
 
-                        budgetLibraryUserGridRows = update(
-                            findIndex(propEq('id', budgetLibraryUser.userId), budgetLibraryUserGridRows),
+                        budgetLibraryUserGridRows.value = update(
+                            findIndex(propEq('id', budgetLibraryUser.userId), budgetLibraryUserGridRows.value),
                             { ...budgetLibraryUserGridRow, isShared: true, canModify: budgetLibraryUser.canModify },
-                            budgetLibraryUserGridRows
+                            budgetLibraryUserGridRows.value
                         );
                     }
                 });
@@ -151,9 +152,9 @@ let stateUsers = ref<User[]>(store.state.userModule.users);
 
   function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      budgetLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), budgetLibraryUserGridRows),
-          'canModify', false, budgetLibraryUserGridRows);
+      budgetLibraryUserGridRows.value = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), budgetLibraryUserGridRows.value),
+          'canModify', false, budgetLibraryUserGridRows.value);
     }
   }
 
@@ -164,11 +165,11 @@ let stateUsers = ref<User[]>(store.state.userModule.users);
       emit('submit', null);
     }
 
-    budgetLibraryUserGridRows = [];
+    budgetLibraryUserGridRows.value = [];
   }
 
   function getBudgetLibraryUsers() {
-    const usersSharedWith: BudgetLibraryUser[] = budgetLibraryUserGridRows
+    const usersSharedWith: BudgetLibraryUser[] = budgetLibraryUserGridRows.value
         .filter((budgetLibraryUserGridRow: BudgetLibraryUserGridRow) => budgetLibraryUserGridRow.isShared)
         .map((budgetLibraryUserGridRow: BudgetLibraryUserGridRow) => ({
           userId: budgetLibraryUserGridRow.id,

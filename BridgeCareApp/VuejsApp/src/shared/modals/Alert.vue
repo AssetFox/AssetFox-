@@ -1,8 +1,8 @@
-﻿<template>
-    <v-dialog max-width="290" persistent v-model="showDialogComputed">
+<template>
+    <v-dialog max-width="290" persistent v-model="dialogData.showDialog">
         <v-card>
             <v-card-title class="headline">
-                <v-row justify-center>
+                <v-row justify="center">
                     {{dialogData.heading}}
                 </v-row>
             </v-card-title>
@@ -12,7 +12,7 @@
                 </div>
             </v-card-text>
             <v-card-actions>
-                <v-row justify-center row v-if="dialogData.choice">
+                <v-row justify="center" v-if="dialogData.choice">
                     <v-btn 
                     id="Alert-Cancel-vbtn"
                     @click="onSubmit(false)" 
@@ -26,7 +26,7 @@
                         Proceed
                     </v-btn>
                 </v-row>
-                <v-row justify-center v-if="!dialogData.choice">
+                <v-row justify="center" v-if="!dialogData.choice">
                     <v-btn @click="onSubmit(true)" class="ara-blue-bg text-white">
                         OK
                     </v-btn>
@@ -36,18 +36,16 @@
     </v-dialog>
 </template>
 
-<script lang="ts" setup>
-    import Vue, { computed } from 'vue';
+<script setup lang="ts">
+    import { toRefs, computed } from 'vue';
     import {AlertData} from '../models/modals/alert-data';
-    import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
-    import { useStore } from 'vuex';
-    import { useRouter } from 'vue-router';
     
 const emit = defineEmits(['submit'])
 const props = defineProps<{
     dialogData: AlertData
     }>()
-    let showDialogComputed = computed(() => props.dialogData.showDialog);
+const { dialogData } = toRefs(props);
+
         /**
          * Emits a boolean result to the parent component
          * @param submit

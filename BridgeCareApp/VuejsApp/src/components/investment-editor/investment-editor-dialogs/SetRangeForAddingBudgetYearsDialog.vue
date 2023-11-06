@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="200px" persistent v-bind:show="showDialog">
+  <v-dialog max-width="200px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title>
         <v-row justify-center>
@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -29,6 +29,7 @@ const props = defineProps<{
   showDialog: boolean,
   startYear: number
 }>()
+let showDialogComputed = computed(() => props.showDialog);
 let range: number = 1;
 function rangeLabel() {
     return 'Year Range: ' + (range <= 1 ? props.startYear : props.startYear + '-' + (props.startYear + range - 1));

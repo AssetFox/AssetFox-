@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="500px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title>
         <v-row justify-center>
@@ -12,7 +12,7 @@
       <v-card-text>
         <v-data-table id="SharePerformanceCurveLibraryDialog-table-vdatatable" :headers="performanceCurveLibraryUserGridHeaders"
                       :items="performanceCurveLibraryUserGridRows"
-                      sort-icon=$vuetify.icons.ghd-table-sort
+                      sort-icon=ghd-table-sort
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="props">
             <td>
@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {PerformanceCurveLibraryUser } from '@/shared/models/iAM/performance';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -68,12 +68,12 @@ let store = useStore();
 const props = defineProps<{
   dialogData: SharePerformanceCurveLibraryDialogData
     }>()
-
+    let showDialogComputed = computed(() => props.dialogData.showDialog);
 let stateUsers = ref<User[]>(store.state.userModule.users);
-let performanceCurveLibraryUserGridHeaders: DataTableHeader[] = [
-    {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
+let performanceCurveLibraryUserGridHeaders: any[] = [
+    {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Shared With', key: '', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Can Modify', key: '', align: 'left', sortable: true, class: '', width: ''}
   ];
 let performanceCurveLibraryUserGridRows: PerformanceCurveLibraryUserGridRow[] = [];
 let currentUserAndOwner: PerformanceCurveLibraryUser[] = [];

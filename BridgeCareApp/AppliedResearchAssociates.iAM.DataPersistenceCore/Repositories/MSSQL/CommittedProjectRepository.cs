@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using Microsoft.Extensions.DependencyModel;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -33,8 +34,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void GetSimulationCommittedProjects(Simulation simulation)
         {
+            Guid guid = simulation.Id;
             double noTreatmentDefaultCost = 0.0;
             var selectableTreatmentRepository = _unitOfWork.SelectableTreatmentRepo;
+            var selectableTreatments = simulation.Treatments;
 
             var simulationEntity = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulation.Id)
                 ?? throw new RowNotInTableException("No simulation was found for the given scenario.");
@@ -50,7 +53,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var projects = _unitOfWork.Context.CommittedProject
                 .Include(_ => _.CommittedProjectLocation)
                 .Include(_ => _.ScenarioBudget)
-                .Where(_ => _.SimulationId == simulation.Id).ToList();
+                .Where(_ => _.SimulationId == simulation.Id)
+                .OrderBy(_ => _.Year).ToList();
 
             var keyPropertyNames = (List<string>)_unitOfWork.AdminSettingsRepo.GetKeyFields();
 
@@ -64,8 +68,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         var defaultNoTreatment = selectableTreatmentRepository.GetDefaultNoTreatment(simulation.Id);
                         noTreatmentDefaultCost = GetDefaultNoTreatmentCost(defaultNoTreatment, asset.Id);
                     }
-
-                    project.CreateCommittedProject(simulation, asset.Id, simulationEntity.NoTreatmentBeforeCommittedProjects, noTreatmentDefaultCost, noTreatmentEntity, keyPropertyNames);
+                    project.CreateCommittedProject(simulation, selectableTreatments, asset.Id, simulationEntity.NoTreatmentBeforeCommittedProjects, noTreatmentDefaultCost, noTreatmentEntity, keyPropertyNames);
                 }
             }
         }

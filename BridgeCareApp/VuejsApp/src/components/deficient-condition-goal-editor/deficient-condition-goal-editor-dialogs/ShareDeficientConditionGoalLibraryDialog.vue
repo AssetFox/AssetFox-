@@ -1,44 +1,45 @@
 <template>
-  <v-dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
-        <v-row justify-center>
+        <v-row  justify="space-between" align="center" style="padding: 10px;">
           <h5>Deficient Condition Goal Library Sharing</h5>
-        </v-row>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
+        </v-row>
       </v-card-title>
       <v-card-text>
         <v-data-table id="ShareDeficientConditionGoalLibraryDialog-table-vdatatable" 
                       :headers="deficientConditionGoalLibraryUserGridHeaders"
                       :items="deficientConditionGoalLibraryUserGridRows"
-                      sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="{item}">
+            <tr>
             <td>
-              {{ item.value.username }}
+              {{ item.username }}
             </td>
             <td>
-              <v-checkbox id="ShareDeficientConditionGoalLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.raw.isShared"
-                          @change="removeUserModifyAccess(item.value.id, item.value.isShared)"/>
+              <v-checkbox id="ShareDeficientConditionGoalLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.isShared"
+                          @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox id="ShareDeficientConditionGoalLibraryDialog-canModify-vcheckbox" :disabled="!item.value.isShared" label="Can Modify" v-model="item.raw.canModify"/>
+              <v-checkbox id="ShareDeficientConditionGoalLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" label="Can Modify" v-model="item.canModify"/>
             </td>
+          </tr>
           </template>
-          <v-alert :model-value="true"
+          <!-- <v-alert :model-value="true"
                    class="ara-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
-          </v-alert>
+          </v-alert> -->
         </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-row row justify-center>
-          <v-btn id="ShareDeficientConditionGoalLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
-          <v-btn id="ShareDeficientConditionGoalLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
+        <v-row justify="center">
+          <v-btn id="ShareDeficientConditionGoalLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "text">Cancel</v-btn>
+          <v-btn id="ShareDeficientConditionGoalLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding" variant="outlined">
             Save
           </v-btn>
         </v-row>
@@ -48,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { watch } from 'vue';
+import { watch, toRefs, ref, computed } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {DeficientConditionGoalLibraryUser } from '@/shared/models/iAM/deficient-condition-goal';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -67,31 +68,30 @@ let store = useStore();
 const props = defineProps<{
   dialogData: ShareDeficientConditionGoalLibraryDialogData
 }>()
+const { dialogData } = toRefs(props);
 const emit = defineEmits(['submit']);
 
-let stateUsers = store.state.userModule.users as User[];
+const stateUsers = computed(() => store.state.userModule.users as User[]);
 
-  let deficientConditionGoalLibraryUserGridHeaders: DataTableHeader[] = [
-    {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
+  let deficientConditionGoalLibraryUserGridHeaders: any[] = [
+    {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Shared With', key: '', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Can Modify', key: '', align: 'left', sortable: true, class: '', width: ''}
   ];
-  let deficientConditionGoalLibraryUserGridRows: DeficientConditionGoalLibraryUserGridRow[] = [];
-  let currentUserAndOwner: DeficientConditionGoalLibraryUser[] = [];
-  let searchTerm: string = '';
+  const deficientConditionGoalLibraryUserGridRows = ref<DeficientConditionGoalLibraryUserGridRow[]>([]);
+  const currentUserAndOwner = ref<DeficientConditionGoalLibraryUser[]>([]);
+  const searchTerm = ref<string>('');
 
-  watch(() => props.dialogData, () => onDialogDataChanged)
-  function onDialogDataChanged() {
-    if (props.dialogData.showDialog) {
+  watch(dialogData, () => {
+    if (dialogData.value.showDialog) {
       onSetGridData();
       onSetUsersSharedWith();
     }
-  }
+  });
 
   function onSetGridData() {
     const currentUser: string = getUserName();
-
-    deficientConditionGoalLibraryUserGridRows = stateUsers
+    deficientConditionGoalLibraryUserGridRows.value = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -104,7 +104,7 @@ let stateUsers = store.state.userModule.users as User[];
   function onSetUsersSharedWith() {
         // Deficient Condition Goal library users
         let deficientConditionGoalLibraryUsers: DeficientConditionGoalLibraryUser[] = [];
-        DeficientConditionGoalService.getDeficientConditionGaolLibraryUsers(props.dialogData.deficientConditionGoalLibrary.id).then(response => {
+        DeficientConditionGoalService.getDeficientConditionGaolLibraryUsers(dialogData.value.deficientConditionGoalLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];
@@ -133,18 +133,18 @@ let stateUsers = store.state.userModule.users as User[];
                 const isCurrentUserOrOwner = (deficientConditionGoalLibraryUser: DeficientConditionGoalLibraryUser) => deficientConditionGoalLibraryUser.username === currentUser || deficientConditionGoalLibraryUser.isOwner;
                 const isNotCurrentUserOrOwner = (deficientConditionGoalLibraryUser: DeficientConditionGoalLibraryUser) => deficientConditionGoalLibraryUser.username !== currentUser && !deficientConditionGoalLibraryUser.isOwner;
 
-                currentUserAndOwner = filter(isCurrentUserOrOwner, deficientConditionGoalLibraryUsers) as DeficientConditionGoalLibraryUser[];
+                currentUserAndOwner.value = filter(isCurrentUserOrOwner, deficientConditionGoalLibraryUsers) as DeficientConditionGoalLibraryUser[];
                 const otherUsers: DeficientConditionGoalLibraryUser[] = filter(isNotCurrentUserOrOwner, deficientConditionGoalLibraryUsers) as DeficientConditionGoalLibraryUser[];
 
                 otherUsers.forEach((deficientConditionGoalLibraryUser: DeficientConditionGoalLibraryUser) => {
-                    if (any(propEq('id', deficientConditionGoalLibraryUser.userId), deficientConditionGoalLibraryUserGridRows)) {
+                    if (any(propEq('id', deficientConditionGoalLibraryUser.userId), deficientConditionGoalLibraryUserGridRows.value)) {
                         const deficientConditionGoalLibraryUserGridRow: DeficientConditionGoalLibraryUserGridRow = find(
-                            propEq('id', deficientConditionGoalLibraryUser.userId), deficientConditionGoalLibraryUserGridRows) as DeficientConditionGoalLibraryUserGridRow;
+                            propEq('id', deficientConditionGoalLibraryUser.userId), deficientConditionGoalLibraryUserGridRows.value) as DeficientConditionGoalLibraryUserGridRow;
 
-                        deficientConditionGoalLibraryUserGridRows = update(
-                            findIndex(propEq('id', deficientConditionGoalLibraryUser.userId), deficientConditionGoalLibraryUserGridRows),
+                        deficientConditionGoalLibraryUserGridRows.value = update(
+                            findIndex(propEq('id', deficientConditionGoalLibraryUser.userId), deficientConditionGoalLibraryUserGridRows.value),
                             { ...deficientConditionGoalLibraryUserGridRow, isShared: true, canModify: deficientConditionGoalLibraryUser.canModify },
-                            deficientConditionGoalLibraryUserGridRows
+                            deficientConditionGoalLibraryUserGridRows.value
                         );
                     }
                 });
@@ -154,9 +154,9 @@ let stateUsers = store.state.userModule.users as User[];
 
   function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      deficientConditionGoalLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), deficientConditionGoalLibraryUserGridRows),
-          'canModify', false, deficientConditionGoalLibraryUserGridRows);
+      deficientConditionGoalLibraryUserGridRows.value = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), deficientConditionGoalLibraryUserGridRows.value),
+          'canModify', false, deficientConditionGoalLibraryUserGridRows.value);
     }
   }
 
@@ -167,11 +167,11 @@ let stateUsers = store.state.userModule.users as User[];
       emit('submit', null);
     }
 
-    deficientConditionGoalLibraryUserGridRows = [];
+    deficientConditionGoalLibraryUserGridRows.value = [];
   }
 
   function getDeficientConditionGoalLibraryUsers() {
-    const usersSharedWith: DeficientConditionGoalLibraryUser[] = deficientConditionGoalLibraryUserGridRows
+    const usersSharedWith: DeficientConditionGoalLibraryUser[] = deficientConditionGoalLibraryUserGridRows.value
         .filter((deficientConditionGoalLibraryUserGridRow: DeficientConditionGoalLibraryUserGridRow) => deficientConditionGoalLibraryUserGridRow.isShared)
         .map((deficientConditionGoalLibraryUserGridRow: DeficientConditionGoalLibraryUserGridRow) => ({
           userId: deficientConditionGoalLibraryUserGridRow.id,
@@ -180,7 +180,7 @@ let stateUsers = store.state.userModule.users as User[];
           isOwner: false
         }));
 
-    return [...currentUserAndOwner, ...usersSharedWith];
+    return [...currentUserAndOwner.value, ...usersSharedWith];
   }
 
 </script>

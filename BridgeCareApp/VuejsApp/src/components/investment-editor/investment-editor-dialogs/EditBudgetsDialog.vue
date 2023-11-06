@@ -1,95 +1,94 @@
-<template>
-    <v-row>
-        <v-dialog max-width='800px' persistent scrollable v-model ='dialogData.showDialog'>
-            <v-card>
-                <v-card-title class="ghd-dialog-box-padding-top">
-                    <v-row justify-space-between align-center>
-                        <div class="ghd-control-dialog-header">Edit Budget Criteria</div>
-                        <v-spacer></v-spacer>
-                        <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-                            X
-                        </v-btn>
-                    </v-row>
-                </v-card-title>
-                <div style='height: 500px; max-width:800px' class="ghd-dialog-box-padding-center">
-                    <div style='max-height: 450px; overflow-y:auto;'>
-                        <v-data-table-server
-                                  id="EditBudgetsDialog-budgets-dataTable"
-                                  :headers='editBudgetsDialogGridHeaders'
-                                  :items="editBudgetsDialogGridData"
-                                  :items-length="editBudgetsDialogGridData.length"
-                                  sort-icon=ghd-table-sort
-                                  hide-actions
-                                  item-key='id'
-                                  v-model='selectedGridRows'
-                                  class="ghd-table">
-                        <template slot='items' slot-scope='props' v-slot:item="props">
-                         <tr>  
-                            <td>
-                                
-                                <v-text-field v-model="props.item.budgetOrder" @change="reorderList(props.item)" @mousedown="setCurrentOrder(props.item)" class='order_input'/>
-                                <v-btn class="ghd-blue" icon>
-                                    <v-icon title="up" @click="swapItemOrder(props.item, 'up')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-up
-                                    </v-icon>
-                                    <v-icon title="down" @click="swapItemOrder(props.item, 'down')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-down
-                                    </v-icon>
-                                </v-btn>
-                                
-                            </td>
-                            <td>
-                                <editDialog id="EditBudgetsDialog-budget-editDialog"
-                                               :return-value.sync='props.item.name' persistent
-                                               @save='onEditBudgetName(props.item)' size="large" lazy>
-                                    <v-text-field id="EditBudgetsDialog-budget-textField"
-                                                  readonly single-line class='sm-txt' :model-value='props.item.name'
-                                                  :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].budgetNameIsUnique(props.item, editBudgetsDialogGridData)]" />
-                                    <template v-slot:input>
-                                        <v-text-field label='Edit' single-line v-model='props.item.name'
-                                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].budgetNameIsUnique(props.item, editBudgetsDialogGridData)]" />
-                                    </template>
-                                </editDialog>
-                            </td>
-                            <td>
-                               
-                                <v-text-field readonly single-line class='sm-txt'
-                                              :model-value='props.item.criterionLibrary.mergedCriteriaExpression'>
-                                    <template v-slot:append-inner>
-                                        <v-btn id="EditBudgetsDialog-openCriteriaEditor-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)"  class="ghd-blue" icon style="margin-top:-6px;">
-                                            <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
-                                        </v-btn>                                        
-                                    </template>
-                                </v-text-field>
-                                
-                            </td>
-                            <td>
-                                <v-btn id="EditBudgetsDialog-removeBudget-btn" @click="onRemoveBudget(props.item.id)" @mousedown="setCurrentOrder(props.item)" class="ghd-blue" icon>
-                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
-                                </v-btn>
-                             
-                            </td>
-                        </tr>    
-                        </template>
-                    </v-data-table-server>
-                    </div>
-                    <v-row row align-end style="margin:0 !important">
-                        <v-btn id="EditBudgetsDialog-add-btn" @click='onAddBudget' class='ghd-blue ghd-button' variant = "flat">
-                            Add
-                        </v-btn>
-                    </v-row>
+<template>  
+    <v-dialog width="100%" persistent scrollable v-model ='dialogData.showDialog'>
+        <v-card>
+            <v-card-title class="ghd-dialog-padding-top-title">
+                <v-row justify="space-between">
+                    <div class="ghd-control-dialog-header"><h5>Edit Budget Criteria</h5></div>
+                    <v-btn @click="onSubmit(false)" flat>
+                        <i class="fas fa-times fa-2x"></i>
+                    </v-btn>
+                </v-row>
+            </v-card-title>
+            
+            <div style='height: 500px;' width="100%" class="ghd-dialog-box-padding-center">
+                <div style='max-height: 450px; overflow-y:auto;'>
+                    <v-data-table-server
+                                id="EditBudgetsDialog-budgets-dataTable"
+                                :headers='editBudgetsDialogGridHeaders'
+                                :items="editBudgetsDialogGridData"
+                                :items-length="editBudgetsDialogGridData.length"
+                                sort-icon=ghd-table-sort
+                                hide-actions
+                                item-key='id'
+                                v-model='selectedGridRows'
+                                class="ghd-table">
+                    <template slot='items' slot-scope='props' v-slot:item="props">
+                        <tr>  
+                        <td style='flex-wrap:nowrap'>                              
+                            <v-text-field v-model="props.item.budgetOrder" @change="reorderList(props.item)" @mousedown="setCurrentOrder(props.item)" class='order_input'/>
+                            <v-btn class="ghd-blue" icon>
+                                <v-icon title="up" @click="swapItemOrder(props.item, 'up')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-up
+                                </v-icon>
+                                <v-icon title="down" @click="swapItemOrder(props.item, 'down')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-down
+                                </v-icon>
+                            </v-btn>                              
+                        </td>
+                        <td>
+                            <editDialog id="EditBudgetsDialog-budget-editDialog"
+                                            :return-value.sync='props.item.name' persistent
+                                            @save='onEditBudgetName(props.item)' size="large" lazy>
+                                <v-text-field id="EditBudgetsDialog-budget-textField"
+                                                readonly single-line class='sm-txt' :model-value='props.item.name'
+                                                :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].budgetNameIsUnique(props.item, editBudgetsDialogGridData)]" />
+                                <template v-slot:input>
+                                    <v-text-field label='Edit' single-line v-model='props.item.name'
+                                                    :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].budgetNameIsUnique(props.item, editBudgetsDialogGridData)]" />
+                                </template>
+                            </editDialog>
+                        </td>
+                        <td>
+                            
+                            <v-text-field readonly single-line class='sm-txt'
+                                            :model-value='props.item.criterionLibrary.mergedCriteriaExpression'>
+                                <template v-slot:append-inner>
+                                    <v-btn id="EditBudgetsDialog-openCriteriaEditor-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)"  class="ghd-blue" icon style="margin-top:-6px;">
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                    </v-btn>                                        
+                                </template>
+                            </v-text-field>
+                            
+                        </td>
+                        <td>
+                            <v-btn id="EditBudgetsDialog-removeBudget-btn" @click="onRemoveBudget(props.item.id)" @mousedown="setCurrentOrder(props.item)" class="ghd-blue" icon>
+                                <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                            </v-btn>
+                            
+                        </td>
+                    </tr>    
+                    </template>
+                </v-data-table-server>
                 </div>
-                
-                <v-card-actions class="ghd-dialog-box-padding-bottom">                   
-                        <v-btn id="EditBudgetsDialog-cancel-btn" @click='onSubmit(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">Cancel</v-btn>
-                        <v-btn id="EditBudgetsDialog-save-btn" @click='onSubmit(true)' class='ghd-blue hd-button-text ghd-button' variant = "flat"
-                               :disabled='disableSubmitButton()'>
-                            Save
-                        </v-btn>                        
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-        <GeneralCriterionEditorDialog :dialogData='criterionLibraryEditorDialogData'
-                                      @submit='onSubmitCriterionLibraryEditorDialogResult' />
-    </v-row>
+                <v-row row align-end style="margin:0 !important">
+                    <v-btn id="EditBudgetsDialog-add-btn" @click='onAddBudget' class='ghd-blue ghd-button' variant = "flat">
+                        Add
+                    </v-btn>
+                </v-row>
+            </div>
+            
+            <v-card-actions class="ghd-dialog-box-padding-bottom">     
+                <v-row justify="center">              
+                    <v-btn id="EditBudgetsDialog-cancel-btn" @click='onSubmit(false)' class='ghd-blue ghd-button-text ghd-button' variant = "outlined">Cancel</v-btn>
+                    <v-btn id="EditBudgetsDialog-save-btn" @click='onSubmit(true)' class='ghd-blue ghd-button-text ghd-button' variant = "outlined"
+                            :disabled='disableSubmitButton()'>
+                        Save
+                    </v-btn>
+                </v-row>                   
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+    <GeneralCriterionEditorDialog :dialogData='criterionLibraryEditorDialogData'
+                                    @submit='onSubmitCriterionLibraryEditorDialogResult' />
+
 </template>
 
 <script lang='ts' setup>

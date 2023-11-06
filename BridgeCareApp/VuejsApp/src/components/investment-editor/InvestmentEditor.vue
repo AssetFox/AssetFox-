@@ -1,23 +1,26 @@
 <template>
     <v-row>
-        <v-col cols = "12">
-            <v-row style="margin-top:0px;">
-                <v-col cols = "4" class="ghd-constant-header">
-                    <v-subheader class="ghd-control-label ghd-md-gray"><span>Select an Investment library</span></v-subheader><!--class="ghd-md-gray ghd-control-subheader"-->
-                    <v-select 
+        <v-col cols="12">
+            <v-row justify="space-between">
+                <v-col cols = "auto" class="ghd-constant-header">
+                    <div style="margin-bottom: 10px;">
+                        <v-subheader class="ghd-control-label ghd-md-gray"><span>Select an Investment library</span></v-subheader><!--class="ghd-md-gray ghd-control-subheader"-->
+                    </div>
+                        <v-select 
                         id="InvestmentEditor-investmentLibrary-select"
                         :items='librarySelectItems'
-                        variant="outlined"
                         item-title="text"
                         item-value="value"
                         v-model='librarySelectItemValue'
-                        class="ghd-select ghd-text-field ghd-text-field-border budget-parent">
+                        class="ghd-select ghd-text-field ghd-text-field-border vs-style"
+                        variant="outlined"
+                        density="compact">
                     </v-select>
                     <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
                 </v-col>
 
                 <!-- these are only in library -->
-                <v-col cols = "6" v-if='!hasScenario' class="ghd-constant-header">
+                <v-col cols = "auto" v-if='!hasScenario' class="ghd-constant-header">
                     <v-row v-if='hasSelectedLibrary && !hasScenario' row class="header-alignment-padding-center">
                         <div class="header-text-content invest-owner-padding">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
@@ -31,9 +34,9 @@
                         </v-btn>
                     </v-row>
                 </v-col>
-                <v-col cols = "2" v-if='!hasScenario' class="ghd-constant-header">
-                    <v-row row align-end justify-end class="header-alignment-padding-right">
-                        <v-spacer></v-spacer>
+                <v-col cols = "auto" v-if='!hasScenario' class="ghd-constant-header">
+                    <v-row align-end justify-end class="header-alignment-padding-right">
+                        <!-- <v-spacer></v-spacer> -->
                         <v-btn id="InvestmentEditor-CreateNewLibrary-vbtn" @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
                         variant = "outlined">
@@ -42,8 +45,9 @@
                     </v-row>
                 </v-col>
             </v-row>
+
             <!-- only for scenario -->
-            <v-row style="margin-top:80px;" v-if='hasInvestmentPlanForScenario'>
+            <v-row style="margin-top:40px;" v-if='hasInvestmentPlanForScenario'>
                 <!-- text boxes for scenario only -->
                 <v-col cols = "2" class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-label"><span>First Year of Analysis Period</span></v-subheader>
@@ -157,8 +161,8 @@
             </v-row>
         </v-col>
 
-        <v-col v-show='hasSelectedLibrary || hasScenario' xs12>             
-            <v-col>
+        <v-col v-show='hasSelectedLibrary || hasScenario'>             
+            <!-- <v-col> -->
                 <v-data-table-server
                     id="InvestmentEditor-investmentsDataTable-dataTable"
                     :headers='budgetYearsGridHeaders' 
@@ -210,7 +214,7 @@
                         class='ghd-blue ghd-button' variant = "flat">
                     Delete Selected
                 </v-btn>
-            </v-col>
+            <!-- </v-col> -->
         </v-col>
     
         <v-col v-show='hasSelectedLibrary && !hasScenario' cols = "12">
@@ -225,8 +229,8 @@
                 </v-col>
             </v-row>
         </v-col>
-        <v-col cols = "12">          
-            <v-row style="padding-bottom: 40px;" v-show='hasSelectedLibrary || hasScenario'>
+        <v-col cols="12">          
+            <v-row justify="space-between" style="padding-bottom: 40px;" v-show='hasSelectedLibrary || hasScenario'>
                 <v-spacer></v-spacer>
                 <v-col>
                     <v-btn id="InvestmentEditor-cancel-btn"

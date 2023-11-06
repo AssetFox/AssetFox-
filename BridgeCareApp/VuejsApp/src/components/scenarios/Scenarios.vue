@@ -33,22 +33,21 @@
                                                 single-line
                                                 v-model="searchMine"
                                                 prepend-inner-icon=ghd-search 
-
-                                                outline
+                                                variant="outlined"
                                                 clearable
                                                 @click:clear="onMineClearClick()"
                                                 class="ghd-text-field-border ghd-text-field search-icon-general"
                                             >
                                             </v-text-field>
                                             <v-btn id="Scenarios-performSearch-button" 
-                                                style="margin-top: 2px;" 
+                                                style="margin-top: 2px;margin-left: 5px; margin-right: 5px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
                                                 variant = "outlined" 
                                                 @click="onMineSearchClick()">
                                                 Search
                                             </v-btn>
                                             <v-btn id="Scenarios-performFilter-button" 
-                                                style="margin-top: 2px;" 
+                                                style="margin-top: 2px; margin-right: 5px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
                                                 variant = "outlined" 
                                                 @click="showFilterScenarioList = true">

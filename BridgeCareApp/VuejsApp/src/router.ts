@@ -513,6 +513,11 @@ const router = createRouter({
             component: CalculatedAttributeEditor,
             props: true,
         },
+        {
+            path: '/',
+            component: Scenario,
+        }
+        // TODO: Does below need to be here?
         // {
         //     path: '*',
         //     redirect: '/AuthenticationStart/',

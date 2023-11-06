@@ -172,12 +172,13 @@
                     class='v-table__overflow ghd-table' 
                     item-key='year' 
                     show-select 
+                    return-object
                     sort-icon=$vuetify.icons.ghd-table-sort
                     v-model='selectedBudgetYearsGridData' 
                     :pagination.sync="pagination"               
                     :rows-per-page-items=[5,10,25]
                     :must-sort='true'>
-                    <template slot='items' slot-scope='props' v-slot:item="{item}">
+                    <template v-slot:item="{item}">
                     <tr>
                         <td>
                             <v-checkbox hide-details primary v-model="selectedBudgetYearsGridData" :value="item"></v-checkbox>
@@ -186,26 +187,26 @@
                             <div v-if="header.key === 'year'">
                                 <span class='sm-txt'>{{ item.year + firstYearOfAnalysisPeriodShift}}</span>
                             </div>       
-                            <div v-if="header.key === 'action'">
-                                <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(item.year)" class="ghd-blue" flat>
-                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
-                                </v-btn>
-                            </div>
+                           
                             <div v-if="header.key !== 'year' && header.key !== 'action'">
                                 <editDialog :return-value.sync='item[header.key]'
                                     @save='onEditBudgetYearValue(item.year, header.key, item[header.key])'
                                     size="large" lazy>
                                     <v-text-field readonly single-line class='sm-txt'
                                         variant="underlined"
-                                        :model-value='formatAsCurrency(item[header.key])'
+                                        :model-value='item[header.key]'
                                         :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     <template v-slot:input>
                                         <v-text-field label='Edit' single-line
-                                                        v-model.number='item[header.key]'
-                                                        v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
-                                                        :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                            v-model.number='item[header.key]'
+                                            :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     </template>
                                 </editDialog>
+                            </div>
+                            <div v-if="header.key === 'action'">
+                                <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(item.year)" class="ghd-blue" flat>
+                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
+                                </v-btn>
                             </div>
                         </td>
                     </tr>
@@ -383,7 +384,7 @@ const stateBudgetLibraries = computed<BudgetLibrary[]>(() => store.state.investm
 const stateSelectedBudgetLibrary = computed<BudgetLibrary>(() => store.state.investmentModule.selectedBudgetLibrary);
 let stateInvestmentPlan = computed<InvestmentPlan>(() => store.state.investmentModule.investmentPlan);
 let stateScenarioBudgets = ref<Budget[]>(store.state.investmentModule.scenarioBudgets);
-let hasUnsavedChanges = computed<boolean>(()=>(store.state.unsavedChangesFlagModule.hasUnsavedChanges));
+const hasUnsavedChanges = computed<boolean>(()=>(store.state.unsavedChangesFlagModule.hasUnsavedChanges));
 //let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess); //DOESNT Work
 let hasAdminAccess: boolean = shallowReactive(store.state.authenticationModule.hasAdminAccess) ; 
 
@@ -447,10 +448,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let librarySelectItemValue = ref<string|null>('');
 
     let actionHeader: any = { title: 'Action', key: 'action', align: 'left', sortable: false, class: '', width: '' }
-    let budgetYearsGridHeaders: any[] = [
+    let budgetYearsGridHeaders = ref<any[]>([
         { title: 'Year', key: 'year', sortable: true, align: 'left', class: '', width: '' },
         actionHeader
-    ];
+    ]);
     let budgetYearsGridData = ref<BudgetYearsGridData[]>([]);
     let selectedBudgetYearsGridData = ref<BudgetYearsGridData[]>([]);
     let selectedBudgetYears = ref<number[]>([]);
@@ -536,34 +537,33 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     onMounted(() => {
-    //getBudgetLibrariesAction();  //WORKS here
-    librarySelectItemValue.value = '';
-                 getHasPermittedAccessAction();
-                 getBudgetLibrariesAction()
-                if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
-                    selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
+        librarySelectItemValue.value = '';
+        getHasPermittedAccessAction();
+        getBudgetLibrariesAction()
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
+            selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
 
-                    if (selectedScenarioId === uuidNIL) {
-                        addErrorNotificationAction({
-                            message: 'Found no selected scenario for edit',
-                        });
-                        $router.push('/Scenarios/');
-                    }
+            if (selectedScenarioId === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Found no selected scenario for edit',
+                });
+                $router.push('/Scenarios/');
+            }
 
-                    hasScenario.value = true;
-                    ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
-                        if(response.data){
-                            setAlertMessageAction("An investment import has been added to the work queue")
-                        }
-                    })
-                     initializePages();
+            hasScenario.value = true;
+            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
+                if(response.data){
+                    setAlertMessageAction("An investment import has been added to the work queue")
                 }
-                else
-                    initializing = false;         
+            })
+                initializePages();
+        }
+        else
+            initializing = false;        
 
-    $emitter.on(
-            Hub.BroadcastEventType.BroadcastImportCompletionEvent,
-            importCompleted,
+        $emitter.on(
+                Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+                importCompleted,
         );
     });
 
@@ -576,7 +576,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     });
         
     // Watchers
-    watch(pagination, onPaginationChanged)
+    watch(pagination, ()=> onPaginationChanged)
     async function onPaginationChanged() {
         if(initializing)
             return;
@@ -681,6 +681,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     
     watch(stateBudgetLibraries, ()=> {
         libraryItems.value = clone(stateBudgetLibraries.value);
+        librarySelectItems.value=[];
+        librarySelectItemNames.value =[];
 
         libraryItems.value.forEach(_=> {
             librarySelectItems.value.push({text:_.name,value:_.id})
@@ -703,13 +705,13 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             CheckUnsavedDialog(onSelectItemValueChanged, () => {
                 librarySelectItemValueAllowedChanged = false;
                 onSelectItemValueChanged();
-                librarySelectItemValue.value = trueLibrarySelectItemValue.value;               
+                librarySelectItemValue.value = trueLibrarySelectItemValue.value;              
             });
         }
         parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
         newLibrarySelection = true;
         scenarioLibraryIsModified.value = false;
-        librarySelectItemValueAllowedChanged = true;
+        librarySelectItemValueAllowedChanged = true;       
     });
 
     function onSelectItemValueChanged() {      
@@ -736,7 +738,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         }
 
         clearChanges()
-       //onPaginationChanged()
+       onPaginationChanged()
     });
 
     watch(stateInvestmentPlan,() => {
@@ -910,8 +912,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 class: '',
                 width: '',
             }) as any);
-        budgetYearsGridHeaders = [
-            budgetYearsGridHeaders[0],
+        budgetYearsGridHeaders.value = [
+            budgetYearsGridHeaders.value[0],
             ...budgetHeaders,
             actionHeader
         ];
@@ -1250,6 +1252,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function onEditBudgetYearValue(year: number, budgetName: string, value: number) {//check out
+    console.log("onEditBudgetYearValue: " + year + ":" + budgetName + ":" + value)
         if (any(propEq('name', budgetName), currentPage.value)) {
             const budget: Budget = find(propEq('name', budgetName), currentPage.value) as Budget;
 
@@ -1313,7 +1316,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             budgetsForDeletion: deletionBudgetIds.value,
             addedBudgets: addedBudgets.value,
             deletionyears: deletionYears.value ,
-            updatedBudgetAmounts: mapToIndexSignature( updatedBudgetAmounts),
+            updatedBudgetAmounts: mapToIndexSignature(updatedBudgetAmounts),
             Investment: null,
             addedBudgetAmounts: mapToIndexSignature(addedBudgetAmounts),
             firstYearAnalysisBudgetShift: 0,
@@ -1349,6 +1352,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function formatAsCurrency(value: any): any {
+        console.log("currency"  + value)
         if (hasValue(value)) {
             return formatAsCurrency(value);
         }
@@ -1433,6 +1437,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function onUpdateBudgetAmount(rowId: string, updatedRow: BudgetAmount) {
+    console.log("onUpdateBudgetAmount")
         if (!isNil(addedBudgetAmounts.get(updatedRow.budgetName)))
             if (any(propEq('id', rowId), addedBudgetAmounts.get(updatedRow.budgetName)!)) {
                 let amounts = addedBudgetAmounts.get(updatedRow.budgetName)!

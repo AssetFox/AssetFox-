@@ -23,6 +23,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment;
+using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 
 namespace BridgeCareCoreTests.Tests.Integration
 {

@@ -4,6 +4,8 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
@@ -86,16 +88,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AdminSettings
             var keyAttributeName = RandomStrings.WithPrefix("keyAttribute");
             var keyAttributeId = Guid.NewGuid();
             var networkId = Guid.NewGuid();
-            var maintainableAssets = new List<MaintainableAsset>();
-            var assetId = Guid.NewGuid();
-            var locationIdentifier = RandomStrings.WithPrefix("Location");
-            var location = Locations.Section(locationIdentifier);
-            var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
+            var maintainableAssets = MaintainableAssetLists.SingleInNetwork(networkId, CommonTestParameterValues.DefaultEquation);
             var resultAttributeName = RandomStrings.WithPrefix("result");
             var resultAttributeId = Guid.NewGuid();
             AttributeTestSetup.CreateSingleTextAttribute(TestHelper.UnitOfWork,
                 resultAttributeId, resultAttributeName, ConnectionType.EXCEL, keyAttributeName);
-            maintainableAssets.Add(maintainableAsset);
             var networkEntity2 = NetworkTestSetup.ModelForEntityInDbWithKeyAttribute(
                 TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, keyAttributeName);
 

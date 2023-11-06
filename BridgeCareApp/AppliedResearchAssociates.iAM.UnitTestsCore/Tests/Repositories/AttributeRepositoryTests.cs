@@ -18,6 +18,7 @@ using Xunit;
 using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes;
 using AppliedResearchAssociates.iAM.Data.Mappers;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
@@ -261,10 +262,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         public void GetAttributeIdsInNetwork_NetworkInDbWithAttribute_GetsAttributeId()
         {
             var networkId = Guid.NewGuid();
-            var assetId = Guid.NewGuid();
-            var locationIdentifier = RandomStrings.WithPrefix("Location");
-            var location = Locations.Section(locationIdentifier);
-            var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
+            var maintainableAsset = MaintainableAssets.InNetwork(networkId, CommonTestParameterValues.DefaultEquation);
             var maintainableAssets = new List<MaintainableAsset> { maintainableAsset };
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId);
             var attributeId = Guid.NewGuid();

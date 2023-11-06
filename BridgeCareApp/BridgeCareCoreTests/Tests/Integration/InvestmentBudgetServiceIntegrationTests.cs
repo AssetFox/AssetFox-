@@ -17,6 +17,7 @@ using Xunit;
 using IamAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using AppliedResearchAssociates.iAM.Data;
 using System.Collections.Immutable;
+using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 
 namespace BridgeCareCoreTests.Tests.Integration
 {

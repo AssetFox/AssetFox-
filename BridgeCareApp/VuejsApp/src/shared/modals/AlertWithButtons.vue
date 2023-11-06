@@ -1,5 +1,5 @@
 <template>
-    <v-dialog max-width="350" persistent v-model="showDialogComputed">
+    <v-dialog max-width="350" persistent v-model="dialogDataWithButtons.showDialog">
         <v-card>
             <v-card-title class="headline">
                 <v-row justify-center>
@@ -36,27 +36,23 @@
         </v-card>
     </v-dialog>
 </template>
+<script setup lang="ts">
+import { toRefs, computed } from 'vue';
+import {AlertDataWithButtons} from '../models/modals/alert-data';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-<script lang="ts" setup>
-    import Vue, { computed } from 'vue';
-    import {AlertDataWithButtons} from '../models/modals/alert-data';
-    import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
-    import { useStore } from 'vuex';
-    import { useRouter } from 'vue-router';
-    
-    const props = defineProps<{
-        dialogDataWithButtons: AlertDataWithButtons
-    }>()
-    let showDialogComputed = computed(() => props.dialogDataWithButtons.showDialog);
+const props = defineProps<{
+    dialogDataWithButtons: AlertDataWithButtons
+}>()
+const { dialogDataWithButtons } = toRefs(props);
 const emit = defineEmits(['submit'])
-
-
-        /**
-         * Emits a boolean result to the parent component
-         * @param submit
-         */
-        function onReturn(submit: string) {
-            emit('submit', submit);
-        }
-    
+/**
+ * Emits a boolean result to the parent component
+ * @param submit
+ */
+function onReturn(submit: string) {
+    emit('submit', submit);
+}
 </script>

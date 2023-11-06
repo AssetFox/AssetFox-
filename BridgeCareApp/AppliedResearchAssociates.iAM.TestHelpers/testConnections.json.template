@@ -1,5 +1,17 @@
 {
   "ConnectionStrings": {
-    "BridgeCareConnex": "data source=xxxxxxx;initial catalog=IAMv2Test;persist security info=True;user id=xxxxx;password=xxxxxxxx;MultipleActiveResultSets=True;App=EntityFramework"
+    "BridgeCareConnex": "data source=xxxxxxx;initial catalog=IAMv3Test;persist security info=True;user id=xxxxx;password=xxxxxxxx;MultipleActiveResultSets=True;App=EntityFramework"
+  },
+  "SimulationOutputSqlBatches": {
+    "AssetDetailBatchSizeOverrideForValueLoad": 0,
+    "AssetDetailBatchSizeOverrideForValueSave": 0
+  },
+  "InventoryData": {
+    "PrimaryNetwork": "7f4ea3ba-6082-4e1e-91a4-b80578aeb0ed",
+    "KeyProperties": [
+      "BRKEY_",
+      "BMSID",
+      "ACTIONTYPE"
+    ]
   }
 }

@@ -141,14 +141,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             var testTreatmentWithRulesId = TestDataForTreatmentSupersedeRules.TreatmentId;
             var scenarioSelectableTreatment = ScenarioTreatment("TestTreatmentWithRules", testTreatmentWithRulesId);
-            var preventTreatment = ScenarioTreatment("PreventTreatment1", NewGuid);
+            var preventTreatment = ScenarioPreventTreatment();
 
             // Add supersede rules
             var criterionLibrary = CreateCriterionLibrary();
             var rule = new ScenarioTreatmentSupersedeRuleEntity
             {
                 Id = NewGuid,
-                PreventScenarioSelectableTreatment = preventTreatment,
+                PreventTreatmentId = preventTreatment.Id,
                 TreatmentId = testTreatmentWithRulesId,
                 CriterionLibraryScenarioTreatmentSupersedeRuleJoin = new CriterionLibraryScenarioTreatmentSupersedeRuleEntity
                 {
@@ -204,7 +204,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var entity = new ScenarioTreatmentSupersedeRuleEntity
             {
                 Id = NewGuid,
-                PreventScenarioSelectableTreatment = preventTreatment,
+                PreventTreatmentId = preventTreatment.Id,
                 TreatmentId = treatmentId,
                 CriterionLibraryScenarioTreatmentSupersedeRuleJoin = new CriterionLibraryScenarioTreatmentSupersedeRuleEntity
                 {
@@ -222,7 +222,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var entity = new TreatmentSupersedeRuleEntity
             {
                 Id = NewGuid,
-                PreventSelectableTreatment = preventTreatment,
+                PreventTreatmentId = preventTreatment.Id,
                 TreatmentId = treatmentId,
                 CriterionLibraryTreatmentSupersedeRuleJoin = new CriterionLibraryTreatmentSupersedeRuleEntity
                 {

@@ -517,6 +517,11 @@ const router = createRouter({
             path: '/',
             component: Scenario,
         }
+        // TODO: Does below need to be here?
+        // {
+        //     path: '*',
+        //     redirect: '/AuthenticationStart/',
+        // },
     ],
 });
 

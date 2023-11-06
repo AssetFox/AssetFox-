@@ -80,9 +80,9 @@
                     
                     <v-menu
                         offset-
-                        min-width="20%"
-                        max-width="20%"
-                        max-height="75%"
+                        min-width="21%"
+                        max-width="21%"
+                        max-height="455%"
                         :close-on-content-click="false"
                     >
                     
@@ -116,7 +116,7 @@
                                 </v-badge>
                             </button>
                         </template>            
-                        <v-card class="mx-auto" style="width: 1800%; min-height: 500%;">
+                        <v-card class="mx-auto" style="width: 1800%; min-height: 500%; left: -80px; top: 20px;">
                             <v-toolbar 
                                 id = "App-notification-toolbar"
                                 color="#002E6C" dark>
@@ -127,28 +127,33 @@
                             </v-toolbar>
                             <v-list class="h-100">
                                 <v-list-group
-                                    v-for="notification in notifications"
+                                    v-for="(notification,index) in notifications"
                                     :key="notification.id"
+                                    
                                     v-model="notification.active"
                                     append-icon=""
                                     class="notification-message"
                                     style="border-bottom: 1px solid; padding:5%;"
+                                    @click="toggleExpand(notification.active,index)"
                                 >
-                                    <v-icon
-                                        slot="prependIcon"
-                                        :color="notification.iconColor"
-                                        >{{ notification.icon }}</v-icon
-                                    >
-                                    <template v-slot:activator>
+                                    
+                                    <template v-slot:activator justify-end   >
+                                        
                                         <v-list-tile 
                                             id="App-notification-vListTile">
-                                            <v-list-tile-content
+                                            <v-row justify="end">
+                                            <v-col cols ="8">
+                                            <v-list-item-content
                                                 style="margin-bottom: 10px;"
                                                 v-text="
                                                     notification.shortMessage
                                                 "
-                                            ></v-list-tile-content>
-                                            <v-btn icon size="16" end position="absolute" style="margin-left:10%;">
+                                            >
+                                            
+                                        </v-list-item-content>
+                                    </v-col>
+                                    <v-col> 
+                                        <v-btn icon size="16" justify-end position="absolute" style="margin-left:20%;">
                                                 <v-icon
                                                     size="small"
                                                     @click="
@@ -159,16 +164,19 @@
                                                     >fas fa-times-circle</v-icon
                                                 >
                                             </v-btn>
+                                        </v-col>
+                                    </v-row>
                                         </v-list-tile>
-                                    </template>
-                                    <v-list-item>
+                                        <v-list-tile v-if="notification.active">
                                             <v-list-item-title
                                                 class="notification-long-message"
                                                 v-text="
                                                     notification.longMessage
                                                 "
                                             ></v-list-item-title>
-                                    </v-list-item>
+                                    </v-list-tile>
+                                    </template>
+                                    
                                     <v-spacer></v-spacer>
                                 </v-list-group>
                             </v-list>         
@@ -325,7 +333,6 @@ import { getUrl } from './shared/utils/get-url';
     let hasRole = computed<boolean>(() => store.state.authenticationModule.hasRole);
     let username = computed<string>(() => store.state.authenticationModule.username);
     let hasAdminAccess = computed(() => store.state.authenticationModule.hasAdminAccess);
-
     const refreshing = computed<boolean>(() => store.state.authenticationModule.refreshing);
     //let navigation = ref<any[]>(store.state.breadcrumbModule.navigation);
     const notifications = computed<Notification[]>(() => store.state.notificationModule.notifications);
@@ -777,6 +784,7 @@ import { getUrl } from './shared/utils/get-url';
         hasUnreadNewsItem = newsAccessDateComparison(latestNewsDate, currentUserLastNewsAccessDate);
     }
 
+    const toggleExpand = (active:boolean,index:number) => {notifications.value[index].active=!active};
 </script>
 
 <style>
@@ -785,7 +793,10 @@ html {
     overflow-x: hidden;
     overflow-y: scroll !important;
 }
-
+.mx-auto{
+    max-height: 300px;
+    overflow-y: auto;
+}
 .navbar-divider {
     display: inline !important;
     line-height: 100% !important;

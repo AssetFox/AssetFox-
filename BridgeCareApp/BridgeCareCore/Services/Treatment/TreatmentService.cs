@@ -68,6 +68,7 @@ namespace BridgeCareCore.Services
             {
                 var treatmentLoadResult = _treatmentLoader.LoadScenarioTreatment(worksheet, scenarioBudgets);
                 scenarioTreatments.Add(treatmentLoadResult.Treatment);
+                _unitOfWork.SelectableTreatmentRepo.AddDefaultPerformanceFactors(simulationId, scenarioTreatments);
                 validationMessages.AddRange(treatmentLoadResult.ValidationMessages);
             }
             var combinedValidationMessage = string.Empty;
@@ -182,6 +183,7 @@ namespace BridgeCareCore.Services
             {                
                 var treatmentLoadResult = _treatmentLoader.LoadScenarioTreatment(worksheet, scenarioBudgets);
                 scenarioTreatments.Add(treatmentLoadResult.Treatment);
+                _unitOfWork.SelectableTreatmentRepo.AddDefaultPerformanceFactors(simulationId, scenarioTreatments);
                 validationMessages.AddRange(treatmentLoadResult.ValidationMessages);
             }
             var combinedValidationMessage = string.Empty;

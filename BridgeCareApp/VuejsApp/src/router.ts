@@ -513,10 +513,10 @@ const router = createRouter({
             component: CalculatedAttributeEditor,
             props: true,
         },
-        // {
-        //     path: '*',
-        //     redirect: '/AuthenticationStart/',
-        // },
+        {
+            path: '/',
+            component: Scenario,
+        }
     ],
 });
 

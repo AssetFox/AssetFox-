@@ -522,7 +522,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                 getCalculatedAttributeLibrariesAction().then(() => {
                     setAttributeSelectItems()
                     setAttributeTimingSelectItems();
-                    if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CalculatedAttribute) === -1) {
+                    if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CalculatedAttribute) !== -1) {
                         
                             selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
                         if (selectedScenarioId === uuidNIL) {

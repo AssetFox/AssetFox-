@@ -353,45 +353,33 @@ namespace BridgeCareCore.Services.Treatment
                 var supersededTreatment = worksheet.Cells[i, 2].Text;
                 var criteria = worksheet.Cells[i, 3].Text;
 
-                if (!string.IsNullOrEmpty(treatmentName) && !string.IsNullOrEmpty(supersededTreatment))
+                foreach (var scenarioTreatment in scenarioTreatments)
                 {
-                    var criterionLibrary = new CriterionLibraryDTO
+                    if (scenarioTreatment.Name == treatmentName)
                     {
-                        Id = Guid.NewGuid(),
-                        Name = "from Excel import",
-                        MergedCriteriaExpression = criteria,
-                        IsSingleUse = true,
-                    };                    
-                   
-                    var supersededTreatmentRule = new TreatmentDTO
-                    {
-                        Name = supersededTreatment
-                    };
+                        var criterionLibrary = new CriterionLibraryDTO
+                        {
+                            Id = Guid.NewGuid(),
+                            Name = "from Excel import",
+                            MergedCriteriaExpression = criteria,
+                            IsSingleUse = true,
+                        };
 
-                    var treatmentRules = new List<TreatmentSupersedeRuleDTO>();
-                    var treatmentRule = new TreatmentSupersedeRuleDTO
-                    {
-                        Id = Guid.NewGuid(),
-                        CriterionLibrary = criterionLibrary,
-                        treatment = supersededTreatmentRule,                        
-                    };
-                    treatmentRules.Add(treatmentRule);
+                        var supersededTreatmentRule = new TreatmentDTO
+                        {
+                            Id = Guid.NewGuid(),
+                            Name = supersededTreatment,
 
-                    var treatments = new List<TreatmentDTO>();
-                    var treatment = new TreatmentDTO
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = treatmentName,
-                        SupersedeRules = treatmentRules,
-                    };
-                    treatments.Add(treatment);                          
-                   
-                    scenarioTreatments.Add(treatment);
+                        };                      
+
+                        treatmentSupersedeRules.Add(new TreatmentSupersedeRuleDTO() { Id = Guid.NewGuid(),  CriterionLibrary = criterionLibrary, treatment = supersededTreatmentRule });
+                        scenarioTreatment.SupersedeRules = treatmentSupersedeRules;                       
+                    }
                 }
             }
-
             return new TreatmentSupersedeRulesLoadResult { Treatments = scenarioTreatments, ValidationMessages = validationMessages };
+
         }
     }
-
 }
+

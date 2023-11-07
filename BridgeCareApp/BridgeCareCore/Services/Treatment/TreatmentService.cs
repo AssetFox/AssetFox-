@@ -261,7 +261,7 @@ namespace BridgeCareCore.Services
                 combinedValidationMessage = combinedValidationMessageBuilder.ToString();
             }
 
-            var scenarioTreatmentImportResult = new ScenarioTreatmentSupersedeRuleImportResultDTO
+            var scenarioTreatmentSupersedeRuleImportResult = new ScenarioTreatmentSupersedeRuleImportResultDTO
             {
                 Treatments = scenarioTreatments,
                 WarningMessage = combinedValidationMessage,
@@ -270,10 +270,16 @@ namespace BridgeCareCore.Services
             {
                 if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                     return new ScenarioTreatmentSupersedeRuleImportResultDTO();
-                queueLog.UpdateWorkQueueStatus("Upserting Treatments");
-                _unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(scenarioTreatmentImportResult.Treatments, simulationId);
+                queueLog.UpdateWorkQueueStatus("Upserting Treatment Supersede Rules");
+
+                if (scenarioTreatmentSupersedeRuleImportResult.Treatments.Any(_ => _.SupersedeRules != null && _.SupersedeRules.Any()))
+                {
+                    var supersedeRulesPerTreatmentId = scenarioTreatmentSupersedeRuleImportResult.Treatments.Where(_ => _.SupersedeRules.Any()).ToList()
+                    .ToDictionary(_ => _.Id, _ => _.SupersedeRules);
+                    _unitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(supersedeRulesPerTreatmentId, simulationId);
+                }
             }
-            return scenarioTreatmentImportResult;
+            return scenarioTreatmentSupersedeRuleImportResult;
         }
         private void SaveToDatabase(
             TreatmentImportResultDTO importResult)

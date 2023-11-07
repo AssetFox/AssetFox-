@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentCost;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Services;
@@ -154,12 +155,20 @@ namespace BridgeCareCoreTests.Tests.Integration
             var dataAsString = fileInfo.FileData;
             var bytes = Convert.FromBase64String(dataAsString);
             var stream = new MemoryStream(bytes);
-            File.WriteAllBytes("zzzzz.xlsx", bytes);
+            File.WriteAllBytes("MDSupersede.xlsx", bytes);
             var excelPackage = new ExcelPackage(stream);
             var userCriteria = new UserCriteriaDTO();
-            TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatments(treatmentsWithSupersede, simulationId);
+            
+            var supersedeRules = new List<TreatmentSupersedeRuleDTO>();
+            var supersedeDictionary = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> {{treatmentId, supersedeRules }};
+            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(supersedeDictionary, simulationId);
+
+
             var treatments2 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
-            Assert.Empty(treatments2);
+            var treatmentSupersedeRulesEmpty = treatments2.Where(_ => _.SupersedeRules.Any()).ToList()
+                    .ToDictionary(_ => _.Id, _ => _.SupersedeRules);
+
+            Assert.Empty(treatmentSupersedeRulesEmpty);
             service.ImportScenarioTreatmentSupersedeRuleFile(simulationId, excelPackage);
             var treatments3 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
             var treatment1 = treatments1.Single();

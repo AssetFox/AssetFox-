@@ -254,6 +254,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return (selectedSimulation == null) ? null : selectedSimulation.Name;
         }
 
+        // Note: looks like this is not in use
         public SimulationCloningResultDTO CloneSimulation(Guid simulationId, Guid networkId, string simulationName)
         {
             SimulationCloningResultDTO result = null;
@@ -881,9 +882,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         {
                             supersedeRule.Id = Guid.NewGuid();
                             supersedeRule.TreatmentId = treatment.Id;
+                            supersedeRule.ScenarioSelectableTreatment = treatment;
+                            supersedeRule.PreventTreatmentId = supersedeRule.PreventTreatmentId;
                             _unitOfWork.Context.ReInitializeAllEntityBaseProperties(supersedeRule,
-                                _unitOfWork.UserEntity?.Id);
-                            // TODO supersedeRule.ScenarioSelectableTreatment = ??
+                                _unitOfWork.UserEntity?.Id);                            
                             if (supersedeRule.CriterionLibraryScenarioTreatmentSupersedeRuleJoin != null)
                             {
                                 var criterionId = Guid.NewGuid();
@@ -1253,8 +1255,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     var treatmentSupersedeRules = simulationToClone.SelectableTreatments
                         .Where(_ => _.ScenarioTreatmentSupersedeRules.Any())
-                        .SelectMany(_ => _.ScenarioTreatmentSupersedeRules
-                            .Select(scheduling => scheduling))
+                        .SelectMany(_ => _.ScenarioTreatmentSupersedeRules)
                         .ToList();
                     _unitOfWork.Context.AddAll(treatmentSupersedeRules);
                     // add treatment supersedeRule criteria

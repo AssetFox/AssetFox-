@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
 {
@@ -35,6 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
                 Costs = new List<TreatmentCostDTO>(),
                 Consequences = new List<TreatmentConsequenceDTO>(),
                 PerformanceFactors = new List<TreatmentPerformanceFactorDTO>(),
+                SupersedeRules = new List<TreatmentSupersedeRuleDTO>(),
                 ShadowForAnyTreatment = 2,
                 ShadowForSameTreatment = 5,
                 CriterionLibrary = treatmentCriterion,
@@ -55,6 +55,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
                 Costs = new List<TreatmentCostDTO>(),
                 Consequences = new List<TreatmentConsequenceDTO>(),
                 PerformanceFactors = new List<TreatmentPerformanceFactorDTO>(),
+                SupersedeRules = new List<TreatmentSupersedeRuleDTO>(),
                 CriterionLibrary = criterionLibrary
             };
             return dto;

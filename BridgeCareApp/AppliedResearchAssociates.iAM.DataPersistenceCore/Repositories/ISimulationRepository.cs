@@ -30,6 +30,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         SimulationDTO GetSimulation(Guid simulationId);
 
+        // Note: looks like this is not in use
         SimulationCloningResultDTO CloneSimulation(Guid simulationId, Guid networkId, string simulationName);
 
         /// <summary>Updates the simulation. If the dto has a nonempty

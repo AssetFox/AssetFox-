@@ -1,5 +1,3 @@
-
-
 Create PROCEDURE dbo.usp_delete_network(
 @NetworkId AS uniqueidentifier=NULL,
 @RetMessage VARCHAR(250) OUTPUT
@@ -394,55 +392,6 @@ AS
 			-----------------------------------------------------------------------
     		-------MaintainableAsset --> AssetSummaryDetail -----
 
-	--BEGIN TRY
-
-	--	Set @RowsDeleted = 0;
-
-	--	ALTER TABLE AssetSummaryDetail NOCHECK CONSTRAINT all;
-	--	--ALTER INDEX ALL ON AssetSummaryDetail DISABLE;
-
-	--	Print 'AssetSummaryDetail ';
-
-	--	Select l3.* INTO #tempAssetSummaryDetail
-	--	FROM Network AS l1
-	--	Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-	--	JOIN AssetSummaryDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-	--	WHERE Not l1.Id IN (@NetworkId);
-
-	--	Select @RowsDeleted = Count(l3.Id) 
-	--	FROM Network AS l1
-	--	Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-	--	JOIN AssetSummaryDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-	--	WHERE l1.Id IN (@NetworkId);
-
-	--	Drop  Table AssetSummaryDetail;
-
-	--	Select * into AssetSummaryDetail from #tempAssetSummaryDetail;
-
-	--	Drop table #tempAssetSummaryDetail;
-					
-	--	--Print 'Rows Affected --MaintainableAsset --> AssetSummaryDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
-					
-	--	ALTER TABLE AssetSummaryDetail WITH CHECK CHECK CONSTRAINT all;
-	--	--ALTER INDEX ALL ON AssetSummaryDetail REBUILD;
-	--END TRY
-	--BEGIN CATCH
-	--	ALTER TABLE AssetSummaryDetail WITH CHECK CHECK CONSTRAINT all;
-	--	--ALTER INDEX ALL ON AssetSummaryDetail REBUILD;
-	--	Print 'Query Error in Network --> MaintainableAsset --> AssetSummaryDetail ***Failed***';
-	--	SELECT ERROR_NUMBER() AS ErrorNumber
-	--	,ERROR_SEVERITY() AS ErrorSeverity
-	--	,ERROR_STATE() AS ErrorState
-	--	,ERROR_PROCEDURE() AS ErrorProcedure
-	--	,ERROR_LINE() AS ErrorLine
-	--	,ERROR_MESSAGE() AS ErrorMessage;
-
-	--	SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetSummaryDetail'
-	--	RAISERROR (@CustomErrorMessage, 16, 1);
-	--	Set @RetMessage = @CustomErrorMessage;
-	--END CATCH
-
-
 	BEGIN TRY
 
 		ALTER TABLE AssetSummaryDetail NOCHECK CONSTRAINT all
@@ -721,59 +670,6 @@ AS
 
 	-- MaintainableAsset --> AssetDetail --> TreatmentOptionDetail -->  -->  --> 
 
-	--BEGIN TRY
-
-	--	Set @RowsDeleted = 0;
-
-	--	ALTER TABLE TreatmentOptionDetail NOCHECK CONSTRAINT all;
-	--	--ALTER INDEX ALL ON TreatmentOptionDetail DISABLE;
-
-	--	Print 'TreatmentOptionDetail ';
-
-	--	Select l4.* INTO #tempTreatmentOptionDetail
-	--					FROM Network AS l1
-	--					Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-	--					Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-	--					JOIN TreatmentOptionDetail AS l4 ON l4.AssetDetailId = l3.Id
-	--					WHERE Not l1.Id IN (@NetworkId);
-
-	--	Select @RowsDeleted = Count(l4.Id) 
-	--					FROM Network AS l1
-	--					Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-	--					Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-	--					JOIN TreatmentOptionDetail AS l4 ON l4.AssetDetailId = l3.Id
-	--					WHERE l1.Id IN (@NetworkId);
-
-	--	Drop  Table TreatmentOptionDetail;
-
-	--	Select * into TreatmentOptionDetail from #tempTreatmentOptionDetail;
-
-	--	Drop table #tempTreatmentOptionDetail;
-					
-	--	--Print 'Rows Affected Network --> MaintainableAsset --> AssetDetail --> TreatmentOptionDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
-					
-	--	ALTER TABLE TreatmentOptionDetail WITH CHECK CHECK CONSTRAINT all;
-	--	--ALTER INDEX ALL ON TreatmentOptionDetail REBUILD;
-
-	--END TRY 
-	--BEGIN CATCH
-	--	ALTER TABLE TreatmentOptionDetail WITH CHECK CHECK CONSTRAINT all;
-	--	--ALTER INDEX ALL ON TreatmentOptionDetail REBUILD;
-	--	Print 'Query Error in Network --> MaintainableAsset --> AssetDetail --> TreatmentOptionDetaild ***Failed***';
-	--	SELECT ERROR_NUMBER() AS ErrorNumber
-	--	,ERROR_SEVERITY() AS ErrorSeverity
-	--	,ERROR_STATE() AS ErrorState
-	--	,ERROR_PROCEDURE() AS ErrorProcedure
-	--	,ERROR_LINE() AS ErrorLine
-	--	,ERROR_MESSAGE() AS ErrorMessage;
-
-	--	SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetDetail --> TreatmentOptionDetail'
-	--	RAISERROR (@CustomErrorMessage, 16, 1);
-	--	Set @RetMessage = @CustomErrorMessage;
-
-	--END CATCH
-
-
 	BEGIN TRY
 
 		ALTER TABLE TreatmentOptionDetail NOCHECK CONSTRAINT all
@@ -933,56 +829,6 @@ AS
 	
 			--MaintainableAsset\AssetDetail
 
-	--BEGIN TRY
-
-	--	Set @RowsDeleted = 0;
-
-	--	ALTER TABLE AssetDetail NOCHECK CONSTRAINT all;
-	--	--ALTER INDEX ALL ON AssetDetail DISABLE;
-
-	--	Print 'AssetDetail ';
-	
-	--	SELECT l3.* INTO #tempAssetDetailId
-	--	FROM Network AS l1
-	--	Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-	--	Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-	--	WHERE Not l1.Id IN (@NetworkId);
-
-	--	Select @RowsDeleted = Count(l3.Id) 	
-	--	FROM Network AS l1
-	--	Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-	--	Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-	--	WHERE l1.Id IN (@NetworkId)
-
-	--	Drop Table AssetDetail;
-
-	--	Select * into AssetDetail from #tempAssetDetailId;
-
-	--	Drop table #tempAssetDetailId;
-					
-	--	--Print 'Rows Affected Network --> MaintainableAsset --> AssetDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
-					
-	--	ALTER TABLE AssetDetail WITH CHECK CHECK CONSTRAINT all;
-	--	--ALTER INDEX ALL ON AssetDetail REBUILD;
-
-	--END TRY 
-	--	BEGIN CATCH
-	--	ALTER TABLE AssetDetail WITH CHECK CHECK CONSTRAINT all;
-	--	--ALTER INDEX ALL ON AssetDetail REBUILD;
-	--	Print 'Query Error in Network --> MaintainableAsset --> AssetDetail ***Failed***';
-	--	SELECT ERROR_NUMBER() AS ErrorNumber
-	--	,ERROR_SEVERITY() AS ErrorSeverity
-	--	,ERROR_STATE() AS ErrorState
-	--	,ERROR_PROCEDURE() AS ErrorProcedure
-	--	,ERROR_LINE() AS ErrorLine
-	--	,ERROR_MESSAGE() AS ErrorMessage;
-
-	--	SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetDetail '
-	--	RAISERROR (@CustomErrorMessage, 16, 1);
-	--	Set @RetMessage = @CustomErrorMessage;
-
-	--END CATCH
-
 	BEGIN TRY
 
 		ALTER TABLE AssetDetail NOCHECK CONSTRAINT all
@@ -1028,18 +874,6 @@ AS
 		Set @RetMessage = @CustomErrorMessage;
 
 	END CATCH
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 		---End  --Network -->MaintainableAsset --> AssetDetail Path---------

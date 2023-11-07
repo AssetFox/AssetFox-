@@ -163,7 +163,6 @@
         </v-col>
 
         <v-col v-show='hasSelectedLibrary || hasScenario'>             
-            <!-- <v-col> -->
                 <v-data-table-server
                     id="InvestmentEditor-investmentsDataTable-dataTable"
                     :headers='budgetYearsGridHeaders' 
@@ -217,18 +216,17 @@
                         class='ghd-blue ghd-button' variant = "text">
                     Delete Selected
                 </v-btn>
-            <!-- </v-col> -->
         </v-col>
     
         <v-col v-show='hasSelectedLibrary && !hasScenario' cols = "12">
             <v-row justify-center>
                 <v-col>
                     <v-subheader class="ghd-label">Description</v-subheader>
-                    <v-textarea no-resize outline rows='4'
+                    <v-textarea no-resize rows='4'
                                 v-model='selectedBudgetLibrary.description'
                                 @update:model-value="checkHasUnsavedChanges()"
                                 variant="outlined"
-                                class="ghd-text-field-border">
+                                class="ghd-control-text ghd-control-border" density="compact">
                     </v-textarea>
                 </v-col>
             </v-row>
@@ -384,9 +382,8 @@ const stateBudgetLibraries = computed<BudgetLibrary[]>(() => store.state.investm
 const stateSelectedBudgetLibrary = computed<BudgetLibrary>(() => store.state.investmentModule.selectedBudgetLibrary);
 let stateInvestmentPlan = computed<InvestmentPlan>(() => store.state.investmentModule.investmentPlan);
 let stateScenarioBudgets = ref<Budget[]>(store.state.investmentModule.scenarioBudgets);
-const hasUnsavedChanges = computed<boolean>(()=>(store.state.unsavedChangesFlagModule.hasUnsavedChanges));
-//let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess); //DOESNT Work
-let hasAdminAccess: boolean = shallowReactive(store.state.authenticationModule.hasAdminAccess) ; 
+const hasUnsavedChanges = computed<boolean>(() => (store.state.unsavedChangesFlagModule.hasUnsavedChanges));
+const hasAdminAccess = computed<boolean>(()=> (store.state.authenticationModule.hasAdminAccess)); 
 
 let isSuccessfulImport = ref<boolean>(store.state.investmentModule.isSuccessfulImport);
 let currentUserCriteriaFilter = ref<UserCriteriaFilter>(store.state.userModule.currentUserCriteriaFilter);
@@ -504,37 +501,37 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     
     // REPLACE with created() ?
     //function beforeRouteEnter() {
-    created();
-    async function created() {
-        // (() => {
-        //     (async () => { 
-        //         librarySelectItemValue.value = '';
-        //         await getHasPermittedAccessAction();
-        //         await getBudgetLibrariesAction()
+    // created();
+    // async function created() {
+    //     (() => {
+    //         (async () => { 
+    //             librarySelectItemValue.value = '';
+    //             await getHasPermittedAccessAction();
+    //             await getBudgetLibrariesAction()
         
-        //         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
-        //             selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
+    //             if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
+    //                 selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
 
-        //             if (selectedScenarioId === uuidNIL) {
-        //                 addErrorNotificationAction({
-        //                     message: 'Found no selected scenario for edit',
-        //                 });
-        //                 $router.push('/Scenarios/');
-        //             }
+    //                 if (selectedScenarioId === uuidNIL) {
+    //                     addErrorNotificationAction({
+    //                         message: 'Found no selected scenario for edit',
+    //                     });
+    //                     $router.push('/Scenarios/');
+    //                 }
 
-        //             hasScenario.value = true;
-        //             ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
-        //                 if(response.data){
-        //                     setAlertMessageAction("An investment import has been added to the work queue")
-        //                 }
-        //             })
-        //             await initializePages();
-        //         }
-        //         else
-        //             initializing = false;               
-        //     })();                    
-        // });
-    }
+    //                 hasScenario.value = true;
+    //                 ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
+    //                     if(response.data){
+    //                         setAlertMessageAction("An investment import has been added to the work queue")
+    //                     }
+    //                 })
+    //                 await initializePages();
+    //             }
+    //             else
+    //                 initializing = false;               
+    //         })();                    
+    //     });
+    // }
 
     onMounted(() => {
         librarySelectItemValue.value = '';
@@ -896,7 +893,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         } else if (hasSelectedLibrary.value) {
             const hasUnsavedChanges: boolean = hasUnsavedChangesCore('',
                 { ...clone(selectedBudgetLibrary.value), budgets: clone(currentPage.value) },
-                stateSelectedBudgetLibrary);
+                stateSelectedBudgetLibrary.value);
             setHasUnsavedChangesAction({ value: hasUnsavedChanges });
         }
     }
@@ -1252,7 +1249,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function onEditBudgetYearValue(year: number, budgetName: string, value: number) {//check out
-    console.log("onEditBudgetYearValue: " + year + ":" + budgetName + ":" + value)
         if (any(propEq('name', budgetName), currentPage.value)) {
             const budget: Budget = find(propEq('name', budgetName), currentPage.value) as Budget;
 
@@ -1352,7 +1348,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function formatAsCurrency(value: any): any {
-        console.log("currency"  + value)
         if (hasValue(value)) {
             return formatAsCurrency(value);
         }
@@ -1437,7 +1432,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function onUpdateBudgetAmount(rowId: string, updatedRow: BudgetAmount) {
-    console.log("onUpdateBudgetAmount")
         if (!isNil(addedBudgetAmounts.get(updatedRow.budgetName)))
             if (any(propEq('id', rowId), addedBudgetAmounts.get(updatedRow.budgetName)!)) {
                 let amounts = addedBudgetAmounts.get(updatedRow.budgetName)!
@@ -1518,7 +1512,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             updatedBudgetAmounts.size > 0 || 
             (hasScenario.value && hasSelectedLibrary.value) ||
             (hasScenario.value && hasUnsavedChangesCore('', CheckInvestmentPlan, CheckStateInvestmentPlan)) || 
-            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedBudgetLibrary.value, stateSelectedBudgetLibrary))
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedBudgetLibrary.value, stateSelectedBudgetLibrary.value))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 

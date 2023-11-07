@@ -978,7 +978,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
             addedRows.value.length > 0 ||
             updatedRowsMap.size > 0 || 
             (hasScenario.value && hasSelectedLibrary.value) ||
-            (hasSelectedLibrary.value && hasUnsavedChangesCore('', stateSelectedCashRuleFlowLibrary.value, selectedCashFlowRuleLibrary.value))
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedCashFlowRuleLibrary.value,  stateSelectedCashRuleFlowLibrary.value))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 

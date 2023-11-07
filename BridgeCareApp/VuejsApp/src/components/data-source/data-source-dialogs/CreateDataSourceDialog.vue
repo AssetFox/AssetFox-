@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
+  <v-dialog max-width="450px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
          <v-row justify-space-between align-center>
@@ -47,7 +47,7 @@ import { clone } from 'ramda';
 
    const newDataSource = ref<Datasource>(emptyDatasource);
   let rules: InputValidationRules = validationRules;
-  let datasourceName: Ref<string> = ref('New Data Source');
+  let datasourceName = ref<string>('New Data Source');
 
   watch(datasourceName, () => { 
       newDataSource.value.name = datasourceName.value;

@@ -39,6 +39,8 @@
               id="DataSource-SourceType-vselect"
               class="ghd-select ghd-text-field ghd-text-field-border ds-style Montserrat-font-family"
               :items="dsTypeItems"
+              item-title = "text"
+              item-value = "value"
               style="padding-right:20%; margin-left:2%;"
               v-model="dataSourceTypeItem"
               v-show="showMssql || showExcel"
@@ -56,6 +58,8 @@
                         class="ghd-control-text ghd-control-border Montserrat-font-family"
                         v-model="fileName"
                         style="margin-left:2%;"
+                        item-title = "text"
+                        item-value = "value"
                         v-show="showExcel"
                         outline
                         variant = "outlined"
@@ -69,6 +73,8 @@
                 :items="locColumns"
                 v-model="currentExcelLocationColumn"
                 v-show="showExcel"
+                item-title = "text"
+                item-value = "value"
                 class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
                 outline
                 variant = "outlined"
@@ -82,6 +88,8 @@
                 v-model="currentExcelDateColumn"
                 class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
                 outline
+                item-title = "text"
+                item-value = "value"
                 variant = "outlined"
                 >
                 </v-select>
@@ -163,16 +171,16 @@ import { useStore } from 'vuex';
     let sqlCommandResponse = computed<SqlCommandResponse>(() => store.state.datasourceModule.sqlCommandResponse) ;
     let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges) ;
 
-    async function getDataSourcesAction(payload?: any): Promise<any> {await store.dispatch('getDataSources');}
-    async function getDataSourceTypesAction(payload?: any): Promise<any> {await store.dispatch('getDataSourceTypes');}
-    async function upsertSqlDataSourceAction(payload?: any): Promise<any> {await store.dispatch('upsertSqlDataSource');}
-    async function upsertExcelDataSourceAction(payload?: any): Promise<any> {await store.dispatch('upsertExcelDataSource');}
-    async function deleteDataSourceAction(payload?: any): Promise<any> {await store.dispatch('deleteDataSource');}
-    async function importExcelSpreadsheetFileAction(payload?: any): Promise<any> {await store.dispatch('importExcelSpreadsheetFile');}
-    async function getExcelSpreadsheetColumnHeadersAction(payload?: any): Promise<any> {await store.dispatch('getExcelSpreadsheetColumnHeaders');}
-    async function checkSqlCommandAction(payload?: any): Promise<any> {await store.dispatch('checkSqlCommand');}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
-    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification');} 
+    async function getDataSourcesAction(payload?: any): Promise<any> {await store.dispatch('getDataSources', payload);}
+    async function getDataSourceTypesAction(payload?: any): Promise<any> {await store.dispatch('getDataSourceTypes', payload);}
+    async function upsertSqlDataSourceAction(payload?: any): Promise<any> {await store.dispatch('upsertSqlDataSource', payload);}
+    async function upsertExcelDataSourceAction(payload?: any): Promise<any> {await store.dispatch('upsertExcelDataSource', payload);}
+    async function deleteDataSourceAction(payload?: any): Promise<any> {await store.dispatch('deleteDataSource', payload);}
+    async function importExcelSpreadsheetFileAction(payload?: any): Promise<any> {await store.dispatch('importExcelSpreadsheetFile', payload);}
+    async function getExcelSpreadsheetColumnHeadersAction(payload?: any): Promise<any> {await store.dispatch('getExcelSpreadsheetColumnHeaders', payload);}
+    async function checkSqlCommandAction(payload?: any): Promise<any> {await store.dispatch('checkSqlCommand', payload);}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification', payload);} 
 
     let getUserNameByIdGetter: any = store.getters.getUserNameById;
     let getIdByUserNameGetter: any = store.getters.getIdByUserName ;
@@ -205,7 +213,7 @@ import { useStore } from 'vuex';
     let isNewDataSource = ref<boolean>(false);
     let allowSaveData = ref<boolean>(false);
         
-    let fileName: string | null = '';
+    let fileName = ref<string>('');
     let fileSelect: HTMLInputElement = {} as HTMLInputElement;
     let files: File[] = [];
     let file: ShallowRef<File | null> = shallowRef(null);   
@@ -318,7 +326,7 @@ import { useStore } from 'vuex';
     function onFileChanged() {
         files = hasValue(file.value) ? [file.value as File] : [];                                   
         emit('submit', file.value);
-        file.value ? fileName = file.value.name : fileName = '';
+        file.value ? fileName.value = file.value.name : fileName.value = '';
 
         (<HTMLInputElement>document.getElementById('file-select')!).value = '';
     }

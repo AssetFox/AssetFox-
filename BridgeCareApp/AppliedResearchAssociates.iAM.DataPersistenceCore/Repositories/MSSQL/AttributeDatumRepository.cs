@@ -21,6 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void AddAssignedData(List<MaintainableAsset> maintainableAssets, List<AttributeDTO> attributeDtos)
         {
+            // Wjwjwj This is where attributeDatum table gets filled
             var configurableAttributes = AttributeDtoDomainMapper.ToDomainList(attributeDtos, _unitOfWork.EncryptionKey);
 
             // insert/update configurable attributes

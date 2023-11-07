@@ -4,7 +4,6 @@
             <v-toolbar app class="paper-white-bg">
                 <v-toolbar-title  >
                     <v-row  >
-
                         <v-col  ><img v-bind:src="agencyLogo"  @click="onNavigate('/Scenarios/')"></v-col>                    
                     </v-row>
                 </v-toolbar-title>

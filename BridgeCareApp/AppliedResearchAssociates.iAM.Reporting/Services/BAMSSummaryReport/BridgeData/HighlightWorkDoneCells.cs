@@ -14,25 +14,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 var range = worksheet.Cells[row, column, row, column + 1];
                 var rangeForCashFlow = worksheet.Cells[row, column - 2, row, column + 1];
-                //ParallelBridgeBAMs(parallelBridge, treatmentCause, range);
                 CashFlowedBridge(treatmentCause, rangeForCashFlow);
 
                 if (index != 1 && treatmentCause == TreatmentCause.CommittedProject
                     && previousYearCause == TreatmentCause.CommittedProject && previousYearTreatment.ToLower() != BAMSConstants.NoTreatment)
                 {
-                    var rangeWithPreviousColumn = worksheet.Cells[row, column - 1, row, column];
+                    var rangeWithPreviousColumn = worksheet.Cells[row, column - 2, row, column - 1];
                     CommittedForConsecutiveYears(rangeWithPreviousColumn);
                     CommittedForConsecutiveYears(range);
                 }
-                //ParallelBridgeMPMS(parallelBridge, treatmentCause, range);
-                //ParallelBridgeCashFlow(parallelBridge, treatmentCause, rangeForCashFlow);
-            }
+            }            
         }
 
         private void CommittedForConsecutiveYears(ExcelRange range)
         {
             ExcelHelper.ApplyColor(range, Color.FromArgb(255, 153, 0));
-            ExcelHelper.SetTextColor(range, Color.White);
+            ExcelHelper.SetTextColor(range, Color.White);                        
         }
 
         private void ParallelBridgeBAMs(int isParallel, TreatmentCause projectPickType, ExcelRange range)

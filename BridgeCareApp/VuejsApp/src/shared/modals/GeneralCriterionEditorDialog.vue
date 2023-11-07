@@ -2,26 +2,22 @@
     <v-dialog
         persistent
         v-model="dialogData.showDialog"
-        width="auto"
         class="criterion-library-editor-dialog"
     >
         <v-card>
             <v-card-text>
-                <v-row justify-center column>
+                <v-row >
                     <div>
-                        <v-row justify-center>
-                            <v-col cols = "10">
-                            <CriteriaEditor :criteriaEditorData="criteriaEditorData"
-                                            @submitCriteriaEditorResult="onSubmitCriteriaEditorResult"/>
-                            </v-col>
-                        </v-row>
+                      <CriteriaEditor :criteriaEditorData="criteriaEditorData"
+                                      @submitCriteriaEditorResult="onSubmitCriteriaEditorResult"/>
                     </div>
                 </v-row>
             </v-card-text>
-            <v-card-actions>
+            <v-row justify="center" style="padding: 10px; margin: 0px;">
                 <v-btn
                     class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                    variant = "flat"
+                    flat
+                    style="margin-right: 5px;"
                     @click="onSubmit(false)"
                 >
                     Cancel
@@ -29,18 +25,18 @@
                 <v-btn
                     :disabled="!canUpdateOrCreate"
                     class="ghd-blue-bg ghd-white ghd-button-text"
-                    variant = "flat"
+                    flat
+                    style="margin-left: 5px;"                    
                     @click="onSubmit(true)"
                 >
                     Save
                 </v-btn>
-            </v-card-actions>
+            </v-row>
         </v-card>
     </v-dialog>
 </template>
 
-<script lang="ts" setup>
-import Vue from 'vue';
+<script setup lang="ts">
 import { GeneralCriterionEditorDialogData } from '../models/modals/general-criterion-editor-dialog-data';
 import {
   CriteriaEditorData,
@@ -49,15 +45,9 @@ import {
     emptyCriteriaEditorData,
     emptyCriterionLibrary,
 } from '@/shared/models/iAM/criteria';
-import { hasValue } from '@/shared/utils/has-value-util';
-import CriterionLibraryEditor from '@/components/criteria-editor/CriterionLibraryEditor.vue';
-import { getBlankGuid } from '@/shared/utils/uuid-utils';
-import { clone, isNil } from 'ramda';
-import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
-import Alert from '@/shared/modals/Alert.vue';
-import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
+import { isNil } from 'ramda';
 import CriteriaEditor from '../components/CriteriaEditor.vue';
-import {inject, reactive, toRefs, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { toRefs, ref, watch} from 'vue';
 import { useStore } from 'vuex';
 
 let store = useStore();
@@ -66,27 +56,21 @@ const props = defineProps<{
     dialogData: GeneralCriterionEditorDialogData
     }>()
 const { dialogData } = toRefs(props);
-let stateCriterionLibraries = ref<CriterionLibrary[]>(store.state.criterionModule.criterionLibraries);
-let stateSelectedCriterionLibrary = ref<CriterionLibrary>(store.state.criterionModule.selectedCriterionLibrary);
-let stateSelectedCriterionIsValid = ref<boolean>(store.state.criterionModule.selectedCriterionIsValid);
-
 const criteriaEditorData = ref<CriteriaEditorData>({
     ...emptyCriteriaEditorData,
     isLibraryContext: true
   });
+const canUpdateOrCreate = ref<boolean>(false);
 
-  const canUpdateOrCreate = ref<boolean>(false);
-
-  let CriteriaExpressionToReturn: string | null = "";
+let CriteriaExpressionToReturn: string | null = "";
 
   watch(dialogData,()=> {
-        const htmlTag: HTMLCollection = document.getElementsByTagName('html') as HTMLCollection;
-        const criteriaEditorCard: HTMLCollection = document.getElementsByClassName('criteria-editor-card') as HTMLCollection;
-
+        // const htmlTag: HTMLCollection = document.getElementsByTagName('html') as HTMLCollection;
+        // const criteriaEditorCard: HTMLCollection = document.getElementsByClassName('criteria-editor-card') as HTMLCollection;
         if (dialogData.value.showDialog) {    
             criteriaEditorData.value = {
                     ...criteriaEditorData.value,
-                    mergedCriteriaExpression: props.dialogData.CriteriaExpression,
+                    mergedCriteriaExpression: dialogData.value.CriteriaExpression,
                     isLibraryContext: true
                 };
 

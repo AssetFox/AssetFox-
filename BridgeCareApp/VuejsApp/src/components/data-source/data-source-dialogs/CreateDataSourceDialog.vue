@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="450px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
          <v-row justify-space-between align-center>
@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { ref, Ref, shallowRef, ShallowRef, watch } from 'vue';
+import Vue, { computed, ref, Ref, shallowRef, ShallowRef, watch } from 'vue';
 import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { Datasource, emptyDatasource, DSSQL } from '../../../shared/models/iAM/data-source';
@@ -45,6 +45,7 @@ import { useStore } from 'vuex';
   const props = defineProps<{
     dialogData: CreateDataSourceDialogData
   }>()
+  let showDialogComputed = computed(() => props.dialogData.showDialog);
   const emit = defineEmits(['submit'])
 
   let newDataSource: ShallowRef<Datasource> = shallowRef(emptyDatasource);

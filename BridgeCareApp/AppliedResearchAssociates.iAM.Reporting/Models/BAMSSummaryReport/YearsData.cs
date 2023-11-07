@@ -1,4 +1,5 @@
 ﻿using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport
@@ -11,6 +12,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport
 
         public TreatmentCategory TreatmentCategory { get; set; }
         public AssetCategories AssetType { get; set; }
+
+        public string ProjectSource { get; set; }
 
         public double Amount { get; set; }
 

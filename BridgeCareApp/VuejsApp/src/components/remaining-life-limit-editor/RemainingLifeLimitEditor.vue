@@ -1,11 +1,12 @@
 <template>
-    <v-row column>
-      <v-col cols = "12">
-        <v-row justify-space-between>
-          <v-col cols = "3" class="ghd-constant-header">
-              <v-row column>
-                  <v-subheader class="ghd-control-label ghd-md-gray">Remaining Life Limit Library</v-subheader>
-                  <v-select id="RemainingLifeLimitEditor-lifeLimitLibrary-select"
+    <v-row>
+        <v-col>
+            <v-row align="center" justify="space-between">
+                <v-col cols = "auto" class="ghd-constant-header">                   
+                    <div style="margin-bottom: 10px;">
+                        <v-subheader class="ghd-control-label ghd-md-gray">Remaining Life Limit Library</v-subheader>
+                    </div>
+                    <v-select id="RemainingLifeLimitEditor-lifeLimitLibrary-select"
                             class="ghd-select ghd-text-field ghd-text-field-border vs-style"
                             :items="selectListItems"
                             item-title="text"
@@ -13,17 +14,17 @@
                             append-icon=ghd-down
                             v-model="librarySelectItemValue"
                             variant="outlined"
+                            density="compact"
                             >
-                  </v-select>
-                  <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
-              </v-row>
-          </v-col>
-          <v-col cols = "4" class="ghd-constant-header">
-                    <v-row v-if="hasSelectedLibrary && !hasScenario" style="padding-top: 18px; padding-left: 5px" align-center>
+                    </v-select>
+                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>                   
+                </v-col>
+                <v-col cols = "auto" class="ghd-constant-header">
+                    <v-row v-if="hasSelectedLibrary && !hasScenario" style="padding-top: 10px; padding-left: 10px">
                         <div class="header-text-content owner-padding">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
-                        <v-divider  vertical 
+                        <v-divider vertical 
                             v-if="hasSelectedLibrary && !hasScenario">
                         </v-divider>
                         <v-badge v-show="isShared" style="padding: 7px">
@@ -37,17 +38,27 @@
                         </v-btn>
                     </v-row>
                 </v-col>
-                <v-col cols = "4" class="ghd-constant-header">
-                <v-row justify-end align-end style="padding-top: 18px !important;">
-                    <div>
-                        <v-btn id="RemainingLifeLimitEditor-addRemainingLifeLimit-btn" class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" v-show="librarySelectItemValue != null || hasScenario" variant = "outlined">Add Remaining Life Limit</v-btn>
-                        <v-btn id="RemainingLifeLimitEditor-createNewLibrary-vbtn" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style ="ri"  @click="onShowCreateRemainingLifeLimitLibraryDialog(false)" v-show="!hasScenario" variant = "outlined">Create New Library</v-btn>
-                    </div>
-                </v-row>
+                <v-col cols = "auto" class="ghd-constant-header">     
+                    <v-btn 
+                        id="RemainingLifeLimitEditor-addRemainingLifeLimit-btn"
+                        class="ghd-white-bg ghd-blue ghd-button"
+                        style="margin: 5px;"
+                        @click="onShowCreateRemainingLifeLimitDialog"
+                        v-show="librarySelectItemValue != null || hasScenario"
+                        variant = "outlined">Add Remaining Life Limit
+                    </v-btn>
+                    <v-btn
+                        id="RemainingLifeLimitEditor-createNewLibrary-vbtn"
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        style="margin: 5px;"
+                        @click="onShowCreateRemainingLifeLimitLibraryDialog(false)"
+                        v-show="!hasScenario"
+                        variant = "outlined">Create New Library
+                    </v-btn>
                 </v-col>
             </v-row>
         </v-col>
-        <div v-show="librarySelectItemValue != null || hasScenario">
+        <div class="remaininglife-data-table" v-show="librarySelectItemValue != null || hasScenario">
             <v-data-table-server
             id="RemainingLifeLimitEditor-attributes-dataTable"
             :headers="gridHeaders"
@@ -99,6 +110,7 @@
                                     readonly
                                     single-line
                                     class="sm-txt"
+                                    variant="underlined"
                                     :model-value="props.item.attribute"
                                     :rules="[
                                         rules['generalRules'].valueIsNotEmpty,
@@ -138,6 +150,7 @@
                                     readonly
                                     single-line
                                     class="sm-txt"
+                                    variant="underlined"
                                     :model-value="props.item.value"
                                     :rules="[
                                         rules['generalRules'].valueIsNotEmpty,
@@ -163,41 +176,41 @@
                         <td v-else>-
                         </td>
                         <td class="px-0">
-                            <v-btn id="RemainingLifeLimitEditor-editCriteria-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)" icon>
-                                <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                            <v-btn id="RemainingLifeLimitEditor-editCriteria-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)" flat>
+                                <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                             </v-btn>   
                         </td>
                         <td justify-end>
-                            <v-btn id="RemainingLifeLimitEditor-deleteAttribute-btn" @click="onRemoveRemainingLifeLimitIcon(props.item)" icon>
-                                <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                            <v-btn id="RemainingLifeLimitEditor-deleteAttribute-btn" @click="onRemoveRemainingLifeLimitIcon(props.item)" flat>
+                                <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>                          
                         </td>
                     </tr>
                 </template>
                 </v-data-table-server>
-                <v-row justify-start align-center class="pa-2">
-                </v-row>
-                <v-divider></v-divider>
-                <v-col v-show="!hasScenario" xs12 class="px-0">
-                    <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
-                    <v-textarea
-                        class="ghd-control-text ghd-control-border"
-                        v-model="selectedRemainingLifeLimitLibrary.description"
-                        @update:model-value="checkHasUnsavedChanges()"
-                        outline
-                    >
-                    </v-textarea>
-                </v-col>
-                <v-row justify-center row>
-                    <v-btn id="RemainingLifeLimitEditor-cancel-btn" class="ghd-blue" variant = "outlined" v-show="hasScenario" @click="onDiscardChanges" :disabled="!hasUnsavedChanges">Cancel</v-btn>
-                    <v-btn id="RemainingLifeLimitEditor-deleteLibrary-btn" class="ghd-blue" variant = "outlined" v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
-                    <v-btn id="RemainingLifeLimitEditor-createAsNewLibrary-btn" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" variant = "outlined">Create as New Library</v-btn>
-                    <v-btn id="RemainingLifeLimitEditor-save-btn" class="ghd-blue-bg ghd-white ghd-button" v-show="hasScenario" @click="onUpsertScenarioRemainingLifeLimits" :disabled="disableCrudButton() || !hasUnsavedChanges">Save</v-btn>
-                    <v-btn id="RemainingLifeLimitEditor-updateLibrary-btn" class="ghd-blue-bg ghd-white ghd-button" v-show="!hasScenario" :disabled="disableCrudButton() || !hasUnsavedChanges" @click="onUpsertRemainingLifeLimitLibrary">Update Library</v-btn>
-                </v-row>
         </div>
-
-        <ConfirmDeleteAlert 
+        <v-divider :thickness="4" class="border-opacity-100" ></v-divider>
+        <v-col v-show="hasSelectedLibrary && !hasScenario" cols="12">
+            <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
+            <v-textarea
+                class="ghd-control-text ghd-control-border"
+                v-model="selectedRemainingLifeLimitLibrary.description"
+                @update:model-value="checkHasUnsavedChanges()"
+                outline
+            >
+            </v-textarea>
+        </v-col>
+        <v-col>
+            <v-row v-show="hasSelectedLibrary" style="padding-bottom: 80px;" align-content="center" justify="center">
+                <v-btn id="RemainingLifeLimitEditor-cancel-btn" style="margin: 5px;" class="ghd-blue" variant = "outlined" v-show="hasScenario" @click="onDiscardChanges" :disabled="!hasUnsavedChanges">Cancel</v-btn>
+                <v-btn id="RemainingLifeLimitEditor-deleteLibrary-btn" style="margin: 5px;" class="ghd-blue" variant = "outlined" v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
+                <v-btn id="RemainingLifeLimitEditor-createAsNewLibrary-btn" style="margin: 5px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" variant = "outlined">Create as New Library</v-btn>
+                <v-btn id="RemainingLifeLimitEditor-save-btn" style="margin: 5px;" class="ghd-blue-bg ghd-white ghd-button" v-show="hasScenario" @click="onUpsertScenarioRemainingLifeLimits" :disabled="disableCrudButton() || !hasUnsavedChanges">Save</v-btn>
+                <v-btn id="RemainingLifeLimitEditor-updateLibrary-btn" style="margin: 5px;" class="ghd-blue-bg ghd-white ghd-button" v-show="!hasScenario" :disabled="disableCrudButton() || !hasUnsavedChanges" @click="onUpsertRemainingLifeLimitLibrary">Update Library</v-btn>
+            </v-row>
+        </v-col>     
+        <!-- <ConfirmDeleteAlert -->
+        <Alert
           :dialogData="confirmDeleteAlertData"
           @submit="onSubmitConfirmDeleteAlertResult"
         />
@@ -221,7 +234,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch } from 'vue';
+import Vue, { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onMounted } from 'vue';
 import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import {
     emptyRemainingLifeLimit,
@@ -273,6 +286,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import { computed } from 'vue';
 import { onBeforeUnmount } from 'vue';
 import { createDecipheriv } from 'crypto';
+import { getUrl } from '@/shared/utils/get-url';
 
     let store = useStore();
     const confirm = useConfirm();
@@ -299,8 +313,8 @@ import { createDecipheriv } from 'crypto';
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>{await store.dispatch('getCurrentUserOrSharedScenario', payload)}
     async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario', payload)}
     
-    function addedOrUpdatedRemainingLifeLimitLibraryMutator(payload: any){store.commit('addedOrUpdatedRemainingLifeLimitLibraryMutator');}
-    function selectedRemainingLifeLimitLibraryMutator(payload: any){store.commit('selectedRemainingLifeLimitLibraryMutator');}
+    function addedOrUpdatedRemainingLifeLimselectListItemsrefitLibraryMutator(payload: any){store.commit('addedOrUpdatedRemainingLifeLimitLibraryMutator', payload);}
+    function selectedRemainingLifeLimitLibraryMutator(payload: any){store.commit('selectedRemainingLifeLimitLibraryMutator', payload);}
 
     let getUserNameByIdGetter: any = store.getters.getUserNameById;
 
@@ -311,8 +325,8 @@ import { createDecipheriv } from 'crypto';
     let selectedGridRows: ShallowRef<RemainingLifeLimit[]> = shallowRef([]);
     let selectedRemainingLifeIds: string[] = [];
     let selectedScenarioId: any = getBlankGuid();
-    let selectListItems: SelectItem[] = [];
-    let hasSelectedLibrary = ref(false);
+    let selectListItems= ref<SelectItem[]>([]);
+    let hasSelectedLibrary = ref<boolean>(false);
     let gridHeaders: any[] = [
         {
             title: 'Remaining Life Attribute',
@@ -372,44 +386,38 @@ import { createDecipheriv } from 'crypto';
     let unsavedDialogAllowed: boolean = true;
     let trueLibrarySelectItemValue: string | null = ''
     let librarySelectItemValueAllowedChanged: boolean = true;
-    let librarySelectItemValue: Ref<string | null> = ref(null);
+    let librarySelectItemValue = ref<string | null>(null);
     let isShared: boolean = false;
 
-    let shareRemainingLifeLimitLibraryDialogData: ShareRemainingLifeLimitLibraryDialogData = clone(emptyShareRemainingLifeLimitLibraryDialogData);
+    let shareRemainingLifeLimitLibraryDialogData =ref<ShareRemainingLifeLimitLibraryDialogData>(clone(emptyShareRemainingLifeLimitLibraryDialogData));
 
     let itemsPerPage:number = 5;
     let dataPerPage: number = 0;
     let totalDataFound: number = 5;
     let remainingLifeLimits: RemainingLifeLimit[] = [];
     let numericAttributeSelectItems: SelectItem[] = [];
-    let createRemainingLifeLimitDialogData: CreateRemainingLifeLimitDialogData = clone(
+    let createRemainingLifeLimitDialogData = ref<CreateRemainingLifeLimitDialogData>(clone(
         emptyCreateRemainingLifeLimitDialogData,
-    );
+    ));
     let selectedRemainingLifeLimit: RemainingLifeLimit = clone(
         emptyRemainingLifeLimit,
     );
-    let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
-        emptyGeneralCriterionEditorDialogData,
-    );
-    let createRemainingLifeLimitLibraryDialogData: CreateRemainingLifeLimitLibraryDialogData = clone(
-        emptyCreateRemainingLifeLimitLibraryDialogData,
-    );
-    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    let criterionEditorDialogData = ref<GeneralCriterionEditorDialogData>(clone(emptyGeneralCriterionEditorDialogData));
+    let createRemainingLifeLimitLibraryDialogData = ref<CreateRemainingLifeLimitLibraryDialogData>(clone(emptyCreateRemainingLifeLimitLibraryDialogData));
+    let confirmDeleteAlertData = ref<AlertData>(clone(emptyAlertData));
     let rules: InputValidationRules = validationRules;
     let uuidNIL: string = getBlankGuid();
-    let hasScenario = ref(false);
+    let hasScenario = ref<boolean>(false);
     let currentUrl: string = window.location.href;
-    let hasCreatedLibrary: boolean = false;
+    let hasCreatedLibrary = ref<boolean>(false);
     let parentLibraryName: string = "None";
     let parentLibraryId: string = "";
-    let scenarioLibraryIsModified: boolean = false;
+    let scenarioLibraryIsModified = ref<boolean>(false);
     let loadedParentName: string = "";
     let loadedParentId: string = "";
-    let newLibrarySelection: boolean = false;
+    let newLibrarySelection = ref<boolean>(false);
 
-    created()
-    function created() {
-
+    onMounted(() => {
             librarySelectItemValue.value = null;
             getRemainingLifeLimitLibrariesAction().then(() => {
                 if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.RemainingLifeLimit) !== -1) {
@@ -428,30 +436,26 @@ import { createDecipheriv } from 'crypto';
                 }
             });
             
-    }
+    });
 
-    onBeforeUnmount(() => beforeDestroy())
-    function beforeDestroy() {
+    onBeforeUnmount(() => {
         setHasUnsavedChangesAction({ value: false });
-    }
+    });
 
-    watch(selectedGridRows, onSelectedGridRowsChanged )
-    function onSelectedGridRowsChanged() {
+    watch(selectedGridRows, ()=> {
             selectedRemainingLifeIds = getPropertyValues('id', selectedGridRows.value,) as string[];
-        }
+        });
 
-    watch(stateRemainingLifeLimitLibraries, onStateRemainingLifeLimitLibrariesChanged )
-    function onStateRemainingLifeLimitLibrariesChanged() {
-        selectListItems = stateRemainingLifeLimitLibraries.value.map(
+    watch(stateRemainingLifeLimitLibraries, ()=>  {
+        selectListItems.value = stateRemainingLifeLimitLibraries.value.map(
             (remainingLifeLimitLibrary: RemainingLifeLimitLibrary) => ({
                 text: remainingLifeLimitLibrary.name,
                 value: remainingLifeLimitLibrary.id,
             }),
         );
-    }
+    });
 
-    watch(librarySelectItemValue, onLibrarySelectItemValueChangedCheckUnsaved )
-    function onLibrarySelectItemValueChangedCheckUnsaved(){
+    watch(librarySelectItemValue, ()=> {
         if(hasScenario.value){
             onLibrarySelectItemValueChanged();
             unsavedDialogAllowed = false;
@@ -463,9 +467,9 @@ import { createDecipheriv } from 'crypto';
             })
         librarySelectItemValueAllowedChanged = true;
         parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
-        newLibrarySelection = true;
+        newLibrarySelection.value = true;
 
-    }
+    });
     function onLibrarySelectItemValueChanged() {
         trueLibrarySelectItemValue = librarySelectItemValue.value
         selectRemainingLifeLimitLibraryAction({
@@ -473,48 +477,42 @@ import { createDecipheriv } from 'crypto';
         });
     }
 
-    watch(stateSelectedRemainingLifeLimitLibrary,  onStateSelectedRemainingLifeLimitLibraryChanged)
-    function onStateSelectedRemainingLifeLimitLibraryChanged() {
+    watch(stateSelectedRemainingLifeLimitLibrary,  ()=> {
         selectedRemainingLifeLimitLibrary.value = clone(
             stateSelectedRemainingLifeLimitLibrary.value,
         );
-    }
+    });
 
-    watch(selectedRemainingLifeLimitLibrary,  onSelectedRemainingLifeLimitLibraryChanged)
-    function onSelectedRemainingLifeLimitLibraryChanged() {
+    watch(selectedRemainingLifeLimitLibrary,  ()=> {
         hasSelectedLibrary.value =  selectedRemainingLifeLimitLibrary.value.id !== uuidNIL;
         clearChanges();
         initializing = false;
         if(hasSelectedLibrary.value)
-            onPaginationChanged();
-    }
+            onPaginationChanged(); 
+    });
 
-    watch(stateScenarioRemainingLifeLimits, onStateScenarioRemainingLifeLimitsChanged )
-    function onStateScenarioRemainingLifeLimitsChanged() {
+    watch(stateScenarioRemainingLifeLimits, ()=> {
         if (hasScenario.value) {
             currentPage.value = clone(stateScenarioRemainingLifeLimits.value);
         }
-    }
+    });
 
-    watch(currentPage,  onGridDataChanged)
-    function onGridDataChanged() {
+    watch(currentPage,  ()=>  {
            // Get parent name from library id
-        selectListItems.forEach(library => {
+        selectListItems.value.forEach(library => {
             if (library.value === parentLibraryId) {
                 parentLibraryName = library.text;
             }
         });
-    }
+    });
     
-    watch(isSharedLibrary, onStateSharedAccessChanged)
-    function onStateSharedAccessChanged() {
+    watch(isSharedLibrary, ()=> {
         isShared = isSharedLibrary.value;
-    }
+    });
     
-    watch(stateNumericAttributes, onStateNumericAttributesChanged )
-    function onStateNumericAttributesChanged() {
+    watch(stateNumericAttributes, ()=> {
         setAttributesSelectListItems();
-    }
+    });
 
     watch(pagination, onPaginationChanged )
     async function onPaginationChanged() {
@@ -530,7 +528,7 @@ import { createDecipheriv } from 'crypto';
                 updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: deletionIds.value,
                 addedRows: addedRows.value,
-                isModified: scenarioLibraryIsModified
+                isModified: scenarioLibraryIsModified.value
             },           
             sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
             isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
@@ -566,17 +564,15 @@ import { createDecipheriv } from 'crypto';
             });     
     }
 
-    watch(deletionIds,onDeletionIdsChanged  )
-    function onDeletionIdsChanged(){
+    watch(deletionIds,()=>{
         checkHasUnsavedChanges();
-    }
+    });
 
-    watch(addedRows, onAddedRowsChanged )
-    function onAddedRowsChanged(){
+    watch(addedRows, ()=> {
         checkHasUnsavedChanges();
-    }
+    });
 
-    function mounted() {
+    function mounted() { // CHECK when its called
         setAttributesSelectListItems();
     }
 
@@ -625,7 +621,7 @@ import { createDecipheriv } from 'crypto';
     }
 
     function onShowCreateRemainingLifeLimitLibraryDialog(createAsNewLibrary: boolean) {
-        createRemainingLifeLimitLibraryDialogData = {
+        createRemainingLifeLimitLibraryDialogData.value = {
             showDialog: true,
             remainingLifeLimits: createAsNewLibrary
                 ? currentPage.value
@@ -634,7 +630,7 @@ import { createDecipheriv } from 'crypto';
     }
 
     function onSubmitCreateRemainingLifeLimitLibraryDialogResult(library: RemainingLifeLimitLibrary) {
-        createRemainingLifeLimitLibraryDialogData = clone(emptyCreateRemainingLifeLimitLibraryDialogData);
+        createRemainingLifeLimitLibraryDialogData.value = clone(emptyCreateRemainingLifeLimitLibraryDialogData);
 
         if (!isNil(library)) {
             const upsertRequest: LibraryUpsertPagingRequest<RemainingLifeLimitLibrary, RemainingLifeLimit> = {
@@ -651,14 +647,14 @@ import { createDecipheriv } from 'crypto';
             }
             RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    hasCreatedLibrary = true;
+                    hasCreatedLibrary.value = true;
                     librarySelectItemValue.value = library.id;
                     
                     if(library.remainingLifeLimits.length == 0){
                         clearChanges();
                     }
 
-                    addedOrUpdatedRemainingLifeLimitLibraryMutator(library);
+                    addedOrUpdatedRemainingLifeLimselectListItemsrefitLibraryMutator(library);
                     selectedRemainingLifeLimitLibraryMutator(library.id);
                     addSuccessNotificationAction({message:'Added remaining life limit library'})
                 }               
@@ -667,14 +663,14 @@ import { createDecipheriv } from 'crypto';
     }
 
     function onShowCreateRemainingLifeLimitDialog() {
-        createRemainingLifeLimitDialogData = {
+        createRemainingLifeLimitDialogData.value = {
             showDialog: true,
             numericAttributeSelectItems: numericAttributeSelectItems,
         };
     }
 
     function onAddRemainingLifeLimit(newRemainingLifeLimit: RemainingLifeLimit) {
-        createRemainingLifeLimitDialogData = clone(emptyCreateRemainingLifeLimitDialogData);
+        createRemainingLifeLimitDialogData.value = clone(emptyCreateRemainingLifeLimitDialogData);
         if (!isNil(newRemainingLifeLimit)) {
             addedRows.value.push(newRemainingLifeLimit);
             onPaginationChanged()
@@ -689,7 +685,7 @@ import { createDecipheriv } from 'crypto';
     function onShowCriterionLibraryEditorDialog(remainingLifeLimit: RemainingLifeLimit) {
         selectedRemainingLifeLimit = remainingLifeLimit;
 
-        criterionEditorDialogData = {
+        criterionEditorDialogData.value = {
             showDialog: true,
             CriteriaExpression: remainingLifeLimit.criterionLibrary.mergedCriteriaExpression,           
         };
@@ -698,7 +694,7 @@ import { createDecipheriv } from 'crypto';
     function onEditRemainingLifeLimitCriterionLibrary(
         criteriaExpression: string | null,
     ) {
-        criterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+        criterionEditorDialogData.value = clone(emptyGeneralCriterionEditorDialogData);
 
         if (!isNil(criteriaExpression) && selectedRemainingLifeLimit.id !== uuidNIL) {
             if(selectedRemainingLifeLimit.criterionLibrary.id === getBlankGuid())
@@ -736,7 +732,7 @@ import { createDecipheriv } from 'crypto';
         RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 clearChanges()
-                addedOrUpdatedRemainingLifeLimitLibraryMutator(selectedRemainingLifeLimitLibrary.value);
+                addedOrUpdatedRemainingLifeLimselectListItemsrefitLibraryMutator(selectedRemainingLifeLimitLibrary.value);
                 selectedRemainingLifeLimitLibraryMutator(selectedRemainingLifeLimitLibrary.value.id)
                 addSuccessNotificationAction({message: "Updated remaining life limit library",});               
             }
@@ -744,15 +740,15 @@ import { createDecipheriv } from 'crypto';
     }
 
     function onUpsertScenarioRemainingLifeLimits() {
-        if (selectedRemainingLifeLimitLibrary.value.id === uuidNIL || hasUnsavedChanges && newLibrarySelection ===false) {scenarioLibraryIsModified = true;}
-        else { scenarioLibraryIsModified = false; }
+        if (selectedRemainingLifeLimitLibrary.value.id === uuidNIL || hasUnsavedChanges && newLibrarySelection.value ===false) {scenarioLibraryIsModified.value = true;}
+        else { scenarioLibraryIsModified.value = false; }
 
         RemainingLifeLimitService.upsertScenarioRemainingLifeLimits({
             libraryId: selectedRemainingLifeLimitLibrary.value.id === uuidNIL ? null : selectedRemainingLifeLimitLibrary.value.id,
             rowsForDeletion: deletionIds.value,
             updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
             addedRows: addedRows.value,
-            isModified: scenarioLibraryIsModified
+            isModified: scenarioLibraryIsModified.value
         }, selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
@@ -777,7 +773,7 @@ import { createDecipheriv } from 'crypto';
     }
 
     function onShowConfirmDeleteAlert() {
-        confirmDeleteAlertData = {
+        confirmDeleteAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -786,7 +782,7 @@ import { createDecipheriv } from 'crypto';
     }
 
     function onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        confirmDeleteAlertData = clone(emptyAlertData);
+        confirmDeleteAlertData.value = clone(emptyAlertData);
 
         if (submit) {
             librarySelectItemValue.value = null;
@@ -885,14 +881,14 @@ import { createDecipheriv } from 'crypto';
     };
 
     function onShowShareRemainingLifeLimitLibraryDialog(remainingLifeLimitLibrary: RemainingLifeLimitLibrary) {
-        shareRemainingLifeLimitLibraryDialogData = {
+        shareRemainingLifeLimitLibraryDialogData.value = {
             showDialog:true,
             remainingLifeLimitLibrary: clone(remainingLifeLimitLibrary)
         }
     }
 
     function onShareRemainingLifeLimitDialogSubmit(remainingLifeLimitLibraryUsers: RemainingLifeLimitLibraryUser[]) {
-        shareRemainingLifeLimitLibraryDialogData = clone(emptyShareRemainingLifeLimitLibraryDialogData);
+        shareRemainingLifeLimitLibraryDialogData.value = clone(emptyShareRemainingLifeLimitLibraryDialogData);
 
                 if (!isNil(remainingLifeLimitLibraryUsers) && selectedRemainingLifeLimitLibrary.value.id !== getBlankGuid())
                 {
@@ -970,12 +966,17 @@ import { createDecipheriv } from 'crypto';
                     setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
                     loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
                     loadedParentName = parentLibraryName; //store original
-                    scenarioLibraryIsModified = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
+                    scenarioLibraryIsModified.value = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
                 }
             });
     }
 </script>
 <style scoped>
+.remaininglife-data-table {
+    height: 425px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
 .vs-style {
     width: 100%;
 }

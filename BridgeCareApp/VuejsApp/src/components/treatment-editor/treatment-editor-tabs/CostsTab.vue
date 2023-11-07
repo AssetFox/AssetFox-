@@ -24,7 +24,7 @@
                                         class="edit-icon"
                                         icon
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                     </v-btn>                                
                                 </v-row>
                                 <v-row  rows = "6" align-center>  
@@ -53,7 +53,7 @@
                                         class="edit-icon"
                                         icon
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-row> 
                                 <v-row  rows = "6" align-center>              
@@ -79,7 +79,7 @@
                                         @click="onRemoveCost(props.item.id)"
                                         icon
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </v-row>                   
                             </td>
@@ -128,6 +128,7 @@ import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditor
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
+import { getUrl } from '@/shared/utils/get-url';
 
     const emit = defineEmits(['submit', 'onAddCost', 'onModifyCost', 'onRemoveCost'])
     let store = useStore();

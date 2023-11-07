@@ -33,22 +33,21 @@
                                                 single-line
                                                 v-model="searchMine"
                                                 prepend-inner-icon=ghd-search 
-
-                                                outline
+                                                variant="outlined"
                                                 clearable
                                                 @click:clear="onMineClearClick()"
                                                 class="ghd-text-field-border ghd-text-field search-icon-general"
                                             >
                                             </v-text-field>
                                             <v-btn id="Scenarios-performSearch-button" 
-                                                style="margin-top: 2px;" 
+                                                style="margin-top: 2px;margin-left: 5px; margin-right: 5px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
                                                 variant = "outlined" 
                                                 @click="onMineSearchClick()">
                                                 Search
                                             </v-btn>
                                             <v-btn id="Scenarios-performFilter-button" 
-                                                style="margin-top: 2px;" 
+                                                style="margin-top: 2px; margin-right: 5px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
                                                 variant = "outlined" 
                                                 @click="showFilterScenarioList = true">
@@ -67,7 +66,7 @@
                                                         >
                                                         {{sortedMineCategory}} by {{ sortedMineValue }}
                                                         
-                                                        <img class='img-general' :src="require('@/assets/icons/x-circle.svg')" @click="onMineFilterClearClick()"  >
+                                                        <img class='img-general' :src="getUrl('assets/icons/x-circle.svg')" @click="onMineFilterClearClick()"  >
                                                 </v-chip>
                                                 </div>
                                             </span>
@@ -195,7 +194,7 @@
                                                         flat
                                                         v-bind="props"
                                                     >
-                                                        <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
+                                                        <img class='img-general' :src="getUrl('assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
                                                 </template>
 
@@ -279,7 +278,7 @@
                                                         >
                                                         {{sortedCategory}} by {{ sortedValue }}
                                                         
-                                                        <img class='img-general' :src="require('@/assets/icons/x-circle.svg')" @click="onSharedFilterClearClick()"  >
+                                                        <img class='img-general' :src="getUrl('assets/icons/x-circle.svg')" @click="onSharedFilterClearClick()"  >
                                                 </v-chip>
                                                 </div>
                                             </span>
@@ -394,7 +393,7 @@
                                                         flat
                                                         v-bind="props"
                                                     >
-                                                        <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
+                                                        <img class='img-general' :src="getUrl('assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
                                                 </template>
 
@@ -479,7 +478,7 @@
                                                         icon
                                                         v-bind="props"
                                                     >
-                                                        <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
+                                                        <img class='img-general' :src="getUrl('assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
                                                 </template>
 
@@ -559,7 +558,7 @@
                                                         icon
                                                         v-bind="props"
                                                     >
-                                                        <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
+                                                        <img class='img-general' :src="getUrl('assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
                                                 </template>
 
@@ -662,6 +661,7 @@
 </template>
 
 <script lang="ts" setup>
+import { getUrl } from '@/shared/utils/get-url';
 import { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, onMounted, inject, readonly, computed, reactive } from 'vue'; 
 import moment from 'moment';
 import {
@@ -728,6 +728,7 @@ import { useRouter } from 'vue-router';
 import mitt from 'mitt';
 import $vuetify from '@/plugins/vuetify';
 import { onBeforeMount } from 'vue';
+import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 
     let store = useStore(); 
     const $router = useRouter();     
@@ -1281,6 +1282,11 @@ import { onBeforeMount } from 'vue';
             getReportStatus,
         );
 
+        $emitter.on(
+            Hub.BroadcastEventType.BroadcastSimulationDeletionCompletionEvent,
+            importCompleted,
+        );
+
         availableActions = {
             runAnalysis: 'runAnalysis',
             reports: 'reports',
@@ -1299,25 +1305,25 @@ import { onBeforeMount } from 'vue';
             {
                 title: 'Run Analysis',
                 action: availableActions.runAnalysis,
-                icon: require("@/assets/icons/monitor.svg"),
+                icon: getUrl("assets/icons/monitor.svg"),
                 isCustomIcon: true
             },
             {
                 title: 'Reports',
                 action: availableActions.reports,
-                icon: require("@/assets/icons/clipboard.svg"),
+                icon: getUrl("assets/icons/clipboard.svg"),
                 isCustomIcon: true
             },
             {
                 title: 'Settings',
                 action: availableActions.settings,
-                icon: require("@/assets/icons/gear.svg"),
+                icon: getUrl("assets/icons/gear.svg"),
                 isCustomIcon: true
             },
             {
                 title: 'Committed Projects',
                 action: availableActions.commitedProjects,
-                icon: require("@/assets/icons/committed-projects.svg"),
+                icon: getUrl("assets/icons/committed-projects.svg"),
                 isCustomIcon: true
             },
             {
@@ -1329,13 +1335,13 @@ import { onBeforeMount } from 'vue';
             {
                 title: 'Clone',
                 action: availableActions.clone,
-                icon: require("@/assets/icons/copy.svg"),
+                icon: getUrl("assets/icons/copy.svg"),
                 isCustomIcon: true
             },
             {
                 title: 'Delete',
                 action: availableActions.delete,
-                icon: require("@/assets/icons/trash.svg"),
+                icon: getUrl("assets/icons/trash.svg"),
                 isCustomIcon: true
             }           
         ];
@@ -1343,7 +1349,7 @@ import { onBeforeMount } from 'vue';
              {
                 title: 'Cancel Work',
                 action: availableSimulationActions.cancel,
-                icon: require("@/assets/icons/x-circle.svg"),
+                icon: getUrl("assets/icons/x-circle.svg"),
                 isCustomIcon: true
             }             
         ];
@@ -1351,7 +1357,7 @@ import { onBeforeMount } from 'vue';
              {
                 title: 'Cancel Work',
                 action: availableSimulationActions.fastCancel,
-                icon: require("@/assets/icons/x-circle.svg"),
+                icon: getUrl("assets/icons/x-circle.svg"),
                 isCustomIcon: true
             }             
         ];
@@ -1359,13 +1365,13 @@ import { onBeforeMount } from 'vue';
         actionItems.splice(4, 0, {
             title: 'Share',
             action: availableActions.share,
-            icon: require("@/assets/icons/share-geometric.svg"),
+            icon: getUrl("assets/icons/share-geometric.svg"),
                 isCustomIcon: true
         });
         tabItems.push(
-            { name: 'My scenarios', icon: require("@/assets/icons/star-empty.svg"), count: totalUserScenarios.value },
-            { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: totalSharedScenarios.value },
-            { name: 'General work queue', icon: require("@/assets/icons/queue.svg"), count: totalQueuedSimulations.value },
+            { name: 'My scenarios', icon: getUrl("assets/icons/star-empty.svg"), count: totalUserScenarios.value },
+            { name: 'Shared with me', icon: getUrl("assets/icons/share-empty.svg"), count: totalSharedScenarios.value },
+            { name: 'General work queue', icon: getUrl("assets/icons/queue.svg"), count: totalQueuedSimulations.value },
         );
         tab.value = 'My scenarios';
     });
@@ -1399,7 +1405,12 @@ import { onBeforeMount } from 'vue';
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
             getReportStatus,
         );
-    }); 
+
+        $emitter.off(
+            Hub.BroadcastEventType.BroadcastSimulationDeletionCompletionEvent,
+            importCompleted,
+        );
+    });
 
     function initializeScenarioPages(){
         const { sort, descending, page, rowsPerPage } = sharedScenariosPagination;
@@ -1911,6 +1922,13 @@ import { onBeforeMount } from 'vue';
                     workQueueStatusUpdate: updatedQueueItem
                 })
             }                                
+    }
+
+    function importCompleted(data: any){
+        var workType = data as WorkType
+        if(workType == WorkType.DeleteSimulation){
+            onScenariosPagination()
+        }        
     }
 
     function updateFastWorkQueue(data: any) {

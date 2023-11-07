@@ -3,9 +3,9 @@
     public enum ProjectSourceDTO
     {
         None,
-        iAMPick,
-        Committed,
-        SAP,
+        ProjectPick,
+        Committed, //default
+        Maintenance,
         ProjectBuilder
     }
 }

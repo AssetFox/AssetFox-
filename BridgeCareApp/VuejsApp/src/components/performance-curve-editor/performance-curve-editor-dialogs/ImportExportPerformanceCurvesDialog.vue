@@ -1,5 +1,5 @@
 <template>
-    <v-dialog width="768px" height="540px" persistent v-bind:show='showDialog'>
+    <v-dialog width="768px" height="540px" persistent v-model='showDialogComputed'>
         <v-card class="div-padding">
             <v-card-title class="pa-2">
                 <v-row justify-start>
@@ -25,7 +25,7 @@
 </template>
 
 <script lang='ts' setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { ImportExportPerformanceCurvesDialogResult } from '@/shared/models/modals/import-export-performance-curves-dialog-result';
 import {clone} from 'ramda';
@@ -39,7 +39,7 @@ let store = useStore();
 const props = defineProps<{
     showDialog: boolean
     }>()
-
+    let showDialogComputed = computed(() => props.showDialog);
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
 async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('setIsBusy');}
 

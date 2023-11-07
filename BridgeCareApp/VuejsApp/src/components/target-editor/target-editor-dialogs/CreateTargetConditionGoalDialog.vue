@@ -89,20 +89,19 @@ import { useStore } from 'vuex';
           currentNumberOfTargetConditionGoals:number
         }>();
         
-  const { showDialog } = toRefs(props);
+  const { showDialog, currentNumberOfTargetConditionGoals } = toRefs(props);
 
   let store = useStore();
   const emit = defineEmits(['submit'])
   const stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributes);
 
   let newTargetConditionGoal = ref<TargetConditionGoal>({...emptyTargetConditionGoal, id: getNewGuid()});
-  let numericAttributeNames = ref<string[]>([]);
+  const numericAttributeNames = ref<string[]>([]);
   const rules = ref<InputValidationRules>(validationRules);
 
-  onMounted(() => mounted);
-  function mounted() {
+  onMounted(() => {
     setNumericAttributeNames();
-  }
+  });
 
   watch(stateNumericAttributes,()=> {
     setNumericAttributeNames();
@@ -112,14 +111,13 @@ import { useStore } from 'vuex';
     setNewTargetConditionGoalDefaultValues();
   });
 
-  watch(() => props.showDialog,()=> {
+  watch(showDialog,()=> {
     setNewTargetConditionGoalDefaultValues();
   });
 
-  watch(() => props.currentNumberOfTargetConditionGoals,()=> onCurrentNumberOfDeficientConditionGoalsChanged)
-  function onCurrentNumberOfDeficientConditionGoalsChanged() {
+  watch(currentNumberOfTargetConditionGoals,()=> {
     setNewTargetConditionGoalDefaultValues();
-  }
+  });
 
   function setNewTargetConditionGoalDefaultValues() {
     if (showDialog) {

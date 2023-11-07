@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using VerifyXunit;
 using Xunit;
@@ -26,9 +27,9 @@ public class SimulationRunnerTests
             Cost = 100,
             Name = "Lovecraftian Horror",
             NameOfTemplateTreatment = scenario.SelectableTreatments.Single(t => t.ForCommittedProjectsOnly).Name,
-            ProjectSource = DTOs.ProjectSourceDTO.SAP.ToString(),
-        });
-
+            ProjectSource = ProjectSourceDTO.Maintenance.ToString(),
+        }) ;
+        
         return RunTest(scenario);
     }
 

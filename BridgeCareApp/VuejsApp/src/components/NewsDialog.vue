@@ -92,11 +92,11 @@
   </Dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcement';
 import moment from 'moment';
 import { hasValue } from '@/shared/utils/has-value-util';
-import { toRefs, computed, watch, reactive, ref } from 'vue';
+import { toRefs, computed, watch, ref } from 'vue';
 import { useStore } from 'vuex';
 import Dialog from 'primevue/dialog';
 
@@ -113,12 +113,12 @@ async function deleteAnnouncementAction(payload?: any): Promise<any> {await stor
 const announcementListOffset = ref<number>(0);
 const newAnnouncementTitle = ref<string>("");
 const newAnnouncementContent = ref<string>("");
-const selectedAnnouncementForEdit = ref<Announcement>(emptyAnnouncement);
+const selectedAnnouncementForEdit = ref<Announcement | undefined>(undefined);
 
     watch(announcements, () => {
     });
     function getVisibleAnnouncements() {
-        return announcements.value.slice(announcementListOffset.value, announcementListOffset.value + (hasAdminAccess ? 9 : 10));
+        return announcements.value.slice(announcementListOffset.value, announcementListOffset.value + (hasAdminAccess.value ? 9 : 10));
     }
 
     function formatDate(announcementDate: Date) {
@@ -134,7 +134,7 @@ const selectedAnnouncementForEdit = ref<Announcement>(emptyAnnouncement);
     }
 
     function onSendAnnouncement() {
-        if (!hasValue(selectedAnnouncementForEdit)) {
+        if (!hasValue(selectedAnnouncementForEdit.value)) {
             onCreateAnnouncement();
         } else {
             onEditAnnouncement();
@@ -145,8 +145,8 @@ const selectedAnnouncementForEdit = ref<Announcement>(emptyAnnouncement);
         upsertAnnouncementAction({
             announcement: {
                 ...emptyAnnouncement,
-                title: newAnnouncementTitle,
-                content: newAnnouncementContent,
+                title: newAnnouncementTitle.value,
+                content: newAnnouncementContent.value,
                 createdDate: new Date(),
             },
         });
@@ -154,20 +154,20 @@ const selectedAnnouncementForEdit = ref<Announcement>(emptyAnnouncement);
     }
 
     function onEditAnnouncement() {
-        if (!hasValue(selectedAnnouncementForEdit)) {
+        if (!hasValue(selectedAnnouncementForEdit.value)) {
             return;
         }
 
         upsertAnnouncementAction({
             announcement: {
-                ...selectedAnnouncementForEdit,
-                title: newAnnouncementTitle,
-                content: newAnnouncementContent,
+                ...selectedAnnouncementForEdit.value,
+                title: newAnnouncementTitle.value,
+                content: newAnnouncementContent.value,
             },
         });
 
         newAnnouncementContent.value = newAnnouncementTitle.value = '';
-        selectedAnnouncementForEdit.value = emptyAnnouncement;
+        selectedAnnouncementForEdit.value = undefined;
     }
 
     function onSetAnnouncementForEdit(announcement: Announcement) {
@@ -177,17 +177,16 @@ const selectedAnnouncementForEdit = ref<Announcement>(emptyAnnouncement);
     }
 
     function onStopEditing() {
-        selectedAnnouncementForEdit.value = emptyAnnouncement;
+        selectedAnnouncementForEdit.value = undefined;
         newAnnouncementTitle.value = newAnnouncementContent.value = '';
         isEditingAnnouncement(selectedAnnouncementForEdit.value);
     }
 
     function isEditingAnnouncement(announcement?: Announcement) {
-        if (announcement === undefined) return false;
         if (!hasValue(announcement)) {
-            return hasValue(selectedAnnouncementForEdit) && (announcement!==emptyAnnouncement);
+            return hasValue(selectedAnnouncementForEdit.value);
         }
-        return hasValue(selectedAnnouncementForEdit) && (announcement!==emptyAnnouncement) && selectedAnnouncementForEdit.value!.id === announcement!.id;
+        return hasValue(selectedAnnouncementForEdit.value) && selectedAnnouncementForEdit.value!.id === announcement!.id;
     }
 
     function seeNewerAnnouncements() {

@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-bind:show="dialogData.showDialog" max-width="444px" persistent>
+  <v-dialog v-model="showDialogComputed" max-width="444px" persistent>
     <v-card height="437px" class="ghd-dialog">
       <v-card-title class="ghd-dialog">
         <v-row justify-left>
@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import {emptyPerformanceCurveLibrary, PerformanceCurve, PerformanceCurveLibrary} from '@/shared/models/iAM/performance';
 import {CreatePerformanceCurveLibraryDialogData} from '@/shared/models/modals/create-performance-curve-library-dialog-data';
 import {getUserName} from '@/shared/utils/get-user-info';
@@ -59,7 +59,7 @@ let store = useStore();
 const props = defineProps<{
   dialogData: CreatePerformanceCurveLibraryDialogData
     }>()
-
+    let showDialogComputed = computed(() => props.dialogData.showDialog);
     let getIdByUserNameGetter: any = store.getters.getIdByUserName
     let newPerformanceCurveLibrary: PerformanceCurveLibrary = {...emptyPerformanceCurveLibrary, id: getNewGuid()};
     let rules: InputValidationRules = validationRules;

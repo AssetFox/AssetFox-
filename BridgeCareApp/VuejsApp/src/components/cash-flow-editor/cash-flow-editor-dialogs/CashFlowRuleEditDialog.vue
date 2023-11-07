@@ -1,5 +1,5 @@
 <template>
-    <v-dialog max-width="850px" persistent v-bind:show="showDialog">
+    <v-dialog max-width="850px" v-model="showDialogComputed">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-row justify-space-between align-center>
@@ -14,7 +14,7 @@
             <v-data-table
                 :headers="cashFlowRuleDistributionGridHeaders"
                 :items="cashFlowDistributionRuleGridData"
-                sort-icon=$vuetify.icons.ghd-table-sort
+                sort-icon=ghd-table-sort
                 hide-actions
                 class="ghd-table v-table__overflow">
                 <template v-slot:item ="{item}" slot="items" slot-scope="props">
@@ -155,7 +155,7 @@
                             @click="onDeleteCashFlowDistributionRule(item.value.id)"
                             class="ghd-blue"
                             icon>
-                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                            <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </td>
                 </template>
@@ -186,7 +186,7 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, ref, watch, Ref } from 'vue';
+import { nextTick, ref, watch, Ref, computed } from 'vue';
 import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import {
   CashFlowDistributionRule,
@@ -204,8 +204,10 @@ import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 //import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { getLastPropertyValue } from '@/shared/utils/getter-utils';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
+import { getUrl } from '@/shared/utils/get-url';
 
   const props = defineProps<{showDialog: boolean, selectedCashFlowRule: CashFlowRule}>()
+  let showDialogComputed = computed(() => props.showDialog);
   const emit = defineEmits(['submit']);
 
   let hasUnsavedChanges: boolean = false;
@@ -214,34 +216,34 @@ import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper
   let cashFlowDistributionRuleGridData: CashFlowDistributionRule[] = []
   let processedGridData: CashFlowDistributionRule[] = [];
 
-  let cashFlowRuleDistributionGridHeaders: DataTableHeader[] = [
+  let cashFlowRuleDistributionGridHeaders: any[] = [
     {
-        text: 'Duration (yr)',
-        value: 'durationInYears',
+        title: 'Duration (yr)',
+        key: 'durationInYears',
         align: 'left',
         sortable: false,
         class: '',
         width: '31.6%',
     },
     {
-        text: 'Cost Ceiling',
-        value: 'costCeiling',
+        title: 'Cost Ceiling',
+        key: 'costCeiling',
         align: 'left',
         sortable: false,
         class: '',
         width: '31.6%',
     },
     {
-        text: 'Yearly Distribution (%)',
-        value: 'yearlyPercentages',
+        title: 'Yearly Distribution (%)',
+        key: 'yearlyPercentages',
         align: 'left',
         sortable: false,
         class: '',
         width: '31.6%',
     },
     {
-        text: '',
-        value: '',
+        title: '',
+        key: '',
         align: 'left',
         sortable: false,
         class: '',

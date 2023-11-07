@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-dialog v-bind:show="showDialog" max-width="434px" persistent>
+    <v-dialog v-model="showDialogComputed" max-width="434px" persistent>
       <v-card  height="411px" class="ghd-dialog">
         <v-card-title class="ghd-dialog">
           <v-row justify-left>
@@ -22,22 +22,12 @@
               class="ghd-select ghd-control-text ghd-control-border"
               v-model="newPerformanceCurve.attribute"
               :items="attributeSelectItems"
-              append-icon=$vuetify.icons.ghd-down
+              append-icon=ghd-down
               :rules="[rules['generalRules'].valueIsNotEmpty]"
               variant="outlined"
+              item-title="text"
+              item-value="value"
             >
-              <template v-slot:selection="{ item }">
-                <span class="ghd-control-text">{{ item.raw.text }}</span>
-              </template>
-              <template v-slot:item="{ item }">
-                <v-list-item class="ghd-control-text" v-bind="props">
-                    <v-list-item-title>
-                      <v-row no-gutters align="center">
-                      <span>{{ item.raw.text }}</span>
-                      </v-row>
-                    </v-list-item-title>
-                </v-list-item>
-              </template>
             </v-select>                      
           </v-row>
         </v-card-text>
@@ -66,7 +56,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import {emptyPerformanceCurve, PerformanceCurve} from '@/shared/models/iAM/performance';
 import {SelectItem} from '@/shared/models/vue/select-item';
 import {Attribute} from '@/shared/models/iAM/attribute';
@@ -84,10 +74,10 @@ const emit = defineEmits(['submit'])
 const props = defineProps<{
     showDialog: boolean
     }>()
-
-    let stateNumericAttributes = ref<Attribute[]>(store.state.attributeModule.numericAttributes);
-    let attributeSelectItems: SelectItem[] = [];
-    let newPerformanceCurve: PerformanceCurve = {...emptyPerformanceCurve, id: getNewGuid()};
+    let showDialogComputed = computed(() => props.showDialog);
+    let stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributes);
+    let attributeSelectItems = ref<SelectItem[]>([]);
+    let newPerformanceCurve = ref<PerformanceCurve>({...emptyPerformanceCurve, id: getNewGuid()});
     let rules: InputValidationRules = validationRules;
 
   onMounted(()=>mounted())
@@ -105,7 +95,7 @@ const props = defineProps<{
   }
 
   function setAttributeSelectItems() {
-    attributeSelectItems = stateNumericAttributes.value.map((attribute: Attribute) => ({
+    attributeSelectItems.value = stateNumericAttributes.value.map((attribute: Attribute) => ({
       text: attribute.name,
       value: attribute.name
     }));
@@ -113,11 +103,11 @@ const props = defineProps<{
 
   function onSubmit(submit: boolean) {
     if (submit) {
-      emit('submit', newPerformanceCurve);
+      emit('submit', newPerformanceCurve.value);
     } else {
       emit('submit', null);
     }
 
-    newPerformanceCurve = {...emptyPerformanceCurve, id: getNewGuid()};
+    newPerformanceCurve.value = {...emptyPerformanceCurve, id: getNewGuid()};
   }
 </script>

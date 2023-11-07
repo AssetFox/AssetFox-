@@ -1,5 +1,5 @@
 <template>
-    <v-row column class="Montserrat-font-family">
+    <v-container class="p-0 pb-5 pr-2">
         <v-col cols = "12">
             <v-row justify-space-between>
                 <v-col cols = "4" class="ghd-constant-header">
@@ -93,6 +93,7 @@
                                 <v-text-field
                                     id="CashFlowEditor-ruleName-text"
                                     readonly
+                                    variant="underlined"
                                     single-line
                                     class="sm-txt"
                                     :model-value="item.item.name"
@@ -117,6 +118,7 @@
                                 min-width="500px">
                                 <template v-slot:activator>
                                     <v-text-field
+                                    variant="underlined"
                                         id="CashFlowEditor-criteria-text"
                                         readonly
                                         single-line
@@ -140,7 +142,8 @@
                                 @click="onEditCashFlowRuleCriterionLibrary(item.item)"
                                 id="CashFlowEditor-editCashFlowRule-btn"
                                 class="ghd-blue"
-                                icon>
+                                icon
+                                variant="flat">
                                 <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                             </v-btn>
                             </v-row>
@@ -152,6 +155,7 @@
                                 @click="onDeleteCashFlowRule(item.item.id)"
                                 id="CashFlowEditor-deleteCashFlowRule-btn"
                                 class="ghd-blue"
+                                variant="flat"
                                 icon>
                                 <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>
@@ -159,6 +163,7 @@
                                 @click="onSelectCashFlowRule(item.item.id)"
                                 id="CashFlowEditor-editCashFlowRuleDistribution-btn"
                                 class="ghd-blue"
+                                variant="flat"
                                 icon>
                                 <img class='img-general' :src="getUrl('assets/icons/edit-cash.svg')"/>
                             </v-btn>
@@ -169,7 +174,7 @@
                 </v-data-table-server>
 
                 <v-btn :disabled='selectedCashRuleGridRows.length === 0' @click='onDeleteSelectedCashFlowRules'
-                    class='ghd-blue ghd-button' variant = "flat">
+                    class='ghd-blue ghd-button' variant = "text">
                     Delete Selected
                 </v-btn>
             </div>
@@ -192,13 +197,12 @@
         </v-col>
         <v-col cols = "12">
             <v-row
-                justify-center
-                row
+                justify="center"
                 v-show="hasSelectedLibrary || hasScenario">
                 <v-btn variant = "outlined"
                     @click="onDeleteCashFlowRuleLibrary"
                     id="CashFlowEditor-deleteLibrary-btn"
-                    class='ghd-blue ghd-button-text ghd-button'
+                    class='m-2 ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission">
                     Delete Library
@@ -206,27 +210,27 @@
                 <v-btn
                     @click="onDiscardChanges"
                     v-show="hasScenario"
-                    :disabled="!hasUnsavedChanges" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
+                    :disabled="!hasUnsavedChanges" variant = "flat" class='m-2 ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>
                 <v-btn
                     :disabled="disableCrudButtons()"
                     @click="onShowCreateCashFlowRuleLibraryDialog(true)"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"> 
+                    class='m-2 ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"> 
                     Create as New Library
                 </v-btn>
                 <v-btn
                     id="CashFlowEditor-save-btn"
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
                     @click="onUpsertScenarioCashFlowRules"
-                    class='ghd-blue-bg text-white ghd-button-text ghd-button'
+                    class='m-2 ghd-blue-bg text-white ghd-button-text ghd-button'
                     v-show="hasScenario">
                     Save
                 </v-btn>
                 <v-btn
                     :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
                     @click="onUpsertCashFlowRuleLibrary"
-                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='m-2 ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario">
                     Update Library
                 </v-btn>                                       
@@ -260,7 +264,7 @@
             :showDialog="showAddCashFlowRuleDialog"
             @submit="onSubmitAddCashFlowRule"/>
         <ConfirmDialog></ConfirmDialog>
-    </v-row>
+    </v-container>
 </template>
 
 <script lang="ts" setup>

@@ -1,7 +1,7 @@
 <template>
-    <v-row column>
         <v-row>
-            <v-card
+            <v-col class="p-0">
+                <v-card
                 class="mx-auto ghd-sidebar-scenario"
                 height="100%"
                 elevation="0"
@@ -46,8 +46,10 @@
                     </v-btn>
                 </div>
             </v-card>
-            <v-col cols = "12" class="ghd-content">
-                <v-container fluid grid-list-xs style="padding-left:20px;padding-right:20px;">
+            </v-col>
+            
+            <v-col class=" p-0" cols="10">
+                <v-container class="p-0" fluid grid-list-xs >
                     <router-view></router-view>
                 </v-container>
             </v-col>
@@ -64,7 +66,7 @@
             @submit="onSubmitImportExportCommittedProjectsDialogResult"
             @delete="onDeleteCommittedProjects"
         />
-    </v-row>
+
 </template>
 
 <script lang="ts" setup>

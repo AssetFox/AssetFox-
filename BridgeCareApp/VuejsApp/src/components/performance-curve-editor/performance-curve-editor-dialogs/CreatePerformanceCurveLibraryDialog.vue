@@ -1,28 +1,30 @@
 <template>
   <v-dialog v-model="showDialogComputed" max-width="444px" persistent>
     <v-card height="437px" class="ghd-dialog">
-      <v-card-title class="ghd-dialog">
+      <v-card-title >
         <v-row justify-left>
-          <h3 class="ghd-dialog">Create New<br/>Deterioration Model Library</h3>
+          <h3 class="ghd-dialog">Create New Deterioration Model Library</h3>
         </v-row>
       </v-card-title>
-      <v-card-text class="ghd-dialog">
-        <v-row column>
+      <v-card-text >
+        <v-row >
+          <v-col>
           <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>             
           <v-text-field id="CreatePerformanceCurveLibraryDialog-Name-vtextfield" class="ghd-control-text ghd-control-border"
                         v-model="newPerformanceCurveLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        outline/>
+                        variant="outlined"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>             
           <v-textarea id="CreatePerformanceCurveLibraryDialog-Description-vtextfield" class="ghd-control-text ghd-control-border"
                       v-model="newPerformanceCurveLibrary.description"
                       no-resize
-                      outline
+                      variant="outlined"
                       rows="3"/>
+            </v-col>
         </v-row>
       </v-card-text>
       <v-card-actions>
-          <v-row justify-center row>
+          <v-row justify="center" row>
             <v-btn id="CreatePerformanceCurveLibraryDialog-Cancel-vbtn" variant = "outlined"
                    class="ghd-white-bg ghd-blue ghd-button-text"
                    

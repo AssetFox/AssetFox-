@@ -2,7 +2,7 @@
     <v-dialog max-width="850px" v-model="showDialogComputed">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
-        <v-row justify-space-between align-center>
+        <v-row justify="space-between" align-center>
           <div class="ghd-control-dialog-header">Cash Flow Rule Settings: {{selectedCashFlowRule.name}}</div>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
@@ -31,6 +31,7 @@
                                 id="CashFlowRuleEditDialog-yearReadOnly-vtextfield"
                                 readonly
                                 single-line
+                                variant="underlined"
                                 class="sm-txt"
                                 :model-value="item.item.durationInYears"
                                 :rules="[
@@ -43,6 +44,7 @@
                                     id="CashFlowRuleEditDialog-yearEdit-vtextfield"
                                     label="Edit"
                                     single-line
+                                    variant="underlined"
                                     v-model.number="item.item.durationInYears"
                                     :rules="[
                                         rules[
@@ -71,6 +73,7 @@
                                 id="CashFlowRuleEditDialog-dollarReadOnly-vtextfield"
                                 readonly
                                 single-line
+                                variant="underlined"
                                 class="sm-txt"
                                 :model-value="
                                     formatAsCurrencyLocaal(item.item.costCeiling)"
@@ -89,6 +92,7 @@
                                     name="CashFlowRuleEditDialog-dollarEdit-vtextfield"
                                     label="Edit"
                                     single-line
+                                    variant="underlined"
                                     :id="item.item.id"
                                     v-model="item.item.costCeiling"
                                     v-currency="{
@@ -122,6 +126,7 @@
                             lazy
                             persistent>
                             <v-text-field
+                            variant="underlined"
                                 id="CashFlowRuleEditDialog-distributionReadOnly-vtextfield"
                                 readonly
                                 single-line
@@ -138,6 +143,7 @@
                                     id="CashFlowRuleEditDialog-distributionEdit-vtextfield"
                                     label="Edit"
                                     single-line
+                                    variant="underlined"
                                     v-model="item.item.yearlyPercentages"
                                     :rules="[
                                         rules[
@@ -155,6 +161,7 @@
                         <v-btn
                             @click="onDeleteCashFlowDistributionRule(item.item.id)"
                             class="ghd-blue"
+                            variant="flat"
                             icon>
                             <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>

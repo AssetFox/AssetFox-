@@ -3,17 +3,19 @@
         <v-card>
             <v-card-title class="ghd-dialog-box-padding-top">
             <v-layout justify-space-between align-center>
-                <div class="ghd-control-dialog-header">Change {{DialogData.settingName}}</div>
+                <div id="EditAdminDataDialog-header-div" class="ghd-control-dialog-header">Change {{DialogData.settingName}}</div>
             </v-layout>
             </v-card-title>
             <v-card-text class="ghd-dialog-box-padding-center">
                 <v-layout>
                     <v-select :items='settingItems'
+                    id="EditAdminDataDialog-addNewItems-select"
                     outline  
                     v-model='settingSelectItemValue'                         
                     class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>   
                     <v-btn style="margin-top: 2px !important; margin-left: 10px !important"
+                    id="EditAdminDataDialog-addNewItems-btn"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                     @click="onAddClick"
                     :disabled='isAddDisabled()'>
@@ -25,13 +27,13 @@
                     v-for="setting in selectedSettings"
                     :key="setting">
                         <v-list-tile-content >
-                            <v-list-tile-title v-text="setting.value"></v-list-tile-title>
+                            <v-list-tile-title id="EditAdminDataDialog-itemName-title" v-text="setting.value"></v-list-tile-title>
                         </v-list-tile-content>
                         <v-radio-group v-if="DialogData.settingName == 'InventoryReports'" class="admin-radio" v-model="setting.networkType" row>
-                            <v-radio  label="RAW" value="(R)"></v-radio>
-                            <v-radio  label="PRIMARY" value="(P)"></v-radio>
+                            <v-radio  id="EditAdminDataDialog-raw-radio" label="RAW" value="(R)"></v-radio>
+                            <v-radio  id="EditAdminDataDialog-primary-radio" label="PRIMARY" value="(P)"></v-radio>
                         </v-radio-group>
-                        <v-btn @click="onDeleteSettingClick(setting)"  class="ghd-blue" icon>
+                        <v-btn id="EditAdminDataDialog-removeItem-btn" @click="onDeleteSettingClick(setting)"  class="ghd-blue" icon>
                             <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </v-list-tile>
@@ -39,10 +41,10 @@
             </v-card-text>
             <v-card-actions class="ghd-dialog-box-padding-bottom">
             <v-layout justify-center row>
-                <v-btn @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
+                <v-btn id="EditAdminDataDialog-cancel-btn" @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
                 Cancel
                 </v-btn >
-                <v-btn  @click="onSubmit(true)" outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                <v-btn  id="EditAdminDataDialog-save-btn" @click="onSubmit(true)" outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                 Save
                 </v-btn>         
             </v-layout>

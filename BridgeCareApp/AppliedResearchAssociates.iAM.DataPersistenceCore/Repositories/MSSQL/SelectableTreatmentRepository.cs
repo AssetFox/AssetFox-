@@ -163,6 +163,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.ScenarioTreatmentSchedulings)
                 .Include(_ => _.ScenarioTreatmentSupersedeRules)
+                .ThenInclude(_=>_.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
+                .ThenInclude(_=>_.CriterionLibrary)
                 .Include(_ => _.ScenarioTreatmentPerformanceFactors)
                 .ToList();
 
@@ -282,6 +284,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToDto())
                 .ToList();
         }
+
         public List<TreatmentLibraryDTO> GetTreatmentLibrariesNoChildrenAccessibleToUser(Guid userId)
         {
             return _unitOfWork.Context.TreatmentLibraryUser
@@ -294,7 +297,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertTreatmentLibrary(TreatmentLibraryDTO dto) =>
         _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
-
 
         public void AddLibraryTreatments(List<TreatmentDTO> treatments, Guid libraryId)
         {
@@ -358,6 +360,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
+            }
+
+            if (treatments.Any(_ => _.SupersedeRules != null && _.SupersedeRules.Any()))
+            {
+                var supersedeRulesPerTreatmentId = treatments.Where(_ => _.SupersedeRules.Any()).ToList()
+                .ToDictionary(_ => _.Id, _ => _.SupersedeRules);
+                _unitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteTreatmentSupersedeRules(supersedeRulesPerTreatmentId, libraryId);
             }
         }
 
@@ -651,7 +660,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
                 }
 
-                // TODO should SupersedeRules be taken care here? Guessing it can be done at Import API work item.
+                if (scenarioSelectableTreatments.Any(_ => _.SupersedeRules != null && _.SupersedeRules.Any()))
+                {
+                    var supersedeRulesPerTreatmentId = scenarioSelectableTreatments.Where(_ => _.SupersedeRules.Any()).ToList()
+                    .ToDictionary(_ => _.Id, _ => _.SupersedeRules);
+                    _unitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(supersedeRulesPerTreatmentId, simulationId);
+                }
 
                 // Update last modified date
                 var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
@@ -813,6 +827,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfWork.Context.DeleteAll<CriterionLibraryConditionalTreatmentConsequenceEntity>(_ =>
                     _.ConditionalTreatmentConsequence.SelectableTreatment.TreatmentLibraryId == libraryId && _.ConditionalTreatmentConsequence.SelectableTreatment.Id == treatment.Id);
+
+                _unitOfWork.Context.DeleteAll<TreatmentSupersedeRuleEntity>(_ =>
+                    _.SelectableTreatment.TreatmentLibraryId == libraryId && _.SelectableTreatment.Id == treatment.Id);
             });
         }
 
@@ -966,6 +983,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.ScenarioTreatmentPerformanceFactors)
+                .Include(_ => _.ScenarioTreatmentSupersedeRules)
+                .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
                 .Single(_ => _.Id == id)
                 .ToDtoWithSimulationId();
         }
@@ -988,6 +1008,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.CriterionLibrarySelectableTreatmentJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_=>_.TreatmentSupersedeRules)
+                .ThenInclude(_=>_.CriterionLibraryTreatmentSupersedeRuleJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Single(_ => _.Id == id)
                 .ToDto();
@@ -1016,6 +1039,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Single(_ => _.Id == treatmentId);
             return entity.TreatmentLibrary.ToDto();
         }
+
         public TreatmentDTO GetDefaultNoTreatment(Guid simulationId)
         {
             try
@@ -1032,6 +1056,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new InvalidOperationException("More than one default treatments found in scenario" + simulationName);
             }
         }
+
         public ScenarioSelectableTreatmentEntity GetDefaultTreatment(Guid simulationId)
         {
             try

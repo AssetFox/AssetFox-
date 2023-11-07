@@ -16,6 +16,7 @@
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Raw Data Network</v-subheader>
                         <v-select :items="selectRawDataNetworkItems"
+                            id="AdminData-rawDataNetwork-select" 
                             outline
                             v-model="selectRawdataNetworkItemValue"
                             class="ghd-select ghd-text-field ghd-text-field-border">
@@ -32,6 +33,7 @@
                         <div id="AdminData-keyFields-div" class="ghd-md-gray ghd-control-label elipsisList">{{keyFieldsDelimited}}</div>  
                     </v-flex>                        
                     <v-btn style="margin-left: 20px !important" 
+                        id="AdminData-editKeyFields-btn" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                         @click="onEditKeyFieldsClick">
                         Edit
@@ -44,9 +46,10 @@
                         <v-subheader class="ghd-md-gray ghd-control-label">Raw Data Key Field(s): </v-subheader> 
                     </v-flex>
                     <v-flex xs5>
-                        <div class="ghd-md-gray ghd-control-label elipsisList">{{rawDataKeyFieldsDelimited}}</div>  
+                        <div id="AdminData-rawDataKeyFields-div" class="ghd-md-gray ghd-control-label elipsisList">{{rawDataKeyFieldsDelimited}}</div>  
                     </v-flex>                        
                     <v-btn style="margin-left: 20px !important" 
+                        id="AdminData-editrawDataKeyFields-btn" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                         @click="onEditRawDataKeyFieldsClick">
                         Edit
@@ -59,9 +62,10 @@
                         <v-subheader class="ghd-md-gray ghd-control-label">Inventory Report(s): </v-subheader> 
                     </v-flex>
                     <v-flex xs5>
-                         <div class="ghd-md-gray ghd-control-label elipsisList">{{inventoryReportsDelimited}}</div> 
+                         <div id="AdminData-inventoryReports-div" class="ghd-md-gray ghd-control-label elipsisList">{{inventoryReportsDelimited}}</div> 
                     </v-flex>                 
                     <v-btn style="margin-left: 20px !important" 
+                        id="AdminData-editInventoryReports-btn" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                         @click="onEditInventoryReportsClick">
                         Edit
@@ -74,9 +78,10 @@
                         <v-subheader class="ghd-md-gray ghd-control-label">Simulation Report(s): </v-subheader> 
                     </v-flex>
                     <v-flex xs5>
-                        <div class="ghd-md-gray ghd-control-label elipsisList">{{simulationReportsDelimited}}</div> 
+                        <div id="AdminData-simulationReports-div" class="ghd-md-gray ghd-control-label elipsisList">{{simulationReportsDelimited}}</div> 
                     </v-flex>                     
                     <v-btn style="margin-left: 20px !important" 
+                        id="AdminData-editSimulationReports-btn" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                         @click="onEditSimulationReportsClick">
                         Edit
@@ -90,8 +95,8 @@
                     </v-flex>
                     <v-flex xs5>
                         <v-radio-group v-model="constraintTypeRadioGroup" row>
-                            <v-radio class="admin-radio" label="OR" value="OR"></v-radio>
-                            <v-radio class="admin-radio" label="AND" value="AND"></v-radio>
+                            <v-radio id="AdminData-constraintTypeOr-radio" class="admin-radio" label="OR" value="OR"></v-radio>
+                            <v-radio id="AdminData-constraintTypeAnd-radio" class="admin-radio" label="AND" value="AND"></v-radio>
                         </v-radio-group>
                     </v-flex>                     
                 </v-layout>
@@ -101,6 +106,7 @@
             <v-layout justify-center>
                 <v-flex xs7>
                     <v-btn style="margin-top: 5px !important;" 
+                        id="AdminData-save-btn"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                         @click="onSaveClick" :disabled='disableCrudButtons() || !hasUnsavedChanges'>
                         Save

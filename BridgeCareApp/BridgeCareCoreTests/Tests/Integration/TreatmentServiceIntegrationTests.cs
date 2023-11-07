@@ -155,7 +155,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var dataAsString = fileInfo.FileData;
             var bytes = Convert.FromBase64String(dataAsString);
             var stream = new MemoryStream(bytes);
-            File.WriteAllBytes("MDSupersede.xlsx", bytes);
+            File.WriteAllBytes("Supersede.xlsx", bytes);
             var excelPackage = new ExcelPackage(stream);
             var userCriteria = new UserCriteriaDTO();
             
@@ -171,6 +171,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             Assert.Empty(treatmentSupersedeRulesEmpty);
             service.ImportScenarioTreatmentSupersedeRuleFile(simulationId, excelPackage);
             var treatments3 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+
             var treatment1 = treatments1.Single();
             var treatment3 = treatments3.Single();
             ObjectAssertions.EquivalentExcluding(treatment1, treatment3,

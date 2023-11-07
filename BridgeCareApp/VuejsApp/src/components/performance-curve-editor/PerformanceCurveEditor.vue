@@ -1129,7 +1129,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         PerformanceCurveService.UpsertPerformanceCurveLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 clearChanges()
-                performanceCurveLibraryMutator(selectedPerformanceCurveLibrary);
+                performanceCurveLibraryMutator(selectedPerformanceCurveLibrary.value);
                 selectedPerformanceCurveLibraryMutator(selectedPerformanceCurveLibrary.value.id);
                 addSuccessNotificationAction({message: "Updated deterioration model library",});
             }

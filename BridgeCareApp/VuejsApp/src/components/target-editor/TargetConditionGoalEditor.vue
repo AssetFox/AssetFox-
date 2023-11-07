@@ -937,7 +937,7 @@ import { getUrl } from '@/shared/utils/get-url';
             addedRows.value.length > 0 ||
             updatedRowsMap.value.size > 0 || 
             (hasScenario.value && hasSelectedLibrary.value) ||
-            (hasSelectedLibrary.value && hasUnsavedChangesCore('', stateSelectedTargetConditionLibrary, selectedTargetConditionGoalLibrary))
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedTargetConditionGoalLibrary.value, stateSelectedTargetConditionLibrary.value))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 

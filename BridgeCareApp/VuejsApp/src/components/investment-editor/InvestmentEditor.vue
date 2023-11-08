@@ -47,7 +47,7 @@
             </v-row>
 
             <!-- only for scenario -->
-            <v-row style="margin-top:80px;" v-if='hasInvestmentPlanForScenario' align="center">
+            <v-row style="margin-top:80px;" v-if='hasInvestmentPlanForScenario' align="end">
                 <!-- text boxes for scenario only -->
                 <v-col cols = "2" class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-label"><span>First Year of Analysis Period</span></v-subheader>
@@ -166,17 +166,27 @@
                 <v-data-table-server
                     id="InvestmentEditor-investmentsDataTable-dataTable"
                     :headers='budgetYearsGridHeaders' 
-                    :items="budgetYearsGridData"
+                    :items="budgetYearsGridData"                                       
+                    :pagination.sync="pagination"                                   
+                    :must-sort='true'
                     :items-length="totalItems"
-                    class='v-table__overflow ghd-table' 
-                    item-key='year' 
+                    :rows-per-page-items=[5,10,25]
+                    :items-per-page-options="[
+                        {value: 5, title: '5'},
+                        {value: 10, title: '10'},
+                        {value: 25, title: '25'},
+                    ]"
+                    item-key='year'
+                    class='v-table__overflow ghd-table'        
                     show-select 
                     return-object
-                    sort-icon=$vuetify.icons.ghd-table-sort
+                    sort-icon=ghd-table-sort
                     v-model='selectedBudgetYearsGridData' 
-                    :pagination.sync="pagination"               
-                    :rows-per-page-items=[5,10,25]
-                    :must-sort='true'>
+                    v-model:sort-by="pagination.sort"
+                    v-model:page="pagination.page"
+                    v-model:items-per-page="pagination.rowsPerPage"
+                    @update:options="onPaginationChanged"
+                    >
                     <template v-slot:item="{item}">
                     <tr>
                         <td>
@@ -193,7 +203,7 @@
                                     size="large" lazy>
                                     <v-text-field readonly single-line class='sm-txt'
                                         variant="underlined"
-                                        :model-value='item[header.key]'
+                                        :model-value="item[header.key]"
                                         :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     <template v-slot:input>
                                         <v-text-field label='Edit' single-line

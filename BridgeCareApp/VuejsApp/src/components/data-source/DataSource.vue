@@ -190,14 +190,14 @@ import { useStore } from 'vuex';
     
     
     let assetNumber: number = 0;
-    let invalidColumn: string = '';
-    let sqlResponse: string | null = '';
-    let sqlValid: boolean = false;
+    let invalidColumn = ref<string>('');
+    let sqlResponse = ref<string | null>('');
+    let sqlValid = ref<boolean>(false);
 
     const sourceTypeItem = ref<string>('');
-    let dataSourceTypeItem: ShallowRef<string | null> = shallowRef('');
-    let datasourceNames: string[] = [];
-    let dataSourceExcelColumns: DataSourceExcelColumns = { locationColumn: [], dateColumn: []};
+    let dataSourceTypeItem = ref<string | null>('');
+    let datasourceNames = ref<string[]>([]);
+    let dataSourceExcelColumns = ref<DataSourceExcelColumns>({ locationColumn: [], dateColumn: []});
 
     let currentExcelLocationColumn = ref<string>('');
     let currentExcelDateColumn = ref<string>('');
@@ -215,13 +215,13 @@ import { useStore } from 'vuex';
         
     let fileName = ref<string>('');
     let fileSelect: HTMLInputElement = {} as HTMLInputElement;
-    let files: File[] = [];
-    let file: ShallowRef<File | null> = shallowRef(null);   
+    let files = ref<File[]>([]);
+    let file = ref<File | null>(null);   
 
-    let locColumns: string[] =[];
-    let datColumns: string[] =[];
+    let locColumns = ref<string[]>([]);
+    let datColumns = ref<string[]>([]);
 
-    let connectionStringPlaceHolderMessage: string = '';    
+    let connectionStringPlaceHolderMessage = ref<string>('');    
 
     created();
     function created() {
@@ -240,16 +240,16 @@ import { useStore } from 'vuex';
     }
 
     watch(excelColumns, () => {
-        dataSourceExcelColumns = {
-            locationColumn: excelColumns ? excelColumns.value.columnHeaders ? excelColumns.value.columnHeaders.length > 0 ? excelColumns.value.columnHeaders : [] : [] : [],
-            dateColumn: excelColumns ? excelColumns.value.columnHeaders ? excelColumns.value.columnHeaders.length > 0 ? excelColumns.value.columnHeaders : [] : [] : []
+        dataSourceExcelColumns.value = {
+            locationColumn: excelColumns.value ? excelColumns.value.columnHeaders ? excelColumns.value.columnHeaders.length > 0 ? excelColumns.value.columnHeaders : [] : [] : [],
+            dateColumn: excelColumns.value ? excelColumns.value.columnHeaders ? excelColumns.value.columnHeaders.length > 0 ? excelColumns.value.columnHeaders : [] : [] : []
         };
-        if (dataSourceExcelColumns.locationColumn.length > 0) {
-            locColumns = dataSourceExcelColumns.locationColumn;
+        if (dataSourceExcelColumns.value.locationColumn.length > 0) {
+            locColumns.value = dataSourceExcelColumns.value.locationColumn;
             currentExcelLocationColumn.value = currentDatasource ? currentDatasource.value.locationColumn : '';
         }
-        if (dataSourceExcelColumns.dateColumn.length > 0) {
-            datColumns = dataSourceExcelColumns.dateColumn; 
+        if (dataSourceExcelColumns.value.dateColumn.length > 0) {
+            datColumns.value = dataSourceExcelColumns.value.dateColumn; 
             currentExcelDateColumn.value = currentDatasource ? currentDatasource.value.dateColumn : '';
         }
     })
@@ -300,7 +300,7 @@ import { useStore } from 'vuex';
         currentExcelDateColumn.value = currentDatasource.dateColumn;
         currentExcelLocationColumn.value = currentDatasource.locationColumn;
         selectedConnection.value = isOwner() ? currentDatasource.connectionString : '';
-        connectionStringPlaceHolderMessage = currentDatasource.connectionString != ''? "Replacement connection string" : 'New connection string';
+        connectionStringPlaceHolderMessage.value = currentDatasource.connectionString != ''? "Replacement connection string" : 'New connection string';
         showSqlMessage.value = false; showSaveMessage.value = false;
         if(!isNewDataSource) {
                 getExcelSpreadsheetColumnHeadersAction(currentDatasource.id);
@@ -319,12 +319,12 @@ import { useStore } from 'vuex';
 
     watch(sqlCommandResponse, () => onSqlCommandResponseChanged)
     function onSqlCommandResponseChanged() {
-        sqlCommandResponse ? sqlResponse = sqlCommandResponse.value.validationMessage : '';
+        sqlCommandResponse ? sqlResponse.value = sqlCommandResponse.value.validationMessage : '';
     }
 
     watch(file, () => onFileChanged)
     function onFileChanged() {
-        files = hasValue(file.value) ? [file.value as File] : [];                                   
+        files.value = hasValue(file.value) ? [file.value as File] : [];                                   
         emit('submit', file.value);
         file.value ? fileName.value = file.value.name : fileName.value = '';
 
@@ -348,10 +348,9 @@ import { useStore } from 'vuex';
         currentDatasource.value.dateColumn = currentExcelDateColumn.value;
     }
 
-    watch(currentExcelLocationColumn, () => onCurrentExcelLocationColumnChanged)
-    function onCurrentExcelLocationColumnChanged() {
+    watch(currentExcelLocationColumn, () =>  {
         currentDatasource.value.locationColumn = currentExcelLocationColumn.value;
-    }
+    })
 
     function onLoadExcel() {
         if ( hasValue(file.value)) {
@@ -382,7 +381,7 @@ import { useStore } from 'vuex';
                     isNewDataSource.value = false;
                 }
                 selectedConnection.value = isOwner() ? currentDatasource.value.connectionString : '';
-                connectionStringPlaceHolderMessage = currentDatasource.value.connectionString!='' ? 'Replacement connection string' : 'New connection string';
+                connectionStringPlaceHolderMessage.value = currentDatasource.value.connectionString!='' ? 'Replacement connection string' : 'New connection string';
                 getDataSourcesAction();
                 unmodifiedDatasource = clone(currentDatasource);
             });
@@ -425,9 +424,9 @@ import { useStore } from 'vuex';
         sourceTypeItem.value = datasource.name;
         dataSourceTypeItem.value = datasource.type;
         selectedConnection.value = datasource.connectionString;        
-        connectionStringPlaceHolderMessage = 'New connection string';
-        datColumns = [];
-        locColumns = [];
+        connectionStringPlaceHolderMessage.value = 'New connection string';
+        datColumns.value = [];
+        locColumns.value = [];
       }
     }
     function allowSave(): boolean {
@@ -444,14 +443,14 @@ import { useStore } from 'vuex';
         currentDatasource.value = emptyDatasource;
         sourceTypeItem.value = '';
         dataSourceTypeItem.value = '';
-        datColumns = [];
-        locColumns = [];
+        datColumns.value = [];
+        locColumns.value = [];
         showMssql.value = false;
         showExcel.value = false;
         showSqlMessage.value = false;
         showSaveMessage.value = false;
         selectedConnection.value = '';
-        connectionStringPlaceHolderMessage = 'New connection string';        
+        connectionStringPlaceHolderMessage.value = 'New connection string';        
     }
     function chooseFiles(){
         if(document != null)
@@ -462,9 +461,9 @@ import { useStore } from 'vuex';
     function onSelect(payload: any) {
         if (hasValue(payload)) {
             const selectedFile = payload.target.files[0];
-            const fileName: string = prop('name', selectedFile) as string;
+            fileName.value = prop('name', selectedFile) as string;
 
-            if (fileName.indexOf('xlsx') === -1) {
+            if (fileName.value.indexOf('xlsx') === -1) {
                 addErrorNotificationAction({
                     message: 'Only .xlsx file types are allowed',
                 });
@@ -484,8 +483,8 @@ import { useStore } from 'vuex';
             let testConnection: TestStringData = {testString: connStr};
 
             checkSqlCommandAction(testConnection).then(() => {
-                sqlValid = sqlCommandResponse.value.isValid;
-                sqlResponse = sqlCommandResponse.value.validationMessage;
+                sqlValid.value = sqlCommandResponse.value.isValid;
+                sqlResponse.value = sqlCommandResponse.value.validationMessage;
                 showSqlMessage.value = true;
             });
         }

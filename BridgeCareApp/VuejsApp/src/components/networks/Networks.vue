@@ -316,8 +316,8 @@ import mitt from 'mitt';
     })
 
     watch(selectNetworkItemValue, () =>  {
-        selectNetworkAction(selectNetworkItemValue);
-        console.log(attributeRows);
+        selectNetworkAction(selectNetworkItemValue.value);
+        console.log(attributeRows.value);
         if(selectNetworkItemValue.value != getBlankGuid() || isNewNetwork)
             hasSelectedNetwork.value = true;
         else
@@ -336,7 +336,7 @@ import mitt from 'mitt';
     
     watch(stateSelectedNetwork, () => {
         if (!isNewNetwork) {
-            selectedNetwork = clone(stateSelectedNetwork);
+            selectedNetwork.value = clone(stateSelectedNetwork.value);
         }
     })
 
@@ -347,7 +347,7 @@ import mitt from 'mitt';
         selectedKeyAttributeItem.value = selectedNetwork.value.keyAttribute;
         spatialWeightingEquationValue.expression = selectedNetwork.value.defaultSpatialWeighting;
 
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', selectedNetwork, stateSelectedNetwork);
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', selectedNetwork.value, stateSelectedNetwork.value);
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     })
 
@@ -373,7 +373,7 @@ import mitt from 'mitt';
         hasSelectedNetwork.value = true;
     }
     function onDiscardChanges() {
-        selectedNetwork = clone(stateSelectedNetwork);
+        selectedNetwork.value = clone(stateSelectedNetwork.value);
     }
     function onSubmitEquationEditorDialogResult(equation: Equation) {
         equationEditorDialogData = clone(emptyEquationEditorDialogData);

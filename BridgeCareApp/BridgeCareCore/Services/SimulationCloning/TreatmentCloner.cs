@@ -1,6 +1,7 @@
 ﻿using AppliedResearchAssociates.iAM.DTOs;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BridgeCareCore.Services
 {
@@ -10,7 +11,7 @@ namespace BridgeCareCore.Services
         {            
             var cloneCriterionLibrary = CriterionLibraryCloner.CloneNullPropagating(treatment.CriterionLibrary, ownerId);
             var cloneTreatmentCost = TreatmentCostCloner.CloneList(treatment.Costs, ownerId);
-            var cloneTreatmentConsequence = TreatmentConsequenceCloner.CloneList(treatment.Consequences, ownerId);
+            var cloneTreatmentConsequence = TreatmentConsequenceCloner.CloneList(treatment.Consequences, ownerId);            
             var clone = new TreatmentDTO
             {
               Name = treatment.Name,
@@ -27,20 +28,33 @@ namespace BridgeCareCore.Services
               Costs = cloneTreatmentCost,
               Id = Guid.NewGuid(),
               IsModified = treatment.IsModified,
-              PerformanceFactors = treatment.PerformanceFactors,              
-            };
+              PerformanceFactors = treatment.PerformanceFactors,
+              SupersedeRules = new List<TreatmentSupersedeRuleDTO>()
+            }; 
             return clone;
         }
+
         internal static List<TreatmentDTO> CloneList(IEnumerable<TreatmentDTO> treatments, Guid ownerId)
         {
-            var clone = new List<TreatmentDTO>();
+            var cloneList = new List<TreatmentDTO>();
             foreach (var treatment in treatments)
             {
                 var childClone = Clone(treatment, ownerId);
-                clone.Add(childClone);
+                cloneList.Add(childClone);
             }
-            return clone;
 
+            // Clone supersede rules here(to get correct prevent treatment ids assigned for rules
+            foreach (var treatmentClone in cloneList)
+            {
+                var treatment = treatments.FirstOrDefault(_ => _.Name == treatmentClone.Name);
+                if (treatment.SupersedeRules.Any())
+                {
+                    var cloneSupersedeRules = TreatmentSupersedeRuleCloner.CloneList(treatment.SupersedeRules, cloneList, ownerId);
+                    treatmentClone.SupersedeRules = cloneSupersedeRules;
+                }
+            }
+
+            return cloneList;
         }
     }
 }

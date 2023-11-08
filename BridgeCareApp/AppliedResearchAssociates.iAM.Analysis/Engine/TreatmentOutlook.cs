@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
 internal sealed class TreatmentOutlook
 {
-    private const bool InternalSummaryShouldBeDumped = false;
+    private const bool InternalSummaryShouldBeDumped = true;
 
     private static readonly Dictionary<SimulationRunner, string> DumpFolderNamePerSimulationRun;
 

@@ -29,10 +29,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void CreateSimulation(Guid networkId, SimulationDTO dto);
 
         SimulationDTO GetSimulation(Guid simulationId);
-
-        // Note: looks like this is not in use
-        SimulationCloningResultDTO CloneSimulation(Guid simulationId, Guid networkId, string simulationName);
-
+                
         /// <summary>Updates the simulation. If the dto has a nonempty
         /// list of users, also updates the users. BUT if the
         /// dto's list of users is empty, the users are unaffected.</summary> 

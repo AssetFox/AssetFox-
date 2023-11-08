@@ -1,5 +1,5 @@
 <template>
-    <v-row column>
+    <v-row>
         <!-- top row -->
         <v-col cols = "12">
             <v-row justify-space-between>
@@ -27,6 +27,7 @@
                                     placeholder="Search Calcultated Attribute"
                                     single-line
                                     v-model="gridSearchTerm"
+                                    variant="outlined"
                                     outline
                                     clearable
                                     @click:clear="onClearClick()"
@@ -40,7 +41,7 @@
                             class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             variant = "outlined"
                             v-show="!hasScenario"
-                            style="top: 2px !important; position: right">
+                            style="top: 2px !important; position: right; margin-left: 5px">
                             Create New Library
                         </v-btn>
                     </v-col>
@@ -54,11 +55,6 @@
                      Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
                 </div>
                 <v-divider class="owner-shared-divider" inset vertical></v-divider>
-                <v-badge v-show="isShared" style="padding: 10px">
-                    <template v-slot:badge>
-                        <span>Shared</span>
-                    </template>
-                    </v-badge>
                     <v-btn id="CalculatedAttribute-shareLibrary-btn" @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                 v-show='!hasScenario'>
                 Share Library
@@ -70,11 +66,11 @@
             <v-row justify-space-between>
                 <v-col cols = "6">
                 <v-row column style="float:left; width: 100%">
-                    <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
                     <v-select
                         id="CalculatedAttribute-Attribute-select"   
                         :items="attributeSelectItems"
                         append-icon=ghd-down
+                        label="Attribute"
                         variant="outlined"
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         item-title="text" 
@@ -87,10 +83,10 @@
                 </v-col>
                 <v-col cols = "6">
                 <v-row column style="float:right; width: 100%">
-                    <v-subheader class="ghd-md-gray ghd-control-label">Timing</v-subheader>
                     <v-select
                         id="CalculatedAttribute-Timing-select"
                         :items="attributeTimingSelectItems"
+                        label="Timing"
                         append-icon=ghd-down
                         variant="outlined"
                         v-model="attributeTimingSelectItemValue"
@@ -106,14 +102,16 @@
         </v-col>
         <!-- Default Equation -->
         <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
+            <v-subheader style="margin-left: 650px" class="ghd-md-gray ghd-control-label">Default Equation</v-subheader>
             <v-row justify-center>
-                <v-col cols = "6">
+                <v-col cols = "8">
                     <v-row column>
-                        <v-subheader class="ghd-md-gray ghd-control-label">Default Equation</v-subheader>
+                        <v-spacer></v-spacer>
                         <v-text-field
                             id="CalculatedAttribute-defaultEquation-textfield"
                             readonly
                             class="sm-txt"
+                            variant="underlined" 
                             v-model="defaultEquation.equation.expression"
                             :disabled="!hasAdminAccess">
                             <template v-slot:append>
@@ -121,6 +119,7 @@
                                     id="CalculatedAttribute-defaultEquationEditor-btn"
                                     @click="onShowEquationEditorDialogForDefaultEquation()"
                                     class="ghd-blue"
+                                    flat
                                     icon
                                     v-if="hasAdminAccess">
                                     <img class='img-general img-shift' :src="require('@/assets/icons/edit.svg')"/>
@@ -168,6 +167,7 @@
                                     id="CalculatedAttribute-editEquation-btn"
                                     @click="onShowEquationEditorDialog(props.item.id)"
                                     class="ghd-blue"
+                                    flat
                                     icon
                                     v-if="hasAdminAccess">
                                     <img class='img-general img-shift' :src="require('@/assets/icons/edit.svg')"/>
@@ -186,6 +186,7 @@
                                     id="CalculatedAttribute-changeEquationCriteria-btn"
                                     @click="onEditCalculatedAttributeCriterionLibrary(props.item.id)"
                                     class="ghd-blue"
+                                    flat
                                     icon
                                     v-if="hasAdminAccess">
                                     <img class='img-general img-shift' :src="require('@/assets/icons/edit.svg')"/>
@@ -199,6 +200,7 @@
                             @click="
                                 onRemoveCalculatedAttribute(props.item.id)"
                             class="ghd-blue"
+                            flat
                             icon
                             :disabled="!hasAdminAccess">
                             <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
@@ -256,6 +258,7 @@
                     v-if="hasAdminAccess"
                     @click="onShowCreateCalculatedAttributeLibraryDialog(true)"
                     variant = "outlined"
+                    style="margin-left: 10px; margin-right: 10px"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                     Create as New Library
                 </v-btn>
@@ -304,7 +307,7 @@
     </v-row>
 </template>
 <script lang="ts" setup>
-import Vue, { shallowReactive, shallowRef } from 'vue';
+import { shallowReactive, shallowRef } from 'vue';
 import Alert from '@/shared/modals/Alert.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
 import CreateCalculatedAttributeLibraryDialog from './calculated-attribute-editor-dialogs/CreateCalculatedAttributeLibraryDialog.vue';
@@ -424,15 +427,14 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     let isShared: boolean = false;
     let modifiedDate: string;
 
-    let shareCalculatedAttributeLibraryDialogData: ShareCalculatedAttributeLibraryDialogData = clone(emptyShareCalculatedAttributeLibraryDialogData);
+    const shareCalculatedAttributeLibraryDialogData = ref<ShareCalculatedAttributeLibraryDialogData>(clone(emptyShareCalculatedAttributeLibraryDialogData));
 
-    let defaultEquation: CriterionAndEquationSet = emptyCriterionAndEquationSet;
-    let defaultEquationCache: CriterionAndEquationSet = emptyCriterionAndEquationSet;
-    let defaultSelected: boolean = false;
-
+    let defaultEquation = ref(emptyCriterionAndEquationSet);
+    let defaultEquationCache = ref(emptyCriterionAndEquationSet);
+    const defaultSelected = ref(false);
     let hasSelectedLibrary = ref<boolean>(false);
     let isDefaultBool = shallowRef<boolean>(false); //this exists because isDefault can't be tracked so this bool is tracked for the switch and is then synced with isDefault
-    let hasScenario = ref(false);
+    let hasScenario = ref<boolean>(false);
     let rules: InputValidationRules = validationRules;
     let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
    let showCreateCalculatedAttributeDialog = false;
@@ -458,7 +460,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
 
     let isAttributeSelectedItemValue: boolean = false;
     let isTimingSelectedItemValue: boolean = false;
-    let attributeTimingSelectItems: SelectItem[] = [];
+    let attributeTimingSelectItems = ref<SelectItem[]>([]);
     let attributeTimingSelectItemValue= ref('');
     let currentCriteriaEquationSetSelectedId: string | null = '';
 
@@ -513,8 +515,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     const $router = useRouter();
     const $emitter = mitt();
     
-    beforeRouteEnter();
-    function beforeRouteEnter(){
+    onMounted(()=> {
         librarySelectItemValue.value = '';
             attributeSelectItemValue.value = '';
 
@@ -531,7 +532,6 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                             });
                             $router.push('/Scenarios/');
                         }
-
                         hasScenario.value = true;
                         getScenarioCalculatedAttributeAction(selectedScenarioId).then(()=> {
                             getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
@@ -541,7 +541,8 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                     }
                 });                
             });
-    }
+    });
+
     onBeforeUnmount(()=>beforeDestroy())
     function beforeDestroy() {
         calculatedAttributeGridData.value = [] as CalculatedAttribute[];
@@ -580,7 +581,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                      currentPage.calculationTiming = data.calculationTiming
                      pairsCache =  currentPage.equations;
                      totalItems = data.totalItems;
-                     defaultEquation = data.defaultEquation;
+                     defaultEquation.value = data.defaultEquation;
                      selectedGridItem.value =  calculatedAttributeGridModelConverter( currentPage)
                 }
             });
@@ -603,7 +604,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                      currentPage.calculationTiming = data.calculationTiming
                      pairsCache =  currentPage.equations;
                      totalItems = data.totalItems;
-                     defaultEquation = data.defaultEquation;
+                     defaultEquation.value = data.defaultEquation;
                      selectedGridItem.value =  calculatedAttributeGridModelConverter( currentPage);
                     if (!isNil( selectedCalculatedAttributeLibrary.value.id) ) {
                          getIsSharedLibraryAction( selectedCalculatedAttributeLibrary.value).then(() => isShared = isSharedLibrary.value);
@@ -683,7 +684,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         }
     }
     function setAttributeTimingSelectItems() {
-        attributeTimingSelectItems = [
+        attributeTimingSelectItems.value = [
             { text: 'Pre Deterioration', value: Timing.PreDeterioration },
             { text: 'Post Deterioration', value: Timing.PostDeterioration },
             { text: 'On Demand', value: Timing.OnDemand },
@@ -701,7 +702,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     // is so that a user is asked wether or not to continue when switching libraries after they have made changes
     //but only when in libraries
     watch(librarySelectItemValue,() =>{
-        defaultEquation.equation.expression = "";
+        defaultEquation.value.equation.expression = "";
         if(hasScenario.value){
             onLibrarySelectItemValueChanged();
             unsavedDialogAllowed = false;
@@ -718,9 +719,9 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         librarySelectItemValueAllowedChanged = true;
     })
     function onLibrarySelectItemValueChanged() {
-        truelibrarySelectItemValue = librarySelectItemValue;
+        truelibrarySelectItemValue.value = librarySelectItemValue.value;
         selectCalculatedAttributeLibraryAction(
-            librarySelectItemValue,
+            librarySelectItemValue.value,
         );
     }
 
@@ -813,6 +814,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         selectedCalculatedAttributeLibrary.value.users = clone(stateSelectedCalculatedAttributeLibrary.value.users)
 
         isDefaultBool.value = selectedCalculatedAttributeLibrary.value.isDefault;
+        onselectedCalculatedAttributeLibraryChanged();
     })
     watch(stateScenarioCalculatedAttributes,() =>{
         if (hasScenario.value) {
@@ -829,9 +831,10 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
             checkHasUnsavedChanges();
         }
     }
-    watch(selectedCalculatedAttributeLibrary, ()=>{
-        
-        // change in library multiselect
+    watch(selectedCalculatedAttributeLibrary,() => onselectedCalculatedAttributeLibraryChanged())
+        function onselectedCalculatedAttributeLibraryChanged()
+        {
+                    // change in library multiselect
         if (
             selectedCalculatedAttributeLibrary.value.id !== uuidNIL 
         ) {
@@ -840,7 +843,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         else {
             hasSelectedLibrary.value = false;
         }
-
+        
         clearChanges();
         if (hasScenario.value && hasSelectedLibrary.value) {
             getSelectedLibraryCalculatedAttributesAction(selectedCalculatedAttributeLibrary.value.id).then(() =>{
@@ -904,7 +907,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                  onCalculatedAttributeGridDataChanged();
             })          
         }         
-    })
+    }
     
     watch(isSharedLibrary,()=> onStateSharedAccessChanged())
     function onStateSharedAccessChanged() {
@@ -1061,7 +1064,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
             return false;
         }
 
-        if( defaultEquation.id === getBlankGuid() ||  defaultEquation.equation.expression.trim() === '')
+        if( defaultEquation.value.id === getBlankGuid() ||  defaultEquation.value.equation.expression.trim() === '')
             return true;   
 
         var updatePairs = clone( updatedPairs.get( selectedAttribute.id));
@@ -1201,10 +1204,10 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     }
 
     function onShowEquationEditorDialogForDefaultEquation() {
-         defaultSelected = true;
+         defaultSelected.value = true;
          equationEditorDialogData.value = {
             showDialog: true,
-            equation:  defaultEquation.equation,
+            equation:  defaultEquation.value.equation,
         };
     }
     function onSubmitEquationEditorDialogResult(equation: Equation) {
@@ -1227,7 +1230,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         }
         else if (!isNil(equation) &&  defaultSelected) {
 
-            var defaultPair =  defaultEquation;
+            var defaultPair =  defaultEquation.value;
             if(!isNil(defaultPair)){
                 defaultPair.equation.expression = equation.expression;
                  updatedDefaultEquation(defaultPair);
@@ -1236,7 +1239,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         }
          selectedCalculatedAttribute.value = clone(emptyCalculatedAttribute);
          hasSelectedCalculatedAttribute = false;
-         defaultSelected = false;
+         defaultSelected.value = false;
     }
     function onRemoveCalculatedAttribute(criterionEquationSetId: string) {
         var currItem =  calculatedAttributeGridData.value.find(
@@ -1336,7 +1339,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         if (selectedItem == undefined) {
             selectedItem = Timing.OnDemand;
         }
-        var localTiming =  attributeTimingSelectItems.find(
+        var localTiming =  attributeTimingSelectItems.value.find(
             _ => _.value == selectedItem,
         )!.text;
          attributeTimingSelectItemValue.value = selectedItem.toString();
@@ -1435,13 +1438,13 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
             var mapEntry =  defaultEquations.value.get( selectedAttribute.id)
             if(isNil(mapEntry)){
                 if(hasUnsavedChangesCore('', defaultEq,  defaultEquationCache)){
-                     defaultEquation = clone(defaultEq);
+                     defaultEquation.value = clone(defaultEq);
                      defaultEquations.value.set( selectedAttribute.id, clone(defaultEq));
                 }
             }               
             else{               
                 if(hasUnsavedChangesCore('', defaultEq,  defaultEquationCache)){
-                     defaultEquation = clone(defaultEq);
+                     defaultEquation.value = clone(defaultEq);
                     mapEntry = clone(defaultEq);
                 }
             }
@@ -1515,14 +1518,14 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     };
 
     function onShowShareCalculatedAttributeLibraryDialog(calculatedAttributeLibrary: CalculatedAttributeLibrary) {
-         shareCalculatedAttributeLibraryDialogData = {
+         shareCalculatedAttributeLibraryDialogData.value = {
             showDialog:true,
             calculatedAttributeLibrary: clone(calculatedAttributeLibrary)
         }
     }
 
     function onShareCalculatedAttributeDialogSubmit(calculatedAttributeLibraryUsers: CalculatedAttributeLibraryUser[]) {
-         shareCalculatedAttributeLibraryDialogData = clone(emptyShareCalculatedAttributeLibraryDialogData);
+         shareCalculatedAttributeLibraryDialogData.value = clone(emptyShareCalculatedAttributeLibraryDialogData);
 
                 if (!isNil(calculatedAttributeLibraryUsers) &&  selectedCalculatedAttributeLibrary.value.id !== getBlankGuid())
                 {
@@ -1602,7 +1605,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                      currentPage.calculationTiming = data.calculationTiming
                      pairsCache =  currentPage.equations;
                      totalItems = data.totalItems;
-                     defaultEquation = data.defaultEquation;
+                     defaultEquation.value = data.defaultEquation;
                      defaultEquationCache = clone( defaultEquation);
                      selectedGridItem.value =  calculatedAttributeGridModelConverter( currentPage)
                      setTimingsMultiSelect( currentPage.calculationTiming);
@@ -1623,7 +1626,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                      currentPage.calculationTiming = data.calculationTiming
                      pairsCache =  currentPage.equations;
                      totalItems = data.totalItems;
-                     defaultEquation = data.defaultEquation;
+                     defaultEquation.value = data.defaultEquation;
                      defaultEquationCache = clone( defaultEquation);
                      selectedGridItem.value =  calculatedAttributeGridModelConverter( currentPage)
                      setTimingsMultiSelect( currentPage.calculationTiming);

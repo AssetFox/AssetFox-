@@ -70,15 +70,15 @@ let store = useStore();
 const props = defineProps<{
     dialogData: ShareCalculatedAttributeLibraryDialogData
   }>()
-let stateUsers = ref<User[]>(store.state.userModule.users);
-let shareCalculatedAttributeLibraryUserGridHeaders: DataTableHeader[] = [
+  let stateUsers = ref<User[]>(store.state.userModule.users);
+  const shareCalculatedAttributeLibraryUserGridHeaders = ref<DataTableHeader[]>([
     {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
-  ];
-  let shareCalculatedAttributeLibraryUserGridRows: CalculatedAttributeLibraryUserGridRow[] = [];
+  ]);
+  const shareCalculatedAttributeLibraryUserGridRows = ref<CalculatedAttributeLibraryUserGridRow[]>([]);
   let currentUserAndOwner: CalculatedAttributeLibraryUser[] = [];
-  let searchTerm: string = '';
+  const searchTerm = ref('');
 
   watch(()=>props.dialogData,() => onDialogDataChanged)
   function onDialogDataChanged() {
@@ -91,7 +91,7 @@ let shareCalculatedAttributeLibraryUserGridHeaders: DataTableHeader[] = [
   function onSetGridData() {
     const currentUser: string = getUserName();
 
-    shareCalculatedAttributeLibraryUserGridRows = stateUsers.value
+    shareCalculatedAttributeLibraryUserGridRows.value = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -137,14 +137,14 @@ let shareCalculatedAttributeLibraryUserGridHeaders: DataTableHeader[] = [
                 const otherUsers: CalculatedAttributeLibraryUser[] = filter(isNotCurrentUserOrOwner, calculatedAttributeLibraryUsers) as CalculatedAttributeLibraryUser[];
 
                 otherUsers.forEach((calculatedAttributeLibraryUser: CalculatedAttributeLibraryUser) => {
-                    if (any(propEq('id', calculatedAttributeLibraryUser.userId), shareCalculatedAttributeLibraryUserGridRows)) {
+                    if (any(propEq('id', calculatedAttributeLibraryUser.userId), shareCalculatedAttributeLibraryUserGridRows.value)) {
                         const calculatedAttributeLibraryUserGridRow: CalculatedAttributeLibraryUserGridRow = find(
-                            propEq('id', calculatedAttributeLibraryUser.userId), shareCalculatedAttributeLibraryUserGridRows) as CalculatedAttributeLibraryUserGridRow;
+                            propEq('id', calculatedAttributeLibraryUser.userId), shareCalculatedAttributeLibraryUserGridRows.value) as CalculatedAttributeLibraryUserGridRow;
 
-                        shareCalculatedAttributeLibraryUserGridRows = update(
-                            findIndex(propEq('id', calculatedAttributeLibraryUser.userId), shareCalculatedAttributeLibraryUserGridRows),
+                        shareCalculatedAttributeLibraryUserGridRows.value = update(
+                            findIndex(propEq('id', calculatedAttributeLibraryUser.userId), shareCalculatedAttributeLibraryUserGridRows.value),
                             { ...calculatedAttributeLibraryUserGridRow, isShared: true, canModify: calculatedAttributeLibraryUser.canModify },
-                            shareCalculatedAttributeLibraryUserGridRows
+                            shareCalculatedAttributeLibraryUserGridRows.value
                         );
                     }
                 });
@@ -154,9 +154,9 @@ let shareCalculatedAttributeLibraryUserGridHeaders: DataTableHeader[] = [
 
   function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      shareCalculatedAttributeLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), shareCalculatedAttributeLibraryUserGridRows),
-          'canModify', false, shareCalculatedAttributeLibraryUserGridRows);
+      shareCalculatedAttributeLibraryUserGridRows.value = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), shareCalculatedAttributeLibraryUserGridRows.value),
+          'canModify', false, shareCalculatedAttributeLibraryUserGridRows.value);
     }
   }
 
@@ -167,11 +167,11 @@ let shareCalculatedAttributeLibraryUserGridHeaders: DataTableHeader[] = [
       emit('submit', null);
     }
 
-    shareCalculatedAttributeLibraryUserGridRows = [];
+    shareCalculatedAttributeLibraryUserGridRows.value = [];
   }
 
   function getCalculatedAttributeLibraryUsers() {
-    const usersSharedWith: CalculatedAttributeLibraryUser[] = shareCalculatedAttributeLibraryUserGridRows
+    const usersSharedWith: CalculatedAttributeLibraryUser[] = shareCalculatedAttributeLibraryUserGridRows.value
         .filter((calculatedAttributeLibraryUserGridRow: CalculatedAttributeLibraryUserGridRow) => calculatedAttributeLibraryUserGridRow.isShared)
         .map((calculatedAttributeLibraryUserGridRow: CalculatedAttributeLibraryUserGridRow) => ({
           userId: calculatedAttributeLibraryUserGridRow.id,

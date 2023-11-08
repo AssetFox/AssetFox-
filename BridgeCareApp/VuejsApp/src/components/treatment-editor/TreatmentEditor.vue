@@ -41,8 +41,6 @@
             >
                 Import Treatment
             </v-btn>
-        <!-- </v-col>
-        <v-col style="padding-right: 5px">                        -->
             <v-btn
                 @click='onShowConfirmDeleteTreatmentAlert'
                 variant = "outlined"
@@ -52,8 +50,6 @@
             >
                 Delete Treatment
             </v-btn>
-        <!-- </v-col>
-        <v-col style="padding-top: 38px !important;"> -->
             <v-btn
                 id="TreatmentEditor-createLibrary-btn"
                 @click='onShowCreateTreatmentLibraryDialog(false)'
@@ -104,14 +100,12 @@
                     >
                     Download Template
                 </v-btn> 
-                <!-- <label style='float:right;padding-top:13px;' class="ghd-grey" v-show ='hasSelectedLibrary && !hasScenario'>|</label> -->
                 <v-btn :disabled='false' @click='OnExportTreamentsClick()'
                 variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'
                     >
                     Download
                 </v-btn> 
-                <!-- <label style='float:right;padding-top:13px;' class="ghd-grey" v-show ='hasSelectedLibrary && !hasScenario'>|</label> -->
                 <v-btn :disabled='false' @click='showImportTreatmentsDialog = true'
                 variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'

@@ -179,7 +179,7 @@ const props = defineProps<{
     }
 
     watch(selectedTreatmentConsequences, () => {
-        consequencesGridData.value = clone(props.selectedTreatmentConsequences);
+        consequencesGridData.value = clone(selectedTreatmentConsequences.value);
     });
 
     watch(stateAttributes, () => {

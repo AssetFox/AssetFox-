@@ -1,4 +1,5 @@
 <template>
+    <v-card height="900px" class="elevation-0 vcard-main-layout">
     <v-row>
         <v-col>
             <v-row class="ghd-constant-header" align="center" justify="space-between">
@@ -30,13 +31,6 @@
                         </v-divider>
                         <v-btn @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario'>
-                        <!-- <v-badge v-show="isShared" style="padding: 10px">
-                            <template v-slot: badge>
-                                <span>Shared</span>
-                            </template>
-                        </v-badge>
-                        <v-btn id="TargetConditionGoalEditor-ShareLibrary-btn" @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
-                            v-show='!hasScenario'> -->
                             Share Library
                         </v-btn>
                     </v-row>
@@ -188,7 +182,7 @@
                 </v-data-table-server>
         </div>
         <v-divider
-            :thickness="4"
+            :thickness="2"
             class="border-opacity-100"
         ></v-divider>
         <v-col cols="12">
@@ -213,7 +207,7 @@
 
         </v-col>
         <v-col>
-            <v-row align="center" v-show="hasSelectedLibrary || hasScenario" style="padding: 10px;" justify="end">
+            <v-row align="center" v-show="hasSelectedLibrary || hasScenario" style="padding: 10px;" justify="center">
                 <v-btn flat
                     id="TargetConditionGoalEditor-deleteLibrary-btn"
                     @click="onShowConfirmDeleteAlert"
@@ -290,6 +284,7 @@
         />
         <ConfirmDialog></ConfirmDialog>
     </v-row>
+    </v-card>
 </template>
 
 <script setup lang="ts">

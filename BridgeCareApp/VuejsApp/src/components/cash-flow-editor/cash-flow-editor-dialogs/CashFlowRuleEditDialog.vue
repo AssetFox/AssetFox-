@@ -9,8 +9,6 @@
             </v-btn>
         </v-row>
       </v-card-title>
-            <div style='height: 500px; max-width:850px' class="ghd-dialog-box-padding-center">
-                    <div style='max-height: 450px; overflow-y:auto;'>
             <v-data-table
                 :headers="cashFlowRuleDistributionGridHeaders"
                 :items="cashFlowDistributionRuleGridData"
@@ -169,16 +167,14 @@
                     </tr>
                 </template>
             </v-data-table>
-                </div>
                 <v-btn @click="onAddCashFlowDistributionRule" class='ghd-blue ghd-button' variant = "flat" id="CashFlowRuleEditDialog-addDistributionRule-btn">
                     Add Distribution Rule
                 </v-btn>
-            </div>
                      
 
                             
       <v-card-actions>
-        <v-row justify-center row>
+        <v-row justify="center">
             <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" id="CashFlowRuleEditDialog-cancel-btn">
             Cancel
           </v-btn>

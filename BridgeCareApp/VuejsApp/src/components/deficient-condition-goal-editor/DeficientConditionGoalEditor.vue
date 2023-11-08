@@ -1,4 +1,5 @@
 <template>
+    <v-card height="800px" class="elevation-0 vcard-main-layout">
     <v-row style="margin: 5px;">
         <v-row align="center" >
                 <v-col cols="6">
@@ -224,7 +225,7 @@
                     <v-textarea
                         class="ghd-text-field-border"
                         no-resize
-                        outline
+                        variant="outlined"
                         rows="4"
                         v-model="selectedDeficientConditionGoalLibrary.description"
                         @update:model-value="checkHasUnsavedChanges()"
@@ -283,7 +284,7 @@
                        
             </v-row>
         </v-col>
-
+</v-card>
         <Alert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
@@ -309,7 +310,6 @@
             :dialogData="criterionEditorDialogData"
             @submit="onEditDeficientConditionGoalCriterionLibrary"
         />
-    <!-- </v-row> -->
     <ConfirmDialog></ConfirmDialog>
 </template>
 

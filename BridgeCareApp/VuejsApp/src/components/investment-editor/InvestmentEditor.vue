@@ -1,4 +1,5 @@
 <template>
+    <v-card height="1000px" class="elevation-0 vcard-main-layout">
     <v-row>
         <v-col cols="12">
             <v-row justify="space-between">
@@ -304,6 +305,7 @@
         <ImportExportInvestmentBudgetsDialog :showDialog='showImportExportInvestmentBudgetsDialog'
                                              @submit='onSubmitImportExportInvestmentBudgetsDialogResult' />
     </v-row>
+</v-card>
     <ConfirmDialog></ConfirmDialog>
 </template>
 
@@ -1674,4 +1676,5 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         height: 22px;
         margin-top: 12px !important;
     }
+    
 </style>

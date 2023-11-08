@@ -1,23 +1,26 @@
 <template>
     <v-row>
-        <v-col cols = "12">
-            <v-row style="margin-top:0px;">
-                <v-col cols = "4" class="ghd-constant-header">
-                    <v-subheader class="ghd-control-label ghd-md-gray"><span>Select an Investment library</span></v-subheader><!--class="ghd-md-gray ghd-control-subheader"-->
-                    <v-select 
+        <v-col cols="12">
+            <v-row justify="space-between">
+                <v-col cols = "auto" class="ghd-constant-header">
+                    <div style="margin-bottom: 10px;">
+                        <v-subheader class="ghd-control-label ghd-md-gray"><span>Select an Investment library</span></v-subheader><!--class="ghd-md-gray ghd-control-subheader"-->
+                    </div>
+                        <v-select 
                         id="InvestmentEditor-investmentLibrary-select"
                         :items='librarySelectItems'
-                        variant="outlined"
                         item-title="text"
                         item-value="value"
                         v-model='librarySelectItemValue'
-                        class="ghd-select ghd-text-field ghd-text-field-border budget-parent">
+                        class="ghd-select ghd-text-field ghd-text-field-border vs-style"
+                        variant="outlined"
+                        density="compact">
                     </v-select>
                     <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
                 </v-col>
 
                 <!-- these are only in library -->
-                <v-col cols = "6" v-if='!hasScenario' class="ghd-constant-header">
+                <v-col cols = "auto" v-if='!hasScenario' class="ghd-constant-header">
                     <v-row v-if='hasSelectedLibrary && !hasScenario' row class="header-alignment-padding-center">
                         <div class="header-text-content invest-owner-padding">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
@@ -31,9 +34,9 @@
                         </v-btn>
                     </v-row>
                 </v-col>
-                <v-col cols = "2" v-if='!hasScenario' class="ghd-constant-header">
-                    <v-row row align-end justify-end class="header-alignment-padding-right">
-                        <v-spacer></v-spacer>
+                <v-col cols = "auto" v-if='!hasScenario' class="ghd-constant-header">
+                    <v-row align-end justify-end class="header-alignment-padding-right">
+                        <!-- <v-spacer></v-spacer> -->
                         <v-btn id="InvestmentEditor-CreateNewLibrary-vbtn" @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
                         variant = "outlined">
@@ -42,6 +45,7 @@
                     </v-row>
                 </v-col>
             </v-row>
+
             <!-- only for scenario -->
             <v-row style="margin-top:80px;" v-if='hasInvestmentPlanForScenario' align="center">
                 <!-- text boxes for scenario only -->
@@ -158,8 +162,7 @@
             </v-row>
         </v-col>
 
-        <v-col v-show='hasSelectedLibrary || hasScenario' xs12>             
-            <v-col>
+        <v-col v-show='hasSelectedLibrary || hasScenario'>             
                 <v-data-table-server
                     id="InvestmentEditor-investmentsDataTable-dataTable"
                     :headers='budgetYearsGridHeaders' 
@@ -168,12 +171,13 @@
                     class='v-table__overflow ghd-table' 
                     item-key='year' 
                     show-select 
+                    return-object
                     sort-icon=$vuetify.icons.ghd-table-sort
                     v-model='selectedBudgetYearsGridData' 
                     :pagination.sync="pagination"               
                     :rows-per-page-items=[5,10,25]
                     :must-sort='true'>
-                    <template slot='items' slot-scope='props' v-slot:item="{item}">
+                    <template v-slot:item="{item}">
                     <tr>
                         <td>
                             <v-checkbox hide-details primary v-model="selectedBudgetYearsGridData" :value="item"></v-checkbox>
@@ -182,26 +186,26 @@
                             <div v-if="header.key === 'year'">
                                 <span class='sm-txt'>{{ item.year + firstYearOfAnalysisPeriodShift}}</span>
                             </div>       
-                            <div v-if="header.key === 'action'">
-                                <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(item.year)" class="ghd-blue" flat>
-                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
-                                </v-btn>
-                            </div>
+                           
                             <div v-if="header.key !== 'year' && header.key !== 'action'">
                                 <editDialog :return-value.sync='item[header.key]'
                                     @save='onEditBudgetYearValue(item.year, header.key, item[header.key])'
                                     size="large" lazy>
                                     <v-text-field readonly single-line class='sm-txt'
                                         variant="underlined"
-                                        :model-value='formatAsCurrency(item[header.key])'
+                                        :model-value='item[header.key]'
                                         :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     <template v-slot:input>
                                         <v-text-field label='Edit' single-line
-                                                        v-model.number='item[header.key]'
-                                                        v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
-                                                        :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                            v-model.number='item[header.key]'
+                                            :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     </template>
                                 </editDialog>
+                            </div>
+                            <div v-if="header.key === 'action'">
+                                <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(item.year)" class="ghd-blue" flat>
+                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
+                                </v-btn>
                             </div>
                         </td>
                     </tr>
@@ -212,18 +216,17 @@
                         class='ghd-blue ghd-button' variant = "text">
                     Delete Selected
                 </v-btn>
-            </v-col>
         </v-col>
     
         <v-col v-show='hasSelectedLibrary && !hasScenario' cols = "12">
             <v-row justify-center>
                 <v-col>
                     <v-subheader class="ghd-label">Description</v-subheader>
-                    <v-textarea no-resize outline rows='4'
+                    <v-textarea no-resize rows='4'
                                 v-model='selectedBudgetLibrary.description'
                                 @update:model-value="checkHasUnsavedChanges()"
                                 variant="outlined"
-                                class="ghd-text-field-border">
+                                class="ghd-control-text ghd-control-border" density="compact">
                     </v-textarea>
                 </v-col>
             </v-row>
@@ -379,9 +382,8 @@ const stateBudgetLibraries = computed<BudgetLibrary[]>(() => store.state.investm
 const stateSelectedBudgetLibrary = computed<BudgetLibrary>(() => store.state.investmentModule.selectedBudgetLibrary);
 let stateInvestmentPlan = computed<InvestmentPlan>(() => store.state.investmentModule.investmentPlan);
 let stateScenarioBudgets = ref<Budget[]>(store.state.investmentModule.scenarioBudgets);
-let hasUnsavedChanges = computed<boolean>(()=>(store.state.unsavedChangesFlagModule.hasUnsavedChanges));
-//let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess); //DOESNT Work
-let hasAdminAccess: boolean = shallowReactive(store.state.authenticationModule.hasAdminAccess) ; 
+const hasUnsavedChanges = computed<boolean>(() => (store.state.unsavedChangesFlagModule.hasUnsavedChanges));
+const hasAdminAccess = computed<boolean>(()=> (store.state.authenticationModule.hasAdminAccess)); 
 
 let isSuccessfulImport = ref<boolean>(store.state.investmentModule.isSuccessfulImport);
 let currentUserCriteriaFilter = ref<UserCriteriaFilter>(store.state.userModule.currentUserCriteriaFilter);
@@ -443,10 +445,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let librarySelectItemValue = ref<string|null>('');
 
     let actionHeader: any = { title: 'Action', key: 'action', align: 'left', sortable: false, class: '', width: '' }
-    let budgetYearsGridHeaders: any[] = [
+    let budgetYearsGridHeaders = ref<any[]>([
         { title: 'Year', key: 'year', sortable: true, align: 'left', class: '', width: '' },
         actionHeader
-    ];
+    ]);
     let budgetYearsGridData = ref<BudgetYearsGridData[]>([]);
     let selectedBudgetYearsGridData = ref<BudgetYearsGridData[]>([]);
     let selectedBudgetYears = ref<number[]>([]);
@@ -499,67 +501,66 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     
     // REPLACE with created() ?
     //function beforeRouteEnter() {
-    created();
-    async function created() {
-        // (() => {
-        //     (async () => { 
-        //         librarySelectItemValue.value = '';
-        //         await getHasPermittedAccessAction();
-        //         await getBudgetLibrariesAction()
+    // created();
+    // async function created() {
+    //     (() => {
+    //         (async () => { 
+    //             librarySelectItemValue.value = '';
+    //             await getHasPermittedAccessAction();
+    //             await getBudgetLibrariesAction()
         
-        //         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
-        //             selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
+    //             if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
+    //                 selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
 
-        //             if (selectedScenarioId === uuidNIL) {
-        //                 addErrorNotificationAction({
-        //                     message: 'Found no selected scenario for edit',
-        //                 });
-        //                 $router.push('/Scenarios/');
-        //             }
+    //                 if (selectedScenarioId === uuidNIL) {
+    //                     addErrorNotificationAction({
+    //                         message: 'Found no selected scenario for edit',
+    //                     });
+    //                     $router.push('/Scenarios/');
+    //                 }
 
-        //             hasScenario.value = true;
-        //             ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
-        //                 if(response.data){
-        //                     setAlertMessageAction("An investment import has been added to the work queue")
-        //                 }
-        //             })
-        //             await initializePages();
-        //         }
-        //         else
-        //             initializing = false;               
-        //     })();                    
-        // });
-    }
+    //                 hasScenario.value = true;
+    //                 ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
+    //                     if(response.data){
+    //                         setAlertMessageAction("An investment import has been added to the work queue")
+    //                     }
+    //                 })
+    //                 await initializePages();
+    //             }
+    //             else
+    //                 initializing = false;               
+    //         })();                    
+    //     });
+    // }
 
     onMounted(() => {
-    //getBudgetLibrariesAction();  //WORKS here
-    librarySelectItemValue.value = '';
-                 getHasPermittedAccessAction();
-                 getBudgetLibrariesAction()
-                if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
-                    selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
+        librarySelectItemValue.value = '';
+        getHasPermittedAccessAction();
+        getBudgetLibrariesAction()
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
+            selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
 
-                    if (selectedScenarioId === uuidNIL) {
-                        addErrorNotificationAction({
-                            message: 'Found no selected scenario for edit',
-                        });
-                        $router.push('/Scenarios/');
-                    }
+            if (selectedScenarioId === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Found no selected scenario for edit',
+                });
+                $router.push('/Scenarios/');
+            }
 
-                    hasScenario.value = true;
-                    ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
-                        if(response.data){
-                            setAlertMessageAction("An investment import has been added to the work queue")
-                        }
-                    })
-                     initializePages();
+            hasScenario.value = true;
+            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
+                if(response.data){
+                    setAlertMessageAction("An investment import has been added to the work queue")
                 }
-                else
-                    initializing = false;         
+            })
+                initializePages();
+        }
+        else
+            initializing = false;        
 
-    $emitter.on(
-            Hub.BroadcastEventType.BroadcastImportCompletionEvent,
-            importCompleted,
+        $emitter.on(
+                Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+                importCompleted,
         );
     });
 
@@ -572,7 +573,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     });
         
     // Watchers
-    watch(pagination, onPaginationChanged)
+    watch(pagination, ()=> onPaginationChanged)
     async function onPaginationChanged() {
         if(initializing)
             return;
@@ -677,6 +678,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     
     watch(stateBudgetLibraries, ()=> {
         libraryItems.value = clone(stateBudgetLibraries.value);
+        librarySelectItems.value=[];
+        librarySelectItemNames.value =[];
 
         libraryItems.value.forEach(_=> {
             librarySelectItems.value.push({text:_.name,value:_.id})
@@ -699,13 +702,13 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             CheckUnsavedDialog(onSelectItemValueChanged, () => {
                 librarySelectItemValueAllowedChanged = false;
                 onSelectItemValueChanged();
-                librarySelectItemValue.value = trueLibrarySelectItemValue.value;               
+                librarySelectItemValue.value = trueLibrarySelectItemValue.value;              
             });
         }
         parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
         newLibrarySelection = true;
         scenarioLibraryIsModified.value = false;
-        librarySelectItemValueAllowedChanged = true;
+        librarySelectItemValueAllowedChanged = true;       
     });
 
     function onSelectItemValueChanged() {      
@@ -732,7 +735,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         }
 
         clearChanges()
-       //onPaginationChanged()
+       onPaginationChanged()
     });
 
     watch(stateInvestmentPlan,() => {
@@ -890,7 +893,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         } else if (hasSelectedLibrary.value) {
             const hasUnsavedChanges: boolean = hasUnsavedChangesCore('',
                 { ...clone(selectedBudgetLibrary.value), budgets: clone(currentPage.value) },
-                stateSelectedBudgetLibrary);
+                stateSelectedBudgetLibrary.value);
             setHasUnsavedChangesAction({ value: hasUnsavedChanges });
         }
     }
@@ -906,8 +909,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 class: '',
                 width: '',
             }) as any);
-        budgetYearsGridHeaders = [
-            budgetYearsGridHeaders[0],
+        budgetYearsGridHeaders.value = [
+            budgetYearsGridHeaders.value[0],
             ...budgetHeaders,
             actionHeader
         ];
@@ -1309,7 +1312,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             budgetsForDeletion: deletionBudgetIds.value,
             addedBudgets: addedBudgets.value,
             deletionyears: deletionYears.value ,
-            updatedBudgetAmounts: mapToIndexSignature( updatedBudgetAmounts),
+            updatedBudgetAmounts: mapToIndexSignature(updatedBudgetAmounts),
             Investment: null,
             addedBudgetAmounts: mapToIndexSignature(addedBudgetAmounts),
             firstYearAnalysisBudgetShift: 0,
@@ -1509,7 +1512,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             updatedBudgetAmounts.size > 0 || 
             (hasScenario.value && hasSelectedLibrary.value) ||
             (hasScenario.value && hasUnsavedChangesCore('', CheckInvestmentPlan, CheckStateInvestmentPlan)) || 
-            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedBudgetLibrary.value, stateSelectedBudgetLibrary))
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedBudgetLibrary.value, stateSelectedBudgetLibrary.value))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 

@@ -1375,7 +1375,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
             addedRows.length > 0 ||
             updatedRowsMap.size > 0 || 
             (hasScenario.value && hasSelectedLibrary.value) ||
-            (hasSelectedLibrary.value && hasUnsavedChangesCore('', stateSelectedTreatmentLibrary.value, selectedTreatmentLibrary.value))
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedTreatmentLibrary.value, stateSelectedTreatmentLibrary.value))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 

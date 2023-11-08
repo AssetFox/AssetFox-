@@ -12,7 +12,7 @@
       <v-card-text class="ghd-dialog-box-padding-center">
         <v-row column>
           <v-subheader class="ghd-md-gray ghd-control-label">Rule Name</v-subheader>
-          <v-text-field outline v-model="newCashRule.name"
+          <v-text-field variant="underlined" v-model="newCashRule.name"
                         id="AddCashFlowRuleDialog-ruleName-vtextfield"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-text-field-border ghd-text-field"/>

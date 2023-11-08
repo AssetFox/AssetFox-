@@ -1,5 +1,5 @@
 <template>
-    <v-row column class="Montserrat-font-family">
+    <v-container class="p-0 pb-5 pr-2">
         <v-col cols = "12">
             <v-row justify-space-between>
                 <v-col cols = "4" class="ghd-constant-header">
@@ -79,6 +79,7 @@
                     item-value="name"
                     @update:options="onPaginationChanged">
                     <template v-slot:item="item" slot="items" slot-scope="props">
+                        <tr>
                         <td>
                             <v-checkbox hide-details primary v-model="selectedCashRuleGridRows" :value="item.item"></v-checkbox>
                         </td>
@@ -92,6 +93,7 @@
                                 <v-text-field
                                     id="CashFlowEditor-ruleName-text"
                                     readonly
+                                    variant="underlined"
                                     single-line
                                     class="sm-txt"
                                     :model-value="item.item.name"
@@ -116,6 +118,7 @@
                                 min-width="500px">
                                 <template v-slot:activator>
                                     <v-text-field
+                                    variant="underlined"
                                         id="CashFlowEditor-criteria-text"
                                         readonly
                                         single-line
@@ -139,7 +142,8 @@
                                 @click="onEditCashFlowRuleCriterionLibrary(item.item)"
                                 id="CashFlowEditor-editCashFlowRule-btn"
                                 class="ghd-blue"
-                                icon>
+                                icon
+                                variant="flat">
                                 <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                             </v-btn>
                             </v-row>
@@ -151,6 +155,7 @@
                                 @click="onDeleteCashFlowRule(item.item.id)"
                                 id="CashFlowEditor-deleteCashFlowRule-btn"
                                 class="ghd-blue"
+                                variant="flat"
                                 icon>
                                 <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>
@@ -158,16 +163,18 @@
                                 @click="onSelectCashFlowRule(item.item.id)"
                                 id="CashFlowEditor-editCashFlowRuleDistribution-btn"
                                 class="ghd-blue"
+                                variant="flat"
                                 icon>
                                 <img class='img-general' :src="getUrl('assets/icons/edit-cash.svg')"/>
                             </v-btn>
                             </v-row>                          
                         </td>
+                        </tr>
                     </template>
                 </v-data-table-server>
 
                 <v-btn :disabled='selectedCashRuleGridRows.length === 0' @click='onDeleteSelectedCashFlowRules'
-                    class='ghd-blue ghd-button' variant = "flat">
+                    class='ghd-blue ghd-button' variant = "text">
                     Delete Selected
                 </v-btn>
             </div>
@@ -190,13 +197,12 @@
         </v-col>
         <v-col cols = "12">
             <v-row
-                justify-center
-                row
+                justify="center"
                 v-show="hasSelectedLibrary || hasScenario">
                 <v-btn variant = "outlined"
                     @click="onDeleteCashFlowRuleLibrary"
                     id="CashFlowEditor-deleteLibrary-btn"
-                    class='ghd-blue ghd-button-text ghd-button'
+                    class='m-2 ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission">
                     Delete Library
@@ -204,34 +210,34 @@
                 <v-btn
                     @click="onDiscardChanges"
                     v-show="hasScenario"
-                    :disabled="!hasUnsavedChanges" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
+                    :disabled="!hasUnsavedChanges" variant = "flat" class='m-2 ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>
                 <v-btn
                     :disabled="disableCrudButtons()"
                     @click="onShowCreateCashFlowRuleLibraryDialog(true)"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"> 
+                    class='m-2 ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"> 
                     Create as New Library
                 </v-btn>
                 <v-btn
                     id="CashFlowEditor-save-btn"
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
                     @click="onUpsertScenarioCashFlowRules"
-                    class='ghd-blue-bg text-white ghd-button-text ghd-button'
+                    class='m-2 ghd-blue-bg text-white ghd-button-text ghd-button'
                     v-show="hasScenario">
                     Save
                 </v-btn>
                 <v-btn
                     :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
                     @click="onUpsertCashFlowRuleLibrary"
-                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='m-2 ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario">
                     Update Library
                 </v-btn>                                       
             </v-row>
         </v-col>
 
-        <ConfirmDeleteAlert
+        <Alert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
         />
@@ -258,7 +264,7 @@
             :showDialog="showAddCashFlowRuleDialog"
             @submit="onSubmitAddCashFlowRule"/>
         <ConfirmDialog></ConfirmDialog>
-    </v-row>
+    </v-container>
 </template>
 
 <script lang="ts" setup>
@@ -316,7 +322,9 @@ import { useRouter } from 'vue-router';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { getUrl } from '@/shared/utils/get-url';
+import { useConfirm } from 'primevue/useconfirm';
 let store = useStore();
+const confirm = useConfirm();
 // const stateSimulationReportNames = computed<string[]>(() => store.state.adminDataModule.simulationReportNames);
 
 const stateCashFlowRuleLibraries = computed<CashFlowRuleLibrary[]>(() => store.state.cashFlowModule.cashFlowRuleLibraries);
@@ -341,8 +349,8 @@ async function addSuccessNotificationAction(payload?: any): Promise<any> {await 
 async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario', payload);}
 async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario', payload);}
 
-function cashFlowRuleLibraryMutator(payload: any){store.commit('');}
-function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
+function cashFlowRuleLibraryMutator(payload: any){store.commit('cashFlowRuleLibraryMutator', payload);}
+function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selectedCashFlowRuleLibraryMutator', payload);}
 
     let getUserNameByIdGetter: any = store.getters.getUserNameById;
 
@@ -359,7 +367,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     let initializing: boolean = true;
     let isShared: boolean = false;
 
-    let shareCashFlowRuleLibraryDialogData: ShareCashFlowRuleLibraryDialogData = clone(emptyShareCashFlowRuleLibraryDialogData);
+    let shareCashFlowRuleLibraryDialogData = ref(clone(emptyShareCashFlowRuleLibraryDialogData));
 
     let unsavedDialogAllowed: boolean = true;
     let trueLibrarySelectItemValue = '';
@@ -368,7 +376,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
 
     let hasSelectedLibrary = ref(false);
     let selectedScenarioId: any = getBlankGuid();
-    let librarySelectItems: SelectItem[] = [];
+    let librarySelectItems  = ref<SelectItem[]>([]);
     let selectedCashFlowRuleLibrary = ref<CashFlowRuleLibrary>(clone(emptyCashFlowRuleLibrary));
     let dateModified: string;
 
@@ -443,20 +451,20 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
         },
     ];
     let cashFlowDistributionRuleGridData: CashFlowDistributionRule[] = [];
-    let createCashFlowRuleLibraryDialogData: CreateCashFlowRuleLibraryDialogData = clone(
+    let createCashFlowRuleLibraryDialogData = ref(clone(
         emptyCreateCashFlowLibraryDialogData,
-    );
-    let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+    ));
+    let criterionEditorDialogData = ref(clone(
         emptyGeneralCriterionEditorDialogData,
-    );
-    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    ));
+    let confirmDeleteAlertData = ref(clone(emptyAlertData));
     let inputRules: InputValidationRules = clone(rules);
     let uuidNIL: string = getBlankGuid();
     let hasScenario = ref(false);
     let hasCreatedLibrary: boolean = false;
     let disableCrudButtonsResult: boolean = false;
     let hasLibraryEditPermission: boolean = false;
-    let showRuleEditorDialog: boolean = false;
+    let showRuleEditorDialog = ref(false);
     let showAddCashFlowRuleDialog= ref(false);
     let importLibraryDisabled: boolean = true;
     let scenarioHasCreatedNew: boolean = false;
@@ -499,7 +507,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     });
 
     watch(stateCashFlowRuleLibraries, () => {
-        librarySelectItems = stateCashFlowRuleLibraries.value.map(
+        librarySelectItems.value = stateCashFlowRuleLibraries.value.map(
             (library: CashFlowRuleLibrary) => ({
                 text: library.name,
                 value: library.id,
@@ -573,7 +581,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     watch(currentPage, () => onCurrentPageChanged())
     function onCurrentPageChanged() {
         // Get parent name from library id
-        librarySelectItems.forEach(library => {
+        librarySelectItems.value.forEach(library => {
             if (library.value === parentLibraryId) {
                 parentLibraryName = "Library Used: " + library.text;
             }
@@ -602,11 +610,11 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
             selectedCashFlowRule.value = clone(emptyCashFlowRule);
         }
 
-        showRuleEditorDialog = true;
+        showRuleEditorDialog.value = true;
     }
 
     function onShowCreateCashFlowRuleLibraryDialog(createAsNewLibrary: boolean) {
-        createCashFlowRuleLibraryDialogData = {
+        createCashFlowRuleLibraryDialogData.value = {
             showDialog: true,
             cashFlowRules: createAsNewLibrary ? currentPage.value : [],
         };
@@ -615,7 +623,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     function onSubmitCreateCashFlowRuleLibraryDialogResult(
         cashFlowRuleLibrary: CashFlowRuleLibrary,
     ) {
-        createCashFlowRuleLibraryDialogData = clone(
+        createCashFlowRuleLibraryDialogData.value = clone(
             emptyCreateCashFlowLibraryDialogData,
         );
 
@@ -655,7 +663,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
 
     function onSubmitCashFlowRuleEdit(CashFlowDistributionRules:CashFlowDistributionRule[])
     {
-        showRuleEditorDialog = false;
+        showRuleEditorDialog.value = false;
         if(!isNil(CashFlowDistributionRules))
         {
             let selectedRule = currentPage.value.find(o => o.id == selectedCashFlowRule.value.id) 
@@ -730,7 +738,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     function onEditCashFlowRuleCriterionLibrary(cashFlowRule: CashFlowRule) {
         selectedCashFlowRuleForCriteriaEdit = clone(cashFlowRule);
 
-        criterionEditorDialogData = {
+        criterionEditorDialogData.value = {
             showDialog: true,
             CriteriaExpression: selectedCashFlowRuleForCriteriaEdit.criterionLibrary.mergedCriteriaExpression,
         };
@@ -739,7 +747,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     function onSubmitCriterionLibraryEditorDialogResult(
         criterionExpression: string,
     ) {
-        criterionEditorDialogData = clone(
+        criterionEditorDialogData.value = clone(
             emptyGeneralCriterionEditorDialogData,
         );
 
@@ -917,7 +925,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     }
 
     function onDeleteCashFlowRuleLibrary() {
-        confirmDeleteAlertData = {
+        confirmDeleteAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -926,7 +934,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     }
 
     function onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        confirmDeleteAlertData = clone(emptyAlertData);
+        confirmDeleteAlertData.value = clone(emptyAlertData);
 
         if (submit) {
             librarySelectItemValue.value = '';
@@ -978,25 +986,25 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
             addedRows.value.length > 0 ||
             updatedRowsMap.size > 0 || 
             (hasScenario.value && hasSelectedLibrary.value) ||
-            (hasSelectedLibrary.value && hasUnsavedChangesCore('', stateSelectedCashRuleFlowLibrary.value, selectedCashFlowRuleLibrary.value))
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedCashFlowRuleLibrary.value,  stateSelectedCashRuleFlowLibrary.value))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
-        // if (hasUnsavedChanges && unsavedDialogAllowed) {
+        if (hasUnsavedChanges.value && unsavedDialogAllowed) {
 
-        //     confirm.require({
-        //         message: "You have unsaved changes. Are you sure you wish to continue?",
-        //         header: "Unsaved Changes",
-        //         icon: 'pi pi-question-circle',
-        //         accept: ()=>next(),
-        //         reject: ()=>otherwise()
-        //     });
-        // } 
-        // else {
-        //     unsavedDialogAllowed = true;
-        //     next();
-        // }
+            confirm.require({
+                message: "You have unsaved changes. Are you sure you wish to continue?",
+                header: "Unsaved Changes",
+                icon: 'pi pi-question-circle',
+                accept: ()=>next(),
+                reject: ()=>otherwise()
+            });
+        } 
+        else {
+            unsavedDialogAllowed = true;
+            next();
+        }
     };
 
     function setParentLibraryName(libraryId: string) {
@@ -1049,7 +1057,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
                 librarySelectItemValue.value = trueLibrarySelectItemValue;               
             })
         librarySelectItemValueAllowedChanged = true;
-        librarySelectItems.forEach(library => {
+        librarySelectItems.value.forEach(library => {
             if (library.value === librarySelectItemValue.value) {
                 parentLibraryName = "Library Used: " + library.text;
             }
@@ -1113,14 +1121,14 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('');}
     }
 
     function onShowShareCashFlowRuleLibraryDialog(cashFlowRuleLibrary: CashFlowRuleLibrary) {
-        shareCashFlowRuleLibraryDialogData = {
+        shareCashFlowRuleLibraryDialogData.value = {
             showDialog:true,
             cashFlowRuleLibrary: clone(cashFlowRuleLibrary)
         }
     }
 
     function onShareCashFlowRuleDialogSubmit(cashFlowRuleLibraryUsers: CashFlowRuleLibraryUser[]) {
-        shareCashFlowRuleLibraryDialogData = clone(emptyShareCashFlowRuleLibraryDialogData);
+        shareCashFlowRuleLibraryDialogData.value = clone(emptyShareCashFlowRuleLibraryDialogData);
 
         if (!isNil(cashFlowRuleLibraryUsers) && selectedCashFlowRuleLibrary.value.id !== getBlankGuid())
         {

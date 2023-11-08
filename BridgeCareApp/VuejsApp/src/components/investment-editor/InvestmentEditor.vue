@@ -47,7 +47,7 @@
             </v-row>
 
             <!-- only for scenario -->
-            <v-row style="margin-top:80px;" v-if='hasInvestmentPlanForScenario' align="center">
+            <v-row style="margin-top:80px;" v-if='hasInvestmentPlanForScenario' align="end">
                 <!-- text boxes for scenario only -->
                 <v-col cols = "2" class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-label"><span>First Year of Analysis Period</span></v-subheader>

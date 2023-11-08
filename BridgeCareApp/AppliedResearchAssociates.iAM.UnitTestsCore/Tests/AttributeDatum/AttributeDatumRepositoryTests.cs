@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.Data.Mappers;
 using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
@@ -32,8 +33,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AttributeDatum
             var asset = MaintainableAssets.InNetwork(networkId, keyAttributeName, assetId);
             var assets = new List<MaintainableAsset> { asset };
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, assets, networkId, keyAttributeId);
-            var explorer = TestHelper.UnitOfWork.AttributeRepo.GetExplorer();
-            TestHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
             var assetIds = new List<Guid> { assetId };
             var attributeIds = new List<Guid> { keyAttributeId };
             var attributeDtos = new List<AttributeDTO> { attributeDto };

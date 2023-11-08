@@ -359,10 +359,10 @@ import { getUrl } from '@/shared/utils/get-url';
     let newLibrarySelection: boolean = false;
     
     created();
-    function created() {
+    async function created() {
         librarySelectItemValue.value = null;
-        getBudgetPriorityLibrariesAction();
-        getHasPermittedAccessAction();
+        await getBudgetPriorityLibrariesAction();
+        await getHasPermittedAccessAction();
 
         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.BudgetPriority) !== -1) {
             selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;

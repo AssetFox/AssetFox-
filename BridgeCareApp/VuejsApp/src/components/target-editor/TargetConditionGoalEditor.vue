@@ -483,11 +483,11 @@ import { getUrl } from '@/shared/utils/get-url';
     function created(){
     }
 
-    onMounted(() => {
+    onMounted(async () => {
         librarySelectItemValue.value = null;
-        getTargetConditionGoalLibrariesAction();
+        await getTargetConditionGoalLibrariesAction();
         numericAttributeNames = getPropertyValues('name', getNumericAttributesGetter);
-        getHasPermittedAccessAction();
+        await getHasPermittedAccessAction();
         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.TargetConditionGoal) !== -1) { 
             //selectedScenarioId = to.query.scenarioId;
             selectedScenarioId = $router.currentRoute.value.query.scenarioId as string; 

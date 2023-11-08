@@ -192,7 +192,7 @@ import { useStore } from 'vuex';
     let selectDatasourceItemValue: ShallowRef<string | null> = shallowRef(null);
     let selectAggregationRuleTypeItems: SelectItem[] = [];
     let selectExcelColumns: SelectItem[] = [];
-    let selectedAttribute: Ref<Attribute> = ref(clone(emptyAttribute));
+    let selectedAttribute = ref<Attribute>(clone(emptyAttribute));
     let selectedDataSource: Datasource | undefined = clone(emptyDatasource);
     let rules: InputValidationRules = validationRules;
     let validationErrorMessage: string = '';
@@ -218,18 +218,18 @@ import { useStore } from 'vuex';
     let selectAttributeItems = ref<SelectItem[]>([]);
     let selectDatasourceItems: SelectItem[] = [];
     
-    async function logOutAction(payload?: any): Promise<any> {await store.dispatch('logOut');}
-    async function getAttributes(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
-    async function getDataSourcesAction(payload?: any): Promise<any> {await store.dispatch('getDataSources');}
-    async function getAttributeAggregationRulesAction(payload?: any): Promise<any> {await store.dispatch('getAttributeAggregationRules');}
-    async function getAggregationRulesForTypeAction(payload?: any): Promise<any> {await store.dispatch('getAggregationRulesForType');}
-    async function getAttributeDataSourceTypes(payload?: any): Promise<any> {await store.dispatch('getAttributeDataSourceTypes');}
-    async function getExcelSpreadsheetColumnHeadersAction(payload?: any): Promise<any> {await store.dispatch('getExcelSpreadsheetColumnHeaders');}
-    async function selectAttributeAction(payload?: any): Promise<any> {await store.dispatch('selectAttribute');}
-    async function upsertAttributeAction(payload?: any): Promise<any> {await store.dispatch('upsertAttribute');}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
-    async function getUserNameByIdGetter(payload?: any): Promise<any> {await store.dispatch('getUserNameById');}
-    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
+    async function logOutAction(payload?: any): Promise<any> {await store.dispatch('logOut', payload);}
+    async function getAttributes(payload?: any): Promise<any> {await store.dispatch('getAttributes', payload);}
+    async function getDataSourcesAction(payload?: any): Promise<any> {await store.dispatch('getDataSources', payload);}
+    async function getAttributeAggregationRulesAction(payload?: any): Promise<any> {await store.dispatch('getAttributeAggregationRules', payload);}
+    async function getAggregationRulesForTypeAction(payload?: any): Promise<any> {await store.dispatch('getAggregationRulesForType', payload);}
+    async function getAttributeDataSourceTypes(payload?: any): Promise<any> {await store.dispatch('getAttributeDataSourceTypes', payload);}
+    async function getExcelSpreadsheetColumnHeadersAction(payload?: any): Promise<any> {await store.dispatch('getExcelSpreadsheetColumnHeaders', payload);}
+    async function selectAttributeAction(payload?: any): Promise<any> {await store.dispatch('selectAttribute', payload);}
+    async function upsertAttributeAction(payload?: any): Promise<any> {await store.dispatch('upsertAttribute', payload);}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+    async function getUserNameByIdGetter(payload?: any): Promise<any> {await store.dispatch('getUserNameById', payload);}
+    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
 
     created()
     function created() {
@@ -265,14 +265,19 @@ import { useStore } from 'vuex';
         commandIsValid = false;
 
         getAggregationRulesForTypeAction(selectedAttribute.value.type)
-        aggregationRuleSelectValues.value = stateAggregationRulesForType.value.map((rule: string) => ({
+        let temp = stateAggregationRulesForType.value.map((rule: string) => ({
             text: rule,
             value: rule,
         }));
+
+        temp.forEach(_ => {
+            aggregationRuleSelectValues.value.push(_)
+        })
     })
     
-    watch(() => selectedAttribute.value.type, () =>  {
-        getAggregationRulesForTypeAction(selectedAttribute.value.type)
+    watch(selectedAttribute, () =>  {
+       getAggregationRulesForTypeAction(selectedAttribute.value.type)
+
         aggregationRuleSelectValues.value = stateAggregationRulesForType.value.map((rule: string) => ({
             text: rule,
             value: rule,

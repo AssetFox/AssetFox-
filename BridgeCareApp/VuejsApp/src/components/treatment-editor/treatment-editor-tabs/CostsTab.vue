@@ -1,7 +1,7 @@
 <template>
-    <v-row class="costs-tab-content">
-        <v-col cols = "12">              
-            <div class="costs-data-table">                
+    <v-row>
+        <v-col cols="12">              
+            <div >                
                 <v-data-table
                     hide-default-header id="CostsTab-vdatatable"
                     :headers="costsGridHeaders"
@@ -11,10 +11,10 @@
                     hide-actions
                 >
                     <template slot="items" slot-scope="props" v-slot:item="props">
-                        <tr style="border:none">
-                            <td xs5>                            
-                                <v-row  rows = "6"  align-center>                                
-                                    <v-subheader class="ghd-control-label ghd-md-gray" style="width:95%">Equation</v-subheader>
+                        <tr>
+                            <td style="border: none;">                            
+                                <v-row justify="space-between" align="end" style="margin: 5px;">
+                                    <v-subheader class="ghd-control-label ghd-md-gray" >Equation</v-subheader>
                                     <v-btn id="TreatmentCostsTab-EquationEditorBtn"
                                         @click="
                                             onShowCostEquationEditorDialog(
@@ -22,18 +22,18 @@
                                             )
                                         "
                                         class="edit-icon"
-                                        icon
+                                        flat
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                     </v-btn>                                
                                 </v-row>
-                                <v-row  rows = "6" align-center>  
+                                <v-row>  
                                     <v-textarea
                                         class="ghd-control-border ghd-control-text-sm"
                                         id="TreatmentCostsTab-Equation-TextArea"
                                         full-width
                                         no-resize
-                                        outline
+                                        variant="outlined"
                                         readonly
                                         rows="3"
                                         v-model="props.item.equation.expression"
@@ -41,9 +41,9 @@
                                     </v-textarea>  
                                 </v-row>                          
                             </td>
-                            <td xs5>
-                                <v-row  rows = "6" align-center>
-                                    <v-subheader class="ghd-control-label ghd-md-gray" style="width:95%">Criteria</v-subheader>
+                            <td style="border: none;">
+                                <v-row justify="space-between" align="end" style="margin: 5px;">
+                                    <v-subheader class="ghd-control-label ghd-md-gray">Criteria</v-subheader>
                                     <v-btn id="TreatmentCostsTab-CriteriaEditorBtn"
                                         @click="
                                             onShowCostCriterionEditorDialog(
@@ -51,18 +51,18 @@
                                             )
                                         "
                                         class="edit-icon"
-                                        icon
+                                        flat
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-row> 
-                                <v-row  rows = "6" align-center>              
+                                <v-row >              
                                     <v-textarea
                                         class="ghd-control-border ghd-control-text-sm"
                                         id="TreatmentCostsTab-Criteria-TextArea"
                                         full-width
                                         no-resize
-                                        outline
+                                        variant="outlined"
                                         readonly
                                         rows="3"
                                         v-model="
@@ -73,13 +73,13 @@
                                     </v-textarea>
                                 </v-row>
                             </td>     
-                            <td xs2>
+                            <td style="border: none;">
                                 <v-row align-start>
                                     <v-btn id="TreatmentCostsTab-DeleteCostBtn"
                                         @click="onRemoveCost(props.item.id)"
-                                        icon
+                                        flat
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </v-row>                   
                             </td>
@@ -87,7 +87,7 @@
                     </template>
                 </v-data-table>
             </div>
-            <v-btn @click="onAddCost" class="ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border" id="TreatmentCostsTab-AddCostBtn" >Add Cost</v-btn>
+            <v-btn flat @click="onAddCost" class="ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border" id="TreatmentCostsTab-AddCostBtn" >Add Cost</v-btn>
             <v-chip class="ma-2 ara-blue" @click="showExampleFunction">
                 Equation - Use Max(,) to enforce minimum costs
             </v-chip>            
@@ -108,14 +108,13 @@
     </v-row>
 </template>
 
-<script lang="ts" setup>
-import Vue, { ShallowRef, shallowRef } from 'vue';
+<script setup lang="ts">
+import { ShallowRef, shallowRef } from 'vue';
 import { emptyCost, TreatmentCost } from '@/shared/models/iAM/treatment';
 import {
     emptyEquationEditorDialogData,
     EquationEditorDialogData,
 } from '@/shared/models/modals/equation-editor-dialog-data';
-import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { clone, isNil } from 'ramda';
 import EquationEditorDialog from '../../../shared/modals/EquationEditorDialog.vue';
 import { Equation } from '@/shared/models/iAM/equation';
@@ -126,18 +125,17 @@ import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
-import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
-import { useStore } from 'vuex';
+import { ref, onMounted, onBeforeUnmount, watch, toRefs } from 'vue';
+import { getUrl } from '@/shared/utils/get-url';
 
     const emit = defineEmits(['submit', 'onAddCost', 'onModifyCost', 'onRemoveCost'])
-    let store = useStore();
     const props = defineProps<{
         selectedTreatmentCosts:TreatmentCost[],
          callFromScenario: boolean,
          callFromLibrary: boolean  
     }>(); 
-
-    let costsGridHeaders: any[] = [
+    const { selectedTreatmentCosts, callFromScenario, callFromLibrary } = toRefs(props);
+    const costsGridHeaders: any[] = [
         {
             title: '',
             key: 'equation',
@@ -174,10 +172,9 @@ import { useStore } from 'vuex';
     let uuidNIL: string = getBlankGuid();
     let alertData = shallowRef(clone(emptyAlertData));
 
-    watch(() => props.selectedTreatmentCosts, () => onSelectedTreatmentCostsChanged())
-    function onSelectedTreatmentCostsChanged() {
+    watch(selectedTreatmentCosts, () => {
         costsGridData.value = clone(props.selectedTreatmentCosts);
-    }
+    });
 
     function onAddCost() {
         const newCost: TreatmentCost = { ...emptyCost, id: getNewGuid() };
@@ -275,17 +272,11 @@ import { useStore } from 'vuex';
 </script>
 
 <style>
-.costs-tab-content {
-    height: 185px;
-    min-width: 1100px;
-}
-
 .costs-data-table {
-    overflow-y: auto;
+    height: 395px;
+    width: 800px;
     border: 1px solid #999999 !important;
-    min-width: 1000px;
 }
-
 .costs-data-table table.v-table thead tr{
     height: 0px !important;
     border: none !important;

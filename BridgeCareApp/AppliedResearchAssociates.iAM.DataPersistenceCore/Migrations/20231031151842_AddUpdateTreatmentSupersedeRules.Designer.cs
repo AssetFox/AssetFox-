@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20231017192532_AddUpdateTreatmentSupersedeRule")]
-    partial class AddUpdateTreatmentSupersedeRule
+    [Migration("20231031151842_AddUpdateTreatmentSupersedeRules")]
+    partial class AddUpdateTreatmentSupersedeRules
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -2831,6 +2831,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid>("PreventTreatmentId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("TreatmentId")
                         .HasColumnType("uniqueidentifier");
 
@@ -4227,6 +4230,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("PreventTreatmentId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("TreatmentId")
                         .HasColumnType("uniqueidentifier");

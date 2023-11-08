@@ -1,71 +1,62 @@
 <template>
-    <v-row column>
-        <v-row column>        
-            <div class="div-border align-start">   
-                <div id="app" class="ghd-white-bg" v-cloak @drop.prevent="onSelect($event.dataTransfer.files)" @dragover.prevent>
-                    <v-row fill-height justify-center>
-                        <div class="drag-drop-area">
-                            <v-row fill-height align-center justify-center>
-                                <img :src="require('@/assets/icons/upload.svg')"/>
-                                <v-row column align-center>
-                                    <span class="span-center Montserrat-font-family">Drag & Drop Files Here </span>
-                                    <!--<span class="span-center Montserrat-font-family">or</span>
-                                    <v-btn class="ghd-blue Montserrat-font-family a-0 ma-0" @click="chooseFiles()" flat> Click here to select files </v-btn>-->
-                                </v-row>
-                            </v-row>
-                        </div>
-                        </v-row>
+    <v-container>
+    <v-row align="start" class="div-border">    
+        <div id="app" class="ghd-white-bg" v-cloak @drop.prevent="onSelect($event.dataTransfer.files)" @dragover.prevent>
+                <div class="drag-drop-area">
+                    <v-col align-self="center" style="padding:10px; margin: 10px;">
+                        <img :src="getUrl('assets/icons/upload.svg')" style="margin: 20px;"/>
+                            <span class="span-center Montserrat-font-family">Drag & Drop Files Here </span>
+                    </v-col>
                 </div>
-            </div>
-            <v-col cols = "12">
-                <v-row justify-start>     
-                    <v-switch
-                        v-show="useTreatment"
-                        label="No Treatment"
-                        class="ghd-control-label ghd-md-gray Montserrat-font-family my-2"
-                        v-model="applyNoTreatment"
-                    />
-                </v-row>
-            </v-col>
-            <div v-show="true">
-                <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden />
-            </div>
-        </v-row>        
-        <div class="files-table">
-            <v-data-table-server :headers="tableHeaders"
-                                 :items="files"
-                                 :items-length="files.length"
-                                 class="elevation-1 fixed-header v-table__overflow Montserrat-font-family"
-                                 sort-icon=$vuetify.icons.ghd-table-sort
-                                 hide-actions>
-                <template slot="items" slot-scope="props" v-slot:item="props">
-                    <td>
-                        {{props.item.name}}
-                    </td>
-                    <td>
-                        <div><strong>{{ formatBytesSize(props.item.size) }}</strong></div>
-                    </td>
-                    <td>
-                        <v-btn @click="file = null" class="ghd-blue" icon>
-                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-                        </v-btn>
-                    </td>
-                </template>
-            </v-data-table-server>
         </div>
+    </v-row>    
+    <v-row justify="end">     
+        <v-col cols="10">
+            <v-switch
+                v-show="useTreatment"
+                label="No Treatment"
+                class="ghd-control-label ghd-md-gray Montserrat-font-family my-2"
+                v-model="applyNoTreatment"
+            />
+        </v-col>
     </v-row>
+    <div>
+        <input @update:model-value="onSelect($event.target.files)" id="file-select" type="file" hidden />
+    </div>
+    <v-divider/>
+    <div style="margin: 10px;">
+        <v-data-table-server :headers="tableHeaders"
+                             :items="files"
+                             :items-length="files.length"
+                             class="fixed-header v-table__overflow Montserrat-font-family"
+                             >
+            <template slot="items" slot-scope="props" v-slot:item="props">
+                <td>
+                    {{props.item.name}}
+                </td>
+                <td>
+                    <div><strong>{{ formatBytesSize(props.item.size) }}</strong></div>
+                </td>
+                <td>
+                    <v-btn @click="file = null" class="ghd-blue" flat>
+                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                    </v-btn>
+                </td>
+            </template>
+        </v-data-table-server>
+    </div>
+    </v-container>
 </template>
 
-<script lang="ts" setup>
-import Vue, { shallowRef } from 'vue';
+<script setup lang="ts">
+import { ref, shallowRef, toRefs, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {clone, prop} from 'ramda';
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import { formatBytes } from '@/shared/utils/math-utils';
-import {inject, reactive, ref, toRefs, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import { getUrl } from '../utils/get-url';
 
 let store = useStore();
 const emit = defineEmits(['submit','treatment'])
@@ -73,22 +64,21 @@ const props = defineProps<{
     closed: boolean,
     useTreatment: boolean
     }>()
-const { useTreatment } = toRefs(props);
+const { useTreatment, closed } = toRefs(props);
 
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
-async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('setIsBusy');}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('setIsBusy', payload);}
 
-    let applyNoTreatment= shallowRef<boolean>(true);
-    let fileSelect: HTMLInputElement = {} as HTMLInputElement;
+    const applyNoTreatment = ref<boolean>(true);
+    const fileSelect = ref<HTMLInputElement>({} as HTMLInputElement);
     let tableHeaders: any[] = [
-        {text: 'Name', value: 'name', align: 'left', sortable: false, class: '', width: '50%'},
-        {text: 'Size', value: 'size', align: 'left', sortable: false, class: '', width: '35%'},
-        {text: 'Action', value: 'action', align: 'left', sortable: false, class: '', width: ''}
+        {title: 'Name', key: 'name', align: 'left', sortable: false, class: '', width: '50%'},
+        {title: 'Size', key: 'size', align: 'left', sortable: false, class: '', width: '35%'},
+        {title: 'Action', key: 'action', align: 'left', sortable: false, class: '', width: ''}
     ];
-    let files: File[] = [];
-    let file= shallowRef<File|null>(null);   
-    let closed = shallowRef<boolean>(true);
-
+    const files = ref<File[]>([]);
+    const file = ref<File|null>(null);   
+    
     function chooseFiles(){
         if(document != null)
         {
@@ -97,27 +87,27 @@ async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatc
     }
 
     watch(file,()=>{        
-        files = hasValue(file.value) ? [file.value as File] : [];                                   
-        emit('submit', file);
+        files.value = hasValue(file.value) ? [file.value as File] : [];                                   
+        emit('submit', file.value);
         (<HTMLInputElement>document.getElementById('file-select')!).value = '';
     });
 
     watch(closed,()=>{
-        if (closed) {
-            files = [];
+        if (closed.value) {
+            files.value = [];
             file.value = null;
-            fileSelect.value = '';
+            fileSelect.value.value = '';
             (<HTMLInputElement>document.getElementById('file-select')!).value = '';
         }
     });
 
     watch(applyNoTreatment,()=>{
-        emit('treatment', applyNoTreatment);
+        emit('treatment', applyNoTreatment.value);
     });
     
     onMounted(() => {
         // couple fileSelect object with #file-select input element
-        fileSelect = document.getElementById('file-select') as HTMLInputElement;        
+        fileSelect.value = document.getElementById('file-select') as HTMLInputElement;        
     });   
 
     /**
@@ -136,7 +126,7 @@ async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatc
             file.value = clone(fileList[0]);
         }
 
-        fileSelect.value = '';
+        fileSelect.value.value = '';
     }
 
     /**

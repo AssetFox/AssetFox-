@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-dialog max-width="900px" persistent scrollable v-bind:show="dialogData.showDialog">
+    <v-dialog max-width="900px" persistent scrollable v-model="showDialogComputed">
       <v-card class="equation-container-card Montserrat-font-family">
         <v-card-title class="ghd-dialog-box-padding-top">
           <v-col cols = "12">
@@ -27,7 +27,8 @@
                 <v-tab :key="0" @click="isPiecewise = false">Equation</v-tab>
                 <v-tab :key="1" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Piecewise</v-tab>
                 <v-tab :key="2" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Time In Rating</v-tab>
-                <v-window-item>
+                <v-window>
+                  <v-window-item>
                   <div class="equation-container-div">
                     <v-row column>
                       <div>
@@ -128,7 +129,7 @@
                           <div class="data-points-grid">
                             <v-data-table :headers="piecewiseGridHeaders"
                                           :items="piecewiseGridData"
-                                          sort-icon=$vuetify.icons.ghd-table-sort
+                                          sort-icon=ghd-table-sort
                                           class="v-table__overflow ghd-table"
                                           hide-actions>
                               <template slot="items" slot-scope="props"  v-slot:item="props">
@@ -146,7 +147,7 @@
                                     <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
                                            icon
                                            v-if="props.item.timeValue !== 0">
-                                      <img :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                      <img :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                   </div>
                                 </td>
@@ -199,7 +200,7 @@
                           <div class="data-points-grid">
                             <v-data-table :headers="timeInRatingGridHeaders"
                                           :items="timeInRatingGridData"
-                                          sort-icon=$vuetify.icons.ghd-table-sort
+                                          sort-icon=ghd-table-sort
                                           class="v-table__overflow ghd-table"
                                           hide-actions>
                               <template slot="items" slot-scope="props"  v-slot:item="props">
@@ -213,7 +214,7 @@
                                   <div v-else>
                                     <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
                                            icon>
-                                      <img :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                      <img :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                   </div>
                                 </td>
@@ -258,6 +259,8 @@
                     </v-row>
                   </div>
                 </v-window-item>
+                  </v-window>
+                
               </v-tabs>
             </v-col>
           </v-row>
@@ -281,7 +284,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog max-width="250px" persistent v-bind:show="showAddDataPointPopup">
+    <v-dialog max-width="250px" persistent v-model="showAddDataPointPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
           <v-row column justify-center>
@@ -321,7 +324,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog max-width="400px" persistent v-bind:show="showAddMultipleDataPointsPopup">
+    <v-dialog max-width="400px" persistent v-model="showAddMultipleDataPointsPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
           <v-row column justify-center>
@@ -350,7 +353,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog max-width="250px" persistent v-bind:show="showEditDataPointPopup">
+    <v-dialog max-width="250px" persistent v-model="showEditDataPointPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
           <v-row column justify-center>
@@ -394,6 +397,7 @@
 </template>
 
 <script lang="ts" setup>
+import { getUrl } from '@/shared/utils/get-url';
 import Vue, {ShallowRef, computed, shallowRef} from 'vue';
 import {EquationEditorDialogData} from '@/shared/models/modals/equation-editor-dialog-data';
 import {formulas} from '@/shared/utils/formulas';
@@ -420,6 +424,7 @@ const props = defineProps<{
   dialogData: EquationEditorDialogData,
   isFromPerformanceCurveEditor: Boolean
     }>()
+    let showDialogComputed = computed(() => props.dialogData.showDialog);
     
 let stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributes);
 async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes');}

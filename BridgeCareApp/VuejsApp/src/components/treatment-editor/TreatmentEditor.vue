@@ -1,102 +1,90 @@
 <template>
-    <v-row column>
-        <v-col style="margin-top: -20px;">
-            <v-row>
-                <v-col cols = "4">
-                    <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
-                    <v-select
-                        id="TreatmentEditor-treatmentLibrary-select"
-                        :items='librarySelectItems'
-                        append-icon=ghd-down
-                        class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
-                        label='Select a Treatment Library'
-                        variant="outlined"
-                        item-title="text"
-                        item-value="value"
-                        v-model='librarySelectItemValue' 
-                    >
-                    </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader treatment-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
-                </v-col>
-
-                <v-col cols = "4">
-                    <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
-                    <v-select
-                    id="TreatmentEditor-treatment-select"
-                        :items='treatmentSelectItems'
-                        append-icon=ghd-down
-                        class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
-                        label='Select'
-                        variant="outlined"
-                        item-title="text"
-                        item-value="value"
-                        v-model='treatmentSelectItemValue'
-                    >
-                    </v-select>
-                      
-                </v-col>
-                <v-col cols = "2" style="padding-right: 20px">                       
-                    <v-btn
-                        @click='showImportTreatmentDialog = true'
-                        variant = "flat"
-                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding ghd-margin-top'                        
-                        v-show='hasSelectedLibrary'                        
-                    >
-                        Import Treatment
-                    </v-btn>
-                    
-                </v-col>
-                <v-col cols = "1" style="padding-right: 5px">                       
-                    <v-btn
-                        @click='onShowConfirmDeleteTreatmentAlert'
-                        variant = "flat"
-                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding ghd-margin-top'                        
-                        v-show='hasSelectedTreatment && !isNoTreatmentSelected'                        
-                    >
-                        Delete Treatment
-                    </v-btn>
-                    
-                </v-col>
-                <v-col style="padding-right: 5px">
-                    
-                </v-col>
-                <v-col justify-right align-end style="padding-top: 38px !important;" >
-                    <v-btn
-                        id="TreatmentEditor-createLibrary-btn"
-                        @click='onShowCreateTreatmentLibraryDialog(false)'
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                        v-show="!hasScenario"
-                        variant = "outlined"
-
-                    >
-                        Create New Library
-                    </v-btn>                                                          
-                </v-col>
-            </v-row>
-
-            <v-col cols = "5">
-                    <v-row v-if='hasSelectedLibrary && !hasScenario' style="padding-bottom: 50px !important">
-                        <div class="ghd-control-label">
-                        Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> | Date Modified: {{ modifiedDate }}   
-                        <v-badge v-show="isShared">
-                            <template v-slot: badge>
-                                <span>Shared</span>
-                            </template>
-                        </v-badge>
-                        <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
-                               v-show='!hasScenario'>
-                            Share Library
-                        </v-btn>
-
-                        </div>  
-                    </v-row>
-            </v-col>
-
-
+    <v-row no-gutters>
+        <v-col>
+            <v-select
+                id="TreatmentEditor-treatmentLibrary-select"
+                :items='librarySelectItems'
+                append-icon=ghd-down
+                class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
+                label='Select a Treatment Library'
+                variant="outlined"
+                item-title="text"
+                item-value="value"
+                v-model='librarySelectItemValue' 
+            >
+            </v-select>
+            <div class="ghd-md-gray ghd-control-subheader treatment-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
         </v-col>
-        <v-divider style="margin-top:-10px" v-show='hasSelectedLibrary || hasScenario'></v-divider>        
-        <div v-show='hasSelectedLibrary || hasScenario' style="width:100%;margin-top:-20px;margin-bottom:-15px;">                
-               <v-btn
+        <v-col>
+            <v-select
+            id="TreatmentEditor-treatment-select"
+                :items='treatmentSelectItems'
+                append-icon=ghd-down
+                class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
+                label='Select a Treatment'
+                variant="outlined"
+                item-title="text"
+                item-value="value"
+                v-model='treatmentSelectItemValue'
+                v-show='hasSelectedLibrary'
+            >
+            </v-select>
+        </v-col>
+        <v-row>
+        <v-col style="padding-right: 20px">                       
+            <v-btn
+                @click='showImportTreatmentDialog = true'
+                variant = "outlined"
+                style="margin-right: 5px;"
+                class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding ghd-margin-top'                        
+                v-show='hasSelectedLibrary'                        
+            >
+                Import Treatment
+            </v-btn>
+            <v-btn
+                @click='onShowConfirmDeleteTreatmentAlert'
+                variant = "outlined"
+                style="margin-right: 5px; margin-left: 5px;"
+                class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding ghd-margin-top'                        
+                v-show='hasSelectedTreatment && !isNoTreatmentSelected'                        
+            >
+                Delete Treatment
+            </v-btn>
+            <v-btn
+                id="TreatmentEditor-createLibrary-btn"
+                @click='onShowCreateTreatmentLibraryDialog(false)'
+                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-margin-top'
+                style="margin-left: 5px;"
+                v-show="!hasScenario"
+                variant = "outlined"
+
+            >
+                Create New Library
+            </v-btn>                                                          
+        </v-col>
+    </v-row>
+    <v-col cols="6">
+            <v-row v-if='hasSelectedLibrary && !hasScenario' style="margin: 10px; !important">
+                <div class="ghd-control-label">
+                Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> | Date Modified: {{ modifiedDate }}   
+                <v-badge v-show="isShared">
+                    <template v-slot: badge>
+                        <span>Shared</span>
+                    </template>
+                </v-badge>
+                <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                       v-show='!hasScenario'>
+                    Share Library
+                </v-btn>
+
+                </div>  
+            </v-row>
+        </v-col>
+
+        <v-divider style="margin-top:10px" v-show='hasSelectedLibrary || hasScenario'></v-divider>        
+        <v-row>
+            <div v-show='hasSelectedLibrary || hasScenario' style="width:100%;margin-top:0px;margin-bottom:-15px; margin-left: 20px;">                
+                <v-btn
                     id="TreatmentEditor-addTreatment-btn"
                     @click='showCreateTreatmentDialog = true'
                     variant = "flat"
@@ -112,14 +100,12 @@
                     >
                     Download Template
                 </v-btn> 
-                <label style='float:right;padding-top:13px;' class="ghd-grey" v-show ='hasSelectedLibrary && !hasScenario'>|</label>
                 <v-btn :disabled='false' @click='OnExportTreamentsClick()'
                 variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'
                     >
                     Download
                 </v-btn> 
-                <label style='float:right;padding-top:13px;' class="ghd-grey" v-show ='hasSelectedLibrary && !hasScenario'>|</label>
                 <v-btn :disabled='false' @click='showImportTreatmentsDialog = true'
                 variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'
@@ -127,240 +113,222 @@
                     Upload
                 </v-btn>
             </div>    
-        <v-col v-show='hasSelectedLibrary || hasScenario' cols="4">
-            <v-row>
-                <div xs2>
-                    <v-col>
-                        <v-list class='treatments-list'>
-                            <template v-for='treatmentSelectItem in treatmentSelectItems' :key='treatmentSelectItem.value'>
-                                <v-list-item ripple :class="{'selected-treatment-item': isSelectedTreatmentItem(treatmentSelectItem.value)}"
-                                             avatar @click='onSetTreatmentSelectItemValue(treatmentSelectItem.value)'>
-                                    <v-list-item-content class ="item-content">
-                                        <span>{{treatmentSelectItem.text}}</span>
-                                        <v-btn  style="margin-left: 10px;" v-show="treatmentSelectItem.text!='No Treatment'" @click="onShowConfirmDeleteTreatmentAlert" class="ghd-blue">
-                                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-                                        </v-btn>
-                                    </v-list-item-content>
-
-                                </v-list-item>
-                            </template>
-                            
-                        
-                        
-                        </v-list>
-                    </v-col>
-                </div>
-                
-            </v-row>
-        </v-col>   
+            <div>
+                <v-col>
+                    <v-list class='treatments-list'>
+                        <template v-for='treatmentSelectItem in treatmentSelectItems' :key='treatmentSelectItem.value'>
+                            <v-list-item ripple :class="{'selected-treatment-item': isSelectedTreatmentItem(treatmentSelectItem.value)}"
+                                        avatar @click='onSetTreatmentSelectItemValue(treatmentSelectItem.value)'>
+                                <v-list-item-content class ="item-content">
+                                    <span>{{treatmentSelectItem.text}}</span>
+                                    <v-btn flat style="margin-left: 10px; background-color: transparent;" v-show="treatmentSelectItem.text!='No Treatment'" @click="onShowConfirmDeleteTreatmentAlert" class="ghd-blue">
+                                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                    </v-btn>
+                                </v-list-item-content>
+                            </v-list-item>
+                        </template>
+                    </v-list>
+                </v-col>
+            </div>
+            <v-col >               
+                <div v-show='selectedTreatment.id !== uuidNILRef'>                                                
+                    <v-tabs v-model='activeTab' id='TreatmentEditor-treatmenttabs'>
+                        <v-tab 
+                            :key='index'
+                            @click='activeTab = index'
+                            ripple
+                            v-for='(treatmentTab,
+                            index) in treatmentTabs'
+                        >
+                            {{ treatmentTab }}
+                        </v-tab>
+                    </v-tabs>
+                    <v-window v-model='activeTab'>
+                        <v-window-item>
+                            <v-card style="border:none;">
+                                <v-card-text
+                                    class='card-tab-content'
+                                >
+                                    <TreatmentDetailsTab
+                                        :selectedTreatmentDetails='selectedTreatmentDetails'
+                                        :rules='rules'
+                                        :callFromScenario='hasScenario'
+                                        :callFromLibrary='!hasScenario'
+                                        @onModifyTreatmentDetails='modifySelectedTreatmentDetails'
+                                    />
+                                </v-card-text>
+                            </v-card>
+                        </v-window-item>
+                        <v-window-item>
+                            <v-card>
+                                <v-card-text
+                                    class='card-tab-content'
+                                >
+                                    <CostsTab
+                                        :selectedTreatmentCosts='selectedTreatment.costs'
+                                        :callFromScenario='hasScenario'
+                                        :callFromLibrary='!hasScenario'
+                                        @onAddCost='addSelectedTreatmentCost'
+                                        @onModifyCost='modifySelectedTreatmentCost'
+                                        @onRemoveCost='removeSelectedTreatmentCost'
+                                    />
+                                </v-card-text>
+                            </v-card>
+                        </v-window-item>
+                        <v-window-item>
+                            <v-card>
+                                <v-card-text
+                                    class='card-tab-content'
+                                >
+                                    <PerformanceFactorTab
+                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performanceFactors'
+                                        :selectedTreatment='selectedTreatment'
+                                        :scenarioId='loadedScenarioId'
+                                        :rules='rules'
+                                        :callFromScenario='hasScenario'
+                                        :callFromLibrary='!hasScenario'
+                                        @onModifyPerformanceFactor='modifySelectedTreatmentPerformanceFactor'
+                                    />
+                                </v-card-text>
+                            </v-card>
+                        </v-window-item>
+                        <v-window-item>
+                            <v-card>
+                                <v-card-text
+                                    class='card-tab-content'
+                                >
+                                <ConsequencesTab
+                                        :selectedTreatmentConsequences='selectedTreatment.consequences'
+                                        :rules='rules'
+                                        :callFromScenario='hasScenario'
+                                        :callFromLibrary='!hasScenario'
+                                        @onAddConsequence='addSelectedTreatmentConsequence'
+                                        @onModifyConsequence='modifySelectedTreatmentConsequence'
+                                        @onRemoveConsequence='removeSelectedTreatmentConsequence'
+                                    />
+                                </v-card-text>
+                            </v-card>
+                        </v-window-item>
+                        <v-window-item>
+                            <v-card>
+                                <v-card-text class='card-tab-content'>
+                                    <BudgetsTab :selectedTreatmentBudgets='selectedTreatment.budgetIds'
+                                                :addTreatment='selectedTreatment.addTreatment'
+                                                :fromLibrary='hasSelectedLibrary'
+                                                @onModifyBudgets='modifySelectedTreatmentBudgets' />
+                                </v-card-text>
+                            </v-card>
+                        </v-window-item>
+                    </v-window>
+                </div>                                             
+            </v-col>                    
+        </v-row>
         <v-col>
-            <div class='treatments-div' xs10>
-                    <v-row column> 
-                        <v-col cols = "14">               
-                            <div v-show='selectedTreatment.id !== uuidNILRef'>                                                
-                                <v-tabs v-model='activeTab' id='TreatmentEditor-treatmenttabs'>
-                                    <v-tab 
-                                        :key='index'
-                                        @click='activeTab = index'
-                                        ripple
-                                        v-for='(treatmentTab,
-                                        index) in treatmentTabs'
-                                    >
-                                        {{ treatmentTab }}
-                                    </v-tab>
-                                </v-tabs>
-                                    <v-window v-model='activeTab'>
-                                        <v-window-item>
-                                            <v-card style="border:none;">
-                                                <v-card-text
-                                                    class='card-tab-content'
-                                                >
-                                                    <TreatmentDetailsTab
-                                                        :selectedTreatmentDetails='selectedTreatmentDetails'
-                                                        :rules='rules'
-                                                        :callFromScenario='hasScenario'
-                                                        :callFromLibrary='!hasScenario'
-                                                        @onModifyTreatmentDetails='modifySelectedTreatmentDetails'
-                                                    />
-                                                </v-card-text>
-                                            </v-card>
-                                        </v-window-item>
-                                        <v-window-item>
-                                            <v-card>
-                                                <v-card-text
-                                                    class='card-tab-content'
-                                                >
-                                                    <CostsTab
-                                                        :selectedTreatmentCosts='selectedTreatment.costs'
-                                                        :callFromScenario='hasScenario'
-                                                        :callFromLibrary='!hasScenario'
-                                                        @onAddCost='addSelectedTreatmentCost'
-                                                        @onModifyCost='modifySelectedTreatmentCost'
-                                                        @onRemoveCost='removeSelectedTreatmentCost'
-                                                    />
-                                                </v-card-text>
-                                            </v-card>
-                                        </v-window-item>
-                                        <v-window-item>
-                                            <v-card>
-                                                <v-card-text
-                                                    class='card-tab-content'
-                                                >
-                                                    <ConsequencesTab
-                                                        :selectedTreatmentConsequences='selectedTreatment.consequences'
-                                                        :rules='rules'
-                                                        :callFromScenario='hasScenario'
-                                                        :callFromLibrary='!hasScenario'
-                                                        @onAddConsequence='addSelectedTreatmentConsequence'
-                                                        @onModifyConsequence='modifySelectedTreatmentConsequence'
-                                                        @onRemoveConsequence='removeSelectedTreatmentConsequence'
-                                                    />
-                                                </v-card-text>
-                                            </v-card>
-                                        </v-window-item>
-                                        <v-window-item>
-                                            <v-card>
-                                                <v-card-text
-                                                    class='card-tab-content'
-                                                >
-                                                    <PerformanceFactorTab
-                                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performanceFactors'
-                                                        :selectedTreatment='selectedTreatment'
-                                                        :scenarioId='loadedScenarioId'
-                                                        :rules='rules'
-                                                        :callFromScenario='hasScenario'
-                                                        :callFromLibrary='!hasScenario'
-                                                        @onModifyPerformanceFactor='modifySelectedTreatmentPerformanceFactor'
-                                                    />
-                                                </v-card-text>
-                                            </v-card>
-                                        </v-window-item>
-                                        <v-window-item>
-                                            <v-card>
-                                                <v-card-text class='card-tab-content'>
-                                                    <BudgetsTab :selectedTreatmentBudgets='selectedTreatment.budgetIds'
-                                                                :addTreatment='selectedTreatment.addTreatment'
-                                                                :fromLibrary='hasSelectedLibrary'
-                                                                @onModifyBudgets='modifySelectedTreatmentBudgets' />
-                                                </v-card-text>
-                                            </v-card>
-                                        </v-window-item>
-                                    </v-window>
-                                
-                            </div>                                             
-                        </v-col>                    
-                    </v-row>
-                </div>
-                    </v-col>
-             
-        <v-col cols = "12">
-            <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>
-            <v-row justify-center v-show='hasSelectedLibrary && !hasScenario'>
-                <v-col cols = "12">
+            <v-row justify="center" v-show='hasSelectedLibrary && !hasScenario'>
+                <v-col>
                     <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
                     <v-textarea                        
                         class='ghd-control-border ghd-control-text'
                         no-resize
-                        outline
+                        variant="outlined"
                         rows='2'
                         v-model='selectedTreatmentLibrary.description'
                         @update:model-value="checkHasUnsavedChanges()"
                     />
                 </v-col>
             </v-row>
-        </v-col>
-            <v-col cols="3"></v-col>
-        <v-row justify-center row v-show='(hasSelectedLibrary || hasScenario)'>
-                <v-col justify-center>
-                <v-btn :disabled='!hasUnsavedChanges'
-                    @click='onDiscardChanges'
-                    class='ghd-white-bg ghd-blue ghd-button-text'
-                    variant = "flat"
-                    v-show='hasScenario'
-                >
-                    Cancel
-                </v-btn>
-                <v-btn id='TreatmentEditor-deleteLibrary-btn' variant = "outlined"
-                    @click='onShowConfirmDeleteAlert'
-                    class='ghd-white-bg ghd-blue ghd-button-text'
-
-                    v-show='!hasScenario'
-                    :disabled='!hasLibraryEditPermission'
-                >
-                    Delete Library
-                </v-btn>
-                <v-btn
-                    @click='onShowCreateTreatmentLibraryDialog(true)'
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                    variant = "outlined"
-                    :disabled='disableCrudButtons()'
-                >
-                    Create as New Library
-                </v-btn>
-                <v-btn justify-center
-                    @click='onUpsertScenarioTreatments'
-                    id="TreatmentEditor-SaveScenarioTreatments-btn"
-                    class='ghd-blue-bg ghd-white ghd-button-text'
-                    variant = "flat"
-                    v-show='hasScenario'
-                    :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
-                    Save
-                </v-btn>
-                <v-btn
-                    id="TreatmentEditor-updateLibrary-btn"
-                    @click='onUpsertTreatmentLibrary'
-                    class='ghd-blue-bg ghd-white ghd-button-text  ghd-text-padding'
-                    variant = "flat"
-                    v-show='!hasScenario'
-                    :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
-                >
-                    Update Library
-                </v-btn>
-            </v-col>
+            <v-row justify="center" v-show="(hasSelectedLibrary || hasScenario) && selectedTreatment.name !== ''">
+                <v-col cols="6">
+                    <v-btn :disabled='!hasUnsavedChanges'
+                        @click='onDiscardChanges'
+                        class='ghd-white-bg ghd-blue ghd-button-text'
+                        variant = "flat"
+                        v-show='hasScenario'
+                        style="margin-right: 5px;"
+                    >
+                        Cancel
+                    </v-btn>
+                    <v-btn id='TreatmentEditor-deleteLibrary-btn' variant = "text"
+                        @click='onShowConfirmDeleteAlert'
+                        class='ghd-white-bg ghd-blue ghd-button-text'
+                        v-show='!hasScenario'
+                        :disabled='!hasLibraryEditPermission'
+                    >
+                        Delete Library
+                    </v-btn>
+                    <v-btn
+                        @click='onShowCreateTreatmentLibraryDialog(true)'
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        variant = "outlined"
+                        style="margin-left: 5px;margin-right: 5px;"
+                        :disabled='disableCrudButtons()'
+                    >
+                        Create as New Library
+                    </v-btn>
+                    <v-btn justify-center
+                        @click='onUpsertScenarioTreatments'
+                        id="TreatmentEditor-SaveScenarioTreatments-btn"
+                        class='ghd-blue-bg ghd-white ghd-button-text'
+                        variant = "flat"
+                        v-show='hasScenario'
+                        style="margin-left: 5px;"
+                        :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
+                        Save
+                    </v-btn>
+                    <v-btn
+                        id="TreatmentEditor-updateLibrary-btn"
+                        @click='onUpsertTreatmentLibrary'
+                        class='ghd-blue-bg ghd-white ghd-button-text  ghd-text-padding'
+                        variant = "flat"
+                        v-show='!hasScenario'
+                        :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
+                    >
+                        Update Library
+                    </v-btn>
+                </v-col>
             </v-row>
-        <v-col cols = "10">
-            
         </v-col>
-
-        <ConfirmDeleteAlert
-            :dialogData='confirmBeforeDeleteAlertData'
-            @submit='onSubmitConfirmDeleteAlertResult'
-        />
-
-        <CreateTreatmentLibraryDialog
-            :dialogData='createTreatmentLibraryDialogData'
-            @submit='onSubmitCreateTreatmentLibraryDialogResult'
-        />
-
-        <ShareTreatmentLibraryDialog :dialogData='shareTreatmentLibraryDialogData' @submit='onShareTreatmentLibraryDialogSubmit' />
-
-        <CreateTreatmentDialog
-            :showDialog='showCreateTreatmentDialog'
-            @submit='onAddTreatment'
-        />
-
-        <ImportNewTreatmentDialog
-            :showDialog ='showImportTreatmentDialog'
-            @submit='onSubmitNewTreatment'
-        />
-
-        <ImportExportTreatmentsDialog :showDialog='showImportTreatmentsDialog'
-            @submit='onSubmitImportTreatmentsDialogResult' />
-
-        <ConfirmDeleteTreatmentAlert
-            :dialogData='confirmBeforeDeleteTreatmentAlertData'
-            @submit='onSubmitConfirmDeleteTreatmentAlertResult'
-        />
     </v-row>
+
+    <ConfirmDeleteAlert
+        :dialogData='confirmBeforeDeleteAlertData'
+        @submit='onSubmitConfirmDeleteAlertResult'
+    />
+
+    <CreateTreatmentLibraryDialog
+        :dialogData='createTreatmentLibraryDialogData'
+        @submit='onSubmitCreateTreatmentLibraryDialogResult'
+    />
+
+    <ShareTreatmentLibraryDialog :dialogData='shareTreatmentLibraryDialogData' @submit='onShareTreatmentLibraryDialogSubmit' />
+
+    <CreateTreatmentDialog
+        :showDialog='showCreateTreatmentDialog'
+        @submit='onAddTreatment'
+    />
+
+    <ImportNewTreatmentDialog
+        :showDialog ='showImportTreatmentDialog'
+        @submit='onSubmitNewTreatment'
+    />
+
+    <ImportExportTreatmentsDialog :showDialog='showImportTreatmentsDialog'
+        @submit='onSubmitImportTreatmentsDialogResult' />
+
+    <ConfirmDeleteAlert
+        :dialogData='confirmBeforeDeleteTreatmentAlertData'
+        @submit='onSubmitConfirmDeleteTreatmentAlertResult'
+    />
     <ConfirmDialog></ConfirmDialog>
 </template>
 
-<script lang='ts' setup>
-import Vue, { ShallowRef, computed, shallowRef, watch } from 'vue';
-import { inject, reactive, ref, onMounted, onBeforeUnmount, Ref} from 'vue';
+<script setup lang='ts'>
+import { ShallowRef, computed, shallowRef, watch } from 'vue';
+import { ref, onMounted, onBeforeUnmount, Ref} from 'vue';
 import { useStore } from 'vuex';
 import CreateTreatmentLibraryDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentLibraryDialog.vue';
 import { SelectItem } from '@/shared/models/vue/select-item';
+import ConfirmDeleteAlert from '@/shared/modals/Alert.vue';
 import {
     CreateTreatmentLibraryDialogData,
     emptyCreateTreatmentLibraryDialogData,
@@ -440,6 +408,7 @@ import { useRouter } from 'vue-router';
 import mitt from 'mitt';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
+import { getUrl } from '@/shared/utils/get-url';
 
     const emit = defineEmits(['submit'])    
     const $emitter = mitt()
@@ -458,6 +427,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
     let stateSimpleSelectableTreatments= computed<SimpleTreatment[]>(() => store.state.treatmentModule.simpleSelectableTreatments);
     let isSharedLibrary= computed<boolean>(() => store.state.treatmentModule.isSharedLibrary);
     let stateScenarioPerformanceCurves= computed<PerformanceCurve[]>(() => store.state.performanceCurveModule.scenarioPerformanceCurves);
+    let getUserNameByIdGetter: any = store.getters.getUserNameById;
+
 
  function addSuccessNotificationAction(payload?: any): void {
      store.dispatch('addSuccessNotification', payload);
@@ -558,10 +529,6 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
    store.dispatch('setAlertMessage', payload);
 }
 
-async function getUserNameByIdGetter(payload?: any): Promise<any> {
-  return await store.getters.getUserNameById(payload);
-}
-
 async function addedOrUpdatedTreatmentLibraryMutator(payload?: any): Promise<any> {
   await store.commit('addedOrUpdatedTreatmentLibraryMutator', payload);
 }
@@ -582,11 +549,9 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     let selectedTreatmentDetails: TreatmentDetails = clone(emptyTreatmentDetails);
     let activeTab = ref(0);
     let treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Performance Factor', 'Consequences'];
-    let createTreatmentLibraryDialogData: CreateTreatmentLibraryDialogData = clone(
-        emptyCreateTreatmentLibraryDialogData,
-    );
+    const createTreatmentLibraryDialogData = ref<CreateTreatmentLibraryDialogData>(clone(emptyCreateTreatmentLibraryDialogData));
     let showCreateTreatmentDialog: boolean = false;
-    let showImportTreatmentDialog: boolean = false;
+    const showImportTreatmentDialog = ref<boolean>(false);
     let confirmBeforeDeleteAlertData: AlertData = clone(emptyAlertData);
     let hasSelectedTreatment = ref(false);
     let rules: InputValidationRules = clone(validationRules);
@@ -598,8 +563,8 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     let hasCreatedLibrary: boolean = false;
     let disableCrudButtonsResult: boolean = false;
     let hasLibraryEditPermission: boolean | Promise<boolean> = false;
-    let showImportTreatmentsDialog: boolean = false;
-    let confirmBeforeDeleteTreatmentAlertData: AlertData = clone(emptyAlertData);
+    const showImportTreatmentsDialog = ref<boolean>(false);
+    const confirmBeforeDeleteTreatmentAlertData = ref<AlertData>(clone(emptyAlertData));
     let isNoTreatmentSelected = ref(false);
     let hasImport: boolean = false;
     let modifiedDate: string = '';
@@ -624,7 +589,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     let librarySelectItemValueAllowedChanged: boolean = true;
     let librarySelectItemValue  = ref<string>('');
 
-    let shareTreatmentLibraryDialogData: ShareTreatmentLibraryDialogData = clone(emptyShareTreatmentLibraryDialogData);
+    const shareTreatmentLibraryDialogData = ref<ShareTreatmentLibraryDialogData>(clone(emptyShareTreatmentLibraryDialogData));
     let loadedScenarioId: string = '';
     let parentLibraryId: string  = uuidNIL;
     let parentLibraryName: string = 'None';
@@ -765,8 +730,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         isShared = isSharedLibrary.value;
     }
 
-    watch(selectedTreatmentLibrary, () => onSelectedTreatmentLibraryChanged())
-    function onSelectedTreatmentLibraryChanged() {
+    watch(selectedTreatmentLibrary, () =>  {
         hasSelectedLibrary.value = selectedTreatmentLibrary.value.id !== uuidNIL;
         getIsSharedLibraryAction(selectedTreatmentLibrary.value).then(() => isShared = isSharedLibrary.value);
         if (hasSelectedLibrary.value) {
@@ -785,7 +749,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         if(treatmentSelectItemValue.value !== null && !hasScenario.value)
             treatmentCache.push(clone(selectedTreatment.value))
         checkHasUnsavedChanges();
-    }
+    })
 
     watch(simpleTreatments, () => onSimpleTreatments())
     function onSimpleTreatments(){
@@ -875,10 +839,11 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         return isEqual(treatmentSelectItemValue.value, treatmentId.toString());
     }
 
-    async function getOwnerUserName(): Promise<string> {
+     function getOwnerUserName(): string {
 
         if (!hasCreatedLibrary) {
-        return await getUserNameByIdGetter(selectedTreatmentLibrary.value.owner);
+            let username:any = getUserNameByIdGetter(selectedTreatmentLibrary.value.owner)
+        return username ;
         }
         
         return getUserName();
@@ -905,7 +870,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     }
     
     function onShowConfirmDeleteTreatmentAlert() {
-        confirmBeforeDeleteTreatmentAlertData = {
+        confirmBeforeDeleteTreatmentAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -914,14 +879,14 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     }
 
     function  onShowTreatmentLibraryDialog(treatmentLibrary: TreatmentLibrary) {
-        shareTreatmentLibraryDialogData = {
+        shareTreatmentLibraryDialogData.value = {
             showDialog: true,
             treatmentLibrary: clone(treatmentLibrary)
         };
     }
 
     function onShareTreatmentLibraryDialogSubmit(treatmentLibraryUsers: TreatmentLibraryUser[]) {
-        shareTreatmentLibraryDialogData = clone(emptyShareTreatmentLibraryDialogData);
+        shareTreatmentLibraryDialogData.value = clone(emptyShareTreatmentLibraryDialogData);
         if (!isNil(treatmentLibraryUsers) && selectedTreatmentLibrary.value.id !== getBlankGuid()) {
             let libraryUserData: LibraryUser[] = [];
                 treatmentLibraryUsers.forEach((treatmentLibraryUser, index) =>
@@ -949,7 +914,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     }
 
     function onSubmitConfirmDeleteTreatmentAlertResult(submit: boolean) {
-        confirmBeforeDeleteTreatmentAlertData = clone(emptyAlertData);
+        confirmBeforeDeleteTreatmentAlertData.value = clone(emptyAlertData);
 
         if (submit) {       
             onDeleteTreatment(selectedTreatment.value.id);
@@ -977,7 +942,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     }
 
     function onShowCreateTreatmentLibraryDialog(createAsNewLibrary: boolean) {
-        createTreatmentLibraryDialogData = {
+        createTreatmentLibraryDialogData.value = {
             showDialog: true,
             selectedTreatmentLibraryTreatments: createAsNewLibrary ? simpleTreatments.value.map(_ => {
                 let treatment: Treatment = clone(emptyTreatment);
@@ -989,7 +954,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     }
 
     function  onSubmitCreateTreatmentLibraryDialogResult(library: TreatmentLibrary) {
-        createTreatmentLibraryDialogData = clone(emptyCreateTreatmentLibraryDialogData,);
+        createTreatmentLibraryDialogData.value = clone(emptyCreateTreatmentLibraryDialogData,);
 
         if (!isNil(library)) {
             const upsertRequest: LibraryUpsertPagingRequest<TreatmentLibrary, Treatment> = {
@@ -1279,8 +1244,9 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     }
 
     function onSubmitNewTreatment(result: ImportNewTreatmentDialogResult){
-        showImportTreatmentDialog = false;
-        
+        showImportTreatmentDialog.value = false;
+        if (result === null) return;
+
         if(hasScenario.value){
             newTreatment.libraryId = parentLibraryId
             newTreatment.name = result.file.name.slice(0, -5);
@@ -1311,7 +1277,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     }
 
      function onSubmitImportTreatmentsDialogResult(result: ImportExportTreatmentsDialogResult) {
-        showImportTreatmentsDialog = false;
+        showImportTreatmentsDialog.value = false;
 
         if (hasValue(result) && hasValue(result.file)) {
             const data: TreatmentsFileImport = {
@@ -1409,7 +1375,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
             addedRows.length > 0 ||
             updatedRowsMap.size > 0 || 
             (hasScenario.value && hasSelectedLibrary.value) ||
-            (hasSelectedLibrary.value && hasUnsavedChangesCore('', stateSelectedTreatmentLibrary.value, selectedTreatmentLibrary.value))
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedTreatmentLibrary.value, stateSelectedTreatmentLibrary.value))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 

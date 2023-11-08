@@ -1,456 +1,419 @@
 <template>
-    <v-row column>
-        <v-col cols = "12">
-            <v-row column>
-                <v-row justify-left style="height:96px">
-                    <v-col cols = "5">
-                        <v-subheader class="ghd-control-label ghd-md-gray">Deterioration Model Library</v-subheader>
-                        <v-select
-                            id="PerformanceCurveEditor-library-select"
-                            class="ghd-control-border ghd-control-text ghd-select"
-                            :items="librarySelectItems"
-                            append-icon=ghd-down
-                            variant="outlined"
-                            v-model="librarySelectItemValue"
-                            item-title="text" 
-                            item-value="value" 
-                        >
-                            <!-- <template v-slot:selection="{ item }">
-                                <span class="ghd-control-text">{{ item.raw.text }}</span>
-                            </template>
-                            <template v-slot:item="{ item }">
-                                <v-list-item v-bind="props">
-                                    <v-list-item-title>
-                                    <v-row no-gutters align="center">
-                                    <span>{{ item.raw.text }}</span>
-                                    </v-row>
-                                    </v-list-item-title>
-                                </v-list-item>
-                            </template> -->
-                        </v-select>
-                        <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} 
-                            
-                            <span v-if="scenarioLibraryIsModified">&nbsp;&nbsp;{{modifiedStatus}}</span></b>
-                        
-                        </div>
+    <v-container class="p-0 pb-5 pr-2">
+        <v-row class="p-0" justify="start" style="height:96px">
+            <v-col cols = "5">
+                <v-subheader class="ghd-control-label ghd-md-gray">Deterioration Model Library</v-subheader>
+                <v-select
+                    id="PerformanceCurveEditor-library-select"
+                    class="ghd-control-border ghd-control-text ghd-select"
+                    :items="librarySelectItems"
+                    append-icon=ghd-down
+                    variant="outlined"
+                    v-model="librarySelectItemValue"
+                    item-title="text" 
+                    item-value="value" 
+                >
+                </v-select>
+                <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}                    
+                    <span v-if="scenarioLibraryIsModified">&nbsp;&nbsp;{{modifiedStatus}}</span></b>              
+                </div>
 
-                    </v-col>
-                    <v-col cols = "2" v-show="hasScenario"></v-col>
-                    <v-col cols = "5" v-show="hasSelectedLibrary || hasScenario">                     
-                        <v-subheader class="ghd-control-label ghd-md-gray"> </v-subheader>
-                        <v-row>
-                        
-                        <v-text-field
-                            id="PerformanceCurveEditor-searchDeteriorationEquations-textField"
-                            class="ghd-text-field-border ghd-text-field search-icon-general"
-                            style="margin-top:0px;"
-                            prepend-inner-icon=ghd-search
-                            hide-details
-                            label="Search Deterioration Equations"
-                            placeholder="Search Deterioration Equations"
-                            single-line
-                            outline
-                            clearable
-                            @click:clear="onClearClick()"
-                            v-model="gridSearchTerm"
-                        >
-                        </v-text-field>
-                        <v-btn id="PerformanceCurveEditor-search-button" style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" @click="onSearchClick()">Search</v-btn>
-                        </v-row>
-                    </v-col>
-                    <v-col cols = "5" v-show="!(hasSelectedLibrary || hasScenario)">
-                    </v-col>                    
-                    <v-col cols = "2" v-show='!hasScenario'>
-                        <v-subheader class="ghd-control-label ghd-md-gray"> </v-subheader>
-                        <v-row row align-end justify-end>
-                            <v-btn
-                                id="PerformanceCurveEditor-createNewLibrary-button"
-                                @click='onShowCreatePerformanceCurveLibraryDialog(false)'
-                                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                                variant = "outlined">
-                                Create New Library
-                            </v-btn>
-                        </v-row>
-                    </v-col>                    
+            </v-col>
+            <v-spacer/>
+            <v-col style="padding-top: 50px;" cols = "5" v-show="hasSelectedLibrary || hasScenario">                     
+                <v-subheader class="ghd-control-label ghd-md-gray"> </v-subheader>
+                <v-row>
+                
+                <v-text-field
+                    id="PerformanceCurveEditor-searchDeteriorationEquations-textField"
+                    class="ghd-text-field-border ghd-text-field search-icon-general"
+                    style="margin-top:0px;"
+                    prepend-inner-icon=ghd-search
+                    hide-details
+                    label="Search Deterioration Equations"
+                    placeholder="Search Deterioration Equations"
+                    single-line
+                    variant="outlined"
+                    clearable
+                    @click:clear="onClearClick()"
+                    v-model="gridSearchTerm"
+                >
+                </v-text-field>
+                <v-btn id="PerformanceCurveEditor-search-button"  class='m-2 ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" @click="onSearchClick()">Search</v-btn>
                 </v-row>
-            </v-row>            
-        </v-col>
-        <v-col>
-            <v-row row style="height:48px;">
-                <v-col cols = "9" v-show="!hasScenario">
-                    <v-row row>
-                            <div style="margin-top:6px;"
-                                v-if='hasSelectedLibrary && !hasScenario'
-                                class="ghd-control-label ghd-md-gray"
-                            > 
-                                Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
-                            <v-badge v-show="isShared">
-                            <template v-slot: badge>
-                                <span>Shared</span>
-                            </template>
-                            </v-badge>
-                            <v-btn
-                                id="PerformanceCurveEditor-shareLibrary-button"
-                                @click='onShowSharePerformanceCurveLibraryDialog(selectedPerformanceCurveLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
-                                v-show='!hasScenario'>
-                                Share Library
-                            </v-btn>
-                            </div>
-                    </v-row>
-                </v-col>
-                <v-col cols = "9" v-show="hasScenario">
-                </v-col>
-                <v-col cols = "2" v-show="hasScenario || hasSelectedLibrary">
-                    <v-row row align-end style="margin-top:-4px;height:40px;">
-                        <v-btn
-                            id="PerformanceCurveEditor-upload-button"
-                            :disabled='false' @click='showImportExportPerformanceCurvesDialog = true'
-                            variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
-                            Upload
-                        </v-btn>
-                        <v-divider class="upload-download-divider" inset vertical>
-                        </v-divider>
-                        <v-btn
-                            id="PerformanceCurveEditor-download-button"
-                            :disabled='false' @click='exportPerformanceCurves()'
-                            variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
-                            Download
-                        </v-btn>
-                        <v-divider class="upload-download-divider" inset vertical>
-                        </v-divider>
-                        <v-btn
-                            id="PerformanceCurveEditor-downloadTemplate-button"
-                            :disabled='false' @click='OnDownloadTemplateClick()'
-                            variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
-                            Download Template
-                        </v-btn>
-                    </v-row>            
-                </v-col>
-            </v-row>
-        </v-col>
-        <v-col v-show="hasSelectedLibrary || hasScenario" xs12>
-            <v-row class="data-table" justify-left>
-                <v-col cols = "12">
-                    <v-card class="elevation-0">
-                        <v-data-table-server
-                            id="PerformanceCurveEditor-deteriorationModels-datatable"                    
-                            show-select
-                            class="fixed-header ghd-table v-table__overflow"
-                            item-key="id"
-
-                            :headers="performanceCurveGridHeaders"
-                            :pagination.sync="performancePagination"
-                            :must-sort='true'
-                            sort-icon=ghd-table-sort
-                            v-model="selectedPerformanceEquations"
-                            return-object
-                            :items="currentPage"                      
-                            :items-length="totalItems"
-                            :items-per-page-options="[
-                                {value: 5, title: '5'},
-                                {value: 10, title: '10'},
-                                {value: 25, title: '25'},
-                            ]"
-                            v-model:sort-by="performancePagination.sort"
-                            v-model:page="performancePagination.page"
-                            v-model:items-per-page="performancePagination.rowsPerPage"                          
-                            @update:options="onPaginationChanged"                           
-                        >
-                            <template slot="items" slot-scope="props" v-slot:item="item">
-                                <tr>
-                                <td>
-                                    <v-checkbox id="PerformanceCurveEditor-deleteModel-vcheckbox" class="ghd-checkbox"
-                                        hide-details
-                                        primary
-                                        v-model="selectedPerformanceEquations" :value="item.item"
-                                    >
-                                    </v-checkbox>
-                                </td>                                
-                                <td class="text-xs-left">
-                                    <editDialog
-                                        :return-value.sync="item.item.name"
-                                        @save="
-                                            onEditPerformanceCurveProperty(
-                                                item.item.id,
-                                                'name',
-                                                item.item.name,
-                                            )
-                                        "
-                                        size="large"
-                                        lazy
-                                    >
-                                        <v-text-field
-                                            readonly
-                                            single-line
-                                            class="sm-txt equation-name-text-field-output"
-                                            :model-value="item.item.name"
-                                            :rules="[
-                                                rules['generalRules']
-                                                    .valueIsNotEmpty,
-                                            ]"
-                                        />
-                                        <template v-slot:input>
-                                            <v-text-field
-                                                label="Edit"
-                                                single-line
-                                                v-model="item.item.name"
-                                                :rules="[
-                                                    rules['generalRules']
-                                                        .valueIsNotEmpty,
-                                                ]"
-                                            />
-                                        </template>
-                                    </editDialog>
-                                </td>
-                                <td class="text-xs-left">
-                                    <editDialog
-                                        :return-value.sync="
-                                            item.item.attribute
-                                        "
-                                        @save="
-                                            onEditPerformanceCurveProperty(
-                                                item.item.id,
-                                                'attribute',
-                                                item.item.attribute,
-                                            )
-                                        "
-                                        size="large"
-                                        lazy
-                                    >
-                                        <v-text-field
-                                            readonly
-                                            single-line
-                                            class="sm-txt attribute-text-field-output"
-                                            :model-value="item.item.attribute"
-                                            :rules="[
-                                                rules['generalRules']
-                                                    .valueIsNotEmpty,
-                                            ]"
-                                        />
-                                        <template v-slot:input>
-                                            <v-select
-                                                :items="attributeSelectItems"
-                                                append-icon=ghd-down
-                                                label="Edit"
-                                                v-model="item.item.attribute"
-                                                :rules="[
-                                                    rules['generalRules']
-                                                        .valueIsNotEmpty,
-                                                ]"
-                                                item-title="text" 
-                                                item-value="value" 
-                                            />
-                                        </template>
-                                    </editDialog>
-                                </td>
-                                <td class="text-xs-left">
-                                    <v-menu
-                                        left
-                                        min-height="500px"
-                                        min-width="500px"
-                                        v-show="
-                                            item.item.equation.expression !==
-                                                ''
-                                        "
-                                    >
-                                        <template v-slot:activator>
-                                            <v-btn id="PerformanceCurveEditor-checkEquationEye-vbtn" class="ghd-blue" icon>
-                                                <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
-                                            </v-btn>
-                                        </template>
-                                        <v-card>
-                                            <v-card-text>
-                                                <v-textarea
-                                                    id="PerformanceCurveEditor-checkEquation-vtextarea"
-                                                    class="sm-txt Montserrat-font-family"
-                                                    :model-value="
-                                                        item.item.equation
-                                                            .expression
-                                                    "
-                                                    full-width
-                                                    no-resize
-                                                    outline
-                                                    readonly
-                                                    rows="5"
-                                                />
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-menu>
-                                    <v-btn id="PerformanceCurveEditor-editEquation-vbtn"
-                                        @click="
-                                            onShowEquationEditorDialog(
-                                                item.item.id,
-                                            )
-                                        "
-                                        class="ghd-blue"
-                                        icon
-                                    >
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')">
-                                    </v-btn>
-                                </td>
-                                <td class="text-xs-left">
-                                    <v-menu
-                                        min-height="500px"
-                                        min-width="500px"
-                                        location="right"
-                                        v-show="
-                                            item.item.criterionLibrary
-                                                .mergedCriteriaExpression !== ''
-                                        "
-                                    >
-                                        <template v-slot:activator>
-                                            <v-btn id="PerformanceCurveEditor-checkCriteriaEye-vbtn" class="ghd-blue" variant = "flat" icon>
-                                                <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
-                                            </v-btn>
-                                        </template>
-                                        <v-card>
-                                            <v-card-text>
-                                                <v-textarea
-                                                    id="PerformanceCurveEditor-checkCriteria-vtextarea"
-                                                    class="sm-txt Montserrat-font-family"
-                                                    :model-value="
-                                                        item.item
-                                                            .criterionLibrary
-                                                            .mergedCriteriaExpression
-                                                    "
-                                                    full-width
-                                                    no-resize
-                                                    outline
-                                                    readonly
-                                                    rows="5"
-                                                />
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-menu>
-                                    <v-btn id="PerformanceCurveEditor-editCriteria-vbtn"
-                                        @click="
-                                            onEditPerformanceCurveCriterionLibrary(
-                                                item.item.id,
-                                            )
-                                        "
-                                        class="ghd-blue"
-                                        icon
-                                    >
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')">
-                                    </v-btn>
-                                </td>
-                                <td class="text-xs-left">
-                                    <v-btn id="PerformanceCurveEditor-deleteModel-vbtn"
-                                        @click="
-                                            onRemovePerformanceCurve(
-                                                item.item.id,
-                                            )
-                                        "
-                                        class="ghd-blue"
-                                        icon
-                                    >
-                                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-                                    </v-btn>
-                                </td>
-                            </tr>
-                            </template>
-                            <!-- <template v-slot:body.append-inner>
-                            <v-btn>Append button</v-btn>
-                            </template>                                -->
-                        </v-data-table-server>
-                        <v-btn style="margin-top:-84px"
-                            id="PerformanceCurveEditor-deleteSelected-button"
-                            :disabled='selectedPerformanceEquationIds.length === 0 || (!hasLibraryEditPermission && !hasScenario)'
-                            @click='onRemovePerformanceEquations'
-                            class='ghd-blue' variant = "flat"
-                        >
-                            Delete Selected
-                        </v-btn>                        
-                    </v-card>
-                </v-col>
-            </v-row>
-        </v-col>
-            <v-row class="header-height" justify-left v-show="hasSelectedLibrary || hasScenario">
-                <v-col cols = "3">
+            </v-col>
+            <v-spacer cols = "5" v-show="!(hasSelectedLibrary || hasScenario)"/>                
+            <v-col cols = "2" v-show='!hasScenario'>
+                <v-subheader class="ghd-control-label ghd-md-gray"> </v-subheader>
+                <v-row align="end" justify="end">
                     <v-btn
-                        id="PerformanceCurveEditor-addDeteriorationModel-button"
-                        @click="showCreatePerformanceCurveDialog = true"
-                        class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border ghd-outline-button-padding"
-                                        
-                        variant = "outlined"
-                    >
-                        Add Deterioration Model
+                        id="PerformanceCurveEditor-createNewLibrary-button"
+                        @click='onShowCreatePerformanceCurveLibraryDialog(false)'
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        variant = "outlined">
+                        Create New Library
                     </v-btn>
-                </v-col>
-            </v-row>        
-        <v-divider v-show="hasSelectedLibrary || hasScenario"></v-divider>
-        <v-col v-show="hasSelectedLibrary && !hasScenario" xs12>
-            <v-row justify-center>
-                <v-col cols = "12">
-                    <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>                    
-                    <v-textarea
-                        class="ghd-control-text ghd-control-border"
-                        no-resize
-                        outline
-                        rows="4"
-                        v-model="selectedPerformanceCurveLibrary.description"
-                        @update:model-value="checkHasUnsavedChanges()"
-                    />
-                </v-col>
-            </v-row>
-        </v-col>
-        <v-col cols = "12">
-            <v-row
-                justify-center
-                row
-                v-show='hasSelectedLibrary || hasScenario'
-            >
+                </v-row>
+            </v-col>                    
+        </v-row>
+        <v-row style="height:48px;">
+            <v-col cols = "9" v-show="!hasScenario">
+                <v-row>
+                        <div style="margin-top:6px;"
+                            v-if='hasSelectedLibrary && !hasScenario'
+                            class="ghd-control-label ghd-md-gray"
+                        > 
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
+                        <v-badge v-show="isShared">
+                        <template v-slot: badge>
+                            <span>Shared</span>
+                        </template>
+                        </v-badge>
+                        <v-btn
+                            id="PerformanceCurveEditor-shareLibrary-button"
+                            @click='onShowSharePerformanceCurveLibraryDialog(selectedPerformanceCurveLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                            v-show='!hasScenario'>
+                            Share Library
+                        </v-btn>
+                        </div>
+                </v-row>
+            </v-col>
+            <v-spacer  v-show="hasScenario"/>
+            <v-col cols = "3" v-show="hasScenario || hasSelectedLibrary">
+                <v-row row align="end" style="margin-top:-4px;height:40px;">
+                    <v-btn
+                        id="PerformanceCurveEditor-upload-button"
+                        :disabled='false' @click='showImportExportPerformanceCurvesDialog = true'
+                        variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                        Upload
+                    </v-btn>
+                    <v-divider class="upload-download-divider" inset vertical>
+                    </v-divider>
+                    <v-btn
+                        id="PerformanceCurveEditor-download-button"
+                        :disabled='false' @click='exportPerformanceCurves()'
+                        variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                        Download
+                    </v-btn>
+                    <v-divider class="upload-download-divider" inset vertical>
+                    </v-divider>
+                    <v-btn
+                        id="PerformanceCurveEditor-downloadTemplate-button"
+                        :disabled='false' @click='OnDownloadTemplateClick()'
+                        variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                        Download Template
+                    </v-btn>
+                </v-row>            
+            </v-col>
+        </v-row>
+        <v-row class="data-table" justify="start" v-show="hasSelectedLibrary || hasScenario" xs12>
+            <v-col cols = "12">
+                <v-card class="elevation-0">
+                    <v-data-table-server
+                        id="PerformanceCurveEditor-deteriorationModels-datatable"                    
+                        show-select
+                        class="fixed-header ghd-table v-table__overflow"
+                        item-key="id"
+
+                        :headers="performanceCurveGridHeaders"
+                        :pagination.sync="performancePagination"
+                        :must-sort='true'
+                        sort-icon=ghd-table-sort
+                        v-model="selectedPerformanceEquations"
+                        return-object
+                        :items="currentPage"                      
+                        :items-length="totalItems"
+                        :items-per-page-options="[
+                            {value: 5, title: '5'},
+                            {value: 10, title: '10'},
+                            {value: 25, title: '25'},
+                        ]"
+                        v-model:sort-by="performancePagination.sort"
+                        v-model:page="performancePagination.page"
+                        v-model:items-per-page="performancePagination.rowsPerPage"                          
+                        @update:options="onPaginationChanged"                           
+                    >
+                        <template slot="items" slot-scope="props" v-slot:item="item">
+                            <tr>
+                            <td>
+                                <v-checkbox id="PerformanceCurveEditor-deleteModel-vcheckbox" class="ghd-checkbox"
+                                    hide-details
+                                    primary
+                                    v-model="selectedPerformanceEquations" :value="item.item"
+                                >
+                                </v-checkbox>
+                            </td>                                
+                            <td class="text-xs-left">
+                                <editDialog
+                                    :return-value.sync="item.item.name"
+                                    @save="
+                                        onEditPerformanceCurveProperty(
+                                            item.item.id,
+                                            'name',
+                                            item.item.name,
+                                        )
+                                    "
+                                    size="large"
+                                    lazy
+                                >
+                                    <v-text-field
+                                        readonly
+                                        single-line
+                                        variant="underlined"
+                                        class="sm-txt equation-name-text-field-output"
+                                        :model-value="item.item.name"
+                                        :rules="[
+                                            rules['generalRules']
+                                                .valueIsNotEmpty,
+                                        ]"
+                                    />
+                                    <template v-slot:input>
+                                        <v-text-field
+                                            label="Edit"
+                                            single-line
+                                            variant="underlined"
+                                            v-model="item.item.name"
+                                            :rules="[
+                                                rules['generalRules']
+                                                    .valueIsNotEmpty,
+                                            ]"
+                                        />
+                                    </template>
+                                </editDialog>
+                            </td>
+                            <td class="text-xs-left">
+                                <editDialog
+                                    :return-value.sync="
+                                        item.item.attribute
+                                    "
+                                    @save="
+                                        onEditPerformanceCurveProperty(
+                                            item.item.id,
+                                            'attribute',
+                                            item.item.attribute,
+                                        )
+                                    "
+                                    size="large"
+                                    lazy
+                                >
+                                    <v-text-field
+                                        readonly
+                                        single-line
+                                        variant="underlined"
+                                        class="sm-txt attribute-text-field-output"
+                                        :model-value="item.item.attribute"
+                                        :rules="[
+                                            rules['generalRules']
+                                                .valueIsNotEmpty,
+                                        ]"
+                                    />
+                                    <template v-slot:input>
+                                        <v-select
+                                            :items="attributeSelectItems"
+                                            append-icon=ghd-down
+                                            label="Edit"
+                                            v-model="item.item.attribute"
+                                            :rules="[
+                                                rules['generalRules']
+                                                    .valueIsNotEmpty,
+                                            ]"
+                                            item-title="text" 
+                                            item-value="value" 
+                                        />
+                                    </template>
+                                </editDialog>
+                            </td>
+                            <td class="text-xs-left">
+                                <v-menu
+                                    location="left"
+                                    min-height="500px"
+                                    min-width="500px"
+                                    v-show="item.item.equation.expression !== ''"
+                                >
+                                    <template v-slot:activator="{ props }">
+                                        <v-btn id="PerformanceCurveEditor-checkEquationEye-vbtn" v-bind="props" class="ghd-blue" icon variant="flat">
+                                            <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')">
+                                        </v-btn>
+                                    </template>
+                                    <v-card>
+                                        <v-card-text>
+                                            <v-textarea
+                                                id="PerformanceCurveEditor-checkEquation-vtextarea"
+                                                class="sm-txt Montserrat-font-family"
+                                                :model-value="
+                                                    item.item.equation
+                                                        .expression
+                                                "
+                                                full-width
+                                                no-resize
+                                                outline
+                                                readonly
+                                                rows="5"
+                                            />
+                                        </v-card-text>
+                                    </v-card>
+                                </v-menu>
+                                <v-btn id="PerformanceCurveEditor-editEquation-vbtn"
+                                    @click="onShowEquationEditorDialog(item.item.id) "
+                                    class="ghd-blue"
+                                    variant="flat"
+                                    icon
+                                >
+                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')">
+                                </v-btn>
+                            </td>
+                            <td class="text-xs-left">
+                                <v-menu
+                                    min-height="500px"
+                                    min-width="500px"
+                                    location="right"
+                                    v-show="
+                                        item.item.criterionLibrary
+                                            .mergedCriteriaExpression !== ''
+                                    "
+                                >
+                                    <template v-slot:activator="{ props }">
+                                        <v-btn v-bind="props" id="PerformanceCurveEditor-checkCriteriaEye-vbtn" class="ghd-blue" variant = "flat" icon>
+                                            <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')">
+                                        </v-btn>
+                                    </template>
+                                    <v-card>
+                                        <v-card-text>
+                                            <v-textarea
+                                                id="PerformanceCurveEditor-checkCriteria-vtextarea"
+                                                class="sm-txt Montserrat-font-family"
+                                                :model-value="
+                                                    item.item
+                                                        .criterionLibrary
+                                                        .mergedCriteriaExpression
+                                                "
+                                                full-width
+                                                no-resize
+                                                outline
+                                                readonly
+                                                rows="5"
+                                            />
+                                        </v-card-text>
+                                    </v-card>
+                                </v-menu>
+                                <v-btn id="PerformanceCurveEditor-editCriteria-vbtn"
+                                    @click="onEditPerformanceCurveCriterionLibrary(item.item.id)"
+                                    variant="flat"
+                                    class="ghd-blue"
+                                    icon
+                                >
+                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')">
+                                </v-btn>
+                            </td>
+                            <td class="text-xs-left">
+                                <v-btn id="PerformanceCurveEditor-deleteModel-vbtn"
+                                    @click="onRemovePerformanceCurve(item.item.id)"
+                                    variant="flat"
+                                    class="ghd-blue"
+                                    icon
+                                >
+                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                </v-btn>
+                            </td>
+                        </tr>
+                        </template>
+                        <!-- <template v-slot:body.append-inner>
+                        <v-btn>Append button</v-btn>
+                        </template>                                -->
+                    </v-data-table-server>
+                    <v-btn style="margin-top:-84px"
+                        id="PerformanceCurveEditor-deleteSelected-button"
+                        :disabled='selectedPerformanceEquationIds.length === 0 || (!hasLibraryEditPermission && !hasScenario)'
+                        @click='onRemovePerformanceEquations'
+                        class='ghd-blue' variant = "text"
+                    >
+                        Delete Selected
+                    </v-btn>                        
+                </v-card>
+            </v-col>
+        </v-row>
+        <v-row class="header-height" justify="start" v-show="hasSelectedLibrary || hasScenario">
+            <v-col cols = "3">
                 <v-btn
-                    id="PerformanceCurveEditor-cancel-button"
-                    :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
-                    @click="onDiscardChanges"
-                    class="ghd-white-bg ghd-blue ghd-button-text"
-                    variant = "flat"
-                    v-show="hasScenario"
-                >
-                    Cancel
-                </v-btn>
-                <v-btn
-                    id="PerformanceCurveEditor-deleteLibrary-button"
-                    @click="onShowConfirmDeleteAlert"
-                    class="ghd-white-bg ghd-blue ghd-button-text"
-                    variant = "flat"
-                    v-show="!hasScenario"
-                    :disabled="!hasLibraryEditPermission"
-                >
-                    Delete Library
-                </v-btn>                
-                <v-btn
-                    id="PerformanceCurveEditor-createAsNewLibrary-button"
-                    :disabled="disableCrudButtons()"
-                    @click="onShowCreatePerformanceCurveLibraryDialog(true)"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                    variant = "outlined"                  
-                >
-                    Create as New Library
-                </v-btn>
-               <v-btn
-                    id="PerformanceCurveEditor-updateLibrary-button"
-                    :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
-                    @click='onUpsertPerformanceCurveLibrary'
-                    class="ghd-blue-bg ghd-white ghd-button-text ghd-button-border ghd-outline-button-padding"
+                    id="PerformanceCurveEditor-addDeteriorationModel-button"
+                    @click="showCreatePerformanceCurveDialog = true"
+                    class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border ghd-outline-button-padding"
+                                    
                     variant = "outlined"
-                    v-show='!hasScenario'
                 >
-                    Update Library
+                    Add Deterioration Model
                 </v-btn>
-                <v-btn
-                    id="PerformanceCurveEditor-save-button"
-                    :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
-                    @click='onUpsertScenarioPerformanceCurves'
-                    class="ghd-blue-bg ghd-white ghd-button-text"
-                    variant = "flat"
-                    v-show='hasScenario'
-                >
-                    Save
-                </v-btn>
-            </v-row>
-        </v-col>
+            </v-col>
+        </v-row>        
+        <v-divider v-show="hasSelectedLibrary || hasScenario"></v-divider>
+        <v-row justify="center"  v-show="hasSelectedLibrary && !hasScenario" xs12>
+            <v-col cols = "12">
+                <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>                    
+                <v-textarea
+                    class="ghd-control-text ghd-control-border"
+                    no-resize
+                    outline
+                    rows="4"
+                    v-model="selectedPerformanceCurveLibrary.description"
+                    @update:model-value="checkHasUnsavedChanges()"
+                />
+            </v-col>
+        </v-row>
+        <v-row
+            justify="center"
+            row
+            v-show='hasSelectedLibrary || hasScenario'
+        >
+            <v-btn
+                id="PerformanceCurveEditor-cancel-button"
+                :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
+                @click="onDiscardChanges"
+                class="m-2 ghd-white-bg ghd-blue ghd-button-text"
+                variant = "flat"
+                v-show="hasScenario"
+            >
+                Cancel
+            </v-btn>
+            <v-btn
+                id="PerformanceCurveEditor-deleteLibrary-button"
+                @click="onShowConfirmDeleteAlert"
+                class="m-2 ghd-white-bg ghd-blue ghd-button-text"
+                variant = "flat"
+                v-show="!hasScenario"
+                :disabled="!hasLibraryEditPermission"
+            >
+                Delete Library
+            </v-btn>                
+            <v-btn
+                id="PerformanceCurveEditor-createAsNewLibrary-button"
+                :disabled="disableCrudButtons()"
+                @click="onShowCreatePerformanceCurveLibraryDialog(true)"
+                class='m-2 ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                variant = "outlined"                  
+            >
+                Create as New Library
+            </v-btn>
+            <v-btn
+                id="PerformanceCurveEditor-updateLibrary-button"
+                :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
+                @click='onUpsertPerformanceCurveLibrary'
+                class="m-2 ghd-blue-bg ghd-white ghd-button-text ghd-button-border ghd-outline-button-padding"
+                variant = "outlined"
+                v-show='!hasScenario'
+            >
+                Update Library
+            </v-btn>
+            <v-btn
+                id="PerformanceCurveEditor-save-button"
+                :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
+                @click='onUpsertScenarioPerformanceCurves'
+                class="ghd-blue-bg ghd-white ghd-button-text m-2"
+                variant = "flat"
+                v-show='hasScenario'
+            >
+                Save
+            </v-btn>
+        </v-row>
 
         <Alert
             :dialogData="confirmDeleteAlertData"
@@ -484,7 +447,7 @@
         />
         <ImportExportPerformanceCurvesDialog :showDialog='showImportExportPerformanceCurvesDialog'
             @submit='onSubmitImportExportPerformanceCurvesDialogResult' />
-    </v-row>
+    </v-container>
     <ConfirmDialog></ConfirmDialog>
 </template>
 
@@ -569,6 +532,7 @@ import mitt from 'mitt';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { computed } from 'vue';
+import { getUrl } from '@/shared/utils/get-url';
 
 const emit = defineEmits(['submit'])
 let store = useStore();
@@ -608,7 +572,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let updatedRowsMap:Map<string, [PerformanceCurve, PerformanceCurve]> = new Map<string, [PerformanceCurve, PerformanceCurve]>();//0: original value | 1: updated value
     let deletionIds: ShallowRef<string[]> = ref([]);
     let rowCache: PerformanceCurve[] = [];
-    let gridSearchTerm = '';
+    let gridSearchTerm = ref('');
     let currentSearch = '';
     let selectedPerformanceCurveLibrary: ShallowRef<PerformanceCurveLibrary> = shallowRef(clone(
         emptyPerformanceCurveLibrary,
@@ -622,7 +586,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let selectedScenarioId: string = getBlankGuid();
     let hasSelectedLibrary = ref(false);
     let hasScenario = ref(false);
-    let librarySelectItems: SelectItem[] = [];
+    let librarySelectItems  = ref<SelectItem[]>([]);
     let modifiedDate: string; 
     
     let performanceCurveGridHeaders: any[] = [
@@ -681,26 +645,26 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let selectedPerformanceEquations: Ref<PerformanceCurve[]> = ref([]);
     let selectedPerformanceEquationIds: string[] = [];
 
-    let createPerformanceCurveLibraryDialogData: CreatePerformanceCurveLibraryDialogData = clone(
+    let createPerformanceCurveLibraryDialogData = ref(clone(
         emptyCreatePerformanceLibraryDialogData,
-    );
-    let equationEditorDialogData: EquationEditorDialogData = clone(
+    ));
+    let equationEditorDialogData = ref(clone(
         emptyEquationEditorDialogData,
-    );
-    let criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+    ));
+    let criterionEditorDialogData = ref(clone(
         emptyGeneralCriterionEditorDialogData,
-    );
-    let showCreatePerformanceCurveDialog = false;
-    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    ));
+    let showCreatePerformanceCurveDialog = ref(false);
+    let confirmDeleteAlertData = ref(clone(emptyAlertData));
     let rules: InputValidationRules = validationRules;
     let uuidNIL: string = getBlankGuid();
     let currentUrl: string = window.location.href;
     let hasCreatedLibrary: boolean = false;
     let disableCrudButtonsResult: boolean = false;
     let hasLibraryEditPermission: boolean = false;
-    let showImportExportPerformanceCurvesDialog: boolean = false;    
+    let showImportExportPerformanceCurvesDialog = ref(false);    
 
-    let sharePerformanceCurveLibraryDialogData: SharePerformanceCurveLibraryDialogData = clone(emptySharePerformanceCurveLibraryDialogData);
+    let sharePerformanceCurveLibraryDialogData = ref(clone(emptySharePerformanceCurveLibraryDialogData));
 
     let parentLibraryName: string = "None";
     let parentLibraryId: string = "";
@@ -816,7 +780,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                     totalItems.value = data.totalItems;
                     isRunning = false;
                     if (!isNil(selectedPerformanceCurveLibrary.value.id) ) {
-                        getIsSharedLibraryAction(selectedPerformanceCurveLibrary).then(()=>isShared = isSharedLibrary.value);
+                        getIsSharedLibraryAction(selectedPerformanceCurveLibrary.value).then(()=>isShared = isSharedLibrary.value);
                     }
                 }
             });  
@@ -825,7 +789,6 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
     watch(selectedPerformanceEquations,()=>onSelectedPerformanceEquationsChanged())
     function onSelectedPerformanceEquationsChanged() {
-        console.log('tset')
         selectedPerformanceEquationIds = getPropertyValues('id', selectedPerformanceEquations.value) as string[];
     } 
     
@@ -838,7 +801,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
     watch(statePerformanceCurveLibraries,()=>onStatePerformanceCurveLibrariesChanged())
     function onStatePerformanceCurveLibrariesChanged() {
-        librarySelectItems = statePerformanceCurveLibraries.value.map(
+        librarySelectItems.value = statePerformanceCurveLibraries.value.map(
             (library: PerformanceCurveLibrary) => ({
                 text: library.name,
                 value: library.id,
@@ -925,7 +888,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     watch(currentPage,()=>onCurrentPageChanged())
     function onCurrentPageChanged() {
         // Get parent name from library id
-        librarySelectItems.forEach(library => {
+        librarySelectItems.value.forEach(library => {
             if (library.value === parentLibraryId) {
                 parentLibraryName = library.text;
             }
@@ -943,7 +906,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
             deletionIds.value.length > 0 || 
             addedRows.value.length > 0 ||
             updatedRowsMap.size > 0 || (hasScenario.value && hasSelectedLibrary.value) ||
-            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedPerformanceCurveLibrary, stateSelectedPerformanceCurveLibrary))
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedPerformanceCurveLibrary.value, stateSelectedPerformanceCurveLibrary.value))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -974,7 +937,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function onShowCreatePerformanceCurveLibraryDialog(createAsNewLibrary: boolean) { 
-        createPerformanceCurveLibraryDialogData = {
+        createPerformanceCurveLibraryDialogData.value = {
             showDialog: true,
             performanceCurves: createAsNewLibrary
                 ? currentPage.value
@@ -985,7 +948,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     function onSubmitCreatePerformanceCurveLibraryDialogResult(
         performanceCurveLibrary: PerformanceCurveLibrary,
     ) {
-        createPerformanceCurveLibraryDialogData = clone(
+        createPerformanceCurveLibraryDialogData.value = clone(
             emptyCreatePerformanceLibraryDialogData,
         );
 
@@ -1020,7 +983,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     function onSubmitCreatePerformanceCurveDialogResult( 
         newPerformanceCurve: PerformanceCurve,
     ) {
-        showCreatePerformanceCurveDialog = false;
+        showCreatePerformanceCurveDialog.value = false;
 
         if (!isNil(newPerformanceCurve)) {
             addedRows.value = prepend(
@@ -1051,7 +1014,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         if (!isNil(selectedPerformanceCurve)) {
             hasSelectedPerformanceCurve = true;
 
-            equationEditorDialogData = {
+            equationEditorDialogData.value = {
                 showDialog: true,
                 equation: selectedPerformanceCurve.equation,
             };
@@ -1059,7 +1022,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function onSubmitEquationEditorDialogResult(equation: Equation) {
-        equationEditorDialogData = clone(emptyEquationEditorDialogData);
+        equationEditorDialogData.value = clone(emptyEquationEditorDialogData);
 
         if (!isNil(equation) && hasSelectedPerformanceCurve) {
             onUpdateRow(selectedPerformanceCurve.id, { ...selectedPerformanceCurve, equation: equation })
@@ -1086,7 +1049,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         if (!isNil(selectedPerformanceCurve)) {
             hasSelectedPerformanceCurve = true;
 
-            criterionEditorDialogData = {
+            criterionEditorDialogData.value = {
                 showDialog: true,
                 CriteriaExpression: selectedPerformanceCurve.criterionLibrary.mergedCriteriaExpression
             };
@@ -1096,7 +1059,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     function onSubmitCriterionEditorDialogResult(
         criterionExpression: string,
     ) {
-        criterionEditorDialogData = clone(
+        criterionEditorDialogData.value = clone(
             emptyGeneralCriterionEditorDialogData,
         );
 
@@ -1129,7 +1092,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
     function onUpsertScenarioPerformanceCurves() {
 
-        if (selectedPerformanceCurveLibrary.value.id === uuidNIL || hasUnsavedChanges && newLibrarySelection ===false) {scenarioLibraryIsModified = true;}
+        if (selectedPerformanceCurveLibrary.value.id === uuidNIL || hasUnsavedChanges.value && newLibrarySelection ===false) {scenarioLibraryIsModified = true;}
         else { scenarioLibraryIsModified = false; }
 
         PerformanceCurveService.UpsertScenarioPerformanceCurves({
@@ -1166,7 +1129,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         PerformanceCurveService.UpsertPerformanceCurveLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 clearChanges()
-                performanceCurveLibraryMutator(selectedPerformanceCurveLibrary);
+                performanceCurveLibraryMutator(selectedPerformanceCurveLibrary.value);
                 selectedPerformanceCurveLibraryMutator(selectedPerformanceCurveLibrary.value.id);
                 addSuccessNotificationAction({message: "Updated deterioration model library",});
             }
@@ -1188,7 +1151,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function onShowConfirmDeleteAlert() {
-        confirmDeleteAlertData = {
+        confirmDeleteAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1197,7 +1160,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        confirmDeleteAlertData = clone(emptyAlertData);
+        confirmDeleteAlertData.value = clone(emptyAlertData);
 
         if (submit) {
             librarySelectItemValue.value = null;
@@ -1257,7 +1220,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function onSubmitImportExportPerformanceCurvesDialogResult(result: ImportExportPerformanceCurvesDialogResult) {
-        showImportExportPerformanceCurvesDialog = false;
+        showImportExportPerformanceCurvesDialog.value = false;
 
         if (hasValue(result)) {
             if (result.isExport) {
@@ -1290,14 +1253,14 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
     function onShowSharePerformanceCurveLibraryDialog(performanceCurveLibrary: PerformanceCurveLibrary)
     {
-        sharePerformanceCurveLibraryDialogData =
+        sharePerformanceCurveLibraryDialogData.value =
         {
             showDialog: true,
             performanceCurveLibrary: clone(performanceCurveLibrary),
         };
     }
     function onSharePerformanceCurveLibraryDialogSubmit(performanceCurveLibraryUsers: PerformanceCurveLibraryUser[]) {
-        sharePerformanceCurveLibraryDialogData = clone(emptySharePerformanceCurveLibraryDialogData);
+        sharePerformanceCurveLibraryDialogData.value = clone(emptySharePerformanceCurveLibraryDialogData);
 
         if (!isNil(performanceCurveLibraryUsers) && selectedPerformanceCurveLibrary.value.id !== getBlankGuid())
         {
@@ -1322,7 +1285,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 libraryUserData.push(libraryUser);
             });
             if (!isNil(selectedPerformanceCurveLibrary.value.id) ) {
-                getIsSharedLibraryAction(selectedPerformanceCurveLibrary).then(()=> isShared = isSharedLibrary.value);
+                getIsSharedLibraryAction(selectedPerformanceCurveLibrary.value).then(()=> isShared = isSharedLibrary.value);
             }
             //update performance curve library sharing
             PerformanceCurveService.upsertOrDeletePerformanceCurveLibraryUsers(selectedPerformanceCurveLibrary.value.id, libraryUserData).then((response: AxiosResponse) => {
@@ -1334,12 +1297,12 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         }
     }
     function onSearchClick(){
-        currentSearch = gridSearchTerm;
+        currentSearch = gridSearchTerm.value;
         resetPage();
     }
 
     function onClearClick(){
-        gridSearchTerm = '';
+        gridSearchTerm.value = '';
         onSearchClick();
     }
 
@@ -1375,7 +1338,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
-        if (hasUnsavedChanges && unsavedDialogAllowed) {
+        if (hasUnsavedChanges.value && unsavedDialogAllowed) {
 
             confirm.require({
                 message: "You have unsaved changes. Are you sure you wish to continue?",

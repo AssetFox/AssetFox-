@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import {
     InputValidationRules,
     rules as validationRules,

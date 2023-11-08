@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-bind:show="dialogData.showDialog">
+  <v-dialog max-width="500px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title>
         <v-row justify-center>
@@ -13,7 +13,7 @@
         <v-data-table id="ShareCalculatedAttributeLibraryDialog-table-vdatatable"
                       :headers="shareCalculatedAttributeLibraryUserGridHeaders"
                       :items="shareCalculatedAttributeLibraryUserGridRows"
-                      sort-icon=$vuetify.icons.ghd-table-sort
+                      sort-icon=ghd-table-sort
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="{item}">
             <td>
@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {CalculatedAttributeLibraryUser } from '@/shared/models/iAM/calculated-attribute';
 import {LibraryUser } from '@/shared/models/iAM/user';

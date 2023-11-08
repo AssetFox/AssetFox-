@@ -89,6 +89,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                 Year = yearData.Year,
                                 Treatment = section.AppliedTreatment,
                                 Amount = budgetAmount,
+                                ProjectSource = section.ProjectSource,
                                 isCommitted = true,
                                 costPerBPN = (bpnName, budgetAmount),
                                 TreatmentCategory = category
@@ -160,6 +161,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 if (amount > 0)
                 {
                     _committedProjectCost.FillCostOfCommittedWork(worksheet, currentCell, simulationYears, costForCommittedBudgets.ToList(),
+                        committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal);
+                    _committedProjectCost.FillCostOfSAPWork(worksheet, currentCell, simulationYears, costForCommittedBudgets.ToList(),
+                        committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal);
+                    _committedProjectCost.FillCostOfProjectBuilderWork(worksheet, currentCell, simulationYears, costForCommittedBudgets.ToList(),
                         committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal);
 
                     _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget.ToList(), totalBudgetPerYearForCulvert, simulationYears, workTypeTotal);

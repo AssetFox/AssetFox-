@@ -11,8 +11,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ScenarioSelectableTreatmentEntity ScenarioSelectableTreatment { get; set; }
 
-        public virtual ScenarioSelectableTreatmentEntity PreventScenarioSelectableTreatment { get; set; }
+        public Guid PreventTreatmentId { get; set; }        
 
         public virtual CriterionLibraryScenarioTreatmentSupersedeRuleEntity CriterionLibraryScenarioTreatmentSupersedeRuleJoin { get; set; }
-    }
+    }  
 }

@@ -1,21 +1,26 @@
 <template>
-    <v-dialog width="768px" height="540px" persistent v-bind:show='showDialog'>
+    <v-dialog width="768px" height="540px" persistent v-model='showDialogComputed'>
         <v-card class="div-padding">
             <v-card-title class="pa-2">
-                <v-row justify-start>
-                    <h3 class="Montserrat-font-family">Performance Curves Upload</h3>
-                </v-row>
-                <v-btn @click="onSubmit(false)" icon>
-                    <i class="fas fa-times fa-2x"></i>
-                </v-btn>
+                <v-row justify="space-between">
+                    <v-col >
+                        <h3 class="Montserrat-font-family">Performance Curves Upload</h3>
+                    </v-col>
+                    <v-spacer/>
+                    <v-col align="end">
+                        <v-btn @click="onSubmit(false)" icon>
+                            <i class="fas fa-times fa-2x"></i>
+                        </v-btn>
+                    </v-col> 
+                </v-row>              
             </v-card-title>
-            <v-card-text class="pa-0">
+            <v-card-text >
                 <v-row column>
                     <PerformanceCurvesFileSelector :closed='closed' @submit='onFileSelectorChange' />                    
                 </v-row>
             </v-card-text>
             <v-card-actions>
-                <v-row justify-center>
+                <v-row justify="center">
                     <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue Montserrat-font-family' variant = "flat">Cancel</v-btn>
                     <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>
                 </v-row>
@@ -25,7 +30,7 @@
 </template>
 
 <script lang='ts' setup>
-import Vue from 'vue';
+import Vue, { computed } from 'vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { ImportExportPerformanceCurvesDialogResult } from '@/shared/models/modals/import-export-performance-curves-dialog-result';
 import {clone} from 'ramda';
@@ -39,7 +44,7 @@ let store = useStore();
 const props = defineProps<{
     showDialog: boolean
     }>()
-
+    let showDialogComputed = computed(() => props.showDialog);
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
 async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('setIsBusy');}
 

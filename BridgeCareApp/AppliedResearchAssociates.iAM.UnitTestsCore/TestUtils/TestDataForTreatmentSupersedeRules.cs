@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public static Guid InterstateBudgetId => Guid.Parse("4dcf6bbc-d135-458c-a6fc-db9bb0801b11");
 
-        public static Guid PreventTreatmentId => Guid.Parse("00dacfde-02da-4109-b8aa-add932756d11");
+        public static Guid PreventTreatmentId => Guid.Parse("11ddccde-02da-4109-b8aa-add932756d11");
 
         public static Guid CostId => Guid.Parse("100dacfe-02da-4109-b8aa-add932756d11");
 

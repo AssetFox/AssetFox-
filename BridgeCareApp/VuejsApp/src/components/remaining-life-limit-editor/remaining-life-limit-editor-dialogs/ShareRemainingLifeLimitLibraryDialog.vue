@@ -1,45 +1,53 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
+  <v-dialog max-width="60%" persistent v-model="dialogData.showDialog">
     <v-card>
-      <v-card-title>
-        <v-row justify-center>
-          <h3>Remaining Life Limit Library Sharing</h3>
-        </v-row>
+      <v-card-title class="ghd-dialog-padding-top-title">
+        <v-row justify="space-between">
+          <h5>Remaining Life Limit Library Sharing</h5>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
+        </v-row>
       </v-card-title>
+
       <v-card-text>
-        <v-data-table-server id="ShareRemainingLifeLimitLibraryDialog-table-vdatatable"
-                      :headers="remainingLifeLimitLibraryUserGridHeaders"
-                      :items="remainingLifeLimitLibraryUserGridRows"
-                      :items-length="remainingLifeLimitLibraryUserGridRows.length"
-                      sort-icon=$vuetify.icons.ghd-table-sort
-                      :search="searchTerm">
-          <template slot="items" slot-scope="props" v-slot:item="props">
-            <td>
-              {{ props.item.username }}
-            </td>
-            <td>
-              <v-checkbox id="ShareRemainingLifeLimitLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="props.item.isShared"
-                          @change="removeUserModifyAccess(props.item.id, props.item.isShared)"/>
-            </td>
-            <td>
-              <v-checkbox id="ShareRemainingLifeLimitLibraryDialog-canModify-vcheckbox" :disabled="!props.item.isShared" label="Can Modify" v-model="props.item.canModify"/>
-            </td>
-          </template>
-          <v-alert :model-value="true"
-                   class="ara-orange-bg"
-                   icon="fas fa-exclamation"
-                   slot="no-results">
-            Your search for "{{ searchTerm }}" found no results.
-          </v-alert>
-        </v-data-table-server>
+        <v-row>
+          <v-col>
+            <v-data-table-server id="ShareRemainingLifeLimitLibraryDialog-table-vdatatable"
+                          :headers="remainingLifeLimitLibraryUserGridHeaders"
+                          :items="remainingLifeLimitLibraryUserGridRows"
+                          :items-length="remainingLifeLimitLibraryUserGridRows.length"
+                          sort-icon=$vuetify.icons.ghd-table-sort
+                          :search="searchTerm">
+              <template v-slot:item="props">
+                <td>
+                  {{ props.item.username }}
+                </td>
+                <td>
+                  <v-checkbox id="ShareRemainingLifeLimitLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="props.item.isShared"
+                              @change="removeUserModifyAccess(props.item.id, props.item.isShared)"/>
+                </td>
+                <td>
+                  <v-checkbox id="ShareRemainingLifeLimitLibraryDialog-canModify-vcheckbox" :disabled="!props.item.isShared" label="Can Modify" v-model="props.item.canModify"/>
+                </td>
+              </template>
+              <v-alert :model-value="true"
+                      class="ara-orange-bg"
+                      icon="fas fa-exclamation"
+                      slot="no-results">
+                Your search for "{{ searchTerm }}" found no results.
+              </v-alert>
+            </v-data-table-server>
+          </v-col>
+        </v-row>
       </v-card-text>
+
       <v-card-actions>
-        <v-row row justify-center>
-          <v-btn id="ShareRemainingLifeLimitLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
-          <v-btn id="ShareRemainingLifeLimitLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
+        <v-row justify="center" class="ghd-dialog-padding-bottom-buttons">
+          <v-btn id="ShareRemainingLifeLimitLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button" variant="outlined">
+            Cancel
+          </v-btn>
+          <v-btn id="ShareRemainingLifeLimitLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button" variant="outlined">
             Save
           </v-btn>
         </v-row>
@@ -81,7 +89,7 @@ import { useStore } from 'vuex';
   let currentUserAndOwner = ref<RemainingLifeLimitLibraryUser[]>([]);
   let searchTerm: string = '';
 
-  watch((() => props.dialogData), onDialogDataChanged )
+  watch(() => props.dialogData, onDialogDataChanged)
   function onDialogDataChanged() {
     if (props.dialogData.showDialog) {
       onSetGridData();

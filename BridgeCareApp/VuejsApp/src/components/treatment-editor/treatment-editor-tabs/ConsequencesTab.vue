@@ -1,13 +1,14 @@
 <template>
-    <v-row class='consequences-tab-content'>
-        <v-col cols = "12">            
-            <div class='consequences-data-table'>
+    <v-row>
+        <v-col cols="12">            
+            <div style="margin-bottom: 10px;">
                 <v-data-table :headers='consequencesGridHeaders' :items='consequencesGridData'
                               id="ConsequencesTab-Consequences-vDataTable"
                               class='elevation-1 fixed-header v-table__overflow'
                               sort-icon=ghd-table-sort
                               hide-actions>
                     <template slot='items' slot-scope='props' v-slot:item="props">
+                        <tr>
                         <td v-for='header in consequencesGridHeaders'>
                             <editDialog
                                 v-if="header.value !== 'equation' && header.value !== 'criterionLibrary' && header.value !== ''"
@@ -41,7 +42,7 @@
                                 v-show="header.value === 'equation'"
                             >
                                 <template v-slot:activator>
-                                    <v-btn id="TreatmentConsequencesTab-EquationView-btn" class="ghd-blue" icon>
+                                    <v-btn id="TreatmentConsequencesTab-EquationView-btn" class="ghd-blue" flat>
                                         <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                     </v-btn>
                                 </template>
@@ -73,7 +74,7 @@
                                 v-show="header.value === 'criterionLibrary'"
                             >
                                 <template v-slot:activator>
-                                    <v-btn id="TreatmentConsequencesTab-CriteriaView-btn" class="ghd-blue" icon>
+                                    <v-btn id="TreatmentConsequencesTab-CriteriaView-btn" class="ghd-blue" flat>
                                         <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                     </v-btn>
                                 </template>
@@ -105,6 +106,7 @@
                                 </v-btn>
                             </v-row>
                         </td>
+                    </tr>
                     </template>
                 </v-data-table>
             </div>
@@ -120,15 +122,13 @@
     </v-row>
 </template>
 
-<script lang='ts' setup>
-import Vue, { computed, shallowRef } from 'vue';
+<script setup lang='ts'>
+import { ref, computed, shallowRef, watch, toRefs } from 'vue';
 import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import { any, clone, isNil } from 'ramda';
 import EquationEditorDialog from '../../../shared/modals/EquationEditorDialog.vue';
-import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { emptyConsequence, TreatmentConsequence } from '@/shared/models/iAM/treatment';
-import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import {
     emptyEquationEditorDialogData,
     EquationEditorDialogData,
@@ -152,24 +152,25 @@ const props = defineProps<{
          callFromScenario: boolean,
          callFromLibrary: boolean  
     }>(); 
+    const { selectedTreatmentConsequences, rules, callFromScenario, callFromLibrary } = toRefs(props);
     const emit = defineEmits(['submit', 'onAddConsequence', 'onModifyConsequence', 'onRemoveConsequence'])
     let store = useStore();
 
-    let stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
+    const stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
     
 
-    let consequencesGridHeaders: any[] = [
+    const consequencesGridHeaders: any[] = [
         { title: 'Attribute', key: 'attribute', align: 'left', sortable: false, class: '', width: '175px' },
         { title: 'Change Value', key: 'changeValue', align: 'left', sortable: false, class: '', width: '125px' },
         { title: 'Equation', key: 'equation', align: 'left', sortable: false, class: '', width: '125px' },
         { title: 'Criteria', key: 'criterionLibrary', align: 'left', sortable: false, class: '', width: '125px' },
         { title: 'Actions', key: '', align: 'left', sortable: false, class: '', width: '100px' },
     ];
-    let consequencesGridData = shallowRef<TreatmentConsequence[]>();
-    let consequenceEquationEditorDialogData = shallowRef(clone(emptyEquationEditorDialogData));
-    let consequenceCriterionEditorDialogData = shallowRef(clone(emptyGeneralCriterionEditorDialogData));
-    let selectedConsequenceForEquationOrCriteriaEdit: TreatmentConsequence = clone(emptyConsequence);
-    let attributeSelectItems: SelectItem[] = [];
+    const consequencesGridData = ref<TreatmentConsequence[]>();
+    const consequenceEquationEditorDialogData = ref(clone(emptyEquationEditorDialogData));
+    const consequenceCriterionEditorDialogData = ref(clone(emptyGeneralCriterionEditorDialogData));
+    const selectedConsequenceForEquationOrCriteriaEdit = ref<TreatmentConsequence>(clone(emptyConsequence));
+    const attributeSelectItems = ref<SelectItem[]>([]);
     let uuidNIL: string = getBlankGuid();
 
    created();
@@ -177,19 +178,17 @@ const props = defineProps<{
         setAttributeSelectItems();
     }
 
-    watch(() => props.selectedTreatmentConsequences, () => onSelectedTreatmentConsequencesChanged())
-    function onSelectedTreatmentConsequencesChanged() {
+    watch(selectedTreatmentConsequences, () => {
         consequencesGridData.value = clone(props.selectedTreatmentConsequences);
-    }
+    });
 
-    watch(stateAttributes, () => onStateAttributesChanged())
-    function onStateAttributesChanged() {
+    watch(stateAttributes, () => {
         setAttributeSelectItems();
-    }
+    });
 
     function setAttributeSelectItems() {
         if (hasValue(stateAttributes.value)) {
-            attributeSelectItems = stateAttributes.value.map((attribute: Attribute) => ({
+            attributeSelectItems.value = stateAttributes.value.map((attribute: Attribute) => ({
                 text: attribute.name,
                 value: attribute.name,
             }));
@@ -206,7 +205,7 @@ const props = defineProps<{
     }
 
     function onShowConsequenceEquationEditorDialog(consequence: TreatmentConsequence) {
-        selectedConsequenceForEquationOrCriteriaEdit = clone(consequence);
+        selectedConsequenceForEquationOrCriteriaEdit.value = clone(consequence);
 
         consequenceEquationEditorDialogData.value = {
             showDialog: true,
@@ -217,15 +216,15 @@ const props = defineProps<{
     function onSubmitConsequenceEquationEditorDialogResult(equation: Equation) {
         consequenceEquationEditorDialogData.value = clone(emptyEquationEditorDialogData);
 
-        if (!isNil(equation) && selectedConsequenceForEquationOrCriteriaEdit.id !== uuidNIL) {
-            emit('onModifyConsequence', setItemPropertyValue('equation', equation, selectedConsequenceForEquationOrCriteriaEdit));
+        if (!isNil(equation) && selectedConsequenceForEquationOrCriteriaEdit.value.id !== uuidNIL) {
+            emit('onModifyConsequence', setItemPropertyValue('equation', equation, selectedConsequenceForEquationOrCriteriaEdit.value));
         }
 
-        selectedConsequenceForEquationOrCriteriaEdit = clone(emptyConsequence);
+        selectedConsequenceForEquationOrCriteriaEdit.value = clone(emptyConsequence);
     }
 
     function onShowConsequenceCriterionEditorDialog(consequence: TreatmentConsequence) {
-        selectedConsequenceForEquationOrCriteriaEdit = clone(consequence);
+        selectedConsequenceForEquationOrCriteriaEdit.value = clone(consequence);
 
         consequenceCriterionEditorDialogData.value = {
             showDialog: true,
@@ -236,15 +235,15 @@ const props = defineProps<{
     function onSubmitConsequenceCriterionEditorDialogResult(criterionExpression: string) {
         consequenceCriterionEditorDialogData.value = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionExpression) && selectedConsequenceForEquationOrCriteriaEdit.id !== uuidNIL) {
-            if(selectedConsequenceForEquationOrCriteriaEdit.criterionLibrary.id === getBlankGuid())
-                selectedConsequenceForEquationOrCriteriaEdit.criterionLibrary.id = getNewGuid();
+        if (!isNil(criterionExpression) && selectedConsequenceForEquationOrCriteriaEdit.value.id !== uuidNIL) {
+            if(selectedConsequenceForEquationOrCriteriaEdit.value.criterionLibrary.id === getBlankGuid())
+                selectedConsequenceForEquationOrCriteriaEdit.value.criterionLibrary.id = getNewGuid();
             emit('onModifyConsequence', setItemPropertyValue('criterionLibrary', 
-            {...selectedConsequenceForEquationOrCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary, 
-            selectedConsequenceForEquationOrCriteriaEdit));
+            {...selectedConsequenceForEquationOrCriteriaEdit.value.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary, 
+            selectedConsequenceForEquationOrCriteriaEdit.value));
         }
 
-        selectedConsequenceForEquationOrCriteriaEdit = clone(emptyConsequence);
+        selectedConsequenceForEquationOrCriteriaEdit.value = clone(emptyConsequence);
     }
 
     function onRemoveConsequence(consequenceId: string) {

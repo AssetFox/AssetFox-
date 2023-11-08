@@ -52,7 +52,7 @@ internal sealed class TreatmentOutlook
                 SimulationRunner.Simulation.AnalysisMethod.Benefit.Attribute.Name,
                 SimulationRunner.Simulation.AnalysisMethod.Benefit.Attribute.IsDecreasingWithDeterioration,
                 SimulationRunner.Simulation.AnalysisMethod.Benefit.Limit,
-                SimulationRunner.Simulation.AnalysisMethod.Weighting.Name,
+                SimulationRunner.Simulation.AnalysisMethod.Weighting?.Name ?? "n/a",
                 InitialYear,
                 assetName,
                 InitialTreatment.Name);

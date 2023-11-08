@@ -176,7 +176,7 @@ internal sealed class TreatmentOutlook
         ConditionChange = afterTreatment.lruBenefit - beforeTreatment.lruBenefit;
 
         Summary?.Details.Add(new(InitialYear, afterTreatment.rawBenefit, afterTreatment.weight));
-        MostRecentBenefit = afterTreatment.lruBenefit; // [FIXME] Should use the 'benefit' (weighted) value.
+        MostRecentBenefit = afterTreatment.benefit;
 
         updateRemainingLife?.Invoke();
 

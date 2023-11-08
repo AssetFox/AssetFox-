@@ -220,7 +220,7 @@ import { useRouter } from 'vue-router';
     onMounted(() => {
     });
     onBeforeMount(() => {
-        selectedScenarioId = router.currentRoute.value.path;  //router.currentRoute.value.query.scenarioId as string;
+        selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
     });
     created();
     function created() { 

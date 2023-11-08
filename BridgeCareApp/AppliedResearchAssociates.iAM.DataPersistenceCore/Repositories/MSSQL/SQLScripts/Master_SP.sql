@@ -1,4 +1,3 @@
-Use iAM_BAMS_Test
 
 Create PROCEDURE dbo.usp_master_procedure AS 
 

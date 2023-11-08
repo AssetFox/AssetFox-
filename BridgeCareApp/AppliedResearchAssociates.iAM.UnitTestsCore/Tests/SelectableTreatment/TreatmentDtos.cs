@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
 
         public static TreatmentDTO DtoWithEmptyCostsAndConsequencesLists(
             Guid? id = null,
-            string name = "Treatment name",
+            string name = "Bridge Replacement",
             string treatmentCriterionExpression = null)
         {
             var resolveId = id ?? Guid.NewGuid();
@@ -31,6 +31,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
                 Id = resolveId,
                 Name = name,
                 Description = "Treatment description",
+                BudgetIds = new List<Guid>(),
+                Budgets = new List<TreatmentBudgetDTO>(),
                 Costs = new List<TreatmentCostDTO>(),
                 Consequences = new List<TreatmentConsequenceDTO>(),
                 PerformanceFactors = new List<TreatmentPerformanceFactorDTO>(),
@@ -79,6 +81,40 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
                 CriterionLibrary = criterionLibrary
             };
             return dto;
+        }
+
+        public static TreatmentDTO DtoWithEmptyCostsAndConsequencesListsWithSupersedeRule(TreatmentDTO supersededTreatment, Guid? id = null, string name = "Treatment name", string mergedCriteriaExpression = null)
+        {
+
+            var criterionLibrary = CriterionLibraryDtos.Dto();
+            var resolveId = id ?? Guid.NewGuid();
+            var dto = new TreatmentDTO
+            {
+                Id = resolveId,
+                BudgetIds = new List<Guid>(),
+                Name = name,
+                Description = "Treatment description",
+                Costs = new List<TreatmentCostDTO>(),
+                Consequences = new List<TreatmentConsequenceDTO>(),
+                PerformanceFactors = new List<TreatmentPerformanceFactorDTO>(),
+                CriterionLibrary = criterionLibrary,
+                SupersedeRules = new List<TreatmentSupersedeRuleDTO>()
+            {
+                    new TreatmentSupersedeRuleDTO
+                    {
+                        CriterionLibrary = new CriterionLibraryDTO
+                        {
+                           MergedCriteriaExpression = "[AGE] > 10",
+                           IsSingleUse = true,
+                           Id = Guid.NewGuid(),
+                        },
+                        Id = Guid.NewGuid(),
+                        treatment = supersededTreatment
+                    },
+                }
+            };
+            return dto;
+
         }
     }
 }

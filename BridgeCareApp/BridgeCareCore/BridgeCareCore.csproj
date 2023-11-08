@@ -126,6 +126,9 @@
     <None Update="DownloadTemplates\Scenario_treatments_template.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+     <None Update="DownloadTemplates\Scenario_treatment_supersede_rule_template.xlsx">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+     </None>
   </ItemGroup>
 
   <ItemGroup>

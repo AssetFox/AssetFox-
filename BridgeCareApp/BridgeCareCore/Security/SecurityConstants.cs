@@ -155,6 +155,8 @@
             public const string TreatmentModifyAnyFromScenarioAccess = "TreatmentModifyAnyFromScenarioAccess";
             public const string TreatmentImportAnyFromScenarioAccess = "TreatmentImportAnyFromScenarioAccess";
             public const string TreatmentViewAnyFromScenarioAccess = "TreatmentViewAnyFromScenarioAccess";
+            public const string TreatmentSupersedeRuleImportAnyFromScenarioAccess = "TreatmentSupersedeRuleImportAnyFromScenarioAccess";
+            public const string TreatmentSupersedeRuleImportPermittedFromScenarioAccess = "TreatmentSupersedeRuleImportPermittedFromScenarioAccess";
             public const string UserCriteriaModifyAccess = "UserCriteriaModifyAccess";
             public const string UserCriteriaViewAccess = "UserCriteriaViewAccess";
             public const string AnalysisMethodModifyAnyAccess = "AnalysisMethodModifyAnyAccess";

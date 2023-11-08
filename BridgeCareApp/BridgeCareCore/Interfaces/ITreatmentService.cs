@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Common.Logging;
 using System.Threading;
 using AppliedResearchAssociates.iAM.DTOs;
-using BridgeCareCore.Models;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Interfaces
@@ -23,13 +21,15 @@ namespace BridgeCareCore.Interfaces
         void ImportScenarioTreatmentsFileSingle(
            Guid treatmentLibraryId,
            ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
-              
-        ScenarioTreatmentSupersedeRuleImportResultDTO ImportScenarioTreatmentsFile(
+
+        ScenarioTreatmentImportResultDTO ImportScenarioTreatmentsFile(
             Guid simulationId,
             ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
 
         FileInfoDTO ExportScenarioTreatmentsExcelFile(Guid simulationId);
 
         FileInfoDTO ExportScenarioTreatmentSupersedeRuleExcelFile(Guid simulationId);
+
+        ScenarioTreatmentSupersedeRuleImportResultDTO ImportScenarioTreatmentSupersedeRulesFile(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
     }
 }

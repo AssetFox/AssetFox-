@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Linq;
 using System.Text;using System.Threading;
-using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Models;
-using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Services.Treatment;
-using Microsoft.SqlServer.Dac.Model;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services
@@ -30,7 +25,7 @@ namespace BridgeCareCore.Services
             _unitOfWork = unitOfWork;
             _treatmentLoader = treatmentLoader;
         }
-
+
         public FileInfoDTO ExportLibraryTreatmentsExcelFile(Guid libraryId)
         {
             var library = _unitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(libraryId);
@@ -83,7 +78,7 @@ namespace BridgeCareCore.Services
                 combinedValidationMessage = combinedValidationMessageBuilder.ToString();
             }
 
-            var scenarioTreatmentImportResult = new ScenarioTreatmentSupersedeRuleImportResultDTO
+            var scenarioTreatmentImportResult = new ScenarioTreatmentImportResultDTO
             {
                 Treatments = scenarioTreatments,
                 WarningMessage = combinedValidationMessage,
@@ -171,14 +166,13 @@ namespace BridgeCareCore.Services
             }
             return returnValue;
         }
-
-        public ScenarioTreatmentSupersedeRuleImportResultDTO ImportScenarioTreatmentsFile(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
+        public ScenarioTreatmentImportResultDTO ImportScenarioTreatmentsFile(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
             queueLog ??= new DoNothingWorkQueueLog();
             var validationMessages = new List<string>();
             var scenarioTreatments = new List<TreatmentDTO>();
             var scenarioBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
-                return new ScenarioTreatmentSupersedeRuleImportResultDTO();
+                return new ScenarioTreatmentImportResultDTO();
             queueLog.UpdateWorkQueueStatus("Loading Excel");
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {                
@@ -197,7 +191,7 @@ namespace BridgeCareCore.Services
                 combinedValidationMessage = combinedValidationMessageBuilder.ToString();
             }
 
-            var scenarioTreatmentImportResult = new ScenarioTreatmentSupersedeRuleImportResultDTO
+            var scenarioTreatmentImportResult = new ScenarioTreatmentImportResultDTO
             {
                 Treatments = scenarioTreatments,
                 WarningMessage = combinedValidationMessage,
@@ -205,7 +199,7 @@ namespace BridgeCareCore.Services
             if (combinedValidationMessage.Length == 0)
             {
                 if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
-                    return new ScenarioTreatmentSupersedeRuleImportResultDTO();
+                    return new ScenarioTreatmentImportResultDTO();
                 queueLog.UpdateWorkQueueStatus("Upserting Treatments");
                 _unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(scenarioTreatmentImportResult.Treatments, simulationId);
             }
@@ -236,7 +230,7 @@ namespace BridgeCareCore.Services
             return fileInfoResult;
         }
 
-        public ScenarioTreatmentSupersedeRuleImportResultDTO ImportScenarioTreatmentSupersedeRuleFile(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
+        public ScenarioTreatmentSupersedeRuleImportResultDTO ImportScenarioTreatmentSupersedeRulesFile(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
             queueLog ??= new DoNothingWorkQueueLog();
             var validationMessages = new List<string>();
@@ -263,7 +257,7 @@ namespace BridgeCareCore.Services
 
             var scenarioTreatmentSupersedeRuleImportResult = new ScenarioTreatmentSupersedeRuleImportResultDTO
             {
-                Treatments = scenarioTreatments,
+             //   Treatments = scenarioTreatments,
                 WarningMessage = combinedValidationMessage,
             };
             if (combinedValidationMessage.Length == 0)
@@ -272,23 +266,15 @@ namespace BridgeCareCore.Services
                     return new ScenarioTreatmentSupersedeRuleImportResultDTO();
                 queueLog.UpdateWorkQueueStatus("Upserting Treatment Supersede Rules");
 
-                if (scenarioTreatmentSupersedeRuleImportResult.Treatments.Any(_ => _.SupersedeRules != null && _.SupersedeRules.Any()))
-                {
-                    var supersedeRulesPerTreatmentId = scenarioTreatmentSupersedeRuleImportResult.Treatments.Where(_ => _.SupersedeRules.Any()).ToList()
-                    .ToDictionary(_ => _.Id, _ => _.SupersedeRules);
-                    _unitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(supersedeRulesPerTreatmentId, simulationId);
-                }
+                //if (scenarioTreatmentSupersedeRuleImportResult.Treatments.Any(_ => _.SupersedeRules != null && _.SupersedeRules.Any()))
+                //{
+                //    var supersedeRulesPerTreatmentId = scenarioTreatmentSupersedeRuleImportResult.Treatments.Where(_ => _.SupersedeRules.Any()).ToList()
+                //    .ToDictionary(_ => _.Id, _ => _.SupersedeRules);
+                //    _unitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(supersedeRulesPerTreatmentId, simulationId);
+                //}
             }
             return scenarioTreatmentSupersedeRuleImportResult;
         }
-        private void SaveToDatabase(
-            TreatmentImportResultDTO importResult)
-        {
-            var libraryId = importResult.TreatmentLibrary.Id;
-            var importedTreatments = importResult.TreatmentLibrary.Treatments;
-            _unitOfWork.SelectableTreatmentRepo.ReplaceTreatmentLibrary(libraryId, importedTreatments);
-        }
-
 
         public FileInfoDTO ExportScenarioTreatmentSupersedeRuleExcelFile(Guid simulationId)
         {
@@ -296,12 +282,13 @@ namespace BridgeCareCore.Services
             var simulationName = simulation.Name;
             var scenarioTreatments = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
 
-            
+
             var fileName = $"TreatmentSupersedeRules_{simulationName.Trim().Replace(" ", "_")}.xlsx";
 
             return CreateExportScenarioTreatmentRuleExportFile(scenarioTreatments, fileName);
 
         }
+
         private static FileInfoDTO CreateExportScenarioTreatmentRuleExportFile(List<TreatmentDTO> Treatments, string fileName)
         {
             using var excelPackage = new ExcelPackage(new FileInfo(fileName));
@@ -314,7 +301,7 @@ namespace BridgeCareCore.Services
             worksheet.Cells[startRow, headerColumn++].Value = "Treatment Name (selected treatment)";
             worksheet.Cells[startRow, headerColumn++].Value = "Superseded treatment";
             worksheet.Cells[startRow, headerColumn++].Value = "Criteria";
-            
+
 
             // data rows
             var dataRow = startRow + 1;
@@ -327,7 +314,7 @@ namespace BridgeCareCore.Services
                     worksheet.Cells[dataRow, dataColumn++].Value = rule.treatment.Name;
                     worksheet.Cells[dataRow, dataColumn++].Value = rule.CriterionLibrary?.MergedCriteriaExpression;
                     dataRow++;
-                }               
+                }
             }
             worksheet.Cells.AutoFitColumns();
 
@@ -338,7 +325,13 @@ namespace BridgeCareCore.Services
                 MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             };
         }
-   
 
+        private void SaveToDatabase(
+            TreatmentImportResultDTO importResult)
+        {
+            var libraryId = importResult.TreatmentLibrary.Id;
+            var importedTreatments = importResult.TreatmentLibrary.Treatments;
+            _unitOfWork.SelectableTreatmentRepo.ReplaceTreatmentLibrary(libraryId, importedTreatments);
+        }        
     }
 }

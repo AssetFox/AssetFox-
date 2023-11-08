@@ -178,7 +178,7 @@ namespace BridgeCareCoreTests.Tests.Integration
                     .ToDictionary(_ => _.Id, _ => _.SupersedeRules);
 
             Assert.Empty(treatmentSupersedeRulesEmpty);
-            service.ImportScenarioTreatmentSupersedeRuleFile(simulationId, excelPackage);
+            service.ImportScenarioTreatmentSupersedeRulesFile(simulationId, excelPackage);
             var treatments3 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
 
             // *****Comparison is not done*****

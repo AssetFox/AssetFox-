@@ -1,4 +1,5 @@
 <template>
+    <v-card height="800px" class="elevation-0 vcard-main-layout">
     <v-div>
         <v-row class="Montserrat-font-family" justify="space-between">
             <v-col>
@@ -70,6 +71,7 @@
                         density="compact"
                         clearable
                         @click:clear="onClearClick()"
+                        style="margin-left: 15px;"
                         class="ghd-text-field-border ghd-text-field search-icon-general">
                     </v-text-field>
                     <v-btn 
@@ -247,11 +249,15 @@
                         class="ghd-white-bg ghd-blue ghd-button btn-style" style="margin:10px" variant = "outlined"
                 > Add Committed Project
         </v-btn> 
+        <v-divider
+            :thickness="2"
+            class="border-opacity-100"
+        ></v-divider>
         <v-col>
             <v-row justify="center">
                 <v-btn 
                 id="CommittedProjectsEditor-cancel-vbtn"
-                @click="onCancelClick" :disabled='!hasUnsavedChanges' class="ghd-white-bg ghd-blue ghd-button-text" variant="outlined">Cancel</v-btn>    
+                @click="onCancelClick" :disabled='!hasUnsavedChanges' class="ghd-white-bg ghd-blue ghd-button-text" variant="text">Cancel</v-btn>    
                 <div style="padding:5px"></div>
 
                 <v-btn 
@@ -279,6 +285,7 @@
             @submit="onDeleteCommittedProjectsSubmit"
         />
     </v-div>
+</v-card>
 </template>
 <script setup lang="ts">
 import { useRouter } from 'vue-router';

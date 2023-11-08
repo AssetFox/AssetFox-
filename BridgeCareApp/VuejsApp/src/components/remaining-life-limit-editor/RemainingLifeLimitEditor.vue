@@ -1,5 +1,5 @@
 <template>
-    <v-container class="p-0 pb-5 pr-2">
+    <v-card height="900px" class="elevation-0 vcard-main-layout">
     <v-row>
         <v-col>
             <v-row align="center" justify="space-between">
@@ -232,7 +232,7 @@
         />
         <ConfirmDialog></ConfirmDialog>
     </v-row>
-    </v-container>
+    </v-card>
 </template>
 
 <script setup lang="ts">

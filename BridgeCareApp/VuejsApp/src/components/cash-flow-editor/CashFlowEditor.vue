@@ -1,5 +1,5 @@
 <template>
-    <v-container class="p-0 pb-5 pr-2">
+    <v-card height="800px" class="elevation-0 vcard-main-layout">
         <v-col cols = "12">
             <v-row justify-space-between>
                 <v-col cols = "4" class="ghd-constant-header">
@@ -39,11 +39,13 @@
                         <v-spacer></v-spacer>
                         <v-btn @click="showAddCashFlowRuleDialog = true" v-show="hasSelectedLibrary || hasScenario"
                             id="CashFlowEditor-addCashFlowRule-btn" 
+                            style="margin-right: 5px;"
                             variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                             Add Cash Flow Rule
                         </v-btn>
                         <v-btn @click="onShowCreateCashFlowRuleLibraryDialog(false)"
                             id="CashFlowEditor-addCashFlowLibrary-btn"
+                            style="margin-left: 5px;"
                             variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario">
                             Create New Library
@@ -142,7 +144,7 @@
                                 @click="onEditCashFlowRuleCriterionLibrary(item.item)"
                                 id="CashFlowEditor-editCashFlowRule-btn"
                                 class="ghd-blue"
-                                icon
+                                style="margin-top: 20px;"
                                 variant="flat">
                                 <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                             </v-btn>
@@ -150,7 +152,7 @@
                                                    
                         </td>
                         <td>
-                            <v-row style='flex-wrap:nowrap'>
+                            <v-row>
                                 <v-btn
                                 @click="onDeleteCashFlowRule(item.item.id)"
                                 id="CashFlowEditor-deleteCashFlowRule-btn"
@@ -186,7 +188,7 @@
                     <v-textarea
                         class="ghd-text-field-border"
                         no-resize
-                        outline
+                        variant="outlined"
                         rows="4"
                         v-model="selectedCashFlowRuleLibrary.description"
                         @update:model-value="checkHasUnsavedChanges()">
@@ -264,7 +266,7 @@
             :showDialog="showAddCashFlowRuleDialog"
             @submit="onSubmitAddCashFlowRule"/>
         <ConfirmDialog></ConfirmDialog>
-    </v-container>
+    </v-card>
 </template>
 
 <script lang="ts" setup>

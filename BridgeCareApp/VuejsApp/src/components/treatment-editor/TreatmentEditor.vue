@@ -1,5 +1,6 @@
 <template>
-    <v-row no-gutters>
+    <v-card height="1000px" class="elevation-0 vcard-main-layout">
+    <v-row style="margin-top: 5px;">
         <v-col>
             <v-select
                 id="TreatmentEditor-treatmentLibrary-select"
@@ -8,6 +9,7 @@
                 class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                 label='Select a Treatment Library'
                 variant="outlined"
+                density="compact"
                 item-title="text"
                 item-value="value"
                 v-model='librarySelectItemValue' 
@@ -23,6 +25,7 @@
                 class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                 label='Select a Treatment'
                 variant="outlined"
+                density="compact"
                 item-title="text"
                 item-value="value"
                 v-model='treatmentSelectItemValue'
@@ -223,7 +226,7 @@
                 </div>                                             
             </v-col>                    
         </v-row>
-        <v-col>
+        <v-col cols="12">
             <v-row justify="center" v-show='hasSelectedLibrary && !hasScenario'>
                 <v-col>
                     <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
@@ -237,6 +240,11 @@
                     />
                 </v-col>
             </v-row>
+            <v-divider
+            v-show="(hasSelectedLibrary || hasScenario) && selectedTreatment.name !== ''"
+            :thickness="2"
+            class="border-opacity-100"
+        ></v-divider>
             <v-row justify="center" v-show="(hasSelectedLibrary || hasScenario) && selectedTreatment.name !== ''">
                 <v-col cols="6">
                     <v-btn :disabled='!hasUnsavedChanges'
@@ -289,7 +297,7 @@
             </v-row>
         </v-col>
     </v-row>
-
+</v-card>
     <ConfirmDeleteAlert
         :dialogData='confirmBeforeDeleteAlertData'
         @submit='onSubmitConfirmDeleteAlertResult'

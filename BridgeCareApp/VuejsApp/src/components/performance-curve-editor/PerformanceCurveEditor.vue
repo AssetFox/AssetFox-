@@ -1,5 +1,5 @@
 <template>
-    <v-card height="800px" class="elevation-0" style="margin-left: 20px; margin-right: 20px; padding-left: 10px; padding-right: 20px;">
+    <v-card height="1000px" class="elevation-0 vcard-main-layout" >
         <v-row class="p-0" justify="start" style="height:96px">
             <v-col cols = "5">
                 <v-subheader class="ghd-control-label ghd-md-gray">Deterioration Model Library</v-subheader>
@@ -51,6 +51,7 @@
                         id="PerformanceCurveEditor-createNewLibrary-button"
                         @click='onShowCreatePerformanceCurveLibraryDialog(false)'
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        style="margin-top: 45px;"
                         variant = "outlined">
                         Create New Library
                     </v-btn>
@@ -65,11 +66,6 @@
                             class="ghd-control-label ghd-md-gray"
                         > 
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
-                        <v-badge v-show="isShared">
-                        <template v-slot: badge>
-                            <span>Shared</span>
-                        </template>
-                        </v-badge>
                         <v-btn
                             id="PerformanceCurveEditor-shareLibrary-button"
                             @click='onShowSharePerformanceCurveLibraryDialog(selectedPerformanceCurveLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
@@ -346,14 +342,18 @@
                 </v-btn>
             </v-col>
         </v-row>        
-        <v-divider v-show="hasSelectedLibrary || hasScenario"></v-divider>
-        <v-row justify="center"  v-show="hasSelectedLibrary && !hasScenario" xs12>
+        <v-divider
+            v-show="hasSelectedLibrary || hasScenario"
+            :thickness="2"
+            class="border-opacity-100"
+        ></v-divider>
+        <v-row justify="center"  v-show="hasSelectedLibrary && !hasScenario">
             <v-col cols = "12">
                 <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>                    
                 <v-textarea
                     class="ghd-control-text ghd-control-border"
                     no-resize
-                    outline
+                    variant="outlined"
                     rows="4"
                     v-model="selectedPerformanceCurveLibrary.description"
                     @update:model-value="checkHasUnsavedChanges()"

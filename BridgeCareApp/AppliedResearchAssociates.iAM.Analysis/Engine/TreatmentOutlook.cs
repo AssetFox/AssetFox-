@@ -1,11 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
 internal sealed class TreatmentOutlook
 {
+    private const bool InternalSummaryShouldBeDumped = false;
+
+    private static readonly Dictionary<SimulationRunner, string> DumpFolderNamePerSimulationRun;
+
+    private readonly InternalSummary Summary;
+
+    static TreatmentOutlook()
+    {
+        if (InternalSummaryShouldBeDumped)
+        {
+            DumpFolderNamePerSimulationRun = new();
+        }
+    }
+
     public TreatmentOutlook(SimulationRunner simulationRunner, AssetContext templateContext, SelectableTreatment initialTreatment, int initialYear, IEnumerable<RemainingLifeCalculator.Factory> remainingLifeCalculatorFactories)
     {
         SimulationRunner = simulationRunner ?? throw new ArgumentNullException(nameof(simulationRunner));
@@ -22,7 +38,45 @@ internal sealed class TreatmentOutlook
 
         RemainingLifeCalculators = remainingLifeCalculatorFactories.Select(factory => factory.Create(AccumulationContext)).ToArray();
 
+        if (InternalSummaryShouldBeDumped)
+        {
+            var assetName = TemplateContext.Asset.AssetName;
+            if (string.IsNullOrWhiteSpace(assetName))
+            {
+                assetName = TemplateContext.Asset.Id.ToString();
+            }
+
+            Summary =
+                new(
+                SimulationRunner.Simulation.Name,
+                SimulationRunner.Simulation.AnalysisMethod.Benefit.Attribute.Name,
+                SimulationRunner.Simulation.AnalysisMethod.Benefit.Attribute.IsDecreasingWithDeterioration,
+                SimulationRunner.Simulation.AnalysisMethod.Benefit.Limit,
+                SimulationRunner.Simulation.AnalysisMethod.Weighting.Name,
+                InitialYear,
+                assetName,
+                InitialTreatment.Name);
+        }
+
         Run();
+
+        if (InternalSummaryShouldBeDumped)
+        {
+            Summary.CumulativeBenefit = CumulativeBenefit;
+
+            if (!DumpFolderNamePerSimulationRun.TryGetValue(SimulationRunner, out var folderName))
+            {
+                folderName = $"simulation data dump {DateTime.Now:yyyy-MM-dd HH-mm-ss-fff}";
+                DumpFolderNamePerSimulationRun[SimulationRunner] = folderName;
+            }
+
+            var folderPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                "Downloads",
+                folderName);
+
+            Summary.WriteToTsv(folderPath);
+        }
     }
 
     public TreatmentOption GetOptionRelativeToBaseline(TreatmentOutlook baseline)
@@ -54,15 +108,22 @@ internal sealed class TreatmentOutlook
     private double MostRecentBenefit;
     private double? RemainingLife;
 
-    private void AccumulateBenefit()
+    private void AccumulateBenefit(int year)
     {
         // The "cumulative benefit" is the "area under the curve" (a key phrase from the
         // legacy system). To accumulate, we want to add the trapezoidal area between the
         // previous data point and the current data point.
 
-        var additionalBenefit = MostRecentBenefit; // Start with the rectangle area of (benefit_0) * 1 year.
-        MostRecentBenefit = AccumulationContext.GetBenefit(); // Update benefit_1.
-        additionalBenefit += (MostRecentBenefit - additionalBenefit) / 2; // Add the right triangle area of ((b_1 - b_0) * 1 year) / 2.
+        // Start with the rectangle area of (benefit_0) * 1 year.
+        var additionalBenefit = MostRecentBenefit;
+
+        var (rawBenefit, _, weight, benefit) = AccumulationContext.GetBenefitData();
+
+        Summary?.Details.Add(new(year, rawBenefit, weight));
+        MostRecentBenefit = benefit; // Update benefit_1.
+
+        // Add the right triangle area of ((b_1 - b_0) * 1 year) / 2.
+        additionalBenefit += (MostRecentBenefit - additionalBenefit) / 2;
 
         CumulativeBenefit += additionalBenefit;
     }
@@ -108,13 +169,15 @@ internal sealed class TreatmentOutlook
             };
         }
 
-        var benefitBeforeTreatment = AccumulationContext.GetBenefit(false);
+        var beforeTreatment = AccumulationContext.GetBenefitData();
         ApplyTreatment(InitialTreatment, InitialYear);
-        var benefitAfterTreatment = AccumulationContext.GetBenefit(false);
+        var afterTreatment = AccumulationContext.GetBenefitData();
 
-        ConditionChange = benefitAfterTreatment - benefitBeforeTreatment;
+        ConditionChange = afterTreatment.lruBenefit - beforeTreatment.lruBenefit;
 
-        MostRecentBenefit = benefitAfterTreatment;
+        Summary?.Details.Add(new(InitialYear, afterTreatment.rawBenefit, afterTreatment.weight));
+        MostRecentBenefit = afterTreatment.lruBenefit; // [FIXME] Should use the 'benefit' (weighted) value.
+
         updateRemainingLife?.Invoke();
 
         foreach (var year in Enumerable.Range(InitialYear + 1, AccumulationContext.SimulationRunner.Simulation.NumberOfYearsOfTreatmentOutlook))
@@ -140,8 +203,77 @@ internal sealed class TreatmentOutlook
             AccumulationContext.ApplyTreatmentMetadataIfPending(year);
             AccumulationContext.UnfixCalculatedFieldValues();
 
-            AccumulateBenefit();
+            AccumulateBenefit(year);
+
             updateRemainingLife?.Invoke();
         }
+    }
+
+    public sealed record InternalSummary(
+        string ScenarioName,
+        string BenefitAttributeName,
+        bool BenefitDecreasesWithDeterioration,
+        double BenefitLimit,
+        string WeightAttributeName,
+        int TreatmentYear,
+        string AssetName,
+        string TreatmentName)
+    {
+        public double CumulativeBenefit { get; set; }
+
+        public List<Detail> Details { get; } = new();
+
+        public void WriteToTsv(string folderPath)
+        {
+            var fileBaseName = $"{ScenarioName}+{TreatmentYear}+{AssetName}+{TreatmentName}";
+            var fileName = new StringBuilder(fileBaseName);
+            for (var i = 0; i < fileName.Length; ++i)
+            {
+                if (Array.IndexOf(InvalidFileNameChars, fileName[i]) >= 0)
+                {
+                    fileName[i] = '_';
+                }
+            }
+
+            var filePath = Path.Combine(folderPath, fileName.Append(".tsv").ToString());
+            var tsv = ToTsv();
+
+            _ = Directory.CreateDirectory(folderPath);
+            File.WriteAllText(filePath, tsv);
+        }
+
+        public string ToTsv()
+        {
+            var tsv = new StringBuilder()
+                .AppendLine($"Scenario\t{ScenarioName}")
+                .AppendLine()
+                .AppendLine($"Benefit attribute\t{BenefitAttributeName}")
+                .AppendLine($"Benefit decreases with deterioration\t{BenefitDecreasesWithDeterioration}")
+                .AppendLine($"Benefit limit\t{BenefitLimit}")
+                .AppendLine($"Weight attribute\t{WeightAttributeName}")
+                .AppendLine()
+                .AppendLine($"Year\t{TreatmentYear}")
+                .AppendLine($"Asset\t{AssetName}")
+                .AppendLine()
+                .AppendLine($"Treatment\t{TreatmentName}")
+                .AppendLine($"Cumulative benefit\t{CumulativeBenefit}")
+                .AppendLine()
+                .AppendLine($"Outlook year\tRaw benefit\tWeight")
+                ;
+
+            foreach (var detail in Details)
+            {
+                _ = tsv.AppendLine(detail.ToTsvRow());
+            }
+
+            return tsv.ToString();
+        }
+
+        public sealed record Detail(int OutlookYear, double RawBenefit, double Weight)
+        {
+            public string ToTsvRow() => $"{OutlookYear}\t{RawBenefit}\t{Weight}";
+        }
+
+        private static readonly char[] InvalidFileNameChars = Path.GetInvalidFileNameChars();
     }
 }

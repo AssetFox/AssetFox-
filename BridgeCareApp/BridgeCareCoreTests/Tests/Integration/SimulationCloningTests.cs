@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,6 +24,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment;
 using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRule;
 
 namespace BridgeCareCoreTests.Tests.Integration
 {
@@ -87,6 +88,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
             var clonedTreatments = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(clonedSimulationId);
             var clonedTreatment = clonedTreatments.Single();
+
             Assert.Equal(networkId, clonedSimulation.NetworkId);
             Assert.Equal("Test Network", clonedSimulation.NetworkName);
             Assert.NotEqual(treatment.Id, clonedTreatment.Id);
@@ -132,7 +134,6 @@ namespace BridgeCareCoreTests.Tests.Integration
             ObjectAssertions.Equivalent(expectedCriterionLibrary, clonedTreatment.CriterionLibrary);
         }
 
-
         [Fact]
         public void SimulationInDbWithSelectableTreatmentWithCriterionLibrary_Clone_Clones()
         {
@@ -170,7 +171,6 @@ namespace BridgeCareCoreTests.Tests.Integration
             Assert.NotEqual(treatmentBefore.Id, clonedTreatment.Id);
             AssertValidLibraryClone(treatmentBefore.CriterionLibrary, clonedTreatment.CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
         }
-
 
         [Fact]
         public void SimulationInDbWithSelectableTreatmentWithConsequences_Clone_Clones()
@@ -217,6 +217,69 @@ namespace BridgeCareCoreTests.Tests.Integration
             ObjectAssertions.EquivalentExcluding(treatmentConsequence, clonedConsequence, c => c.Id, c => c.CriterionLibrary, c => c.Equation.Id);
             AssertValidLibraryClone(treatmentConsequence.CriterionLibrary, clonedConsequence.CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
             Assert.NotEqual(treatmentConsequence.Id, clonedConsequence.Id);
+        }
+
+        [Fact]
+        public void SimulationInDbWithSelectableTreatmentWithSupersedeRules_Clone_Clones()
+        {
+            var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationId = simulationEntity.Id;
+            var newSimulationName = RandomStrings.WithPrefix("cloned");
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+
+            var treatmentbudget = TreatmentBudgetDtos.Dto();
+            var treatmentId = Guid.NewGuid();
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesListsWithCriterionLibrary(treatmentId);
+            treatment.Budgets = new List<TreatmentBudgetDTO>() { treatmentbudget };
+            treatment.BudgetIds = new List<Guid> { treatmentbudget.Id };
+
+            var preventTreatmentId = Guid.NewGuid();
+            var preventTreatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesListsWithCriterionLibrary(preventTreatmentId);
+            var treatmentbudget1 = TreatmentBudgetDtos.Dto();
+            preventTreatment.Name = "Prevent Treatment Name";
+            preventTreatment.Budgets = new List<TreatmentBudgetDTO>() { treatmentbudget1 };
+            preventTreatment.BudgetIds = new List<Guid> { treatmentbudget1.Id };
+
+            var treatments = new List<TreatmentDTO> { treatment, preventTreatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(treatments, simulation.Id);
+
+            var supersedeRuleId = Guid.NewGuid();
+            var treatmentSuperdedeRule = TreatmentSupersedeRuleTestSetup.TreatmentSuperdedeRuleDto;
+            treatmentSuperdedeRule.Id = supersedeRuleId;
+            treatmentSuperdedeRule.treatment = preventTreatment;
+            var treatmentWithSupersedeRules = new List<TreatmentSupersedeRuleDTO>() { treatmentSuperdedeRule };
+            var treatmentWithSupersedeRulesPerTreatmentId = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>>
+            {
+                [treatmentId] = treatmentWithSupersedeRules
+            };
+
+            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(treatmentWithSupersedeRulesPerTreatmentId, simulationId);
+
+            var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            var cloningService = CreateCompleteSimulationCloningService();
+            var cloningResult = cloningService.Clone(cloneSimulationDto);
+
+            var clonedSimulationId = cloningResult.Simulation.Id;
+            var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
+            var clonedTreatments = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(clonedSimulationId);
+            var clonedTreatment1 = clonedTreatments.FirstOrDefault(_ => _.Name.Equals("Treatment name"));
+
+            Assert.Equal(newSimulationName, clonedSimulation.Name);
+            Assert.Equal(networkId, clonedSimulation.NetworkId);
+            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(2, clonedTreatments.Count);
+            Assert.True(clonedTreatment1.SupersedeRules.Count == 1);
+            Assert.NotEqual(treatment.Id, clonedTreatment1.Id);
+            Assert.Empty(clonedTreatment1.Budgets);
+            Assert.Empty(clonedTreatment1.BudgetIds);
+            Assert.Empty(clonedTreatment1.Consequences);
+            Assert.Empty(clonedTreatment1.PerformanceFactors);
+            ObjectAssertions.EquivalentExcluding(treatment, clonedTreatment1, t => t.Id, t => t.Consequences, t => t.CriterionLibrary, t => t.BudgetIds, t => t.Budgets, t => t.SupersedeRules);            
+            var clonedSupersedeRule = clonedTreatment1.SupersedeRules.Single();
+            ObjectAssertions.EquivalentExcluding(treatmentSuperdedeRule, clonedSupersedeRule, _ => _.Id, _ => _.CriterionLibrary, _ => _.treatment.CriterionLibrary, _ => _.treatment.BudgetIds, t => t.treatment.Budgets, t => t.treatment.SupersedeRules, t => t.treatment.Id);
+            AssertValidLibraryClone(treatmentSuperdedeRule.CriterionLibrary, clonedSupersedeRule.CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
+            Assert.NotEqual(treatmentSuperdedeRule.Id, clonedSupersedeRule.Id);
         }
 
         [Fact]
@@ -285,7 +348,6 @@ namespace BridgeCareCoreTests.Tests.Integration
             Assert.NotEqual(lifeLimitBefore.Id, clonedLifeLimit.Id);
             Assert.NotEqual(lifeLimitBefore.CriterionLibrary.Id, clonedLifeLimit.CriterionLibrary.Id);
         }
-
 
         [Fact]
         public void SimulationInDbWithScenarioDeficientConditionGoals_Clone_Clones()

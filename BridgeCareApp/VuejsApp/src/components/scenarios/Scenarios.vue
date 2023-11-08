@@ -34,6 +34,7 @@
                                                 v-model="searchMine"
                                                 prepend-inner-icon=ghd-search 
                                                 variant="outlined"
+                                                density="compact"
                                                 clearable
                                                 @click:clear="onMineClearClick()"
                                                 class="ghd-text-field-border ghd-text-field search-icon-general"
@@ -242,7 +243,8 @@
                                                 id="Scenarios-shared-searchScenarios-textField"
                                                 label="Search"
                                                 placeholder="Search in scenarios"
-                                                outline
+                                                density="compact"
+                                                variant="outlined"
                                                 hide-details
                                                 single-line
                                                 v-model="searchShared"
@@ -251,7 +253,7 @@
                                                 class="ghd-text-field-border ghd-text-field search-icon-general"
                                             >
                                             </v-text-field>
-                                            <v-btn style="margin-top: 2px;" 
+                                            <v-btn style="margin-top: 2px; margin-left: 5px; margin-right: 5px;" 
                                                 id="Scenarios-shared-performSearch-button"
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
                                                 variant = "outlined" 
@@ -259,7 +261,7 @@
                                                 Search
                                             </v-btn>
                                             <v-btn id="Scenarios-performFilter-button" 
-                                                style="margin-top: 2px;" 
+                                                style="margin-top: 2px; margin-left: 5px;" 
                                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
                                                 variant = "outlined" 
                                                 @click="showSharedFilterScenarioList = true">
@@ -475,7 +477,7 @@
                                                 >
                                                     <v-btn
                                                         color="text-green darken-1"
-                                                        icon
+                                                        flat
                                                         v-bind="props"
                                                     >
                                                         <img class='img-general' :src="getUrl('assets/icons/more-vertical.svg')"/>
@@ -487,7 +489,7 @@
                                                         :key="i"
                                                         @click="OnWorkQueueActionTaken(item.action,props.item)"
                                                         class="menu-style">
-                                                        <v-list-tile-title icon>                                                        
+                                                        <v-list-tile-title flat>                                                        
                                                             <img style="padding-right:5px" v-bind:src="item.icon"/>
                                                             {{item.title}}
                                                         </v-list-tile-title>
@@ -522,59 +524,61 @@
                                     v-model:page="fastWorkQueuePagination.page"
                                     v-model:items-per-page="fastWorkQueuePagination.rowsPerPage"
                                     item-value="name"
-                                    @update:options="onFastWorkQueuePagination"
+                                    
                                 >                           
                                     <template slot="items" slot-scope="props" v-slot:item="props">
-                                        <td>{{ props.item.queuePosition }}</td>
-                                        <td>
-                                            {{ props.item.name }}
-                                        </td>
-                                        <td>{{props.item.workDescription}}</td>
-                                        <td>
-                                            {{
-                                                props.item.queueingUser
-                                                    ? props.item.queueingUser
-                                                    : '[ Unknown ]'
-                                            }}
-                                        </td>
-                                        <td>
-                                            {{ formatDateWithTime(props.item.queueEntryTimestamp) }}
-                                        </td>
-                                        <td>
-                                            {{ formatDateWithTime(props.item.workStartedTimestamp) }}
-                                        </td>
-                                        <td>{{ props.item.currentRunTime }}</td>
-                                        <td>{{ props.item.previousRunTime }}</td>
-                                        <td>{{ props.item.status }}</td>  
-                                        <td>
-                                            <v-menu  left>
-                                                <template
-                                                    v-slot:activator="{
-                                                        props
-                                                    }"
-                                                >
-                                                    <v-btn
-                                                        color="text-green darken-1"
-                                                        icon
-                                                        v-bind="props"
+                                        <tr>
+                                            <td>{{ props.item.queuePosition }}</td>
+                                            <td>
+                                                {{ props.item.name }}
+                                            </td>
+                                            <td>{{props.item.workDescription}}</td>
+                                            <td>
+                                                {{
+                                                    props.item.queueingUser
+                                                        ? props.item.queueingUser
+                                                        : '[ Unknown ]'
+                                                }}
+                                            </td>
+                                            <td>
+                                                {{ formatDateWithTime(props.item.queueEntryTimestamp) }}
+                                            </td>
+                                            <td>
+                                                {{ formatDateWithTime(props.item.workStartedTimestamp) }}
+                                            </td>
+                                            <td>{{ props.item.currentRunTime }}</td>
+                                            <td>{{ props.item.previousRunTime }}</td>
+                                            <td>{{ props.item.status }}</td>  
+                                            <td>
+                                                <v-menu  left>
+                                                    <template
+                                                        v-slot:activator="{
+                                                            props
+                                                        }"
                                                     >
-                                                        <img class='img-general' :src="getUrl('assets/icons/more-vertical.svg')"/>
-                                                    </v-btn>
-                                                </template>
+                                                        <v-btn
+                                                            color="text-green darken-1"
+                                                            flat
+                                                            v-bind="props"
+                                                        >
+                                                            <img class='img-general' :src="getUrl('assets/icons/more-vertical.svg')"/>
+                                                        </v-btn>
+                                                    </template>
 
-                                                <v-list>
-                                                    <v-list-item v-for="(item,i) in actionItemsForFastWorkQueue"
-                                                        :key="i"
-                                                        @click="OnWorkQueueActionTaken(item.action,props.item)"
-                                                        class="menu-style">
-                                                        <v-list-item-title icon>                                                        
-                                                            <img style="padding-right:5px" v-bind:src="item.icon"/>
-                                                            {{item.title}}
-                                                        </v-list-item-title>
-                                                    </v-list-item>
-                                                </v-list>
-                                            </v-menu>
-                                        </td>
+                                                    <v-list>
+                                                        <v-list-item v-for="(item,i) in actionItemsForFastWorkQueue"
+                                                            :key="i"
+                                                            @click="OnWorkQueueActionTaken(item.action,props.item)"
+                                                            class="menu-style">
+                                                            <v-list-item-title flat>                                                        
+                                                                <img style="padding-right:5px" v-bind:src="item.icon"/>
+                                                                {{item.title}}
+                                                            </v-list-item-title>
+                                                        </v-list-item>
+                                                    </v-list>
+                                                </v-menu>
+                                            </td>
+                                        </tr>
                                     </template>                                         
                                     <template v-slot:no-data>
                                         {{ getEmptyWorkQueueMessage() }}
@@ -1033,13 +1037,13 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
     let alertDataForDeletingCommittedProjects = ref({ ...emptyAlertData });
     let selectedScenarioId: string = "";
     
-    let currentWorkQueuePage: QueuedWork[] = [];
-    const workQueuePagination: Pagination = shallowReactive(clone(emptyPagination));
+    const currentWorkQueuePage = ref<QueuedWork[]>([]);
+    const workQueuePagination = ref<Pagination>(clone(emptyPagination));
     let totalQueuedSimulations: ShallowRef<number> = shallowRef(0);
     let initializingWorkQueue: boolean = true;
     let selectedQueuedWork: QueuedWork = clone(emptyQueuedWork);
 
-    let currentFastWorkQueuePage: QueuedWork[] = [];
+    const currentFastWorkQueuePage = ref<QueuedWork[]>([]);
     const fastWorkQueuePagination: Pagination = shallowReactive(clone(emptyPagination));
     let totalFastQueuedItems: ShallowRef<number> = shallowRef(0);
     let initializingFastWorkQueue: boolean = true;
@@ -1090,10 +1094,9 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
         setTabTotals();
     }
     
-    watch(stateWorkQueuePage, onStateWorkQueuePageChanged) 
-    function onStateWorkQueuePageChanged(){
-        currentWorkQueuePage = clone(stateWorkQueuePage.value);
-    }
+    watch(stateWorkQueuePage, () => {
+        currentWorkQueuePage.value = clone(stateWorkQueuePage.value);
+    });
 
     watch(stateTotalQueuedSimulations, onStateTotalQueuedSimulations) 
     function onStateTotalQueuedSimulations(){
@@ -1106,7 +1109,7 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 
     watch(stateFastWorkQueuePage, onStateFastWorkQueuePageChanged) 
     function onStateFastWorkQueuePageChanged(){
-        currentFastWorkQueuePage = clone(stateFastWorkQueuePage.value);
+        currentFastWorkQueuePage.value = clone(stateFastWorkQueuePage.value);
     }
 
     watch(stateTotalFastQueuedItems, onStateTotalFastQueuedItemsChanged) 
@@ -1192,12 +1195,10 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
             });
     }
 
-    watch(workQueuePagination, onWorkQueuePagination) 
     function onWorkQueuePagination() {
         doWorkQueuePagination();
     }
 
-    watch(fastWorkQueuePagination, onFastWorkQueuePagination) 
     function onFastWorkQueuePagination() {
         doFastQueuePagination();
     }
@@ -1205,7 +1206,7 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
     function doWorkQueuePagination() {
         if(initializingWorkQueue)
             return;
-        const { sort, descending, page, rowsPerPage } = workQueuePagination;
+        const { sort, descending, page, rowsPerPage } = workQueuePagination.value;
 
         const workQueueRequest: PagingRequest<QueuedWork>= {
             page: page,
@@ -1456,8 +1457,8 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
             totalFastQueuedItems.value = stateTotalFastQueuedItems.value;
             currentUserScenariosPage.value = clone(stateUserScenariosPage.value);
             currentSharedScenariosPage.value = clone(stateSharedScenariosPage.value);
-            currentWorkQueuePage = clone(stateWorkQueuePage.value);
-            currentFastWorkQueuePage = clone(stateFastWorkQueuePage.value);
+            currentWorkQueuePage.value = clone(stateWorkQueuePage.value);
+            currentFastWorkQueuePage.value = clone(stateFastWorkQueuePage.value);
         })))); 
     }
 

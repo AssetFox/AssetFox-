@@ -1,6 +1,6 @@
 <template>
-    <v-row class='factor-tab-content'>
-        <v-col cols = "12">            
+    <v-row>
+        <v-col>            
             <div class='factor-data-table'>
                 <v-data-table :headers='factorGridHeaders' :items='factorGridData'
                               class='elevation-1 fixed-header v-table__overflow'
@@ -40,10 +40,9 @@
     </v-row>
 </template>
 
-<script lang='ts' setup>
-import Vue, { computed, onMounted, ref, shallowRef } from 'vue';
+<script setup lang='ts'>
+import { watch, toRefs, computed, onMounted, ref, shallowRef } from 'vue';
 import { TreatmentAttributeFactor, TreatmentPerformanceFactor, Treatment } from '@/shared/models/iAM/treatment';
-import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { Attribute } from '@/shared/models/iAM/attribute';
@@ -54,10 +53,8 @@ import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import {
     PerformanceCurve,
 } from '@/shared/models/iAM/performance';
-import { isNullOrUndefined } from 'util';
-import { any, clone } from 'ramda';
+import { clone } from 'ramda';
 import { useStore } from 'vuex';
-import { inject, reactive, onBeforeUnmount, watch, Ref} from 'vue';
 
     const props = defineProps<{
         selectedTreatmentPerformanceFactors: TreatmentPerformanceFactor[],
@@ -67,42 +64,39 @@ import { inject, reactive, onBeforeUnmount, watch, Ref} from 'vue';
         callFromScenario: boolean,
         callFromLibrary: boolean
     }>(); 
-
-    const emit = defineEmits(['submit', 'onAddConsequence', 'onModifyConsequence', 'onRemoveConsequence','onModifyPerformanceFactor'])
+    const { selectedTreatmentPerformanceFactors, selectedTreatment, scenarioId, rules, callFromScenario, callFromLibrary } = toRefs(props);
+    const emit = defineEmits(['submit', 'onAddConsequence', 'onModifyConsequence', 'onRemoveConsequence','onModifyPerformanceFactor']);
     let store = useStore();
 
-    let stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
-    let stateScenarioPerformanceCurves = computed<PerformanceCurve[]>(() => store.state.performanceCurveModule.scenarioPerformanceCurves)
+    const stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
+    const stateScenarioPerformanceCurves = computed<PerformanceCurve[]>(() => store.state.performanceCurveModule.scenarioPerformanceCurves)
 
-    let factorGridHeaders: any[] = [
+    const factorGridHeaders: any[] = [
         { title: 'Attribute', key: 'attribute', align: 'left', sortable: false, class: '', width: '175px' },
         { title: 'Performance Factor', key: 'performanceFactor', align: 'left', sortable: false, class: '', width: '100px' },
     ];
-    let factorGridData = shallowRef<TreatmentPerformanceFactor[]>([]);
-    let attributeSelectItems: SelectItem[] = [];
+    const factorGridData = ref<TreatmentPerformanceFactor[]>([]);
+    const attributeSelectItems = ref<SelectItem[]>([]);
     let uuidNIL: string = getBlankGuid();
 
 
-    onMounted(() => mounted());
-    function mounted() {
+    onMounted(() =>  {
         setAttributeSelectItems();
-   }
+    });
 
-   watch(stateAttributes, () => onStateAttributesChanged())
-    function onStateAttributesChanged() {
+    watch(stateAttributes, () =>  {
         setAttributeSelectItems();
-    }
+    });
 
-    watch(() => props.selectedTreatment, () => onSelectedTreatmentChanged())
-    function onSelectedTreatmentChanged() {
-        if (props.selectedTreatmentPerformanceFactors.length <= 0) {
+    watch(selectedTreatment, () => {
+        if (selectedTreatmentPerformanceFactors.value.length <= 0) {
            buildDataFromCurves(); 
            factorGridData.value.forEach(_ => emit('onModifyPerformanceFactor', clone(_)))
         }
         else{
             factorGridData.value.forEach(data => {
                 let found = false;
-                props.selectedTreatmentPerformanceFactors.forEach(factors => {
+                selectedTreatmentPerformanceFactors.value.forEach(factors => {
                     if (factors.attribute === data.attribute) {
                         data.id = factors.id;
                         data.performanceFactor = factors.performanceFactor;
@@ -113,25 +107,28 @@ import { inject, reactive, onBeforeUnmount, watch, Ref} from 'vue';
                     emit('onModifyPerformanceFactor', clone(data))
             });
         }
-    }
-    watch(stateScenarioPerformanceCurves, () => onStatePerformanceCurvesChanged)
-   function onStatePerformanceCurvesChanged() {
+    });
+
+    watch(stateScenarioPerformanceCurves, () => {
         buildDataFromCurves();
-    }
+    });
+
     function setAttributeSelectItems() {
-        if (hasValue(stateAttributes)) {
-            attributeSelectItems = stateAttributes.value.map((attribute: Attribute) => ({
+        if (hasValue(stateAttributes.value)) {
+            attributeSelectItems.value = stateAttributes.value.map((attribute: Attribute) => ({
                 text: attribute.name,
                 value: attribute.name,
             }));
         }
     }
+
     function onEditPerformanceFactorProperty(performancefactor: TreatmentPerformanceFactor, property: string, value: any) {
         performancefactor.performanceFactor = value;
         emit('onModifyPerformanceFactor', setItemPropertyValue(property, value, performancefactor));
     }
+
     function buildDataFromCurves() {
-        if(props.callFromLibrary)
+        if(callFromLibrary.value)
             return;
         let testStateAttributes:Attribute[] = [];
         stateScenarioPerformanceCurves.value.forEach(curve => {

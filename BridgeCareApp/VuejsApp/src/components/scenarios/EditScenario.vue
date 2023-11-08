@@ -3,7 +3,7 @@
             <v-col class="p-0">
                 <v-card
                 class="mx-auto ghd-sidebar-scenario"
-                height="100%"
+                
                 elevation="0"
                 style="border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; border: 1px solid #999999;"
             >
@@ -35,11 +35,10 @@
                         </v-list-item>
                     </v-list-item>
                 </v-list>
-                <div style="margin: auto; width: 85%;">
+                <div style="margin: 10px;">
                     <v-btn
                         class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border"
                         @click="onShowRunSimulationAlert"
-                        
                         block
                         variant = "outlined">
                         Run Scenario
@@ -70,7 +69,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, onBeforeMount } from 'vue'; 
+import Vue, { ref, shallowReactive, computed, watch, onMounted, onBeforeUnmount, onBeforeMount } from 'vue'; 
 import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
 import ImportExportCommittedProjectsDialog from '@/components/scenarios/scenarios-dialogs/ImportExportCommittedProjectsDialog.vue';
 import { any, clone, isNil, propEq } from 'ramda';
@@ -106,22 +105,22 @@ import { useRouter } from 'vue-router';
     const router = useRouter(); 
 
     const stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks) ;
-    let hasAdminAccess: boolean = (store.state.authenticationModule.hasAdminAccess) ; 
+    const hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess) ; 
     let hasSimulationAccess:boolean = (store.state.authenticationModule.hasSimulationAccess) ; 
 
-    const stateSelectedScenario: Scenario = shallowReactive(store.state.scenarioModule.selectedScenario) ;
-    const stateSharedScenariosPage: Scenario[] = shallowReactive(store.state.scenarioModule.currentSharedScenariosPage) ;
-    const stateUserScenariosPage: Scenario[] = shallowReactive(store.state.scenarioModule.currentUserScenarioPage) ;
+    const stateSelectedScenario = computed<Scenario>(() => store.state.scenarioModule.selectedScenario) ;
+    const stateSharedScenariosPage = computed<Scenario[]>(() => store.state.scenarioModule.currentSharedScenariosPage) ;
+    const stateUserScenariosPage = computed<Scenario[]>(() =>store.state.scenarioModule.currentUserScenarioPage) ;
 
     let userId = ref<string>(store.state.authenticationModule.userId);
 
-    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification')}
-    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification')}
+    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification',payload)}
+    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification',payload)}
 
-    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario')} 
+    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario',payload)} 
 
-    async function runSimulationAction(payload?: any): Promise<any>{await store.dispatch('runSimulation')}   
-    async function runNewSimulationAction(payload?: any): Promise<any>{await store.dispatch('runNewSimulation')}
+    async function runSimulationAction(payload?: any): Promise<any>{await store.dispatch('runSimulation', payload)}   
+    async function runNewSimulationAction(payload?: any): Promise<any>{await store.dispatch('runNewSimulation',payload)}
 
     let selectedScenarioId: string = getBlankGuid();
     let showImportExportCommittedProjectsDialog: boolean = false;
@@ -215,14 +214,13 @@ import { useRouter } from 'vue-router';
             },
         },
     ];
-    let alertData: AlertData = clone(emptyAlertData);
-    let alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
+    const alertData = ref<AlertData>(clone(emptyAlertData));
+    const alertDataForDeletingCommittedProjects = ref<AlertData>({ ...emptyAlertData });
 
     onMounted(() => {
     });
     onBeforeMount(() => {
         selectedScenarioId = router.currentRoute.value.path;  //router.currentRoute.value.query.scenarioId as string;
-        let temp: string = router.currentRoute.value.query.scenarioId as string;
     });
     created();
     function created() { 
@@ -259,7 +257,7 @@ import { useRouter } from 'vue-router';
                             || navigationTab.tabName === 'Target Condition Goal' 
                             || navigationTab.tabName === 'Deficient Condition Goal' 
                             || navigationTab.tabName === 'Calculated Attribute') {
-                            navigationTab['visible'] = hasAdminAccess;
+                            navigationTab['visible'] = hasAdminAccess.value;
                         }
 
                         return navigationTab;
@@ -283,7 +281,7 @@ import { useRouter } from 'vue-router';
 
     watch(stateSelectedScenario, () => onStateSelectedScenarioChanged)
     function onStateSelectedScenarioChanged() {
-        selectedScenario = clone(stateSelectedScenario);
+        selectedScenario = clone(stateSelectedScenario.value);
     }
 
     watch(stateSharedScenariosPage, () => onStateSharedScenariosPageChanged)
@@ -367,7 +365,7 @@ import { useRouter } from 'vue-router';
     }
 
     function onDeleteCommittedProjects() {
-        alertDataForDeletingCommittedProjects = {
+        alertDataForDeletingCommittedProjects.value = {
             showDialog: true,
             heading: 'Are you sure?',
             message:
@@ -377,7 +375,7 @@ import { useRouter } from 'vue-router';
     }
 
     function onDeleteCommittedProjectsSubmit(doDelete: boolean) {
-        alertDataForDeletingCommittedProjects = { ...emptyAlertData };
+        alertDataForDeletingCommittedProjects.value = { ...emptyAlertData };
 
         if (doDelete) {
             CommittedProjectsService.deleteSimulationCommittedProjects(
@@ -406,7 +404,7 @@ import { useRouter } from 'vue-router';
      * Shows the Alert
      */
     function onShowRunSimulationAlert() {
-        alertData = {
+        alertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -421,7 +419,7 @@ import { useRouter } from 'vue-router';
      * @param runScenarioSimulation Alert result
      */
     function onSubmitAlertResult(runScenarioSimulation: boolean) {
-        alertData = clone(emptyAlertData);
+        alertData.value = clone(emptyAlertData);
 
         if (runScenarioSimulation) {
             runSimulationAction({

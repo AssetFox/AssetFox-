@@ -259,7 +259,10 @@
                              v-if="selectedScenarioHasStatus">{{
                                  selectedScenario.status
                              }}</span>
-                    </div>
+                </div>
+                <div v-else style="margin-bottom: 20px; height: auto;">
+                    <br>
+                </div>
             <v-container fluid v-bind="container">
                 <router-view></router-view>
             </v-container>

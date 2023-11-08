@@ -123,7 +123,6 @@
                                         <v-select v-if="header.key === 'treatment'"
                                             :items="treatmentSelectItems"
                                             class="ghd-down-small"
-                                            label="Select a Treatment"
                                             density="compact"
                                             variant="underlined"
                                             v-model="item.item[header.key]"
@@ -136,7 +135,6 @@
                                             class="ghd-down-small"
                                             density="compact"
                                             variant="underlined"
-                                            label="Select Project Source"
                                             v-model="item.item[header.key]"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                                             @update:model-value="onEditCommittedProjectProperty(item.item, header.key, item.item.projectSource)"
@@ -439,9 +437,9 @@ import { getUrl } from '@/shared/utils/get-url';
     let isNoTreatmentBefore = ref<boolean>(true);
     let isNoTreatmentBeforeCache = ref<boolean>(true);
     
-    const cpGridHeaders: any[] = [
+    const cpGridHeaders = ref<any[]>([
         {
-            title: 'Key Attribute',
+            title: '',
             key: 'keyAttr',
             align: 'left',
             sortable: true,
@@ -504,7 +502,7 @@ import { getUrl } from '@/shared/utils/get-url';
             class: '',
             width: '10%',
         },
-    ];
+    ]);
 
     function created() {
 
@@ -608,10 +606,10 @@ import { getUrl } from '@/shared/utils/get-url';
                 value: attribute.name
             }),
         );
-        let keyAttr = stateAttributes.value.find(_ => _.id == network.keyAttribute)
+        let keyAttr = stateAttributes.value.find(_ => _.id == network.keyAttribute);
         if(!isNil(keyAttr)){
             keyattr = keyAttr.name;
-            cpGridHeaders[0].text = keyattr;
+            cpGridHeaders.value[0].title = keyattr;
         }
     });
 

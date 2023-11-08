@@ -1,4 +1,5 @@
 <template>
+    <v-container class="p-0 pb-5 pr-2">
     <v-row>
         <v-col cols="12">
             <v-row justify="space-between">
@@ -294,6 +295,7 @@
         <ImportExportInvestmentBudgetsDialog :showDialog='showImportExportInvestmentBudgetsDialog'
                                              @submit='onSubmitImportExportInvestmentBudgetsDialogResult' />
     </v-row>
+</v-container>
     <ConfirmDialog></ConfirmDialog>
 </template>
 

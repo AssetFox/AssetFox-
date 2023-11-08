@@ -1,5 +1,5 @@
 <template>
-    <v-container class="p-0 pb-5 pr-2">
+    <v-card height="800px" class="elevation-0" style="margin-left: 20px; margin-right: 20px; padding-left: 10px; padding-right: 20px;">
         <v-row class="p-0" justify="start" style="height:96px">
             <v-col cols = "5">
                 <v-subheader class="ghd-control-label ghd-md-gray">Deterioration Model Library</v-subheader>
@@ -22,7 +22,7 @@
             <v-spacer/>
             <v-col style="padding-top: 50px;" cols = "5" v-show="hasSelectedLibrary || hasScenario">                     
                 <v-subheader class="ghd-control-label ghd-md-gray"> </v-subheader>
-                <v-row>
+                <v-row align="center">
                 
                 <v-text-field
                     id="PerformanceCurveEditor-searchDeteriorationEquations-textField"
@@ -34,6 +34,7 @@
                     placeholder="Search Deterioration Equations"
                     single-line
                     variant="outlined"
+                    density="compact"
                     clearable
                     @click:clear="onClearClick()"
                     v-model="gridSearchTerm"
@@ -447,7 +448,7 @@
         />
         <ImportExportPerformanceCurvesDialog :showDialog='showImportExportPerformanceCurvesDialog'
             @submit='onSubmitImportExportPerformanceCurvesDialogResult' />
-    </v-container>
+    </v-card>
     <ConfirmDialog></ConfirmDialog>
 </template>
 

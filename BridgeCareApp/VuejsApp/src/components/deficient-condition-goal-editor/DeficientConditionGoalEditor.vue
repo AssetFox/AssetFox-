@@ -1,4 +1,5 @@
 <template>
+    <v-container class="p-0 pb-5 pr-2">
     <v-row style="margin: 5px;">
         <v-row align="center" >
                 <v-col cols="6">
@@ -283,7 +284,7 @@
                        
             </v-row>
         </v-col>
-
+</v-container>
         <Alert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
@@ -309,7 +310,6 @@
             :dialogData="criterionEditorDialogData"
             @submit="onEditDeficientConditionGoalCriterionLibrary"
         />
-    <!-- </v-row> -->
     <ConfirmDialog></ConfirmDialog>
 </template>
 

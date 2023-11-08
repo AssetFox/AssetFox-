@@ -1,4 +1,5 @@
 <template>
+    <v-container class="p-0 pb-5 pr-2">
     <v-row>
         <v-col>
             <v-row align="center" justify="space-between">
@@ -231,6 +232,7 @@
         />
         <ConfirmDialog></ConfirmDialog>
     </v-row>
+    </v-container>
 </template>
 
 <script setup lang="ts">

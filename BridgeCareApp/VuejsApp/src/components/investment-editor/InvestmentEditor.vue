@@ -543,10 +543,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     //     });
     // }
 
-    onMounted(() => {
+    onMounted(async () => {
         librarySelectItemValue.value = '';
-        getHasPermittedAccessAction();
-        getBudgetLibrariesAction()
+        await getHasPermittedAccessAction();
+        await getBudgetLibrariesAction()
         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
             selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
 
@@ -563,7 +563,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     setAlertMessageAction("An investment import has been added to the work queue")
                 }
             })
-                initializePages();
+                await initializePages();
         }
         else
             initializing = false;        

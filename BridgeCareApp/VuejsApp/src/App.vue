@@ -1,10 +1,9 @@
 <template>
     <v-app class="paper-white-bg">
         <v-main>
-            <v-toolbar app class="paper-white-bg">
+            <v-toolbar app class="paper-white-bg elevation-2">
                 <v-toolbar-title  >
                     <v-row  >
-
                         <v-col  ><img v-bind:src="agencyLogo"  @click="onNavigate('/Scenarios/')"></v-col>                    
                     </v-row>
                 </v-toolbar-title>
@@ -260,7 +259,10 @@
                              v-if="selectedScenarioHasStatus">{{
                                  selectedScenario.status
                              }}</span>
-                    </div>
+                </div>
+                <div v-else style="margin-bottom: 20px; height: auto;">
+                    <br>
+                </div>
             <v-container fluid v-bind="container">
                 <router-view></router-view>
             </v-container>

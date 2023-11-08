@@ -2,13 +2,14 @@
     <v-dialog max-width="450px" v-model="showDialogComputed">
         <v-card elevation="5"  class="modal-pop-up-padding">
             <v-card-title>
+                <v-row justify="space-between">
                 <h3 class="dialog-header">
                     Create new scenario
-                </h3>
-                <v-spacer></v-spacer>
-                <v-btn @click="onSubmit(false)" icon>
+                </h3>                
+                <v-btn @click="onSubmit(false)" flat>
                     <i class="fas fa-times fa-2x"></i>
                 </v-btn>
+            </v-row>
             </v-card-title>
 
             <v-card-text>
@@ -26,7 +27,7 @@
                 <v-text-field
                     id="CreateScenarioDialog-scenarioName-textField"
                     label="Scenario name"
-                    outline
+                    variant="outlined"
                     v-model="newScenario.name"
                 ></v-text-field>
                 <v-checkbox v-model="shared" label="Share with all?" />
@@ -34,27 +35,29 @@
             <v-card-actions>
                 <v-row justify-space-between row>
                     <v-btn
+                    variant="text"
+                        id="CreateScenarioDialog-cancel-btn"
+                        @click="onSubmit(false)"
+                        class='ghd-white-bg ghd-blue ghd-button-text'
+                        >Cancel</v-btn
+                    >
+                    <v-btn
                         id="CreateScenarioDialog-save-btn"
                         :disabled="newScenario.name === '' || !isNetworkSelected"
                         @click="onSubmit(true)"
-                        class="ara-blue-bg text-white"
+                        class="ghd-blue ghd-button-text"
+                        variant="outlined"
                     >
                         Save
                     </v-btn>
-                    <v-btn
-                        id="CreateScenarioDialog-cancel-btn"
-                        @click="onSubmit(false)"
-                        class="ara-orange-bg text-white"
-                        >Cancel</v-btn
-                    >
                 </v-row>
             </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
 
-<script lang="ts" setup>
-import Vue, { computed, ref, shallowReactive, watch } from 'vue'; 
+<script setup lang="ts">
+import { computed, ref, shallowReactive, watch } from 'vue'; 
 import { getUserName } from '@/shared/utils/get-user-info';
 import { User } from '@/shared/models/iAM/user';
 import {

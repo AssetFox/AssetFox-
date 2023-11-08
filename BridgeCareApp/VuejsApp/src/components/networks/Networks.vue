@@ -218,19 +218,19 @@ import mitt from 'mitt';
     let stateSelectedNetwork = computed<Network> (() => store.state.networkModule.selectedNetwork) ;
     let stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
     let stateDataSources = computed<Datasource[]>(() => store.state.datasourceModule.dataSources) ;
-    let hasUnsavedChanges: boolean = (store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+    let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
     let isAdmin: boolean = (store.state.authenticationModule.isAdmin) ;
     
-    async function getNetworks(payload?: any): Promise<any> {await store.dispatch('getNetworks');}
-    async function getDataSources(payload?: any): Promise<any> {await store.dispatch('getDataSources');}
-    async function getAttributes(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
-    async function selectNetworkAction(payload?: any): Promise<any> {await store.dispatch('selectNetwork');}
-    async function createNetworkAction(payload?: any): Promise<any> {await store.dispatch('createNetwork');}
-    async function deleteNetworkAction(payload?: any): Promise<any> {await store.dispatch('deleteNetwork');}
-    async function aggregateNetworkAction(payload?: any): Promise<any> {await store.dispatch('aggregateNetworkData');}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
-    async function getUserNameByIdGetter(payload?: any): Promise<any> {await store.dispatch('getUserNameById');}
-    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
+    async function getNetworks(payload?: any): Promise<any> {await store.dispatch('getNetworks', payload);}
+    async function getDataSources(payload?: any): Promise<any> {await store.dispatch('getDataSources', payload);}
+    async function getAttributes(payload?: any): Promise<any> {await store.dispatch('getAttributes', payload);}
+    async function selectNetworkAction(payload?: any): Promise<any> {await store.dispatch('selectNetwork', payload);}
+    async function createNetworkAction(payload?: any): Promise<any> {await store.dispatch('createNetwork', payload);}
+    async function deleteNetworkAction(payload?: any): Promise<any> {await store.dispatch('deleteNetwork', payload);}
+    async function aggregateNetworkAction(payload?: any): Promise<any> {await store.dispatch('aggregateNetworkData', payload);}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+    async function getUserNameByIdGetter(payload?: any): Promise<any> {await store.dispatch('getUserNameById', payload);}
+    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
 
     let rules: InputValidationRules = validationRules;
 

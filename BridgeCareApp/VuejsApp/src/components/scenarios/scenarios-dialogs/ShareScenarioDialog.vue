@@ -1,9 +1,12 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="showDialogComputed">
+  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
-        <v-row justify-center>
+        <v-row justify="space-between">
           <h3>Scenario Sharing</h3>
+          <v-btn @click="onSubmit(false)" flat>
+            <i class="fas fa-times fa-2x"></i>
+          </v-btn>
         </v-row>
       </v-card-title>
       <v-card-text>
@@ -12,31 +15,33 @@
                       sort-icon=ghd-table-sort
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="{item}">
+            <tr>
             <td>
-              <v-label>{{ item.value.username }}</v-label>
+              <v-label>{{ item.username }}</v-label>
             </td>
             <td>
-              <v-checkbox class="ghd-padding-top bottom-margin-zero" label="Is Shared" v-model="item.raw.isShared"
-                  @change="removeUserModifyAccess(item.value.id, item.value.isShared)"/>
+              <v-checkbox class="ghd-padding-top bottom-margin-zero" label="Is Shared" v-model="item.isShared"
+                  @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!item.value.isShared" class="ghd-padding-top bottom-margin-zero" label="Can Modify" v-model="item.raw.canModify"/>
+              <v-checkbox :disabled="!item.isShared" class="ghd-padding-top bottom-margin-zero" label="Can Modify" v-model="item.canModify"/>
             </td>
+          </tr>
           </template>
-          <v-alert :model-value="true"
+          <!-- <v-alert :model-value="true"
                    class="ara-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
-          </v-alert>
+          </v-alert> -->
         </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-row justify-space-between row>
-          <v-btn @click="onSubmit(true)" class="ara-blue-bg text-white">
+        <v-row justify="center">
+          <v-btn @click="onSubmit(false)" class="ghd-button ghd-blue">Cancel</v-btn>
+          <v-btn @click="onSubmit(true)" class="ghd-white-bg ghd-blue" variant="outlined">
             Save
           </v-btn>
-          <v-btn @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
         </v-row>
       </v-card-actions>
     </v-card>
@@ -44,14 +49,12 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, computed } from 'vue'; 
-
+import { ref, watch, onMounted, toRefs, computed } from 'vue'; 
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {ScenarioUser} from '@/shared/models/iAM/scenario';
 import {User} from '@/shared/models/iAM/user';
 import {getUserName} from '@/shared/utils/get-user-info';
 import {setItemPropertyValueInList} from '@/shared/utils/setter-utils';
-import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {ScenarioUserGridRow, ShareScenarioDialogData} from '@/shared/models/modals/share-scenario-dialog-data';
 import { useStore } from 'vuex'; 
 
@@ -59,7 +62,7 @@ import { useStore } from 'vuex';
 
   const props = defineProps<{dialogData: ShareScenarioDialogData}>();
   const emit = defineEmits(['submit'])
-  let showDialogComputed = computed(() => props.dialogData.showDialog);
+  const { dialogData } = toRefs(props);
   const stateUsers = computed<User[]>(() => store.state.userModule.users)
 
   let scenarioUserGridHeaders: any[] = [
@@ -71,13 +74,12 @@ import { useStore } from 'vuex';
   let currentUserAndOwner: ScenarioUser[] = [];
   let searchTerm = ref('');
 
-  watch(()=> props.dialogData,()=> onDialogDataChanged())
-  function onDialogDataChanged() {
-    if (props.dialogData.showDialog) {
+  watch(dialogData,()=> {
+    if (dialogData.value.showDialog) {
       onSetGridData();
       onSetUsersSharedWith();
     }
-  }
+  });
 
   function onSetGridData() {
     const currentUser: string = getUserName();

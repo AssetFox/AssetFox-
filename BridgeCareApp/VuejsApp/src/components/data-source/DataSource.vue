@@ -39,6 +39,8 @@
               id="DataSource-SourceType-vselect"
               class="ghd-select ghd-text-field ghd-text-field-border ds-style Montserrat-font-family"
               :items="dsTypeItems"
+              item-title = "text"
+              item-value = "value"
               style="padding-right:20%; margin-left:2%;"
               v-model="dataSourceTypeItem"
               v-show="showMssql || showExcel"
@@ -56,12 +58,14 @@
                         class="ghd-control-text ghd-control-border Montserrat-font-family"
                         v-model="fileName"
                         style="margin-left:2%;"
+                        item-title = "text"
+                        item-value = "value"
                         v-show="showExcel"
                         outline
                         variant = "outlined"
                     ></v-text-field>
                     <v-btn id="DataSource-AddFile-vbtn" v-show="showExcel" class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button Montserrat-font-family" style="margin-left:2%; margin-top: 1%;;" variant = "outlined" @click="chooseFiles()">Add File</v-btn>
-                    <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden />
+                    <input @change="onSelect" id="file-select" type="file" hidden />
                 </v-row>
                 <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Location Column</v-subheader>
                 <v-select
@@ -69,6 +73,8 @@
                 :items="locColumns"
                 v-model="currentExcelLocationColumn"
                 v-show="showExcel"
+                item-title = "text"
+                item-value = "value"
                 class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
                 outline
                 variant = "outlined"
@@ -82,6 +88,8 @@
                 v-model="currentExcelDateColumn"
                 class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
                 outline
+                item-title = "text"
+                item-value = "value"
                 variant = "outlined"
                 >
                 </v-select>
@@ -128,7 +136,7 @@
 </template>
 
 <script setup lang='ts'>
-import Vue, { computed, onMounted, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
+import Vue, { computed, onMounted, reactive, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
 import { clone, isNil, prop } from 'ramda';
 import {
     Datasource, 
@@ -163,16 +171,16 @@ import { useStore } from 'vuex';
     let sqlCommandResponse = computed<SqlCommandResponse>(() => store.state.datasourceModule.sqlCommandResponse) ;
     let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges) ;
 
-    async function getDataSourcesAction(payload?: any): Promise<any> {await store.dispatch('getDataSources');}
-    async function getDataSourceTypesAction(payload?: any): Promise<any> {await store.dispatch('getDataSourceTypes');}
-    async function upsertSqlDataSourceAction(payload?: any): Promise<any> {await store.dispatch('upsertSqlDataSource');}
-    async function upsertExcelDataSourceAction(payload?: any): Promise<any> {await store.dispatch('upsertExcelDataSource');}
-    async function deleteDataSourceAction(payload?: any): Promise<any> {await store.dispatch('deleteDataSource');}
-    async function importExcelSpreadsheetFileAction(payload?: any): Promise<any> {await store.dispatch('importExcelSpreadsheetFile');}
-    async function getExcelSpreadsheetColumnHeadersAction(payload?: any): Promise<any> {await store.dispatch('getExcelSpreadsheetColumnHeaders');}
-    async function checkSqlCommandAction(payload?: any): Promise<any> {await store.dispatch('checkSqlCommand');}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges');}
-    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification');} 
+    async function getDataSourcesAction(payload?: any): Promise<any> {await store.dispatch('getDataSources', payload);}
+    async function getDataSourceTypesAction(payload?: any): Promise<any> {await store.dispatch('getDataSourceTypes', payload);}
+    async function upsertSqlDataSourceAction(payload?: any): Promise<any> {await store.dispatch('upsertSqlDataSource', payload);}
+    async function upsertExcelDataSourceAction(payload?: any): Promise<any> {await store.dispatch('upsertExcelDataSource', payload);}
+    async function deleteDataSourceAction(payload?: any): Promise<any> {await store.dispatch('deleteDataSource', payload);}
+    async function importExcelSpreadsheetFileAction(payload?: any): Promise<any> {await store.dispatch('importExcelSpreadsheetFile', payload);}
+    async function getExcelSpreadsheetColumnHeadersAction(payload?: any): Promise<any> {await store.dispatch('getExcelSpreadsheetColumnHeaders', payload);}
+    async function checkSqlCommandAction(payload?: any): Promise<any> {await store.dispatch('checkSqlCommand', payload);}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification', payload);} 
 
     let getUserNameByIdGetter: any = store.getters.getUserNameById;
     let getIdByUserNameGetter: any = store.getters.getIdByUserName ;
@@ -195,7 +203,7 @@ import { useStore } from 'vuex';
     let currentExcelDateColumn = ref<string>('');
     let currentDatasource = ref<Datasource>(clone(emptyDatasource));
     let unmodifiedDatasource = ref<Datasource>(clone(emptyDatasource));
-    let createDataSourceDialogData = ref<CreateDataSourceDialogData>(clone(emptyCreateDataSourceDialogData));
+    const createDataSourceDialogData = reactive<CreateDataSourceDialogData>(emptyCreateDataSourceDialogData);
 
     let selectedConnection = ref<string>('');
     let showMssql = ref<boolean>(false);
@@ -205,7 +213,7 @@ import { useStore } from 'vuex';
     let isNewDataSource = ref<boolean>(false);
     let allowSaveData = ref<boolean>(false);
         
-    let fileName: string | null = '';
+    let fileName = ref<string>('');
     let fileSelect: HTMLInputElement = {} as HTMLInputElement;
     let files: File[] = [];
     let file: ShallowRef<File | null> = shallowRef(null);   
@@ -214,6 +222,12 @@ import { useStore } from 'vuex';
     let datColumns: string[] =[];
 
     let connectionStringPlaceHolderMessage: string = '';    
+
+    created();
+    function created() {
+        getDataSourcesAction();
+        getDataSourceTypesAction();
+    }
     
     onMounted(() => mounted)
     function mounted() {
@@ -312,7 +326,7 @@ import { useStore } from 'vuex';
     function onFileChanged() {
         files = hasValue(file.value) ? [file.value as File] : [];                                   
         emit('submit', file.value);
-        file.value ? fileName = file.value.name : fileName = '';
+        file.value ? fileName.value = file.value.name : fileName.value = '';
 
         (<HTMLInputElement>document.getElementById('file-select')!).value = '';
     }
@@ -400,10 +414,7 @@ import { useStore } from 'vuex';
         })
     }
     function onShowCreateDataSourceDialog() {
-        createDataSourceDialogData.showDialog.value = true;
-        //createDataSourceDialogData = {
-            //showDialog: true,
-        //}
+        createDataSourceDialogData.showDialog = true;
     }
     function onCreateNewDataSource(datasource: Datasource) {
         // add to the state
@@ -416,8 +427,8 @@ import { useStore } from 'vuex';
         selectedConnection.value = datasource.connectionString;        
         connectionStringPlaceHolderMessage = 'New connection string';
         datColumns = [];
-        locColumns = [];       
-        }
+        locColumns = [];
+      }
     }
     function allowSave(): boolean {
         let result: boolean = false;
@@ -448,9 +459,10 @@ import { useStore } from 'vuex';
             document.getElementById('file-select')!.click();
         }
     }
-    function onSelect(fileList: FileList) {
-        if (hasValue(fileList)) {
-            const fileName: string = prop('name', fileList[0]) as string;
+    function onSelect(payload: any) {
+        if (hasValue(payload)) {
+            const selectedFile = payload.target.files[0];
+            const fileName: string = prop('name', selectedFile) as string;
 
             if (fileName.indexOf('xlsx') === -1) {
                 addErrorNotificationAction({
@@ -458,7 +470,7 @@ import { useStore } from 'vuex';
                 });
             }
 
-            file.value = clone(fileList[0]);
+            file.value = clone(selectedFile);
         }
 
         fileSelect.value = '';

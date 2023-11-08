@@ -1,37 +1,34 @@
 <template>
-    <v-row>
-        <div class="div-border align-start">   
-            <div id="app" class="ghd-white-bg" v-cloak @drop.prevent="onSelect($event.dataTransfer.files)" @dragover.prevent>
-                <v-row>
-                    <div class="drag-drop-area">
-                        <v-row justify="center" align="center" style="padding:10px; margin: 10px;">
-                            <img :src="getUrl('assets/icons/upload.svg')" style="margin: 20px;"/>
-                                <span class="span-center Montserrat-font-family">Drag & Drop Files Here </span>
-                        </v-row>
-                    </div>
-                </v-row>
-            </div>
+    <v-container>
+    <v-row align="start" class="div-border">    
+        <div id="app" class="ghd-white-bg" v-cloak @drop.prevent="onSelect($event.dataTransfer.files)" @dragover.prevent>
+                <div class="drag-drop-area">
+                    <v-col align-self="center" style="padding:10px; margin: 10px;">
+                        <img :src="getUrl('assets/icons/upload.svg')" style="margin: 20px;"/>
+                            <span class="span-center Montserrat-font-family">Drag & Drop Files Here </span>
+                    </v-col>
+                </div>
         </div>
-        <v-row justify="end">     
-            <v-col cols="10">
-                <v-switch
-                    v-show="useTreatment"
-                    label="No Treatment"
-                    class="ghd-control-label ghd-md-gray Montserrat-font-family my-2"
-                    v-model="applyNoTreatment"
-                />
-            </v-col>
-        </v-row>
-        <div>
-            <input @update:model-value="onSelect($event.target.files)" id="file-select" type="file" hidden />
-        </div>
-    </v-row>        
+    </v-row>    
+    <v-row justify="end">     
+        <v-col cols="10">
+            <v-switch
+                v-show="useTreatment"
+                label="No Treatment"
+                class="ghd-control-label ghd-md-gray Montserrat-font-family my-2"
+                v-model="applyNoTreatment"
+            />
+        </v-col>
+    </v-row>
+    <div>
+        <input @update:model-value="onSelect($event.target.files)" id="file-select" type="file" hidden />
+    </div>
     <v-divider/>
     <div style="margin: 10px;">
         <v-data-table-server :headers="tableHeaders"
                              :items="files"
                              :items-length="files.length"
-                             class="elevation-1 fixed-header v-table__overflow Montserrat-font-family"
+                             class="fixed-header v-table__overflow Montserrat-font-family"
                              >
             <template slot="items" slot-scope="props" v-slot:item="props">
                 <td>
@@ -48,6 +45,7 @@
             </template>
         </v-data-table-server>
     </div>
+    </v-container>
 </template>
 
 <script setup lang="ts">

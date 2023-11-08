@@ -155,12 +155,12 @@
 }
 
 /* Select */
-v-input.ghd-control-text  {
+.ghd-control-text span  {
     font-family: 'Montserrat', sans-serif !important;
     font-size: 14px !important;    
 }
 
-v-list-item.ghd-control-text {
+.ghd-control-text .v-list-item{
     font-family: 'Montserrat', sans-serif !important;
     font-size: 14px !important;    
     font-weight: 600 !important;
@@ -678,7 +678,13 @@ table.v-table tbody td input {
 .v-label--active{
 display: none !important;
 }
-
+.vcard-main-layout {
+        
+    margin-left: 20px; 
+    margin-right: 20px; 
+    padding-left: 10px; 
+    padding-right: 20px;
+}
 .v-small-dialog__actions .v-btn
 {
     padding: 0px !important;

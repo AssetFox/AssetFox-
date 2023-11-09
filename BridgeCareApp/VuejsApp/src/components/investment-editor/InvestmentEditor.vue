@@ -203,12 +203,11 @@
                                     size="large" lazy>
                                     <currencyTextbox readonly single-line class='sm-txt'
                                         variant="underlined"
-                                        :model-value='formatAsCurrency(item[header.key])'
+                                        :model-value='item[header.key]'
                                         :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     <template v-slot:input>
                                         <currencyTextbox label='Edit' single-line
-                                            v-model.number='item[header.key]'
-                                            v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"                         
+                                            v-model.number='item[header.key]'                                             
                                             :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     </template>
                                 </editDialog>

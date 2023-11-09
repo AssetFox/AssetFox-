@@ -1,38 +1,41 @@
 <template>
-  <v-dialog persistent maximizable v-model="showDialogComputed" class="criterion-library-editor-dialog">
+  <v-dialog persistent
+        v-model="dialogData.showDialog"
+        class="criterion-library-editor-dialog">
     <v-card>
       <v-card-text>
-        <v-row justify-center column>
-          <div>
-            <v-row justify-center>
-        <v-col cols = "10">
-          <CriteriaEditor :criteriaEditorData="criteriaEditorData"
-                          @submitCriteriaEditorResult="onSubmitCriteriaEditorResult"/>
-        </v-col>
-      </v-row>
-          </div>
-        </v-row>
-      </v-card-text>
-      <v-card-actions>
-        <v-row justify-space-between row>
-            <v-btn
-                 class="ara-blue-bg text-white"
-                 @click="onBeforeSubmit(true)">
-            Save
-          </v-btn>
-          <v-btn class="ara-orange-bg text-white"
-                 @click="onSubmit(false)">
-            Cancel
-          </v-btn>
-        </v-row>
-      </v-card-actions>
+                <v-row >
+                    <div>
+                      <CriteriaEditor :criteriaEditorData="criteriaEditorData"
+                                      @submitCriteriaEditorResult="onSubmitCriteriaEditorResult"/>
+                    </div>
+                </v-row>
+            </v-card-text>
+            <v-row justify="center" style="padding: 10px; margin: 0px;">
+                <v-btn
+                    class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
+                    flat
+                    style="margin-right: 5px;"
+                    @click="onBeforeSubmit(false)"
+                >
+                    Cancel
+                </v-btn>
+                <v-btn
+                    class="ghd-blue-bg ghd-white ghd-button-text"
+                    flat
+                    style="margin-left: 5px;"                    
+                    @click="onSubmit(true)"
+                >
+                    Save
+                </v-btn>
+            </v-row>
     </v-card>
     <HasUnsavedChangesAlert :dialogData="hasUnsavedChangesAlertData" @submit="onCloseHasUnsavedChangesAlert"/>
   </v-dialog>
 </template>
 
 <script lang="ts" setup>
-import Vue, { computed } from 'vue';
+import Vue, { computed, toRefs } from 'vue';
 import {CriterionFilterEditorDialogData} from '../models/modals/criterion-filter-editor-dialog-data';
 import {hasValue} from '@/shared/utils/has-value-util';
 import CriterionLibraryEditor from '@/components/criteria-editor/CriterionLibraryEditor.vue';
@@ -56,7 +59,8 @@ const emit = defineEmits(['submitCriteriaEditorDialogResult'])
 const props = defineProps<{
   dialogData: CriterionFilterEditorDialogData
     }>()
-    let showDialogComputed = computed(() => props.dialogData.showDialog);
+    const { dialogData } = toRefs(props);
+let showDialogComputed = computed(() => props.dialogData.showDialog);
 async function getAvailableReportsAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports');}
 
   let uuidNIL: string = getBlankGuid();
@@ -70,32 +74,21 @@ async function getAvailableReportsAction(payload?: any): Promise<any> {await sto
     isLibraryContext: true
   };
 
-  watch(()=>props.dialogData,()=>onDialogDataChanged())
-  function onDialogDataChanged() {
+  watch(dialogData,()=> {
     const htmlTag: HTMLCollection = document.getElementsByTagName('html') as HTMLCollection;
     const criteriaEditorCard: HTMLCollection = document.getElementsByClassName('criteria-editor-card') as HTMLCollection;
 
-    if (props.dialogData.showDialog) {
+    if (dialogData.value.showDialog) {
     
     criteriaEditorData = {
         ...criteriaEditorData,
-        mergedCriteriaExpression: props.dialogData.criteria,
+        mergedCriteriaExpression: dialogData.value.criteria,
         isLibraryContext: true
         };
 
-      if (hasValue(htmlTag)) {
-        htmlTag[0].setAttribute('style', 'overflow:hidden;');
-      }
-
-      if (hasValue(criteriaEditorCard)) {
-        criteriaEditorCard[0].setAttribute('style', 'height:100%');
-      }
-    } else {
-      if (hasValue(htmlTag)) {
-        htmlTag[0].setAttribute('style', 'overflow:auto;');
-      }
+      
     }
-  }
+  })
 
     function onSubmitCriteriaEditorResult(result: CriteriaEditorResult) {
         const canUpdateOrCreate = result.validated;

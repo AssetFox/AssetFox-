@@ -1,40 +1,41 @@
 <template>
-  <v-dialog max-width="60%" persistent v-model ="dialogData.showDialog">
+  <v-dialog  max-width="500px" persistent v-model ="dialogData.showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-padding-top-title">
-        <v-row justify="space-between">         
+        <v-row justify="space-between">
           <div class="ghd-control-dialog-header"><h5>Budget Priority Library Sharing</h5></div>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
         </v-row>
       </v-card-title>
-
       <v-card-text>
-        <v-data-table-server id="ShareBudgetPriorityLibraryDialog-table-vdatatable" 
+        <v-data-table-server id="ShareBudgetPriorityLibraryDialog-table-vdatatable"
                       :headers="budgetPriorityLibraryUserGridHeaders"
-                      :items="budgetPriorityLibraryUserGridRows" 
+                      :items="budgetPriorityLibraryUserGridRows"
                       :items-length="budgetPriorityLibraryUserGridRows.length"
                       sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
           <template v-slot:item="{item}" slot="items" slot-scope="props">
+            <tr>
             <td>
-              {{ item.value.username }}
+              {{ item.username }}
             </td>
             <td>
-              <v-checkbox id="ShareBudgetPriorityLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.raw.isShared"
-                          @change="removeUserModifyAccess(item.value.id, item.value.isShared)"/>
+              <v-checkbox id="ShareBudgetPriorityLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.isShared"
+                          @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox id="ShareBudgetPriorityLibraryDialog-canModify-vcheckbox" :disabled="!item.value.isShared" label="Can Modify" v-model="item.raw.canModify"/>
+              <v-checkbox id="ShareBudgetPriorityLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" label="Can Modify" v-model="item.canModify"/>
             </td>
+          </tr>
           </template>
-          <v-alert :model-value="true"
+          <!-- <v-alert :model-value="true"
                    class="ara-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
-          </v-alert>
+          </v-alert> -->
         </v-data-table-server>
       </v-card-text>
       <v-card-actions>
@@ -50,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { computed, toRefs, ref, watch } from 'vue';
+import { computed, toRefs, ref, watch } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {BudgetPriorityLibraryUser } from '@/shared/models/iAM/budget-priority';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -65,9 +66,7 @@ import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
 
   let store = useStore();
-  //let stateUsers = store.state.userModule.users;
   const stateUsers  = computed<User[]>(()=>store.state.userModule.users);
-
   const props = defineProps<{
     dialogData: ShareBudgetPriorityLibraryDialogData
   }>();
@@ -84,8 +83,8 @@ import { useStore } from 'vuex';
   let currentUserAndOwner = ref<BudgetPriorityLibraryUser[]>([]);
   let searchTerm: string = '';
 
-  watch(()=> props.dialogData, ()=> {
-    if (props.dialogData.showDialog) {
+  watch(dialogData, ()=> {
+    if (dialogData.value.showDialog) {
       onSetGridData();
       onSetUsersSharedWith();
     }

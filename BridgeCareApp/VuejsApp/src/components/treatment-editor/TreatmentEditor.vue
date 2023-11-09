@@ -70,11 +70,6 @@
             <v-row v-if='hasSelectedLibrary && !hasScenario' style="margin: 10px; !important">
                 <div class="ghd-control-label">
                 Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> | Date Modified: {{ modifiedDate }}   
-                <v-badge v-show="isShared">
-                    <template v-slot: badge>
-                        <span>Shared</span>
-                    </template>
-                </v-badge>
                 <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                        v-show='!hasScenario'>
                     Share Library

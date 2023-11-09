@@ -5,7 +5,7 @@
         <v-card-title class="ghd-dialog-box-padding-top">
           <v-col cols = "12">
             <v-row justify="space-between" class="text-center" >
-              <div style="margin-left: 300px" class="ghd-control-dialog-header">Equation Editor</div>
+              <div style="margin-left: 347px" class="ghd-control-dialog-header">Equation Editor</div>
               <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                 X
             </v-btn>
@@ -13,14 +13,10 @@
           </v-col>
         </v-card-title>
          <v-card-text class="equation-content ghd-dialog-box-padding-center">
-            <v-col cols = "12">
-              <div class="validation-message-div">
                 <v-row justify="center">
                   <p class="invalid-message" v-if="invalidExpressionMessage !== ''">{{ invalidExpressionMessage }}</p>
                   <p id="EquationEditor-validEquatiionMsg-p" class="valid-message" v-if="validExpressionMessage !== ''">{{ validExpressionMessage }}</p>
                 </v-row>
-              </div>
-            </v-col>
             <v-col cols = "12">
               <v-tabs v-model="selectedTab">
                 <v-tab @click="isPiecewise = false">Equation</v-tab>
@@ -95,11 +91,14 @@
                                 </v-btn>
                               </div>
                             </v-row>
-                            <v-row style="padding-top: 10px">
-                              <v-textarea :rows="5" @blur="setCursorPosition" @focus="setTextareaCursorPosition" full-width
+                            <v-row style="padding-top: 10px; padding-left: 15px">
+                              <v-textarea :rows="5" @blur="setCursorPosition" @focus="setTextareaCursorPosition"
                                           id="equation_textarea"
                                           no-resize outline
                                           spellcheck="false"
+                                          variant="outlined"
+                                          density="compact"
+                                          style="max-width: 825px"
                                           v-model="expression" class="ghd-text-field-border">
                               </v-textarea>
                             </v-row>

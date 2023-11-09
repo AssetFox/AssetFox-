@@ -233,21 +233,21 @@ namespace BridgeCareCore.Services
         public ScenarioTreatmentSupersedeRuleImportResultDTO ImportScenarioTreatmentSupersedeRulesFile(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
             queueLog ??= new DoNothingWorkQueueLog();
-            var validationMessages = new List<string>();
-           
-            var scenarioTreatments = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
-                return new ScenarioTreatmentSupersedeRuleImportResultDTO();
-            queueLog.UpdateWorkQueueStatus("Loading Excel");
-            foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {
-                var treatmentSupersedeRuleResult = _treatmentLoader.LoadTreatmentSupersedeRules(worksheet, scenarioTreatments);
-                validationMessages.AddRange(treatmentSupersedeRuleResult.ValidationMessages);
-            }
-            var combinedValidationMessage = string.Empty;
+                return new ScenarioTreatmentSupersedeRuleImportResultDTO();
+            }
+            queueLog.UpdateWorkQueueStatus("Loading Excel");
+
+            var worksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
+            var scenarioTreatments = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);            
+            var treatmentSupersedeRuleResult = _treatmentLoader.LoadTreatmentSupersedeRules(worksheet, scenarioTreatments);
+
+            var validationMessages = treatmentSupersedeRuleResult.ValidationMessages;
+            var combinedValidationMessage = string.Empty;
             if (validationMessages.Any())
             {
-                var combinedValidationMessageBuilder = new StringBuilder();
+                var combinedValidationMessageBuilder = new StringBuilder();
                 foreach (var message in validationMessages)
                 {
                     combinedValidationMessageBuilder.AppendLine(message);
@@ -257,21 +257,18 @@ namespace BridgeCareCore.Services
 
             var scenarioTreatmentSupersedeRuleImportResult = new ScenarioTreatmentSupersedeRuleImportResultDTO
             {
-             //   Treatments = scenarioTreatments,
+                supersedeRulesPerTreatmentId = treatmentSupersedeRuleResult.supersedeRulesPerTreatmentId,
                 WarningMessage = combinedValidationMessage,
-            };
+            };
+
             if (combinedValidationMessage.Length == 0)
             {
                 if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                {
                     return new ScenarioTreatmentSupersedeRuleImportResultDTO();
-                queueLog.UpdateWorkQueueStatus("Upserting Treatment Supersede Rules");
-
-                //if (scenarioTreatmentSupersedeRuleImportResult.Treatments.Any(_ => _.SupersedeRules != null && _.SupersedeRules.Any()))
-                //{
-                //    var supersedeRulesPerTreatmentId = scenarioTreatmentSupersedeRuleImportResult.Treatments.Where(_ => _.SupersedeRules.Any()).ToList()
-                //    .ToDictionary(_ => _.Id, _ => _.SupersedeRules);
-                //    _unitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(supersedeRulesPerTreatmentId, simulationId);
-                //}
+                }
+                queueLog.UpdateWorkQueueStatus("Upserting Scenario Treatment Supersede Rules");
+                _unitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(scenarioTreatmentSupersedeRuleImportResult.supersedeRulesPerTreatmentId, simulationId);
             }
             return scenarioTreatmentSupersedeRuleImportResult;
         }

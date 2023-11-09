@@ -334,51 +334,54 @@ namespace BridgeCareCore.Services.Treatment
             return treatmentLoadResult;
         }
 
-
-        public TreatmentSupersedeRulesLoadResult LoadTreatmentSupersedeRules(ExcelWorksheet worksheet, List<TreatmentDTO> scenarioTreatments)
+        // TODO check if library version can use same method for loading
+        public TreatmentSupersedeRulesLoadResult LoadTreatmentSupersedeRules(ExcelWorksheet worksheet, List<TreatmentDTO> treatments)
         {
-            var treatmentSupersedeRules = new List<TreatmentSupersedeRuleDTO>();
-
+            var supersedeRulesPerTreatmentId = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>>();
+            // var treatmentSupersedeRules = new List<TreatmentSupersedeRuleDTO>();
             var validationMessages = new List<string>();
 
-            var tsLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.SupersedeTreatmentName, 1);
-            if (tsLineIndex == 0)
+            var index = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.SupersedeTreatmentName, 1);
+            if (index == 0)
             {
-                throw new Exception($"Cell with content {TreatmentExportStringConstants.TreatmentName} not found!");
+                throw new Exception($"Cell with content {TreatmentExportStringConstants.SupersedeTreatmentName} not found!");
             }
+
             var height = worksheet.Dimension.End.Row;
-            for (var i = tsLineIndex + 1; i <= height; i++)
+            for (var i = index + 1; i <= height; i++)
             {
                 var treatmentName = worksheet.Cells[i, 1].Text;
-                var supersededTreatment = worksheet.Cells[i, 2].Text;
+                var supersededTreatmentName = worksheet.Cells[i, 2].Text;
                 var criteria = worksheet.Cells[i, 3].Text;
-
-                foreach (var scenarioTreatment in scenarioTreatments)
+                var treatment = treatments.FirstOrDefault(_ => _.Name.Equals(treatmentName));
+                var supersededTreatment = treatments.FirstOrDefault(_ => _.Name.Equals(supersededTreatmentName));
+                if (treatment != null && supersededTreatment != null)
                 {
-                    if (scenarioTreatment.Name == treatmentName)
+                    var criterionLibrary = new CriterionLibraryDTO
                     {
-                        var criterionLibrary = new CriterionLibraryDTO
-                        {
-                            Id = Guid.NewGuid(),
-                            Name = "from Excel import",
-                            MergedCriteriaExpression = criteria,
-                            IsSingleUse = true,
-                        };
+                        Id = Guid.NewGuid(),
+                        Name = "FromExcelImport",
+                        MergedCriteriaExpression = criteria,
+                        IsSingleUse = true,
+                    };
 
-                        var supersededTreatmentRule = new TreatmentDTO
-                        {
-                            Id = Guid.NewGuid(),
-                            Name = supersededTreatment,
-
-                        };                      
-
-                        treatmentSupersedeRules.Add(new TreatmentSupersedeRuleDTO() { Id = Guid.NewGuid(),  CriterionLibrary = criterionLibrary, treatment = supersededTreatmentRule });
-                        scenarioTreatment.SupersedeRules = treatmentSupersedeRules;                       
+                    if (supersedeRulesPerTreatmentId.ContainsKey(treatment.Id))
+                    {
+                        supersedeRulesPerTreatmentId[treatment.Id].Add(new TreatmentSupersedeRuleDTO() { Id = Guid.NewGuid(), CriterionLibrary = criterionLibrary, treatment = supersededTreatment });
+                    }
+                    else
+                    {
+                        supersedeRulesPerTreatmentId.Add(treatment.Id, new List<TreatmentSupersedeRuleDTO>() { new TreatmentSupersedeRuleDTO() { Id = Guid.NewGuid(), CriterionLibrary = criterionLibrary, treatment = supersededTreatment } });
                     }
                 }
+                else
+                {
+                    var name = treatment == null ? treatmentName : string.Empty;
+                    name = supersededTreatment == null ? (string.IsNullOrEmpty(name) ? supersededTreatmentName : ", " + supersededTreatmentName) : string.Empty;
+                    validationMessages.Add("Scenario treatment(s) " + name + " does not exist.");
+                }
             }
-            return new TreatmentSupersedeRulesLoadResult { Treatments = scenarioTreatments, ValidationMessages = validationMessages };
-
+            return new TreatmentSupersedeRulesLoadResult { supersedeRulesPerTreatmentId = supersedeRulesPerTreatmentId, ValidationMessages = validationMessages };
         }
     }
 }

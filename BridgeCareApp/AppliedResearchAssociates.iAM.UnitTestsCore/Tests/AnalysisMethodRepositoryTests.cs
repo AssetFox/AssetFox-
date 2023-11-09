@@ -14,6 +14,7 @@ using Xunit;
 using AppliedResearchAssociates.iAM.Common.PerformanceMeasurement;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Benefit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -74,7 +75,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void ShouldUpdateAnalysisMethod()
+        public void AnalysisMethodInDb_Update_Updates()
         {
             var unitOfWork = TestHelper.UnitOfWork;
             AttributeTestSetup.CreateAttributes(unitOfWork);
@@ -88,10 +89,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             analysisMethodDto.Attribute = attributeEntity.Name;
             analysisMethodDto.CriterionLibrary = criterionLibrary;
             var analysisMethod = AnalysisMethodEntities.TestAnalysis(simulation.Id);
-            var benefit = TestBenefit(analysisMethod.Id);
-            benefit.Attribute = attributeEntity;
-            analysisMethodDto.Benefit = benefit.ToDto();
-            analysisMethodDto.Benefit.Attribute = attributeEntity.Name;
+            var benefitDto = BenefitDtos.Dto(attributeEntity.Name);
+            analysisMethodDto.Benefit = benefitDto;
 
             // Act
             repo.UpsertAnalysisMethod(simulation.Id, analysisMethodDto);

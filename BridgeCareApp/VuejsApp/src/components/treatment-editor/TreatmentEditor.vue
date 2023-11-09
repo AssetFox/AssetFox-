@@ -798,13 +798,11 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
                             treatmentCache.push(data)
                     }
                 })
-            }
-
             
             else if(!isNil(treatment))
                 selectedTreatment.value = clone(treatment);
-            else
-                 selectedTreatment.value = clone(emptyTreatment);
+            else{
+                selectedTreatment.value = clone(emptyTreatment);
                  if (!keepActiveTab) {
                      activeTab.value = 0;
                     }
@@ -817,9 +815,10 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
                         scenarioLibraryIsModified = selectedTreatment.value ? selectedTreatment.value.isModified : false;
                     }
                 })
+            }
+                 
         }
-   
-    
+    }
 
     watch(selectedTreatment, () => onSelectedTreatmentChanged())
     function onSelectedTreatmentChanged() {

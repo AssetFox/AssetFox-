@@ -44,9 +44,6 @@ const ghdTableSortIconSet: IconSet = {
 
 const vuetify = createVuetify({ 
   components: {
-    VDataTable,
-    VDataTableServer,
-    VDataTableVirtual,
     components
   },
     icons: { 

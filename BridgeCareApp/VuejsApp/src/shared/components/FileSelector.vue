@@ -1,16 +1,12 @@
 <template>
     <v-container>
-    <v-row align="start" class="div-border">    
-        <div id="app" class="ghd-white-bg" v-cloak @drop.prevent="onSelect($event.dataTransfer.files)" @dragover.prevent>
-                <div class="drag-drop-area">
-                    <v-col align-self="center" style="padding:10px; margin: 10px;">
-                        <img :src="getUrl('assets/icons/upload.svg')" style="margin: 20px;"/>
+    <v-row  class="div-border">    
+        <v-col align="center" id="app" class="ghd-white-bg" v-cloak @drop.prevent="onSelect($event.dataTransfer.files)" @dragover.prevent>
+            <img :src="getUrl('assets/icons/upload.svg')" style="margin: 20px;"/>
                             <span class="span-center Montserrat-font-family">Drag & Drop Files Here </span>
-                    </v-col>
-                </div>
-        </div>
+        </v-col>
     </v-row>    
-    <v-row justify="end">     
+    <v-row justify="start">     
         <v-col cols="10">
             <v-switch
                 v-show="useTreatment"
@@ -25,7 +21,7 @@
     </div>
     <v-divider/>
     <div style="margin: 10px;">
-        <v-data-table-server :headers="tableHeaders"
+        <v-data-table-virtual :headers="tableHeaders"
                              :items="files"
                              :items-length="files.length"
                              class="fixed-header v-table__overflow Montserrat-font-family"
@@ -43,7 +39,7 @@
                     </v-btn>
                 </td>
             </template>
-        </v-data-table-server>
+        </v-data-table-virtual>
     </div>
     </v-container>
 </template>

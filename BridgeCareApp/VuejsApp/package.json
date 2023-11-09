@@ -59,7 +59,7 @@
         "vue-socket.io-extended": "^3.2.2",
         "vue-worker": "1.2.1",
         "vuejs-dialog": "^1.4.2",
-        "vuetify": "^3.3.17",
+        "vuetify": "^3.4.0",
         "vuex": "^4.1.0"
     },
     "devDependencies": {

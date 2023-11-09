@@ -83,11 +83,11 @@
                   <v-menu bottom 
                       min-height='500px' min-width='500px' v-if='item.hasCriteria' style='width: 100%'>
                     <template v-slot:activator="{props}" >
-                      <v-text-field  v-bind="props" id="UserCriteria-userCriteria-textfield" class='sm-txt' :model-value='item.criteria' readonly style='width: 100%' type='text' />
+                      <v-text-field variant="underlined"  v-bind="props" id="UserCriteria-userCriteria-textfield" class='sm-txt' :model-value='item.criteria' readonly style='width: 100%' type='text' />
                     </template>
                     <v-card>
                       <v-card-text>
-                        <v-textarea :model-value='item.criteria' full-width no-resize outline 
+                        <v-textarea :model-value='item.criteria' full-width no-resize variant="underlined"
                         readonly 
                         rows='5'>
                       </v-textarea>
@@ -128,11 +128,11 @@
               <td>
                 <v-menu bottom min-height='200px' min-width='200px'>
                   <template v-slot:activator="{ props }" >
-                    <v-text-field v-bind="props" id="UserCriteria-userName-textfield" v-model='item.name' :readonly='!item.hasCriteria' style='width: 15em' type='text' class='text-center' />
+                    <v-text-field v-bind="props" id="UserCriteria-userName-textfield" v-model='item.name' variant="underlined" :readonly='!item.hasCriteria' style='width: 15em' type='text' class='text-center' />
                   </template>
                   <v-card style="top: -60px;" >
                     <v-card-text>
-                      <v-text-field id="UserCriteria-editUserName-textfield" v-model='item.name' label='Edit Name' single-line @click.stop />
+                      <v-text-field id="UserCriteria-editUserName-textfield" variant="underlined" v-model='item.name' label='Edit Name' single-line @click.stop />
                       <v-btn id="UserCriteria-updateUserName-btn" @click='updateName(item)'>Update</v-btn>
                     </v-card-text>
                   </v-card>
@@ -141,11 +141,11 @@
               <td>
                 <v-menu bottom min-height='200px' min-width='200px'>
                   <template v-slot:activator="{ props }">
-                    <v-text-field v-bind="props" id="UserCriteria-userDescription-textfield" v-model='item.description' :readonly='!item.hasCriteria' style='width: 15em' type='text' class='text-center' />
+                    <v-text-field v-bind="props" id="UserCriteria-userDescription-textfield" variant="underlined" v-model='item.description' :readonly='!item.hasCriteria' style='width: 15em' type='text' class='text-center' />
                   </template>
                   <v-card style="top: -60px;">
                     <v-card-text>
-                      <v-text-field id="UserCriteria-editUserDescription-textfield" v-model='item.description' label='Edit Description' single-line @click.stop />
+                      <v-text-field id="UserCriteria-editUserDescription-textfield" variant="underlined" v-model='item.description' label='Edit Description' single-line @click.stop />
                       <v-btn id="UserCriteria-updateUserDescription-btn" @click='updateDescription(item)'>Update</v-btn>
                     </v-card-text>
                   </v-card>

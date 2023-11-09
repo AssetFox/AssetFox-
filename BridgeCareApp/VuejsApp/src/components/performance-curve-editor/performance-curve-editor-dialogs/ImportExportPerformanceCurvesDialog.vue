@@ -3,12 +3,12 @@
         <v-card class="div-padding">
             <v-card-title class="pa-2">
                 <v-row justify="space-between">
-                    <v-col >
-                        <h3 class="Montserrat-font-family">Performance Curves Upload</h3>
+                    <v-col class="pt-0">
+                        <h3  style="padding-top: 10px;" class="Montserrat-font-family">Performance Curves Upload</h3>
                     </v-col>
                     <v-spacer/>
-                    <v-col align="end">
-                        <v-btn @click="onSubmit(false)" icon>
+                    <v-col class="pt-0" align="end">
+                        <v-btn @click="onSubmit(false)" icon variant="flat">
                             <i class="fas fa-times fa-2x"></i>
                         </v-btn>
                     </v-col> 

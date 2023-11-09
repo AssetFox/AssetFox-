@@ -11,25 +11,25 @@
                         <tr>
                         <td v-for='header in consequencesGridHeaders'>
                             <editDialog
-                                v-if="header.value !== 'equation' && header.value !== 'criterionLibrary' && header.value !== ''"
-                                :return-value.sync='props.item[header.value]'
-                                @save='onEditConsequenceProperty(props.item, header.value, props.item[header.value])'
+                                v-if="header.key !== 'equation' && header.key !== 'criterionLibrary' && header.key !== ''"
+                                :return-value.sync='props.item[header.key]'
+                                @save='onEditConsequenceProperty(props.item, header.key, props.item[header.key])'
                                 size="large" lazy persistent>
-                                <v-text-field v-if="header.value === 'attribute'" readonly single-line class='ghd-control-text-sm'
+                                <v-text-field v-if="header.key === 'attribute'" readonly single-line class='ghd-control-text-sm'
                                               :model-value='props.item.attribute'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                <v-text-field v-if="header.value === 'changeValue'" readonly single-line class='ghd-control-text-sm'
+                                <v-text-field v-if="header.key === 'changeValue'" readonly single-line class='ghd-control-text-sm'
                                               :model-value='props.item.changeValue'
                                               :rules="[rules['treatmentRules'].hasChangeValueOrEquation(props.item.changeValue, props.item.equation.expression)]" />
                                 <template v-slot:input>
-                                    <v-select v-if="header.value === 'attribute'" :items='attributeSelectItems'
+                                    <v-select v-if="header.key === 'attribute'" :items='attributeSelectItems'
                                         item-title="text"
                                         item-value="value"   
                                         append-icon=ghd-down
                                         label='Edit'
                                         v-model='props.item.attribute'
                                         :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                    <v-text-field v-if="header.value === 'changeValue'" label='Edit'
+                                    <v-text-field v-if="header.key === 'changeValue'" label='Edit'
                                                   v-model='props.item.changeValue'
                                                   :rules="[rules['treatmentRules'].hasChangeValueOrEquation(props.item.changeValue, props.item.equation.expression)]" />
                                 </template>
@@ -39,10 +39,10 @@
                                 location="left"
                                 min-height="500px"
                                 min-width="500px"
-                                v-show="header.value === 'equation'"
+                                v-if="header.key === 'equation'"
                             >
-                                <template v-slot:activator>
-                                    <v-btn id="TreatmentConsequencesTab-EquationView-btn" class="ghd-blue" flat>
+                                <template v-slot:activator="{ props }">
+                                    <v-btn v-bind="props" id="TreatmentConsequencesTab-EquationView-btn" class="ghd-blue" flat>
                                         <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                     </v-btn>
                                 </template>
@@ -62,7 +62,7 @@
                                     </v-card-text>
                                 </v-card>
                             </v-menu>     
-                             <v-btn id="TreatmentConsequencesTab-EquationEditorBtn" v-if="header.value === 'equation'" @click='onShowConsequenceEquationEditorDialog(props.item)' class='edit-icon'
+                             <v-btn id="TreatmentConsequencesTab-EquationEditorBtn" v-if="header.key === 'equation'" @click='onShowConsequenceEquationEditorDialog(props.item)' class='edit-icon'
                                     icon>
                                 <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                             </v-btn>                       
@@ -71,10 +71,10 @@
                                 location="left"
                                 min-height="500px"
                                 min-width="500px"
-                                v-show="header.value === 'criterionLibrary'"
+                                v-if="header.key === 'criterionLibrary'"
                             >
-                                <template v-slot:activator>
-                                    <v-btn id="TreatmentConsequencesTab-CriteriaView-btn" class="ghd-blue" flat>
+                                <template v-slot:activator="{ props }">
+                                    <v-btn v-bind="props" id="TreatmentConsequencesTab-CriteriaView-btn" class="ghd-blue" flat>
                                         <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                     </v-btn>
                                 </template>
@@ -95,12 +95,12 @@
                                     </v-card-text>
                                 </v-card>
                             </v-menu>
-                            <v-btn id="TreatmentConsequencesTab-CriteriaEditorBtn" v-if="header.value === 'criterionLibrary'" @click='onShowConsequenceCriterionEditorDialog(props.item)'
+                            <v-btn id="TreatmentConsequencesTab-CriteriaEditorBtn" v-if="header.key === 'criterionLibrary'" @click='onShowConsequenceCriterionEditorDialog(props.item)'
                                     class='edit-icon' icon>
                                 <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                             </v-btn>
 
-                            <v-row v-if="header.value === ''" align-start>
+                            <v-row v-if="header.key === ''" align="start">
                                 <v-btn id="TreatmentConquencesTab-DeleteCostBtn" @click='onRemoveConsequence(props.item.id)' icon>
                                     <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
@@ -123,7 +123,7 @@
 </template>
 
 <script setup lang='ts'>
-import { ref, computed, shallowRef, watch, toRefs } from 'vue';
+import { ref, computed, shallowRef, watch, toRefs, onMounted } from 'vue';
 import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import { any, clone, isNil } from 'ramda';
 import EquationEditorDialog from '../../../shared/modals/EquationEditorDialog.vue';
@@ -178,7 +178,12 @@ const props = defineProps<{
         setAttributeSelectItems();
     }
 
-    watch(selectedTreatmentConsequences, () => {
+    onMounted(() => {
+        if(props.selectedTreatmentConsequences.length > 0)
+        consequencesGridData.value = clone(props.selectedTreatmentConsequences);
+    })
+
+    watch(() => props.selectedTreatmentConsequences, () => {
         consequencesGridData.value = clone(selectedTreatmentConsequences.value);
     });
 

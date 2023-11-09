@@ -82,13 +82,17 @@ import { useStore } from 'vuex';
 
     onMounted(() =>  {
         setAttributeSelectItems();
+
+        onTreatmentChange();
     });
 
     watch(stateAttributes, () =>  {
         setAttributeSelectItems();
     });
 
-    watch(selectedTreatment, () => {
+    watch(selectedTreatment, onTreatmentChange);
+
+    function onTreatmentChange(){
         if (selectedTreatmentPerformanceFactors.value.length <= 0) {
            buildDataFromCurves(); 
            factorGridData.value.forEach(_ => emit('onModifyPerformanceFactor', clone(_)))
@@ -107,7 +111,7 @@ import { useStore } from 'vuex';
                     emit('onModifyPerformanceFactor', clone(data))
             });
         }
-    });
+    }
 
     watch(stateScenarioPerformanceCurves, () => {
         buildDataFromCurves();

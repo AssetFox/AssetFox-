@@ -326,7 +326,7 @@ const router = createRouter({
                     component: RemainingLifeLimitEditor,
                 },
                 {
-                    path: '/CashFlowEditor/Library',
+                    path: '/CashFlowEditor/Library/',
                     component: CashFlowEditor,
                 },
                 {

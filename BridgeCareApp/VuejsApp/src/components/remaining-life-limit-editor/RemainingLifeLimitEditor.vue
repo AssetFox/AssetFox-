@@ -397,7 +397,7 @@ import { getUrl } from '@/shared/utils/get-url';
     let dataPerPage: number = 0;
     let totalDataFound: number = 5;
     let remainingLifeLimits: RemainingLifeLimit[] = [];
-    let numericAttributeSelectItems: SelectItem[] = [];
+    let numericAttributeSelectItems = ref<SelectItem[]>([]);
     let createRemainingLifeLimitDialogData = ref<CreateRemainingLifeLimitDialogData>(clone(
         emptyCreateRemainingLifeLimitDialogData,
     ));
@@ -437,6 +437,7 @@ import { getUrl } from '@/shared/utils/get-url';
                     });                                      
                 }
             });
+            setAttributesSelectListItems();
             
     });
 
@@ -574,13 +575,14 @@ import { getUrl } from '@/shared/utils/get-url';
         checkHasUnsavedChanges();
     });
 
-    function mounted() { // CHECK when its called
-        setAttributesSelectListItems();
-    }
+
+    // onMounted(() => {
+    //     setAttributesSelectListItems();
+    // });
 
     function setAttributesSelectListItems() {
         if (hasValue(stateNumericAttributes)) {
-            numericAttributeSelectItems = stateNumericAttributes.value.map(
+            numericAttributeSelectItems.value = stateNumericAttributes.value.map(
                 (attribute: Attribute) => ({
                     text: attribute.name,
                     value: attribute.name,
@@ -667,7 +669,7 @@ import { getUrl } from '@/shared/utils/get-url';
     function onShowCreateRemainingLifeLimitDialog() {
         createRemainingLifeLimitDialogData.value = {
             showDialog: true,
-            numericAttributeSelectItems: numericAttributeSelectItems,
+            numericAttributeSelectItems: numericAttributeSelectItems.value
         };
     }
 

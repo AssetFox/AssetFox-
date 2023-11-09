@@ -127,7 +127,7 @@
                       <v-col cols = "5" >
                         <div>                 
                           <div class="data-points-grid">
-                            <v-data-table :header="piecewiseGridHeaders"
+                            <v-data-table :headers="piecewiseGridHeaders"
                                           :items="piecewiseGridData"
                                           sort-icon=ghd-table-sort
                                           class="v-table__overflow ghd-table"
@@ -198,7 +198,7 @@
                       <v-col cols = "5">
                         <div>
                           <div class="data-points-grid">
-                            <v-data-table :header="timeInRatingGridHeaders"
+                            <v-data-table :headers="timeInRatingGridHeaders"
                                           :items="timeInRatingGridData"
                                           sort-icon=ghd-table-sort
                                           class="v-table__overflow ghd-table"
@@ -427,19 +427,19 @@ const props = defineProps<{
     let showDialogComputed = computed(() => props.dialogData.showDialog);
     
 let stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributes);
-async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes', payload);}
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
 
-  let equation = ref<Equation>({...emptyEquation, id: getNewGuid()});
+  let equation: Equation = {...emptyEquation, id: getNewGuid()};
   const attributesList = ref<string[]>([]);  
   const formulasList = ref<string[]>(formulas);
-  let expression = ref<string>('');
+  let expression = shallowRef<string>('');
   const isPiecewise = ref<boolean>(false);
   let textareaInput: HTMLTextAreaElement = {} as HTMLTextAreaElement;
-  let cursorPosition = ref<number>(0);
+  let cursorPosition: number = 0;
   const cannotSubmit = ref<boolean>(true);
-  const invalidExpressionMessage = ref<string>('');
-  const validExpressionMessage = ref<string>('');
+  const invalidExpressionMessage = ref('');
+  const validExpressionMessage = ref('');
   const piecewiseGridHeaders = ref<DataTableHeader[]>([
     {text: 'Time', value: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
     {text: 'Condition', value: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
@@ -454,18 +454,18 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
   const timeInRatingGridData = ref<TimeConditionDataPoint[]>([]);
   const showAddDataPointPopup = ref<boolean>(false);
   const newDataPoint = ref<TimeConditionDataPoint>(clone(emptyTimeConditionDataPoint));
-  let xAxisMax = ref<number>(0);
-  let yAxisMax = ref<number>(0);
+  let xAxisMax: number = 0;
+  let yAxisMax: number = 0;
   const dataPointsSource = ref<number[][]>([]);
   const showAddMultipleDataPointsPopup = ref<boolean>(false);
   const multipleDataPoints = ref('');;
   const selectedTab = ref<number>(0);
   const showEditDataPointPopup = ref<boolean>(false);
-  let editedDataPointProperty = ref<string>('');
+  let editedDataPointProperty: string = '';
   const editedDataPoint = ref<TimeConditionDataPoint>(clone(emptyTimeConditionDataPoint));
-  let piecewiseRegex = ref<RegExp>(/(\(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*\))/);
-  let multipleDataPointsRegex = ref<RegExp>(/(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*)/);
-  let uuidNIL =  ref<string>(getBlankGuid());
+  let piecewiseRegex: RegExp = /(\(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*\))/;
+  let multipleDataPointsRegex: RegExp = /(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*)/;
+  let uuidNIL: string = getBlankGuid();
 /**
    * mounted => event handler is used to set the textareaInput object, set the cursorPosition object, and to trigger
    * a function to set the attributesList object.
@@ -497,13 +497,13 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    */
   watch(()=>props.dialogData,()=>onDialogDataChanged())
   function onDialogDataChanged() {
-    equation.value = {
-      id: props.dialogData.equation.id === uuidNIL.value ? equation.value.id : props.dialogData.equation.id,
+    equation = {
+      id: props.dialogData.equation.id === uuidNIL ? equation.id : props.dialogData.equation.id,
       expression: !isNil(props.dialogData.equation.expression) ? props.dialogData.equation.expression : ''
     };
-    expression.value = equation.value.expression;
+    expression.value = equation.expression;
 
-    if (piecewiseRegex.value.test(expression.value)) {
+    if (piecewiseRegex.test(expression.value)) {
       isPiecewise.value = true;
       selectedTab.value = 1;
       onParsePiecewiseEquation();
@@ -526,13 +526,13 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     if (highestTimeValue % 2 !== 0) {
       highestTimeValue += 1;
     }
-    xAxisMax.value = highestTimeValue;
+    xAxisMax = highestTimeValue;
 
     let highestConditionValue: number = getLastPropertyValue('conditionValue', piecewiseGridData.value);
     if (highestConditionValue % 2 !== 0) {
       highestConditionValue += 1;
     }
-    yAxisMax.value = highestConditionValue;
+    yAxisMax = highestConditionValue;
 
     dataPointsSource.value = piecewiseGridData.value.map((dataPoint: TimeConditionDataPoint) =>
         [dataPoint.timeValue, dataPoint.conditionValue]);
@@ -555,7 +555,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
   function onParsePiecewiseEquation() {
     let dataPoints: TimeConditionDataPoint[] = [];
 
-    const dataPointStrings: string[] = expression.value.split(piecewiseRegex.value)
+    const dataPointStrings: string[] = expression.value.split(piecewiseRegex)
         .filter((dataPoint: string) => hasValue(dataPoint) && dataPoint.indexOf(',') !== -1);
 
     dataPointStrings.forEach((dataPoint: string) => {
@@ -587,7 +587,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * Setter: cursorPosition
    */
    function setCursorPosition() {
-    cursorPosition.value = textareaInput.selectionStart;
+    cursorPosition = textareaInput.selectionStart;
   }
 
   /**
@@ -595,33 +595,33 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * @param formula The formula string to add to the expression string
    */
    function onAddFormulaToEquation(formula: string) {
-    if (cursorPosition.value === 0) {
+    if (cursorPosition === 0) {
       expression.value = `${formula}${expression}`;
-      cursorPosition.value = formula !== 'E' && formula !== 'PI'
+      cursorPosition = formula !== 'E' && formula !== 'PI'
           ? formula.indexOf('(') + 1
           : formula.length;
-    } else if (cursorPosition.value === expression.value.length) {
+    } else if (cursorPosition === expression.value.length) {
       expression.value = `${expression}${formula}`;
       if (formula !== 'E' && formula !== 'PI') {
         let i = expression.value.length;
         while (expression.value.charAt(i) !== '(') {
           i--;
         }
-        cursorPosition.value = i + 1;
+        cursorPosition = i + 1;
       } else {
-        cursorPosition.value = expression.value.length;
+        cursorPosition = expression.value.length;
       }
     } else {
-      const output = `${expression.value.substr(0, cursorPosition.value)}${formula}`;
-      expression.value = `${output}${expression.value.substr(cursorPosition.value)}`;
+      const output = `${expression.value.substr(0, cursorPosition)}${formula}`;
+      expression.value = `${output}${expression.value.substr(cursorPosition)}`;
       if (formula !== 'E' && formula !== 'PI') {
         let i = output.length;
         while (output.charAt(i) !== '(') {
           i--;
         }
-        cursorPosition.value = i + 1;
+        cursorPosition = i + 1;
       } else {
-        cursorPosition.value = output.length;
+        cursorPosition = output.length;
       }
     }
     textareaInput.focus();
@@ -633,16 +633,16 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * the textareaInput object is put into focus.
    */
    function onAddValueToExpression(value: string) {
-    if (cursorPosition.value === 0) {
-      cursorPosition.value = value.length;
+    if (cursorPosition === 0) {
+      cursorPosition = value.length;
       expression.value = `${value}${expression}`;
-    } else if (cursorPosition.value === expression.value.length) {
+    } else if (cursorPosition === expression.value.length) {
       expression.value = `${expression}${value}`;
-      cursorPosition.value = expression.value.length;
+      cursorPosition = expression.value.length;
     } else {
-      const output = `${expression.value.substr(0, cursorPosition.value)}${value}`;
-      expression.value = `${output}${expression.value.substr(cursorPosition.value)}`;
-      cursorPosition.value = output.length;
+      const output = `${expression.value.substr(0, cursorPosition)}${value}`;
+      expression.value = `${output}${expression.value.substr(cursorPosition)}`;
+      cursorPosition = output.length;
     }
     textareaInput.focus();
   }
@@ -652,7 +652,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    */
    function setTextareaCursorPosition() {
     setTimeout(() =>
-        textareaInput.setSelectionRange(cursorPosition.value, cursorPosition.value)
+        textareaInput.setSelectionRange(cursorPosition, cursorPosition)
     );
   }
 
@@ -803,7 +803,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    */
    function onEditDataPoint(dataPoint: TimeConditionDataPoint, property: string) {
     editedDataPoint.value = clone(dataPoint);
-    editedDataPointProperty.value = property;
+    editedDataPointProperty = property;
     showEditDataPointPopup.value = true;
   }
 
@@ -828,7 +828,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     }
 
     editedDataPoint.value = clone(emptyTimeConditionDataPoint);
-    editedDataPointProperty.value = '';
+    editedDataPointProperty = '';
     showEditDataPointPopup.value = false;
   }
 
@@ -895,7 +895,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     resetComponentCalculatedProperties();
 
     if (submit) {
-      equation.value.expression = isPiecewise ? onParseTimeAttributeDataPoints() : expression.value;
+      equation.expression = isPiecewise ? onParseTimeAttributeDataPoints() : expression.value;
       emit('submit', equation);
     } else {
       emit('submit', null);
@@ -904,7 +904,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     piecewiseGridData.value = [];
     timeInRatingGridData.value = [];
     selectedTab.value = 0;
-    equation.value = {...emptyEquation, id: getNewGuid()};
+    equation = {...emptyEquation, id: getNewGuid()};
   }
 
   /**
@@ -912,7 +912,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * and validExpressionMessage objects.
    */
    function resetComponentCalculatedProperties() {
-    cursorPosition.value = 0;
+    cursorPosition = 0;
     invalidExpressionMessage.value = '';
     validExpressionMessage.value = '';
   }
@@ -1017,7 +1017,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     const eachDataPointIsValid = multipleDataPoints.value
         .split(/\r?\n/).filter((dataPoints: string) => dataPoints !== '')
         .every((dataPoints: string) => {
-          return multipleDataPointsRegex.value.test(dataPoints) &&
+          return multipleDataPointsRegex.test(dataPoints) &&
               dataPoints.split(',').every((value: string) => !isNaN(parseFloat(value)));
         });
 

@@ -215,8 +215,8 @@ const emit = defineEmits(['submit'])
     { title: 'Description', align: 'Left', sortable: false, key: 'description' }
   ];
 
-  let unassignedUsers= ref<User[]>([]);
-  let assignedUsers= ref<User[]> ([]);
+  let unassignedUsers: User[]=[];
+  let assignedUsers:User[] =[];
 
   const assignedUsersCriteriaFilter= ref<any>([]) ;
   const unassignedUsersCriteriaFilter=ref <UserCriteriaFilter[]> ([]);
@@ -266,11 +266,11 @@ watch(stateUsersCriteriaFilter, () => {
 
 watch(stateUsers,()=>onUserCriteriaChanged())
   function onUserCriteriaChanged() {
-    unassignedUsers.value = stateUsers.value.filter((user: User) => !user.hasInventoryAccess);
-    assignedUsers.value = stateUsers.value.filter((user: User) => user.hasInventoryAccess);
+    unassignedUsers = stateUsers.value.filter((user: User) => !user.hasInventoryAccess);
+    assignedUsers = stateUsers.value.filter((user: User) => user.hasInventoryAccess);
 
     unassignedUsersCriteriaFilter.value = [{ ...emptyUserCriteriaFilter }];
-    unassignedUsers.value.forEach((value) => {
+    unassignedUsers.forEach((value) => {
       var tempL: UserCriteriaFilter = {
         userId: value.id,
         userName: value.username,

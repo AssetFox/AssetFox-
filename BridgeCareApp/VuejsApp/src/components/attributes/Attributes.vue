@@ -29,7 +29,7 @@
                 <v-col cols="2"> 
                     <v-subheader class="ghd-md-gray ghd-control-label" style="margin-left:2%;">Attribute</v-subheader>
                     <v-text-field id="Attributes-attributeName-vtextfield" outline class="ghd-text-field-border ghd-text-field"
-                        placeholder="Name" v-model='selectedAttribute.name'/>
+                         v-model='selectedAttribute.name'/>
                 </v-col>
                 <v-col cols="2">
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Type</v-subheader>
@@ -67,7 +67,7 @@
                         <v-text-field id="Attributes-attributeDefaultString-vtextfield" v-if="selectedAttribute.type == 'STRING'" outline class="ghd-text-field-border ghd-text-field"
                             v-model='selectedAttribute.defaultValue'/>
                         <v-text-field id="Attributes-attributeDefaultNumber-vtextfield" v-if="selectedAttribute.type != 'STRING'" outline class="ghd-text-field-border ghd-text-field"
-                            v-model.number='selectedAttribute.defaultValue'
+                            v-model='selectedAttribute.defaultValue'
                             />
                     </v-col>
                     <v-col cols="2">
@@ -84,9 +84,9 @@
                     </v-col>
                     <v-col cols="4" style="padding-top:50px;">
                         <v-row>
-                        <v-switch id="Attributes-attributeCalculated-vswitch" class='sharing header-text-content' label='Calculated' 
+                        <v-switch id="Attributes-attributeCalculated-vswitch" class='sharing header-text-content'  label='Calculated' 
                             v-model='selectedAttribute.isCalculated'/>
-                        <v-switch id="Attributes-attributeAscending-vswitch" class='sharing header-text-content' label='Ascending' 
+                        <v-switch id="Attributes-attributeAscending-vswitch" class='sharing header-text-content'  label='Ascending' 
                             v-model='selectedAttribute.isAscending'/>
                         </v-row>
                     </v-col>
@@ -142,6 +142,8 @@
                     <v-select
                         id="Attributes-attributeColumnName-vselect"
                         variant="outlined"
+                        item-title="text"
+                        item-value="value"
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='selectExcelColumns'
                         v-model='selectedAttribute.command'>
@@ -155,12 +157,14 @@
                 <v-btn id="Attributes-cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Cancel
                 </v-btn>  
+                <p>&nbsp;&nbsp;&nbsp;</p>
                 <v-btn
                 variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'
                     @click="CheckSqlCommand">
                     Test
                 </v-btn>
-                <v-btn id="Attributes-save-vbtn" @click='saveAttribute' :disabled='disableCrudButtons() || !hasUnsavedChanges' variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
+                <p>&nbsp;&nbsp;&nbsp;</p>
+                <v-btn id="Attributes-save-vbtn" @click='saveAttribute'  variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Save
                 </v-btn>               
             </v-row>
@@ -188,17 +192,17 @@ import { useStore } from 'vuex';
     let store = useStore();
     let hasSelectedAttribute = ref<boolean>(false);
     let hasEmptyDataSource: boolean = true;
-    let selectAttributeItemValue: ShallowRef<string | null> = shallowRef(null);
-    let selectDatasourceItemValue: ShallowRef<string | null> = shallowRef(null);
+    let selectAttributeItemValue = ref<string | null>(null);
+    let selectDatasourceItemValue = ref<string | null>(null);
     let selectAggregationRuleTypeItems: SelectItem[] = [];
-    let selectExcelColumns: SelectItem[] = [];
+    let selectExcelColumns = ref<SelectItem[]>([]);
     let selectedAttribute = ref<Attribute>(clone(emptyAttribute));
     let selectedDataSource: Datasource | undefined = clone(emptyDatasource);
     let rules: InputValidationRules = validationRules;
-    let validationErrorMessage: string = '';
-    let ValidationSuccessMessage: string = '';
-    let commandIsValid: boolean = true;
-    let checkedCommand = '';
+    let validationErrorMessage = ref<string>('');
+    let ValidationSuccessMessage = ref<string>('');
+    let commandIsValid = ref<boolean>(true);
+    let checkedCommand = ref<string>('');
 
     let aggregationRuleSelectValues = ref<SelectItem[]>([]);    
     let typeSelectValues = ref<SelectItem[]>([
@@ -245,10 +249,11 @@ import { useStore } from 'vuex';
     }
 
     watch(stateAttributes, () =>  {
-            selectAttributeItems.value = stateAttributes.value.map((attribute: Attribute) => ({
-            text: attribute.name,
-            value: attribute.id,
-        }));
+
+            let temp = clone(stateAttributes.value)
+            temp.forEach(_ => {
+                selectAttributeItems.value.push({text: _.name, value: _.id})
+            })
     })
 
     watch(stateDataSources, () => {
@@ -259,10 +264,10 @@ import { useStore } from 'vuex';
     })
 
     watch(selectAttributeItemValue, () =>  {
-        selectAttributeAction(selectAttributeItemValue);
+        selectAttributeAction(selectAttributeItemValue.value);
         hasSelectedAttribute.value = true;
-        checkedCommand = "";
-        commandIsValid = false;
+        checkedCommand.value = "";
+        commandIsValid.value = false;
 
         getAggregationRulesForTypeAction(selectedAttribute.value.type)
         let temp = stateAggregationRulesForType.value.map((rule: string) => ({
@@ -285,9 +290,9 @@ import { useStore } from 'vuex';
     })
 
     watch(selectDatasourceItemValue, () => {
-        if (any(propEq('id', selectDatasourceItemValue), stateDataSources.value)) {
+        if (any(propEq('id', selectDatasourceItemValue.value), stateDataSources.value)) {
             let ds = find(
-                propEq('id', selectDatasourceItemValue),
+                propEq('id', selectDatasourceItemValue.value),
                 stateDataSources.value,
             )
             if(!isNil(ds))
@@ -305,26 +310,31 @@ import { useStore } from 'vuex';
     })
 
     watch(excelColumns, () => {
-        selectExcelColumns = excelColumns.value.columnHeaders.map((header: string) => ({
-            text: header,
-            value: header,
-        }));
+
+        let temp = clone(excelColumns.value.columnHeaders);
+
+        temp.forEach(_ =>{
+            selectExcelColumns.value.push({text: _, value: _});
+        });
+
+        //selectExcelColumns.value = excelColumns.value.columnHeaders.map((header: string) => ({
+          //  text: header,
+           // value: header,
+       // }));
     })
 
-    watch(stateSelectedAttribute, () => onStateSelectedAttributeChanged)
-    function onStateSelectedAttributeChanged() {
-        selectedAttribute = clone(stateSelectedAttribute);
+    watch(stateSelectedAttribute, () =>  {
+        selectedAttribute.value = clone(stateSelectedAttribute.value);
         if(isNil(selectedAttribute.value.dataSource)) {
             selectedAttribute.value.dataSource = clone(emptyDatasource);
         }
         selectDatasourceItemValue.value = selectedAttribute.value.dataSource.id;
-    }
+    })
 
-    watch(selectedAttribute, () =>onSelectedAttributeChanged )
-    function onSelectedAttributeChanged() {
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', selectedAttribute, stateSelectedAttribute);
+    watch(selectedAttribute, () => {
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', selectedAttribute.value, stateSelectedAttribute.value);
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
-    }
+    })
 
     function addAttribute()
     {
@@ -332,7 +342,7 @@ import { useStore } from 'vuex';
     }
 
     function onDiscardChanges() {
-        selectedAttribute = clone(stateSelectedAttribute);
+        selectedAttribute.value = clone(stateSelectedAttribute.value);
     }
 
     function saveAttribute(){
@@ -342,7 +352,7 @@ import { useStore } from 'vuex';
             isInsert = true;
         }
             
-        upsertAttributeAction(selectedAttribute)
+        upsertAttributeAction(selectedAttribute.value)
         
         if(isInsert)
             selectAttributeItemValue.value = selectedAttribute.value.id;
@@ -371,8 +381,8 @@ import { useStore } from 'vuex';
             if(selectedAttribute.value.dataSource.type === 'SQL'){
                 allValid = allValid &&
                 rules['generalRules'].valueIsNotEmpty(selectedAttribute.value.command) === true &&
-                checkedCommand === selectedAttribute.value.command &&
-                commandIsValid;
+                checkedCommand.value === selectedAttribute.value.command &&
+                commandIsValid.value;
             }
             else if(selectedAttribute.value.dataSource.type === 'Excel'){
                 allValid = allValid &&
@@ -388,14 +398,14 @@ import { useStore } from 'vuex';
             .then((response: AxiosResponse) => {
           if (hasValue(response, 'data')) {
             const result: ValidationResult = response.data as ValidationResult;
-            commandIsValid = result.isValid;
-            checkedCommand = selectedAttribute.value.command;
+            commandIsValid.value = result.isValid;
+            checkedCommand.value = selectedAttribute.value.command;
             if (result.isValid) {
-              ValidationSuccessMessage = result.validationMessage;
-              validationErrorMessage = '';
+              ValidationSuccessMessage.value = result.validationMessage;
+              validationErrorMessage.value = '';
             } else {
-              validationErrorMessage = result.validationMessage;
-              ValidationSuccessMessage = '';            
+              validationErrorMessage.value = result.validationMessage;
+              ValidationSuccessMessage.value = '';            
             }
           }
         });

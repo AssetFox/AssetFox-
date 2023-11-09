@@ -37,7 +37,7 @@ import { useStore } from 'vuex';
 import { clone } from 'ramda';
 
   let store = useStore();
-  let getIdByUserNameGetter: any = store.getters.getIdByUserName ;
+  let getIdByUserNameGetter = store.getters.getIdByUserName ;
 
   const props = defineProps<{
     dialogData: CreateDataSourceDialogData

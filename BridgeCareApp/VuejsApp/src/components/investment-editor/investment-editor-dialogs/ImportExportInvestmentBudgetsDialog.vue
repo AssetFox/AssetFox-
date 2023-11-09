@@ -2,15 +2,14 @@
     <v-row>
         <v-dialog width="768px" height="540px" persistent v-model ='showDialog'>
             <v-card class="div-padding">
-                <v-card-title class="pa-2">
-                    <v-row justify-start>
-                        <h4 class="Montserrat-font-family">Investment Budgets Upload</h4>
+                    <v-row justify="space-between" style="margin-bottom: 10px;">
+                        <h4 style="padding-top: 10px; padding-left: 10px;" class="Montserrat-font-family">Investment Budgets Upload</h4>
+                        <v-btn @click="onSubmit(false)" icon variant="flat">
+                            <i class="fas fa-times fa-2x"></i>
+                        </v-btn>
                     </v-row>
-                    <v-btn @click="onSubmit(false)" icon>
-                    <i class="fas fa-times fa-2x"></i>
-                </v-btn>
-                </v-card-title>
-                <v-card-text class="pa-0">
+                    
+                <v-card-text >
                     <v-row column>
                         <InvestmentBudgetsFileSelector :closed='closed' @submit='onFileSelectorChange' />
                         <v-col cols = "12">
@@ -21,7 +20,7 @@
                     </v-row>
                 </v-card-text>
                 <v-card-actions>
-                    <v-row justify-center>
+                    <v-row justify="center">
                         <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "flat">Cancel</v-btn>
                         <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>
                     </v-row>
@@ -31,7 +30,7 @@
         <v-dialog max-width='400px' persistent v-model='isSuccessfulImport'>
             <v-card>
                 <v-card-title class="title-padding">
-                    <v-row justify-center>
+                    <v-row justify="center">
                         <h6 class="ghd-control-label">Budgets have been replaced.  Please update budget priorities</h6>
                     </v-row>
                 </v-card-title>
@@ -68,7 +67,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 let isSuccessfulImport = computed<boolean>(() => store.state.investmentModule.isSuccessfulImport);
 
 let investmentBudgetsFile = ref<File | null>(null);
-let overwriteBudgets: boolean = true;
+let overwriteBudgets = ref(true);
 let closed = ref<boolean>(false);
 
     function flipVisible(){
@@ -98,7 +97,7 @@ let closed = ref<boolean>(false);
     function onSubmit(submit: boolean, isExport: boolean = false) {
         if (submit) {
             const result: ImportExportInvestmentBudgetsDialogResult = {
-                overwriteBudgets: overwriteBudgets,
+                overwriteBudgets: overwriteBudgets.value,
                 file: investmentBudgetsFile.value as File,
                 isExport: isExport
             };

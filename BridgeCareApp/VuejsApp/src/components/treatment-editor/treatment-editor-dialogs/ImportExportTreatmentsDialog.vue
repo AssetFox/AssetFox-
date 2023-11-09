@@ -3,7 +3,7 @@
         <v-card class="div-padding">
             <v-row justify="space-between" style="margin-bottom: 10px;">
                 <h3 class="Montserrat-font-family">Treatments Upload</h3>
-                <v-btn @click="onSubmit(false)" flat>
+                <v-btn @click="onSubmit(false)" variant="flat">
                 <i class="fas fa-times fa-2x"></i>
             </v-btn>
             </v-row>

@@ -4,15 +4,12 @@
       <v-card-title class="ghd-dialog-box-padding-top">
          <v-row justify-space-between align-center>
             <div class="ghd-control-dialog-header">New Network</div>
-            <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-              X
-            </v-btn>
           </v-row>
         </v-card-title>           
       <v-card-text class="ghd-dialog-box-padding-center">
         <v-row column>
-          <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
           <v-text-field outline 
+            label="Name"
             id="AddNetworkDialog-NetworkName-vtextfield"
             v-model="networkName"
             class="ghd-text-field-border ghd-text-field"/>
@@ -20,9 +17,9 @@
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-row justify-center row>
-          <v-btn id="AddNetworkDialog-Cancel-vbtn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' variant = "flat">Cancel</v-btn>
+          <v-btn id="AddNetworkDialog-Cancel-vbtn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button'  style="margin-right:auto; margin-left:auto;" variant = "flat">Cancel</v-btn>
           <v-btn id="AddNetworkDialog-Save-vbtn" @click="onSubmit(true)"
-                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
+                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-right:auto; margin-left:auto;" variant = "outlined">
             Save
           </v-btn>          
         </v-row>
@@ -44,32 +41,29 @@ import { ref, Ref, watch } from 'vue';
   const emit = defineEmits(['submit'])
 
 
-  let newNetwork: Network = clone(emptyNetwork);
+  let newNetwork = ref<Network>(clone(emptyNetwork));
   let rules: InputValidationRules = validationRules;
-  let networkName: Ref<string> = ref('New Network');
+  let networkName = ref<string>('New Network');
 
-  watch(networkName, () => onNetworkNameChanged)
-  function onNetworkNameChanged() {
-      newNetwork.name = networkName.value;
-  }
+  watch(networkName, () =>  {
+      newNetwork.value.name = networkName.value;
+  })
 
-   watch(() => props.dialogData, () => onDialogDataChanged)
-  function onDialogDataChanged() {
-    newNetwork = {
-      ...newNetwork,
+   watch(() => props.dialogData, () =>  {
+    newNetwork.value = {
+      ...newNetwork.value,
       name: networkName.value,
     }
-    
-  }
+  })
 
   function onSubmit(submit: boolean) {
     if (submit) {
-      emit('submit', newNetwork);
+      emit('submit', newNetwork.value);
     } else {
       emit('submit', null);
     }
 
-    newNetwork = clone(emptyNetwork);
+    newNetwork.value = clone(emptyNetwork);
     props.dialogData.showDialog = false;
   }
 

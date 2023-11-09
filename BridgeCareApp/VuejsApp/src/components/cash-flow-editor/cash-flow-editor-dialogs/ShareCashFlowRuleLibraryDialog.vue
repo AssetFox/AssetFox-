@@ -1,13 +1,13 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="showDialogComputed">
+  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
-        <v-row justify-center>
-          <h3>Cash Flow Rule Library Sharing</h3>
-        </v-row>
+        <v-row justify="space-between" style="margin-top: 10px;">
+          <h5>Cash Flow Rule Library Sharing</h5>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
+        </v-row>
       </v-card-title>
       <v-card-text>
         <v-data-table id="ShareCashFlowRuleLibraryDialog-table-vdatatable" :headers="shareCashFlowRuleLibraryUserGridHeaders"
@@ -15,29 +15,31 @@
                       sort-icon=ghd-table-sort
                       :search="searchTerm">
           <template v-slot:item="{item}" slot="items" slot-scope="props">
+            <tr>
             <td>
-              {{ item.value.username }}
+              {{ item.username }}
             </td>
             <td>
-              <v-checkbox id="ShareCashFlowRuleLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.raw.isShared"
-                          @change="removeUserModifyAccess(item.value.id, item.value.isShared)"/>
+              <v-checkbox id="ShareCashFlowRuleLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.isShared"
+                          @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox id="ShareCashFlowRuleLibraryDialog-canModify-vcheckbox" :disabled="!item.value.isShared" label="Can Modify" v-model="item.raw.canModify"/>
+              <v-checkbox id="ShareCashFlowRuleLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" label="Can Modify" v-model="item.canModify"/>
             </td>
+          </tr>
           </template>
-          <v-alert :model-value="true"
+          <!-- <v-alert :model-value="true"
                    class="ara-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
-          </v-alert>
+          </v-alert> -->
         </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-row row justify-center>
+        <v-row justify="center">
           <v-btn id="ShareCashFlowRuleLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
-          <v-btn id="ShareCashFlowRuleLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
+          <v-btn id="ShareCashFlowRuleLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding" variant="outlined">
             Save
           </v-btn>
         </v-row>
@@ -47,7 +49,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, watch, ref, computed } from 'vue';
+import { reactive, watch, ref, computed, toRefs } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {CashFlowRuleLibraryUser } from '@/shared/models/iAM/cash-flow';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -55,42 +57,38 @@ import {User} from '@/shared/models/iAM/user';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getUserName} from '@/shared/utils/get-user-info';
 import {setItemPropertyValueInList} from '@/shared/utils/setter-utils';
-import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {CashFlowRuleLibraryUserGridRow, ShareCashFlowRuleLibraryDialogData } from '@/shared/models/modals/share-cash-flow-rule-data';
 import CashFlowRuleService from '@/services/cash-flow.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
 
   let store = useStore();
-
   const props = defineProps<{dialogData: ShareCashFlowRuleLibraryDialogData}>()
-  let showDialogComputed = computed(() => props.dialogData.showDialog);
-  const emit = defineEmits(['submit']);
+  const { dialogData } = toRefs(props);
+  const stateUsers = computed<User[]>(() => store.state.userModule.users);
 
-  let stateUsers = ref<User[]>(store.state.userModule.users);
+  const emit = defineEmits(['submit']);
 
   const shareCashFlowRuleLibraryUserGridHeaders: any[]= [
     {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
-    {title: 'Shared With', key: '', align: 'left', sortable: true, class: '', width: ''},
-    {title: 'Can Modify', key: '', align: 'left', sortable: true, class: '', width: ''}
+    {title: 'Shared With', key: 'isShared', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Can Modify', key: 'canModify', align: 'left', sortable: true, class: '', width: ''}
   ] ;
-  let shareCashFlowRuleLibraryUserGridRows: CashFlowRuleLibraryUserGridRow[] = [];
+  const shareCashFlowRuleLibraryUserGridRows = ref<CashFlowRuleLibraryUserGridRow[]>([]);
   let currentUserAndOwner: CashFlowRuleLibraryUser[] = [];
   let searchTerm: string = '';
-  const dialogData = reactive(props.dialogData);
 
-  watch(() => props.dialogData, () => onDialogDataChanged)
-  function onDialogDataChanged() {
-    if (dialogData.showDialog) {
+  watch(dialogData, () => {
+    if (dialogData.value.showDialog) {
       onSetGridData();
       onSetUsersSharedWith();
     }
-  }
+  });
 
   function onSetGridData() {
     const currentUser: string = getUserName();
 
-    shareCashFlowRuleLibraryUserGridRows = stateUsers.value
+    shareCashFlowRuleLibraryUserGridRows.value = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -103,7 +101,7 @@ import { useStore } from 'vuex';
     function onSetUsersSharedWith() {
         // Cash Flow Rule library users
         let cashFlowRuleLibraryUsers: CashFlowRuleLibraryUser[] = [];
-        CashFlowRuleService.getCashFlowRuleLibraryUsers(dialogData.cashFlowRuleLibrary.id).then(response => {
+        CashFlowRuleService.getCashFlowRuleLibraryUsers(dialogData.value.cashFlowRuleLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];
@@ -135,14 +133,14 @@ import { useStore } from 'vuex';
                 const otherUsers: CashFlowRuleLibraryUser[] = filter(isNotCurrentUserOrOwner, cashFlowRuleLibraryUsers) as CashFlowRuleLibraryUser[];
 
                 otherUsers.forEach((cashFlowRuleLibraryUser: CashFlowRuleLibraryUser) => {
-                    if (any(propEq('id', cashFlowRuleLibraryUser.userId), shareCashFlowRuleLibraryUserGridRows)) {
+                    if (any(propEq('id', cashFlowRuleLibraryUser.userId), shareCashFlowRuleLibraryUserGridRows.value)) {
                         const cashFlowRuleLibraryUserGridRow: CashFlowRuleLibraryUserGridRow = find(
-                            propEq('id', cashFlowRuleLibraryUser.userId), shareCashFlowRuleLibraryUserGridRows) as CashFlowRuleLibraryUserGridRow;
+                            propEq('id', cashFlowRuleLibraryUser.userId), shareCashFlowRuleLibraryUserGridRows.value) as CashFlowRuleLibraryUserGridRow;
 
-                        shareCashFlowRuleLibraryUserGridRows = update(
-                            findIndex(propEq('id', cashFlowRuleLibraryUser.userId), shareCashFlowRuleLibraryUserGridRows),
+                        shareCashFlowRuleLibraryUserGridRows.value = update(
+                            findIndex(propEq('id', cashFlowRuleLibraryUser.userId), shareCashFlowRuleLibraryUserGridRows.value),
                             { ...cashFlowRuleLibraryUserGridRow, isShared: true, canModify: cashFlowRuleLibraryUser.canModify },
-                            shareCashFlowRuleLibraryUserGridRows
+                            shareCashFlowRuleLibraryUserGridRows.value
                         );
                     }
                 });
@@ -152,9 +150,9 @@ import { useStore } from 'vuex';
 
   function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      shareCashFlowRuleLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), shareCashFlowRuleLibraryUserGridRows),
-          'canModify', false, shareCashFlowRuleLibraryUserGridRows);
+      shareCashFlowRuleLibraryUserGridRows.value = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), shareCashFlowRuleLibraryUserGridRows.value),
+          'canModify', false, shareCashFlowRuleLibraryUserGridRows.value);
     }
   }
 
@@ -165,11 +163,11 @@ import { useStore } from 'vuex';
       emit('submit', null);
     }
 
-    shareCashFlowRuleLibraryUserGridRows = [];
+    shareCashFlowRuleLibraryUserGridRows.value = [];
   }
 
   function getCashFlowRuleLibraryUsers() {
-    const usersSharedWith: CashFlowRuleLibraryUser[] = shareCashFlowRuleLibraryUserGridRows
+    const usersSharedWith: CashFlowRuleLibraryUser[] = shareCashFlowRuleLibraryUserGridRows.value
         .filter((cashFlowRuleLibraryUserGridRow: CashFlowRuleLibraryUserGridRow) => cashFlowRuleLibraryUserGridRow.isShared)
         .map((cashFlowRuleLibraryUserGridRow: CashFlowRuleLibraryUserGridRow) => ({
           userId: cashFlowRuleLibraryUserGridRow.id,

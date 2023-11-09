@@ -70,11 +70,6 @@
             <v-row v-if='hasSelectedLibrary && !hasScenario' style="margin: 10px; !important">
                 <div class="ghd-control-label">
                 Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> | Date Modified: {{ modifiedDate }}   
-                <v-badge v-show="isShared">
-                    <template v-slot: badge>
-                        <span>Shared</span>
-                    </template>
-                </v-badge>
                 <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                        v-show='!hasScenario'>
                     Share Library
@@ -803,13 +798,11 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
                             treatmentCache.push(data)
                     }
                 })
-            }
-
             
             else if(!isNil(treatment))
                 selectedTreatment.value = clone(treatment);
-            else
-                 selectedTreatment.value = clone(emptyTreatment);
+            else{
+                selectedTreatment.value = clone(emptyTreatment);
                  if (!keepActiveTab) {
                      activeTab.value = 0;
                     }
@@ -822,9 +815,10 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
                         scenarioLibraryIsModified = selectedTreatment.value ? selectedTreatment.value.isModified : false;
                     }
                 })
+            }
+                 
         }
-   
-    
+    }
 
     watch(selectedTreatment, () => onSelectedTreatmentChanged())
     function onSelectedTreatmentChanged() {

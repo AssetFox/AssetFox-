@@ -1,13 +1,13 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="showDialogComputed">
+  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
-        <v-row justify-center>
-          <h3>Performance Curve Library Sharing</h3>
-        </v-row>
+        <v-row justify="space-between" style="margin-top: 10px;">
+          <h5>Performance Curve Library Sharing</h5>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
+        </v-row>
       </v-card-title>
       <v-card-text>
         <v-data-table id="SharePerformanceCurveLibraryDialog-table-vdatatable" :headers="performanceCurveLibraryUserGridHeaders"
@@ -15,6 +15,7 @@
                       sort-icon=ghd-table-sort
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="props">
+            <tr>
             <td>
               {{ props.item.username }}
             </td>
@@ -25,18 +26,19 @@
             <td>
               <v-checkbox id="SharePerformanceCurveLibraryDialog-canModify-vcheckbox" :disabled="!props.item.isShared" label="Can Modify" v-model="props.item.canModify"/>
             </td>
+          </tr>
           </template>
-          <v-alert :model-value="true"
+          <!-- <v-alert :model-value="true"
                    class="ara-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
-          </v-alert>
+          </v-alert> -->
         </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-row row justify-center>
-          <v-btn id="SharePerformanceCurveLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
+        <v-row justify="center">
+          <v-btn id="SharePerformanceCurveLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
           <v-btn id="SharePerformanceCurveLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
             Save
           </v-btn>
@@ -47,7 +49,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { computed } from 'vue';
+import { watch, toRefs, computed, ref } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {PerformanceCurveLibraryUser } from '@/shared/models/iAM/performance';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -55,42 +57,39 @@ import {User} from '@/shared/models/iAM/user';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getUserName} from '@/shared/utils/get-user-info';
 import {setItemPropertyValueInList} from '@/shared/utils/setter-utils';
-import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {PerformanceCurveLibraryUserGridRow, SharePerformanceCurveLibraryDialogData } from '@/shared/models/modals/share-performance-curve-library-dialog-data';
 import PerformanceCurveService from '@/services/performance-curve.service';
 import { http2XX } from '@/shared/utils/http-utils';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
 
 const emit = defineEmits(['submit'])
 let store = useStore();
 const props = defineProps<{
   dialogData: SharePerformanceCurveLibraryDialogData
     }>()
-    let showDialogComputed = computed(() => props.dialogData.showDialog);
-let stateUsers = ref<User[]>(store.state.userModule.users);
+const { dialogData } = toRefs(props);
+    // let showDialogComputed = computed(() => props.dialogData.showDialog);
+const stateUsers = computed<User[]>(() => store.state.userModule.users);
 let performanceCurveLibraryUserGridHeaders: any[] = [
     {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
     {title: 'Shared With', key: '', align: 'left', sortable: true, class: '', width: ''},
     {title: 'Can Modify', key: '', align: 'left', sortable: true, class: '', width: ''}
   ];
-let performanceCurveLibraryUserGridRows: PerformanceCurveLibraryUserGridRow[] = [];
+const performanceCurveLibraryUserGridRows = ref<PerformanceCurveLibraryUserGridRow[]>([]);
 let currentUserAndOwner: PerformanceCurveLibraryUser[] = [];
 let searchTerm: string = '';
 
-watch(()=>props.dialogData,()=>onDialogDataChanged())
-  function onDialogDataChanged() {
-    if (props.dialogData.showDialog) {
+watch(dialogData,()=> {
+    if (dialogData.value.showDialog) {
       onSetGridData();
       onSetUsersSharedWith();
     }
-  }
+  });
 
   function onSetGridData() {
     const currentUser: string = getUserName();
 
-    performanceCurveLibraryUserGridRows = stateUsers.value
+    performanceCurveLibraryUserGridRows.value = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -103,7 +102,7 @@ watch(()=>props.dialogData,()=>onDialogDataChanged())
     function onSetUsersSharedWith() {
         //performance curve library users
         let performanceCurveLibraryUsers: PerformanceCurveLibraryUser[] = [];
-        PerformanceCurveService.GetPerformanceCurveLibraryUsers(props.dialogData.performanceCurveLibrary.id).then(response => {
+        PerformanceCurveService.GetPerformanceCurveLibraryUsers(dialogData.value.performanceCurveLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];
@@ -136,14 +135,14 @@ watch(()=>props.dialogData,()=>onDialogDataChanged())
                 const otherUsers: PerformanceCurveLibraryUser[] = filter(isNotCurrentUserOrOwner, performanceCurveLibraryUsers) as PerformanceCurveLibraryUser[];
 
                 otherUsers.forEach((performanceCurveLibraryUser: PerformanceCurveLibraryUser) => {
-                    if (any(propEq('id', performanceCurveLibraryUser.userId), performanceCurveLibraryUserGridRows)) {
+                    if (any(propEq('id', performanceCurveLibraryUser.userId), performanceCurveLibraryUserGridRows.value)) {
                         const performanceCurveLibraryUserGridRow: PerformanceCurveLibraryUserGridRow = find(
-                            propEq('id', performanceCurveLibraryUser.userId), performanceCurveLibraryUserGridRows) as PerformanceCurveLibraryUserGridRow;
+                            propEq('id', performanceCurveLibraryUser.userId), performanceCurveLibraryUserGridRows.value) as PerformanceCurveLibraryUserGridRow;
 
-                        performanceCurveLibraryUserGridRows = update(
-                            findIndex(propEq('id', performanceCurveLibraryUser.userId), performanceCurveLibraryUserGridRows),
+                        performanceCurveLibraryUserGridRows.value = update(
+                            findIndex(propEq('id', performanceCurveLibraryUser.userId), performanceCurveLibraryUserGridRows.value),
                             { ...performanceCurveLibraryUserGridRow, isShared: true, canModify: performanceCurveLibraryUser.canModify },
-                            performanceCurveLibraryUserGridRows
+                            performanceCurveLibraryUserGridRows.value
                         );
                     }
                 });
@@ -153,9 +152,9 @@ watch(()=>props.dialogData,()=>onDialogDataChanged())
 
   function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      performanceCurveLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), performanceCurveLibraryUserGridRows),
-          'canModify', false, performanceCurveLibraryUserGridRows);
+      performanceCurveLibraryUserGridRows.value = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), performanceCurveLibraryUserGridRows.value),
+          'canModify', false, performanceCurveLibraryUserGridRows.value);
     }
   }
 
@@ -166,11 +165,11 @@ watch(()=>props.dialogData,()=>onDialogDataChanged())
       emit('submit', null);
     }
 
-    performanceCurveLibraryUserGridRows = [];
+    performanceCurveLibraryUserGridRows.value = [];
   }
 
   function getPerformanceCurveLibraryUsers() {
-    const usersSharedWith: PerformanceCurveLibraryUser[] = performanceCurveLibraryUserGridRows
+    const usersSharedWith: PerformanceCurveLibraryUser[] = performanceCurveLibraryUserGridRows.value
         .filter((performanceCurveLibraryUserGridRow: PerformanceCurveLibraryUserGridRow) => performanceCurveLibraryUserGridRow.isShared)
         .map((performanceCurveLibraryUserGridRow: PerformanceCurveLibraryUserGridRow) => ({
           userId: performanceCurveLibraryUserGridRow.id,

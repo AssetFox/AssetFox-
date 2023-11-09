@@ -1,13 +1,13 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="showDialogComputed">
+  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
-        <v-row justify-center>
-          <h3>Calculated Attribute Library Sharing</h3>
-        </v-row>
+        <v-row justify="space-between" align="center" style="margin-top: 10px;">
+          <h5>Calculated Attribute Library Sharing</h5>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
+        </v-row>
       </v-card-title>
       <v-card-text>
         <v-data-table id="ShareCalculatedAttributeLibraryDialog-table-vdatatable"
@@ -16,27 +16,29 @@
                       sort-icon=ghd-table-sort
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="{item}">
+            <tr>
             <td>
-              {{ item.value.username }}
+              {{ item.username }}
             </td>
             <td>
-              <v-checkbox label="Is Shared" v-model="item.raw.isShared" id="ShareCalculatedAttributeLibraryDialog-isShared-vcheckbox"
-                          @change="removeUserModifyAccess(item.value.id, item.value.isShared)"/>
+              <v-checkbox label="Is Shared" v-model="item.isShared" id="ShareCalculatedAttributeLibraryDialog-isShared-vcheckbox"
+                          @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!dialogData.showDialog" label="Can Modify" v-model="item.raw.canModify" id="ShareCalculatedAttributeLibraryDialog-canModify-vcheckbox"/>
+              <v-checkbox :disabled="!dialogData.showDialog" label="Can Modify" v-model="item.canModify" id="ShareCalculatedAttributeLibraryDialog-canModify-vcheckbox"/>
             </td>
+          </tr>
           </template>
-          <v-alert :model-value="true"
+          <!-- <v-alert :model-value="true"
                    class="ara-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
-          </v-alert>
+          </v-alert> -->
         </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-row row justify-center>
+        <v-row justify="center">
           <v-btn id="ShareCalculatedAttributeLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
           <v-btn id="ShareCalculatedAttributeLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
             Save
@@ -48,7 +50,7 @@
 </template>
 
 <script lang="ts" setup>
-import Vue, { computed } from 'vue';
+import { toRefs, ref, watch, computed } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {CalculatedAttributeLibraryUser } from '@/shared/models/iAM/calculated-attribute';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -61,32 +63,29 @@ import {CalculatedAttributeLibraryUserGridRow, ShareCalculatedAttributeLibraryDi
 import CalculatedAttributeService from '@/services/calculated-attribute.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
-import { CreateCalculatedAttributeLibraryDialogData } from '@/shared/models/modals/create-calculated-attribute-library-dialog-data';
 
 const emit = defineEmits(['submit'])
 let store = useStore();
 const props = defineProps<{
     dialogData: ShareCalculatedAttributeLibraryDialogData
   }>()
-  let stateUsers = ref<User[]>(store.state.userModule.users);
-  const shareCalculatedAttributeLibraryUserGridHeaders = ref<DataTableHeader[]>([
-    {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
+const {dialogData } = toRefs(props);
+const stateUsers = computed<User[]>(() => store.state.userModule.users);
+const shareCalculatedAttributeLibraryUserGridHeaders = ref<any[]>([
+    {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Shared With', key: 'isShared', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Can Modify', key: 'canModify', align: 'left', sortable: true, class: '', width: ''}
   ]);
   const shareCalculatedAttributeLibraryUserGridRows = ref<CalculatedAttributeLibraryUserGridRow[]>([]);
   let currentUserAndOwner: CalculatedAttributeLibraryUser[] = [];
   const searchTerm = ref('');
 
-  watch(()=>props.dialogData,() => onDialogDataChanged)
-  function onDialogDataChanged() {
-    if (props.dialogData.showDialog) {
+  watch(dialogData,() => {
+    if (dialogData.value.showDialog) {
       onSetGridData();
       onSetUsersSharedWith();
     }
-  }
+  });
 
   function onSetGridData() {
     const currentUser: string = getUserName();
@@ -104,7 +103,7 @@ const props = defineProps<{
     function onSetUsersSharedWith() {
         // Calculated Attribute library users
         let calculatedAttributeLibraryUsers: CalculatedAttributeLibraryUser[] = [];
-        CalculatedAttributeService.getCalculatedAttributeLibraryUsers(props.dialogData.calculatedAttributeLibrary.id).then(response => {
+        CalculatedAttributeService.getCalculatedAttributeLibraryUsers(dialogData.value.calculatedAttributeLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];

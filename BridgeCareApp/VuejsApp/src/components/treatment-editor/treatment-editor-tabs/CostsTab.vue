@@ -172,7 +172,11 @@ import { getUrl } from '@/shared/utils/get-url';
     let uuidNIL: string = getBlankGuid();
     let alertData = shallowRef(clone(emptyAlertData));
 
-    watch(selectedTreatmentCosts, () => {
+    onMounted(() => {
+        if(props.selectedTreatmentCosts.length > 0)
+            costsGridData.value = clone(props.selectedTreatmentCosts);
+    })
+    watch(() => props.selectedTreatmentCosts, () => {
         costsGridData.value = clone(props.selectedTreatmentCosts);
     });
 

@@ -28,11 +28,6 @@
                         <v-divider vertical 
                             v-if="hasSelectedLibrary && !hasScenario">
                         </v-divider>
-                        <v-badge v-show="isShared" style="padding: 7px">
-                            <template v-slot: badge>
-                                <span>Shared</span>
-                            </template>
-                        </v-badge>
                         <v-btn id="RemainingLifeLimitEditor-shareLibrary-vbtn" @click='onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
@@ -236,7 +231,7 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onMounted } from 'vue';
+import { ref, shallowReactive, shallowRef, ShallowRef, watch, onMounted } from 'vue';
 import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import {
     emptyRemainingLifeLimit,

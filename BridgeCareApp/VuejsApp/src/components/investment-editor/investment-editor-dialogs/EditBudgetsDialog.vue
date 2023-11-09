@@ -11,9 +11,9 @@
                         </v-btn>
                     </v-row>
                 </v-card-title>
-                <div style='height: 500px; max-width:900px' class="ghd-dialog-box-padding-center">
+                <div style='height: 500px; max-width:900px; margin-top:20px;' class="ghd-dialog-box-padding-center">
                     <div style='max-height: 450px; overflow-y:auto;'>
-                        <v-data-table-server
+                        <v-data-table-virtual
                                   id="EditBudgetsDialog-budgets-dataTable"
                                   :headers='editBudgetsDialogGridHeaders'
                                   :items="editBudgetsDialogGridData"
@@ -73,7 +73,7 @@
                             </td>
                         </tr>    
                         </template>
-                    </v-data-table-server>
+                    </v-data-table-virtual>
                     </div>
                     <v-row row align-end style="margin:0 !important">
                         <v-btn id="EditBudgetsDialog-add-btn" @click='onAddBudget' class='ghd-blue ghd-button' variant = "flat">

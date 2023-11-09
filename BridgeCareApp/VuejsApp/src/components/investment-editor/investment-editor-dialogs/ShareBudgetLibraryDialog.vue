@@ -2,7 +2,7 @@
   <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
-        <v-row justify="space-between">
+        <v-row justify="space-between" style="margin-top: 10px;">
           <h3>Budget Library Sharing</h3>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
@@ -15,6 +15,7 @@
                       sort-icon=ghd-table-sort
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="{item}">
+            <tr>
             <td>
               {{ item.username }}
             </td>
@@ -25,6 +26,7 @@
             <td>
               <v-checkbox id="ShareBudgetLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" label="Can Modify" v-model="item.canModify"/>
             </td>
+          </tr>
           </template>
           <!-- <v-alert :model-value="true"
                    class="ara-orange-bg"
@@ -68,7 +70,6 @@ import { useRouter } from 'vue-router';
 let store = useStore();
 const props = defineProps<{dialogData: ShareBudgetLibraryDialogData}>()
 const { dialogData } = toRefs(props);
-// let showDialogComputed = computed(() => props.dialogData.showDialog);
 const stateUsers = computed<User[]>(() => store.state.userModule.users);
   const emit = defineEmits(['submit']);
 

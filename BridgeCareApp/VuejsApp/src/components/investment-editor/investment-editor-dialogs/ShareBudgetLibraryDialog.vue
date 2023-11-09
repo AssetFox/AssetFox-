@@ -1,9 +1,12 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="showDialogComputed">
+  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
-        <v-row justify-center>
+        <v-row justify="space-between">
           <h3>Budget Library Sharing</h3>
+          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
+            X
+          </v-btn>
         </v-row>
       </v-card-title>
       <v-card-text>
@@ -13,31 +16,31 @@
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="{item}">
             <td>
-              {{ item.value.username }}
+              {{ item.username }}
             </td>
             <td>
-              <v-checkbox id="ShareBudgetLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.raw.isShared"
-                          @change="removeUserModifyAccess(item.value.id, item.value.isShared)"/>
+              <v-checkbox id="ShareBudgetLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.isShared"
+                          @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox id="ShareBudgetLibraryDialog-canModify-vcheckbox" :disabled="!item.value.isShared" label="Can Modify" v-model="item.raw.canModify"/>
+              <v-checkbox id="ShareBudgetLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" label="Can Modify" v-model="item.canModify"/>
             </td>
           </template>
-          <v-alert :model-value="true"
+          <!-- <v-alert :model-value="true"
                    class="ara-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
-          </v-alert>
+          </v-alert> -->
         </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-row justify-space-between row>
+        <v-row>
           <v-spacer></v-spacer>
-          <v-btn id="ShareBudgetLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ara-blue-bg text-white">
+          <v-btn id="ShareBudgetLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-blue">Cancel</v-btn>
+          <v-btn id="ShareBudgetLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-blue-bg text-white">
             Save
           </v-btn>
-          <v-btn id="ShareBudgetLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
           <v-spacer></v-spacer>
         </v-row>
       </v-card-actions>
@@ -58,33 +61,32 @@ import { BudgetLibraryUserGridRow, ShareBudgetLibraryDialogData } from '@/shared
 import InvestmentService from '@/services/investment.service';
     import { AxiosResponse } from 'axios';
     import { http2XX } from '@/shared/utils/http-utils';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref, computed} from 'vue';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, toRefs, computed} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
 let store = useStore();
-const emit = defineEmits(['submit'])
 const props = defineProps<{dialogData: ShareBudgetLibraryDialogData}>()
-
-let showDialogComputed = computed(() => props.dialogData.showDialog);
-let stateUsers = computed<User[]>(() => store.state.userModule.users);
+const { dialogData } = toRefs(props);
+// let showDialogComputed = computed(() => props.dialogData.showDialog);
+const stateUsers = computed<User[]>(() => store.state.userModule.users);
+  const emit = defineEmits(['submit']);
 
   let budgetLibraryUserGridHeaders: any[] = [
     {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
-    {title: 'Shared With', key: '', align: 'left', sortable: true, class: '', width: ''},
-    {title: 'Can Modify', key: '', align: 'left', sortable: true, class: '', width: ''}
+    {title: 'Shared With', key: 'isShared', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Can Modify', key: 'canModify', align: 'left', sortable: true, class: '', width: ''}
   ];
   let budgetLibraryUserGridRows = ref<BudgetLibraryUserGridRow[]>([]);
   let currentUserAndOwner: BudgetLibraryUser[] = [];
   let searchTerm: string = '';
 
-  watch(()=>props.dialogData,()=>onDialogDataChanged)
-  function onDialogDataChanged() {
-    if (props.dialogData.showDialog) {
+  watch(dialogData,()=> {
+    if (dialogData.value.showDialog) {
       onSetGridData();
       onSetUsersSharedWith();
     }
-  }
+  });
 
   function onSetGridData() {
     const currentUser: string = getUserName();
@@ -97,12 +99,13 @@ let stateUsers = computed<User[]>(() => store.state.userModule.users);
           isShared: false,
           canModify: false
         }));
+        console.log("lenght: "+ budgetLibraryUserGridRows.value.length);
   }
 
     function onSetUsersSharedWith() {
         //budget library users
         let budgetLibraryUsers: BudgetLibraryUser[] = [];
-        InvestmentService.getBudgetLibraryUsers(props.dialogData.budgetLibrary.id).then(response => {
+        InvestmentService.getBudgetLibraryUsers(dialogData.value.budgetLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];

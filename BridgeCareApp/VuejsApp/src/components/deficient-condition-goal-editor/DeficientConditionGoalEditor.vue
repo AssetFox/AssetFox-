@@ -1,4 +1,5 @@
 <template>
+    <v-card height="800px" class="elevation-0 vcard-main-layout">
     <v-row style="margin: 5px;">
         <v-row align="center" >
                 <v-col cols="6">
@@ -224,7 +225,7 @@
                     <v-textarea
                         class="ghd-text-field-border"
                         no-resize
-                        outline
+                        variant="outlined"
                         rows="4"
                         v-model="selectedDeficientConditionGoalLibrary.description"
                         @update:model-value="checkHasUnsavedChanges()"
@@ -283,7 +284,7 @@
                        
             </v-row>
         </v-col>
-
+</v-card>
         <Alert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
@@ -309,7 +310,6 @@
             :dialogData="criterionEditorDialogData"
             @submit="onEditDeficientConditionGoalCriterionLibrary"
         />
-    <!-- </v-row> -->
     <ConfirmDialog></ConfirmDialog>
 </template>
 
@@ -587,7 +587,7 @@ import { getUrl } from '@/shared/utils/get-url';
 
     watch(selectedDeficientConditionGoalLibrary, () => onSelectedDeficientConditionGoalLibraryChanged())
     function onSelectedDeficientConditionGoalLibraryChanged() {
-        if (!isNil(selectedDeficientConditionGoalLibrary)) {
+        if (!isNil(selectedDeficientConditionGoalLibrary.value)) {
             hasSelectedLibrary.value = selectedDeficientConditionGoalLibrary.value.id !== uuidNIL;
             
         }
@@ -974,7 +974,7 @@ import { getUrl } from '@/shared/utils/get-url';
             addedRows.value.length > 0 ||
             updatedRowsMap.size > 0 || 
             (hasScenario.value && hasSelectedLibrary.value) ||
-            (hasSelectedLibrary.value && hasUnsavedChangesCore('', stateSelectedDeficientConditionGoalLibrary.value, selectedDeficientConditionGoalLibrary))
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedDeficientConditionGoalLibrary.value , stateSelectedDeficientConditionGoalLibrary.value))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -1028,7 +1028,7 @@ import { getUrl } from '@/shared/utils/get-url';
                         libraryUserData.push(libraryUser);
                     });
                     if (!isNil(selectedDeficientConditionGoalLibrary.value.id) ) {
-                        getIsSharedLibraryAction(selectedDeficientConditionGoalLibrary).then(() => isShared = isSharedLibrary.value);
+                        getIsSharedLibraryAction(selectedDeficientConditionGoalLibrary.value).then(() => isShared = isSharedLibrary.value);
                     }
                     //update budget library sharing
                     DeficientConditionGoalService.upsertOrDeleteDeficientConditionGoalLibraryUsers(selectedDeficientConditionGoalLibrary.value.id, libraryUserData).then((response: AxiosResponse) => {

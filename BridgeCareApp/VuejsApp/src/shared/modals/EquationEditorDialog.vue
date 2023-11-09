@@ -27,7 +27,8 @@
                 <v-tab :key="0" @click="isPiecewise = false">Equation</v-tab>
                 <v-tab :key="1" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Piecewise</v-tab>
                 <v-tab :key="2" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Time In Rating</v-tab>
-                <v-window-item>
+                <v-window>
+                  <v-window-item>
                   <div class="equation-container-div">
                     <v-row column>
                       <div>
@@ -258,6 +259,8 @@
                     </v-row>
                   </div>
                 </v-window-item>
+                  </v-window>
+                
               </v-tabs>
             </v-col>
           </v-row>
@@ -394,6 +397,7 @@
 </template>
 
 <script lang="ts" setup>
+import { getUrl } from '@/shared/utils/get-url';
 import Vue, {ShallowRef, computed, shallowRef} from 'vue';
 import {EquationEditorDialogData} from '@/shared/models/modals/equation-editor-dialog-data';
 import {formulas} from '@/shared/utils/formulas';
@@ -427,38 +431,38 @@ async function getAttributesAction(payload?: any): Promise<any> {await store.dis
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
 
   let equation: Equation = {...emptyEquation, id: getNewGuid()};
-  let attributesList: string[] = [];
-  let formulasList: string[] = formulas;
+  const attributesList = ref<string[]>([]);  
+  const formulasList = ref<string[]>(formulas);
   let expression = shallowRef<string>('');
-  let isPiecewise: boolean = false;
+  const isPiecewise = ref<boolean>(false);
   let textareaInput: HTMLTextAreaElement = {} as HTMLTextAreaElement;
   let cursorPosition: number = 0;
-  let cannotSubmit: boolean = true;
-  let invalidExpressionMessage: string = '';
-  let validExpressionMessage: string = '';
-  let piecewiseGridHeaders: any[] = [
-    {title: 'Time', key: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {title: 'Condition', key: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {title: 'Action', key: '', align: 'left', sortable: false, class: '', width: '10px'}
-  ];
-  let timeInRatingGridHeaders: any[] = [
-    {title: 'Condition', key: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {title: 'Time', key: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {title: 'Action', key: '', align: 'left', sortable: false, class: '', width: '10px'}
-  ];
-  let piecewiseGridData: TimeConditionDataPoint[] = [];
-  let timeInRatingGridData: TimeConditionDataPoint[] = [];
-  let showAddDataPointPopup: boolean = false;
-  let newDataPoint: TimeConditionDataPoint = clone(emptyTimeConditionDataPoint);
+  const cannotSubmit = ref<boolean>(true);
+  const invalidExpressionMessage = ref('');
+  const validExpressionMessage = ref('');
+  const piecewiseGridHeaders = ref<DataTableHeader[]>([
+    {text: 'Time', value: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {text: 'Condition', value: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {text: 'Action', value: '', align: 'left', sortable: false, class: '', width: '10px'}
+  ]);
+  const timeInRatingGridHeaders= ref<DataTableHeader[]>([
+    {text: 'Condition', value: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {text: 'Time', value: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {text: 'Action', value: '', align: 'left', sortable: false, class: '', width: '10px'}
+  ]);
+  const piecewiseGridData = ref<TimeConditionDataPoint[]>([]); 
+  const timeInRatingGridData = ref<TimeConditionDataPoint[]>([]);
+  const showAddDataPointPopup = ref<boolean>(false);
+  const newDataPoint = ref<TimeConditionDataPoint>(clone(emptyTimeConditionDataPoint));
   let xAxisMax: number = 0;
   let yAxisMax: number = 0;
-  let dataPointsSource: number[][] = [];
-  let showAddMultipleDataPointsPopup: boolean = false;
-  let multipleDataPoints: string = '';
-  let selectedTab: number = 0;
-  let showEditDataPointPopup: boolean = false;
+  const dataPointsSource = ref<number[][]>([]);
+  const showAddMultipleDataPointsPopup = ref<boolean>(false);
+  const multipleDataPoints = ref('');;
+  const selectedTab = ref<number>(0);
+  const showEditDataPointPopup = ref<boolean>(false);
   let editedDataPointProperty: string = '';
-  let editedDataPoint: TimeConditionDataPoint = clone(emptyTimeConditionDataPoint);
+  const editedDataPoint = ref<TimeConditionDataPoint>(clone(emptyTimeConditionDataPoint));
   let piecewiseRegex: RegExp = /(\(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*\))/;
   let multipleDataPointsRegex: RegExp = /(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*)/;
   let uuidNIL: string = getBlankGuid();
@@ -500,11 +504,11 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     expression.value = equation.expression;
 
     if (piecewiseRegex.test(expression.value)) {
-      isPiecewise = true;
-      selectedTab = 1;
+      isPiecewise.value = true;
+      selectedTab.value = 1;
       onParsePiecewiseEquation();
     } else {
-      isPiecewise = false;
+      isPiecewise.value = false;
     }
   }
 
@@ -514,23 +518,23 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    */
   watch(piecewiseGridData,()=> onPiecewiseGridDataChanged())
   function onPiecewiseGridDataChanged() {
-    cannotSubmit = true;
-    invalidExpressionMessage = '';
-    validExpressionMessage = '';
+    cannotSubmit.value = true;
+    invalidExpressionMessage.value = '';
+    validExpressionMessage.value = '';
 
-    let highestTimeValue: number = getLastPropertyValue('timeValue', piecewiseGridData);
+    let highestTimeValue: number = getLastPropertyValue('timeValue', piecewiseGridData.value);
     if (highestTimeValue % 2 !== 0) {
       highestTimeValue += 1;
     }
     xAxisMax = highestTimeValue;
 
-    let highestConditionValue: number = getLastPropertyValue('conditionValue', piecewiseGridData);
+    let highestConditionValue: number = getLastPropertyValue('conditionValue', piecewiseGridData.value);
     if (highestConditionValue % 2 !== 0) {
       highestConditionValue += 1;
     }
     yAxisMax = highestConditionValue;
 
-    dataPointsSource = piecewiseGridData.map((dataPoint: TimeConditionDataPoint) =>
+    dataPointsSource.value = piecewiseGridData.value.map((dataPoint: TimeConditionDataPoint) =>
         [dataPoint.timeValue, dataPoint.conditionValue]);
   }
 
@@ -540,9 +544,9 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    */
   watch(expression,()=>onExpressionChanged())
   function onExpressionChanged() {
-    invalidExpressionMessage = '';
-    validExpressionMessage = '';
-    cannotSubmit = !(expression.value === '' && !isPiecewise);
+    invalidExpressionMessage.value = '';
+    validExpressionMessage.value = '';
+    cannotSubmit.value = !(expression.value === '' && !isPiecewise);
   }
 
   /**
@@ -576,7 +580,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * setAttributesList => function is used to set the attributesList object.
    */
   function setAttributesList() {
-    attributesList = getPropertyValues('name', stateNumericAttributes.value);
+    attributesList.value = getPropertyValues('name', stateNumericAttributes.value);
   }
 
   /**
@@ -657,11 +661,11 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * and then set the showAddDataPointPopup object to 'true'.
    */
    function onAddTimeAttributeDataPoint() {
-    newDataPoint = {
-      ...newDataPoint,
+    newDataPoint.value = {
+      ...newDataPoint.value,
       id: getNewGuid()
     };
-    showAddDataPointPopup = true;
+    showAddDataPointPopup.value = true;
   }
 
   /**
@@ -669,23 +673,23 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * and then sync it with the other data point values between the piecewise and time-in-rating data grids/charts.
    */
    function onSubmitNewDataPoint(submit: boolean) {
-    showAddDataPointPopup = false;
+    showAddDataPointPopup.value = false;
 
     if (submit) {
       const newParsedDataPoint: TimeConditionDataPoint = {
-        ...newDataPoint,
-        timeValue: parseInt(newDataPoint.timeValue.toString()),
-        conditionValue: parseFloat(newDataPoint.conditionValue.toString())
+        ...newDataPoint.value,
+        timeValue: parseInt(newDataPoint.value.timeValue.toString()),
+        conditionValue: parseFloat(newDataPoint.value.conditionValue.toString())
       };
 
-      const dataPoints: TimeConditionDataPoint[] = selectedTab === 1
-          ? [...piecewiseGridData, newParsedDataPoint]
-          : [...timeInRatingGridData, newParsedDataPoint];
+      const dataPoints: TimeConditionDataPoint[] = selectedTab.value === 1
+          ? [...piecewiseGridData.value, newParsedDataPoint]
+          : [...timeInRatingGridData.value, newParsedDataPoint];
 
       syncDataGridLists(dataPoints);
     }
 
-    newDataPoint = clone(emptyTimeConditionDataPoint);
+    newDataPoint.value = clone(emptyTimeConditionDataPoint);
   }
 
   /**
@@ -696,7 +700,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     let piecewiseData: TimeConditionDataPoint[] = [];
     let timeInRatingData: TimeConditionDataPoint[] = [];
 
-    if (selectedTab === 1) {
+    if (selectedTab.value === 1) {
       piecewiseData = sortByProperty('timeValue', dataPoints)
           .filter((dataPoint: TimeConditionDataPoint) => dataPoint.timeValue !== 0);
 
@@ -745,8 +749,8 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
       }
     }
 
-    piecewiseGridData = piecewiseData;
-    timeInRatingGridData = timeInRatingData;
+    piecewiseGridData.value = piecewiseData;
+    timeInRatingGridData.value = timeInRatingData;
   }
 
   /**
@@ -757,15 +761,15 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     if (submit) {
       const parsedMultiDataPoints: TimeConditionDataPoint[] = parseMultipleDataPoints();
 
-      const dataPoints = selectedTab === 1
-          ? [...piecewiseGridData, ...parsedMultiDataPoints]
-          : [...timeInRatingGridData, ...parsedMultiDataPoints];
+      const dataPoints = selectedTab.value === 1
+          ? [...piecewiseGridData.value, ...parsedMultiDataPoints]
+          : [...timeInRatingGridData.value, ...parsedMultiDataPoints];
 
       syncDataGridLists(dataPoints);
     }
 
-    showAddMultipleDataPointsPopup = false;
-    multipleDataPoints = '';
+    showAddMultipleDataPointsPopup.value = false;
+    multipleDataPoints.value = '';
   }
 
   /**
@@ -773,7 +777,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * TimeConditionDataPoint objects.
    */
    function parseMultipleDataPoints() {
-    const splitDataPoints: string[] = multipleDataPoints
+    const splitDataPoints: string[] = multipleDataPoints.value
         .split(/\r?\n/).filter((dataPoints: string) => dataPoints !== '');
 
     if (hasValue(splitDataPoints)) {
@@ -798,9 +802,9 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * showEditDataPointPopup.
    */
    function onEditDataPoint(dataPoint: TimeConditionDataPoint, property: string) {
-    editedDataPoint = clone(dataPoint);
+    editedDataPoint.value = clone(dataPoint);
     editedDataPointProperty = property;
-    showEditDataPointPopup = true;
+    showEditDataPointPopup.value = true;
   }
 
   /**
@@ -809,23 +813,23 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    */
    function onSubmitEditedDataPointValue(submit: boolean) {
     if (submit) {
-      let dataPoints = selectedTab === 1 ? clone(piecewiseGridData) : clone(timeInRatingGridData);
-      var timeValue = parseFloat(editedDataPoint.timeValue.toString());
-      var conditionValue = parseFloat(editedDataPoint.conditionValue.toString());
+      let dataPoints = selectedTab.value === 1 ? clone(piecewiseGridData.value) : clone(timeInRatingGridData.value);
+      var timeValue = parseFloat(editedDataPoint.value.timeValue.toString());
+      var conditionValue = parseFloat(editedDataPoint.value.conditionValue.toString());
       if (!isNaN(timeValue) && !isNaN(conditionValue)) {
-        editedDataPoint.timeValue = timeValue;
-        editedDataPoint.conditionValue = conditionValue;
+        editedDataPoint.value.timeValue = timeValue;
+        editedDataPoint.value.conditionValue = conditionValue;
         dataPoints = update(
-          findIndex(propEq('id', editedDataPoint.id), dataPoints), editedDataPoint, dataPoints
+          findIndex(propEq('id', editedDataPoint.value.id), dataPoints), editedDataPoint.value, dataPoints
         );
 
         syncDataGridLists(dataPoints);
       }
     }
 
-    editedDataPoint = clone(emptyTimeConditionDataPoint);
+    editedDataPoint.value = clone(emptyTimeConditionDataPoint);
     editedDataPointProperty = '';
-    showEditDataPointPopup = false;
+    showEditDataPointPopup.value = false;
   }
 
   /**
@@ -834,9 +838,9 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * between the piecewise and time-in-rating data grids/charts.
    */
    function onRemoveTimeAttributeDataPoint(id: string) {
-    const dataPoints: TimeConditionDataPoint[] = selectedTab === 1
-        ? piecewiseGridData.filter((dataPoint: TimeConditionDataPoint) => dataPoint.id !== id)
-        : timeInRatingGridData.filter((dataPoint: TimeConditionDataPoint) => dataPoint.id !== id);
+    const dataPoints: TimeConditionDataPoint[] = selectedTab.value === 1
+        ? piecewiseGridData.value.filter((dataPoint: TimeConditionDataPoint) => dataPoint.id !== id)
+        : timeInRatingGridData.value.filter((dataPoint: TimeConditionDataPoint) => dataPoint.id !== id);
 
     syncDataGridLists(dataPoints);
   }
@@ -852,7 +856,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    function onCheckEquation() {
     const equationValidationParameters: EquationValidationParameters = {
       expression: isPiecewise ? onParseTimeAttributeDataPoints() : expression.value,
-      isPiecewise: isPiecewise,
+      isPiecewise: isPiecewise.value,
       currentUserCriteriaFilter: {...emptyUserCriteriaFilter},
       networkId: getBlankGuid()
     };
@@ -862,13 +866,13 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
           if (hasValue(response, 'data')) {
             const result: ValidationResult = response.data as ValidationResult;
             if (result.isValid) {
-              validExpressionMessage = 'Equation is valid.';
-              invalidExpressionMessage = '';
-              cannotSubmit = false;
+              validExpressionMessage.value = 'Equation is valid.';
+              invalidExpressionMessage.value = '';
+              cannotSubmit.value = false;
             } else {
-              invalidExpressionMessage = result.validationMessage;
-              validExpressionMessage = '';
-              cannotSubmit = true;
+              invalidExpressionMessage.value = result.validationMessage;
+              validExpressionMessage.value = '';
+              cannotSubmit.value = true;
             }
           }
         });
@@ -879,7 +883,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * string of (x,y) data points.
    */
    function onParseTimeAttributeDataPoints() {
-    return piecewiseGridData.map((timeAttributeDataPoint: TimeConditionDataPoint) =>
+    return piecewiseGridData.value.map((timeAttributeDataPoint: TimeConditionDataPoint) =>
         `(${timeAttributeDataPoint.timeValue},${timeAttributeDataPoint.conditionValue})`
     ).join('');
   }
@@ -897,9 +901,9 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
       emit('submit', null);
     }
 
-    piecewiseGridData = [];
-    timeInRatingGridData = [];
-    selectedTab = 0;
+    piecewiseGridData.value = [];
+    timeInRatingGridData.value = [];
+    selectedTab.value = 0;
     equation = {...emptyEquation, id: getNewGuid()};
   }
 
@@ -909,8 +913,8 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    */
    function resetComponentCalculatedProperties() {
     cursorPosition = 0;
-    invalidExpressionMessage = '';
-    validExpressionMessage = '';
+    invalidExpressionMessage.value = '';
+    validExpressionMessage.value = '';
   }
 
   /**
@@ -918,11 +922,11 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * point value is not valid.
    */
    function disableNewDataPointSubmit() {
-    return timeValueIsNotEmpty(newDataPoint.timeValue.toString()) !== true ||
-        timeValueIsGreaterThanZero(newDataPoint.timeValue.toString()) !== true ||
-        timeValueIsNew(newDataPoint.timeValue.toString()) !== true ||
-        conditionValueIsNotEmpty(newDataPoint.conditionValue.toString()) !== true ||
-        conditionValueIsNew(newDataPoint.conditionValue.toString()) !== true;
+    return timeValueIsNotEmpty(newDataPoint.value.timeValue.toString()) !== true ||
+        timeValueIsGreaterThanZero(newDataPoint.value.timeValue.toString()) !== true ||
+        timeValueIsNew(newDataPoint.value.timeValue.toString()) !== true ||
+        conditionValueIsNotEmpty(newDataPoint.value.conditionValue.toString()) !== true ||
+        conditionValueIsNew(newDataPoint.value.conditionValue.toString()) !== true;
   }
 
   /**
@@ -930,7 +934,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * if the multiple data points' values are not valid.
    */
    function disableMultipleDataPointsSubmit() {
-    return multipleDataPoints === '' ||
+    return multipleDataPoints.value === '' ||
         isCorrectMultipleDataPointsFormat() !== true ||
         multipleDataPointsAreNew() !== true;
   }
@@ -941,11 +945,11 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    */
    function disableEditDataPointSubmit() {
 
-      return (timeValueIsNotEmpty(editedDataPoint.timeValue.toString()) !== true ||
-          timeValueIsGreaterThanZero(editedDataPoint.timeValue.toString()) !== true ||
-          timeValueIsNew(editedDataPoint.timeValue.toString()) !== true) &&
-       (conditionValueIsNotEmpty(editedDataPoint.conditionValue.toString()) !== true ||
-          conditionValueIsNew(editedDataPoint.conditionValue.toString()) !== true);
+      return (timeValueIsNotEmpty(editedDataPoint.value.timeValue.toString()) !== true ||
+          timeValueIsGreaterThanZero(editedDataPoint.value.timeValue.toString()) !== true ||
+          timeValueIsNew(editedDataPoint.value.timeValue.toString()) !== true) &&
+       (conditionValueIsNotEmpty(editedDataPoint.value.conditionValue.toString()) !== true ||
+          conditionValueIsNew(editedDataPoint.value.conditionValue.toString()) !== true);
     
   }
 
@@ -962,8 +966,8 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * @param value
    */
    function timeValueIsNew(value: string) {
-    if (selectedTab === 1) {
-      const timeValues: number[] = getPropertyValues('timeValue', piecewiseGridData);
+    if (selectedTab.value === 1) {
+      const timeValues: number[] = getPropertyValues('timeValue', piecewiseGridData.value);
 
       return timeValues.indexOf(parseInt(value)) === -1 || 'Time value already exists';
     }
@@ -984,9 +988,9 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * @param value
    */
    function conditionValueIsNew(value: string) {
-    const conditionValues: number[] = selectedTab === 1
-        ? getPropertyValues('conditionValue', piecewiseGridData)
-        : getPropertyValues('conditionValue', timeInRatingGridData);
+    const conditionValues: number[] = selectedTab.value === 1
+        ? getPropertyValues('conditionValue', piecewiseGridData.value)
+        : getPropertyValues('conditionValue', timeInRatingGridData.value);
 
     return conditionValues.indexOf(parseFloat(value)) === -1 || 'Condition value already exists';
   }
@@ -1003,14 +1007,14 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * Rule: Checks if the multiple data points popup's textarea is not empty
    */
    function multipleDataPointsFormIsNotEmpty() {
-    return multipleDataPoints !== '' || 'Values must be entered';
+    return multipleDataPoints.value !== '' || 'Values must be entered';
   }
 
   /**
    * Rule: Checks if the multiple data points popup's textarea has correctly formatted data
    */
    function isCorrectMultipleDataPointsFormat() {
-    const eachDataPointIsValid = multipleDataPoints
+    const eachDataPointIsValid = multipleDataPoints.value
         .split(/\r?\n/).filter((dataPoints: string) => dataPoints !== '')
         .every((dataPoints: string) => {
           return multipleDataPointsRegex.test(dataPoints) &&
@@ -1036,11 +1040,11 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         existingConditionValues.push(dataPoint.conditionValue);
       }
 
-      if (selectedTab === 1 && !timeValueIsNew) {
+      if (selectedTab.value === 1 && !timeValueIsNew) {
         existingTimeValues.push(dataPoint.timeValue);
       }
 
-      return selectedTab === 1
+      return selectedTab.value === 1
           ? conditionEditorValueIsNew && timeEditorValueIsNew
           : conditionEditorValueIsNew;
     });

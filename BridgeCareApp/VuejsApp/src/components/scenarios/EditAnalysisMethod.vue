@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <v-card height="800px" class="elevation-0 vcard-main-layout">
         <v-row>
             <v-col id="EditAnalysisMethod-weightingParent-vflex">
         <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
@@ -171,7 +171,7 @@
                         >Save</v-btn
                     >
                 </v-row>
-    </div>
+    </v-card>
             <GeneralCriterionEditorDialog
                 :dialogData="criterionEditorDialogData"
                 @submit="onCriterionEditorDialogSubmit"

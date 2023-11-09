@@ -1,4 +1,5 @@
 <template>
+    <v-card height="800px" class="elevation-0 vcard-main-layout">
     <v-row>
         <v-col col="12">
             <v-row align="center" justify="space-between" >              
@@ -51,7 +52,6 @@
         </v-col>
 
         <v-col v-show='hasSelectedLibrary || hasScenario' cols="12">
-            <!-- <div class='priorities-data-table'> -->
                 <v-data-table-server 
                     id = "BudgetPriority-priorities-vdatatable"
                     :headers='budgetPriorityGridHeaders' 
@@ -117,7 +117,7 @@
                                                     </v-btn>
                                                 </div>
                                                 <div v-else class='priority-criteria-output'>
-                                                    <v-text-field readonly single-line class='sm-txt'
+                                                    <v-text-field readonly single-line class='sm-txt' variant="underlined"
                                                                 :model-value='item.item.criteria' />
                                                 </div>
                                             </template>
@@ -156,9 +156,6 @@
                         </tr>
                     </template>
                 </v-data-table-server>
-            <!-- </div> -->
-
-            <v-divider :thickness="4" class="border-opacity-100"></v-divider>
             <v-btn flat
                 :disabled='selectedBudgetPriorityIds.length === 0'
                 @click='onRemoveBudgetPriorities'
@@ -167,7 +164,10 @@
                 Delete Selected
             </v-btn>
         </v-col>
-       
+        <v-divider
+            :thickness="2"
+            class="border-opacity-100"
+        ></v-divider>
         <v-col cols="12" v-show='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
             <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
             <v-textarea class="ghd-control-text ghd-control-border" variant="outlined" density="compact"
@@ -216,6 +216,7 @@
                                       @submit='onSubmitCriterionLibraryEditorDialogResult' />
         <ConfirmDialog></ConfirmDialog>
     </v-row>
+</v-card>
 </template>
 
 <script setup lang='ts'>
@@ -358,10 +359,10 @@ import { getUrl } from '@/shared/utils/get-url';
     let newLibrarySelection: boolean = false;
     
     created();
-    function created() {
+    async function created() {
         librarySelectItemValue.value = null;
-        getBudgetPriorityLibrariesAction();
-        getHasPermittedAccessAction();
+        await getBudgetPriorityLibrariesAction();
+        await getHasPermittedAccessAction();
 
         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.BudgetPriority) !== -1) {
             selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;

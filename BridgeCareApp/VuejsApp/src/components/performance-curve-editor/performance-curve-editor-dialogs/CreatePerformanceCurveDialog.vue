@@ -3,19 +3,20 @@
     <v-dialog v-model="showDialogComputed" max-width="434px" persistent>
       <v-card  height="411px" class="ghd-dialog">
         <v-card-title class="ghd-dialog">
-          <v-row justify-left>
+          <v-row justify="start">
             <h3 class="ghd-dialog">Add New Deterioration Equation</h3>
           </v-row>
         </v-card-title>
-        <v-card-text class="ghd-dialog">
-          <v-row column>
+        <v-card-text >
+          <v-row>
+            <v-col>
             <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>            
             <v-text-field
               id="CreatePerformanceCurveDialog-name-text"
               class="ghd-control-text ghd-control-border"
               v-model="newPerformanceCurve.name"
               :rules="[rules['generalRules'].valueIsNotEmpty]"
-              outline/>
+              variant="outlined"/>
             <v-subheader class="ghd-control-label ghd-md-gray">Select Attribute</v-subheader>            
             <v-select
               id="CreatePerformanceCurveDialog-attribute-select"
@@ -28,11 +29,12 @@
               item-title="text"
               item-value="value"
             >
-            </v-select>                      
+            </v-select>   
+            </v-col>                   
           </v-row>
         </v-card-text>
         <v-card-actions>
-          <v-row justify-center row>
+          <v-row justify="center" >
             <v-btn
               id="CreatePerformanceCurveDialog-cancel-button"
               class="ghd-white-bg ghd-blue ghd-button-text"
@@ -87,7 +89,7 @@ const props = defineProps<{
     }
   }
 
-  watch(stateNumericAttributes,()=>onStateNumericAttributesChanged)
+  watch(stateNumericAttributes,()=>onStateNumericAttributesChanged())
   function onStateNumericAttributesChanged() {
     if (hasValue(stateNumericAttributes.value)) {
       setAttributeSelectItems();

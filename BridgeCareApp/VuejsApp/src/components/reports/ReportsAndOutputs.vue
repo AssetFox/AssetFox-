@@ -1,4 +1,5 @@
 <template>
+    <v-card height="800px" class="elevation-0 vcard-main-layout">
     <v-row column class="Montserrat-font-family" justify-start>
         <div style="padding: 10px;">
             <v-subheader  class="ghd-md-gray ghd-control-label">
@@ -79,8 +80,11 @@
                 <v-subheader class="ghd-md-gray ghd-control-label">
                     Diagnostics & Logging
                 </v-subheader>
-                <v-divider style="margin:0px;" />
-                <v-row style="margin:10px;">
+                <v-divider
+            :thickness="2"
+            class="border-opacity-100"
+        ></v-divider>
+                <v-row style="margin:5px;">
                     <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" variant = "flat">Simulation Log</v-btn>
                 </v-row>
             </v-col>
@@ -92,6 +96,7 @@
             @submit="onCriterionEditorDialogSubmit"
         />
     </v-row>
+</v-card>
 </template>
 
 <script setup lang='ts'>

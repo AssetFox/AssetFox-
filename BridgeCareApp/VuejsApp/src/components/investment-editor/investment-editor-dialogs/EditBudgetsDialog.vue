@@ -81,12 +81,14 @@
                         </v-btn>
                     </v-row>
                 </div>
-                <v-card-actions class="ghd-dialog-box-padding-bottom">                   
-                        <v-btn id="EditBudgetsDialog-cancel-btn" @click='onSubmit(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">Cancel</v-btn>
-                        <v-btn id="EditBudgetsDialog-save-btn" @click='onSubmit(true)' class='ghd-blue hd-button-text ghd-button' variant = "flat"
+                <v-card-actions class="ghd-dialog-box-padding-bottom">
+                    <v-row justify="center">                 
+                        <v-btn id="EditBudgetsDialog-cancel-btn" @click='onSubmit(false)' class='ghd-blue ghd-button-text ghd-button' variant = "outlined">Cancel</v-btn>
+                        <v-btn id="EditBudgetsDialog-save-btn" @click='onSubmit(true)' class='ghd-blue ghd-button-text ghd-button' variant = "outlined"
                                :disabled='disableSubmitButton()'>
                             Save
-                        </v-btn>                        
+                        </v-btn>
+                    </v-row>                    
                 </v-card-actions>
             </v-card>
         </v-dialog>

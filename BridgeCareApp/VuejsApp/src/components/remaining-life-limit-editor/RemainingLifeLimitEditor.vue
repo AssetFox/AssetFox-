@@ -1,4 +1,5 @@
 <template>
+    <v-card height="900px" class="elevation-0 vcard-main-layout">
     <v-row>
         <v-col>
             <v-row align="center" justify="space-between">
@@ -191,12 +192,12 @@
         </div>
         <v-divider :thickness="4" class="border-opacity-100" ></v-divider>
         <v-col v-show="hasSelectedLibrary && !hasScenario" cols="12">
-            <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
+            <v-subheader class="ghd-subheader">Description</v-subheader>
             <v-textarea
                 class="ghd-control-text ghd-control-border"
                 v-model="selectedRemainingLifeLimitLibrary.description"
                 @update:model-value="checkHasUnsavedChanges()"
-                outline
+                variant="outlined" density="compact"
             >
             </v-textarea>
         </v-col>
@@ -231,6 +232,7 @@
         />
         <ConfirmDialog></ConfirmDialog>
     </v-row>
+    </v-card>
 </template>
 
 <script setup lang="ts">
@@ -740,7 +742,7 @@ import { getUrl } from '@/shared/utils/get-url';
     }
 
     function onUpsertScenarioRemainingLifeLimits() {
-        if (selectedRemainingLifeLimitLibrary.value.id === uuidNIL || hasUnsavedChanges && newLibrarySelection.value ===false) {scenarioLibraryIsModified.value = true;}
+        if (selectedRemainingLifeLimitLibrary.value.id === uuidNIL || hasUnsavedChanges.value && newLibrarySelection.value ===false) {scenarioLibraryIsModified.value = true;}
         else { scenarioLibraryIsModified.value = false; }
 
         RemainingLifeLimitService.upsertScenarioRemainingLifeLimits({
@@ -860,12 +862,12 @@ import { getUrl } from '@/shared/utils/get-url';
             addedRows.value.length > 0 ||
             updatedRowsMap.size > 0 || 
             (hasScenario.value && hasSelectedLibrary.value) ||
-            (hasSelectedLibrary.value && hasUnsavedChangesCore('', stateSelectedRemainingLifeLimitLibrary, selectedRemainingLifeLimitLibrary))
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedRemainingLifeLimitLibrary.value, stateSelectedRemainingLifeLimitLibrary.value))
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
     function CheckUnsavedDialog(next: any, otherwise: any) {
-        if (hasUnsavedChanges && unsavedDialogAllowed) {
+        if (hasUnsavedChanges.value && unsavedDialogAllowed) {
             confirm.require({
                 message: "You have unsaved changes. Are you sure you wish to continue?",
                 header: "Unsaved Changes",
@@ -913,7 +915,7 @@ import { getUrl } from '@/shared/utils/get-url';
                         libraryUserData.push(libraryUser);
                     });
                     if (!isNil(selectedRemainingLifeLimitLibrary.value.id) ) {
-                        getIsSharedLibraryAction(selectedRemainingLifeLimitLibrary).then(() => isShared = isSharedLibrary.value);
+                        getIsSharedLibraryAction(selectedRemainingLifeLimitLibrary.value).then(() => isShared = isSharedLibrary.value);
                     }
                     //update budget library sharing
                     RemainingLifeLimitService.upsertOrDeleteRemainingLifeLimitLibraryUsers(selectedRemainingLifeLimitLibrary.value.id, libraryUserData).then((response: AxiosResponse) => {

@@ -3,7 +3,7 @@
     <v-card>
       <v-card-title class="ghd-dialog-padding-top-title">
         <v-row justify="space-between">
-          <div class="ghd-control-dialog-header"><h3>Budget Priority Library Sharing</h3></div>
+          <div class="ghd-control-dialog-header"><h5>Budget Priority Library Sharing</h5></div>
           <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>

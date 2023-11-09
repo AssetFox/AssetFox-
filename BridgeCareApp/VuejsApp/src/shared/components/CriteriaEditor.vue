@@ -217,7 +217,7 @@
                                 <div class="validation-check-btn-container">
                                     <v-btn
                                         id="CriteriaEditor-updateSubcriteria-btn"
-                                        :disabled="onDisableCheckCriteriaButton()"
+                                        
                                         @click="onCheckSubCriteria"
                                         class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
                                         variant = "flat"
@@ -898,7 +898,7 @@ const tab = ref<any>(null);
                 isEmpty(parsedSelectedSubCriteriaClause.join(''))) ||
             (activeTab === 'raw-criteria' &&
                 (isEmpty(selectedRawSubCriteriaClause.value) ||
-                    parsedSelectedRawSubCriteriaClause === null ||
+                    parsedSelectedRawSubCriteriaClause == null ||
                     (parsedSelectedRawSubCriteriaClause &&
                         isEmpty(parsedSelectedRawSubCriteriaClause.join('')))));
 

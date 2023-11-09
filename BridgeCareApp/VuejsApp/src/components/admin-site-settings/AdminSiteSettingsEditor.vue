@@ -28,8 +28,8 @@
             </v-text-field>
           </v-row>
         </v-col>
-        <v-col cols="1">
-          <v-row column style="padding-left: 200px; margin-top: -55px;">
+        <v-col cols="2">
+          <v-row column style="padding-left: 200px; margin-top: -55px; margin-left: 25px;">
             <v-btn
               class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button"
               style="padding-left: 10px"

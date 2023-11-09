@@ -182,7 +182,7 @@
                                                 :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), inputRules['generalRules'].valueIsNotEmpty, inputRules['generalRules'].valueIsWithinRange(item.item[header.key], [firstYear, lastYear])]"
                                                 :error-messages="item.item.yearErrors"/>
 
-                                            <v-text-field v-if="header.key === 'cost'"
+                                            <currencyTextbox v-if="header.key === 'cost'"
                                                 :model-value='item.item[header.key]'
                                                 density="compact"
                                                 variant="underlined"
@@ -214,11 +214,10 @@
                                                     :mask="'##########'"
                                                     :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.item[header.key], [firstYear, lastYear])]"/>
 
-                                                <v-text-field v-if="header.key === 'cost'"
+                                                <currencyTextbox v-if="header.key === 'cost'"
                                                     label="Edit"
                                                     single-line
                                                     v-model.number="item.item[header.key]"
-                                                    v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
                                                     :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
                                             </template>
@@ -329,6 +328,7 @@ import Dialog from 'primevue/dialog';
 import Column from 'primevue/column';
 import TreatmentService from '@/services/treatment.service';
 import { getUrl } from '@/shared/utils/get-url';
+import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 
     let store = useStore();
     const $router = useRouter();    

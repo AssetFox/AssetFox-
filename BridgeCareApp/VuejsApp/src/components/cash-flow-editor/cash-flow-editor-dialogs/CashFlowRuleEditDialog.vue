@@ -67,14 +67,13 @@
                             full-width
                             @save="onEditSelectedLibraryListData(item.item,'costCeiling')"
                             @open="onOpenCostCeilingEditDialog(item.item.id)">
-                            <v-text-field
+                            <currencyTextbox
                                 id="CashFlowRuleEditDialog-dollarReadOnly-vtextfield"
                                 readonly
                                 single-line
                                 variant="underlined"
                                 class="sm-txt"
-                                :model-value="
-                                    formatAsCurrencyLocaal(item.item.costCeiling)"
+                                :model-value="item.item.costCeiling"
                                 :rules="[
                                     rules['generalRules']
                                         .valueIsNotEmpty,
@@ -86,21 +85,13 @@
                                     )
                                 ]"/>
                             <template v-slot:input>
-                                <v-text-field
+                                <currencyTextbox
                                     name="CashFlowRuleEditDialog-dollarEdit-vtextfield"
                                     label="Edit"
                                     single-line
                                     variant="underlined"
                                     :id="item.item.id"
                                     v-model="item.item.costCeiling"
-                                    v-currency="{
-                                        currency: {
-                                            prefix: '$',
-                                            suffix: ''
-                                        },
-                                        locale: 'en-US',
-                                        distractionFree: false
-                                    }"
                                     :rules="[
                                         rules[
                                             'generalRules'
@@ -210,6 +201,7 @@ import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { getLastPropertyValue } from '@/shared/utils/getter-utils';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { getUrl } from '@/shared/utils/get-url';
+import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 
   const props = defineProps<{showDialog: boolean, selectedCashFlowRule: CashFlowRule}>()
   let showDialogComputed = computed(() => props.showDialog);

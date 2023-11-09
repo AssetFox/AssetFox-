@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,7 +11,7 @@ internal sealed class TreatmentOutlook
 {
     private const bool InternalSummaryShouldBeDumped = true;
 
-    private static readonly Dictionary<SimulationRunner, string> DumpFolderNamePerSimulationRun;
+    private static readonly ConcurrentDictionary<SimulationRunner, string> DumpFolderNamePerSimulationRun;
 
     private readonly InternalSummary Summary;
 
@@ -64,11 +65,9 @@ internal sealed class TreatmentOutlook
         {
             Summary.CumulativeBenefit = CumulativeBenefit;
 
-            if (!DumpFolderNamePerSimulationRun.TryGetValue(SimulationRunner, out var folderName))
-            {
-                folderName = $"simulation data dump {DateTime.Now:yyyy-MM-dd HH-mm-ss-fff}";
-                DumpFolderNamePerSimulationRun[SimulationRunner] = folderName;
-            }
+            var folderName = DumpFolderNamePerSimulationRun.GetOrAdd(
+                SimulationRunner,
+                $"simulation data dump {DateTime.Now:yyyy-MM-dd HH-mm-ss-fff}");
 
             var folderPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),

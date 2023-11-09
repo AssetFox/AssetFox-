@@ -4,8 +4,9 @@
       class="Montserrat-font-family ma-0"
       style="width: 25%; padding-left: 50px"
     >
+    <v-col></v-col>
       <v-row align-center class="vl-style">
-        <v-col cols="12">
+        <v-col cols="11">
           <v-row column>
             <v-subheader
               class="ghd-control-label ghd-md-gray Montserrat-font-family"
@@ -13,23 +14,22 @@
             >
           </v-row>
         </v-col>
-        <v-col cols="12">
+        <v-col cols="8">
           <v-row column style="padding-right: 100px">
             <v-text-field
-              id="AdminSiteSettingsEditor-EditImplementationName-textfield" class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family search-icon-general"
+            variant="underlined"
+              id="AdminSiteSettingsEditor-EditImplementationName-textfield"
               v-model="ImplementationID"
               type="text"
               hide-details
               clearable
               single-line
-              outline
+              
               style="padding-left: 0px; width: 250%"
             >
             </v-text-field>
-          </v-row>
-        </v-col>
-        <v-col cols="2">
-          <v-row column style="padding-left: 200px; margin-top: -55px; margin-left: 25px;">
+            <v-col >
+          <v-row column style="padding-left: 300px; margin-top: -55px; margin-left: 25px;">
             <v-btn
               class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button"
               style="padding-left: 10px"
@@ -39,6 +39,9 @@
             >
           </v-row>
         </v-col>
+          </v-row>
+        </v-col>
+        
       </v-row>
       <v-row align-center class="vl-style" style="margin-top: 5%">
         <v-col cols="12">
@@ -50,7 +53,7 @@
           </v-row>
         </v-col>
         <v-col cols="12">
-          <v-row column style="padding-left: 200px; margin-top: -45px;" >
+          <v-row column style="padding-left: 330px; margin-top: -45px;" >
             <input
               id="agencyImageUpload"
               type="file"
@@ -79,7 +82,7 @@
           </v-row>
         </v-col>
         <v-col cols="12">
-          <v-row column style="padding-left: 200px; margin-top: -35px;">
+          <v-row column style="padding-left: 330px; margin-top: -35px;">
             <input
               id="implementationImageUpload"
               type="file"

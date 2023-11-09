@@ -12,15 +12,15 @@
           <v-divider style='margin: 0' />
           <div v-for='user in unassignedUsersCriteriaFilter'>
             <v-row row class='unassigned-user-layout'>
-              <v-col id="UserCriteria-unassignedUser-flex" class='unassigned-user-layout-username-flex' xs3>
+              <v-col id="UserCriteria-unassignedUser-flex" class='unassigned-user-layout-username-flex' cols="2">
                 {{ user.userName }}
               </v-col>
               <v-col cols = "3">
                 {{ user.description }}
               </v-col>
-              <v-col style='padding: 0' xs4>
+              <v-col style='padding: 0' cols="3">
                 <v-row align-center>
-                  <v-btn id="UserCriteria-assignUnassignedUserCriteria-btn" @click='onEditCriteria(user)' class='ara-blue-bg text-white' 
+                  <v-btn id="UserCriteria-assignUnassignedUserCriteria-btn" @click='onEditCriteria(user)'  class='ara-blue-bg text-white' 
                           title='Give the user limited access to the bridge inventory'>
                     <v-icon size='1.5em' style='padding-right: 0.5em'>fas fa-edit</v-icon>
                     Assign Criteria Filter
@@ -29,7 +29,7 @@
               </v-col>
               <v-col justify-center style='padding: 0' xs2>
                 <v-row align-center>
-                  <v-btn @click='onDeleteUser(user)' class='ara-orange' icon title='Delete User'>
+                  <v-btn @click='onDeleteUser(user)' class='ara-orange' flat title='Delete User'>
                     <v-icon>fas fa-trash</v-icon>
                   </v-btn>
                 </v-row>
@@ -52,34 +52,42 @@
           ></v-text-field>
         </div>
         <div>
-          <!-- <v-data-table id="UserCriteria-users-datatable"
+          <v-data-table id="UserCriteria-users-datatable"
             :header='userCriteriaGridHeaders'
-            :items='filteredUsersCriteriaFilter'
-            :items-per-page='5'
+            :items='assignedUsersCriteriaFilter'
+            :rows-per-page-items=[5,10,25]
+            item-key="userId"
             class='elevation-1'
-            hide-actions
-            @sort='onSort'
+            
           >
-            <template v-slot :header="{ header, index }">
-              <span style='cursor: pointer'>
-                {{ header.text }}
-                <v-icon v-if='sortKey === header.value'>
-                  {{ sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-                </v-icon>
-              </span>
+          <template v-slot:headers="props">
+              <tr>
+                  <th
+                    v-for="header in userCriteriaGridHeaders"
+                    :key="header"
+                  >
+                    <span style='cursor: pointer'>
+                      {{ header.title }}
+                      <v-icon v-if='sortKey === header.key'>
+                        {{ sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                      </v-icon>
+                    </span>
+                  </th>
+              </tr>
             </template>
-            <template v-slot:item="props" slot='items' slot-scope='props'>
-              <td style='width: 15%; font-size: 1.2em; padding-top: 0.4em'>{{ props.item.userName }}</td>
+            <template v-slot:item="{item}" >
+              <tr>
+              <td style='width: 15%; font-size: 1.2em; padding-top: 0.4em'>{{ item.userName }}</td>
               <td style='width: 35%'>
                 <v-row align-center style='flex-wrap:nowrap; margin-left: 0; width: 100%'>
                   <v-menu bottom 
-                      min-height='500px' min-width='500px' v-if='props.item.hasCriteria' style='width: 100%'>
-                    <template v-slot:activator>
-                      <v-text-field id="UserCriteria-userCriteria-textfield" class='sm-txt' :model-value='props.item.criteria' readonly style='width: 100%' type='text' />
+                      min-height='500px' min-width='500px' v-if='item.hasCriteria' style='width: 100%'>
+                    <template v-slot:activator="{props}" >
+                      <v-text-field  v-bind="props" id="UserCriteria-userCriteria-textfield" class='sm-txt' :model-value='item.criteria' readonly style='width: 100%' type='text' />
                     </template>
                     <v-card>
                       <v-card-text>
-                        <v-textarea :model-value='props.item.criteria' full-width no-resize outline 
+                        <v-textarea :model-value='item.criteria' full-width no-resize outline 
                         readonly 
                         rows='5'>
                       </v-textarea>
@@ -87,68 +95,69 @@
                     </v-card>
                   </v-menu>
                   <div id="UserCriteria-userHasAllAssets-div" style='font-size: 1.2em; font-weight: bold; padding-top: 0.4em; padding-right: 1em' 
-                      v-if='!props.item.hasCriteria'>
+                      v-if='!item.hasCriteria'>
                     All Assets
                   </div>
-                  <v-btn id="UserCriteria-editUserCriteria-btn" @click='onEditCriteria(props.item)' class='edit-icon' icon 
+                  <v-btn id="UserCriteria-editUserCriteria-btn" @click='onEditCriteria(item)' class='edit-icon' flat 
                           title='Edit Criteria' 
-                          v-if='props.item.hasCriteria'>
+                          v-if='item.hasCriteria'>
                     <v-icon>fas fa-edit</v-icon>
                   </v-btn>
                 </v-row>
               </td>
               <td class='d-flex'>
-                <v-btn id="UserCriteria-restrictUserAccess-btn" @click='onEditCriteria(props.item)' class='ara-blue' icon 
+                <v-btn id="UserCriteria-restrictUserAccess-btn" @click='onEditCriteria(item)'  class='ara-blue' flat 
                         title='Restrict Access with Criteria Filter' 
-                        v-if='!props.item.hasCriteria'>
+                        v-if='!item.hasCriteria'>
                   <v-icon>fas fa-lock</v-icon>
                 </v-btn>
-                <v-btn id="UserCriteria-allowUserAllAccess-btn" @click='onGiveUnrestrictedAccess(props.item)' class='ara-blue' icon 
+                <v-btn id="UserCriteria-allowUserAllAccess-btn" @click='onGiveUnrestrictedAccess(item)' class='ara-blue' flat 
                         title='Allow All Assets' 
-                        v-if='props.item.hasCriteria'>
+                        v-if='item.hasCriteria'>
                   <v-icon>fas fa-lock-open</v-icon>
                 </v-btn>
-                <v-btn id="UserCriteria-revokeUserAccess-btn" @click='onRevokeAccess(props.item)' class='ara-orange' icon 
+                <v-btn id="UserCriteria-revokeUserAccess-btn" @click='onRevokeAccess(item)' class='ara-orange' flat 
                         title='Revoke Access'>
                   <v-icon>fas fa-times-circle</v-icon>
                 </v-btn>
-                <v-btn id="UserCriteria-deleteUser-btn" @click='onDeleteUser(props.item)' class='ara-orange' icon 
+                <v-btn id="UserCriteria-deleteUser-btn" @click='onDeleteUser(item)' class='ara-orange' flat 
                         title='Delete User'>
                   <v-icon>fas fa-trash</v-icon>
                 </v-btn>
               </td>
               <td>
                 <v-menu bottom min-height='200px' min-width='200px'>
-                  <template v-slot:activator="{ props }">
-                    <v-text-field id="UserCriteria-userName-textfield" v-model='props.item.name' :readonly='!props.item.hasCriteria' style='width: 15em' type='text' class='text-center' />
+                  <template v-slot:activator="{ props }" >
+                    <v-text-field v-bind="props" id="UserCriteria-userName-textfield" v-model='item.name' :readonly='!item.hasCriteria' style='width: 15em' type='text' class='text-center' />
                   </template>
-                  <v-card>
+                  <v-card style="top: -60px;" >
                     <v-card-text>
-                      <v-text-field id="UserCriteria-editUserName-textfield" v-model='props.item.name' label='Edit Name' single-line @click.stop />
-                      <v-btn id="UserCriteria-updateUserName-btn" @click='updateName(props.item)'>Update</v-btn>
+                      <v-text-field id="UserCriteria-editUserName-textfield" v-model='item.name' label='Edit Name' single-line @click.stop />
+                      <v-btn id="UserCriteria-updateUserName-btn" @click='updateName(item)'>Update</v-btn>
                     </v-card-text>
                   </v-card>
                 </v-menu>
               </td>
               <td>
                 <v-menu bottom min-height='200px' min-width='200px'>
-                  <template v-slot:activator>
-                    <v-text-field id="UserCriteria-userDescription-textfield" v-model='props.item.description' :readonly='!props.item.hasCriteria' style='width: 15em' type='text' class='text-center' />
+                  <template v-slot:activator="{ props }">
+                    <v-text-field v-bind="props" id="UserCriteria-userDescription-textfield" v-model='item.description' :readonly='!item.hasCriteria' style='width: 15em' type='text' class='text-center' />
                   </template>
-                  <v-card>
+                  <v-card style="top: -60px;">
                     <v-card-text>
-                      <v-text-field id="UserCriteria-editUserDescription-textfield" v-model='props.item.description' label='Edit Description' single-line @click.stop />
-                      <v-btn id="UserCriteria-updateUserDescription-btn" @click='updateDescription(props.item)'>Update</v-btn>
+                      <v-text-field id="UserCriteria-editUserDescription-textfield" v-model='item.description' label='Edit Description' single-line @click.stop />
+                      <v-btn id="UserCriteria-updateUserDescription-btn" @click='updateDescription(item)'>Update</v-btn>
                     </v-card-text>
                   </v-card>
                 </v-menu>
               </td>
+            </tr>
             </template>
-          </v-data-table> -->
+          </v-data-table>
         </div>
       </v-card>
     </v-col>
-    <criteriaFilterEditorDialogData :dialogData='criteriaFilterEditorDialogData' 
+    <EditCriteriaDialog :dialogData='criteriaFilterEditorDialogData' 
                                 @submitCriteriaEditorDialogResult='onSubmitCriteria' />
 
     <Alert :dialogData='beforeDeleteAlertData' @submit='onSubmitDeleteUserResponse' />
@@ -156,11 +165,11 @@
 </template>
 
 <script lang='ts' setup>
-import Vue, { getCurrentInstance } from 'vue';
+import Vue, { computed, getCurrentInstance } from 'vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
-import {
-  CriterionFilterEditorDialogData,
+import EditCriteriaDialog from '@/shared/modals/CriterionFilterEditorDialog.vue';
+import{CriterionFilterEditorDialogData,
   emptyCriterionFilterEditorDialogData,
 } from '@/shared/models/modals/criterion-filter-editor-dialog-data';
 import { User } from '@/shared/models/iAM/user';
@@ -174,7 +183,7 @@ import { useRouter } from 'vue-router';
 
 let store = useStore();
 const instance = getCurrentInstance();
-
+let edit = ref<boolean>(false)
 const emit = defineEmits(['submit'])
 
     function filteredUsersCriteriaFilter() {
@@ -183,36 +192,36 @@ const emit = defineEmits(['submit'])
     }
     const lowerCaseSearch = search.toLowerCase();
     
-    return assignedUsersCriteriaFilter.filter((item: { [s: string]: any; } | ArrayLike<unknown>) => {
+    return assignedUsersCriteriaFilter.value.filter((item: { [s: string]: any; } | ArrayLike<unknown>) => {
       return Object.values(item).some(val => String(val).toLowerCase().includes(lowerCaseSearch));
     });
   }
   
-  let stateUsers = ref<User[]>(store.state.userModule.users);
-  let stateUsersCriteriaFilter = ref<UserCriteriaFilter[]>(store.state.userModule.usersCriteriaFilter);
+  let stateUsers = computed<User[]>(()=>store.state.userModule.users);
+  let stateUsersCriteriaFilter = computed<UserCriteriaFilter[]>(()=>store.state.userModule.usersCriteriaFilter);
 
-  async function getAllUserCriteriaAction(payload?: any): Promise<any> {await store.dispatch('getAllUsers');}
-  async function deleteUserAction(payload?: any): Promise<any> {await store.dispatch('deleteUser');}
-  async function getAllUserCriteriaFilterAction(payload?: any): Promise<any> {await store.dispatch('getAllUserCriteriaFilter');}
-  async function updateUserCriteriaFilterAction(payload?: any): Promise<any> {await store.dispatch('updateUserCriteriaFilter');}
-  async function revokeUserCriteriaFilterAction(payload?: any): Promise<any> {await store.dispatch('revokeUserCriteriaFilter');}
+  async function getAllUserCriteriaAction(payload?: any): Promise<any> {await store.dispatch('getAllUsers',payload);}
+  async function deleteUserAction(payload?: any): Promise<any> {await store.dispatch('deleteUser',payload);}
+  async function getAllUserCriteriaFilterAction(payload?: any): Promise<any> {await store.dispatch('getAllUserCriteriaFilter',payload);}
+  async function updateUserCriteriaFilterAction(payload?: any): Promise<any> {await store.dispatch('updateUserCriteriaFilter',payload);}
+  async function revokeUserCriteriaFilterAction(payload?: any): Promise<any> {await store.dispatch('revokeUserCriteriaFilter',payload);}
   
-  let beforeDeleteAlertData: AlertData = { ...emptyAlertData };
-  let userCriteriaGridHeaders: object[] = [
-    { text: 'User', align: 'left', sortable: true, value: 'userName' },
-    { text: 'Criteria Filter', sortable: true, value: 'hasCriteria' },
-    { text: '', align: 'right', sortable: false, value: 'actions' },
-    { text: 'Name', align: 'Left', sortable: false, value: 'name' },
-    { text: 'Description', align: 'Left', sortable: false, value: 'description' }
+  let beforeDeleteAlertData=ref<AlertData> (emptyAlertData);
+  let userCriteriaGridHeaders: any = [
+    { title: 'User', align: 'left', sortable: true, key: 'userName' },
+    { title: 'Criteria Filter', sortable: true, key: 'criteria' },
+    { title: '', align: 'right', sortable: false, key: 'actions' },
+    { title: 'Name', align: 'Left', sortable: false, key: 'name' },
+    { title: 'Description', align: 'Left', sortable: false, key: 'description' }
   ];
 
-  let unassignedUsers: User[] = [];
-  let assignedUsers: User[] = [];
+  let unassignedUsers: User[]=[];
+  let assignedUsers:User[] =[];
 
-  let assignedUsersCriteriaFilter: UserCriteriaFilter[]=[] ;
-  let unassignedUsersCriteriaFilter: UserCriteriaFilter[] = [];
+  const assignedUsersCriteriaFilter= ref<any>([]) ;
+  const unassignedUsersCriteriaFilter=ref <UserCriteriaFilter[]> ([]);
   
-  let criteriaFilterEditorDialogData: CriterionFilterEditorDialogData = { ...emptyCriterionFilterEditorDialogData };
+  const criteriaFilterEditorDialogData= ref<any>  (emptyCriterionFilterEditorDialogData);
   let selectedUser: UserCriteriaFilter = { ...emptyUserCriteriaFilter };
   let uuidNIL: string = getBlankGuid();
   let nameValue: string = '';
@@ -224,30 +233,43 @@ const emit = defineEmits(['submit'])
   const $forceUpdate = inject('$forceUpdate') as any
   created();
   function created() {
-  criteriaFilterEditorDialogData = { ...emptyCriterionFilterEditorDialogData };
-  unassignedUsersCriteriaFilter = [];
-  assignedUsersCriteriaFilter = [];
+  unassignedUsersCriteriaFilter.value = [];
+  assignedUsersCriteriaFilter.value = [];
 
   getAllUserCriteriaAction().then(() => {
     loading = false;
   });
 
   watch(stateUsersCriteriaFilter, () => {
-    assignedUsersCriteriaFilter.forEach((userCriteriaFilter: UserCriteriaFilter) => {
-      if (userCriteriaFilter.hasCriteria) {
-        nameValue = userCriteriaFilter.name;
-        descriptionValue = userCriteriaFilter.description;
-      }
-    });
+    stateUsersCriteriaFilter.value.forEach((userCriteriafilter: UserCriteriaFilter)=>{
+    let tempUserCriteria = userCriteriafilter;
+    if(tempUserCriteria.hasCriteria)
+    {
+        nameValue = tempUserCriteria.name;
+        descriptionValue = tempUserCriteria.description;
+    }
+    assignedUsersCriteriaFilter.value.push(tempUserCriteria);
+    })
   });
 }
+watch(stateUsersCriteriaFilter, () => {
+    stateUsersCriteriaFilter.value.forEach((userCriteriafilter: UserCriteriaFilter)=>{
+    let tempUserCriteria = userCriteriafilter;
+    if(tempUserCriteria.hasCriteria)
+    {
+        nameValue = tempUserCriteria.name;
+        descriptionValue = tempUserCriteria.description;
+    }
+    assignedUsersCriteriaFilter.value.push(tempUserCriteria);
+    })
+  });
 
 watch(stateUsers,()=>onUserCriteriaChanged())
   function onUserCriteriaChanged() {
     unassignedUsers = stateUsers.value.filter((user: User) => !user.hasInventoryAccess);
     assignedUsers = stateUsers.value.filter((user: User) => user.hasInventoryAccess);
 
-    unassignedUsersCriteriaFilter = [{ ...emptyUserCriteriaFilter }];
+    unassignedUsersCriteriaFilter.value = [{ ...emptyUserCriteriaFilter }];
     unassignedUsers.forEach((value) => {
       var tempL: UserCriteriaFilter = {
         userId: value.id,
@@ -255,20 +277,20 @@ watch(stateUsers,()=>onUserCriteriaChanged())
         hasAccess: value.hasInventoryAccess,
         hasCriteria: false,
         name: '',
-        description: '',
+        description: value.description,
         criteria: '',
         criteriaId: '',
       };
-      unassignedUsersCriteriaFilter.push(tempL);
+      unassignedUsersCriteriaFilter.value.push(tempL);
     });
-    unassignedUsersCriteriaFilter.shift(); // removes the 1st element, which is always bank in case
-    $forceUpdate();
+    unassignedUsersCriteriaFilter.value.shift(); // removes the 1st element, which is always bank in case
+    // $forceUpdate();
   }
 
   watch(stateUsersCriteriaFilter,()=>onUserCriteriaFilterChanged())
   function onUserCriteriaFilterChanged() {
-    assignedUsersCriteriaFilter = stateUsersCriteriaFilter.value;
-    $forceUpdate();
+    assignedUsersCriteriaFilter.value = stateUsersCriteriaFilter.value;
+    // $forceUpdate();
   }
 
   onMounted(()=>mounted())
@@ -280,7 +302,7 @@ watch(stateUsers,()=>onUserCriteriaChanged())
     selectedUser = userFilter;
     var currentUser = stateUsers.value.filter((user: User) => user.id == userFilter.userId)[0];
 
-    criteriaFilterEditorDialogData = {
+    criteriaFilterEditorDialogData.value = {
       showDialog: true,
       userId: currentUser.id,
       name: userFilter.name,
@@ -299,14 +321,17 @@ watch(stateUsers,()=>onUserCriteriaChanged())
 }
 
   function onSubmitCriteria(userCriteriaFilter: UserCriteriaFilter) {
-    criteriaFilterEditorDialogData = { ...emptyCriterionFilterEditorDialogData };
+    criteriaFilterEditorDialogData.value = { ...emptyCriterionFilterEditorDialogData };
     if (userCriteriaFilter != null) {
       if (userCriteriaFilter.criteriaId == '') {
         userCriteriaFilter.criteriaId = getNewGuid();
       }
       updateUserCriteriaFilterAction({ userCriteriaFilter: userCriteriaFilter });
+      
     }
-
+    getAllUserCriteriaAction().then(() => {
+    loading = false;
+  });
     selectedUser = { ...emptyUserCriteriaFilter };
   }
 
@@ -332,6 +357,8 @@ watch(stateUsers,()=>onUserCriteriaChanged())
       criteria: undefined,
       hasAccess: false,
       hasCriteria: false,
+      descriptionValue: targetUser.description,
+      nameValue:targetUser.name
     };
     revokeUserCriteriaFilterAction({ userCriteriaId: userCriteriaFilter.criteriaId });
   }
@@ -342,6 +369,8 @@ watch(stateUsers,()=>onUserCriteriaChanged())
       criteria: '',
       hasAccess: true,
       hasCriteria: false,
+      nameValue:targetUser.name,
+      descriptionValue:targetUser.description
     };
     if (userFilterCriteria.criteriaId == '') {
       userFilterCriteria.criteriaId = getNewGuid();
@@ -352,7 +381,7 @@ watch(stateUsers,()=>onUserCriteriaChanged())
   function onDeleteUser(user: UserCriteriaFilter) {
     selectedUser = user;
 
-    beforeDeleteAlertData = {
+    beforeDeleteAlertData.value = {
       choice: true,
       heading: 'Delete User',
       message: `Are you sure you want to delete user ${selectedUser.userName}?`,
@@ -361,13 +390,14 @@ watch(stateUsers,()=>onUserCriteriaChanged())
   }
 
   function onSubmitDeleteUserResponse(doDelete: boolean) {
-    beforeDeleteAlertData = { ...emptyAlertData };
+    beforeDeleteAlertData.value = { ...emptyAlertData };
 
     if (doDelete && !itemsAreEqual(selectedUser, emptyUserCriteriaFilter)) {
 
       deleteUserAction({ userId: selectedUser.userId })
           .then(() => selectedUser = { ...emptyUserCriteriaFilter });
     }
+    beforeDeleteAlertData.value.showDialog=false;
   }
 
 </script>
@@ -378,7 +408,9 @@ watch(stateUsers,()=>onUserCriteriaChanged())
   width: 75%;
   text-align: center
 }
-
+.d-flex{
+  margin-top: 29px;
+}
 .unassigned-user-layout-username-flex {
   display: flex;
   flex-direction: column;

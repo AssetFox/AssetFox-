@@ -70,11 +70,10 @@
                 </v-col>
                 <v-col cols = "2" class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-label"><span>Minimum Project Cost Limit</span></v-subheader>
-                    <v-text-field outline 
+                    <currencyTextbox outline 
                                   id='InvestmentEditor-minimumProjectCostLimit-textField'
                                   @change='onEditInvestmentPlan("minimumProjectCostLimit", $event)'
                                   v-model='investmentPlan.minimumProjectCostLimit'
-                                  v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: true}"
                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]"
                                   :disabled="!hasAdminAccess"
                                   variant="outlined"
@@ -202,12 +201,12 @@
                                 <editDialog :return-value.sync='item[header.key]'
                                     @save='onEditBudgetYearValue(item.year, header.key, item[header.key])'
                                     size="large" lazy>
-                                    <v-text-field readonly single-line class='sm-txt'
+                                    <currencyTextbox readonly single-line class='sm-txt'
                                         variant="underlined"
                                         :model-value='formatAsCurrency(item[header.key])'
                                         :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     <template v-slot:input>
-                                        <v-text-field label='Edit' single-line
+                                        <currencyTextbox label='Edit' single-line
                                             v-model.number='item[header.key]'
                                             v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"                         
                                             :rules="[rules['generalRules'].valueIsNotEmpty]" />
@@ -383,6 +382,7 @@ import mitt from 'mitt';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
+import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 
 let store = useStore();
 const confirm = useConfirm();

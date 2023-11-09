@@ -1,5 +1,5 @@
 <template>
-  <v-dialog  persistent v-model ="dialogData.showDialog">
+  <v-dialog  max-width="500px" persistent v-model ="dialogData.showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-padding-top-title">
         <v-row justify="space-between">
@@ -17,16 +17,18 @@
                       sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
           <template v-slot:item="{item}" slot="items" slot-scope="props">
+            <tr>
             <td>
-              {{ item.value.username }}
+              {{ item.username }}
             </td>
             <td>
-              <v-checkbox id="ShareBudgetPriorityLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.raw.isShared"
-                          @change="removeUserModifyAccess(item.value.id, item.value.isShared)"/>
+              <v-checkbox id="ShareBudgetPriorityLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.isShared"
+                          @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox id="ShareBudgetPriorityLibraryDialog-canModify-vcheckbox" :disabled="!item.value.isShared" label="Can Modify" v-model="item.raw.canModify"/>
+              <v-checkbox id="ShareBudgetPriorityLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" label="Can Modify" v-model="item.canModify"/>
             </td>
+          </tr>
           </template>
           <!-- <v-alert :model-value="true"
                    class="ara-orange-bg"

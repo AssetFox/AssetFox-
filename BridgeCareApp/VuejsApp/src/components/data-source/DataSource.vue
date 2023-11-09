@@ -29,10 +29,10 @@
                 </div>
             </v-row>
         <v-row>
-            <div style="margin-left: 5%;" v-show="!isNewDataSource">
+            <div style="margin-left: 5%;">
 
             <v-row>
-                <v-subheader v-show="showMssql || showExcel" class="ghd-md-gray ghd-control-label" style="margin-left:2%;" >Source Type</v-subheader>
+                <v-subheader v-show="showMssql || showExcel && !isNewDataSource" class="ghd-md-gray ghd-control-label" style="margin-left:2%;" >Source Type</v-subheader>
             </v-row>
         <v-row>
             <v-select
@@ -43,14 +43,14 @@
               item-value = "value"
               style="padding-right:20%; margin-left:2%;"
               v-model="dataSourceTypeItem"
-              v-show="showMssql || showExcel"
+              v-show="showMssql || showExcel && !isNewDataSource"
               outline
               variant = "outlined"
             >
             </v-select>
         </v-row>
                 <v-row>               
-                <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family" style="margin-left:2%;">FileName</v-subheader>
+                <v-subheader v-show="showExcel  && !isNewDataSource" class="ghd-control-label ghd-md-gray Montserrat-font-family" style="margin-left:2%;">FileName</v-subheader>
                 </v-row> 
                 <v-row>
                     <v-text-field
@@ -60,19 +60,19 @@
                         style="margin-left:2%;"
                         item-title = "text"
                         item-value = "value"
-                        v-show="showExcel"
+                        v-show="showExcel  && !isNewDataSource"
                         outline
                         variant = "outlined"
                     ></v-text-field>
-                    <v-btn id="DataSource-AddFile-vbtn" v-show="showExcel" class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button Montserrat-font-family" style="margin-left:2%; margin-top: 1%;;" variant = "outlined" @click="chooseFiles()">Add File</v-btn>
+                    <v-btn id="DataSource-AddFile-vbtn" v-show="showExcel  && !isNewDataSource" class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button Montserrat-font-family" style="margin-left:2%; margin-top: 1%;;" variant = "outlined" @click="chooseFiles()">Add File</v-btn>
                     <input @change="onSelect" id="file-select" type="file" hidden />
                 </v-row>
-                <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Location Column</v-subheader>
+                <v-subheader v-show="showExcel  && !isNewDataSource" class="ghd-control-label ghd-md-gray Montserrat-font-family">Location Column</v-subheader>
                 <v-select
                 id="DataSource-Location-vselect"
                 :items="locColumns"
                 v-model="currentExcelLocationColumn"
-                v-show="showExcel"
+                v-show="showExcel  && !isNewDataSource"
                 item-title = "text"
                 item-value = "value"
                 class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
@@ -80,11 +80,11 @@
                 variant = "outlined"
                 >
                 </v-select>
-                <v-subheader  v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Date Column</v-subheader>
+                <v-subheader  v-show="showExcel  && !isNewDataSource" class="ghd-control-label ghd-md-gray Montserrat-font-family">Date Column</v-subheader>
                 <v-select
                 id="DataSource-Date-vselect"
                 :items="datColumns"
-                v-show="showExcel"
+                v-show="showExcel  && !isNewDataSource"
                 v-model="currentExcelDateColumn"
                 class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
                 outline
@@ -98,7 +98,7 @@
                 <v-row>
                 <v-btn id="DataSource-Cancel-vbtn"  @click="resetDataSource" v-show="showMssql || showExcel" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' flat>Cancel</v-btn>
                 <v-btn id="DataSource-Test-vbtn"  @click="checkSQLConnection" v-show="showMssql" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>Test</v-btn>
-                <v-btn id="DataSource-Save-vbtn"  :disabled="disableCrudButtons() || !hasUnsavedChanges" v-show="showMssql || showExcel" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onSaveDatasource">Save</v-btn>
+                <v-btn id="DataSource-Save-vbtn"   v-show="showMssql || showExcel" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onSaveDatasource">Save</v-btn>
                 <v-btn id="DataSource-Load-vbtn"  :disabled="isNewDataSource" variant = "outlined" v-show="showExcel" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onLoadExcel">Load</v-btn>
                 <v-btn id="DataSource-Delete-vbtn"  :disabled="isNewDataSource" v-show="showMssql || showExcel" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onDeleteClick">Delete</v-btn>
                 </v-row>
@@ -190,14 +190,14 @@ import { useStore } from 'vuex';
     
     
     let assetNumber: number = 0;
-    let invalidColumn: string = '';
-    let sqlResponse: string | null = '';
-    let sqlValid: boolean = false;
+    let invalidColumn = ref<string>('');
+    let sqlResponse = ref<string | null>('');
+    let sqlValid = ref<boolean>(false);
 
     const sourceTypeItem = ref<string>('');
-    let dataSourceTypeItem: ShallowRef<string | null> = shallowRef('');
-    let datasourceNames: string[] = [];
-    let dataSourceExcelColumns: DataSourceExcelColumns = { locationColumn: [], dateColumn: []};
+    let dataSourceTypeItem = ref<string | null>('');
+    let datasourceNames = ref<string[]>([]);
+    let dataSourceExcelColumns = ref<DataSourceExcelColumns>({ locationColumn: [], dateColumn: []});
 
     let currentExcelLocationColumn = ref<string>('');
     let currentExcelDateColumn = ref<string>('');
@@ -215,13 +215,13 @@ import { useStore } from 'vuex';
         
     let fileName = ref<string>('');
     let fileSelect: HTMLInputElement = {} as HTMLInputElement;
-    let files: File[] = [];
-    let file: ShallowRef<File | null> = shallowRef(null);   
+    let files = ref<File[]>([]);
+    let file = ref<File | null>(null);   
 
-    let locColumns: string[] =[];
-    let datColumns: string[] =[];
+    let locColumns = ref<string[]>([]);
+    let datColumns = ref<string[]>([]);
 
-    let connectionStringPlaceHolderMessage: string = '';    
+    let connectionStringPlaceHolderMessage = ref<string>('');    
 
     created();
     function created() {
@@ -240,16 +240,16 @@ import { useStore } from 'vuex';
     }
 
     watch(excelColumns, () => {
-        dataSourceExcelColumns = {
-            locationColumn: excelColumns ? excelColumns.value.columnHeaders ? excelColumns.value.columnHeaders.length > 0 ? excelColumns.value.columnHeaders : [] : [] : [],
-            dateColumn: excelColumns ? excelColumns.value.columnHeaders ? excelColumns.value.columnHeaders.length > 0 ? excelColumns.value.columnHeaders : [] : [] : []
+        dataSourceExcelColumns.value = {
+            locationColumn: excelColumns.value ? excelColumns.value.columnHeaders ? excelColumns.value.columnHeaders.length > 0 ? excelColumns.value.columnHeaders : [] : [] : [],
+            dateColumn: excelColumns.value ? excelColumns.value.columnHeaders ? excelColumns.value.columnHeaders.length > 0 ? excelColumns.value.columnHeaders : [] : [] : []
         };
-        if (dataSourceExcelColumns.locationColumn.length > 0) {
-            locColumns = dataSourceExcelColumns.locationColumn;
+        if (dataSourceExcelColumns.value.locationColumn.length > 0) {
+            locColumns.value = dataSourceExcelColumns.value.locationColumn;
             currentExcelLocationColumn.value = currentDatasource ? currentDatasource.value.locationColumn : '';
         }
-        if (dataSourceExcelColumns.dateColumn.length > 0) {
-            datColumns = dataSourceExcelColumns.dateColumn; 
+        if (dataSourceExcelColumns.value.dateColumn.length > 0) {
+            datColumns.value = dataSourceExcelColumns.value.dateColumn; 
             currentExcelDateColumn.value = currentDatasource ? currentDatasource.value.dateColumn : '';
         }
     })
@@ -275,7 +275,7 @@ import { useStore } from 'vuex';
             showMssql.value = false;
             currentDatasource.value.type = "Excel";
             
-            if(!isNewDataSource) {
+            if(!isNewDataSource.value) {
                 getExcelSpreadsheetColumnHeadersAction(currentDatasource.value.id);
                 currentExcelDateColumn.value = currentDatasource.value.dateColumn;
                 currentExcelLocationColumn.value = currentDatasource.value.locationColumn;
@@ -300,58 +300,51 @@ import { useStore } from 'vuex';
         currentExcelDateColumn.value = currentDatasource.dateColumn;
         currentExcelLocationColumn.value = currentDatasource.locationColumn;
         selectedConnection.value = isOwner() ? currentDatasource.connectionString : '';
-        connectionStringPlaceHolderMessage = currentDatasource.connectionString != ''? "Replacement connection string" : 'New connection string';
+        connectionStringPlaceHolderMessage.value = currentDatasource.connectionString != ''? "Replacement connection string" : 'New connection string';
         showSqlMessage.value = false; showSaveMessage.value = false;
-        if(!isNewDataSource) {
+        if(!isNewDataSource.value) {
                 getExcelSpreadsheetColumnHeadersAction(currentDatasource.id);
                 currentExcelDateColumn.value = currentDatasource.dateColumn;
                 currentExcelLocationColumn.value = currentDatasource.locationColumn;
             }
     })
 
-    watch(selectedConnection, () => onSelectedConnectionChanged)
-    function onSelectedConnectionChanged() {
+    watch(selectedConnection, () => {
         if(selectedConnection.value != '')
         {
             currentDatasource.value.connectionString = selectedConnection.value;
         }
-    }
+    })
 
-    watch(sqlCommandResponse, () => onSqlCommandResponseChanged)
-    function onSqlCommandResponseChanged() {
-        sqlCommandResponse ? sqlResponse = sqlCommandResponse.value.validationMessage : '';
-    }
+    watch(sqlCommandResponse, () =>  {
+        sqlCommandResponse.value ? sqlResponse.value = sqlCommandResponse.value.validationMessage : '';
+    })
 
-    watch(file, () => onFileChanged)
-    function onFileChanged() {
-        files = hasValue(file.value) ? [file.value as File] : [];                                   
+    watch(file, () =>  {
+        files.value = hasValue(file.value) ? [file.value as File] : [];                                   
         emit('submit', file.value);
         file.value ? fileName.value = file.value.name : fileName.value = '';
 
         (<HTMLInputElement>document.getElementById('file-select')!).value = '';
-    }
+    })
 
-    watch(currentDatasource, () => onCurrentDataSourceChanged)
-    function onCurrentDataSourceChanged() {
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', currentDatasource, unmodifiedDatasource);
+    watch(currentDatasource, () =>  {
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', currentDatasource.value, unmodifiedDatasource.value);
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
-    }
+    })
 
-    watch(unmodifiedDatasource, () => onUnmodifiedDatasourceChanged)
-    function onUnmodifiedDatasourceChanged(){
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', currentDatasource, unmodifiedDatasource);
+    watch(unmodifiedDatasource, () => {
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', currentDatasource.value, unmodifiedDatasource.value);
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
-    }
+    })
 
-    watch(currentExcelDateColumn, () => onCurrentExcelDateColumnChanged)
-    function onCurrentExcelDateColumnChanged() {
+    watch(currentExcelDateColumn, () =>  {
         currentDatasource.value.dateColumn = currentExcelDateColumn.value;
-    }
+    })
 
-    watch(currentExcelLocationColumn, () => onCurrentExcelLocationColumnChanged)
-    function onCurrentExcelLocationColumnChanged() {
+    watch(currentExcelLocationColumn, () =>  {
         currentDatasource.value.locationColumn = currentExcelLocationColumn.value;
-    }
+    })
 
     function onLoadExcel() {
         if ( hasValue(file.value)) {
@@ -376,15 +369,15 @@ import { useStore } from 'vuex';
             upsertSqlDataSourceAction(sqldat).then(() => {
                 showSqlMessage.value = false;
                 showSaveMessage.value = true;
-                if(isNewDataSource)
+                if(isNewDataSource.value)
                 {
                     currentDatasource.value.createdBy = getIdByUserNameGetter(getUserName());
                     isNewDataSource.value = false;
                 }
                 selectedConnection.value = isOwner() ? currentDatasource.value.connectionString : '';
-                connectionStringPlaceHolderMessage = currentDatasource.value.connectionString!='' ? 'Replacement connection string' : 'New connection string';
+                connectionStringPlaceHolderMessage.value = currentDatasource.value.connectionString!='' ? 'Replacement connection string' : 'New connection string';
                 getDataSourcesAction();
-                unmodifiedDatasource = clone(currentDatasource);
+                unmodifiedDatasource.value = clone(currentDatasource.value);
             });
         } else {
             let exldat : ExcelDataSource = {
@@ -397,13 +390,13 @@ import { useStore } from 'vuex';
             createdBy: currentDatasource.value.createdBy
             }
             upsertExcelDataSourceAction(exldat).then(() => {
-                if (!isNewDataSource) {
+                if (!isNewDataSource.value) {
                     showSaveMessage.value = true;
                 }
                 getDataSourcesAction().then(() => {
                     isNewDataSource.value = false;
                 });
-                unmodifiedDatasource = clone(currentDatasource);
+                unmodifiedDatasource.value = clone(currentDatasource.value);
             });
         }
     }
@@ -425,14 +418,14 @@ import { useStore } from 'vuex';
         sourceTypeItem.value = datasource.name;
         dataSourceTypeItem.value = datasource.type;
         selectedConnection.value = datasource.connectionString;        
-        connectionStringPlaceHolderMessage = 'New connection string';
-        datColumns = [];
-        locColumns = [];
+        connectionStringPlaceHolderMessage.value = 'New connection string';
+        datColumns.value = [];
+        locColumns.value = [];
       }
     }
     function allowSave(): boolean {
         let result: boolean = false;
-        if (dataSources == undefined) return false;
+        if (dataSources.value == undefined) return false;
         if (dataSourceTypeItem.value===DSEXCEL) {
             if (currentExcelDateColumn.value !== '' || currentExcelLocationColumn.value !== '') {
                 return true;
@@ -444,14 +437,14 @@ import { useStore } from 'vuex';
         currentDatasource.value = emptyDatasource;
         sourceTypeItem.value = '';
         dataSourceTypeItem.value = '';
-        datColumns = [];
-        locColumns = [];
+        datColumns.value = [];
+        locColumns.value = [];
         showMssql.value = false;
         showExcel.value = false;
         showSqlMessage.value = false;
         showSaveMessage.value = false;
         selectedConnection.value = '';
-        connectionStringPlaceHolderMessage = 'New connection string';        
+        connectionStringPlaceHolderMessage.value = 'New connection string';        
     }
     function chooseFiles(){
         if(document != null)
@@ -462,9 +455,9 @@ import { useStore } from 'vuex';
     function onSelect(payload: any) {
         if (hasValue(payload)) {
             const selectedFile = payload.target.files[0];
-            const fileName: string = prop('name', selectedFile) as string;
+            fileName.value = prop('name', selectedFile) as string;
 
-            if (fileName.indexOf('xlsx') === -1) {
+            if (fileName.value.indexOf('xlsx') === -1) {
                 addErrorNotificationAction({
                     message: 'Only .xlsx file types are allowed',
                 });
@@ -476,7 +469,7 @@ import { useStore } from 'vuex';
         fileSelect.value = '';
     }
     function checkSQLConnection() {
-        if (currentDatasource != undefined) {
+        if (currentDatasource.value != undefined) {
             showSqlMessage.value = false;
             showSaveMessage.value = false;
             let connStr: string = currentDatasource.value.connectionString;
@@ -484,8 +477,8 @@ import { useStore } from 'vuex';
             let testConnection: TestStringData = {testString: connStr};
 
             checkSqlCommandAction(testConnection).then(() => {
-                sqlValid = sqlCommandResponse.value.isValid;
-                sqlResponse = sqlCommandResponse.value.validationMessage;
+                sqlValid.value = sqlCommandResponse.value.isValid;
+                sqlResponse.value = sqlCommandResponse.value.validationMessage;
                 showSqlMessage.value = true;
             });
         }
@@ -506,7 +499,7 @@ import { useStore } from 'vuex';
             return !sqlValid;
         }
 
-        if(currentDatasource.value.type == "Excel" && !isNewDataSource)
+        if(currentDatasource.value.type == "Excel" && !isNewDataSource.value)
         {
             return !allowSave();
         }

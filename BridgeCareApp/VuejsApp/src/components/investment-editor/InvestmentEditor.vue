@@ -1,4 +1,5 @@
 <template>
+    <v-card height="1000px" class="elevation-0 vcard-main-layout">
     <v-row>
         <v-col cols="12">
             <v-row justify="space-between">
@@ -69,11 +70,10 @@
                 </v-col>
                 <v-col cols = "2" class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-label"><span>Minimum Project Cost Limit</span></v-subheader>
-                    <v-text-field outline 
+                    <currencyTextbox outline 
                                   id='InvestmentEditor-minimumProjectCostLimit-textField'
                                   @change='onEditInvestmentPlan("minimumProjectCostLimit", $event)'
                                   v-model='investmentPlan.minimumProjectCostLimit'
-                                  v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: true}"
                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]"
                                   :disabled="!hasAdminAccess"
                                   variant="outlined"
@@ -201,12 +201,12 @@
                                 <editDialog :return-value.sync='item[header.key]'
                                     @save='onEditBudgetYearValue(item.year, header.key, item[header.key])'
                                     size="large" lazy>
-                                    <v-text-field readonly single-line class='sm-txt'
+                                    <currencyTextbox readonly single-line class='sm-txt'
                                         variant="underlined"
                                         :model-value="item[header.key]"
                                         :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     <template v-slot:input>
-                                        <v-text-field label='Edit' single-line
+                                        <currencyTextbox label='Edit' single-line
                                             v-model.number='item[header.key]'
                                             :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     </template>
@@ -304,6 +304,7 @@
         <ImportExportInvestmentBudgetsDialog :showDialog='showImportExportInvestmentBudgetsDialog'
                                              @submit='onSubmitImportExportInvestmentBudgetsDialogResult' />
     </v-row>
+</v-card>
     <ConfirmDialog></ConfirmDialog>
 </template>
 
@@ -380,6 +381,7 @@ import mitt from 'mitt';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
+import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 
 let store = useStore();
 const confirm = useConfirm();
@@ -543,10 +545,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     //     });
     // }
 
-    onMounted(() => {
+    onMounted(async () => {
         librarySelectItemValue.value = '';
-        getHasPermittedAccessAction();
-        getBudgetLibrariesAction()
+        await getHasPermittedAccessAction();
+        await getBudgetLibrariesAction()
         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
             selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
 
@@ -563,7 +565,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     setAlertMessageAction("An investment import has been added to the work queue")
                 }
             })
-                initializePages();
+                await initializePages();
         }
         else
             initializing = false;        
@@ -1674,4 +1676,5 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         height: 22px;
         margin-top: 12px !important;
     }
+    
 </style>

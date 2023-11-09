@@ -104,6 +104,7 @@ let CriteriaExpressionToReturn: string | null = "";
                 emit('submit', CriteriaExpressionToReturn);
             }
         } else {
+            dialogData.value.showDialog = false
             emit('submit', null);
         }
     }

@@ -9,8 +9,6 @@
             </v-btn>
         </v-row>
       </v-card-title>
-            <div style='height: 500px; max-width:850px' class="ghd-dialog-box-padding-center">
-                    <div style='max-height: 450px; overflow-y:auto;'>
             <v-data-table
                 :headers="cashFlowRuleDistributionGridHeaders"
                 :items="cashFlowDistributionRuleGridData"
@@ -69,14 +67,13 @@
                             full-width
                             @save="onEditSelectedLibraryListData(item.item,'costCeiling')"
                             @open="onOpenCostCeilingEditDialog(item.item.id)">
-                            <v-text-field
+                            <currencyTextbox
                                 id="CashFlowRuleEditDialog-dollarReadOnly-vtextfield"
                                 readonly
                                 single-line
                                 variant="underlined"
                                 class="sm-txt"
-                                :model-value="
-                                    formatAsCurrencyLocaal(item.item.costCeiling)"
+                                :model-value="item.item.costCeiling"
                                 :rules="[
                                     rules['generalRules']
                                         .valueIsNotEmpty,
@@ -88,21 +85,13 @@
                                     )
                                 ]"/>
                             <template v-slot:input>
-                                <v-text-field
+                                <currencyTextbox
                                     name="CashFlowRuleEditDialog-dollarEdit-vtextfield"
                                     label="Edit"
                                     single-line
                                     variant="underlined"
                                     :id="item.item.id"
                                     v-model="item.item.costCeiling"
-                                    v-currency="{
-                                        currency: {
-                                            prefix: '$',
-                                            suffix: ''
-                                        },
-                                        locale: 'en-US',
-                                        distractionFree: false
-                                    }"
                                     :rules="[
                                         rules[
                                             'generalRules'
@@ -169,16 +158,14 @@
                     </tr>
                 </template>
             </v-data-table>
-                </div>
                 <v-btn @click="onAddCashFlowDistributionRule" class='ghd-blue ghd-button' variant = "flat" id="CashFlowRuleEditDialog-addDistributionRule-btn">
                     Add Distribution Rule
                 </v-btn>
-            </div>
                      
 
                             
       <v-card-actions>
-        <v-row justify-center row>
+        <v-row justify="center">
             <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" id="CashFlowRuleEditDialog-cancel-btn">
             Cancel
           </v-btn>
@@ -214,6 +201,7 @@ import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { getLastPropertyValue } from '@/shared/utils/getter-utils';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { getUrl } from '@/shared/utils/get-url';
+import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 
   const props = defineProps<{showDialog: boolean, selectedCashFlowRule: CashFlowRule}>()
   let showDialogComputed = computed(() => props.showDialog);

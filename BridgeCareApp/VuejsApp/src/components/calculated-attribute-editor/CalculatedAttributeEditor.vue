@@ -1,6 +1,6 @@
 <template>
+    <v-card height="900px" class="elevation-0 vcard-main-layout">
     <v-row>
-        <!-- top row -->
         <v-col cols = "12">
             <v-row justify-space-between>
                 <v-col cols = "5" class="ghd-constant-header" style="margin-right: 10px; margin-left: 10px">
@@ -102,7 +102,7 @@
         </v-col>
         <!-- Default Equation -->
         <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
-            <v-subheader style="margin-left: 650px" class="ghd-md-gray ghd-control-label">Default Equation</v-subheader>
+            <v-subheader style="margin-left: 400px" class="ghd-md-gray ghd-control-label">Default Equation</v-subheader>
             <v-row justify-center>
                 <v-col cols = "8">
                     <v-row column>
@@ -226,7 +226,7 @@
             <v-subheader class="ghd-subheader ">Description</v-subheader>
             <v-textarea
                 no-resize
-                outline
+                variant="outlined"
                 class="ghd-text-field-border"
                 rows="4"
                 v-model="selectedCalculatedAttributeLibrary.description"
@@ -234,7 +234,7 @@
         </v-col>
         <!-- buttons -->
         <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
-            <v-row justify-center v-show='hasSelectedLibrary || hasScenario'>
+            <v-row justify="center" v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn
                     :disabled="!hasUnsavedChanges"
                     v-if="hasAdminAccess && hasScenario"
@@ -305,6 +305,7 @@
         />
         <ConfirmDialog></ConfirmDialog>
     </v-row>
+</v-card>
 </template>
 <script lang="ts" setup>
 import { shallowReactive, shallowRef } from 'vue';

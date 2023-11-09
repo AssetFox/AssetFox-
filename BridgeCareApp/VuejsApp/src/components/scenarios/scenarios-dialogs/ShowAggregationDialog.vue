@@ -133,7 +133,7 @@
                     :dialogData="equationEditorDialogData"
                     @submit="onSubmitEquationEditorDialogSubmit"
                 />
-                <ConfirmDataAssignmentAlert :is="Alert"
+                <ConfirmDataAssignmentAlert
                     :dialogData="confirmDataAggregationAlertData"
                     @submit="onConfirmDataAggregationAlertSubmit"
                 />
@@ -143,7 +143,7 @@
 </template>
 
 <script lang="ts" setup>
-import Alert from '@/shared/modals/Alert.vue';
+import ConfirmDataAssignmentAlert from '@/shared/modals/Alert.vue';
 import EquationEditorDialog from '@/shared/modals/EquationEditorDialog.vue';
 import { Equation } from '@/shared/models/iAM/equation';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';

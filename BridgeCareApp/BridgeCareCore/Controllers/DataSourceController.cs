@@ -144,7 +144,7 @@ namespace BridgeCareCore.Controllers
         [HttpGet]
         [Route("GetDataSourceTypes")]
         [ClaimAuthorize("DataSourceViewAccess")]
-        public async Task<IActionResult> GetDataSourceTypes()
+        public Task<IActionResult> GetDataSourceTypes()
         {
             try
             {
@@ -152,7 +152,7 @@ namespace BridgeCareCore.Controllers
                 //All and None are internal data types we do not want to expose to the UI
                 var result = dataSourceArray.Where(q => q.ToString() != "All" && q.ToString() != "None")
                     .Select(v => v.ToString()).ToList();
-                return Ok(result);
+                return Task.FromResult<IActionResult>(Ok(result));
             }
             catch (Exception e)
             {

@@ -1,8 +1,8 @@
 <template>
-    <v-row column>
         <v-row>
+            <v-col class="p-0">
             <v-card
-                class="mx-auto ghd-sidebar-libary"
+                class="ghd-sidebar-libary"
                 height="100%"
                 elevation="0"
                 style="border-top-left-radius: 10px; border-bottom-left-radius: 10px; border: 1px solid #999999;"
@@ -37,12 +37,12 @@
                     <router-view></router-view>
                 </v-container>
             </v-col>
+        </v-col>
         </v-row>
-    </v-row>
 </template>
 
 <script lang="ts" setup>
-import Vue, { ref, shallowReactive } from 'vue'
+import { ref, computed } from 'vue'
 import { any } from 'ramda';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
@@ -59,7 +59,7 @@ import { useStore } from 'vuex';
 
     let store = useStore(); 
 
-    const hasAdminAccess: boolean = shallowReactive(store.state.authenticationModule.hasAdminAccess) ; 
+    const hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess) ; 
     let userId = ref<string>(store.state.authenticationModule.userId);
 
     let networkId: string = getBlankGuid();
@@ -149,7 +149,7 @@ import { useStore } from 'vuex';
                             || navigationTab.tabName === 'Target Condition Goal' 
                             || navigationTab.tabName === 'Deficient Condition Goal' 
                             || navigationTab.tabName === 'Calculated Attribute') {
-                            navigationTab['visible'] = hasAdminAccess;
+                            navigationTab['visible'] = hasAdminAccess.value;
                         }
 
                         return navigationTab;

@@ -4,39 +4,32 @@
       <v-card class="equation-container-card Montserrat-font-family">
         <v-card-title class="ghd-dialog-box-padding-top">
           <v-col cols = "12">
-            <v-row justify-space-between >
-              <div class="ghd-control-dialog-header">Equation Editor</div>
+            <v-row justify="space-between" class="text-center" >
+              <div style="margin-left: 347px" class="ghd-control-dialog-header">Equation Editor</div>
               <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                 X
             </v-btn>
             </v-row>
           </v-col>
         </v-card-title>
-        <v-card-text class="equation-content ghd-dialog-box-padding-center">
-          <v-row column>
-            <v-col cols = "12">
-              <div class="validation-message-div">
-                <v-row justify-center>
+         <v-card-text class="equation-content ghd-dialog-box-padding-center">
+                <v-row justify="center">
                   <p class="invalid-message" v-if="invalidExpressionMessage !== ''">{{ invalidExpressionMessage }}</p>
                   <p id="EquationEditor-validEquatiionMsg-p" class="valid-message" v-if="validExpressionMessage !== ''">{{ validExpressionMessage }}</p>
                 </v-row>
-              </div>
-            </v-col>
             <v-col cols = "12">
               <v-tabs v-model="selectedTab">
-                <v-tab :key="0" @click="isPiecewise = false">Equation</v-tab>
-                <v-tab :key="1" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Piecewise</v-tab>
-                <v-tab :key="2" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Time In Rating</v-tab>
+                <v-tab @click="isPiecewise = false">Equation</v-tab>
+                <v-tab @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Piecewise</v-tab>
+                <v-tab @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Time In Rating</v-tab>
+              </v-tabs>
+            </v-col>
                 <v-window>
-                  <v-window-item>
-                  <div class="equation-container-div">
-                    <v-row column>
-                      <div>
-                        <v-row justify-space-between row>
-                          <div>
-                            <v-list>
-                              <template>
-                                <v-list-subheader class="equation-list-subheader">Attributes: Click to add</v-list-subheader>
+                    <v-window-item v-if="selectedTab === 0">
+                      <div class="equation-container-div">
+                            <v-row>
+                              <v-col>
+                                <v-subheader class="equation-list-subheader">Attributes: Click to add</v-subheader>
                                 <div class="attributes-list-container">
                                   <template v-for="(attribute, index) in attributesList" :key="attribute">
                                     <v-list-tile 
@@ -50,12 +43,8 @@
                                      <v-divider v-if="index + 1 < attributesList.length" :key="`divider-${index}`"></v-divider>
                                   </template>
                                 </div>
-                              </template>
-                            </v-list>
-                          </div>
-                          <div>
-                            <v-list>
-                              <template>
+                              </v-col>
+                              <v-col>
                                 <v-subheader class="equation-list-subheader">Formulas: Click to add</v-subheader>
                                 <div class="formulas-list-container">
                                   <template v-for="(formula, index) in formulasList" :key="formula">
@@ -71,214 +60,201 @@
                                     <v-divider v-if="index + 1 < formulasList.length" :key="`divider-${index}`"></v-divider>
                                   </template>
                                 </div>
-                              </template>
-                            </v-list>
-                          </div>
-                        </v-row>
-                      </div>
-                      <div>
-                        <v-row justify-center>
-                          <div class="math-buttons-container">
-                            <v-row justify-space-between row>
-                              <v-btn @click="onAddValueToExpression('+')" class="math-button add circular-button" icon
-                                     size="small">
-                                <span>+</span>
-                              </v-btn>
-                              <v-btn @click="onAddValueToExpression('-')" class="math-button subtract circular-button" icon
-                              size="small">
-                                <span>-</span>
-                              </v-btn>
-                              <v-btn @click="onAddValueToExpression('*')" class="math-button multiply circular-button" icon
-                              size="small">
-                                <span>*</span>
-                              </v-btn>
-                              <v-btn @click="onAddValueToExpression('/')" class="math-button divide circular-button" icon
-                              size="small">
-                                <span>/</span>
-                              </v-btn>
-                              <v-btn @click="onAddValueToExpression('(')" class="math-button parentheses circular-button" icon
-                              size="small">
-                                <span>(</span>
-                              </v-btn>
-                              <v-btn @click="onAddValueToExpression(')')" class="math-button parentheses circular-button" icon
-                              size="small">
-                                <span>)</span>
-                              </v-btn>
+                              </v-col>
                             </v-row>
-                          </div>
+                            
+                            <v-row justify="center"> 
+                              <div class="math-buttons-container">
+                                <v-btn @click="onAddValueToExpression('+')" class="math-button add circular-button" icon
+                                      size="small">
+                                  <span>+</span>
+                                </v-btn>
+                                <v-btn @click="onAddValueToExpression('-')" class="math-button subtract circular-button" icon
+                                size="small">
+                                  <span>-</span>
+                                </v-btn>
+                                <v-btn @click="onAddValueToExpression('*')" class="math-button multiply circular-button" icon
+                                size="small">
+                                  <span>*</span>
+                                </v-btn>
+                                <v-btn @click="onAddValueToExpression('/')" class="math-button divide circular-button" icon
+                                size="small">
+                                  <span>/</span>
+                                </v-btn>
+                                <v-btn @click="onAddValueToExpression('(')" class="math-button parentheses circular-button" icon
+                                size="small">
+                                  <span>(</span>
+                                </v-btn>
+                                <v-btn @click="onAddValueToExpression(')')" class="math-button parentheses circular-button" icon
+                                size="small">
+                                  <span>)</span>
+                                </v-btn>
+                              </div>
+                            </v-row>
+                            <v-row style="padding-top: 10px; padding-left: 15px">
+                              <v-textarea :rows="5" @blur="setCursorPosition" @focus="setTextareaCursorPosition"
+                                          id="equation_textarea"
+                                          no-resize outline
+                                          spellcheck="false"
+                                          variant="outlined"
+                                          density="compact"
+                                          style="max-width: 825px"
+                                          v-model="expression" class="ghd-text-field-border">
+                              </v-textarea>
+                            </v-row>
+                      </div>
+                    </v-window-item>
+                    <v-window-item v-if="selectedTab === 1">
+                      <div class="equation-container-div">
+                        <v-row>
+                          <v-col cols = "5" >
+                            <div>                 
+                              <div class="data-points-grid">
+                                <v-data-table :header="piecewiseGridHeaders"
+                                              :items="piecewiseGridData"
+                                              sort-icon=ghd-table-sort
+                                              class="v-table__overflow ghd-table"
+                                              hide-actions>
+                                  <template slot="items" slot-scope="props"  v-slot:item="props">
+                                    <td v-for="header in piecewiseGridHeaders">
+                                      <div v-if="header.value !== ''">
+                                        <div v-if="props.item.timeValue === 0">
+                                          {{ props.item[header.value] }}
+                                        </div>
+                                        <div @click="onEditDataPoint(props.item, header.value)" class="edit-data-point-span"
+                                            v-else>
+                                          {{ props.item[header.value] }}
+                                        </div>
+                                      </div>
+                                      <div v-else>
+                                        <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
+                                              icon
+                                              v-if="props.item.timeValue !== 0">
+                                          <img :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                        </v-btn>
+                                      </div>
+                                    </td>
+                                  </template>
+                                </v-data-table>
+                              </div>
+                              <v-row justify="space-between" class="add-addmulti-container">
+                                <v-btn @click="onAddTimeAttributeDataPoint"
+                                variant = "flat"  class='ghd-blue ghd-button ghd-button-text'>
+                                  Add
+                                </v-btn>
+                                <v-btn @click="showAddMultipleDataPointsPopup = true"
+                                variant = "flat" class="ghd-blue ghd-button ghd-button-text">
+                                  Add Multi
+                                </v-btn>
+                              </v-row>
+                            </div>
+                          </v-col>
+                          <v-col cols = "7" >
+                            <div class="kendo-chart-container">
+                              <kendo-chart :data-source="piecewiseGridData"
+                                          :pannable-lock="'y'"
+                                          :series-defaults-style="'smooth'"
+                                          :series-defaults-type="'scatterLine'"
+                                          :theme="'sass'"
+                                          :tooltip-format="'({0},{1})'"
+                                          :tooltip-visible="true"
+                                          :x-axis-max="xAxisMax"
+                                          :x-axis-min="0"
+                                          :x-axis-title-text="'Time'"
+                                          :y-axis-max="yAxisMax"
+                                          :y-axis-min="0"
+                                          :y-axis-title-text="'Condition'"
+                                          :zoomable-mousewheel-lock="'y'"
+                                          :zoomable-selection-lock="'y'">
+                                <kendo-chart-series-item :data="dataPointsSource"
+                                                        :markers-visible="false">
+                                </kendo-chart-series-item>
+                              </kendo-chart>
+                            </div>
+                          </v-col>
                         </v-row>
                       </div>
-                      <div>
-                        <v-row justify-center>
-                          <v-textarea :rows="5" @blur="setCursorPosition" @focus="setTextareaCursorPosition" full-width
-                                      id="equation_textarea"
-                                      no-resize outline
-                                      spellcheck="false"
-                                      v-model="expression" class="ghd-text-field-border">
-                          </v-textarea>
+                    </v-window-item>
+                    <v-window-item v-if="selectedTab === 2">
+                      <div class="equation-container-div">
+                        <v-row>
+                          <v-col cols = "5">
+                            <div>
+                              <div class="data-points-grid">
+                                <v-data-table :header="timeInRatingGridHeaders"
+                                              :items="timeInRatingGridData"
+                                              sort-icon=ghd-table-sort
+                                              class="v-table__overflow ghd-table"
+                                              hide-actions>
+                                  <template slot="items" slot-scope="props"  v-slot:item="props">
+                                    <td v-for="header in timeInRatingGridHeaders">
+                                      <div v-if="header.value !== ''">
+                                        <div @click="onEditDataPoint(props.item, header.value)"
+                                            class="edit-data-point-span">
+                                          {{ props.item[header.value] }}
+                                        </div>
+                                      </div>
+                                      <div v-else>
+                                        <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
+                                              icon>
+                                          <img :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                        </v-btn>
+                                      </div>
+                                    </td>
+                                  </template>
+                                </v-data-table>
+                              </div>
+                              <v-row justify="space-between" class="add-addmulti-container">
+                                <v-btn @click="onAddTimeAttributeDataPoint"
+                                variant = "flat" class='ghd-blue ghd-button ghd-button-text' >
+                                  Add
+                                </v-btn>
+                                <v-btn @click="showAddMultipleDataPointsPopup = true"
+                                variant = "flat" class='ghd-blue ghd-button ghd-button-text'>
+                                  Add Multi
+                                </v-btn>
+                              </v-row>
+                            </div>
+                          </v-col>
+                          <v-col cols = "7" >
+                            <div class="kendo-chart-container">
+                              <kendo-chart :data-source="piecewiseGridData"
+                                          :pannable-lock="'y'"
+                                          :series-defaults-style="'smooth'"
+                                          :series-defaults-type="'scatterLine'"
+                                          :theme="'sass'"
+                                          :tooltip-format="'({0},{1})'"
+                                          :tooltip-visible="true"
+                                          :x-axis-max="xAxisMax"
+                                          :x-axis-min="0"
+                                          :x-axis-title-text="'Time'"
+                                          :y-axis-max="yAxisMax"
+                                          :y-axis-min="0"
+                                          :y-axis-title-text="'Condition'"
+                                          :zoomable-mousewheel-lock="'y'"
+                                          :zoomable-selection-lock="'y'">
+                                <kendo-chart-series-item :data="dataPointsSource"
+                                                        :markers-visible="false">
+                                </kendo-chart-series-item>
+                              </kendo-chart>
+                            </div>
+                          </v-col>
                         </v-row>
                       </div>
-                    </v-row>
-                  </div>
-                </v-window-item>
-                <v-window-item>
-                  <div class="equation-container-div">
-                    <v-row>
-                      <v-col cols = "5" >
-                        <div>                 
-                          <div class="data-points-grid">
-                            <v-data-table :headers="piecewiseGridHeaders"
-                                          :items="piecewiseGridData"
-                                          sort-icon=ghd-table-sort
-                                          class="v-table__overflow ghd-table"
-                                          hide-actions>
-                              <template slot="items" slot-scope="props"  v-slot:item="props">
-                                <td v-for="header in piecewiseGridHeaders">
-                                  <div v-if="header.value !== ''">
-                                    <div v-if="props.item.timeValue === 0">
-                                      {{ props.item[header.value] }}
-                                    </div>
-                                    <div @click="onEditDataPoint(props.item, header.value)" class="edit-data-point-span"
-                                         v-else>
-                                      {{ props.item[header.value] }}
-                                    </div>
-                                  </div>
-                                  <div v-else>
-                                    <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
-                                           icon
-                                           v-if="props.item.timeValue !== 0">
-                                      <img :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
-                                    </v-btn>
-                                  </div>
-                                </td>
-                              </template>
-                            </v-data-table>
-                          </div>
-                          <v-row justify-space-between class="add-addmulti-container">
-                            <v-btn @click="onAddTimeAttributeDataPoint"
-                            variant = "flat"  class='ghd-blue ghd-button ghd-button-text'>
-                              Add
-                            </v-btn>
-                            <v-btn @click="showAddMultipleDataPointsPopup = true"
-                            variant = "flat" class="ghd-blue ghd-button ghd-button-text">
-                              Add Multi
-                            </v-btn>
-                          </v-row>
-                        </div>
-                      </v-col>
-                      <v-col cols = "7" >
-                        <div class="kendo-chart-container">
-                          <kendo-chart :data-source="piecewiseGridData"
-                                       :pannable-lock="'y'"
-                                       :series-defaults-style="'smooth'"
-                                       :series-defaults-type="'scatterLine'"
-                                       :theme="'sass'"
-                                       :tooltip-format="'({0},{1})'"
-                                       :tooltip-visible="true"
-                                       :x-axis-max="xAxisMax"
-                                       :x-axis-min="0"
-                                       :x-axis-title-text="'Time'"
-                                       :y-axis-max="yAxisMax"
-                                       :y-axis-min="0"
-                                       :y-axis-title-text="'Condition'"
-                                       :zoomable-mousewheel-lock="'y'"
-                                       :zoomable-selection-lock="'y'">
-                            <kendo-chart-series-item :data="dataPointsSource"
-                                                     :markers-visible="false">
-                            </kendo-chart-series-item>
-                          </kendo-chart>
-                        </div>
-                      </v-col>
-                    </v-row>
-                  </div>
-                </v-window-item>
-                <v-window-item>
-                  <div class="equation-container-div">
-                    <v-row>
-                      <v-col cols = "5">
-                        <div>
-                          <div class="data-points-grid">
-                            <v-data-table :headers="timeInRatingGridHeaders"
-                                          :items="timeInRatingGridData"
-                                          sort-icon=ghd-table-sort
-                                          class="v-table__overflow ghd-table"
-                                          hide-actions>
-                              <template slot="items" slot-scope="props"  v-slot:item="props">
-                                <td v-for="header in timeInRatingGridHeaders">
-                                  <div v-if="header.value !== ''">
-                                    <div @click="onEditDataPoint(props.item, header.value)"
-                                         class="edit-data-point-span">
-                                      {{ props.item[header.value] }}
-                                    </div>
-                                  </div>
-                                  <div v-else>
-                                    <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
-                                           icon>
-                                      <img :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
-                                    </v-btn>
-                                  </div>
-                                </td>
-                              </template>
-                            </v-data-table>
-                          </div>
-                          <v-row justify-space-between class="add-addmulti-container">
-                            <v-btn @click="onAddTimeAttributeDataPoint"
-                            variant = "flat" class='ghd-blue ghd-button ghd-button-text' >
-                              Add
-                            </v-btn>
-                            <v-btn @click="showAddMultipleDataPointsPopup = true"
-                            variant = "flat" class='ghd-blue ghd-button ghd-button-text'>
-                              Add Multi
-                            </v-btn>
-                          </v-row>
-                        </div>
-                      </v-col>
-                      <v-col cols = "7" >
-                        <div class="kendo-chart-container">
-                          <kendo-chart :data-source="piecewiseGridData"
-                                       :pannable-lock="'y'"
-                                       :series-defaults-style="'smooth'"
-                                       :series-defaults-type="'scatterLine'"
-                                       :theme="'sass'"
-                                       :tooltip-format="'({0},{1})'"
-                                       :tooltip-visible="true"
-                                       :x-axis-max="xAxisMax"
-                                       :x-axis-min="0"
-                                       :x-axis-title-text="'Time'"
-                                       :y-axis-max="yAxisMax"
-                                       :y-axis-min="0"
-                                       :y-axis-title-text="'Condition'"
-                                       :zoomable-mousewheel-lock="'y'"
-                                       :zoomable-selection-lock="'y'">
-                            <kendo-chart-series-item :data="dataPointsSource"
-                                                     :markers-visible="false">
-                            </kendo-chart-series-item>
-                          </kendo-chart>
-                        </div>
-                      </v-col>
-                    </v-row>
-                  </div>
-                </v-window-item>
-                  </v-window>
-                
-              </v-tabs>
-            </v-col>
-          </v-row>
+                    </v-window-item>
+                </v-window>
+
         </v-card-text>
-        <v-card-actions class="ghd-dialog-box-padding-bottom">
+        <v-row justify="center" style="margin-bottom: 5px">
+          <v-btn id="EquationEditor-checkEquation-btn" :disabled="disableEquationCheck()" @click="onCheckEquation" density="compact" variant = "flat" class="ghd-blue check-eq ghd-button ghd-button-text">Check Equation</v-btn>
+        </v-row>
+       <v-card-actions class="ghd-dialog-box-padding-bottom">
           <v-row>
             <v-col cols = "12">
-              <div>
-                 <v-row justify-center row>
-                  <v-btn id="EquationEditor-checkEquation-btn" :disabled="disableEquationCheck()" @click="onCheckEquation" variant = "flat" class="ghd-blue check-eq ghd-button ghd-button-text">Check Equation</v-btn>
-                </v-row>
-                <v-row justify-center row>
+                <v-row justify="center">
                   <v-btn @click="onSubmit(false)" variant = "outlined" class='ghd-blue ghd-button ghd-button-text' id="EquationEditorDialog-Cancel-Btn">Cancel</v-btn>
-                  <v-btn :disabled="cannotSubmit" @click="onSubmit(true)"
-                         class="text-white ghd-blue ghd-button ghd-button-text">Save
-                  </v-btn>                  
+                  <v-btn :disabled="cannotSubmit" @click="onSubmit(false)" variant = "outlined" class='ghd-blue ghd-button ghd-button-text' id="EquationEditorDialog-Save-Btn">Save</v-btn>
                 </v-row>
-              </div>
             </v-col>
           </v-row>
         </v-card-actions>
@@ -313,7 +289,7 @@
           </v-row>
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
-          <v-row justify-center row>
+          <v-row justify="center">
             <v-btn @click="onSubmitNewDataPoint(false)" variant = "flat" size="small" class="ghd-blue ghd-button ghd-button-text">Cancel</v-btn>
             <v-btn :disabled="disableNewDataPointSubmit()" @click="onSubmitNewDataPoint(true)"
             variant = "outlined"
@@ -330,7 +306,7 @@
           <v-row column justify-center>
             <p>Data point entries must follow the format <strong>#,#</strong> (time,attribute) with each entry on a
               separate line.</p>
-            <v-col cols = "2">
+            <v-col cols = "12">
               <v-textarea
                   :rules="[multipleDataPointsFormIsNotEmpty, isCorrectMultipleDataPointsFormat, timeValueIsGreaterThanZero, multipleDataPointsAreNew]"
                   no-resize outline rows="10"
@@ -341,7 +317,7 @@
           </v-row>
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
-          <v-row justify-center row>
+          <v-row justify="center">
             <v-btn @click="onSubmitNewDataPointMulti(false)" variant = "flat" size="small" class="ghd-blue ghd-button ghd-button-text">Cancel
             </v-btn>
             <v-btn :disabled="disableMultipleDataPointsSubmit()" @click="onSubmitNewDataPointMulti(true)"
@@ -382,7 +358,7 @@
           </v-row>
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
-          <v-row justify-center row>
+          <v-row justify-center>
             <v-btn @click="onSubmitEditedDataPointValue(false)" variant = "flat" size="small" class="ghd-blue ghd-button-text">Cancel</v-btn>
             <v-btn :disabled="disableEditDataPointSubmit()" @click="onSubmitEditedDataPointValue(true)"
             variant = "outlined"
@@ -461,6 +437,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
   const multipleDataPoints = ref('');;
   const selectedTab = ref<number>(0);
   const showEditDataPointPopup = ref<boolean>(false);
+  const randEq = ["Equation", "Picewise", "Third one"]
   let editedDataPointProperty: string = '';
   const editedDataPoint = ref<TimeConditionDataPoint>(clone(emptyTimeConditionDataPoint));
   let piecewiseRegex: RegExp = /(\(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*\))/;
@@ -596,12 +573,12 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    */
    function onAddFormulaToEquation(formula: string) {
     if (cursorPosition === 0) {
-      expression.value = `${formula}${expression}`;
+      expression.value = `${formula}${expression.value}`;
       cursorPosition = formula !== 'E' && formula !== 'PI'
           ? formula.indexOf('(') + 1
           : formula.length;
     } else if (cursorPosition === expression.value.length) {
-      expression.value = `${expression}${formula}`;
+      expression.value = `${expression.value}${formula}`;
       if (formula !== 'E' && formula !== 'PI') {
         let i = expression.value.length;
         while (expression.value.charAt(i) !== '(') {
@@ -635,9 +612,9 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    function onAddValueToExpression(value: string) {
     if (cursorPosition === 0) {
       cursorPosition = value.length;
-      expression.value = `${value}${expression}`;
+      expression.value = `${value}${expression.value}`;
     } else if (cursorPosition === expression.value.length) {
-      expression.value = `${expression}${value}`;
+      expression.value = `${expression.value}${value}`;
       cursorPosition = expression.value.length;
     } else {
       const output = `${expression.value.substr(0, cursorPosition)}${value}`;
@@ -846,7 +823,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
   }
 
   function disableEquationCheck() {
-        return isPiecewise ? !hasValue(onParseTimeAttributeDataPoints()) : !hasValue(expression);
+        return isPiecewise ? !hasValue(onParseTimeAttributeDataPoints()) : !hasValue(expression.value);
     }
 
   /**

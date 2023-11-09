@@ -157,11 +157,13 @@
                 <v-btn id="Attributes-cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Cancel
                 </v-btn>  
+                <p>&nbsp;&nbsp;&nbsp;</p>
                 <v-btn
                 variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'
                     @click="CheckSqlCommand">
                     Test
                 </v-btn>
+                <p>&nbsp;&nbsp;&nbsp;</p>
                 <v-btn id="Attributes-save-vbtn" @click='saveAttribute'  variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Save
                 </v-btn>               

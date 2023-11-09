@@ -165,13 +165,13 @@
                 variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Cancel
                 </v-btn>  
-                <v-btn id="Networks-Aggregate-vbtn" @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork'  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
+                <v-btn id="Networks-Aggregate-vbtn" @click='aggregateNetworkData' :disabled='isNewNetwork'  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Aggregate
                 </v-btn>
                 <v-btn id="Networks-Delete-vbtn" @click='onDeleteClick' :disabled='isNewNetwork'  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Delete
                 </v-btn>
-                <v-btn id="Networks-Create-vbtn" @click='createNetwork' :disabled='disableCrudButtonsCreate() || !isNewNetwork'
+                <v-btn id="Networks-Create-vbtn" @click='createNetwork' :disabled='!isNewNetwork'
                    
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Create
@@ -232,12 +232,12 @@ import mitt from 'mitt';
     async function getUserNameByIdGetter(payload?: any): Promise<any> {await store.dispatch('getUserNameById', payload);}
     async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
 
-    let rules: InputValidationRules = validationRules;
+    let rules = ref<InputValidationRules>(validationRules);
 
-    let dataSourceGridHeaders: DataTableHeader[] = [
+    let dataSourceGridHeaders = ref<DataTableHeader[]>([
         { text: 'Name', value: 'name', align: 'left', sortable: true, class: '', width: '' },
         { text: 'Data Source', value: 'data source', align: 'left', sortable: true, class: '', width: '' },
-    ];
+    ]);
 
 
 
@@ -256,19 +256,19 @@ import mitt from 'mitt';
         {text: 'None', value: 'None'}
     ]; 
 
-    let networkDataAssignmentPercentage: number = 0;
-    let networkDataAssignmentStatus: string = 'Waiting on server.';
+    let networkDataAssignmentPercentage = ref<number>(0);
+    let networkDataAssignmentStatus = ref<string>('Waiting on server.');
 
     let selectedKeyAttributeItem = ref<string>('');
     let selectedKeyAttribute = ref<Attribute>(clone(emptyAttribute));
     let selectedNetwork = ref<Network>(clone(emptyNetwork));
     let selectNetworkItemValue = ref<string>('');
-    let selectDataSourceId: string = '';
+    let selectDataSourceId = ref<string>('');
     let hasSelectedNetwork = ref<boolean>(false);
-    let isNewNetwork: boolean = false;
-    let hasStartedAggregation: boolean = false;
-    let isKeyPropertySelectedAttribute: boolean = false;
-    let spatialWeightingEquationValue: Equation = clone(emptyEquation); //placeholder until network dto and api changes
+    let isNewNetwork = ref<boolean>(false);
+    let hasStartedAggregation = ref<boolean>(false);
+    let isKeyPropertySelectedAttribute = ref<boolean>(false);
+    let spatialWeightingEquationValue = ref<Equation>(clone(emptyEquation)); //placeholder until network dto and api changes
     let equationEditorDialogData: EquationEditorDialogData = clone(
         emptyEquationEditorDialogData,
     );
@@ -316,9 +316,9 @@ import mitt from 'mitt';
     })
 
     watch(selectNetworkItemValue, () =>  {
-        selectNetworkAction(selectNetworkItemValue);
-        console.log(attributeRows);
-        if(selectNetworkItemValue.value != getBlankGuid() || isNewNetwork)
+        selectNetworkAction(selectNetworkItemValue.value);
+        console.log(attributeRows.value);
+        if(selectNetworkItemValue.value != getBlankGuid() || isNewNetwork.value)
             hasSelectedNetwork.value = true;
         else
             hasSelectedNetwork.value = false;
@@ -327,27 +327,27 @@ import mitt from 'mitt';
     watch(selectedAttributeRows, () => 
     {
         if(any(propEq('id', selectedNetwork.value.keyAttribute), selectedAttributeRows.value)) {
-            isKeyPropertySelectedAttribute = true;
+            isKeyPropertySelectedAttribute.value = true;
         }
         else {
-            isKeyPropertySelectedAttribute = false;
+            isKeyPropertySelectedAttribute.value  = false;
         }
     })
     
     watch(stateSelectedNetwork, () => {
         if (!isNewNetwork) {
-            selectedNetwork = clone(stateSelectedNetwork);
+            selectedNetwork.value = clone(stateSelectedNetwork.value);
         }
     })
 
     watch(selectedNetwork, () => { 
         selectedAttributeRows.value = [];
-        hasStartedAggregation = false;
+        hasStartedAggregation.value  = false;
         selectNetworkItemValue.value = selectedNetwork.value.id;
         selectedKeyAttributeItem.value = selectedNetwork.value.keyAttribute;
-        spatialWeightingEquationValue.expression = selectedNetwork.value.defaultSpatialWeighting;
+        spatialWeightingEquationValue.value.expression = selectedNetwork.value.defaultSpatialWeighting;
 
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', selectedNetwork, stateSelectedNetwork);
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', selectedNetwork.value, stateSelectedNetwork.value);
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     })
 
@@ -367,29 +367,29 @@ import mitt from 'mitt';
             value: network.id
         });
         
-        isNewNetwork = true;
+        isNewNetwork.value  = true;
         selectNetworkItemValue.value = network.id;
         selectedNetwork.value = clone(network);
         hasSelectedNetwork.value = true;
     }
     function onDiscardChanges() {
-        selectedNetwork = clone(stateSelectedNetwork);
+        selectedNetwork.value = clone(stateSelectedNetwork.value);
     }
     function onSubmitEquationEditorDialogResult(equation: Equation) {
         equationEditorDialogData = clone(emptyEquationEditorDialogData);
 
         if (!isNil(equation)) {
-            spatialWeightingEquationValue = clone(equation)
+            spatialWeightingEquationValue.value  = clone(equation)
         }
     }
     function onShowEquationEditorDialog() {
         equationEditorDialogData = {
             showDialog: true,
-            equation: spatialWeightingEquationValue,
+            equation: spatialWeightingEquationValue.value,
         };      
     }
     function selectAllFromSource(){
-        selectedAttributeRows.value = clone(stateAttributes.value.filter((attr: Attribute) => attr.dataSource.id == selectDataSourceId));
+        selectedAttributeRows.value = clone(stateAttributes.value.filter((attr: Attribute) => attr.dataSource.id == selectDataSourceId.value));
     }
     function onAddAll(){
         selectedAttributeRows.value = clone(attributeRows.value)
@@ -403,7 +403,7 @@ import mitt from 'mitt';
             networkId: selectNetworkItemValue.value
         });
 
-        hasStartedAggregation = true;
+        hasStartedAggregation.value = true;
     }
 
     function onDeleteClick(){
@@ -415,9 +415,9 @@ import mitt from 'mitt';
     }
     function disableCrudButtonsCreate() {
 
-        let allValid = rules['generalRules'].valueIsNotEmpty(selectedNetwork.value.name) === true
-            && rules['generalRules'].valueIsNotEmpty(spatialWeightingEquationValue.expression) === true
-            && rules['generalRules'].valueIsNotEmpty(selectedKeyAttributeItem) === true;
+        let allValid = rules.value['generalRules'].valueIsNotEmpty(selectedNetwork.value.name) === true
+            && rules.value['generalRules'].valueIsNotEmpty(spatialWeightingEquationValue.value.expression) === true
+            && rules.value['generalRules'].valueIsNotEmpty(selectedKeyAttributeItem.value) === true;
 
 
         return !allValid;
@@ -425,22 +425,22 @@ import mitt from 'mitt';
     function disableCrudButtonsAggregate() {
         let isKeyPropertySelectedAttribute: Boolean = any(propEq('id', selectedNetwork.value.KeyAttribute), selectedAttributeRows.value);
 
-        let allValid = rules['generalRules'].valueIsNotEmpty(selectedNetwork.value.name) === true
-            && rules['generalRules'].valueIsNotEmpty(selectedAttributeRows) === true
+        let allValid = rules.value['generalRules'].valueIsNotEmpty(selectedNetwork.value.name) === true
+            && rules.value['generalRules'].valueIsNotEmpty(selectedAttributeRows.value) === true
             && isKeyPropertySelectedAttribute === true
-            && hasStartedAggregation === false;
+            && hasStartedAggregation.value === false;
 
 
         return !allValid;
     }
     function createNetwork(){
-        isNewNetwork = false;
+        isNewNetwork.value = false;
 
         createNetworkAction({
             network: selectedNetwork.value,
             parameters: {
-                defaultEquation: spatialWeightingEquationValue.expression,
-                networkDefinitionAttribute: selectedKeyAttribute
+                defaultEquation: spatialWeightingEquationValue.value.expression,
+                networkDefinitionAttribute: selectedKeyAttribute.value
             }
         })
 
@@ -449,8 +449,8 @@ import mitt from 'mitt';
     function getDataAggregationStatus(data: any) {
         const networkRollupDetail: NetworkRollupDetail = data.networkRollupDetail as NetworkRollupDetail;
         if (networkRollupDetail.networkId === selectedNetwork.value.id){
-            networkDataAssignmentStatus = networkRollupDetail.status;
-            networkDataAssignmentPercentage = data.percentage as number;
+            networkDataAssignmentStatus.value = networkRollupDetail.status;
+            networkDataAssignmentPercentage.value = data.percentage as number;
         }
     }
     

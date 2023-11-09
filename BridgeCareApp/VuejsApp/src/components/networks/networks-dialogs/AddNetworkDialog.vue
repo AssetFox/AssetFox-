@@ -41,32 +41,29 @@ import { ref, Ref, watch } from 'vue';
   const emit = defineEmits(['submit'])
 
 
-  let newNetwork: Network = clone(emptyNetwork);
+  let newNetwork = ref<Network>(clone(emptyNetwork));
   let rules: InputValidationRules = validationRules;
-  let networkName: Ref<string> = ref('New Network');
+  let networkName = ref<string>('New Network');
 
-  watch(networkName, () => onNetworkNameChanged)
-  function onNetworkNameChanged() {
-      newNetwork.name = networkName.value;
-  }
+  watch(networkName, () =>  {
+      newNetwork.value.name = networkName.value;
+  })
 
-   watch(() => props.dialogData, () => onDialogDataChanged)
-  function onDialogDataChanged() {
-    newNetwork = {
-      ...newNetwork,
+   watch(() => props.dialogData, () =>  {
+    newNetwork.value = {
+      ...newNetwork.value,
       name: networkName.value,
     }
-    
-  }
+  })
 
   function onSubmit(submit: boolean) {
     if (submit) {
-      emit('submit', newNetwork);
+      emit('submit', newNetwork.value);
     } else {
       emit('submit', null);
     }
 
-    newNetwork = clone(emptyNetwork);
+    newNetwork.value = clone(emptyNetwork);
     props.dialogData.showDialog = false;
   }
 

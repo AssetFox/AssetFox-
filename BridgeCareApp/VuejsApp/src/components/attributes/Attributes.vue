@@ -162,7 +162,7 @@
                     @click="CheckSqlCommand">
                     Test
                 </v-btn>
-                <v-btn id="Attributes-save-vbtn" @click='saveAttribute' :disabled='disableCrudButtons()' variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
+                <v-btn id="Attributes-save-vbtn" @click='saveAttribute'  variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Save
                 </v-btn>               
             </v-row>

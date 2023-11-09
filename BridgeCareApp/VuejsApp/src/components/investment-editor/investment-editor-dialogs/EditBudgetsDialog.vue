@@ -11,9 +11,9 @@
                         </v-btn>
                     </v-row>
                 </v-card-title>
-                <div style='height: 500px; max-width:900px' class="ghd-dialog-box-padding-center">
+                <div style='height: 500px; max-width:900px; margin-top:20px;' class="ghd-dialog-box-padding-center">
                     <div style='max-height: 450px; overflow-y:auto;'>
-                        <v-data-table-server
+                        <v-data-table-virtual
                                   id="EditBudgetsDialog-budgets-dataTable"
                                   :headers='editBudgetsDialogGridHeaders'
                                   :items="editBudgetsDialogGridData"
@@ -30,7 +30,7 @@
                                     v-model="props.item.budgetOrder" 
                                     @change="reorderList(props.item)" 
                                     @mousedown="setCurrentOrder(props.item)" 
-                                    variant="underlined"
+                                    variant="underlined" style="width: 20px;"
                                     />
                                 <v-btn class="ghd-blue" flat>
                                     <v-icon title="up" @click="swapItemOrder(props.item, 'up')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-up
@@ -73,7 +73,7 @@
                             </td>
                         </tr>    
                         </template>
-                    </v-data-table-server>
+                    </v-data-table-virtual>
                     </div>
                     <v-row row align-end style="margin:0 !important">
                         <v-btn id="EditBudgetsDialog-add-btn" @click='onAddBudget' class='ghd-blue ghd-button' variant = "flat">
@@ -134,7 +134,7 @@ let editBudgetsDialogGridData = ref<Budget[]>([]);
 let totalItems = ref<number>(0);
 let selectedGridRows = ref<Budget[]>([]);    
 let criterionLibraryEditorDialogData = ref<GeneralCriterionEditorDialogData>(clone(emptyGeneralCriterionEditorDialogData));
-let selectedBudgetForCriteriaEdit: Budget = clone(emptyBudget);
+let selectedBudgetForCriteriaEdit = ref<Budget>(clone(emptyBudget));
 let rules: InputValidationRules = validationRules;
 let uuidNIL: string = getBlankGuid();
 let Up: string = "up";
@@ -247,7 +247,7 @@ watch(dialogData,() => {
     }
 
     function onShowCriterionLibraryEditorDialog(budget: Budget) {
-        selectedBudgetForCriteriaEdit = clone(budget);
+        selectedBudgetForCriteriaEdit.value = clone(budget);
 
         criterionLibraryEditorDialogData.value = {
             showDialog: true,
@@ -258,16 +258,16 @@ watch(dialogData,() => {
     function onSubmitCriterionLibraryEditorDialogResult(criterionExpression: string) {
         criterionLibraryEditorDialogData.value = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionExpression) && selectedBudgetForCriteriaEdit.id !== uuidNIL) {
-            selectedBudgetForCriteriaEdit.criterionLibrary.mergedCriteriaExpression = criterionExpression;           
+        if (!isNil(criterionExpression) && selectedBudgetForCriteriaEdit.value.id !== uuidNIL) {
+            selectedBudgetForCriteriaEdit.value.criterionLibrary.mergedCriteriaExpression = criterionExpression;           
 
             editBudgetsDialogGridData.value = update(
-                findIndex(propEq('id', selectedBudgetForCriteriaEdit.id), editBudgetsDialogGridData.value),
-                { ...selectedBudgetForCriteriaEdit, criterionLibrary: selectedBudgetForCriteriaEdit.criterionLibrary },
+                findIndex(propEq('id', selectedBudgetForCriteriaEdit.value.id), editBudgetsDialogGridData.value),
+                { ...selectedBudgetForCriteriaEdit.value, criterionLibrary: selectedBudgetForCriteriaEdit.value.criterionLibrary },
                 editBudgetsDialogGridData.value,
             );
 
-            const budget = selectedBudgetForCriteriaEdit;
+            const budget = selectedBudgetForCriteriaEdit.value;
             const origBudget = props.dialogData.budgets.find((b) => b.id == budget.id);
 
             if(!isNil(origBudget)){
@@ -288,7 +288,7 @@ watch(dialogData,() => {
                 budgetChanges.value.addedBudgets[budgetChanges.value.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
             }        
 
-            selectedBudgetForCriteriaEdit = clone(emptyBudget);
+            selectedBudgetForCriteriaEdit.value = clone(emptyBudget);
         }
     }
 

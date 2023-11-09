@@ -3,7 +3,7 @@
         <!-- top row -->
         <v-col cols = "12">
             <v-row justify-space-between>
-                <v-col cols = "5" class="ghd-constant-header" style="margin-right: 10px">
+                <v-col cols = "5" class="ghd-constant-header" style="margin-right: 10px; margin-left: 10px">
                         <v-subheader class="ghd-control-label ghd-md-gray"><span>Select an Investment library</span></v-subheader>
                         <v-select
                                   id="CalculatedAttribute-CalculatedAttribute-select"
@@ -49,7 +49,7 @@
                 </v-col>
             </v-row>
         </v-col>
-        <v-col cols = "6" class="ghd-constant-header" style="margin-bottom: 15px">
+        <v-col cols = "6" class="ghd-constant-header" style="margin-left: 15px; margin-bottom: 15px">
             <v-row v-if='hasSelectedLibrary && !hasScenario' align-center>
                 <div class="header-text-content owner-padding">
                      Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
@@ -65,7 +65,7 @@
         <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
             <v-row justify-space-between>
                 <v-col cols = "6">
-                <v-row column style="float:left; width: 100%">
+                <v-row column style="float:left; width: 100%; margin-left: 10px">
                     <v-select
                         id="CalculatedAttribute-Attribute-select"   
                         :items="attributeSelectItems"
@@ -732,7 +732,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         if(attributeSelectItemValueAllowedChanged)
             CheckUnsavedDialog(onAttributeSelectItemValueChanged, () => {
                 attributeSelectItemValueAllowedChanged = false;
-                attributeSelectItemValue = trueAttributeSelectItemValue;               
+                attributeSelectItemValue.value = trueAttributeSelectItemValue.value;               
             })
         attributeSelectItemValueAllowedChanged = true;
     }

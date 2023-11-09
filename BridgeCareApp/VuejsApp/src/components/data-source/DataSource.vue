@@ -98,8 +98,11 @@
                 <v-row>
                 <v-btn id="DataSource-Cancel-vbtn"  @click="resetDataSource" v-show="showMssql || showExcel" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' flat>Cancel</v-btn>
                 <v-btn id="DataSource-Test-vbtn"  @click="checkSQLConnection" v-show="showMssql" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>Test</v-btn>
+                <p>&nbsp;&nbsp;&nbsp;</p>
                 <v-btn id="DataSource-Save-vbtn"   v-show="showMssql || showExcel" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onSaveDatasource">Save</v-btn>
+                <p>&nbsp;&nbsp;&nbsp;</p>
                 <v-btn id="DataSource-Load-vbtn"  :disabled="isNewDataSource" variant = "outlined" v-show="showExcel" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onLoadExcel">Load</v-btn>
+                <p>&nbsp;&nbsp;&nbsp;</p>
                 <v-btn id="DataSource-Delete-vbtn"  :disabled="isNewDataSource" v-show="showMssql || showExcel" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onDeleteClick">Delete</v-btn>
                 </v-row>
                  </v-col>

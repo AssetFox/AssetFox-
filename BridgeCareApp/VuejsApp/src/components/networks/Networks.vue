@@ -165,13 +165,16 @@
                 variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Cancel
                 </v-btn>  
+                <p>&nbsp;&nbsp;&nbsp;</p>
                 <v-btn id="Networks-Aggregate-vbtn" @click='aggregateNetworkData' :disabled='isNewNetwork'  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Aggregate
                 </v-btn>
+                <p>&nbsp;&nbsp;&nbsp;</p>
                 <v-btn id="Networks-Delete-vbtn" @click='onDeleteClick' :disabled='isNewNetwork'  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Delete
                 </v-btn>
-                <v-btn id="Networks-Create-vbtn" @click='createNetwork' :disabled='!isNewNetwork'
+                <p>&nbsp;&nbsp;&nbsp;</p>
+                <v-btn id="Networks-Create-vbtn" @click='createNetwork'  :disabled='!isNewNetwork'
                    
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Create
@@ -437,7 +440,7 @@ import mitt from 'mitt';
         isNewNetwork.value = false;
 
         createNetworkAction({
-            network: selectedNetwork.value,
+            network: selectedNetwork.value.id,
             parameters: {
                 defaultEquation: spatialWeightingEquationValue.value.expression,
                 networkDefinitionAttribute: selectedKeyAttribute.value

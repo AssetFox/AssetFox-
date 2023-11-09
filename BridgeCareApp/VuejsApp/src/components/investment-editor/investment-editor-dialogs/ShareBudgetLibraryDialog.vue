@@ -100,7 +100,6 @@ const stateUsers = computed<User[]>(() => store.state.userModule.users);
           isShared: false,
           canModify: false
         }));
-        console.log("lenght: "+ budgetLibraryUserGridRows.value.length);
   }
 
     function onSetUsersSharedWith() {

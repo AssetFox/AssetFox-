@@ -105,7 +105,7 @@
             <v-row justify-space-between v-show='hasSelectedLibrary || hasScenario'>
                 <v-col cols = "6">
                     <v-row>
-                        <v-col>
+                        <v-col cols="auto">
                         <v-btn id="InvestmentEditor-editBudgets-btn"
                             @click='onShowEditBudgetsDialog'
                             variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>

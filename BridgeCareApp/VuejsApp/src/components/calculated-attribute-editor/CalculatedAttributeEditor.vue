@@ -1481,7 +1481,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
              addedCalcAttr.length > 0 ||
              defaultEquations.value.size > 0 ||
             ( hasScenario.value &&  hasSelectedLibrary.value) ||
-            ( hasSelectedLibrary.value && hasUnsavedChangesCore('',  selectedCalculatedAttributeLibrary,  stateSelectedCalculatedAttributeLibrary.value))
+            ( hasSelectedLibrary.value && hasUnsavedChangesCore('',  selectedCalculatedAttributeLibrary.value,  stateSelectedCalculatedAttributeLibrary.value))
          setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 

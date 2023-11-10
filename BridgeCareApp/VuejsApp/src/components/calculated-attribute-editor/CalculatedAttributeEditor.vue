@@ -140,8 +140,6 @@
                 class="v-table__overflow ghd-table"
                 sort-icon=ghd-table-sort
                 item-key="calculatedAttributeLibraryEquationId"                            
-
-                     
                 :items-length="totalItems"
                 :items-per-page-options="[
                     {value: 5, title: '5'},
@@ -160,6 +158,7 @@
                             id="CalculatedAttribute-equation-textfield"
                             readonly
                             class="sm-txt"
+                            variant="underlined"
                             :model-value="props.item.equation"
                             :disabled="!hasAdminAccess">
                             <template v-slot:append>
@@ -179,6 +178,7 @@
                         <v-text-field id="CalculatedAttribute-EquationCriteria-textfield"
                             readonly
                             class="sm-txt"
+                            variant="underlined"
                             :model-value="props.item.criteriaExpression"
                             :disabled="!hasAdminAccess">
                             <template v-slot:append>
@@ -201,7 +201,7 @@
                                 onRemoveCalculatedAttribute(props.item.id)"
                             class="ghd-blue"
                             flat
-                            icon
+                            style="margin-bottom: 20px;"
                             :disabled="!hasAdminAccess">
                             <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
@@ -240,7 +240,7 @@
                     v-if="hasAdminAccess && hasScenario"
                     @click="onDiscardChanges"
                     class='ghd-blue ghd-button-text ghd-button'
-                    variant = "flat"
+                    variant = "text"
                     v-show="hasSelectedLibrary || hasScenario">
                     Cancel
                 </v-btn>

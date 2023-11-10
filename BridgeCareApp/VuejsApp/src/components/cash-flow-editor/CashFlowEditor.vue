@@ -102,6 +102,7 @@
                                         no-resize
                                         outline
                                         rows="5"
+                                        variant="outlined"
                                         :rules="[inputRules.generalRules.valueIsNotEmpty]"
                                         v-model="item.item.name"/>
                                 </template>

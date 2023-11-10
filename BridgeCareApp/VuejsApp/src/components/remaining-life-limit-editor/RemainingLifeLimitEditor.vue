@@ -157,6 +157,7 @@
                                         label="Edit"
                                         single-line
                                         :mask="'##########'"
+                                        variant="underlined"
                                         v-model.number="props.item.value"
                                         :rules="[
                                             rules['generalRules']

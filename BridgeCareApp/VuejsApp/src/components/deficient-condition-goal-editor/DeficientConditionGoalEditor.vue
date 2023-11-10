@@ -136,6 +136,7 @@
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalName-vtextfield"
                                             label="Edit"
                                             single-line
+                                            variant="underlined"
                                             v-model="item.item[header.key]"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
@@ -144,6 +145,7 @@
                                             :items="numericAttributeNames"
                                             append-icon=ghd-down
                                             label="Select an Attribute"
+                                            variant="outlined"
                                             v-model="item.item[header.key]"
                                             :rules="[
                                                 rules['generalRules'].valueIsNotEmpty]">
@@ -153,6 +155,7 @@
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalLimit-vtextfield"
                                             label="Edit"
                                             single-line
+                                            variant="underlined"
                                             v-model="item.item[header.key]"
                                             :mask="'##########'"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
@@ -161,6 +164,7 @@
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalPercentage-vtextfield"
                                             label="Edit"
                                             single-line
+                                            variant="underlined"
                                             v-model.number="item.item[header.key]"
                                             :mask="'###'"
                                             :rules="[

@@ -209,6 +209,7 @@
                                             :items="attributeSelectItems"
                                             append-icon=ghd-down
                                             label="Edit"
+                                            variant="outlined"
                                             v-model="item.item.attribute"
                                             :rules="[
                                                 rules['generalRules']

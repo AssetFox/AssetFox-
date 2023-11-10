@@ -24,7 +24,6 @@ watch(
 <template>
   <v-text-field
     v-model="formattedValue"
-    density="compact"
     variant="solo"
     ref="inputRef"
   >

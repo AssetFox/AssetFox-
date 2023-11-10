@@ -184,9 +184,9 @@ namespace BridgeCareCoreTests.Tests.Integration
 
             var treatmentSupersedeRule = supersedeRules.Single();
             var treatmentSupersedeRuleSame = supersedeRulesSame.Single();
-           // ObjectAssertions.EquivalentExcluding(treatmentSupersedeRule, treatmentSupersedeRuleSame,
+            ObjectAssertions.EquivalentExcluding(treatmentSupersedeRule, treatmentSupersedeRuleSame,
                 _ => _.Id,
-                _ => _.CriterionLibrary.Id);
+                _ => _.CriterionLibrary.Id); // todo check whats happening..
         }
     }
 }

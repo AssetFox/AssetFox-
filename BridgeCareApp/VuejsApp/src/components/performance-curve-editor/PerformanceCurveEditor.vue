@@ -142,7 +142,7 @@
                             </td>                                
                             <td class="text-xs-left">
                                 <editDialog
-                                    :return-value.sync="item.item.name"
+                                    v-model:return-value="item.item.name"
                                     @save="
                                         onEditPerformanceCurveProperty(
                                             item.item.id,
@@ -180,7 +180,7 @@
                             </td>
                             <td class="text-xs-left">
                                 <editDialog
-                                    :return-value.sync="
+                                    v-model:return-value="
                                         item.item.attribute
                                     "
                                     @save="

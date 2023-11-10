@@ -82,7 +82,7 @@
                         </td>
                         <td>
                             <editDialog
-                                :return-value.sync="item.item.name"
+                                v-model:return-value="item.item.name"
                                 large
                                 lazy
                                 @save="onEditSelectedLibraryListData(item,'description')"

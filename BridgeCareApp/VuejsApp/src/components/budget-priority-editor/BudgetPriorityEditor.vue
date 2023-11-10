@@ -79,7 +79,7 @@
                             <td v-for='header in budgetPriorityGridHeaders'>
                                 <div v-if="header.key === 'priorityLevel' || header.key === 'year'">
                                     <editDialog
-                                        :return-value.sync='item.item[header.key]'
+                                        v-model:return-value='item.item[header.key]'
                                         @save='onEditBudgetPriority(item.item, header.key, item.item[header.key])'
                                         size="large" lazy>
                                         <v-text-field v-if="header.key === 'priorityLevel'" readonly single-line
@@ -130,7 +130,7 @@
                                 </div>
                                 <div v-else-if="header.title.endsWith('%')">
                                     <editDialog
-                                        :return-value.sync='item.item[header.key]'
+                                        v-model:return-value='item.item[header.key]'
                                         @save='onEditBudgetPercentagePair(item.item, header.key, item.item[header.key])'
                                         size="large" lazy>
                                         <v-text-field readonly single-line class='sm-txt' :model-value='item.item[header.key]' variant="underlined"

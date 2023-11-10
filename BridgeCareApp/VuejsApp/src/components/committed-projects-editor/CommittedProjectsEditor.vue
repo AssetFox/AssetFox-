@@ -141,7 +141,7 @@
                                             
                                         ></v-select>
                                         <editDialog v-if="header.key !== 'actions' && header.key !== 'selection'"
-                                            :return-value.sync="item.item[header.key]"
+                                            v-model:return-value="item.item[header.key]"
                                             @save="onEditCommittedProjectProperty(item.item,header.key,item.item[header.key])"
                                             size="large"
                                             lazy

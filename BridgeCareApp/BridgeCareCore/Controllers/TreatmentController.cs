@@ -857,7 +857,7 @@ namespace BridgeCareCore.Controllers
                     simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
                 });
 
-                ImportScenarioTreatmentSupersedeRuleWorkitem workItem = new ImportScenarioTreatmentSupersedeRuleWorkitem(simulationId, excelPackage, UserInfo.Name, simulationName);
+                var workItem = new ImportScenarioTreatmentSupersedeRuleWorkitem(simulationId, excelPackage, UserInfo.Name, simulationName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, simulationId.ToString());
 

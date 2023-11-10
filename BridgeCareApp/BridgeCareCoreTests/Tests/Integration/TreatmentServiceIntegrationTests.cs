@@ -15,6 +15,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Services;
 using BridgeCareCore.Services.Treatment;
 using BridgeCareCoreTests.Helpers;
+using Humanizer;
 using OfficeOpenXml;
 using Xunit;
 
@@ -124,77 +125,68 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
-        // treatment performance factors
-        // need to be added to this test.
-        public void DownloadScenarioTreatmentSupersedeRuleSpreadsheet_ThenUpload_SameTreatmentSupersedeRule()
+        public void DownloadScenarioTreatmentSupersedeRulesSpreadsheet_ThenUpload_Same()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
             var simulationName = RandomStrings.WithPrefix("Simulation");
             SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName);
+
+            // Add treatments
             var budget = BudgetDtos.New();
             var budgets = new List<BudgetDTO> { budget };
             ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
-            var treatmentId = Guid.NewGuid();
-              var treatmentBudget = TreatmentBudgetDtos.Dto(budget.Name);
-            var treatmentBudgets = new List<TreatmentBudgetDTO> { treatmentBudget };
-            var budgetIds = new List<Guid> { budget.Id };
-          
-            var treatmentsWithSupersede = TreatmentTestSetup.ModelWithSupersededTreatmentOfSimulationInDb(TestHelper.UnitOfWork, simulationId, treatmentId, criterionExpression: "treatment criterion", budgets: treatmentBudgets, budgetIds: budgetIds);
-                        
-            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(treatmentsWithSupersede, simulationId);
-            var cost = ScenarioTreatmentCostTestSetup.CostForTreatmentInDb(TestHelper.UnitOfWork, treatmentId, simulationId);
 
-            var consequence = ScenarioTreatmentConsequenceTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, treatmentId,
-                attribute: "AGE", equation: "[AGE]", criterion: "[AGE] > 10");
-            
-            var treatments1 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            var treatmentBudget = TreatmentBudgetDtos.Dto(budget.Name);
+            var treatmentBudgets = new List<TreatmentBudgetDTO> { treatmentBudget };
+            var treatmentBudgetIds = new List<Guid> { treatmentBudget.Id };
+            var treatmentId = Guid.NewGuid();
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfSimulation(treatmentId, name: "Bridge Replacement", criterionExpression: "treatment criterion", budgets: treatmentBudgets, budgetIds: treatmentBudgetIds);
+
+            var preventTreatmentBudget = TreatmentBudgetDtos.Dto(budget.Name);
+            var preventTreatmentBudgets = new List<TreatmentBudgetDTO> { preventTreatmentBudget };
+            var preventTreatmentBudgetIds = new List<Guid> { preventTreatmentBudget.Id };
+            var preventTreatmentId = Guid.NewGuid();
+            var preventTreatment = TreatmentTestSetup.ModelForSingleTreatmentOfSimulation(preventTreatmentId, name: "Deck Replacement", criterionExpression: "treatment criterion", budgets: preventTreatmentBudgets, budgetIds: preventTreatmentBudgetIds);
+
+            var dtos = new List<TreatmentDTO> { treatment, preventTreatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
+
+            // Add supersede rule
+            var supersedeRule = TreatmentDtos.SupersedeRule(preventTreatment, "Age > 20");
+            var scenarioTreatmentSupersedeRulesPerTreatmentId = TreatmentTestSetup.ModelScenarioTreatmentSupersedeRules(treatmentId, new List<TreatmentSupersedeRuleDTO> { supersedeRule });
+            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(scenarioTreatmentSupersedeRulesPerTreatmentId, simulationId);
+
+            // Get treatements // remove after 1 testing
+            var treatments = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId); // 2
+            // Get treatment supersede rules
+            var supersedeRules = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetScenarioTreatmentSupersedeRules(treatmentId, simulationId);
+
             var service = CreateTreatmentService(TestHelper.UnitOfWork);
-            var fileInfo = service.ExportScenarioTreatmentSupersedeRuleExcelFile(simulationId);
+            var fileInfo = service.ExportScenarioTreatmentSupersedeRuleExcelFile(simulationId); // Todo check if Export method needs any updates...
             var dataAsString = fileInfo.FileData;
             var bytes = Convert.FromBase64String(dataAsString);
             var stream = new MemoryStream(bytes);
-            File.WriteAllBytes("Supersede.xlsx", bytes);
+            File.WriteAllBytes("ScenarioTreatmentSupersedeRules.xlsx", bytes);
             var excelPackage = new ExcelPackage(stream);
-            var userCriteria = new UserCriteriaDTO();
 
-            var treatmentUpdate = treatmentsWithSupersede.First(_ => _.SupersedeRules.Any());
-            treatmentUpdate.SupersedeRules = new List<TreatmentSupersedeRuleDTO>();
+            // This was attempting to delete via supersede object.            
+            var supersedeDictionary = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> { { treatmentId, new List<TreatmentSupersedeRuleDTO>() } };
+            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(supersedeDictionary, simulationId);
 
-            //Attempting to delete via the treatment object
-            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(new List<TreatmentDTO>() { treatmentUpdate}, simulationId);
-
-
-            // This was attempting to delete via supersede object.
-            //var supersedeRules = new List<TreatmentSupersedeRuleDTO>();    
-            //var supersedeDictionary = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> {{treatmentId, supersedeRules }};
-
-            //TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(supersedeDictionary, simulationId);
-
-
-            var treatments2 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
-            var treatmentSupersedeRulesEmpty = treatments2.Where(_ => _.SupersedeRules.Any()).ToList()
-                    .ToDictionary(_ => _.Id, _ => _.SupersedeRules);
-
+            // Get treatment supersede rules            
+            var treatmentSupersedeRulesEmpty = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetScenarioTreatmentSupersedeRules(treatmentId, simulationId);
             Assert.Empty(treatmentSupersedeRulesEmpty);
+
             service.ImportScenarioTreatmentSupersedeRulesFile(simulationId, excelPackage);
-            var treatments3 = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            var supersedeRulesSame = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetScenarioTreatmentSupersedeRules(treatmentId, simulationId);
 
-            // *****Comparison is not done*****
-
-            //var treatment1 = treatments1.Single();
-            //var treatment3 = treatments3.Single();
-            //ObjectAssertions.EquivalentExcluding(treatment1, treatment3,
-            //    t => t.Id,
-            //    t => t.CriterionLibrary.Id,
-            //    t => t.Costs[0].Id,
-            //    t => t.Costs[0].Equation.Id,
-            //    t => t.Costs[0].CriterionLibrary.Id,
-            //    t => t.Consequences[0].Id,
-            //    t => t.Consequences[0].Equation.Id,
-            //    t => t.Consequences[0].CriterionLibrary.Id); ;
+            var treatmentSupersedeRule = supersedeRules.Single();
+            var treatmentSupersedeRuleSame = supersedeRulesSame.Single();
+           // ObjectAssertions.EquivalentExcluding(treatmentSupersedeRule, treatmentSupersedeRuleSame,
+                _ => _.Id,
+                _ => _.CriterionLibrary.Id);
         }
-
     }
 }

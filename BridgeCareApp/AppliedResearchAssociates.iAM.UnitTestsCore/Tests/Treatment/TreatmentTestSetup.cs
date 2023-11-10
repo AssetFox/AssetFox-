@@ -37,47 +37,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return dto;
         }
 
-        public static List<TreatmentDTO> ModelWithSupersededTreatmentOfSimulationInDb(IUnitOfWork unitOfWork, Guid simulationId, Guid? id = null, string name = "Treatment name", string criterionExpression = null, List<TreatmentBudgetDTO> budgets = null, List<Guid> budgetIds = null)
+        public static TreatmentDTO ModelForSingleTreatmentOfSimulation(Guid? id = null, string name = "Treatment name", string criterionExpression = null, List<TreatmentBudgetDTO> budgets = null, List<Guid> budgetIds = null)
         {
+
             budgets ??= new List<TreatmentBudgetDTO>();
-            var firstTreatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(null, "Deck Replacement");
-            firstTreatment.Budgets = budgets;
+            var dto = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(id, name, criterionExpression);
+            dto.Budgets = budgets;
             budgetIds ??= new List<Guid>();
-            firstTreatment.BudgetIds = budgetIds;
-            firstTreatment.SupersedeRules = new List<TreatmentSupersedeRuleDTO>();
-
-            var superBudget = BudgetDtos.New();
-            var superBudgets = new List<BudgetDTO> { superBudget };
-            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, superBudgets, simulationId);
-            var treatmentId = Guid.NewGuid();
-            var treatmentBudget = TreatmentBudgetDtos.Dto(superBudget.Name);
-            var treatmentBudgets = new List<TreatmentBudgetDTO> { treatmentBudget };
-            var superBudgetIds = new List<Guid> { superBudget.Id };
-
-            var supersedeTreatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesListsWithSupersedeRule(firstTreatment, id, "Bridge Replacement", "Age > 20");
-            var dtos = new List<TreatmentDTO> { firstTreatment, supersedeTreatment };
-            unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
-            return dtos;
+            dto.BudgetIds = budgetIds;           
+            
+            return dto;
         }
 
-        public static List<TreatmentDTO> ModelNoSupersededTreatmentOfSimulationInDb(IUnitOfWork unitOfWork, Guid simulationId, Guid? id = null, string name = "Treatment name", string criterionExpression = null, List<TreatmentBudgetDTO> budgets = null, List<Guid> budgetIds = null)
+        public static Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> ModelScenarioTreatmentSupersedeRules(Guid treatmentId,List<TreatmentSupersedeRuleDTO> supersedeRules)
         {
-            budgets ??= new List<TreatmentBudgetDTO>();
-            var firstTreatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(null, "Deck Replacement");
-            firstTreatment.Budgets = budgets;
-            budgetIds ??= new List<Guid>();
-            firstTreatment.BudgetIds = budgetIds;
-            var secondTreatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(null, "Super Structure Painting");
-            secondTreatment.Budgets = budgets;
-            budgetIds ??= new List<Guid>();
-            secondTreatment.BudgetIds = budgetIds;
-            var dtos = new List<TreatmentDTO> { firstTreatment, secondTreatment };
-            unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
-            return dtos;
+            var scenarioTreatmentSupersedeRulesPerTreatmentId = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>>
+            {
+                { treatmentId, supersedeRules }
+            };
+            return scenarioTreatmentSupersedeRulesPerTreatmentId;
         }
-
-
-    }
-
-   
+    }   
 }

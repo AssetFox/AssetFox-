@@ -17,58 +17,60 @@
                     </v-row>
                 </v-toolbar-title>
                 <v-toolbar-items >
-                    <v-btn
-                        id="App-scenarios-btn"
-                        @click="onNavigate('/Scenarios/')"
-                        class="ara-blue-pantone-281"
-                        variant = "flat"                     
-                    >
-                        Scenarios
-                    </v-btn>                   
-                     <v-btn
-                        id="App-libraries-btn"
-                        @click="onNavigate('/EditLibrary/')"
-                        class="ara-blue-pantone-281"
-                        variant = "flat"
-                    >
-                        Libraries
-                    </v-btn>
-                    <v-btn
-                        id="App-rawData-btn"
-                        @click="onNavigate('/EditRawData/')"
-                        class="ara-blue-pantone-281"
-                        variant = "flat"
-                        v-if="hasAdminAccess"
-                        
-                    >
-                        Raw Data
-                    </v-btn>
-                    <v-btn
-                        id="App-administration-btn"
-                        @click="onNavigate('/EditAdmin/')"
-                        class="ara-blue-pantone-281"
-                        variant = "flat"
-                        v-if="hasAdminAccess"
-                    >
-                        Administration
-                    </v-btn>
-                    <v-btn
-                        id="App-inventory-btn"
-                        @click="onNavigate('/Inventory/')"
-                        class="ara-blue-pantone-281"
-                        variant = "flat"
-                    >
-                        Inventory
-                    </v-btn>
-                     <v-btn
-                        id="App-news-btn"
-                        @click="onShowNewsDialog()"
-                        class="ara-blue-pantone-281"
-                        variant = "flat"
-                    >
-                        News
-                        <v-icon v-if="hasUnreadNewsItem" size="13" class="news-notification">fas fa-exclamation-circle</v-icon>
-                    </v-btn>
+                    <v-btn-toggle>
+                        <v-btn
+                            id="App-scenarios-btn"
+                            @click="onNavigate('/Scenarios/')"
+                            class="ara-blue-pantone-281"
+                            variant = "flat"                     
+                        >
+                            Scenarios
+                        </v-btn>                   
+                        <v-btn
+                            id="App-libraries-btn"
+                            @click="onNavigate('/EditLibrary/')"
+                            class="ara-blue-pantone-281"
+                            variant = "flat"
+                        >
+                            Libraries
+                        </v-btn>
+                        <v-btn
+                            id="App-rawData-btn"
+                            @click="onNavigate('/EditRawData/')"
+                            class="ara-blue-pantone-281"
+                            variant = "flat"
+                            v-if="hasAdminAccess"
+                            
+                        >
+                            Raw Data
+                        </v-btn>
+                        <v-btn
+                            id="App-administration-btn"
+                            @click="onNavigate('/EditAdmin/')"
+                            class="ara-blue-pantone-281"
+                            variant = "flat"
+                            v-if="hasAdminAccess"
+                        >
+                            Administration
+                        </v-btn>
+                        <v-btn
+                            id="App-inventory-btn"
+                            @click="onNavigate('/Inventory/')"
+                            class="ara-blue-pantone-281"
+                            variant = "flat"
+                        >
+                            Inventory
+                        </v-btn>
+                        <v-btn
+                            id="App-news-btn"
+                            @click="onShowNewsDialog()"
+                            class="ara-blue-pantone-281"
+                            variant = "flat"
+                        >
+                            News
+                            <v-icon v-if="hasUnreadNewsItem" size="13" class="news-notification">fas fa-exclamation-circle</v-icon>
+                        </v-btn>
+                    </v-btn-toggle>
                 </v-toolbar-items>
                 
                 <v-spacer></v-spacer>

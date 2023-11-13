@@ -82,7 +82,7 @@
                         </td>
                         <td>
                             <editDialog
-                                :return-value.sync="item.item.name"
+                                v-model:return-value="item.item.name"
                                 large
                                 lazy
                                 @save="onEditSelectedLibraryListData(item,'description')"
@@ -102,6 +102,7 @@
                                         no-resize
                                         outline
                                         rows="5"
+                                        variant="outlined"
                                         :rules="[inputRules.generalRules.valueIsNotEmpty]"
                                         v-model="item.item.name"/>
                                 </template>

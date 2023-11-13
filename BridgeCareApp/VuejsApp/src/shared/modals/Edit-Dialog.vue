@@ -15,11 +15,10 @@
             <v-card-text>
                 <v-col>
 
-                <slot name="input"></slot>
-              
+                <slot style="cursor:pointer;" name="input"></slot>          
                 <v-row >
                     <v-col align="center">
-                        <v-btn variant = "outlined" class='pa-2 ma-2 ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' @click="dialog = false">Cancel</v-btn>
+                        <v-btn variant = "outlined" class='pa-2 ma-2 ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' @click="onCancel">Cancel</v-btn>
                     <v-btn variant = "outlined" class='pa-2 ma-2 ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' @click="onSave">Save</v-btn>
                     </v-col>                   
                 </v-row>
@@ -34,13 +33,22 @@
 <script setup lang="ts">
 
 import { clone } from 'ramda';
-import { ref, watch } from 'vue';
-    const emit = defineEmits(['save','open'])
+import { computed, ref, watch } from 'vue';
+    const emit = defineEmits(['save','open', 'update:returnValue'])
     let dialog = ref(false)
     let prevVal:any;
     const props = defineProps<{
         returnValue: any
     }>()
+
+    const value = computed({
+      get() {
+        return props.returnValue
+      },
+      set(value) {
+        emit('update:returnValue', value)
+      }
+    })
 
     watch(dialog, (newVal, oldVal) =>  onDialogChanged(newVal))
     function onDialogChanged(val: boolean){
@@ -54,5 +62,10 @@ import { ref, watch } from 'vue';
     function onSave(){
         emit('save');
         dialog.value = false;
+    }
+
+    function onCancel(){
+      value.value = prevVal
+      dialog.value = false
     }
 </script>

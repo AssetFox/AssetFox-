@@ -141,7 +141,7 @@
                                             
                                         ></v-select>
                                         <editDialog v-if="header.key !== 'actions' && header.key !== 'selection'"
-                                            :return-value.sync="item.item[header.key]"
+                                            v-model:return-value="item.item[header.key]"
                                             @save="onEditCommittedProjectProperty(item.item,header.key,item.item[header.key])"
                                             size="large"
                                             lazy
@@ -192,24 +192,28 @@
                                                 <v-text-field v-if="header.key === 'keyAttr'"
                                                     label="Edit"
                                                     single-line
+                                                    variant="underlined"
                                                     v-model="item.item[header.key]"
                                                     :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
                                                 <v-select v-if="header.key === 'budget'"
                                                     :items="budgetSelectItems"
                                                     label="Select a Budget"
+                                                    variant="outlined"
                                                     v-model="item.item[header.key]">
                                                 </v-select>
 
                                                 <v-select v-if="header.key === 'category'"
                                                     :items="categorySelectItems"
-                                                    label="Select a Budget"
+                                                    label="Select a Category"
+                                                    variant="outlined"
                                                     v-model="item.item[header.key]">
                                                 </v-select>
                                                 
                                                 <v-text-field v-if="header.key === 'year'"
                                                     label="Edit"
                                                     single-line
+                                                    variant = "underlined"
                                                     v-model="item.item[header.key]"
                                                     :mask="'##########'"
                                                     :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.item[header.key], [firstYear, lastYear])]"/>
@@ -348,7 +352,7 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
     const treatmentSelectItems = ref< string[] >([]);
     const projectSourceOptions = ref< string [] >([]);
     const budgetSelectItems = ref< any[] >([]);
-    let categorySelectItems: SelectItem[] = [];
+    const categorySelectItems = ref<SelectItem[]>([]);
     let categories: string[] = [];
     let scenarioId: string = getBlankGuid();
     let networkId: string = getBlankGuid();
@@ -523,7 +527,7 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
             $router.push('/Scenarios/');
         }
         reverseCatMap.forEach(cat => {
-            categorySelectItems.push({text: cat, value: cat})        
+            categorySelectItems.value.push({text: cat, value: cat})        
         });
         fetchTreatmentLibrary(scenarioId);
 

@@ -91,7 +91,7 @@
                     <tr :active="props.item.selected" @click="props.item.selected = !props.item.selected">
                         <td>
                             <editDialog
-                                :return-value.sync="props.item.attribute"
+                                v-model:return-value="props.item.attribute"
                                 size="large"
                                 lazy
                                 @save="
@@ -131,7 +131,7 @@
                         </td>
                         <td>
                             <editDialog
-                                :return-value.sync="props.item.value"
+                                v-model:return-value="props.item.value"
                                 size="large"
                                 lazy
                                 @save="
@@ -157,6 +157,7 @@
                                         label="Edit"
                                         single-line
                                         :mask="'##########'"
+                                        variant="underlined"
                                         v-model.number="props.item.value"
                                         :rules="[
                                             rules['generalRules']

@@ -77,107 +77,95 @@
                     class="elevation-1 fixed-header v-table__overflow"
                     item-key="id"
                     show-select
+                    return-object
                     v-model="selectedGridRows"
                 >
-                    <template slot="items" slot-scope="props" v-slot:item="props">
+                    <template v-slot:item="item">
                         <tr>
-                        <td>
+                            <td>
                             <v-checkbox 
                                 id="TargetConditionGoalEditor-selectForDelete-vcheckbox"
                                 hide-details
-                                v-model="selectedGridRows" :value="props.item"
+                                v-model="selectedGridRows" :value="item.item"
                             ></v-checkbox>
-                        </td>
-                        <td>
-                            <v-text-field
-                                id="TargetConditionGoalEditor-editTargetConditionGoalName-vtextfield"
-                                readonly
-                                bg-color="white"
-                                single-line
-                                class="sm-txt"
-                                density="compact"
-                                v-model="props.item['name']"/>
-                        </td>
-                        <td>
-                            <v-text-field 
-                                readonly
-                                bg-color="white"
-                                single-line
-                                class="sm-txt"
-                                density="compact"
-                                id="TargetConditionGoalEditor-editTargetConditionGoalAttribute-vselect"
-                                v-model="props.item['attribute']"
-                                :rules="[
-                                    rules['generalRules']
-                                        .valueIsNotEmpty]"/>
-                        </td>
-                        <td>
-                            <v-text-field 
-                                id="TargetConditionGoalEditor-editTargetConditionGoalTarget-vtextfield"
-                                bg-color="white"
-                                single-line
-                                class="sm-txt"
-                                density="compact"
-                                v-model="props.item['target']"
-                                :rules="[
-                                    rules['generalRules']
-                                        .valueIsNotEmpty]">
-                            </v-text-field>
-                        </td>
-                        <td>
-                            <v-text-field 
-                                id="TargetConditionGoalEditor-editTargetConditionGoalYear-vtextfield"
-                                bg-color="white"
-                                readonly
-                                single-line
-                                class="sm-txt"
-                                density="compact"
-                                v-model="props.item['year']"/>
-                        </td>
-                        <td>
-                            <v-row style="margin: 5px;" align="center">
-                                <v-menu
-                                    location="bottom"
-                                    min-height="500px"
-                                    min-width="500px">
+                            </td>
+                            <td v-for="header in targetConditionGoalGridHeaders">
+                                <editDialog v-if="header.key !== 'criterionLibrary' && header.key !== 'actions'"
+                                    :return-value.sync="item.item[header.key]"
+                                    @save="onEditTargetConditionGoalProperty(item.item,header.key,item.item[header.key])"
+                                    size="large"
+                                    lazy>
+                                    <v-text-field v-if="header.key !== 'allowedDeficientPercentage'"
+                                        readonly
+                                        class="sm-txt"
+                                        density="compact"
+                                        variant="underlined"
+                                        :model-value="item.item[header.key]"
+                                        :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                      <template v-slot:input>
+                                        <v-text-field v-if="header.key === 'name'"
+                                            id="TargetConditionGoalEditor-editTargetConditionGoalName-vtextfield"
+                                            label="Edit"
+                                            single-line
+                                            variant="underlined"
+                                            v-model="item.item[header.key]"
+                                            :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                        <v-select v-if="header.key === 'attribute'"
+                                            id="TargetConditionGoalEditor-editTargetConditionGoalAttribute-vselect"
+                                            :items="numericAttributeNames"
+                                            append-icon=ghd-down
+                                            label="Select an Attribute"
+                                            variant="outlined"
+                                            v-model="item.item[header.key]"
+                                            :rules="[
+                                                rules['generalRules'].valueIsNotEmpty]">
+                                        </v-select>
+                                        <v-text-field v-if="header.key === 'target'"
+                                            id="TargetConditionGoalEditor-editTargetConditionGoalTarget-vtextfield"
+                                            label="Edit"
+                                            single-line
+                                            variant="underlined"
+                                            v-model="item.item[header.key]"
+                                            :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                        <v-text-field v-if="header.key === 'year'"
+                                            id="TargetConditionGoalEditor-editTargetConditionGoalYear-vtextfield"
+                                            label="Edit"
+                                            single-line
+                                            variant="underlined"
+                                            v-model="item.item[header.key]"
+                                            :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                      </template>
+                                </editDialog>
+                                <v-row v-if="header.key === 'criterionLibrary'" align="center">
+                                <v-menu>
                                     <template v-slot:activator>
                                         <v-text-field
                                             bg-color="white"
                                             readonly
                                             class="sm-txt"
                                             density="compact"
-                                            v-model="props.item.criterionLibrary.mergedCriteriaExpression"/>
+                                            v-model="item.item.criterionLibrary.mergedCriteriaExpression"/>
                                     </template>
-                                    <v-card>
-                                        <v-card-text>
-                                            <v-textarea
-                                                :v-model="props.item.criterionLibrary.mergedCriteriaExpression"
-                                                label="test"
-                                                variant="solo-filled"
-                                                readonly
-                                                rows="5"/>
-                                        </v-card-text>
-                                    </v-card>
                                 </v-menu>
                                 <v-btn
                                     id="TargetConditionGoalEditor-editTargetConditionGoalCriteria-vbtn"
-                                    @click="onShowCriterionLibraryEditorDialog(props.item)"
+                                    @click="onShowCriterionLibraryEditorDialog(item.item)"
                                     class="ghd-blue"
                                     flat>
                                     <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                 </v-btn>
-                            </v-row>
-                        </td>
-                        <td>
-                            <v-btn 
-                                id="TargetConditionGoalEditor-deleteTargetConditionGoal-vbtn" 
-                                @click="onRemoveTargetConditionGoalsIcon(props.item)"  
-                                class="ghd-blue" 
-                                flat>
-                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
-                            </v-btn>
-                        </td>
-                    </tr>
+                                </v-row>
+                                <div v-if="header.key === 'actions'">
+                                    <v-btn 
+                                        id="TargetConditionGoalEditor-deleteTargetConditionGoal-vbtn" 
+                                        @click="onRemoveTargetConditionGoalsIcon(item.item)"  
+                                        class="ghd-blue" 
+                                        flat>
+                                            <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                    </v-btn>
+                                </div>
+                            </td>
+                        </tr>
                     </template>
                 </v-data-table-server>
         </div>
@@ -454,7 +442,7 @@ import { getUrl } from '@/shared/utils/get-url';
             width: '10%',
         }
     ];
-    let numericAttributeNames: string[] = [];
+    const numericAttributeNames = ref<string[]>([]);
     const selectedGridRows= ref<TargetConditionGoal[]>([]);
     const selectedTargetConditionGoalIds = ref<string[]>([]);
     let selectedTargetConditionGoalForCriteriaEdit: TargetConditionGoal = clone(
@@ -486,7 +474,7 @@ import { getUrl } from '@/shared/utils/get-url';
     onMounted(async () => {
         librarySelectItemValue.value = null;
         await getTargetConditionGoalLibrariesAction();
-        numericAttributeNames = getPropertyValues('name', getNumericAttributesGetter);
+        numericAttributeNames.value = getPropertyValues('name', getNumericAttributesGetter);
         await getHasPermittedAccessAction();
         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.TargetConditionGoal) !== -1) { 
             //selectedScenarioId = to.query.scenarioId;
@@ -559,7 +547,7 @@ import { getUrl } from '@/shared/utils/get-url';
             hasCreatedLibrary = false;
         }
 
-        numericAttributeNames = getPropertyValues('name', getNumericAttributesGetter);
+        numericAttributeNames.value = getPropertyValues('name', getNumericAttributesGetter);
 
         clearChanges();
         initializing = false;
@@ -573,7 +561,7 @@ import { getUrl } from '@/shared/utils/get-url';
 
     watch(stateNumericAttributes,()=> onStateNumericAttributesChanged)
     function onStateNumericAttributesChanged() {
-        numericAttributeNames = getPropertyValues('name', stateNumericAttributes.value);
+        numericAttributeNames.value = getPropertyValues('name', stateNumericAttributes.value);
     }
 
     watch(stateScenarioTargetConditionGoals,()=> onStateScenarioTargetConditionGoalsChanged)

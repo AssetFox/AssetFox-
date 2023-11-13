@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore;
@@ -15,7 +10,6 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Services;
 using BridgeCareCore.Services.Treatment;
 using BridgeCareCoreTests.Helpers;
-using Humanizer;
 using OfficeOpenXml;
 using Xunit;
 
@@ -157,14 +151,13 @@ namespace BridgeCareCoreTests.Tests.Integration
             var supersedeRule = TreatmentDtos.SupersedeRule(preventTreatment, "Age > 20");
             var scenarioTreatmentSupersedeRulesPerTreatmentId = TreatmentTestSetup.ModelScenarioTreatmentSupersedeRules(treatmentId, new List<TreatmentSupersedeRuleDTO> { supersedeRule });
             TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(scenarioTreatmentSupersedeRulesPerTreatmentId, simulationId);
-
-            // Get treatements // remove after 1 testing
-            var treatments = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId); // 2
+                        
             // Get treatment supersede rules
             var supersedeRules = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetScenarioTreatmentSupersedeRules(treatmentId, simulationId);
 
             var service = CreateTreatmentService(TestHelper.UnitOfWork);
-            var fileInfo = service.ExportScenarioTreatmentSupersedeRuleExcelFile(simulationId); // Todo check if Export method needs any updates...
+            // Export
+            var fileInfo = service.ExportScenarioTreatmentSupersedeRuleExcelFile(simulationId);
             var dataAsString = fileInfo.FileData;
             var bytes = Convert.FromBase64String(dataAsString);
             var stream = new MemoryStream(bytes);
@@ -179,14 +172,14 @@ namespace BridgeCareCoreTests.Tests.Integration
             var treatmentSupersedeRulesEmpty = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetScenarioTreatmentSupersedeRules(treatmentId, simulationId);
             Assert.Empty(treatmentSupersedeRulesEmpty);
 
+            // Import and Get
             service.ImportScenarioTreatmentSupersedeRulesFile(simulationId, excelPackage);
             var supersedeRulesSame = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetScenarioTreatmentSupersedeRules(treatmentId, simulationId);
 
             var treatmentSupersedeRule = supersedeRules.Single();
             var treatmentSupersedeRuleSame = supersedeRulesSame.Single();
             ObjectAssertions.EquivalentExcluding(treatmentSupersedeRule, treatmentSupersedeRuleSame,
-                _ => _.Id,
-                _ => _.CriterionLibrary.Id); // todo check whats happening..
+                _ => _.Id, _ => _.CriterionLibrary.Id, _ => _.CriterionLibrary.Name);
         }
     }
 }

@@ -17,6 +17,7 @@ using IamAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using AppliedResearchAssociates.iAM.Data.Mappers;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -29,10 +30,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var maintainableAssets = new List<MaintainableAsset>();
             for (int i = 0; i < assetCount; i++)
             {
-                var assetId = Guid.NewGuid();
-                var locationIdentifier = RandomStrings.WithPrefix("Location");
-                var location = Locations.Section(locationIdentifier);
-                var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
+                var maintainableAsset = MaintainableAssets.InNetwork(networkId, CommonTestParameterValues.DefaultEquation);
                 maintainableAssets.Add(maintainableAsset);
             }
             var resultAttributes = new List<IamAttribute>();

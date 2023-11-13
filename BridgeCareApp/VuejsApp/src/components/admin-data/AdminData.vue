@@ -24,6 +24,7 @@
                             item-title="text"
                             style="margin-left: 5px;"
                             item-value="value"
+                            id="AdminData-rawDataNetwork-select" 
                             v-model="selectRawdataNetworkItemValue"
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>
@@ -40,6 +41,7 @@
                     </v-col>                        
                     <v-btn style="margin-left: 20px;margin-top:10px !important" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        id="AdminData-editKeyFields-btn"
                         @click="onEditKeyFieldsClick">
                         Edit
                     </v-btn>
@@ -51,10 +53,11 @@
                         <v-subheader class="ghd-md-gray ghd-control-label">Raw Data Key Field(s): </v-subheader> 
                     </v-col>
                     <v-col cols="5" style="margin-top: 5px;">
-                        <div class="ghd-md-gray ghd-control-label elipsisList">{{rawDataKeyFieldsDelimited}}</div>  
+                        <div class="ghd-md-gray ghd-control-label elipsisList" id="AdminData-rawDataKeyFields-div">{{rawDataKeyFieldsDelimited}}</div>  
                     </v-col>                        
                     <v-btn style="margin-left: 20px; margin-top:13px !important" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        id="AdminData-editrawDataKeyFields-btn" 
                         @click="onEditRawDataKeyFieldsClick">
                         Edit
                     </v-btn>
@@ -66,10 +69,12 @@
                         <v-subheader class="ghd-md-gray ghd-control-label">Inventory Report(s): </v-subheader> 
                     </v-col>
                     <v-col cols="5">
-                         <div class="ghd-md-gray ghd-control-label elipsisList">{{inventoryReportsDelimited}}</div> 
+                         <div id="AdminData-inventoryReports-div" class="ghd-md-gray ghd-control-label elipsisList">{{inventoryReportsDelimited}}</div> 
                     </v-col>                 
                     <v-btn style="margin-left: 20px;margin-top:13px !important" 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        id="AdminData-editInventoryReports-btn" 
+                        variant = "outlined"
                         @click="onEditInventoryReportsClick">
                         Edit
                     </v-btn>
@@ -81,10 +86,12 @@
                         <v-subheader class="ghd-md-gray ghd-control-label">Simulation Report(s): </v-subheader> 
                     </v-col>
                     <v-col cols="5">
-                        <div class="ghd-md-gray ghd-control-label elipsisList">{{simulationReportsDelimited}}</div> 
+                        <div id="AdminData-simulationReports-div" class="ghd-md-gray ghd-control-label elipsisList">{{simulationReportsDelimited}}</div> 
                     </v-col>                     
                     <v-btn style="margin-left: 20px;margin-top:13px !important" 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        id="AdminData-editSimulationReports-btn" 
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                        variant = "outlined"
                         @click="onEditSimulationReportsClick">
                         Edit
                     </v-btn>
@@ -96,9 +103,9 @@
                         <v-subheader class="ghd-md-gray ghd-control-label">Constraint Type: </v-subheader> 
                     </v-col>
                     <v-col cols="4">
-                        <input type ="radio" v-model="constraintTypeRadioGroup" value ="OR"/>
+                        <input type ="radio" id="AdminData-constraintTypeOr-radio" v-model="constraintTypeRadioGroup" value ="OR"/>
                         <label style="margin-right: 10px;">OR</label>
-                        <input type ="radio" v-model="constraintTypeRadioGroup" value ="AND"/>
+                        <input type ="radio" id="AdminData-constraintTypeAnd-radio" v-model="constraintTypeRadioGroup" value ="AND"/>
                         <label>AND</label>
                     </v-col>                     
                 </v-row>
@@ -108,6 +115,7 @@
             <v-row justify-center>
                 <v-col cols="7">
                     <v-btn style="margin-top: -30px !important;" 
+                        id="AdminData-save-btn"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onSaveClick" :disabled='!hasUnsavedChanges || !disableCrudButtons()' >
                         Save

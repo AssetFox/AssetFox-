@@ -16,6 +16,8 @@ using BridgeCareCore.Services;
 using Xunit;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 
 namespace BridgeCareCoreTests.Tests.Integration
 {
@@ -48,12 +50,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var attribute = AttributeDtos.DeckDurationN;
             var networkId = NetworkTestSetup.NetworkId;
-            var assetName = "AssetName";
-            var location = new SectionLocation(Guid.NewGuid(), assetName);
-            var maintainableAssetId = Guid.NewGuid();
-            var spatialWeightingValue = "[Deck_Area]";
-            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
-            var assetList = new List<MaintainableAsset> { newAsset };
+            var assetList = MaintainableAssetLists.SingleInNetwork(networkId, CommonTestParameterValues.DefaultEquation);
             TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
             var numericAttribute = AttributeTestSetup.Numeric(attribute.Id, attribute.Name, dataSource.Id);
             var attributeList = new List<IamAttribute> { numericAttribute };
@@ -85,12 +82,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var attribute = AttributeDtos.Interstate;
             var networkId = NetworkTestSetup.NetworkId;
-            var assetName = "AssetName";
-            var location = new SectionLocation(Guid.NewGuid(), assetName);
-            var maintainableAssetId = Guid.NewGuid();
-            var spatialWeightingValue = "[Deck_Area]";
-            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
-            var assetList = new List<MaintainableAsset> { newAsset };
+            var assetList = MaintainableAssetLists.SingleInNetwork(networkId, CommonTestParameterValues.DefaultEquation);
             TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
             var numericAttribute = AttributeTestSetup.Numeric(attribute.Id, attribute.Name, dataSource.Id);
             var attributeList = new List<IamAttribute> { numericAttribute };

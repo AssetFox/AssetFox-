@@ -1,5 +1,7 @@
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
@@ -48,19 +50,14 @@ namespace BridgeCareCoreTests.Tests.Integration
             var assetKeyData = "key";
             var treatmentName = "treatment";
             var keyAttributeId = Guid.NewGuid();
-            var maintainableAssets = new List<MaintainableAsset>();
-            var assetId = Guid.NewGuid();
-            var locationIdentifier = RandomStrings.WithPrefix("Location");
-            var location = Locations.Section(locationIdentifier);
-            var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
+            var maintainableAssets = MaintainableAssetLists.SingleInNetwork(networkId, CommonTestParameterValues.DefaultEquation);
             var keyAttributeName = RandomStrings.WithPrefix("attribute");
             var keyAttribute = AttributeTestSetup.Text(keyAttributeId, keyAttributeName);
             var resultAttributeName = RandomStrings.WithPrefix("result");
             var resultAttributeId = Guid.NewGuid();
-            var resultAttribute = AttributeTestSetup.Text(resultAttributeId, resultAttributeName); ;
+            var resultAttribute = AttributeTestSetup.Text(resultAttributeId, resultAttributeName);
             AttributeTestSetup.CreateSingleTextAttribute(TestHelper.UnitOfWork,
                 resultAttributeId, resultAttributeName, ConnectionType.EXCEL, keyAttributeName);
-            maintainableAssets.Add(maintainableAsset);
             var network = NetworkTestSetup.ModelForEntityInDbWithKeyAttribute(
                 TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, keyAttributeName);
             var attributes = new List<IamAttribute> { keyAttribute, resultAttribute };

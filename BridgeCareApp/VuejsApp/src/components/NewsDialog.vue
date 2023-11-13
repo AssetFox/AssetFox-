@@ -99,6 +99,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import { toRefs, computed, watch, ref } from 'vue';
 import { useStore } from 'vuex';
 import Dialog from 'primevue/dialog';
+import { getNewGuid } from '@/shared/utils/uuid-utils';
 
 const emit = defineEmits(['close'])
 let store = useStore();
@@ -144,14 +145,14 @@ const selectedAnnouncementForEdit = ref<Announcement | undefined>(undefined);
     function onCreateAnnouncement() {
         upsertAnnouncementAction({
             announcement: {
-                ...emptyAnnouncement,
+                id: getNewGuid(),
                 title: newAnnouncementTitle.value,
                 content: newAnnouncementContent.value,
                 createdDate: new Date(),
             },
         });
         newAnnouncementContent.value = newAnnouncementTitle.value = '';
-    }
+            }
 
     function onEditAnnouncement() {
         if (!hasValue(selectedAnnouncementForEdit.value)) {
@@ -167,7 +168,7 @@ const selectedAnnouncementForEdit = ref<Announcement | undefined>(undefined);
         });
 
         newAnnouncementContent.value = newAnnouncementTitle.value = '';
-        selectedAnnouncementForEdit.value = undefined;
+                selectedAnnouncementForEdit.value = undefined;
     }
 
     function onSetAnnouncementForEdit(announcement: Announcement) {

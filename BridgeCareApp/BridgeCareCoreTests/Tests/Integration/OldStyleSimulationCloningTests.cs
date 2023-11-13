@@ -222,8 +222,7 @@ namespace BridgeCareCoreTests.Tests.Integration
                 .Single(_ => _.Id == dto.Id);
 
             foreach (var treatment in originalSimulation.SelectableTreatments)
-            {
-                treatment.ScenarioTreatmentSupersedeRules = new List<ScenarioTreatmentSupersedeRuleEntity>();
+            {                
                 treatment.ScenarioTreatmentSchedulings = new List<ScenarioTreatmentSchedulingEntity>();
             }
 
@@ -236,6 +235,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             };
+            originalSimulation.SelectableTreatments = originalSimulation.SelectableTreatments.OrderBy(_ => _.Name).ToList();
+            clonedSimulation.SelectableTreatments = clonedSimulation.SelectableTreatments.OrderBy(_ => _.Name).ToList();
             var serializeOriginal = JsonConvert.SerializeObject(originalSimulation, Formatting.Indented, jsonSettings);
             var serializeClone = JsonConvert.SerializeObject(clonedSimulation, Formatting.Indented, jsonSettings);
             var originalLines = StringExtensions.ToLines(serializeOriginal);
@@ -311,6 +312,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             }
             Assert.Equal(originalLines.Count, cloneLines.Count);
         }
+
         private void CreateTestData()
         {
             if (!TestHelper.UnitOfWork.Context.User.Any(u => u.Username == "Clone Tester"))
@@ -326,6 +328,7 @@ namespace BridgeCareCoreTests.Tests.Integration
                 var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
                 var budgetId = Guid.NewGuid();
                 var treatmentId = Guid.NewGuid();
+                var preventTreatmentId = Guid.NewGuid();
                 var committedProjectEnity = new CommittedProjectEntity
                 {
                     Id = Guid.NewGuid(),
@@ -676,13 +679,29 @@ namespace BridgeCareCoreTests.Tests.Integration
                                                 "Treatment Supersession Expression",
                                             IsSingleUse = true
                                         }
-                                    }
+                                    },
+                                PreventTreatmentId = preventTreatmentId
                             }
+                        }
+                    },
+                    new ScenarioSelectableTreatmentEntity
+                    {
+                        Id = preventTreatmentId,
+                        Name = "Treatment2",
+                        ShadowForAnyTreatment = 1,
+                        ShadowForSameTreatment = 1,
+                        ScenarioSelectableTreatmentScenarioBudgetJoins =
+                        new List<ScenarioSelectableTreatmentScenarioBudgetEntity>
+                        {
+                            new ScenarioSelectableTreatmentScenarioBudgetEntity {ScenarioBudgetId = budgetId}
                         }
                     }
                 }
                 };
                 TestHelper.UnitOfWork.Context.AddEntity(_testSimulationToClone);
+                var treatment = _testSimulationToClone.SelectableTreatments.FirstOrDefault(_ => _.Name == "Treatment");
+                treatment.ScenarioTreatmentSupersedeRules.FirstOrDefault().ScenarioSelectableTreatment = treatment;
+
                 TestHelper.UnitOfWork.Context.SaveChanges();
             }
         }

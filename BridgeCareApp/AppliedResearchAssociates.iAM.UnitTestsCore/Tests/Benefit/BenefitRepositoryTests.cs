@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -43,6 +43,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             NetworkTestSetup.CreateNetwork(unitOfWork);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var analysisMethod = AnalysisMethodDtos.Default(analysisMethodId, TestAttributeNames.Age);
+            var benefitId = analysisMethod.Benefit.Id;
             TestHelper.UnitOfWork.AnalysisMethodRepo.UpsertAnalysisMethod(simulation.Id, analysisMethod);
             var benefitId2 = Guid.NewGuid();
             var benefitDto2 = BenefitDtos.Dto(TestAttributeNames.DeckDurationN, benefitId2);
@@ -52,6 +53,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var analysisMethodAfter = TestHelper.UnitOfWork.AnalysisMethodRepo.GetAnalysisMethod(simulation.Id);
             var benefitAfter = analysisMethodAfter.Benefit;
             ObjectAssertions.Equivalent(benefitDto2, benefitAfter);
+            var deletedBenefitEntity = TestHelper.UnitOfWork.Context.Benefit
+                .SingleOrDefault(b => b.Id == benefitId);
+            Assert.Null(deletedBenefitEntity);
         }
 
         [Fact]

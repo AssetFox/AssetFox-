@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     public class AnalysisMethodRepositoryTests
     {
         [Fact]
-        public void ShouldReturnOkResultOnGet()
+        public void GetAnalysisMethod_AnalysisMethodInDb_Gets()
         {
             var unitOfWork = TestHelper.UnitOfWork;
             AttributeTestSetup.CreateAttributes(unitOfWork);
@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
 
         [Fact]
-        public void ShouldCreateAnalysisMethod()
+        public void UpsertAnalysisMethod_AnalysisMethodAlreadyInDb_UpdatesBenefit()
         {
             // Arrange
             var unitOfWork = TestHelper.UnitOfWork;
@@ -47,35 +47,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var repo = unitOfWork.AnalysisMethodRepo;
             var analysisMethodDto = repo.GetAnalysisMethod(simulation.Id);
-            analysisMethodDto.Benefit = new BenefitDTO
-            {
-                Id = Guid.NewGuid(),
-                Limit = 0.0,
-                Attribute = TestHelper.UnitOfWork.Context.Attribute.First().Name
-            };
+            analysisMethodDto.Benefit = BenefitDtos.Dto(TestAttributeNames.Age);
 
             // Act
             repo.UpsertAnalysisMethod(simulation.Id, analysisMethodDto);
+
             // Assert
             var upsertedAnalysisMethodDto = repo.GetAnalysisMethod(simulation.Id);
             Assert.Equal(analysisMethodDto.Id, upsertedAnalysisMethodDto.Id);
             Assert.Equal(analysisMethodDto.Benefit.Id, upsertedAnalysisMethodDto.Benefit.Id);
         }
 
-        private BenefitEntity TestBenefit(Guid analysisMethodId, Guid? benefitId = null)
-        {
-            var resolveId = benefitId ?? Guid.NewGuid();
-            var returnValue = new BenefitEntity
-            {
-                Id = resolveId,
-                AnalysisMethodId = analysisMethodId,
-                Limit = 1
-            };
-            return returnValue;
-        }
-
         [Fact]
-        public void AnalysisMethodInDb_Update_Updates()
+        public void UpsertAnalysisMethod_AnalysisMethodInDb_Updates()
         {
             var unitOfWork = TestHelper.UnitOfWork;
             AttributeTestSetup.CreateAttributes(unitOfWork);

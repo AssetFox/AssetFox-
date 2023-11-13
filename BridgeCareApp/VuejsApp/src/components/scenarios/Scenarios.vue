@@ -110,7 +110,7 @@
                                                 size="large"
                                                 lazy
                                                 persistent
-                                                :return-value.sync="
+                                                v-model:return-value="
                                                     props.item.name
                                                 "
                                                 @save="
@@ -311,7 +311,7 @@
                                                 size="large"
                                                 lazy
                                                 persistent
-                                                :return-value.sync="
+                                                v-model:return-value="
                                                     props.item.name
                                                 "
                                                 @save="

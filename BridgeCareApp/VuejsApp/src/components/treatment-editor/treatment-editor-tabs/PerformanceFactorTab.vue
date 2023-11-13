@@ -14,21 +14,21 @@
                                     v-model:return-value='props.item[header.key]'
                                     @save='onEditPerformanceFactorProperty(props.item, header.key, props.item[header.key])'
                                     size="large" lazy persistent>
-                                    <v-text-field v-if="header.key === 'attribute'" readonly single-line class='ghd-control-text-sm'
+                                    <v-text-field v-if="header.key === 'attribute'" variant="underlined" readonly single-line class='ghd-control-text-sm'
                                                 :model-value='props.item.attribute'
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                    <v-text-field v-if="header.key === 'performanceFactor'" readonly single-line class='ghd-control-text-sm'
+                                    <v-text-field v-if="header.key === 'performanceFactor'" variant="underlined" readonly single-line class='ghd-control-text-sm'
                                                 :model-value='parseFloat(props.item.performanceFactor).toFixed(2)'
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                                     <template v-slot:input>
-                                        <v-select v-if="header.key === 'attribute'" :items='attributeSelectItems'
+                                        <v-select v-if="header.key === 'attribute'" variant="underlined" :items='attributeSelectItems'
                                                 append-icon=ghd-down
                                                 label='Edit'
                                                 item-title="text"
                                                 item-value="value" 
                                                 v-model='props.item.attribute'
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                        <v-text-field v-if="header.key === 'performanceFactor'" label='Edit' single-line maxLength="5"
+                                        <v-text-field v-if="header.key === 'performanceFactor'" variant="underlined" label='Edit' single-line maxLength="5"
                                                     v-model='props.item.performanceFactor'
                                                     :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     </template>

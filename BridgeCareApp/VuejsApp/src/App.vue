@@ -117,7 +117,7 @@
                                 </v-badge>
                             </button>
                         </template>            
-                        <v-card class="mx-auto" style="width: 1800%; min-height: 500%; left: -80px; top: 20px;">
+                        <v-card class="mx-auto" style="width: 2200%; min-height: 500%; left: -170px; top: 20px;">
                             <v-toolbar 
                                 id = "App-notification-toolbar"
                                 color="#002E6C" dark>
@@ -137,13 +137,18 @@
                                     style="border-bottom: 1px solid; padding:5%;"
                                     @click="toggleExpand(notification.active,index)"
                                 >
-                                    
+                               
                                     <template v-slot:activator justify-end   >
                                         
                                         <v-list-tile 
                                             id="App-notification-vListTile">
                                             <v-row justify="end">
-                                            <v-col cols ="8">
+                                            <v-col cols ="9">
+                                                <v-icon class="notificationIcon"
+                                        :color="notification.iconColor"
+                                        >{{ notification.icon }}</v-icon
+                                    >
+                                            
                                             <v-list-item-content
                                                 style="margin-bottom: 10px;"
                                                 v-text="
@@ -801,6 +806,9 @@ html {
 .mx-auto{
     max-height: 300px;
     overflow-y: auto;
+}
+.notificationIcon{
+    margin-right: 15px;
 }
 .navbar-divider {
     display: inline !important;

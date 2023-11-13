@@ -283,139 +283,142 @@ ALTER TABLE [dbo].[ScenarioTreatmentSupersedeRule]  WITH CHECK ADD  CONSTRAINT  
 --Update Indexes
 
 	   
+
+
+
     IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_AttributeDatum_MaintainableAssetId') 
 DROP INDEX [IX_AttributeDatum_MaintainableAssetId] ON [dbo].[AttributeDatum]
- 
+
 CREATE NONCLUSTERED INDEX [IX_AttributeDatum_MaintainableAssetId]
 ON [dbo].[AttributeDatum] ([MaintainableAssetId])
 INCLUDE ([Id],[Discriminator],[TimeStamp],[NumericValue],[TextValue],[AttributeId])
 	WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-	 
+	
 
 
 -----------------------------------------
 
- 
+
   IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_AttributeDatum_AttributeId')   
       DROP INDEX IX_AttributeDatum_AttributeId ON [dbo].[AttributeDatum];   
-     
+    
   CREATE NonCLUSTERED INDEX [IX_AttributeDatum_AttributeId]
       ON [dbo].[AttributeDatum] ([AttributeId] ASC)
   INCLUDE ([Discriminator],[TimeStamp],[NumericValue],[TextValue],[MaintainableAssetId]
   	) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-    
+   
 
 -----------------------------------------
 
-  
+ 
     IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_AssetSummaryDetailValueIntId_AssetSummaryDetailId') 
 DROP INDEX [IX_AssetSummaryDetailValueIntId_AssetSummaryDetailId] ON [dbo].[AssetSummaryDetailValueIntId]
- 
+
 CREATE NONCLUSTERED INDEX [IX_AssetSummaryDetailValueIntId_AssetSummaryDetailId]
 ON [dbo].[AssetSummaryDetailValueIntId] ([AssetSummaryDetailId])
 INCLUDE ([Id],[Discriminator],[TextValue],[NumericValue],[AttributeId])
- 
+
 
 -----------------------------------------
 
- 
+
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_MaintainableAsset_NetworkId') 
 	DROP INDEX [IX_MaintainableAsset_NetworkId] ON [dbo].[MaintainableAsset]
- 
+
 
 CREATE NONCLUSTERED INDEX [IX_MaintainableAsset_NetworkId] ON [dbo].[MaintainableAsset]
 ([NetworkId] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 -----------------------------------------
 
- 
+
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_BudgetUsageDetail_TreatmentConsiderationDetailId') 
 	DROP INDEX [IX_BudgetUsageDetail_TreatmentConsiderationDetailId] ON [dbo].[BudgetUsageDetail]
- 
+
 CREATE NONCLUSTERED INDEX [IX_BudgetUsageDetail_TreatmentConsiderationDetailId] ON [dbo].[BudgetUsageDetail]
 ([TreatmentConsiderationDetailId] ASC) INCLUDE ([BudgetName],[CoveredCost],[Status]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 -----------------------------------------
 
- 
+
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_TreatmentConsiderationDetail_AssetDetailId') 
 	DROP INDEX [IX_TreatmentConsiderationDetail_AssetDetailId] ON [dbo].[TreatmentConsiderationDetail]
- 
+
 CREATE NONCLUSTERED INDEX [IX_TreatmentConsiderationDetail_AssetDetailId] ON [dbo].[TreatmentConsiderationDetail]
 (
 	[AssetDetailId] ASC
 )
 INCLUDE ([BudgetPriorityLevel],[TreatmentName]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 -----------------------------------------
 
- 
+
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_TreatmentOptionDetail_AssetDetailId') 
 DROP INDEX [IX_TreatmentOptionDetail_AssetDetailId] ON [dbo].[TreatmentOptionDetail]
- 
+
 CREATE NONCLUSTERED INDEX [IX_TreatmentOptionDetail_AssetDetailId] ON [dbo].[TreatmentOptionDetail]
 (
 	[AssetDetailId] ASC) INCLUDE ([Benefit],[Cost],[RemainingLife],[TreatmentName],[ConditionChange])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 -----------------------------------------
 
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_TreatmentRejectionDetail_AssetDetailId') 
 DROP INDEX [IX_TreatmentRejectionDetail_AssetDetailId] ON [dbo].[TreatmentRejectionDetail]
- 
+
 CREATE NONCLUSTERED INDEX [IX_TreatmentRejectionDetail_AssetDetailId]
 ON [dbo].[TreatmentRejectionDetail] ([AssetDetailId])
 INCLUDE ([Id],[TreatmentName],[TreatmentRejectionReason],[PotentialConditionChange])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 -----------------------------------------
 
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_ScenarioBudget_SimulationId')
 DROP INDEX [IX_ScenarioBudget_SimulationId] ON [dbo].[ScenarioBudget]
- 
+
 
 CREATE NONCLUSTERED INDEX [IX_ScenarioBudget_SimulationId] ON [dbo].[ScenarioBudget]
 ([SimulationId] ASC) INCLUDE([Name],[BudgetOrder],[LibraryId],[IsModified])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 
 -----------------------------------------
 
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_ScenarioBudgetAmount_ScenarioBudgetId')
 DROP INDEX [IX_ScenarioBudgetAmount_ScenarioBudgetId] ON [dbo].[ScenarioBudgetAmount]
- 
+
 CREATE NONCLUSTERED INDEX [IX_ScenarioBudgetAmount_ScenarioBudgetId] ON [dbo].[ScenarioBudgetAmount]
 (
 	[ScenarioBudgetId] ASC) INCLUDE ([Year],[Value])
 	WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 
 -----------------------------------------
 
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_BudgetPercentagePair_ScenarioBudgetPriorityId')
 DROP INDEX [IX_BudgetPercentagePair_ScenarioBudgetPriorityId] ON [dbo].[BudgetPercentagePair]
- 
+
 CREATE NONCLUSTERED INDEX [IX_BudgetPercentagePair_ScenarioBudgetPriorityId] ON [dbo].[BudgetPercentagePair]
 (	[ScenarioBudgetPriorityId] ASC) INCLUDE ([Percentage],[ScenarioBudgetId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 -----------------------------------------
 
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_ScenarioCalculatedAttributePair_ScenarioCalculatedAttribute_ScenarioCalculatedAttributeId')
 DROP INDEX [IX_ScenarioCalculatedAttributePair_ScenarioCalculatedAttribute_ScenarioCalculatedAttributeId] ON [dbo].[ScenarioCalculatedAttributePair]
- 
+
 CREATE NONCLUSTERED INDEX [IX_ScenarioCalculatedAttributePair_ScenarioCalculatedAttribute_ScenarioCalculatedAttributeId] ON [dbo].[ScenarioCalculatedAttributePair]
 ([ScenarioCalculatedAttributeId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 
 -----------------------------------------
@@ -423,24 +426,24 @@ CREATE NONCLUSTERED INDEX [IX_ScenarioCalculatedAttributePair_ScenarioCalculated
 
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_ScenarioPerformanceCurve_SimulationId')
 DROP INDEX [IX_ScenarioPerformanceCurve_SimulationId] ON [dbo].[ScenarioPerformanceCurve]
- 
+
 CREATE NONCLUSTERED INDEX [IX_ScenarioPerformanceCurve_SimulationId] ON [dbo].[ScenarioPerformanceCurve]
 (
 	[SimulationId] ASC) INCLUDE ([AttributeId],[Name],[Shift],[LibraryId],[IsModified])
 	WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 -----------------------------------------
 
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_ScenarioConditionalTreatmentConsequences_ScenarioSelectableTreatmentId')
 DROP INDEX [IX_ScenarioConditionalTreatmentConsequences_ScenarioSelectableTreatmentId] ON [dbo].[ScenarioConditionalTreatmentConsequences]
- 
+
 
 CREATE NONCLUSTERED INDEX [IX_ScenarioConditionalTreatmentConsequences_ScenarioSelectableTreatmentId] ON [dbo].[ScenarioConditionalTreatmentConsequences]
 (
 	[ScenarioSelectableTreatmentId] ASC) INCLUDE ([AttributeId],[ChangeValue])
 	WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 -----------------------------------------
 
@@ -453,16 +456,17 @@ CREATE NONCLUSTERED INDEX [IX_ScenarioSelectableTreatment_SimulationId] ON [dbo]
 	WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 
 
+
 -----------------------------------------
 
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_SimulationLog_SimulationId')
 DROP INDEX [IX_SimulationLog_SimulationId] ON [dbo].[SimulationLog]
- 
+
 CREATE NONCLUSTERED INDEX [IX_SimulationLog_SimulationId] ON [dbo].[SimulationLog]
 (
 	[SimulationId] ASC) INCLUDE ([Status],[Subject],[Message])
 	WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 
 -----------------------------------------
@@ -470,375 +474,375 @@ CREATE NONCLUSTERED INDEX [IX_SimulationLog_SimulationId] ON [dbo].[SimulationLo
 
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_MaintainableAssetLocation_MaintainableAssetId')
 DROP INDEX [IX_MaintainableAssetLocation_MaintainableAssetId] ON [dbo].[MaintainableAssetLocation]
- 
+
 CREATE UNIQUE NONCLUSTERED INDEX [IX_MaintainableAssetLocation_MaintainableAssetId] ON [dbo].[MaintainableAssetLocation]
 (
 	[MaintainableAssetId] ASC) INCLUDE ([Discriminator],[LocationIdentifier],[Start],[End],[Direction])
 	WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
 
 
------------------------------------------
-
+-----------------------------------------------------------
+  
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_AttributeDatumLocation_AttributeDatumId')
 DROP INDEX [IX_AttributeDatumLocation_AttributeDatumId] ON [dbo].[AttributeDatumLocation]
- 
+
 CREATE UNIQUE NONCLUSTERED INDEX [IX_AttributeDatumLocation_AttributeDatumId] ON [dbo].[AttributeDatumLocation]
 (
-	[AttributeDatumId] ASC ) INCLUDE ([Discriminator],[LocationIdentifier],[Start],[End],[Direction])
+	[AttributeDatumId] ASC ) INCLUDE ([Id],[Discriminator],[LocationIdentifier],[Start],[End],[Direction])
 	WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 --------------------------------------------------------------
 
 
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_AssetSummaryDetail_MaintainableAssetId')
 DROP INDEX [IX_AssetSummaryDetail_MaintainableAssetId] ON [dbo].[AssetSummaryDetail]
- 
+
 CREATE NONCLUSTERED INDEX [IX_AssetSummaryDetail_MaintainableAssetId] ON [dbo].[AssetSummaryDetail]
 (
 	[MaintainableAssetId] ASC ) INCLUDE ([SimulationOutputId])
 	WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 -----------------------------------------
 
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_CashFlowConsiderationDetail_TreatmentConsiderationDetailId')
 DROP INDEX [IX_CashFlowConsiderationDetail_TreatmentConsiderationDetailId] ON [dbo].[CashFlowConsiderationDetail]
- 
+
 CREATE NONCLUSTERED INDEX [IX_CashFlowConsiderationDetail_TreatmentConsiderationDetailId] ON [dbo].[CashFlowConsiderationDetail]
 (
 	[TreatmentConsiderationDetailId] ASC ) INCLUDE ([CashFlowRuleName],[ReasonAgainstCashFlow])
 	WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 -----------------------------------------
 
 
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_BudgetPercentagePair_ScenarioBudgetId')
 DROP INDEX [IX_BudgetPercentagePair_ScenarioBudgetId] ON [dbo].[BudgetPercentagePair]
- 
+
 CREATE NONCLUSTERED INDEX [IX_BudgetPercentagePair_ScenarioBudgetId] ON [dbo].[BudgetPercentagePair]
 (
 	[ScenarioBudgetId] ASC ) INCLUDE ([Percentage],[ScenarioBudgetPriorityId])
 	WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 -----------------------------------------
 
 
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_CriterionLibrary_ScenarioPerformanceCurve_ScenarioPerformanceCurveId')
 DROP INDEX [IX_CriterionLibrary_ScenarioPerformanceCurve_ScenarioPerformanceCurveId] ON [dbo].[CriterionLibrary_ScenarioPerformanceCurve]
- 
+
 CREATE UNIQUE NONCLUSTERED INDEX [IX_CriterionLibrary_ScenarioPerformanceCurve_ScenarioPerformanceCurveId] ON [dbo].[CriterionLibrary_ScenarioPerformanceCurve]
 (
 	[ScenarioPerformanceCurveId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 -----------------------------------------
 
-  
+ 
     IF EXISTS (SELECT name FROM sys.indexes  
               WHERE name = N'IX_CriterionLibrary_ScenarioTreatmentConsequence_CriterionLibraryId') 
 DROP INDEX [IX_CriterionLibrary_ScenarioTreatmentConsequence_CriterionLibraryId] ON [dbo].[CriterionLibrary_ScenarioTreatmentConsequence]
- 
+
 
 CREATE NONCLUSTERED INDEX [IX_CriterionLibrary_ScenarioTreatmentConsequence_CriterionLibraryId] ON [dbo].[CriterionLibrary_ScenarioTreatmentConsequence]
 (
 	[CriterionLibraryId] ASC
 )  WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 ----------------------------------------------------------------------------------------------------------------
 
 
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_CriterionLibrary_ScenarioTreatmentConsequence_ScenarioConditionalTreatmentConsequenceId')
 DROP INDEX [IX_CriterionLibrary_ScenarioTreatmentConsequence_ScenarioConditionalTreatmentConsequenceId] ON [dbo].[CriterionLibrary_ScenarioTreatmentConsequence]
- 
+
 CREATE UNIQUE NONCLUSTERED INDEX [IX_CriterionLibrary_ScenarioTreatmentConsequence_ScenarioConditionalTreatmentConsequenceId] ON [dbo].[CriterionLibrary_ScenarioTreatmentConsequence]
 ([ScenarioConditionalTreatmentConsequenceId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 ---------------------------------------------------------
 
 
 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_ScenarioTreatmentCost_ScenarioSelectableTreatmentId')
 DROP INDEX [IX_ScenarioTreatmentCost_ScenarioSelectableTreatmentId] ON [dbo].[ScenarioTreatmentCost]
- 
+
 CREATE NONCLUSTERED INDEX [IX_ScenarioTreatmentCost_ScenarioSelectableTreatmentId] ON [dbo].[ScenarioTreatmentCost]
 ([ScenarioSelectableTreatmentId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
 
 
- 
+
+
   IF EXISTS (SELECT name FROM sys.indexes  WHERE name = N'IX_TreatmentConsequence_SelectableTreatmentId')   
       DROP INDEX IX_TreatmentConsequence_SelectableTreatmentId ON [dbo].[TreatmentConsequence];   
-     
+    
   
   CREATE NonCLUSTERED INDEX [IX_TreatmentConsequence_SelectableTreatmentId]
       ON [dbo].TreatmentConsequence ([SelectableTreatmentId] ASC)
   	INCLUDE ([AttributeId],[ChangeValue]
   	) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-   
+  
 
   ----------------------------------------------------------------------------------------
   
-   
+  
   IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_AggregatedResult_AttributeId')   
       DROP INDEX IX_AggregatedResult_AttributeId ON [dbo].[AggregatedResult];   
-     
+    
   
   CREATE NonCLUSTERED INDEX [IX_AggregatedResult_AttributeId]  ON [dbo].[AggregatedResult] ([AttributeId] ASC)
   INCLUDE ([Discriminator],[Year],[TextValue],[NumericValue],[MaintainableAssetId]
   	) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-    
+   
 
   ----------------------------------------------------------------------------------------
 
-   
+  
   IF EXISTS (SELECT name FROM sys.indexes  WHERE name = N'IX_AggregatedResult_MaintainableAssetId')  
 DROP INDEX [IX_AggregatedResult_MaintainableAssetId] ON [dbo].[AggregatedResult]
- 
+
 CREATE NONCLUSTERED INDEX [IX_AggregatedResult_MaintainableAssetId] ON [dbo].[AggregatedResult]
 ([MaintainableAssetId] ASC)
 INCLUDE([Discriminator],[Year],[TextValue],[NumericValue],[AttributeId] ) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
   ----------------------------------------------------------------------------------------
 
-   
+  
   IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_TreatmentConsequence_AttributeId')   
       DROP INDEX IX_TreatmentConsequence_AttributeId ON [dbo].[TreatmentConsequence];   
-     
+    
   
   CREATE NonCLUSTERED INDEX [IX_TreatmentConsequence_AttributeId]
       ON [dbo].[TreatmentConsequence] ([AttributeId] ASC)
   INCLUDE ([SelectableTreatmentId],[ChangeValue]
   	) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-    
+   
 
   ----------------------------------------------------------------------------------------
   
-   
+  
     IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_SimulationOutput_ChangeTracking')  
 DROP INDEX [IX_SimulationOutput_ChangeTracking] ON [dbo].SimulationOutput
- 
+
 
 CREATE NONCLUSTERED INDEX IX_SimulationOutput_ChangeTracking ON dbo.SimulationOutput(Id)
 INCLUDE(CreatedDate,LastModifiedDate,CreatedBy,LastModifiedBy) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
   ----------------------------------------------------------------------------------------
   
-  
+ 
     IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_CriterionLibrary_ScenarioTreatment_ScenarioSelectableTreatmentId')  
 DROP INDEX [IX_CriterionLibrary_ScenarioTreatment_ScenarioSelectableTreatmentId] ON [dbo].[CriterionLibrary_ScenarioTreatment]
- 
 
-CREATE  NONCLUSTERED INDEX [IX_CriterionLibrary_ScenarioTreatment_ScenarioSelectableTreatmentId] ON [dbo].[CriterionLibrary_ScenarioTreatment]
+
+CREATE UNIQUE NONCLUSTERED INDEX [IX_CriterionLibrary_ScenarioTreatment_ScenarioSelectableTreatmentId] ON [dbo].[CriterionLibrary_ScenarioTreatment]
 (
 	[ScenarioSelectableTreatmentId] ASC
 )  INCLUDE( [CriterionLibraryId]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
   ----------------------------------------------------------------------------------------
    
-    
+   
     IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_CriterionLibrary_ScenarioTreatment_CriterionLibraryId') 
 DROP INDEX [IX_CriterionLibrary_ScenarioTreatment_CriterionLibraryId] ON [dbo].[CriterionLibrary_ScenarioTreatment]
- 
+
 
 CREATE NONCLUSTERED INDEX [IX_CriterionLibrary_ScenarioTreatment_CriterionLibraryId] ON [dbo].[CriterionLibrary_ScenarioTreatment]
 (
 	[CriterionLibraryId] ASC
 )INCLUDE( [ScenarioSelectableTreatmentId])  WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
   ----------------------------------------------------------------------------------------
   
-   
+  
     IF EXISTS (SELECT name FROM sys.indexes  WHERE name = N'IX_CriterionLibrary_Id') 
 DROP INDEX [IX_CriterionLibrary_Id] ON [dbo].[CriterionLibrary]
- 
+
 CREATE NONCLUSTERED INDEX [IX_CriterionLibrary_Id] ON [dbo].[CriterionLibrary]
 (
 	[Id] ASC
 )
 INCLUDE([IsSingleUse],[IsShared]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 -------------------------------------------------------------------------
 --[ScenarioSelectableTreatment_ScenarioBudget] 
 
-  
+ 
     IF EXISTS (SELECT name FROM sys.indexes  
               WHERE name = N'IX_ScenarioSelectableTreatment_ScenarioBudget_ScenarioBudgetId') 
 DROP INDEX [IX_ScenarioSelectableTreatment_ScenarioBudget_ScenarioBudgetId] ON [dbo].[ScenarioSelectableTreatment_ScenarioBudget]
- 
+
 
 CREATE NONCLUSTERED INDEX [IX_ScenarioSelectableTreatment_ScenarioBudget_ScenarioBudgetId] ON [dbo].[ScenarioSelectableTreatment_ScenarioBudget]
 (
 	[ScenarioBudgetId] ASC
 ) INCLUDE([ScenarioSelectableTreatmentId])   WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
 
 ------------------------------------------------------------------------------------------------
 --[ScenarioSelectableTreatment_ScenarioBudget] 
 
-   
+  
     IF EXISTS (SELECT name FROM sys.indexes  
               WHERE name = N'IX_ScenarioSelectableTreatment_ScenarioBudget_ScenarioSelectableTreatmentId') 
 DROP INDEX [IX_ScenarioSelectableTreatment_ScenarioBudget_ScenarioSelectableTreatmentId] ON [dbo].[ScenarioSelectableTreatment_ScenarioBudget]
- 
+
 
 CREATE NONCLUSTERED INDEX [IX_ScenarioSelectableTreatment_ScenarioBudget_ScenarioSelectableTreatmentId] ON [dbo].[ScenarioSelectableTreatment_ScenarioBudget]
 (
 	[ScenarioSelectableTreatmentId] ASC
 ) INCLUDE([ScenarioBudgetId]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
+
 ----------------------------------------------------
 
- IF EXISTS (SELECT name FROM sys.indexes  WHERE name = N'IX_Equation_Expression') DROP INDEX [IX_Equation_Expression] ON [dbo].[Equation]
- 
+  
+    IF EXISTS (SELECT name FROM sys.indexes  
+              WHERE name = N'IX_Equation_Expression') 
+DROP INDEX [IX_Equation_Expression] ON [dbo].[Equation]
+
+
 CREATE NONCLUSTERED INDEX [IX_Equation_Expression] ON [dbo].[Equation]
 (
 	[CreatedBy] ASC
 ) INCLUDE([LastModifiedBy])
  WITH  (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
+
 -----------------------------------------------------------------------------
-   
+  
+  
     IF EXISTS (SELECT name FROM sys.indexes  
               WHERE name = N'IX_Attribute_DataSourceId') 
 DROP INDEX [IX_Attribute_DataSourceId] ON [dbo].[Attribute]
- 
+
 CREATE NONCLUSTERED INDEX [IX_Attribute_DataSourceId] ON [dbo].[Attribute]
 (
 	[DataSourceId] ASC
 ) INCLUDE([Name],[DataType],[AggregationRuleType],[Command],[ConnectionType],[DefaultValue],[Minimum],[Maximum],[IsCalculated],[IsAscending]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
+
 -------------------------------------------------------------------------------------------------------------
-   
-    IF EXISTS (SELECT name FROM sys.indexes  
-              WHERE name = N'IX_Attribute_Name') 
+
+  
+    IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_Attribute_Name') 
 DROP INDEX [IX_Attribute_Name] ON [dbo].[Attribute]
- 
-CREATE  NONCLUSTERED INDEX [IX_Attribute_Name] ON [dbo].[Attribute]
-(
-	[Name] ASC
-) INCLUDE([DataSourceId],[DataType],[AggregationRuleType],[Command],[ConnectionType],[DefaultValue],[Minimum],[Maximum],[IsCalculated],[IsAscending])  WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Attribute_Name] ON [dbo].[Attribute]
+([Name] ASC) INCLUDE([DataSourceId],[DataType],[AggregationRuleType],[Command],[ConnectionType],[DefaultValue],[Minimum],[Maximum],[IsCalculated],[IsAscending])  WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+
+
 ----------------------------------------------------------------------
-   
+
+  
     IF EXISTS (SELECT name FROM sys.indexes  
               WHERE name = N'IX_ScenarioTreatmentConsequence_Equation_EquationId') 
 DROP INDEX [IX_ScenarioTreatmentConsequence_Equation_EquationId] ON [dbo].[ScenarioTreatmentConsequence_Equation]
- 
 
-CREATE  NONCLUSTERED INDEX [IX_ScenarioTreatmentConsequence_Equation_EquationId] ON [dbo].[ScenarioTreatmentConsequence_Equation]
+
+CREATE UNIQUE NONCLUSTERED INDEX [IX_ScenarioTreatmentConsequence_Equation_EquationId] ON [dbo].[ScenarioTreatmentConsequence_Equation]
 (
 	[EquationId] ASC
 ) INCLUDE([ScenarioConditionalTreatmentConsequenceId],[CreatedBy],[LastModifiedBy]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
------------------------------------------------------------------------------------
-   
+
+
+------------------------------------------------------------------------------------
+
+  
     IF EXISTS (SELECT name FROM sys.indexes  
               WHERE name = N'IX_ScenarioTreatmentConsequence_Equation_ScenarioConditionalTreatmentConsequenceId') 
 DROP INDEX [IX_ScenarioTreatmentConsequence_Equation_ScenarioConditionalTreatmentConsequenceId] ON [dbo].[ScenarioTreatmentConsequence_Equation]
- 
 
-CREATE  NONCLUSTERED INDEX [IX_ScenarioTreatmentConsequence_Equation_ScenarioConditionalTreatmentConsequenceId] ON [dbo].[ScenarioTreatmentConsequence_Equation]
+
+CREATE UNIQUE NONCLUSTERED INDEX [IX_ScenarioTreatmentConsequence_Equation_ScenarioConditionalTreatmentConsequenceId] ON [dbo].[ScenarioTreatmentConsequence_Equation]
 (
 	[ScenarioConditionalTreatmentConsequenceId] ASC
 ) INCLUDE([EquationId],[CreatedBy],[LastModifiedBy]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
+
 ----------------------------------------------------------------------------------------------------------------
-   
+
+  
     IF EXISTS (SELECT name FROM sys.indexes  
               WHERE name = N'IX_AssetSummaryDetail_SimulationOutput_SimulationOutputId') 
 DROP INDEX [IX_AssetSummaryDetail_SimulationOutput_SimulationOutputId] ON [dbo].[AssetSummaryDetail]
- 
+
 
 CREATE NONCLUSTERED INDEX [IX_AssetSummaryDetail_SimulationOutput_SimulationOutputId] ON [dbo].[AssetSummaryDetail]
 (
 	[SimulationOutputId] ASC
 )
 INCLUDE([MaintainableAssetId]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
+
 ----------------------------------------------------------------------------------------------------------------
-   
+
+  
     IF EXISTS (SELECT name FROM sys.indexes  
               WHERE name = N'IX_AssetDetail_MaintainableAsset_MaintainableAssetId') 
 DROP INDEX [IX_AssetDetail_MaintainableAsset_MaintainableAssetId] ON [dbo].[AssetDetail]
- 
+
 CREATE NONCLUSTERED INDEX [IX_AssetDetail_MaintainableAsset_MaintainableAssetId] ON [dbo].[AssetDetail]
 ([MaintainableAssetId] ASC)
 INCLUDE([SimulationYearDetailId],[AppliedTreatment],[TreatmentCause],[TreatmentFundingIgnoresSpendingLimit],[TreatmentStatus]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
+
 ----------------------------------------------------------------------------------------------------------------
-   
+
+
+  
     IF EXISTS (SELECT name FROM sys.indexes  
               WHERE name = N'IX_AssetDetail_SimulationYearDetail_SimulationYearDetailId') 
 DROP INDEX [IX_AssetDetail_SimulationYearDetail_SimulationYearDetailId] ON [dbo].[AssetDetail]
- 
+
 CREATE NONCLUSTERED INDEX [IX_AssetDetail_SimulationYearDetail_SimulationYearDetailId] ON [dbo].[AssetDetail]
 ([SimulationYearDetailId] ASC)
 INCLUDE([MaintainableAssetId],[AppliedTreatment],[TreatmentCause],[TreatmentFundingIgnoresSpendingLimit],[TreatmentStatus]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
+
 
 -------------------------------------------------------------------------------------------------------------------------------------------
-   
+
+  
     IF EXISTS (SELECT name FROM sys.indexes  
               WHERE name = N'IX_AssetDetailValueIntId_Attribute_AttributeId') 
 DROP INDEX [IX_AssetDetailValueIntId_Attribute_AttributeId] ON [dbo].[AssetDetailValueIntId]
- 
-CREATE NONCLUSTERED INDEX [IX_AssetDetailValueIntId_Attribute_AttributeId] ON [dbo].[AssetDetailValueIntId]
-([AttributeId] ASC)
+
+CREATE NONCLUSTERED INDEX [IX_AssetDetailValueIntId_Attribute_AttributeId] ON [dbo].[AssetDetailValueIntId]([AttributeId] ASC)
 INCLUDE([AssetDetailId],[Discriminator],[TextValue],[NumericValue]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
+
+
 -------------------------------------------------------------------------------------------------------------------------------------------
-   
-    IF EXISTS (SELECT name FROM sys.indexes  
-              WHERE name = N'IX_AssetDetailValueIntId_AssetDetail_AssetDetailId') 
-DROP INDEX [IX_AssetDetailValueIntId_AssetDetail_AssetDetailId] ON [dbo].[AssetDetailValueIntId]
+
+
+    IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_AssetDetailValueIntId_AssetDetailId') 
+DROP INDEX [IX_AssetDetailValueIntId_AssetDetailId] ON [dbo].[AssetDetailValueIntId]
+
+CREATE NONCLUSTERED INDEX [IX_AssetDetailValueIntId_AssetDetailId] ON [dbo].[AssetDetailValueIntId] ([AssetDetailId])
+INCLUDE ([Id],[Discriminator],[TextValue],[NumericValue],[AttributeId])
+	WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+
+
+----------------------------------------------------------------------------------------------------------------
  
-CREATE NONCLUSTERED INDEX [IX_AssetDetailValueIntId_AssetDetail_AssetDetailId] ON [dbo].[AssetDetailValueIntId]
-([AssetDetailId])
-INCLUDE ([Discriminator],[TextValue],[NumericValue],[AttributeId])  WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
- ----------------------------------------------------------------------------------------------------------------
-    
+  
     IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_BudgetDetail_SimulationYearDetailId') 
 DROP INDEX [IX_BudgetDetail_SimulationYearDetailId] ON [dbo].[BudgetDetail]
- 
+
  CREATE NONCLUSTERED INDEX [IX_BudgetDetail_SimulationYearDetailId] ON [dbo].[BudgetDetail]
  ([SimulationYearDetailId] ASC)
  INCLUDE ([AvailableFunding],[BudgetName])WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
  
-  ----------------------------------------------------------------------------------------
 
-IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_AttributeDatumLocation_AttributeDatumId')
-DROP INDEX [IX_AttributeDatumLocation_AttributeDatumId] ON [dbo].[AttributeDatumLocation]
- 
-CREATE UNIQUE NONCLUSTERED INDEX [IX_AttributeDatumLocation_AttributeDatumId] ON [dbo].[AttributeDatumLocation]
-(
-	[AttributeDatumId] ASC ) INCLUDE ([Discriminator],[LocationIdentifier],[Start],[End],[Direction])
-	WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
   ----------------------------------------------------------------------------------------
-   
-    IF EXISTS (SELECT name FROM sys.indexes WHERE name = N'IX_AssetDetailValueIntId_AssetDetailId') 
-DROP INDEX [IX_AssetDetailValueIntId_AssetDetailId] ON [dbo].[AssetDetailValueIntId]
- 
-CREATE NONCLUSTERED INDEX [IX_AssetDetailValueIntId_AssetDetailId]
-ON [dbo].[AssetDetailValueIntId] ([AssetDetailId])
-INCLUDE ([Id],[Discriminator],[TextValue],[NumericValue],[AttributeId])
-	WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
- 
-  ----------------------------------------------------------------------------------------
-
 
 	END TRY
 	BEGIN CATCH

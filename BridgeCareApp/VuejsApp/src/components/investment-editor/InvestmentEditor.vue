@@ -187,33 +187,34 @@
                     v-model:items-per-page="pagination.rowsPerPage"
                     @update:options="onPaginationChanged"
                     >
-                    <template v-slot:item="{item}">
+                    <template v-slot:item="item">
                     <tr>
                         <td>
-                            <v-checkbox hide-details primary v-model="selectedBudgetYearsGridData" :value="item"></v-checkbox>
+                            <v-checkbox hide-details primary v-model="selectedBudgetYearsGridData" :value="item.item"></v-checkbox>
                         </td>
                         <td v-for='header in budgetYearsGridHeaders'>
                             <div v-if="header.key === 'year'">
-                                <span class='sm-txt'>{{ item.year + firstYearOfAnalysisPeriodShift}}</span>
+                                <span class='sm-txt'>{{ item.item.year + firstYearOfAnalysisPeriodShift}}</span>
                             </div>       
                            
                             <div v-if="header.key !== 'year' && header.key !== 'action'">
-                                <editDialog v-model:return-value='item[header.key]'
-                                    @save='onEditBudgetYearValue(item.year, header.key, item[header.key])'
+                                <editDialog :return-value.sync='item.item.values[header.key]'
+                                    @save='onEditBudgetYearValue(item.item.year, header.key, item.item.values[header.key])'
                                     size="large" lazy>
                                     <currencyTextbox readonly single-line class='sm-txt'
                                         variant="underlined"
-                                        :model-value='item[header.key]'
+                                        :model-value='item.item.values[header.key]'
                                         :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     <template v-slot:input>
                                         <currencyTextbox label='Edit' single-line
-                                            v-model.number='item[header.key]'                                             
+                                            v-model.number='item.item.values[header.key]'                                             
                                             :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     </template>
                                 </editDialog>
                             </div>
+
                             <div v-if="header.key === 'action'">
-                                <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(item.year)" class="ghd-blue" flat>
+                                <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(item.item.year)" class="ghd-blue" flat>
                                     <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
                                 </v-btn>
                             </div>
@@ -1052,7 +1053,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function checkLibraryEditPermission() {
-        hasLibraryEditPermission.value = hasAdminAccess || (hasPermittedAccess.value && checkUserIsLibraryOwner());
+        hasLibraryEditPermission.value = hasAdminAccess.value || (hasPermittedAccess.value && checkUserIsLibraryOwner());
     }
 
     function checkUserIsLibraryOwner() {

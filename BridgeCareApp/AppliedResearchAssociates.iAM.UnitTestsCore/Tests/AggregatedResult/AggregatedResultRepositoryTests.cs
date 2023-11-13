@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
@@ -26,12 +28,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AggregatedResult
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var attribute = AttributeDtos.DeckDurationN;
             var networkId = NetworkTestSetup.NetworkId;
-            var assetName = "AssetName";
-            var location = new SectionLocation(Guid.NewGuid(), assetName);
-            var maintainableAssetId = Guid.NewGuid();
-            var spatialWeightingValue = "[Deck_Area]";
-            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
-            var assetList = new List<MaintainableAsset> { newAsset };
+            var assetList = MaintainableAssetLists.SingleInNetwork(networkId, CommonTestParameterValues.DefaultEquation);
             TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
             var numericAttribute = AttributeTestSetup.Numeric(attribute.Id, attribute.Name, dataSource.Id);
             var attributeList = new List<IamAttribute> { numericAttribute };
@@ -52,12 +49,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AggregatedResult
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var attribute = AttributeDtos.DeckDurationN;
             var networkId = NetworkTestSetup.NetworkId;
-            var assetName = "AssetName";
-            var location = new SectionLocation(Guid.NewGuid(), assetName);
-            var maintainableAssetId = Guid.NewGuid();
-            var spatialWeightingValue = "[Deck_Area]";
-            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
-            var assetList = new List<MaintainableAsset> { newAsset };
+            var assetList = MaintainableAssetLists.SingleInNetwork(networkId, CommonTestParameterValues.DefaultEquation);
             TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
             var numericAttribute = AttributeTestSetup.Numeric(attribute.Id, attribute.Name, dataSource.Id);
             var attributeList = new List<IamAttribute> { numericAttribute };
@@ -87,12 +79,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AggregatedResult
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var attribute = AttributeDtos.DeckDurationN;
             var networkId = NetworkTestSetup.NetworkId;
-            var assetName = "AssetName";
-            var location = new SectionLocation(Guid.NewGuid(), assetName);
-            var maintainableAssetId = Guid.NewGuid();
-            var spatialWeightingValue = "[Deck_Area]";
-            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
-            var assetList = new List<MaintainableAsset> { newAsset };
+            var assetList = MaintainableAssetLists.SingleInNetwork(networkId, CommonTestParameterValues.DefaultEquation);
             TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
             var numericAttribute = AttributeTestSetup.Numeric(attribute.Id, attribute.Name, dataSource.Id);
             var attributeList = new List<IamAttribute> { numericAttribute };
@@ -114,12 +101,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AggregatedResult
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var attribute = AttributeDtos.DeckDurationN;
             var networkId = NetworkTestSetup.NetworkId;
-            var assetName = "AssetName";
-            var location = new SectionLocation(Guid.NewGuid(), assetName);
-            var maintainableAssetId = Guid.NewGuid();
-            var spatialWeightingValue = "[Deck_Area]";
-            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
-            var assetList = new List<MaintainableAsset> { newAsset };
+            var assetList = MaintainableAssetLists.SingleInNetwork(networkId, CommonTestParameterValues.DefaultEquation);
             TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
             var numericAttribute = AttributeTestSetup.Numeric(attribute.Id, attribute.Name, dataSource.Id);
             var attributeList = new List<IamAttribute> { numericAttribute };
@@ -151,12 +133,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AggregatedResult
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var attribute = AttributeDtos.DeckDurationN;
             var networkId = NetworkTestSetup.NetworkId;
-            var assetName = "AssetName";
-            var location = new SectionLocation(Guid.NewGuid(), assetName);
-            var maintainableAssetId = Guid.NewGuid();
-            var spatialWeightingValue = "[Deck_Area]";
-            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
-            var assetList = new List<MaintainableAsset> { newAsset };
+            var assetList = MaintainableAssetLists.SingleInNetwork(networkId, CommonTestParameterValues.DefaultEquation);
             TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
             var numericAttribute = AttributeTestSetup.Numeric(attribute.Id, attribute.Name, dataSource.Id);
             var attributeList = new List<IamAttribute> { numericAttribute };
@@ -188,12 +165,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AggregatedResult
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var attribute = AttributeDtos.Interstate;
             var networkId = NetworkTestSetup.NetworkId;
-            var assetName = "AssetName";
-            var location = new SectionLocation(Guid.NewGuid(), assetName);
-            var maintainableAssetId = Guid.NewGuid();
-            var spatialWeightingValue = "[Deck_Area]";
-            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
-            var assetList = new List<MaintainableAsset> { newAsset };
+            var assetList = MaintainableAssetLists.SingleInNetwork(networkId, CommonTestParameterValues.DefaultEquation);
             TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
             var numericAttribute = AttributeTestSetup.Numeric(attribute.Id, attribute.Name, dataSource.Id);
             var attributeList = new List<IamAttribute> { numericAttribute };
@@ -224,12 +196,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AggregatedResult
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var attribute = AttributeDtos.Interstate;
             var networkId = NetworkTestSetup.NetworkId;
-            var assetName = "AssetName";
-            var location = new SectionLocation(Guid.NewGuid(), assetName);
-            var maintainableAssetId = Guid.NewGuid();
-            var spatialWeightingValue = "[Deck_Area]";
-            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
-            var assetList = new List<MaintainableAsset> { newAsset };
+
+            var assetList = MaintainableAssetLists.SingleInNetwork(networkId, CommonTestParameterValues.DefaultEquation);
             TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
             var numericAttribute = AttributeTestSetup.Numeric(attribute.Id, attribute.Name, dataSource.Id);
             var attributeList = new List<IamAttribute> { numericAttribute };
@@ -251,12 +219,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AggregatedResult
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var attribute = AttributeDtos.Interstate;
             var networkId = NetworkTestSetup.NetworkId;
-            var assetName = "AssetName";
-            var location = new SectionLocation(Guid.NewGuid(), assetName);
-            var maintainableAssetId = Guid.NewGuid();
-            var spatialWeightingValue = "[Deck_Area]";
-            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
-            var assetList = new List<MaintainableAsset> { newAsset };
+
+            var assetList = MaintainableAssetLists.SingleInNetwork(networkId, CommonTestParameterValues.DefaultEquation);
             TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
             var numericAttribute = AttributeTestSetup.Numeric(attribute.Id, attribute.Name, dataSource.Id);
             var attributeList = new List<IamAttribute> { numericAttribute };
@@ -288,12 +252,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AggregatedResult
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var attribute = AttributeDtos.Interstate;
             var networkId = NetworkTestSetup.NetworkId;
-            var assetName = "AssetName";
-            var location = new SectionLocation(Guid.NewGuid(), assetName);
-            var maintainableAssetId = Guid.NewGuid();
-            var spatialWeightingValue = "[Deck_Area]";
-            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
-            var assetList = new List<MaintainableAsset> { newAsset };
+
+            var assetList = MaintainableAssetLists.SingleInNetwork(networkId, CommonTestParameterValues.DefaultEquation);
             TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
             var numericAttribute = AttributeTestSetup.Numeric(attribute.Id, attribute.Name, dataSource.Id);
             var attributeList = new List<IamAttribute> { numericAttribute };
@@ -327,12 +287,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AggregatedResult
 
             var attribute1 = AttributeDtos.DeckDurationN;
             var networkId = NetworkTestSetup.NetworkId;
-            var assetName = "AssetName";
-            var location = new SectionLocation(Guid.NewGuid(), assetName);
-            var maintainableAssetId = Guid.NewGuid();
-            var spatialWeightingValue = "[Deck_Area]";
-            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
-            var assetList = new List<MaintainableAsset> { newAsset };
+
+            var assetList = MaintainableAssetLists.SingleInNetwork(networkId, CommonTestParameterValues.DefaultEquation);
             TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
             var numericAttribute1 = AttributeTestSetup.Numeric(attribute1.Id, attribute1.Name, dataSource.Id);
             var attribute2 = AttributeDtos.Interstate;

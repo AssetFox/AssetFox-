@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,6 +23,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment;
+using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRule;
 
 namespace BridgeCareCoreTests.Tests.Integration

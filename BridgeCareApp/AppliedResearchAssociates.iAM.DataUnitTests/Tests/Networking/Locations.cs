@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests
 {
     public static class Locations
     {

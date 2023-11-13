@@ -319,6 +319,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
 import { useConfirm } from 'primevue/useconfirm';
 let store = useStore();

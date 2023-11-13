@@ -198,7 +198,7 @@
                             </div>       
                            
                             <div v-if="header.key !== 'year' && header.key !== 'action'">
-                                <editDialog :return-value.sync='item[header.key]'
+                                <editDialog v-model:return-value='item[header.key]'
                                     @save='onEditBudgetYearValue(item.year, header.key, item[header.key])'
                                     size="large" lazy>
                                     <currencyTextbox readonly single-line class='sm-txt'

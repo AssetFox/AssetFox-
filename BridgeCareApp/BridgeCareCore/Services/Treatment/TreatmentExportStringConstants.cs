@@ -20,5 +20,8 @@
         public const string BudgetName = "Budget Name";
         public const string PerformanceFactors = "Performance Factors";
         public const string PerformanceFactor = "Performance Factor";
+        public const string SupersedeTreatmentName = "Treatment Name (selected treatment)";
+        public const string SupersededTreatment = "Superseded Treatment";
+        public const string Criteria = "Criteria";
     }
 }

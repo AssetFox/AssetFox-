@@ -141,7 +141,7 @@
                             {{ treatmentTab }}
                         </v-tab>
                     </v-tabs>
-                    <v-window v-model='activeTab'>
+                    <v-window v-model='activeTab'> 
                         <v-window-item>
                             <v-card style="border:none;">
                                 <v-card-text
@@ -178,23 +178,6 @@
                                 <v-card-text
                                     class='card-tab-content'
                                 >
-                                    <PerformanceFactorTab
-                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performanceFactors'
-                                        :selectedTreatment='selectedTreatment'
-                                        :scenarioId='loadedScenarioId'
-                                        :rules='rules'
-                                        :callFromScenario='hasScenario'
-                                        :callFromLibrary='!hasScenario'
-                                        @onModifyPerformanceFactor='modifySelectedTreatmentPerformanceFactor'
-                                    />
-                                </v-card-text>
-                            </v-card>
-                        </v-window-item>
-                        <v-window-item>
-                            <v-card>
-                                <v-card-text
-                                    class='card-tab-content'
-                                >
                                 <ConsequencesTab
                                         :selectedTreatmentConsequences='selectedTreatment.consequences'
                                         :rules='rules'
@@ -204,16 +187,35 @@
                                         @onModifyConsequence='modifySelectedTreatmentConsequence'
                                         @onRemoveConsequence='removeSelectedTreatmentConsequence'
                                     />
+                                    
+                                </v-card-text>
+                            </v-card>
+                        </v-window-item>
+                        <v-window-item>
+                            <v-card>
+                                <v-card-text
+                                    class='card-tab-content'
+                                >
+                                <BudgetsTab :selectedTreatmentBudgets='selectedTreatment.budgetIds'
+                                                :addTreatment='selectedTreatment.addTreatment'
+                                                :fromLibrary='hasSelectedLibrary'
+                                                @onModifyBudgets='modifySelectedTreatmentBudgets' />
                                 </v-card-text>
                             </v-card>
                         </v-window-item>
                         <v-window-item>
                             <v-card>
                                 <v-card-text class='card-tab-content'>
-                                    <BudgetsTab :selectedTreatmentBudgets='selectedTreatment.budgetIds'
-                                                :addTreatment='selectedTreatment.addTreatment'
-                                                :fromLibrary='hasSelectedLibrary'
-                                                @onModifyBudgets='modifySelectedTreatmentBudgets' />
+                                    
+                                    <PerformanceFactorTab
+                                        :selectedTreatmentPerformanceFactors='selectedTreatment.performanceFactors'
+                                        :selectedTreatment='selectedTreatment'
+                                        :scenarioId='loadedScenarioId'
+                                        :rules='rules'
+                                        :callFromScenario='hasScenario'
+                                        :callFromLibrary='!hasScenario'
+                                        @onModifyPerformanceFactor='modifySelectedTreatmentPerformanceFactor'
+                                    />
                                 </v-card-text>
                             </v-card>
                         </v-window-item>
@@ -551,9 +553,9 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     let selectedTreatment = ref(clone(emptyTreatment));
     let selectedTreatmentDetails: TreatmentDetails = clone(emptyTreatmentDetails);
     let activeTab = ref(0);
-    let treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Performance Factor', 'Consequences'];
+    let treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Consequences'];
     const createTreatmentLibraryDialogData = ref<CreateTreatmentLibraryDialogData>(clone(emptyCreateTreatmentLibraryDialogData));
-    let showCreateTreatmentDialog: boolean = false;
+    let showCreateTreatmentDialog = ref(false);
     const showImportTreatmentDialog = ref<boolean>(false);
     let confirmBeforeDeleteAlertData: AlertData = clone(emptyAlertData);
     let hasSelectedTreatment = ref(false);
@@ -621,7 +623,8 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
             getSimpleScenarioSelectableTreatmentsAction(selectedScenarioId);
             getTreatmentLibraryBySimulationIdAction(selectedScenarioId);
             getScenarioPerformanceCurvesAction(selectedScenarioId);
-            treatmentTabs = [...treatmentTabs, 'Budgets'];
+            
+            treatmentTabs = [...treatmentTabs, 'Budgets', 'Performance Factor'];
             getScenarioSimpleBudgetDetailsAction({ scenarioId: selectedScenarioId, }).then(()=> {
                 getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
                     selectScenarioAction({ scenarioId: selectedScenarioId });   
@@ -801,12 +804,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
             
             else if(!isNil(treatment))
                 selectedTreatment.value = clone(treatment);
-            else{
-                selectedTreatment.value = clone(emptyTreatment);
-                 if (!keepActiveTab) {
-                     activeTab.value = 0;
-                    }
-                keepActiveTab = true;
+            else{              
                 TreatmentService.getScenarioSelectedTreatmentById(treatmentSelectItemValue.value).then((response: AxiosResponse) => {
                     if(hasValue(response, 'data')) {
                         var data = response.data as Treatment;
@@ -818,6 +816,12 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
             }
                  
         }
+        else
+            selectedTreatment.value = clone(emptyTreatment);
+        if (!keepActiveTab) {
+            activeTab.value = 0;
+        }
+        keepActiveTab = true;
     }
 
     watch(selectedTreatment, () => onSelectedTreatmentChanged())
@@ -1055,7 +1059,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     }
 
     function onAddTreatment(newTreatment: Treatment) {
-        showCreateTreatmentDialog = false;
+        showCreateTreatmentDialog.value = false;
 
         if (!isNil(newTreatment)) {
             if(hasScenario.value)

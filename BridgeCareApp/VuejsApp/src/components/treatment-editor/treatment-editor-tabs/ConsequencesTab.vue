@@ -15,10 +15,10 @@
                                 v-model:return-value='props.item[header.key]'
                                 @save='onEditConsequenceProperty(props.item, header.key, props.item[header.key])'
                                 size="large" lazy persistent>
-                                <v-text-field v-if="header.key === 'attribute'" readonly single-line class='ghd-control-text-sm'
+                                <v-text-field v-if="header.key === 'attribute'" variant="underlined" readonly single-line class='ghd-control-text-sm'
                                               :model-value='props.item.attribute'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                <v-text-field v-if="header.key === 'changeValue'" readonly single-line class='ghd-control-text-sm'
+                                <v-text-field variant="underlined" v-if="header.key === 'changeValue'" readonly single-line class='ghd-control-text-sm'
                                               :model-value='props.item.changeValue'
                                               :rules="[rules['treatmentRules'].hasChangeValueOrEquation(props.item.changeValue, props.item.equation.expression)]" />
                                 <template v-slot:input>
@@ -26,10 +26,11 @@
                                         item-title="text"
                                         item-value="value"   
                                         append-icon=ghd-down
+                                        variant="underlined"
                                         label='Edit'
                                         v-model='props.item.attribute'
                                         :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                    <v-text-field v-if="header.key === 'changeValue'" label='Edit'
+                                    <v-text-field variant="underlined" v-if="header.key === 'changeValue'" label='Edit'
                                                   v-model='props.item.changeValue'
                                                   :rules="[rules['treatmentRules'].hasChangeValueOrEquation(props.item.changeValue, props.item.equation.expression)]" />
                                 </template>
@@ -62,7 +63,7 @@
                                     </v-card-text>
                                 </v-card>
                             </v-menu>     
-                             <v-btn id="TreatmentConsequencesTab-EquationEditorBtn" v-if="header.key === 'equation'" @click='onShowConsequenceEquationEditorDialog(props.item)' class='edit-icon'
+                             <v-btn variant="flat" id="TreatmentConsequencesTab-EquationEditorBtn" v-if="header.key === 'equation'" @click='onShowConsequenceEquationEditorDialog(props.item)' class='edit-icon'
                                     icon>
                                 <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                             </v-btn>                       
@@ -74,7 +75,7 @@
                                 v-if="header.key === 'criterionLibrary'"
                             >
                                 <template v-slot:activator="{ props }">
-                                    <v-btn v-bind="props" id="TreatmentConsequencesTab-CriteriaView-btn" class="ghd-blue" flat>
+                                    <v-btn v-bind="props" variant="flat" id="TreatmentConsequencesTab-CriteriaView-btn" class="ghd-blue" flat>
                                         <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                     </v-btn>
                                 </template>
@@ -96,12 +97,12 @@
                                 </v-card>
                             </v-menu>
                             <v-btn id="TreatmentConsequencesTab-CriteriaEditorBtn" v-if="header.key === 'criterionLibrary'" @click='onShowConsequenceCriterionEditorDialog(props.item)'
-                                    class='edit-icon' icon>
+                                    variant="flat" class='edit-icon' icon>
                                 <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                             </v-btn>
 
                             <v-row v-if="header.key === ''" align="start">
-                                <v-btn id="TreatmentConquencesTab-DeleteCostBtn" @click='onRemoveConsequence(props.item.id)' icon>
+                                <v-btn variant="flat" id="TreatmentConquencesTab-DeleteCostBtn" @click='onRemoveConsequence(props.item.id)' icon>
                                     <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                             </v-row>

@@ -31,5 +31,7 @@ namespace BridgeCareCore.Interfaces
         FileInfoDTO ExportScenarioTreatmentSupersedeRuleExcelFile(Guid simulationId);
 
         ScenarioTreatmentSupersedeRuleImportResultDTO ImportScenarioTreatmentSupersedeRulesFile(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
+
+        public FileInfoDTO ExportTreatmentSupersedeRuleExcelFile(Guid libraryId);
     }
 }

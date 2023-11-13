@@ -103,8 +103,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // Update last modified date
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
-
-     
+             
         private void JoinTreatmentsWithBudgets(Dictionary<Guid, List<Guid>> budgetIdsPerTreatmentId)
         {
             var treatmentBudgetJoins = new List<ScenarioSelectableTreatmentScenarioBudgetEntity>();
@@ -876,7 +875,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
         }
 
-
         public void DeleteScenarioSelectableTreatments(List<TreatmentDTO> scenarioSelectableTreatments, Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
@@ -990,6 +988,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToDtoWithSimulationId();
         }
 
+        // TODO check if needed or update to use library/scenario specific treatmentdto list param to ToDto()
         public TreatmentDTO GetSelectableTreatmentById(Guid id)
         {
             return _unitOfWork.Context.SelectableTreatment.AsNoTracking()

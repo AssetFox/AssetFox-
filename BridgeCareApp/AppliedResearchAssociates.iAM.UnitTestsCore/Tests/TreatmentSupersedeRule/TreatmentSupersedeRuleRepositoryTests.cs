@@ -231,7 +231,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
         }
 
         private int GetSupersedeRulesCount(TreatmentDTO treatmentDTO) =>
-            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetTreatmentSupersedeRules(treatmentDTO.Id, _testTreatmentLibrary.Id).Count;
+            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRules(treatmentDTO.Id, _testTreatmentLibrary.Id).Count;
         
     }
 }

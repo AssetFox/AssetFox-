@@ -277,16 +277,22 @@ namespace BridgeCareCore.Services
         {
             var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
             var simulationName = simulation.Name;
-            var scenarioTreatments = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            var scenarioTreatmentSupersedeRules = _unitOfWork.TreatmentSupersedeRuleRepo.GetScenarioTreatmentSupersedeRulesBysimulationId(simulationId); 
+            var fileName = $"ScenarioTreatmentSupersedeRules_{simulationName.Trim().Replace(" ", "_")}.xlsx";
 
-
-            var fileName = $"TreatmentSupersedeRules_{simulationName.Trim().Replace(" ", "_")}.xlsx";
-
-            return CreateExportScenarioTreatmentRuleExportFile(scenarioTreatments, fileName);
-
+            return CreateExportScenarioTreatmentRuleExportFile(scenarioTreatmentSupersedeRules, fileName);
         }
 
-        private static FileInfoDTO CreateExportScenarioTreatmentRuleExportFile(List<TreatmentDTO> Treatments, string fileName)
+        public FileInfoDTO ExportTreatmentSupersedeRuleExcelFile(Guid libraryId)
+        {
+            var library = _unitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(libraryId);
+            var libraryTreatmentSupersedeRules = _unitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRulesByLibraryId(libraryId);
+            var fileName = $"TreatmentSupersedeRules_{library.Name.Trim().Replace(" ", "_")}.xlsx";
+
+            return CreateExportScenarioTreatmentRuleExportFile(libraryTreatmentSupersedeRules, fileName);
+        }
+
+        private static FileInfoDTO CreateExportScenarioTreatmentRuleExportFile(List<TreatmentSupersedeRuleExportDTO> treatmentSupersedeRules, string fileName)
         {
             using var excelPackage = new ExcelPackage(new FileInfo(fileName));
             var worksheet = excelPackage.Workbook.Worksheets.Add("Treatment Supersede Rules");
@@ -299,19 +305,15 @@ namespace BridgeCareCore.Services
             worksheet.Cells[startRow, headerColumn++].Value = "Superseded treatment";
             worksheet.Cells[startRow, headerColumn++].Value = "Criteria";
 
-
             // data rows
             var dataRow = startRow + 1;
-            foreach (var treatment in Treatments)
+            foreach (var treatmentSupersedeRule in treatmentSupersedeRules)
             {
-                foreach (var rule in treatment.SupersedeRules)
-                {
-                    var dataColumn = startColumn;
-                    worksheet.Cells[dataRow, dataColumn++].Value = treatment.Name;
-                    worksheet.Cells[dataRow, dataColumn++].Value = rule.treatment.Name;
-                    worksheet.Cells[dataRow, dataColumn++].Value = rule.CriterionLibrary?.MergedCriteriaExpression;
-                    dataRow++;
-                }
+                var dataColumn = startColumn;
+                worksheet.Cells[dataRow, dataColumn++].Value = treatmentSupersedeRule.TreatmentName;
+                worksheet.Cells[dataRow, dataColumn++].Value = treatmentSupersedeRule.treatment.Name;
+                worksheet.Cells[dataRow, dataColumn++].Value = treatmentSupersedeRule.CriterionLibrary?.MergedCriteriaExpression;
+                dataRow++;
             }
             worksheet.Cells.AutoFitColumns();
 

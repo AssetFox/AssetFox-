@@ -12,7 +12,7 @@
                         <td v-for='header in consequencesGridHeaders'>
                             <editDialog
                                 v-if="header.key !== 'equation' && header.key !== 'criterionLibrary' && header.key !== ''"
-                                :return-value.sync='props.item[header.key]'
+                                v-model:return-value='props.item[header.key]'
                                 @save='onEditConsequenceProperty(props.item, header.key, props.item[header.key])'
                                 size="large" lazy persistent>
                                 <v-text-field v-if="header.key === 'attribute'" readonly single-line class='ghd-control-text-sm'

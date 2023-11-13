@@ -758,6 +758,7 @@ import { getUrl } from './shared/utils/get-url';
      */
     function onNavigate(route: any) {
         if (router.currentRoute.value.path !== route.path) {
+            hasSelectedScenario.value = false;
             router.push(route).catch(() => {});
         }
     }

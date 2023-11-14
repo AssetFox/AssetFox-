@@ -5,6 +5,7 @@ Create PROCEDURE dbo.usp_delete_network(
 AS 
 
     BEGIN 
+	          BEGIN TRY
 
  	DECLARE @CustomErrorMessage NVARCHAR(MAX),
 	@ErrorNumber int,
@@ -16,10 +17,9 @@ AS
 	Set  @RetMessage = 'Success';
 	DECLARE @CurrentDateTime DATETIME;
 	DECLARE @BatchSize INT = 100000;
-	DECLARE @RowsDeleted INT = 1;
+	DECLARE @RowsDeleted INT = 0;
 
-		Begin Transaction
-	BEGIN TRY
+
 -----------------------------------------------------------------------
 
 --Network --> BenefitQuantifier - Done
@@ -38,6 +38,8 @@ AS
             BEGIN TRY
 
           ALTER TABLE BenefitQuantifier NOCHECK CONSTRAINT all
+
+		  	Print 'BenefitQuantifier ';
 
 			Delete l2 
 			FROM Network AS l1
@@ -63,13 +65,15 @@ AS
 
 			------End BenefitQuantifier------------------------------------------
 
------Start NetworkRollupDetail Path-----------------------------------------
+			-----Start NetworkRollupDetail Path-----------------------------------------
 
 			--Network --> NetworkRollupDetail
 
-            BEGIN TRY
+           BEGIN TRY
 
-          ALTER TABLE NetworkRollupDetail NOCHECK CONSTRAINT all
+			ALTER TABLE NetworkRollupDetail NOCHECK CONSTRAINT all
+
+			Print 'NetworkRollupDetail ';
 
 			Delete l2 
 			FROM Network AS l1
@@ -100,7 +104,9 @@ AS
 
             BEGIN TRY
 
-          ALTER TABLE NetworkAttribute NOCHECK CONSTRAINT all
+           ALTER TABLE NetworkAttribute NOCHECK CONSTRAINT all
+
+		   Print 'NetworkAttribute ';
 
 			Delete l2 
 			FROM Network AS l1
@@ -133,13 +139,14 @@ AS
 
           ALTER TABLE AnalysisMaintainableAsset NOCHECK CONSTRAINT all
 
+		  Print 'AnalysisMaintainableAsset ';
+
 			Delete l2 
 			FROM Network AS l1
 			JOIN AnalysisMaintainableAsset AS l2 ON l2.NetworkId = l1.Id
 			WHERE l1.Id IN (@NetworkId);
 
             ALTER TABLE AnalysisMaintainableAsset WITH CHECK CHECK CONSTRAINT all;
-
 
             END TRY 
 			BEGIN CATCH
@@ -156,20 +163,7 @@ AS
 
             END CATCH
 
-   COMMIT TRANSACTION
-    -- for simple recovery model
-    Print 'Partial Network Delete Transaction Committed in Network --> AnalysisMaintainableAsset';
-	END TRY
-	BEGIN CATCH
-  			Set @RetMessage = 'Failed';
-			Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-			Print 'Rolled Back Network Delete Transaction in Stored Procedure:  ' + @ErrorMessage;
-			ROLLBACK TRANSACTION;
-			RAISERROR  (@RetMessage, 16, 1); 
-			Return -1;
-	END CATCH;
-
-    ------End AnalysisMaintainableAsset------------------------------------------
+   ------End AnalysisMaintainableAsset------------------------------------------
 	----- Start MaintainableAsset Path
 	-----Start AggregatedResult Path-----------------------------------------
 
@@ -177,873 +171,721 @@ AS
 
 	BEGIN TRY
 
-          ALTER TABLE AggregatedResult NOCHECK CONSTRAINT all
-		  SET @RowsDeleted = 1;
-		  --Print 'AggregatedResult ';
+		Set @RowsDeleted = 0;
 
-		   WHILE @RowsDeleted > 0
-				BEGIN
-					BEGIN TRY
-						Begin Transaction
+		ALTER TABLE AggregatedResult NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON AggregatedResult DISABLE;
+		
+		Print 'AggregatedResult ';
 
-						--Delete TOP (@BatchSize) l3
-						SELECT TOP  (@BatchSize) l3.Id  INTO #tempAggregatedResult
+		Select l3.* INTO #tempAggregatedResult
+		FROM Network AS l1
+		Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+		JOIN AggregatedResult AS l3 ON l3.MaintainableAssetId = l2.Id
+		WHERE Not l1.Id IN (@NetworkId);
+
+		Select @RowsDeleted = Count(l3.Id) 
+		FROM Network AS l1
+		Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+		JOIN AggregatedResult AS l3 ON l3.MaintainableAssetId = l2.Id
+		WHERE l1.Id IN (@NetworkId);
+
+		Drop  Table AggregatedResult;
+
+		Select * into AggregatedResult from #tempAggregatedResult;
+
+		Drop table #tempAggregatedResult;
+				
+		----Print 'Rows Affected Network --> MaintainableAsset-->AggregatedResult: ' +  convert(NVARCHAR(50), @RowsDeleted);
+					
+		ALTER TABLE AggregatedResult WITH CHECK CHECK CONSTRAINT all
+		--ALTER INDEX ALL ON AggregatedResult REBUILD;
+					
+	END TRY
+	BEGIN CATCH
+		ALTER TABLE AggregatedResult WITH CHECK CHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON AggregatedResult REBUILD;
+		Print 'Query Error in  Network --> MaintainableAsset-->AggregatedResult ***Failed***';
+		SELECT ERROR_NUMBER() AS ErrorNumber
+		,ERROR_SEVERITY() AS ErrorSeverity
+		,ERROR_STATE() AS ErrorState
+		,ERROR_PROCEDURE() AS ErrorProcedure
+		,ERROR_LINE() AS ErrorLine
+		,ERROR_MESSAGE() AS ErrorMessage;
+
+		SELECT @CustomErrorMessage = 'Query Error in  Network --> MaintainableAsset-->AggregatedResult'
+		RAISERROR (@CustomErrorMessage, 16, 1);
+		Set @RetMessage = @CustomErrorMessage;
+	END CATCH;
+
+-----End AggregatedResult -----------------------------------------------------------------
+
+
+-------Start AttributeDatum Path-
+
+--MaintainableAsset --> AttributeDatum --> AttributeDatumLocation -->  -->  --> 
+
+	BEGIN TRY
+
+		Set @RowsDeleted = 0;
+
+		ALTER TABLE AttributeDatumLocation NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON AttributeDatumLocation DISABLE;
+
+		Print 'AttributeDatumLocation ';
+
+		SELECT l4.*  INTO #tempAttributeDatumLocation
+		FROM Network AS l1
+		Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+		JOIN AttributeDatum AS l3 ON l3.MaintainableAssetId = l2.Id
+		Join AttributeDatumLocation As l4 ON l4.AttributeDatumId = l3.Id
+		WHERE Not l1.Id IN (@NetworkId);
+
+		Select @RowsDeleted = Count(l3.Id) 
+		FROM Network AS l1
+		Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+		JOIN AttributeDatum AS l3 ON l3.MaintainableAssetId = l2.Id
+		Join AttributeDatumLocation As l4 ON l4.AttributeDatumId = l3.Id
+		WHERE l1.Id IN (@NetworkId);
+
+		Drop  Table AttributeDatumLocation;
+
+		Select * into AttributeDatumLocation from #tempAttributeDatumLocation;
+
+		Drop table #tempAttributeDatumLocation;
+				
+		--Print 'Rows Affected Network --> MaintainableAsset-->AttributeDatum-->AttributeDatumLocation: ' +  convert(NVARCHAR(50), @RowsDeleted);
+
+		ALTER TABLE AttributeDatumLocation WITH CHECK CHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON AttributeDatumLocation REBUILD;
+					
+	END TRY
+	BEGIN CATCH
+			ALTER TABLE AttributeDatumLocation WITH CHECK CHECK CONSTRAINT all;
+			--ALTER INDEX ALL ON AttributeDatumLocation REBUILD;
+			Print 'Query Error in Network --> MaintainableAsset-->AttributeDatum-->AttributeDatumLocationt ***Failed***';
+			SELECT ERROR_NUMBER() AS ErrorNumber
+			,ERROR_SEVERITY() AS ErrorSeverity
+			,ERROR_STATE() AS ErrorState
+			,ERROR_PROCEDURE() AS ErrorProcedure
+			,ERROR_LINE() AS ErrorLine
+			,ERROR_MESSAGE() AS ErrorMessage;
+
+			SELECT @CustomErrorMessage = 'Query Error in  Network --> MaintainableAsset-->AttributeDatum-->AttributeDatumLocation'
+			RAISERROR (@CustomErrorMessage, 16, 1);
+			Set @RetMessage = @CustomErrorMessage;
+	END CATCH;
+
+
+
+--------End AttributeDatumLocation---------------------------------------------------------------
+
+--------MaintainableAsset --> AttributeDatum--
+          
+	BEGIN TRY
+
+		Set @RowsDeleted = 0;
+
+		ALTER TABLE AttributeDatum NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON AttributeDatum DISABLE;
+
+		Print 'AttributeDatum ';
+
+		SELECT l3.*  INTO #tempAttributeDatumA
+		FROM Network AS l1
+		Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+		JOIN AttributeDatum AS l3 ON l3.MaintainableAssetId = l2.Id
+		WHERE Not l1.Id IN (@NetworkId);
+
+		Select @RowsDeleted = Count(l3.Id) 
+		FROM Network AS l1
+		Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+		JOIN AttributeDatum AS l3 ON l3.MaintainableAssetId = l2.Id
+		WHERE l1.Id IN (@NetworkId);
+
+		DROP TABLE AttributeDatum;
+
+		Select * into AttributeDatum from #tempAttributeDatumA;
+
+		Drop table #tempAttributeDatumA;
+				
+		--Print 'Rows Affected Network --> MaintainableAsset-->AttributeDatum: ' +  convert(NVARCHAR(50), @RowsDeleted);
+
+		ALTER TABLE AttributeDatum WITH CHECK CHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON AttributeDatum REBUILD;
+
+	END TRY
+	BEGIN CATCH
+		ALTER TABLE AttributeDatum WITH CHECK CHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON AttributeDatum REBUILD
+		Print 'Query Error in Network --> MaintainableAsset-->AttributeDatum-->AttributeDatum ***Failed***';
+		SELECT ERROR_NUMBER() AS ErrorNumber
+		,ERROR_SEVERITY() AS ErrorSeverity
+		,ERROR_STATE() AS ErrorState
+		,ERROR_PROCEDURE() AS ErrorProcedure
+		,ERROR_LINE() AS ErrorLine
+		,ERROR_MESSAGE() AS ErrorMessage;
+
+		SELECT @CustomErrorMessage = 'Query Error in  Network --> MaintainableAsset-->AttributeDatum-->AttributeDatum'
+		RAISERROR (@CustomErrorMessage, 16, 1);
+		Set @RetMessage = @CustomErrorMessage;
+	END CATCH
+
+	----------------------------------------------------------------------
+	-----End AttributeDatum Path--------------------------------------
+
+	-----Start AssetSummaryDetail Path-----------------------------------------
+	--MaintainableAsset --> AssetSummaryDetail --> AssetSummaryDetailValueIntId -->  -->  --> 
+
+	BEGIN TRY
+
+		Set @RowsDeleted = 0;
+
+		ALTER TABLE AssetSummaryDetailValueIntId NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON AssetSummaryDetailValueIntId DISABLE;
+
+		Print 'AssetSummaryDetailValueIntId ';
+
+		Select l4.* INTO #tempAssetSummaryDetailValueIntId
 						FROM Network AS l1
 						Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-						JOIN AggregatedResult AS l3 ON l3.MaintainableAssetId = l2.Id
-						WHERE l1.Id IN (@NetworkId);
-						
-						--DELETE ar
-						--FROM AggregatedResult As ar
-						--JOIN #tempAggregatedResult T ON T.Id = ar.Id;
+						JOIN AssetSummaryDetail AS l3 ON l3.MaintainableAssetId = l2.Id
+						Join AssetSummaryDetailValueIntId As l4 ON l4.AssetSummaryDetailId = l3.Id
+						WHERE Not l1.Id IN (@NetworkId);
 
-						DELETE FROM AggregatedResult WHERE Id in (SELECT Id FROM #tempAggregatedResult);
-
-						SET @RowsDeleted = @@ROWCOUNT;
-
-						DROP TABLE #tempAggregatedResult;
-						--WAITFOR DELAY '00:00:01';
-
-						COMMIT TRANSACTION
-						
-						Print 'Rows Affected Network --> MaintainableAsset-->AggregatedResult: ' +  convert(NVARCHAR(50), @RowsDeleted);
-					END TRY
-					BEGIN CATCH
-							ALTER TABLE AggregatedResult WITH CHECK CHECK CONSTRAINT all
-  							Set @RetMessage = 'Failed';
-							Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-							Print 'Rolled Back AggregatedResult Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-							ROLLBACK TRANSACTION;
-							RAISERROR  (@RetMessage, 16, 1); 
-							Return -1;
-					END CATCH;
-				END
-
-            ALTER TABLE AggregatedResult WITH CHECK CHECK CONSTRAINT all
-
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
-
- 		         SELECT @CustomErrorMessage = 'Query Error in  Network --> MaintainableAsset-->AggregatedResult'
-		         RAISERROR (@CustomErrorMessage, 16, 1);
-				 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
-
-			------End -----------------------------------------------------------------
-
-
-			-------Start AttributeDatum Path-
-
-			--MaintainableAsset --> AttributeDatum --> AttributeDatumLocation -->  -->  --> 
-
-            BEGIN TRY
-
-          ALTER TABLE AttributeDatumLocation NOCHECK CONSTRAINT all
-		  SET @RowsDeleted = 1;
-		  	--Print 'AttributeDatumLocation ';
-
-		  WHILE @RowsDeleted > 0
-				BEGIN
-					BEGIN TRY
-						Begin Transaction
-
-							SELECT TOP (@BatchSize) l4.Id  INTO #tempAttributeDatumLocation
-							FROM Network AS l1
-							Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-							JOIN AttributeDatum AS l3 ON l3.MaintainableAssetId = l2.Id
-							Join AttributeDatumLocation As l4 ON l4.AttributeDatumId = l3.Id
-							WHERE l1.Id IN (@NetworkId);
-
-						--DELETE adl
-						--FROM AttributeDatumLocation As adl
-						--JOIN #tempAttributeDatumLocation T ON T.Id = adl.Id;
-
-						DELETE FROM AttributeDatumLocation WHERE Id in (SELECT Id FROM #tempAttributeDatumLocation);
-
-						SET @RowsDeleted = @@ROWCOUNT;
-
-						DROP TABLE #tempAttributeDatumLocation;
-						--WAITFOR DELAY '00:00:01';
-
-						COMMIT TRANSACTION
-						
-						Print 'Rows Affected Network --> MaintainableAsset-->AttributeDatumLocation: ' +  convert(NVARCHAR(50), @RowsDeleted);
-					END TRY
-					BEGIN CATCH
-							ALTER TABLE AttributeDatumLocation WITH CHECK CHECK CONSTRAINT all
-  							Set @RetMessage = 'Failed';
-							Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-							Print 'Rolled Back AttributeDatumLocation Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-							ROLLBACK TRANSACTION;
-							RAISERROR  (@RetMessage, 16, 1); 
-							Return -1;
-					END CATCH;
-				END
-
-            ALTER TABLE AttributeDatumLocation WITH CHECK CHECK CONSTRAINT all
-
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
-
- 		         SELECT @CustomErrorMessage = 'Query Error in Network --> MaintainableAsset-->AttributeDatum-->AttributeDatumLocation'
-		         RAISERROR (@CustomErrorMessage, 16, 1);
-				 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
-
-			-----------------------------------------------------------------------
-
-    		--------MaintainableAsset --> AttributeDatum--
-
-            BEGIN TRY
-
-			ALTER TABLE AttributeDatum NOCHECK CONSTRAINT all
-			SET @RowsDeleted = 1;
-			Print 'AttributeDatum ';
-
-			WHILE @RowsDeleted > 0
-				BEGIN
-					BEGIN TRY
-					Begin Transaction
-
-						Select  TOP (@BatchSize) l3.Id  INTO #tempAttributeDatum
-						FROM Network AS l1
-						Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-						JOIN AttributeDatum AS l3 ON l3.MaintainableAssetId = l2.Id
-						WHERE l1.Id IN (@NetworkId);
-
-						--DELETE ad
-						--FROM AttributeDatum As ad
-						--JOIN #tempAttributeDatum T ON T.Id = ad.Id;
-
-						DELETE FROM AttributeDatum WHERE Id in (SELECT Id FROM #tempAttributeDatum);
-
-						SET @RowsDeleted = @@ROWCOUNT;
-
-						DROP TABLE #tempAttributeDatum;
-						--WAITFOR DELAY '00:00:01';
-
-						COMMIT TRANSACTION
-						
-						Print 'Rows Affected Network --> MaintainableAsset-->AttributeDatum: ' +  convert(NVARCHAR(50), @RowsDeleted);
-					END TRY
-					BEGIN CATCH
-						ALTER TABLE AttributeDatum WITH CHECK CHECK CONSTRAINT all
-						Set @RetMessage = 'Failed';
-						Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-						Print 'Rolled Back AttributeDatum Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-						ROLLBACK TRANSACTION;
-						RAISERROR  (@RetMessage, 16, 1); 
-						Return -1;
-					END CATCH;
-				END
-
-            ALTER TABLE AttributeDatum WITH CHECK CHECK CONSTRAINT all
-
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
-
- 		         SELECT @CustomErrorMessage = 'Query Error in Network --> MaintainableAsset-->AttributeDatum'
-		         RAISERROR (@CustomErrorMessage, 16, 1);
-				 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
-
-
-			----------------------------------------------------------------------
-			-----End AttributeDatum Path--------------------------------------
-
-			-----Start AssetSummaryDetail Path-----------------------------------------
-
-			--MaintainableAsset --> AssetSummaryDetail
-			--MaintainableAsset --> AssetSummaryDetail --> AssetSummaryDetailValueIntId -->  -->  --> 
-
-            BEGIN TRY
-
-          ALTER TABLE AssetSummaryDetailValueIntId NOCHECK CONSTRAINT all
-		  SET @RowsDeleted = 1;
-		  Print 'AssetSummaryDetailValueIntId ';
-
-			WHILE @RowsDeleted > 0
-				BEGIN
-					BEGIN TRY
-					Begin Transaction
-
-						--Delete TOP (@BatchSize) l4 
-						--FROM Network AS l1
-						--Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-						--JOIN AssetSummaryDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-						--Join AssetSummaryDetailValueIntId As l4 ON l4.AssetSummaryDetailId = l3.Id
-						--WHERE l1.Id IN (@NetworkId);
-
-						SELECT TOP (@BatchSize) l4.Id INTO #tempAssetSummaryDetailId
+		Select @RowsDeleted = Count(l4.Id) 
 						FROM Network AS l1
 						Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
 						JOIN AssetSummaryDetail AS l3 ON l3.MaintainableAssetId = l2.Id
 						Join AssetSummaryDetailValueIntId As l4 ON l4.AssetSummaryDetailId = l3.Id
 						WHERE l1.Id IN (@NetworkId);
 
-						--DELETE asd
-						--FROM AssetSummaryDetailValueIntId As asd
-						--JOIN #tempAssetSummaryDetailId T ON T.Id = asd.Id;
+		Drop  Table AssetSummaryDetailValueIntId;
 
-						DELETE FROM AssetSummaryDetailValueIntId WHERE Id in (SELECT Id FROM #tempAssetSummaryDetailId);
+		Select * into AssetSummaryDetailValueIntId from #tempAssetSummaryDetailValueIntId;
 
-						SET @RowsDeleted = @@ROWCOUNT;
+		Drop table #tempAssetSummaryDetailValueIntId;
+					
+		--Print 'Rows Affected MaintainableAsset --> AssetSummaryDetail --> AssetSummaryDetailValueIntId: ' +  convert(NVARCHAR(50), @RowsDeleted);
+					
+		ALTER TABLE AssetSummaryDetailValueIntId WITH CHECK CHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON AssetSummaryDetailValueIntId REBUILD;
 
-						DROP TABLE #tempAssetSummaryDetailId;
-						--WAITFOR DELAY '00:00:01';
+	END TRY 
+	BEGIN CATCH
+		ALTER TABLE AssetSummaryDetailValueIntId WITH CHECK CHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON AssetSummaryDetailValueIntId REBUILD;
+		Print 'Query Error in Network --> MaintainableAsset --> AssetSummaryDetail --> AssetSummaryDetailValueIntId ***Failed***';
+		SELECT ERROR_NUMBER() AS ErrorNumber
+		,ERROR_SEVERITY() AS ErrorSeverity
+		,ERROR_STATE() AS ErrorState
+		,ERROR_PROCEDURE() AS ErrorProcedure
+		,ERROR_LINE() AS ErrorLine
+		,ERROR_MESSAGE() AS ErrorMessage;
 
-						COMMIT TRANSACTION
-						
-						Print 'Rows Affected MaintainableAsset --> AssetSummaryDetail --> AssetSummaryDetailValueIntId: ' +  convert(NVARCHAR(50), @RowsDeleted);
-					END TRY
-					BEGIN CATCH
-						ALTER TABLE AssetSummaryDetailValueIntId WITH CHECK CHECK CONSTRAINT all
-						Set @RetMessage = 'Failed';
-						Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-						Print 'Rolled Back AssetSummaryDetailValueIntId Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-						ROLLBACK TRANSACTION;
-						RAISERROR  (@RetMessage, 16, 1); 
-						Return -1;
-					END CATCH;
-				END
+		SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetSummaryDetail --> AssetSummaryDetailValueIntId'
+		RAISERROR (@CustomErrorMessage, 16, 1);
+		Set @RetMessage = @CustomErrorMessage;
 
-            ALTER TABLE AssetSummaryDetailValueIntId WITH CHECK CHECK CONSTRAINT all
-
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
-
- 		         SELECT @CustomErrorMessage = 'Query Error in Network --> MaintainableAsset --> AssetSummaryDetail --> AssetSummaryDetailValueIntI'
-		         RAISERROR (@CustomErrorMessage, 16, 1);
-				 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
+	END CATCH
 
 			-----------------------------------------------------------------------
     		-------MaintainableAsset --> AssetSummaryDetail -----
 
-            BEGIN TRY
+	BEGIN TRY
 
-			ALTER TABLE AssetSummaryDetail NOCHECK CONSTRAINT all
-			SET @RowsDeleted = 1;
-		    Print 'AssetSummaryDetail ';
+		ALTER TABLE AssetSummaryDetail NOCHECK CONSTRAINT all
+		SET @RowsDeleted = 1;
+		    
+		Print 'AssetSummaryDetail ';
 
-			WHILE @RowsDeleted > 0
-				BEGIN
-					BEGIN TRY
-						Begin Transaction
+		WHILE @RowsDeleted > 0
+		BEGIN
+		SELECT TOP (@BatchSize) l3.Id INTO #tempAssetSummaryDetail
+		FROM Network AS l1
+		Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+		JOIN AssetSummaryDetail AS l3 ON l3.MaintainableAssetId = l2.Id
+		WHERE l1.Id IN (@NetworkId);
 
-						--Delete l3 
-						SELECT TOP (@BatchSize) l3.Id INTO #tempAssetSummaryDetail
-						FROM Network AS l1
-						Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-						JOIN AssetSummaryDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-						WHERE l1.Id IN (@NetworkId);
+		DELETE FROM AssetSummaryDetail WHERE Id in (SELECT Id FROM #tempAssetSummaryDetail);
 
-						DELETE FROM AssetSummaryDetail WHERE Id in (SELECT Id FROM #tempAssetSummaryDetail);
+		SET @RowsDeleted = @@ROWCOUNT;
 
- 						SET @RowsDeleted = @@ROWCOUNT;
-
-						DROP TABLE #tempAssetSummaryDetail;
-
-						COMMIT TRANSACTION;
-
-					Print 'Rows Affected --MaintainableAsset --> AssetSummaryDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		DROP TABLE #tempAssetSummaryDetail;
+					
+		--Print 'Rows Affected --MaintainableAsset --> AssetSummaryDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
  
-					END TRY
-					BEGIN CATCH
-						ALTER TABLE AssetSummaryDetail WITH CHECK CHECK CONSTRAINT all
-						Set @RetMessage = 'Failed';
-						Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-						Print 'Rolled Back AssetSummaryDetail Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-						ROLLBACK TRANSACTION;
-						RAISERROR  (@RetMessage, 16, 1); 
-						Return -1;
-					END CATCH;
-					END
+		END
 		
-			ALTER TABLE AssetSummaryDetail WITH CHECK CHECK CONSTRAINT all
+		ALTER TABLE AssetSummaryDetail WITH CHECK CHECK CONSTRAINT all
 
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
+	END TRY 
+	BEGIN CATCH
+		ALTER TABLE AssetSummaryDetail WITH CHECK CHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON AssetSummaryDetail REBUILD;
+		Print 'Query Error in Network --> MaintainableAsset --> AssetSummaryDetail ***Failed***';
+		SELECT ERROR_NUMBER() AS ErrorNumber
+		,ERROR_SEVERITY() AS ErrorSeverity
+		,ERROR_STATE() AS ErrorState
+		,ERROR_PROCEDURE() AS ErrorProcedure
+		,ERROR_LINE() AS ErrorLine
+		,ERROR_MESSAGE() AS ErrorMessage;
 
- 		         SELECT @CustomErrorMessage = 'Query Error in Network --> MaintainableAsset --> AssetSummaryDetail'
-		         RAISERROR (@CustomErrorMessage, 16, 1);
-				 Set @RetMessage = @CustomErrorMessage;
+		SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetSummaryDetail'
+		RAISERROR (@CustomErrorMessage, 16, 1);
+		Set @RetMessage = @CustomErrorMessage;
+	END CATCH
 
-            END CATCH
+	-----End AssetSummaryDetail Path--------------------------------------
 
+--MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail -->  --> 
+---Start BudgetUsageDetail --------------------------------------------------------------------
 
-			----------------------------------------------------------------------
-			-----End AssetSummaryDetail Path--------------------------------------
+	BEGIN TRY
 
+		Set @RowsDeleted = 0;
 
-		BEGIN TRY
+		ALTER TABLE BudgetUsageDetail NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON BudgetUsageDetail DISABLE;
 
-		--MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail -->  --> 
+		Print 'BudgetUsageDetail1 ';
 
-            ALTER TABLE BudgetUsageDetail NOCHECK CONSTRAINT all
+		Select l5.* INTO  #tempBudgetUsageDetail
+			FROM Network AS l1
+			Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+			Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
+			JOIN TreatmentConsiderationDetail AS l4 ON l4.AssetDetailId = l3.Id
+			JOIN BudgetUsageDetail AS l5 ON l5.TreatmentConsiderationDetailId = l4.Id
+			WHERE Not l1.Id IN (@NetworkId);
 
-		  SET @RowsDeleted = 1;
-		  Print 'BudgetUsageDetail ';
+		Select @RowsDeleted = Count(l5.Id) 
+			FROM Network AS l1
+			Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+			Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
+			JOIN TreatmentConsiderationDetail AS l4 ON l4.AssetDetailId = l3.Id
+			JOIN BudgetUsageDetail AS l5 ON l5.TreatmentConsiderationDetailId = l4.Id
+			WHERE l1.Id IN (@NetworkId);
 
-			WHILE @RowsDeleted > 0
-				BEGIN
-					BEGIN TRY
-						Begin Transaction
+		Drop  Table BudgetUsageDetail;
 
-						SELECT TOP (@BatchSize) l5.Id INTO #tempBudgetUsageDetail
-						--Delete l5 
-						FROM Network AS l1
-						Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-						Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-						JOIN TreatmentConsiderationDetail AS l4 ON l4.AssetDetailId = l3.Id
-						JOIN BudgetUsageDetail AS l5 ON l5.TreatmentConsiderationDetailId = l4.Id
-						WHERE l1.Id IN (@NetworkId);
+		Select * into BudgetUsageDetail from #tempBudgetUsageDetail;
 
-						DELETE FROM BudgetUsageDetail WHERE Id in (SELECT Id FROM #tempBudgetUsageDetail);
+		Drop table #tempBudgetUsageDetail;
+					
+		--Print 'Rows Affected --MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+					
+		ALTER TABLE BudgetUsageDetail NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON BudgetUsageDetail DISABLE;
 
-						SET @RowsDeleted = @@ROWCOUNT;
+	END TRY
+	BEGIN CATCH
+		ALTER TABLE BudgetUsageDetail NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON BudgetUsageDetail DISABLE;
+		Print 'Query Error in Network --> MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail ***Failed***';
+		SELECT ERROR_NUMBER() AS ErrorNumber
+		,ERROR_SEVERITY() AS ErrorSeverity
+		,ERROR_STATE() AS ErrorState
+		,ERROR_PROCEDURE() AS ErrorProcedure
+		,ERROR_LINE() AS ErrorLine
+		,ERROR_MESSAGE() AS ErrorMessage;
 
-						DROP TABLE #tempBudgetUsageDetail;
-						--WAITFOR DELAY '00:00:01';
-
-						COMMIT TRANSACTION
-						
-						Print 'Rows Affected --MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
-
-  					END TRY
-					BEGIN CATCH
-						ALTER TABLE BudgetUsageDetail WITH CHECK CHECK CONSTRAINT all
-						Set @RetMessage = 'Failed';
-						Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-						Print 'Rolled Back BudgetUsageDetail Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-						ROLLBACK TRANSACTION;
-						RAISERROR  (@RetMessage, 16, 1); 
-						Return -1;
-					END CATCH;
-				END
-  
- 			ALTER TABLE BudgetUsageDetail WITH CHECK CHECK CONSTRAINT all
-
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
-
- 		         SELECT @CustomErrorMessage = 'Query Error in Network -> BudgetUsageDetail'
-		         RAISERROR (@CustomErrorMessage, 16, 1);
-				 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
+		SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail'
+		RAISERROR (@CustomErrorMessage, 16, 1);
+		Set @RetMessage = @CustomErrorMessage;
+	END CATCH
 	
-	------------------------------------------------------------------
+	---End BudgetUsageDetail----------------------------------------------------------------------
 
-				-- MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail --> CashFlowConsiderationDetail -->  --> 
+	-- MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail --> CashFlowConsiderationDetail -->  --> 
+	---Start CashFlowConsiderationDetail --------------------------------------------------------------------
 
-			BEGIN TRY
+	BEGIN TRY
 
-            ALTER TABLE CashFlowConsiderationDetail NOCHECK CONSTRAINT all
+		Set @RowsDeleted = 0;
 
-			  SET @RowsDeleted = 1;
-			  Print 'CashFlowConsiderationDetail ';
+		ALTER TABLE CashFlowConsiderationDetail NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON CashFlowConsiderationDetail DISABLE;
 
-				WHILE @RowsDeleted > 0
-					BEGIN
-						BEGIN TRY
-						Begin Transaction
+		Print 'CashFlowConsiderationDetail ';
 
-						SELECT TOP (@BatchSize) l5.Id INTO #tempCashFlowConsiderationDetail
-						--Delete l5 
-						FROM Network AS l1
-						Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-						Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-						JOIN TreatmentConsiderationDetail AS l4 ON l4.AssetDetailId = l3.Id
-						JOIN CashFlowConsiderationDetail AS l5 ON l5.TreatmentConsiderationDetailId = l4.Id
-						WHERE l1.Id IN (@NetworkId);
+		Select l5.* INTO  #tempCashFlowConsiderationDetail
+			FROM Network AS l1
+			Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+			Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
+			JOIN TreatmentConsiderationDetail AS l4 ON l4.AssetDetailId = l3.Id
+			JOIN CashFlowConsiderationDetail AS l5 ON l5.TreatmentConsiderationDetailId = l4.Id
+			WHERE Not l1.Id IN (@NetworkId);
 
-						SET @RowsDeleted = @@ROWCOUNT;
-						Print 'Rows Affected --MaintainableAsset --> AssetDetail --> CashFlowConsiderationDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		Select @RowsDeleted = Count(l5.Id) 
+			FROM Network AS l1
+			Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+			Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
+			JOIN TreatmentConsiderationDetail AS l4 ON l4.AssetDetailId = l3.Id
+			JOIN CashFlowConsiderationDetail AS l5 ON l5.TreatmentConsiderationDetailId = l4.Id
+			WHERE l1.Id IN (@NetworkId);
 
-						DELETE FROM CashFlowConsiderationDetail WHERE Id in (SELECT Id FROM #tempCashFlowConsiderationDetail);
+		Drop  Table CashFlowConsiderationDetail;
 
-						SET @RowsDeleted = @@ROWCOUNT;
+		Select * into CashFlowConsiderationDetail from #tempCashFlowConsiderationDetail;
 
-						DROP TABLE #tempCashFlowConsiderationDetail;
-						--WAITFOR DELAY '00:00:01';
+		Drop table #tempCashFlowConsiderationDetail;
+					
+		--Print 'Rows Affected --MaintainableAsset --> AssetDetail --> CashFlowConsiderationDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		
+		ALTER TABLE CashFlowConsiderationDetail NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON CashFlowConsiderationDetail DISABLE;
 
-						COMMIT TRANSACTION
-						
-						Print 'Rows Affected MaintainableAsset -->AssetDetail --> TreatmentConsiderationDetail --> CashFlowConsiderationDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
-					END TRY
-					BEGIN CATCH
-						ALTER TABLE CashFlowConsiderationDetail WITH CHECK CHECK CONSTRAINT all
-						Set @RetMessage = 'Failed';
-						Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-						Print 'Rolled Back CashFlowConsiderationDetail Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-						ROLLBACK TRANSACTION;
-						RAISERROR  (@RetMessage, 16, 1); 
-						Return -1;
-					END CATCH;
-				END
+	END TRY
+	BEGIN CATCH
+		ALTER TABLE CashFlowConsiderationDetail NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON CashFlowConsiderationDetail DISABLE;
+		Print 'Query Error in Network --> MaintainableAsset --> AssetDetail --> CashFlowConsiderationDetail ***Failed***';
+		SELECT ERROR_NUMBER() AS ErrorNumber
+		,ERROR_SEVERITY() AS ErrorSeverity
+		,ERROR_STATE() AS ErrorState
+		,ERROR_PROCEDURE() AS ErrorProcedure
+		,ERROR_LINE() AS ErrorLine
+		,ERROR_MESSAGE() AS ErrorMessage;
 
-            ALTER TABLE CashFlowConsiderationDetail WITH CHECK CHECK CONSTRAINT all
-
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
-
- 		         SELECT @CustomErrorMessage = 'Query Error in Network -> CashFlowConsiderationDetail'
-		         RAISERROR (@CustomErrorMessage, 16, 1);
-				 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
+		SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetDetail --> CashFlowConsiderationDetail'
+		RAISERROR (@CustomErrorMessage, 16, 1);
+		Set @RetMessage = @CustomErrorMessage;
+	END CATCH
 	
-	------------------------------------------------------------------
+	---End CashFlowConsiderationDetail --------------------------------------------------------------------
+	---Start TreatmentConsiderationDetail --------------------------------------------------------------------
 	
 		--MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail 
 
-			BEGIN TRY
+	BEGIN TRY
 
-            ALTER TABLE TreatmentConsiderationDetail NOCHECK CONSTRAINT all
+		Set @RowsDeleted = 0;
 
-		  SET @RowsDeleted = 1;
-		  Print 'TreatmentConsiderationDetail ';
+		ALTER TABLE TreatmentConsiderationDetail NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON TreatmentConsiderationDetail DISABLE;
 
-			WHILE @RowsDeleted > 0
-				BEGIN
-					BEGIN TRY
-					Begin Transaction
+		Print 'TreatmentConsiderationDetail1 ';
 
-						SELECT TOP (@BatchSize) l4.Id INTO #tempTreatmentConsiderationDetail
-						--Delete l4
-						FROM Network AS l1
-						Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-						Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-						JOIN TreatmentConsiderationDetail AS l4 ON l4.AssetDetailId = l3.Id
-						WHERE l1.Id IN (@NetworkId);
+		SELECT l4.* INTO #tempTreatmentConsiderationDetail
+		FROM Network AS l1
+		Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+		Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
+		JOIN TreatmentConsiderationDetail AS l4 ON l4.AssetDetailId = l3.Id
+		WHERE Not l1.Id IN (@NetworkId);
 
-						DELETE FROM TreatmentConsiderationDetail WHERE Id in (SELECT Id FROM #tempTreatmentConsiderationDetail);
+		Select @RowsDeleted = Count(l4.Id) 
+		FROM Network AS l1
+		Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+		Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
+		JOIN TreatmentConsiderationDetail AS l4 ON l4.AssetDetailId = l3.Id
+		WHERE l1.Id IN (@NetworkId);
 
-						SET @RowsDeleted = @@ROWCOUNT;
+		Drop  Table TreatmentConsiderationDetail;
 
-						DROP TABLE #tempTreatmentConsiderationDetail;
-						--WAITFOR DELAY '00:00:01';
+		Select * into TreatmentConsiderationDetail from #tempTreatmentConsiderationDetail;
 
-						COMMIT TRANSACTION;
-						
-						Print 'Rows Affected --MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
-					END TRY
-					BEGIN CATCH
-						ALTER TABLE TreatmentConsiderationDetail WITH CHECK CHECK CONSTRAINT all
-						Set @RetMessage = 'Failed';
-						Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-						Print 'Rolled Back TreatmentConsiderationDetail Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-						ROLLBACK TRANSACTION;
-						RAISERROR  (@RetMessage, 16, 1); 
-						Return -1;
-					END CATCH;
-				END
-	
+		Drop table #tempTreatmentConsiderationDetail;
+					
+		--Print 'Rows Affected --MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		
+		ALTER TABLE TreatmentConsiderationDetail NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON TreatmentConsiderationDetail DISABLE;
 
-            ALTER TABLE TreatmentConsiderationDetail WITH CHECK CHECK CONSTRAINT all
+	END TRY
+	BEGIN CATCH
+		ALTER TABLE TreatmentConsiderationDetail NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON TreatmentConsiderationDetail DISABLE;
+		Print 'Query Error in Network --> MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail ***Failed***';
+		SELECT ERROR_NUMBER() AS ErrorNumber
+		,ERROR_SEVERITY() AS ErrorSeverity
+		,ERROR_STATE() AS ErrorState
+		,ERROR_PROCEDURE() AS ErrorProcedure
+		,ERROR_LINE() AS ErrorLine
+		,ERROR_MESSAGE() AS ErrorMessage;
 
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
+		SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail'
+		RAISERROR (@CustomErrorMessage, 16, 1);
+		Set @RetMessage = @CustomErrorMessage;
+	END CATCH
 
- 		         SELECT @CustomErrorMessage = 'Query Error in Network -> TreatmentConsiderationDetail'
-		         RAISERROR (@CustomErrorMessage, 16, 1);
-				 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
-	
-	------------------------------------------------------------------
+	---End TreatmentConsiderationDetail --------------------------------------------------------------------
+	---Start AssetDetailValueIntId --------------------------------------------------------------------
 
 	-- Network --> MaintainableAsset --> AssetDetail --> AssetDetailValueIntId -
 
+	BEGIN TRY
 
-			BEGIN TRY
+		Set @RowsDeleted = 0;
 
-            ALTER TABLE AssetDetailValueIntId NOCHECK CONSTRAINT all;
+		ALTER TABLE AssetDetailValueIntId NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON AssetDetailValueIntId DISABLE;
 
-		  SET @RowsDeleted = 1;
-		  Print 'AssetDetailValueIntId ';
+		Print 'AssetDetailValueIntId ';
 
-			WHILE @RowsDeleted > 0
-				BEGIN
-					BEGIN TRY
-					Begin Transaction
+		Select l4.* INTO #tempAssetDetailValueIntId
+		FROM Network AS l1 
+		Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+		Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
+		JOIN AssetDetailValueIntId AS l4 ON l4.AssetDetailId = l3.Id
+		WHERE Not l1.Id IN (@NetworkId);
 
-						SELECT TOP (@BatchSize) l4.Id INTO #tempAssetDetailValueIntId
-						--Delete l4 
-						FROM Network AS l1
-						Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-						Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-						JOIN AssetDetailValueIntId AS l4 ON l4.AssetDetailId = l3.Id
-						WHERE l1.Id IN (@NetworkId);
+		Select @RowsDeleted = Count(l4.Id) 
+		FROM Network AS l1 
+		Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+		Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
+		JOIN AssetDetailValueIntId AS l4 ON l4.AssetDetailId = l3.Id
+		WHERE l1.Id IN (@NetworkId);
 
-						DELETE FROM AssetDetailValueIntId WHERE Id in (SELECT Id FROM #tempAssetDetailValueIntId);
+		Drop  Table AssetDetailValueIntId;
 
-						SET @RowsDeleted = @@ROWCOUNT;
+		Select * into AssetDetailValueIntId from #tempAssetDetailValueIntId;
 
-						DROP TABLE #tempAssetDetailValueIntId;
-						--WAITFOR DELAY '00:00:01';
+		Drop table #tempAssetDetailValueIntId;
+					
+		--Print 'Rows Affected Network --> MaintainableAsset --> AssetDetail --> AssetDetailValueIntId: ' +  convert(NVARCHAR(50), @RowsDeleted);
+					
+		ALTER TABLE AssetDetailValueIntId WITH CHECK CHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON AssetDetailValueIntId REBUILD;
 
-						COMMIT TRANSACTION
-						
-					Print 'Rows Affected Network --> MaintainableAsset --> AssetDetail --> AssetDetailValueIntId: ' +  convert(NVARCHAR(50), @RowsDeleted);
-					END TRY
-					BEGIN CATCH
-						ALTER TABLE AssetDetailValueIntId WITH CHECK CHECK CONSTRAINT all
-						Set @RetMessage = 'Failed';
-						Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-						Print 'Rolled Back AssetDetailValueIntId Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-						ROLLBACK TRANSACTION;
-						RAISERROR  (@RetMessage, 16, 1); 
-						Return -1;
-					END CATCH;
-				END
+	END TRY 
+	BEGIN CATCH
+		ALTER TABLE AssetDetailValueIntId WITH CHECK CHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON AssetDetailValueIntId REBUILD;
+		Print 'Query Error in Network --> MaintainableAsset --> AssetSummaryDetail --> AssetDetailValueIntId ***Failed***';
+		SELECT ERROR_NUMBER() AS ErrorNumber
+		,ERROR_SEVERITY() AS ErrorSeverity
+		,ERROR_STATE() AS ErrorState
+		,ERROR_PROCEDURE() AS ErrorProcedure
+		,ERROR_LINE() AS ErrorLine
+		,ERROR_MESSAGE() AS ErrorMessage;
 
-            ALTER TABLE AssetDetailValueIntId WITH CHECK CHECK CONSTRAINT all
+		SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetSummaryDetail --> AssetDetailValueIntId'
+		RAISERROR (@CustomErrorMessage, 16, 1);
+		Set @RetMessage = @CustomErrorMessage;
 
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
+	END CATCH
 
- 		         SELECT @CustomErrorMessage = 'Query Error in Network -> AssetDetailValueIntId'
-		         RAISERROR (@CustomErrorMessage, 16, 1);
-				 Set @RetMessage = @CustomErrorMessage;
+	---End AssetDetailValueIntId --------------------------------------------------------------------
+	---Start TreatmentOptionDetail --------------------------------------------------------------------
 
-            END CATCH
-	
-		-----------------------------------------------------------------
+	-- MaintainableAsset --> AssetDetail --> TreatmentOptionDetail -->  -->  --> 
 
-			-- MaintainableAsset --> AssetDetail --> TreatmentOptionDetail -->  -->  --> 
+	BEGIN TRY
 
-			BEGIN TRY
+		ALTER TABLE TreatmentOptionDetail NOCHECK CONSTRAINT all
 
-            ALTER TABLE TreatmentOptionDetail NOCHECK CONSTRAINT all
+		SET @RowsDeleted = 1;
+		Print 'TreatmentOptionDetail ';
 
-			  SET @RowsDeleted = 1;
-			  Print 'TreatmentOptionDetail ';
+		WHILE @RowsDeleted > 0
+		BEGIN
 
-				WHILE @RowsDeleted > 0
-					BEGIN
-						BEGIN TRY
-						Begin Transaction
+		SELECT TOP (@BatchSize) l4.Id INTO #tempTreatmentOptionDetail
+		FROM Network AS l1
+		Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+		Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
+		JOIN TreatmentOptionDetail AS l4 ON l4.AssetDetailId = l3.Id
+		WHERE l1.Id IN (@NetworkId);
 
-						SELECT TOP (@BatchSize) l4.Id INTO #tempTreatmentOptionDetail
-						--Delete l4 
-						FROM Network AS l1
-						Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-						Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-						JOIN TreatmentOptionDetail AS l4 ON l4.AssetDetailId = l3.Id
-						WHERE l1.Id IN (@NetworkId);
+		DELETE FROM TreatmentOptionDetail WHERE Id in (SELECT Id FROM #tempTreatmentOptionDetail);
 
-						DELETE FROM TreatmentOptionDetail WHERE Id in (SELECT Id FROM #tempTreatmentOptionDetail);
+		SET @RowsDeleted = @@ROWCOUNT;
 
-						SET @RowsDeleted = @@ROWCOUNT;
+		DROP TABLE #tempTreatmentOptionDetail;
+		--WAITFOR DELAY '00:00:01';
 
-						DROP TABLE #tempTreatmentOptionDetail;
-						--WAITFOR DELAY '00:00:01';
+		--Print 'Rows Affected MaintainableAsset --> AssetDetail --> TreatmentOptionDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		END
+		ALTER TABLE TreatmentOptionDetail WITH CHECK CHECK CONSTRAINT all
 
-						COMMIT TRANSACTION
+	END TRY 
+	BEGIN CATCH
+		ALTER TABLE TreatmentOptionDetail WITH CHECK CHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON TreatmentOptionDetail REBUILD;
+		Print 'Query Error in Network --> MaintainableAsset --> AssetDetail --> TreatmentOptionDetaild ***Failed***';
+		SELECT ERROR_NUMBER() AS ErrorNumber
+		,ERROR_SEVERITY() AS ErrorSeverity
+		,ERROR_STATE() AS ErrorState
+		,ERROR_PROCEDURE() AS ErrorProcedure
+		,ERROR_LINE() AS ErrorLine
+		,ERROR_MESSAGE() AS ErrorMessage;
 
-					Print 'Rows Affected MaintainableAsset --> AssetDetail --> TreatmentOptionDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
-					END TRY
-					BEGIN CATCH
-						ALTER TABLE TreatmentOptionDetail WITH CHECK CHECK CONSTRAINT all
-						Set @RetMessage = 'Failed';
-						Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-						Print 'Rolled Back TreatmentOptionDetail Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-						ROLLBACK TRANSACTION;
-						RAISERROR  (@RetMessage, 16, 1); 
-						Return -1;
-					END CATCH;
-				END
-
-            ALTER TABLE TreatmentOptionDetail WITH CHECK CHECK CONSTRAINT all
-
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
-
- 		         SELECT @CustomErrorMessage = 'Query Error in Network -> TreatmentOptionDetail'
-		         RAISERROR (@CustomErrorMessage, 16, 1);
-				 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
+		SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetDetail --> TreatmentOptionDetail'
+		RAISERROR (@CustomErrorMessage, 16, 1);
+		Set @RetMessage = @CustomErrorMessage;
+	END CATCH
 
 
+---End TreatmentOptionDetail --------------------------------------------------------------------
+---Start TreatmentOptionDetail --------------------------------------------------------------------
 	-----------------------------------------------------------------
 
 		-- AssetDetail --> TreatmentRejectionDetail 
+			
+		BEGIN TRY
 
-			BEGIN TRY
+		Set @RowsDeleted = 0;
 
-            ALTER TABLE TreatmentRejectionDetail NOCHECK CONSTRAINT all
-  		    Print 'TreatmentRejectionDetail ';
+		ALTER TABLE TreatmentRejectionDetail NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON TreatmentRejectionDetail DISABLE;
 
-			WHILE @RowsDeleted > 0
-				BEGIN
-					BEGIN TRY
-					Begin Transaction
+		Print 'TreatmentRejectionDetail ';
 
-				--Delete l4 
-				SELECT TOP (@BatchSize) l4.Id  INTO #tempTreatmentRejectionDet
+		Select l4.* INTO #tempTreatmentRejectionDetail		
+				FROM Network AS l1
+				Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+				Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
+				JOIN TreatmentRejectionDetail AS l4 ON l4.AssetDetailId = l3.Id
+				WHERE Not l1.Id IN (@NetworkId);
+
+		Select @RowsDeleted = Count(l4.Id) 	
 				FROM Network AS l1
 				Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
 				Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
 				JOIN TreatmentRejectionDetail AS l4 ON l4.AssetDetailId = l3.Id
 				WHERE l1.Id IN (@NetworkId);
 
-				DELETE FROM TreatmentRejectionDetail WHERE Id in (SELECT Id FROM #tempTreatmentRejectionDet);
+		Drop  Table TreatmentRejectionDetail;
 
-				SET @RowsDeleted = @@ROWCOUNT;
+		Select * into TreatmentRejectionDetail from #tempTreatmentRejectionDetail;
 
-				DROP TABLE #tempTreatmentRejectionDet;
-				--WAITFOR DELAY '00:00:01';
-				
-				COMMIT TRANSACTION
-				
-				Print 'Rows Affected Network --> MaintainableAsset-->AssetDetail --> TreatmentRejectionDetail : ' +  convert(NVARCHAR(50), @RowsDeleted);
-            
-					END TRY
-					BEGIN CATCH
-						ALTER TABLE TreatmentRejectionDetail WITH CHECK CHECK CONSTRAINT all
-						Set @RetMessage = 'Failed';
-						Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-						Print 'Rolled Back Network --> MaintainableAsset-->AssetDetail --> TreatmentRejectionDetail  Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-						ROLLBACK TRANSACTION;
-						RAISERROR  (@RetMessage, 16, 1); 
-						Return -1;
-					END CATCH;
-				END
+		Drop table #tempTreatmentRejectionDetail;
+					
+		--Print 'Rows Affected Network --> MaintainableAsset --> AssetDetail --> TreatmentRejectionDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+					
+		ALTER TABLE TreatmentRejectionDetail WITH CHECK CHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON TreatmentRejectionDetail REBUILD;
 
-            ALTER TABLE TreatmentRejectionDetail WITH CHECK CHECK CONSTRAINT all		
-		END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
+	END TRY 
+	BEGIN CATCH
+		ALTER TABLE TreatmentOptionDetail WITH CHECK CHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON TreatmentOptionDetail REBUILD;
+		Print 'Query Error in Network --> MaintainableAsset --> AssetDetail --> TreatmentRejectionDetail ***Failed***';
+		SELECT ERROR_NUMBER() AS ErrorNumber
+		,ERROR_SEVERITY() AS ErrorSeverity
+		,ERROR_STATE() AS ErrorState
+		,ERROR_PROCEDURE() AS ErrorProcedure
+		,ERROR_LINE() AS ErrorLine
+		,ERROR_MESSAGE() AS ErrorMessage;
 
- 		         SELECT @CustomErrorMessage = 'Query Error in Network -> TreatmentRejectionDetail'
-		         RAISERROR (@CustomErrorMessage, 16, 1);
-				 Set @RetMessage = @CustomErrorMessage;
+		SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetDetail --> TreatmentRejectionDetail'
+		RAISERROR (@CustomErrorMessage, 16, 1);
+		Set @RetMessage = @CustomErrorMessage;
 
-            END CATCH
-	
+	END CATCH
+
 	-----------------------------------------------------------------
 
 	-- AssetDetail --> TreatmentSchedulingCollisionDetail 
 
-			BEGIN TRY
+	BEGIN TRY
 
-            ALTER TABLE TreatmentSchedulingCollisionDetail NOCHECK CONSTRAINT all
+		ALTER TABLE TreatmentSchedulingCollisionDetail NOCHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON TreatmentSchedulingCollisionDetail DISABLE;
 
-		  SET @RowsDeleted = 1;
-		  Print 'TreatmentSchedulingCollisionDetail ';
+		SET @RowsDeleted = 1;
+		Print 'TreatmentSchedulingCollisionDetail ';
 
-			WHILE @RowsDeleted > 0
-				BEGIN
-					BEGIN TRY
-						Begin Transaction
+		WHILE @RowsDeleted > 0
+		BEGIN
 
-						SELECT TOP (@BatchSize) l4.Id INTO #tempTreatmentSchedulingCollisionDetail
-						--Delete l4 
-						FROM Network AS l1
-						Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-						Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-						JOIN TreatmentSchedulingCollisionDetail AS l4 ON l4.AssetDetailId = l3.Id
-						WHERE l1.Id IN (@NetworkId);
+		SELECT TOP (@BatchSize) l4.Id INTO #tempTreatmentSchedulingCollisionDetail
+		FROM Network AS l1
+		Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+		Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
+		JOIN TreatmentSchedulingCollisionDetail AS l4 ON l4.AssetDetailId = l3.Id
+		WHERE l1.Id IN (@NetworkId);
 
-						DELETE FROM TreatmentSchedulingCollisionDetail WHERE Id in (SELECT Id FROM #tempTreatmentSchedulingCollisionDetail);
+		DELETE FROM TreatmentSchedulingCollisionDetail WHERE Id in (SELECT Id FROM #tempTreatmentSchedulingCollisionDetail);
 
-						SET @RowsDeleted = @@ROWCOUNT;
+		SET @RowsDeleted = @@ROWCOUNT;
 
-						DROP TABLE #tempTreatmentSchedulingCollisionDetail;
-						--WAITFOR DELAY '00:00:01';
-
-						COMMIT TRANSACTION;
+		DROP TABLE #tempTreatmentSchedulingCollisionDetail;
+		--WAITFOR DELAY '00:00:01';
 						
-						Print 'Rows Affected Network --> MaintainableAsset-->AssetDetail --> TreatmentSchedulingCollisionDetail : ' +  convert(NVARCHAR(50), @RowsDeleted);
-					END TRY
-					BEGIN CATCH
-						ALTER TABLE TreatmentSchedulingCollisionDetail WITH CHECK CHECK CONSTRAINT all
-						Set @RetMessage = 'Failed';
-						Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-						Print 'Rolled Back TreatmentSchedulingCollisionDetail Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-						ROLLBACK TRANSACTION;
-						RAISERROR  (@RetMessage, 16, 1); 
-						Return -1;
-					END CATCH;
-				END
+		--Print 'Rows Affected Network --> MaintainableAsset-->AssetDetail --> TreatmentSchedulingCollisionDetail : ' +  convert(NVARCHAR(50), @RowsDeleted);
+		ALTER TABLE TreatmentSchedulingCollisionDetail WITH CHECK CHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON TreatmentSchedulingCollisionDetail REBUILD;
+		END
 
-			ALTER TABLE TreatmentSchedulingCollisionDetail WITH CHECK CHECK CONSTRAINT all
+	END TRY 
+	BEGIN CATCH
+		ALTER TABLE TreatmentSchedulingCollisionDetail WITH CHECK CHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON TreatmentSchedulingCollisionDetail REBUILD;
+		SELECT ERROR_NUMBER() AS ErrorNumber
+		,ERROR_SEVERITY() AS ErrorSeverity
+		,ERROR_STATE() AS ErrorState
+		,ERROR_PROCEDURE() AS ErrorProcedure
+		,ERROR_LINE() AS ErrorLine
+		,ERROR_MESSAGE() AS ErrorMessage;
 
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
+		SELECT @CustomErrorMessage = 'Query Error in Network --> MaintainableAsset-->AssetDetail -->  TreatmentSchedulingCollisionDetail'
+		RAISERROR (@CustomErrorMessage, 16, 1);
+		Set @RetMessage = @CustomErrorMessage;
 
- 		         SELECT @CustomErrorMessage = 'Query Error in Network --> MaintainableAsset-->AssetDetail -->  TreatmentSchedulingCollisionDetail'
-				 RAISERROR (@CustomErrorMessage, 16, 1);
-				 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
-
+	END CATCH
 
 	-----------------------------------------------------------------
-
+	
 			--MaintainableAsset\AssetDetail
-			
-			BEGIN TRY
 
-            ALTER TABLE AssetDetail NOCHECK CONSTRAINT all
+	BEGIN TRY
 
-			SET @RowsDeleted = 1;
-		  Print 'AssetDetail ';
+		ALTER TABLE AssetDetail NOCHECK CONSTRAINT all
 
-		   WHILE @RowsDeleted > 0
-				BEGIN
-					BEGIN TRY
-						Begin Transaction
+		SET @RowsDeleted = 1;
+		Print 'AssetDetail ';
 
-							--Delete  TOP (@BatchSize) l3
-							SELECT TOP (@BatchSize) l3.Id INTO #tempAssetDetailId
-							FROM Network AS l1
-							Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
-							Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
-							WHERE l1.Id IN (@NetworkId);
+		WHILE @RowsDeleted > 0
+		BEGIN
 
-							--DELETE ad
-							--FROM AssetDetail As ad
-							--JOIN #tempAssetDetailId T ON T.Id = ad.Id;
+		SELECT TOP (@BatchSize) l3.Id INTO #tempAssetDetailId
+		FROM Network AS l1
+		Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
+		Join AssetDetail AS l3 ON l3.MaintainableAssetId = l2.Id
+		WHERE l1.Id IN (@NetworkId);
 
-							DELETE FROM AssetDetail WHERE Id in (SELECT Id FROM #tempAssetDetailId);
+		DELETE FROM AssetDetail WHERE Id in (SELECT Id FROM #tempAssetDetailId);
 
-						    SET @RowsDeleted = @@ROWCOUNT;
+		SET @RowsDeleted = @@ROWCOUNT;
 
-							DROP TABLE #tempAssetDetailId;
-							----WAITFOR DELAY '00:00:01';
+		DROP TABLE #tempAssetDetailId;
+		----WAITFOR DELAY '00:00:01';
+				
+		--Print 'Rows Affected Network --> MaintainableAsset-->AssetDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		END
 
-						COMMIT TRANSACTION
-						
-					Print 'Rows Affected Network --> MaintainableAsset-->AssetDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
-				END TRY
-				BEGIN CATCH
-						ALTER TABLE AssetDetail WITH CHECK CHECK CONSTRAINT all
-  						Set @RetMessage = 'Failed';
-						Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-						Print 'Rolled Back AssetDetail Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-						ROLLBACK TRANSACTION;
-						RAISERROR  (@RetMessage, 16, 1); 
-						Return -1;
-				END CATCH;
-			END
+		ALTER TABLE AssetDetail WITH CHECK CHECK CONSTRAINT all
 
-            ALTER TABLE AssetDetail WITH CHECK CHECK CONSTRAINT all
+	END TRY
+	BEGIN CATCH
+		ALTER TABLE AssetDetail WITH CHECK CHECK CONSTRAINT all;
+		--ALTER INDEX ALL ON AssetDetail REBUILD;
+		Print 'Query Error in Network --> MaintainableAsset --> AssetDetail ***Failed***';
+		SELECT ERROR_NUMBER() AS ErrorNumber
+		,ERROR_SEVERITY() AS ErrorSeverity
+		,ERROR_STATE() AS ErrorState
+		,ERROR_PROCEDURE() AS ErrorProcedure
+		,ERROR_LINE() AS ErrorLine
+		,ERROR_MESSAGE() AS ErrorMessage;
 
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
+		SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetDetail '
+		RAISERROR (@CustomErrorMessage, 16, 1);
+		Set @RetMessage = @CustomErrorMessage;
 
- 		         SELECT @CustomErrorMessage = 'Query Error in Network -> AssetDetail'
-		         RAISERROR (@CustomErrorMessage, 16, 1);
-				 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
+	END CATCH
 
 
 		---End  --Network -->MaintainableAsset --> AssetDetail Path---------
-		--Restart Transaction
-			Begin Transaction
-			BEGIN TRY
-
-		----- Start CommittedProject Path
-		--Network --> MaintainableAsset --> CommittedProject --> CommittedProjectConsequence -->  -->  -->  -->  -->  --> 
-		--Network --> MaintainableAsset --> CommittedProject --> CommittedProjectLocation -->  -->  -->  -->  -->  -->
-		--Network --> MaintainableAsset --> CommittedProject 
-
-		PRINT 'Start CommittedProject Path;'
-
-			-----Start CommittedProject Path-----------------------------------------
+	  -----Start CommittedProject Path-----------------------------------------
 			
 		--Network --> MaintainableAsset --> CommittedProject --> CommittedProjectConsequence -->  -->  -->  -->  -->  --> 
-
 
          BEGIN TRY
 
             ALTER TABLE CommittedProjectConsequence NOCHECK CONSTRAINT all
+
+			Print 'CommittedProjectConsequence ';
 
 			Delete l4 
 			FROM Network AS l1
@@ -1053,7 +895,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected Network Delete CommittedProjectConsequence: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected Network Delete CommittedProjectConsequence: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			ALTER TABLE CommittedProjectConsequence WITH CHECK CHECK CONSTRAINT all
  	
@@ -1080,6 +922,8 @@ AS
 
             ALTER TABLE CommittedProjectLocation NOCHECK CONSTRAINT all
 
+			Print 'CommittedProjectLocation ';
+
 			Delete l4 
 			FROM Network AS l1
 			Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
@@ -1088,7 +932,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected Network Delete CommittedProjectLocation: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected Network Delete CommittedProjectLocation: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			ALTER TABLE CommittedProjectLocation WITH CHECK CHECK CONSTRAINT all
  	
@@ -1115,6 +959,8 @@ AS
 
 			ALTER TABLE CommittedProject NOCHECK CONSTRAINT all
 
+			Print 'CommittedProject ';
+
 			Delete l3 
 			FROM Network AS l1
 			Join MaintainableAsset AS l2 ON l2.NetworkId = l1.Id
@@ -1122,7 +968,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected Network Delete CommittedProject: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected Network Delete CommittedProject: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			ALTER TABLE CommittedProject WITH CHECK CHECK CONSTRAINT all
 
@@ -1143,6 +989,7 @@ AS
 
 			-------------------------------------
 
+
 			-----End CommittedProject Path-----------------------------------------
 
 		----Start Network --> MaintainableAsset --> MaintainableAssetLocation  Path
@@ -1160,7 +1007,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected Network --> MaintainableAsset-->MaintainableAssetLocation: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected Network --> MaintainableAsset-->MaintainableAssetLocation: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
             ALTER TABLE MaintainableAssetLocation WITH CHECK CHECK CONSTRAINT all
 
@@ -1195,7 +1042,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected Network --> MaintainableAsset: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected Network --> MaintainableAsset: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
             ALTER TABLE MaintainableAsset WITH CHECK CHECK CONSTRAINT all
 
@@ -1215,7 +1062,6 @@ AS
             END CATCH
 
 			------Network --> MaintainableAsset Path--------------------------------------------------------------------
-
 					   			 
 		----- Start Simulation Path
 			
@@ -1227,6 +1073,7 @@ AS
  
             ALTER TABLE Benefit NOCHECK CONSTRAINT all
 
+			Print 'Benefit ';
 			--AnalysisMethod	Benefit							FK_Benefit_AnalysisMethod_AnalysisMethodId
 			--AnalysisMethod	CriterionLibrary_AnalysisMethod	FK_CriterionLibrary_AnalysisMethod_AnalysisMethod_AnalysisMethodId
 
@@ -1238,7 +1085,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected Network --> Benefit: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected Network --> Benefit: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
             ALTER TABLE Benefit WITH CHECK CHECK CONSTRAINT all
 
@@ -1264,6 +1111,8 @@ AS
 
             ALTER TABLE CriterionLibrary_AnalysisMethod NOCHECK CONSTRAINT all
 
+			Print 'CriterionLibrary_AnalysisMethod ';
+
 			Delete l4 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -1272,7 +1121,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected Network --> CriterionLibrary_AnalysisMethod: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected Network --> CriterionLibrary_AnalysisMethod: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
             ALTER TABLE CriterionLibrary_AnalysisMethod WITH CHECK CHECK CONSTRAINT all
 
@@ -1296,6 +1145,8 @@ AS
 
             ALTER TABLE AnalysisMethod NOCHECK CONSTRAINT all
 
+			Print 'AnalysisMethod ';
+
 			Delete l3 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -1303,7 +1154,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected Network --> AnalysisMethod: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected Network --> AnalysisMethod: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			ALTER TABLE AnalysisMethod WITH CHECK CHECK CONSTRAINT all
  
@@ -1332,6 +1183,8 @@ AS
 
             ALTER TABLE CommittedProjectConsequence NOCHECK CONSTRAINT all
 
+			Print 'CommittedProjectConsequence ';
+
 			Delete l4 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -1340,7 +1193,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected Network --> CommittedProjectConsequence: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected Network --> CommittedProjectConsequence: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			ALTER TABLE CommittedProjectConsequence WITH CHECK CHECK CONSTRAINT all
  	
@@ -1367,6 +1220,8 @@ AS
 
             ALTER TABLE CommittedProjectLocation NOCHECK CONSTRAINT all
 
+			Print 'CommittedProjectLocation ';
+
 			Delete l4 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -1375,7 +1230,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected Network --> CommittedProjectLocation: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected Network --> CommittedProjectLocation: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			ALTER TABLE CommittedProjectLocation WITH CHECK CHECK CONSTRAINT all
  	
@@ -1402,6 +1257,8 @@ AS
 
 			ALTER TABLE CommittedProject NOCHECK CONSTRAINT all
 
+			Print 'CommittedProject ';
+
 			Delete l3 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -1409,7 +1266,7 @@ AS
 			WHERE l1.Id IN (@NetworkId)
 
 			SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected Network --> CommittedProject: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected Network --> CommittedProject: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			ALTER TABLE CommittedProject WITH CHECK CHECK CONSTRAINT all
 
@@ -1430,15 +1287,14 @@ AS
 
 
 			-----End CommittedProject Path-----------------------------------------
-
-
 		   -----Start Simulation --> InvestmentPlan 
 
 
             BEGIN TRY
 
-			Print 'InvestmentPlan';
 			ALTER TABLE InvestmentPlan NOCHECK CONSTRAINT all
+
+			Print 'InvestmentPlan';
 
 			Delete l3 
 			FROM Network AS l1
@@ -1447,7 +1303,6 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			ALTER TABLE InvestmentPlan WITH CHECK CHECK CONSTRAINT all
-
  
             END TRY 
 			BEGIN CATCH
@@ -1501,9 +1356,10 @@ AS
 			-- Start Network --> Simulation --> ScenarioBudget --> BudgetPercentagePair -->
 
             BEGIN TRY
-			Print 'BudgetPercentagePair';
 
 			ALTER TABLE BudgetPercentagePair NOCHECK CONSTRAINT all
+
+			Print 'BudgetPercentagePair';
 
 			Delete l4 
 			FROM Network AS l1
@@ -1535,9 +1391,9 @@ AS
 
             BEGIN TRY
 
-			Print 'CommittedProjectConsequence';
-
             ALTER TABLE CommittedProjectConsequence NOCHECK CONSTRAINT all
+
+			Print 'CommittedProjectConsequence';
 
 			Delete l5 
 			FROM Network AS l1
@@ -1572,6 +1428,8 @@ AS
 
             ALTER TABLE CommittedProjectLocation NOCHECK CONSTRAINT all
 
+			Print 'CommittedProjectLocation ';
+
 			Delete l5 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -1605,6 +1463,8 @@ AS
 
 			ALTER TABLE CommittedProject NOCHECK CONSTRAINT all
 
+			Print 'CommittedProject ';
+
 			Delete l4 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -1637,6 +1497,8 @@ AS
 
 			ALTER TABLE CriterionLibrary_ScenarioBudget NOCHECK CONSTRAINT all
 
+			Print 'CriterionLibrary_ScenarioBudget ';
+
 			Delete l4 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -1667,9 +1529,9 @@ AS
 
             BEGIN TRY
 
-			Print 'ScenarioBudgetAmount';
-			
 			ALTER TABLE ScenarioBudgetAmount NOCHECK CONSTRAINT all
+
+			Print 'ScenarioBudgetAmount';
 
 			Delete l4 
 			FROM Network AS l1
@@ -1714,7 +1576,6 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			ALTER TABLE ScenarioSelectableTreatment_ScenarioBudget WITH CHECK CHECK CONSTRAINT all
-
  
             END TRY 
 			BEGIN CATCH
@@ -1748,7 +1609,6 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			ALTER TABLE ScenarioBudget WITH CHECK CHECK CONSTRAINT all
-
  
             END TRY 
 			BEGIN CATCH
@@ -1766,6 +1626,7 @@ AS
             END CATCH
 
 			-----End --Network --> Simulation --> ScenarioBudget Path-----------------------------------------
+
 			------Start  --Network --> Simulation --> ScenarioBudgetPriority -----------
 
 			--Network --> Simulation --> ScenarioBudgetPriority --> CriterionLibrary_ScenarioBudgetPriority --> 
@@ -1773,6 +1634,8 @@ AS
             BEGIN TRY
 
 			ALTER TABLE CriterionLibrary_ScenarioBudgetPriority NOCHECK CONSTRAINT all
+
+			Print 'CriterionLibrary_ScenarioBudgetPriority ';
 
 			Delete l4 
 			FROM Network AS l1
@@ -1834,7 +1697,6 @@ AS
 
             END CATCH
 
-
 			------------------------------------------------------------
 
 			--Network --> Simulation --> ScenarioBudgetPriority
@@ -1842,6 +1704,8 @@ AS
             BEGIN TRY
 
 			ALTER TABLE ScenarioBudgetPriority NOCHECK CONSTRAINT all
+
+			Print 'ScenarioBudgetPriority ';
 
 			Delete l3 
 			FROM Network AS l1
@@ -1877,6 +1741,8 @@ AS
 
 			ALTER TABLE ScenarioCalculatedAttributePair_Criteria NOCHECK CONSTRAINT all
 
+			Print 'ScenarioCalculatedAttributePair_Criteria';
+
 			Delete l5 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -1911,6 +1777,8 @@ AS
 
 			ALTER TABLE ScenarioCalculatedAttributePair_Equation NOCHECK CONSTRAINT all
 
+			Print 'ScenarioCalculatedAttributePair_Equation';
+
 			Delete l5 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -1943,6 +1811,8 @@ AS
 
 			ALTER TABLE ScenarioCalculatedAttributePair NOCHECK CONSTRAINT all
 
+			Print 'ScenarioCalculatedAttributePair';
+
 			Delete l4 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -1972,7 +1842,7 @@ AS
 
             BEGIN TRY
 
-			Print 'ScenarioCalculatedAttribute';
+			Print 'ScenarioCalculatedAttribute ';
 
 			ALTER TABLE ScenarioCalculatedAttribute NOCHECK CONSTRAINT all
 
@@ -2008,6 +1878,8 @@ AS
 
 			ALTER TABLE CriterionLibrary_ScenarioCashFlowRule NOCHECK CONSTRAINT all
 
+			Print 'CriterionLibrary_ScenarioCashFlowRule ';
+
 			Delete l4 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -2040,6 +1912,8 @@ AS
 
 			ALTER TABLE ScenarioCashFlowDistributionRule NOCHECK CONSTRAINT all
 
+			Print 'ScenarioCashFlowDistributionRule ';
+
 			Delete l4 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -2070,6 +1944,8 @@ AS
             BEGIN TRY
 
 			ALTER TABLE ScenarioCashFlowRule NOCHECK CONSTRAINT all
+
+			Print 'ScenarioCashFlowRule ';
 
 			Delete l3 
 			FROM Network AS l1
@@ -2136,6 +2012,8 @@ AS
 
 			ALTER TABLE ScenarioDeficientConditionGoal NOCHECK CONSTRAINT all
 
+			Print 'ScenarioDeficientConditionGoal ';
+
 			Delete l3 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -2200,6 +2078,8 @@ AS
             BEGIN TRY
 
 			ALTER TABLE ScenarioPerformanceCurve_Equation NOCHECK CONSTRAINT all
+
+			Print 'ScenarioPerformanceCurve_Equation ';
 
 			Delete l4 
 			FROM Network AS l1
@@ -2267,6 +2147,8 @@ AS
 
 			ALTER TABLE CriterionLibrary_ScenarioRemainingLifeLimit NOCHECK CONSTRAINT all
 
+			Print 'CriterionLibrary_ScenarioRemainingLifeLimit';
+
 			Delete l4 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -2299,6 +2181,8 @@ AS
 
 			ALTER TABLE ScenarioRemainingLifeLimit NOCHECK CONSTRAINT all
 
+			Print 'ScenarioRemainingLifeLimit';
+
 			Delete l3 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -2325,25 +2209,24 @@ AS
 			------End ScenarioRemainingLifeLimit----------------------------------------------------------
 			------Start ScenarioSelectableTreatment--------------------------------------------------------
 
-            BEGIN TRY
+ 
+  --Network --> Simulation --> ScenarioSelectableTreatment --> ScenarioTreatmentSupersedeRule --> CriterionLibrary_ScenarioTreatmentSupersedeRule --> 
 
-			ALTER TABLE CriterionLibrary_TreatmentSupersession NOCHECK CONSTRAINT all
+			BEGIN TRY
 
-			--Network --> Simulation --> ScenarioSelectableTreatment --> ScenarioTreatmentSupersession --> CriterionLibrary_ScenarioTreatmentSupersession --> TreatmentSupersession 
-			--> CriterionLibrary_ScenarioTreatmentSupersession --> CriterionLibrary_TreatmentSupersession --> TreatmentSupersession -->  --> 
+			ALTER TABLE CriterionLibrary_ScenarioTreatmentSupersedeRule NOCHECK CONSTRAINT all
 
+			Print 'CriterionLibrary_ScenarioTreatmentSupersedeRule';
 
-			Delete l7  
+			Delete l5
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
 			JOIN ScenarioSelectableTreatment AS l3 ON l3.SimulationId = l2.Id
-			JOIN ScenarioTreatmentSupersession AS l4 ON l4.TreatmentId = l3.Id
-			JOIN CriterionLibrary_ScenarioTreatmentSupersession  AS l5  ON l5.TreatmentSupersessionId = l4.Id
-			JOIN TreatmentSupersession  AS l6  ON l6.CriterionLibraryScenarioTreatmentSupersessionJoinCriterionLibraryId = l5.CriterionLibraryId
-			JOIN CriterionLibrary_TreatmentSupersession  AS l7 ON l7.TreatmentSupersessionId = l6.Id
+			JOIN ScenarioTreatmentSupersedeRule AS l4 ON l4.TreatmentId = l3.Id
+			JOIN CriterionLibrary_ScenarioTreatmentSupersedeRule AS l5  ON l5.ScenarioTreatmentSupersedeRuleId = l4.Id
 			WHERE l1.Id IN (@NetworkId);
 
-			ALTER TABLE CriterionLibrary_TreatmentSupersession WITH CHECK CHECK CONSTRAINT all
+			ALTER TABLE CriterionLibrary_ScenarioTreatmentSupersedeRule WITH CHECK CHECK CONSTRAINT all
  
             END TRY 
 			BEGIN CATCH
@@ -2354,7 +2237,7 @@ AS
                        ,ERROR_LINE() AS ErrorLine
                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_TreatmentSupersession'
+ 		         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTreatmentSupersedeRule'
                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2362,23 +2245,22 @@ AS
 
 			---------------------------------------------------------------------------
 
-		--Simulation --> ScenarioSelectableTreatment --> ScenarioTreatmentSupersession --> CriterionLibrary_ScenarioTreatmentSupersession --> TreatmentSupersession
+   --Network --> Simulation --> ScenarioSelectableTreatment --> ScenarioTreatmentSupersedeRule  
 
-            BEGIN TRY
+         BEGIN TRY
 
-			ALTER TABLE TreatmentSupersession NOCHECK CONSTRAINT all
+			ALTER TABLE ScenarioTreatmentSupersedeRule NOCHECK CONSTRAINT all
 
-			Delete l6 
+			Print 'ScenarioTreatmentSupersedeRule ';
+
+			Delete l4
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
 			JOIN ScenarioSelectableTreatment AS l3 ON l3.SimulationId = l2.Id
-			JOIN ScenarioTreatmentSupersession AS l4 ON l4.TreatmentId = l3.Id
-			JOIN  CriterionLibrary_ScenarioTreatmentSupersession  AS l5  ON l5.TreatmentSupersessionId = l4.Id
-			JOIN  TreatmentSupersession  AS l6  ON l6.CriterionLibraryScenarioTreatmentSupersessionJoinTreatmentSupersessionId = l5.TreatmentSupersessionId
-			    OR l6.CriterionLibraryScenarioTreatmentSupersessionJoinCriterionLibraryId = l5.CriterionLibraryId
+			JOIN ScenarioTreatmentSupersedeRule AS l4 ON l4.TreatmentId = l3.Id
 			WHERE l1.Id IN (@NetworkId);
 
-			ALTER TABLE TreatmentSupersession WITH CHECK CHECK CONSTRAINT all
+			ALTER TABLE ScenarioTreatmentSupersedeRule WITH CHECK CHECK CONSTRAINT all
  
             END TRY 
 			BEGIN CATCH
@@ -2389,79 +2271,14 @@ AS
                        ,ERROR_LINE() AS ErrorLine
                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		         SELECT @CustomErrorMessage = 'Query Error in TreatmentSupersession'
+ 		         SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentSupersedeRule'
                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                  Set @RetMessage = @CustomErrorMessage;
 
             END CATCH
 
 			---------------------------------------------------------------------------
-			
-		--Simulation --> ScenarioSelectableTreatment --> ScenarioTreatmentSupersession --> CriterionLibrary_ScenarioTreatmentSupersession
 
-            BEGIN TRY
-
-			ALTER TABLE CriterionLibrary_ScenarioTreatmentSupersession NOCHECK CONSTRAINT all
-
-			Delete l5 
-			FROM Network AS l1
-			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
-			JOIN ScenarioSelectableTreatment AS l3 ON l3.SimulationId = l2.Id
-			JOIN ScenarioTreatmentSupersession AS l4 ON l4.TreatmentId = l3.Id
-			JOIN CriterionLibrary_ScenarioTreatmentSupersession AS l5 ON l5.TreatmentSupersessionId = l4.Id
-			WHERE l1.Id IN (@NetworkId);
-
-			ALTER TABLE CriterionLibrary_ScenarioTreatmentSupersession WITH CHECK CHECK CONSTRAINT all
- 
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
-
- 		         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTreatmentSupersession'
-                 RAISERROR  (@CustomErrorMessage, 16, 1);  
-                 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
-
-			-----------------------------------------------------------------------
-
-		--Simulation --> ScenarioSelectableTreatment --> ScenarioTreatmentSupersession 
-
-            BEGIN TRY
-
-			ALTER TABLE ScenarioTreatmentSupersession NOCHECK CONSTRAINT all
-
-			Delete l4 
-			FROM Network AS l1
-			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
-			JOIN ScenarioSelectableTreatment AS l3 ON l3.SimulationId = l2.Id
-			JOIN ScenarioTreatmentSupersession AS l4 ON l4.TreatmentId = l3.Id
-			WHERE l1.Id IN (@NetworkId);
-
-			ALTER TABLE ScenarioTreatmentSupersession WITH CHECK CHECK CONSTRAINT all
- 
-            END TRY 
-			BEGIN CATCH
-                 SELECT ERROR_NUMBER() AS ErrorNumber
-                       ,ERROR_SEVERITY() AS ErrorSeverity
-                       ,ERROR_STATE() AS ErrorState
-                       ,ERROR_PROCEDURE() AS ErrorProcedure
-                       ,ERROR_LINE() AS ErrorLine
-                       ,ERROR_MESSAGE() AS ErrorMessage;
-
- 		         SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentSupersession'
-                 RAISERROR  (@CustomErrorMessage, 16, 1);  
-                 Set @RetMessage = @CustomErrorMessage;
-
-            END CATCH
-
-			---------------------------------------------------------------------------
-			
 		--Simulation --> ScenarioSelectableTreatment --> ScenarioConditionalTreatmentConsequences   --> CriterionLibrary_ScenarioTreatmentConsequence
 
             BEGIN TRY
@@ -2503,6 +2320,8 @@ AS
 
 			--ALTER TABLE ScenarioTreatmentConsequence_Equation NOCHECK CONSTRAINT all
 
+			Print 'ScenarioTreatmentConsequence_Equation';
+
 			Delete l5 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -2535,6 +2354,8 @@ AS
             BEGIN TRY
 
 			ALTER TABLE ScenarioConditionalTreatmentConsequences NOCHECK CONSTRAINT all
+
+			Print 'ScenarioConditionalTreatmentConsequences';
 
 			Delete l4 
 			FROM Network AS l1
@@ -2569,6 +2390,8 @@ AS
 
 			--ALTER TABLE ScenarioTreatmentCost_Equation NOCHECK CONSTRAINT all
 
+			Print 'ScenarioTreatmentCost_Equation';
+
 			Delete l5 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -2601,7 +2424,7 @@ AS
 
             BEGIN TRY
 
-			Print 'CriterionLibrary_ScenarioTreatmentCost';
+			Print 'CriterionLibrary_ScenarioTreatmentCost ';
 
 			ALTER TABLE CriterionLibrary_ScenarioTreatmentCost NOCHECK CONSTRAINT all
 
@@ -2631,14 +2454,13 @@ AS
             END CATCH
 
 			---------------------------------------------------------------------------
-
-
 		--simulation --> ScenarioSelectableTreatment --> ScenarioTreatmentCost
-
 
             BEGIN TRY
 
 			ALTER TABLE ScenarioTreatmentCost NOCHECK CONSTRAINT all
+
+			Print 'ScenarioTreatmentCost ';
 
 			Delete l4 
 			FROM Network AS l1
@@ -2648,7 +2470,6 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			ALTER TABLE ScenarioTreatmentCost WITH CHECK CHECK CONSTRAINT all
-
  
             END TRY 
 			BEGIN CATCH
@@ -2673,6 +2494,8 @@ AS
             BEGIN TRY
 
 			ALTER TABLE ScenarioSelectableTreatment_ScenarioBudget NOCHECK CONSTRAINT all
+
+			Print 'ScenarioSelectableTreatment_ScenarioBudget ';
 
 			Delete l4 
 			FROM Network AS l1
@@ -2739,6 +2562,8 @@ AS
 
 			ALTER TABLE CriterionLibrary_ScenarioTreatment NOCHECK CONSTRAINT all
 
+			Print 'CriterionLibrary_ScenarioTreatment ';
+
 			Delete l4 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -2747,7 +2572,6 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			ALTER TABLE CriterionLibrary_ScenarioTreatment WITH CHECK CHECK CONSTRAINT all
-
  
             END TRY 
 			BEGIN CATCH
@@ -2771,6 +2595,8 @@ AS
             BEGIN TRY
 
 			ALTER TABLE ScenarioTreatmentScheduling NOCHECK CONSTRAINT all
+
+			Print 'ScenarioTreatmentScheduling ';
 
 			Delete l4 
 			FROM Network AS l1
@@ -2803,6 +2629,8 @@ AS
             BEGIN TRY
 
 			ALTER TABLE ScenarioSelectableTreatment NOCHECK CONSTRAINT all
+
+			Print 'ScenarioSelectableTreatment ';
 
 			Delete l3 
 			FROM Network AS l1
@@ -2872,6 +2700,8 @@ AS
 
 			ALTER TABLE ScenarioTargetConditionGoals NOCHECK CONSTRAINT all
 
+			Print 'ScenarioTargetConditionGoals ';
+
 			Delete l3 
 			FROM Network AS l1
 			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
@@ -2897,12 +2727,13 @@ AS
 
 			---End ScenarioTargetConditionGoals --------------------------------------------
 			---------------------------------------------------------------------------
-
 		--Simulation --> Simulation_User 
 
             BEGIN TRY
 
 			ALTER TABLE Simulation_User NOCHECK CONSTRAINT all
+
+			Print 'Simulation_User ';
 
 			Delete l3 
 			FROM Network AS l1
@@ -2934,7 +2765,7 @@ AS
 
             BEGIN TRY
 
-			Print 'Simulation --> SimulationAnalysisDetail';
+			Print 'SimulationAnalysisDetail';
 
 			ALTER TABLE SimulationAnalysisDetail NOCHECK CONSTRAINT all
 
@@ -2998,22 +2829,6 @@ AS
 			
 			----Start SimulationOutput Path---------------------------------------
 
-
-   COMMIT TRANSACTION
-   
-    Print 'Partial Network Delete Before SimulationOutput Transaction Committed';
-	END TRY
-	BEGIN CATCH
-  			Set @RetMessage = 'Failed';
-			Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-			Print 'Rolled Back Network Delete Transaction in Stored Procedure:  ' + @ErrorMessage;
-			ROLLBACK TRANSACTION;
-			RAISERROR  (@RetMessage, 16, 1); 
-			Return -1;
-	END CATCH;
-
-
-
 			-----Start AssetSummaryDetail Path-----------------------------------------
 
 			-------SimulationOutput --> AssetSummaryDetail --> AssetSummaryDetailValueIntI----
@@ -3028,11 +2843,9 @@ AS
 
 		   WHILE @RowsDeleted > 0
 				BEGIN
-					BEGIN TRY
-						Begin Transaction
 
 				--Delete TOP (@BatchSize) l5 
-				SELECT TOP  (@BatchSize) l5.Id  INTO #tempAssetSummaryDetailValueIntId	
+				SELECT TOP  (@BatchSize) l5.Id  INTO #tempAssetSummaryDetailValueIntIdSim	
 				FROM Network AS l1
 				JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
 				JOIN SimulationOutput AS l3 ON l3.SimulationId = l2.Id
@@ -3040,36 +2853,19 @@ AS
 				Join AssetSummaryDetailValueIntId As l5 ON l5.AssetSummaryDetailId = l4.Id
 				WHERE l1.Id IN (@NetworkId);
 
-				--DELETE ar
-				--FROM AssetSummaryDetailValueIntId As ar
-				--JOIN #tempAssetSummaryDetailValueIntId T ON T.Id = ar.Id;
-
-				DELETE FROM AssetSummaryDetailValueIntId WHERE Id in (SELECT Id FROM #tempAssetSummaryDetailValueIntId);
+				DELETE FROM AssetSummaryDetailValueIntId WHERE Id in (SELECT Id FROM #tempAssetSummaryDetailValueIntIdSim);
 
 				SET @RowsDeleted = @@ROWCOUNT;
 
-				DROP TABLE #tempAssetSummaryDetailValueIntId;
+				DROP TABLE #tempAssetSummaryDetailValueIntIdSim;
 				--WAITFOR DELAY '00:00:01';
+			END	
 
-				COMMIT TRANSACTION
-				
-				Print 'Rows Affected Network  --> Simulation --> SimulationOutput --> AssetSummaryDetail -->  AssetSummaryDetailValueIntId: ' +  convert(NVARCHAR(50), @RowsDeleted);
-					END TRY
-					BEGIN CATCH
-							ALTER TABLE AssetSummaryDetailValueIntId WITH CHECK CHECK CONSTRAINT all
-  							Set @RetMessage = 'Failed';
-							Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-							Print 'Rolled Back Simulation --> SimulationOutput --> AssetSummaryDetail --> AssetSummaryDetailValueIntId Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-							ROLLBACK TRANSACTION;
-							RAISERROR  (@RetMessage, 16, 1); 
-							Return -1;
-					END CATCH;
-				END
-
-            ALTER TABLE AssetSummaryDetailValueIntId WITH CHECK CHECK CONSTRAINT all
+            ALTER TABLE AssetSummaryDetailValueIntId WITH CHECK CHECK CONSTRAINT all;
 
             END TRY 
 			BEGIN CATCH
+			     ALTER TABLE AssetSummaryDetailValueIntId WITH CHECK CHECK CONSTRAINT all;
                  SELECT ERROR_NUMBER() AS ErrorNumber
                        ,ERROR_SEVERITY() AS ErrorSeverity
                        ,ERROR_STATE() AS ErrorState
@@ -3084,11 +2880,87 @@ AS
             END CATCH
 
 			-----------------------------------------------------------------
-			--Restart Transaction at AssetSummaryDetail
-			Begin Transaction
-				BEGIN TRY
 
-     		-------SimulationOutput --> AssetSummaryDetail -----
+    		-------SimulationOutput --> AssetSummaryDetail -----
+
+            BEGIN TRY
+
+			Print 'AssetSummaryDetail';
+
+          ALTER TABLE AssetSummaryDetail NOCHECK CONSTRAINT all
+
+			Delete l4 
+			FROM Network AS l1
+			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
+			JOIN SimulationOutput AS l3 ON l3.SimulationId = l2.Id
+			JOIN AssetSummaryDetail AS l4 ON l4.SimulationOutputId = l3.Id
+			WHERE l1.Id IN (@NetworkId);
+
+            ALTER TABLE AssetSummaryDetail WITH CHECK CHECK CONSTRAINT all
+
+            END TRY 
+			BEGIN CATCH
+                 SELECT ERROR_NUMBER() AS ErrorNumber
+                       ,ERROR_SEVERITY() AS ErrorSeverity
+                       ,ERROR_STATE() AS ErrorState
+                       ,ERROR_PROCEDURE() AS ErrorProcedure
+                       ,ERROR_LINE() AS ErrorLine
+                       ,ERROR_MESSAGE() AS ErrorMessage;
+
+ 		         SELECT @CustomErrorMessage = 'Query Error in AssetSummaryDetail'
+                 RAISERROR  (@CustomErrorMessage, 16, 1);  
+                 Set @RetMessage = @CustomErrorMessage;
+
+            END CATCH
+
+
+			----------------------------------------------------------------------
+			-----End AssetSummaryDetail Path--------------------------------------
+
+			-----Start SimulationYearDetail Path-----------------------------------------
+
+			--SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail 
+
+			BEGIN TRY
+
+			Print 'BudgetUsageDetail2';
+
+            ALTER TABLE BudgetUsageDetail NOCHECK CONSTRAINT all
+
+		    Delete l7  
+			FROM Network AS l1
+			JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
+			JOIN SimulationOutput AS l3 ON l3.SimulationId = l2.Id
+			JOIN SimulationYearDetail AS l4 ON l4.SimulationOutputId = l3.Id
+			JOIN AssetDetail AS l5 ON l5.SimulationYearDetailId = l4.Id
+			JOIN TreatmentConsiderationDetail AS l6 ON l6.AssetDetailId = l5.Id
+			JOIN BudgetUsageDetail AS l7 ON l7.TreatmentConsiderationDetailId = l6.Id
+			WHERE l1.Id IN (@NetworkId);
+
+		    SET @RowsDeleted = @@ROWCOUNT;
+			--Print 'Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+
+            ALTER TABLE BudgetUsageDetail WITH CHECK CHECK CONSTRAINT all
+
+            END TRY 
+			BEGIN CATCH
+                 SELECT ERROR_NUMBER() AS ErrorNumber
+                       ,ERROR_SEVERITY() AS ErrorSeverity
+                       ,ERROR_STATE() AS ErrorState
+                       ,ERROR_PROCEDURE() AS ErrorProcedure
+                       ,ERROR_LINE() AS ErrorLine
+                       ,ERROR_MESSAGE() AS ErrorMessage;
+
+ 		         SELECT @CustomErrorMessage = 'Query Error in BudgetUsageDetail'
+                 RAISERROR  (@CustomErrorMessage, 16, 1);  
+                 Set @RetMessage = @CustomErrorMessage;
+
+            END CATCH
+
+		--Print '*******BudgetUsageDetail**************'
+	
+	------------------------------------------------------------------
+    		-------SimulationOutput --> AssetSummaryDetail -----
 
             BEGIN TRY
 
@@ -3145,7 +3017,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 		    SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
             ALTER TABLE BudgetUsageDetail WITH CHECK CHECK CONSTRAINT all
 
@@ -3187,7 +3059,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 		    SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected --SSimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail --> CashFlowConsiderationDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail --> CashFlowConsiderationDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
             ALTER TABLE CashFlowConsiderationDetail WITH CHECK CHECK CONSTRAINT all
 
@@ -3226,7 +3098,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 		    SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
             ALTER TABLE TreatmentConsiderationDetail WITH CHECK CHECK CONSTRAINT all
 
@@ -3267,7 +3139,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 		    SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentOptionDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentOptionDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
 			
             ALTER TABLE TreatmentOptionDetail WITH CHECK CHECK CONSTRAINT all
 
@@ -3287,21 +3159,6 @@ AS
             END CATCH
 	
 		-----------------------------------------------------------------
-
-   COMMIT TRANSACTION
-   
-    Print 'Partial Network Delete at AssetDetailValueIntId Transaction Committed';
-	END TRY
-	BEGIN CATCH
-  			Set @RetMessage = 'Failed';
-			Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-			Print 'Rolled Back Network Delete Transaction at AssetDetailValueIntId in Stored Procedure:  ' + @ErrorMessage;
-			ROLLBACK TRANSACTION;
-			RAISERROR  (@RetMessage, 16, 1); 
-			Return -1;
-	END CATCH;
-
-
 		---------------------------------------------------------------
 			--SimulationOutput --> SimulationYearDetail --> AssetDetail --> AssetDetailValueIntId -->  -->  -->  -->  -->  --> 
 
@@ -3315,8 +3172,6 @@ AS
 
 			WHILE @RowsDeleted > 0
 			BEGIN
-				BEGIN TRY
-					Begin Transaction
 
 						--Delete TOP (@BatchSize) l6 
 						SELECT TOP  (@BatchSize) l6.Id  INTO #tempAssetDetailValueIntId2
@@ -3328,36 +3183,19 @@ AS
 						JOIN AssetDetailValueIntId AS l6 ON l6.AssetDetailId = l5.Id
 						WHERE l1.Id IN (@NetworkId);
 
-						--DELETE ar
-						--FROM AssetDetailValueIntId As ar
-						--JOIN #tempAssetDetailValueIntId2 T ON T.Id = ar.Id;
-
 						DELETE FROM AssetDetailValueIntId WHERE Id in (SELECT Id FROM #tempAssetDetailValueIntId2);
 
 						SET @RowsDeleted = @@ROWCOUNT;
 
 						DROP TABLE #tempAssetDetailValueIntId2;
-						--WAITFOR DELAY '00:00:01';
-;
-						COMMIT TRANSACTION
+					
+						--Print 'Rows Affected Network --> --SimulationOutput --> SimulationYearDetail --> AssetDetail --> AssetDetailValueIntId: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			END			
 						
-						Print 'Rows Affected Network --> --SimulationOutput --> SimulationYearDetail --> AssetDetail --> AssetDetailValueIntId: ' +  convert(NVARCHAR(50), @RowsDeleted);
-					END TRY
-					BEGIN CATCH
-							ALTER TABLE AssetDetailValueIntId WITH CHECK CHECK CONSTRAINT all
-  							Set @RetMessage = 'Failed';
-							Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-							Print 'Rolled Back AssetDetailValueIntId Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-							ROLLBACK TRANSACTION;
-							RAISERROR  (@RetMessage, 16, 1); 
-							Return -1;
-					END CATCH;
-				END
-
-            ALTER TABLE AssetDetailValueIntId WITH CHECK CHECK CONSTRAINT all
-
+						ALTER TABLE AssetDetailValueIntId WITH CHECK CHECK CONSTRAINT all
             END TRY 
 			BEGIN CATCH
+			ALTER TABLE AssetDetailValueIntId WITH CHECK CHECK CONSTRAINT all
                  SELECT ERROR_NUMBER() AS ErrorNumber
                        ,ERROR_SEVERITY() AS ErrorSeverity
                        ,ERROR_STATE() AS ErrorState
@@ -3384,11 +3222,9 @@ AS
 
 			WHILE @RowsDeleted > 0
 			BEGIN
-				BEGIN TRY
-					Begin Transaction
 
 						--Delete TOP (@BatchSize) l6 
-						SELECT TOP  (@BatchSize) l6.Id  INTO #tempTreatmentRejectionDetail
+						SELECT TOP  (@BatchSize) l6.Id  INTO #tempTreatmentRejectionDetailSim
 						FROM Network AS l1
 						JOIN Simulation  AS l2 ON l2.NetworkId = l1.Id
 						JOIN SimulationOutput AS l3 ON l3.SimulationId = l2.Id
@@ -3397,33 +3233,17 @@ AS
 						JOIN TreatmentRejectionDetail AS l6 ON l6.AssetDetailId = l5.Id
 						WHERE l1.Id IN (@NetworkId);
 
-						--DELETE ar
-						--FROM TreatmentRejectionDetail As ar
-						--JOIN #tempTreatmentRejectionDetail T ON T.Id = ar.Id;
-
-						DELETE FROM TreatmentRejectionDetail WHERE Id in (SELECT Id FROM #tempTreatmentRejectionDetail);
+						DELETE FROM TreatmentRejectionDetail WHERE Id in (SELECT Id FROM #tempTreatmentRejectionDetailSim);
 
 						SET @RowsDeleted = @@ROWCOUNT;
 
-						DROP TABLE #tempTreatmentRejectionDetail;
+						DROP TABLE #tempTreatmentRejectionDetailSim;
 						--WAITFOR DELAY '00:00:01';
-
-						COMMIT TRANSACTION
 						
-						Print 'Rows Affected Network --> --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentRejectionDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
-					END TRY
-					BEGIN CATCH
-							ALTER TABLE TreatmentRejectionDetail WITH CHECK CHECK CONSTRAINT all
-  							Set @RetMessage = 'Failed';
-							Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-							Print 'Rolled Back TreatmentRejectionDetail Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
-							ROLLBACK TRANSACTION;
-							RAISERROR  (@RetMessage, 16, 1); 
-							Return -1;
-					END CATCH;
-				END
-
-            ALTER TABLE TreatmentRejectionDetail WITH CHECK CHECK CONSTRAINT all
+						--Print 'Rows Affected Network --> --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentRejectionDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			END						
+						
+						ALTER TABLE TreatmentRejectionDetail WITH CHECK CHECK CONSTRAINT all
 
             END TRY 
 			BEGIN CATCH
@@ -3440,12 +3260,7 @@ AS
 
             END CATCH
 	
-	--Print '***TreatmentRejectionDetail***'
-	-----------------------------------------------------------------
-	--Restart Transaction at TreatmentSchedulingCollisionDetail
-	Begin Transaction
-	BEGIN TRY
-
+	----End TreatmentRejectionDetail-------------------------------------------------------------
 	-----------------------------------------------------------------
 	--SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentSchedulingCollisionDetail 
 
@@ -3501,7 +3316,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected  Network ->  Simulation ->  SimulationOutput --> SimulationYearDetail-->AssetDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected  Network ->  Simulation ->  SimulationOutput --> SimulationYearDetail-->AssetDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
             ALTER TABLE AssetDetail WITH CHECK CHECK CONSTRAINT all
 
@@ -3558,8 +3373,7 @@ AS
 	
 	------------------------------------------------------------------
 
-
-				--SimulationOutput\SimulationYearDetail\DeficientConditionGoalDetail
+			--SimulationOutput\SimulationYearDetail\DeficientConditionGoalDetail
 			
 			BEGIN TRY
 
@@ -3591,9 +3405,7 @@ AS
             END CATCH
 	
 	------------------------------------------------------------------
-
-	
-				--SimulationOutput\SimulationYearDetail\TargetConditionGoalDetail
+		--SimulationOutput\SimulationYearDetail\TargetConditionGoalDetail
 			
 			BEGIN TRY
 
@@ -3632,7 +3444,7 @@ AS
 			
 			BEGIN TRY
 
-			Print 'SimulationYearDetail';
+			Print 'SimulationYearDetail ';
 
             ALTER TABLE SimulationYearDetail NOCHECK CONSTRAINT all
 
@@ -3661,13 +3473,13 @@ AS
             END CATCH
 
 			------------------------------------------------------------------
-
-			
 			--SimulationOutputJson Delete records where SimulationOutput is the parent
 
             BEGIN TRY
 
 			ALTER TABLE SimulationOutputJson NOCHECK CONSTRAINT all
+
+			Print 'SimulationOutputJson ';
 
 			Delete l4 
 			FROM Network AS l1
@@ -3694,12 +3506,13 @@ AS
             END CATCH
 
 			---------------------------------------------------------------------------
-
 			--SimulationOutput
 
             BEGIN TRY
 
             ALTER TABLE SimulationOutput NOCHECK CONSTRAINT all
+
+			Print 'SimulationOutput ';
 
 			Delete l3 
 			FROM Network AS l1
@@ -3744,7 +3557,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected  Network ->  Simulation ->  SimulationOutputJson: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected  Network ->  Simulation ->  SimulationOutputJson: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			ALTER TABLE SimulationOutputJson WITH CHECK CHECK CONSTRAINT all
  
@@ -3812,9 +3625,9 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected  Network --> Simulation: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected  Network --> Simulation: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
-			ALTER TABLE Simulation WITH CHECK CHECK CONSTRAINT all
+			ALTER TABLE Simulation WITH CHECK CHECK CONSTRAINT all;
  
             END TRY 
 			BEGIN CATCH
@@ -3831,8 +3644,8 @@ AS
 
             END CATCH
 		
-		    SET @CurrentDateTime = GETDATE();
-			PRINT 'End Simulation Delete: ' + CONVERT(NVARCHAR, @CurrentDateTime, 120);
+		 --   SET @CurrentDateTime = GETDATE();
+			--PRINT 'End Simulation Delete: ' + CONVERT(NVARCHAR, @CurrentDateTime, 120);
 			------End Simulation Delete-------------------------------------------------------------------
 			-----End  ----Network --> Simulation Path---------
 
@@ -3849,7 +3662,7 @@ AS
 			WHERE l1.Id IN (@NetworkId);
 
 			SET @RowsDeleted = @@ROWCOUNT;
-			Print 'Rows Affected  Network: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			--Print 'Rows Affected  Network: ' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			ALTER TABLE Network WITH CHECK CHECK CONSTRAINT all
  
@@ -3870,21 +3683,15 @@ AS
 
 		   ---------------------------------------------------------------------------
 			------End Network Delete-------------------------------------------------------------------
-
-    COMMIT TRANSACTION
-	
     Print 'Delete Network Committed End';
-   	RAISERROR (@RetMessage, 0, 1);
+ 	RAISERROR (@RetMessage, 0, 1);
 	END TRY
 	BEGIN CATCH
   			Set @RetMessage = 'Failed ' + @RetMessage;
 			Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-			Print 'Rolled Back Last Partial Delete Transaction in Network SP:  ' + @ErrorMessage;
-			ROLLBACK TRANSACTION;
+			Print 'Overall Catch in Network SP:  ' + @ErrorMessage;
+
 			RAISERROR  (@RetMessage, 16, 1);  
 	END CATCH;
 
 END 
-
---  DECLARE @RetMessage varchar(100); EXEC usp_delete_network '119AD446-3330-426B-864D-E9D471949D6B' , @RetMessage OUTPUT 
-

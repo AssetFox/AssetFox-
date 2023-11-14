@@ -100,6 +100,7 @@
                                     v-model:page="userScenariosPagination.page"
                                     v-model:items-per-page="userScenariosPagination.rowsPerPage"
                                     item-value="name"
+                                    :hover="true"
                                     @update:options="onUserScenariosPagination"
                                 >
                                     <template slot="items" slot-scope="props" v-slot:item="props">
@@ -110,7 +111,7 @@
                                                 size="large"
                                                 lazy
                                                 persistent
-                                                :return-value.sync="
+                                                v-model:return-value="
                                                     props.item.name
                                                 "
                                                 @save="
@@ -298,6 +299,7 @@
                                         {value: 10, title: '10'},
                                         {value: 25, title: '25'},
                                     ]"
+                                    :hover="true"
                                     v-model:sort-by="sharedScenariosPagination.sort"
                                     v-model:page="sharedScenariosPagination.page"
                                     v-model:items-per-page="sharedScenariosPagination.rowsPerPage"
@@ -311,7 +313,7 @@
                                                 size="large"
                                                 lazy
                                                 persistent
-                                                :return-value.sync="
+                                                v-model:return-value="
                                                     props.item.name
                                                 "
                                                 @save="

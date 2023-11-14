@@ -10,7 +10,8 @@
         </v-row>
       </v-card-title>
       <v-card-text>
-        <v-data-table :headers="scenarioUserGridHeaders"
+        <v-data-table id="ShareScenarioDialog-table-vdatatable"
+                      :headers="scenarioUserGridHeaders"
                       :items="scenarioUserGridRows"
                       sort-icon=ghd-table-sort
                       :search="searchTerm">
@@ -20,11 +21,16 @@
               <v-label>{{ item.username }}</v-label>
             </td>
             <td>
-              <v-checkbox class="ghd-padding-top bottom-margin-zero" label="Is Shared" v-model="item.isShared"
+              <v-checkbox id="ShareScenarioDialog-isShared-vcheckbox" 
+                  class="ghd-padding-top bottom-margin-zero" label="Is Shared" v-model="item.isShared"
                   @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!item.isShared" class="ghd-padding-top bottom-margin-zero" label="Can Modify" v-model="item.canModify"/>
+              <v-checkbox id="ShareScenarioDialog-canModify-vcheckbox" 
+                :disabled="!item.isShared" 
+                class="ghd-padding-top bottom-margin-zero" 
+                label="Can Modify" 
+                v-model="item.canModify"/>
             </td>
           </tr>
           </template>
@@ -38,8 +44,8 @@
       </v-card-text>
       <v-card-actions>
         <v-row justify="center">
-          <v-btn @click="onSubmit(false)" class="ghd-button ghd-blue">Cancel</v-btn>
-          <v-btn @click="onSubmit(true)" class="ghd-white-bg ghd-blue" variant="outlined">
+          <v-btn id="ShareScenarioDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-button ghd-blue">Cancel</v-btn>
+          <v-btn id="ShareScenarioDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue" variant="outlined">
             Save
           </v-btn>
         </v-row>

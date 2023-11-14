@@ -82,7 +82,7 @@
                         </td>
                         <td>
                             <editDialog
-                                :return-value.sync="item.item.name"
+                                v-model:return-value="item.item.name"
                                 large
                                 lazy
                                 @save="onEditSelectedLibraryListData(item,'description')"
@@ -319,6 +319,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
 import { useConfirm } from 'primevue/useconfirm';
 let store = useStore();
@@ -1072,6 +1073,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
             hasCreatedLibrary = false;
         }
         initializing = false;
+        clearChanges();
 
         if(hasSelectedLibrary.value)
             onPaginationChanged();

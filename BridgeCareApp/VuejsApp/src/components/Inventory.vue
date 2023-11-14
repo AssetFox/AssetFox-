@@ -78,7 +78,6 @@
 
     const selectedInventoryIndex = ref([]);
 
-
     let htmlResponse = ref();
 
     let queryLength: number;
@@ -97,6 +96,11 @@
     let inventoryData: any  = null;
     let sanitizedHTML: any = null;
     let inventoryReportName: string = '';
+
+    const beforeRouteLeave = () => {
+    // Reset staticHTMLForInventory when leaving the route
+    store.state.inventoryModule.staticHTMLForInventory = null; // Set to null or an initial value
+    }
 
 
     const InventoryStateKeys = computed<InventoryItem[]>(()=> store.state.inventoryModule.inventoryItems)
@@ -196,8 +200,7 @@
         /**
          * Vue component has been mounted
          */
-        onMounted(()=>mounted())
-         function mounted() {
+        onMounted(() => {
             (async () => { 
                 await getConstraintTypeAction();
                 await getInventoryReportsAction();
@@ -205,7 +208,13 @@
                 await getRawDataKeyFieldsAction();
                 await getConstraintTypeAction();
             })();
-        }
+        })
+
+        onBeforeUnmount(() => {
+            const router = useRouter();
+            router.beforeEach(beforeRouteLeave);
+        });
+
         created();
         function created() {
             initializeLists();
@@ -245,6 +254,7 @@
         }
 
         function onSelectInventoryItem(index: number){
+            constraintDetails = stateConstraintType.value;
             if(constraintDetails == 'OR')
             {
                 HandleSelectedItems(index);

@@ -3,7 +3,7 @@
         <v-card>
             <v-card-title class="ghd-dialog-box-padding-top">
             <v-row justify-space-between align-center>
-                <div class="ghd-control-dialog-header">Change {{DialogData.settingName}}</div>
+                <div id="EditAdminDataDialog-header-div" class="ghd-control-dialog-header">Change {{DialogData.settingName}}</div>
             </v-row>
             </v-card-title>
             <v-card-text class="ghd-dialog-box-padding-center">
@@ -13,9 +13,11 @@
                     item-title="text"
                     item-value="value"
                     v-model='DialogData.selectedItem'                         
+                    id="EditAdminDataDialog-addNewItems-select"
                     class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>   
                     <v-btn style="margin-top: 2px !important; margin-left: 10px !important"
+                    id="EditAdminDataDialog-addNewItems-btn"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                     @click="onAddClick"
                     :disabled='isAddDisabled()'>
@@ -30,13 +32,13 @@
                     <v-row justify="end">
                         <v-col cols = "21" >
                         <v-list-tile-content >
-                            <v-list-tile-title v-text="setting.value"></v-list-tile-title>
+                            <v-list-tile-title id="EditAdminDataDialog-itemName-title" v-text="setting.value"></v-list-tile-title>
                         </v-list-tile-content>
                     </v-col>
                     <v-col>
                         <input type ="radio" v-if="DialogData.settingName == 'InventoryReports'" v-model="setting.networkType" value ="(R)"/>
                         <label v-if="DialogData.settingName == 'InventoryReports'" style="margin-right: 10px;">RAW</label>
-                        <input type ="radio" v-if="DialogData.settingName == 'InventoryReports'" v-model="setting.networkType" value ="(P)"/>
+                        <input type ="radio" id="EditAdminDataDialog-primary-radio" v-if="DialogData.settingName == 'InventoryReports'" v-model="setting.networkType" value ="(P)"/>
                         <label v-if="DialogData.settingName == 'InventoryReports'">PRIMARY</label>
                     </v-col>
                         <v-btn @click="onDeleteSettingClick(setting)"  class="ghd-blue" flat>
@@ -50,10 +52,10 @@
             </v-card-text>
             <v-card-actions class="ghd-dialog-box-padding-bottom">
             <v-row justify-center row>
-                <v-btn @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
+                <v-btn id="EditAdminDataDialog-cancel-btn" @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
                 Cancel
                 </v-btn >
-                <v-btn @click="onSubmit(true)" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                <v-btn id="EditAdminDataDialog-save-btn" @click="onSubmit(true)" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                 Save
                 </v-btn>         
             </v-row>

@@ -41,7 +41,7 @@
                             </td>
                             <td>
                                 <editDialog id="EditBudgetsDialog-budget-editDialog"
-                                               :return-value.sync='props.item.name' persistent
+                                               v-model:return-value='props.item.name' persistent
                                                @save='onEditBudgetName(props.item)' size="large" lazy>
                                     <v-text-field id="EditBudgetsDialog-budget-textField"
                                         variant="underlined"

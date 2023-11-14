@@ -19,7 +19,7 @@
                     <tr>
                     <td>
                         <editDialog
-                            :return-value.sync="item.item.durationInYears"
+                            v-model:return-value="item.item.durationInYears"
                             @save="onEditSelectedLibraryListData(item,'durationInYears')"
                             full-width
                             size="large"
@@ -60,7 +60,7 @@
                     </td>
                     <td>
                         <editDialog
-                            :return-value.sync="item.item.costCeiling"
+                            v-model:return-value="item.item.costCeiling"
                             size="large"
                             lazy
                             persistent
@@ -108,7 +108,7 @@
                     </td>
                     <td>
                         <editDialog
-                            :return-value.sync="item.item.yearlyPercentages"
+                            v-model:return-value="item.item.yearlyPercentages"
                             @save="onEditSelectedLibraryListData(item,'yearlyPercentages')"
                             full-width
                             size="large"

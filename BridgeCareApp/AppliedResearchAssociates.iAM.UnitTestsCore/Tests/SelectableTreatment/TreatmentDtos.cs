@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
 {
@@ -21,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
 
         public static TreatmentDTO DtoWithEmptyCostsAndConsequencesLists(
             Guid? id = null,
-            string name = "Treatment name",
+            string name = "Bridge Replacement",
             string treatmentCriterionExpression = null)
         {
             var resolveId = id ?? Guid.NewGuid();
@@ -32,9 +31,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
                 Id = resolveId,
                 Name = name,
                 Description = "Treatment description",
+                BudgetIds = new List<Guid>(),
                 Costs = new List<TreatmentCostDTO>(),
                 Consequences = new List<TreatmentConsequenceDTO>(),
                 PerformanceFactors = new List<TreatmentPerformanceFactorDTO>(),
+                SupersedeRules = new List<TreatmentSupersedeRuleDTO>(),
                 ShadowForAnyTreatment = 2,
                 ShadowForSameTreatment = 5,
                 CriterionLibrary = treatmentCriterion,
@@ -55,6 +56,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
                 Costs = new List<TreatmentCostDTO>(),
                 Consequences = new List<TreatmentConsequenceDTO>(),
                 PerformanceFactors = new List<TreatmentPerformanceFactorDTO>(),
+                SupersedeRules = new List<TreatmentSupersedeRuleDTO>(),
                 CriterionLibrary = criterionLibrary
             };
             return dto;
@@ -78,6 +80,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
                 CriterionLibrary = criterionLibrary
             };
             return dto;
+        }
+
+        public static TreatmentSupersedeRuleDTO SupersedeRule(TreatmentDTO preventTreatment, string mergedCriteriaExpression = null)
+        {
+            var criterionLibrary = CriterionLibraryDtos.Dto(mergedCriteriaExpression: mergedCriteriaExpression);
+            return new TreatmentSupersedeRuleDTO
+            {                
+                Id = Guid.NewGuid(),
+                treatment = preventTreatment,
+                CriterionLibrary = criterionLibrary
+            };
         }
     }
 }

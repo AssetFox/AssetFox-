@@ -386,7 +386,7 @@ const stateSelectedCalculatedAttributeLibrary = computed<CalculatedAttributeLibr
 const stateScenarioCalculatedAttributes = computed<CalculatedAttribute[]>(() => store.state.calculatedAttributeModule.scenarioCalculatedAttributes);
 let stateSelectedLibraryCalculatedAttributes = computed<CalculatedAttribute[]>(() => store.state.calculatedAttributeModule.selectedLibraryCalculatedAttributes);
 let stateCalculatedAttributes = computed<Attribute[]>(() => store.state.calculatedAttributeModule.calculatedAttributes);
-let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+const hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
 let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
 let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeModule.isSharedLibrary);
 
@@ -1501,8 +1501,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
              addedCalcPairs.size > 0 ||
              updatedCalcAttrMap.size > 0 || 
              updatedPairs.size > 0 || 
-             addedCalcAttr.length > 0 ||
-            ( hasSelectedLibrary.value && ! hasScenario.value && hasUnsavedChangesCore('',  selectedCalculatedAttributeLibrary.value,  stateSelectedCalculatedAttributeLibrary.value))
+             addedCalcAttr.length > 0
         if (hasUnsavedChanges &&  unsavedDialogAllowed) {
 
             confirm.require({

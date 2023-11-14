@@ -3,21 +3,22 @@
     <v-dialog max-width="450px" persistent v-model="showDialogComputed">
       <v-card class="ghd-padding">
         <v-card-title>
-            <v-row justify-left>
+            <v-row justify="space-between">
               <h3 class="ghd-title">Create New Treatment</h3>
-            </v-row>
-            <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+              <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
               X
-            </v-btn>          
+            </v-btn>  
+            </v-row>
+                    
         </v-card-title>
         <v-card-text>
           <v-row column>
             <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
-            <v-text-field id="CreateTreatmentDialog-name-textField" class="ghd-control-border ghd-control-text ghd-control-width-lg" outline v-model="newTreatment.name"></v-text-field>
+            <v-text-field variant="outlined" id="CreateTreatmentDialog-name-textField" class="ghd-control-border ghd-control-text ghd-control-width-lg" outline v-model="newTreatment.name"></v-text-field>
           </v-row>
         </v-card-text>
         <v-card-actions>
-          <v-row row justify-center>
+          <v-row justify="center">
             <v-btn
               id="CreateTreatmentDialog-cancel-btn"
               @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel
@@ -44,19 +45,19 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 
 const props = defineProps<{showDialog: boolean}>()
 let showDialogComputed = computed(() => props.showDialog);
-let newTreatment: Treatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
+let newTreatment = ref<Treatment>({...emptyTreatment, id: getNewGuid(), addTreatment: false});
 let store = useStore();
 const emit = defineEmits(['submit'])
 
   function onSubmit(submit: boolean) {
     if (submit) {
-      newTreatment.addTreatment = true;
-      emit('submit', newTreatment);
+      newTreatment.value.addTreatment = true;
+      emit('submit', newTreatment.value);
     } else {
       emit('submit', null);
     }
 
-    newTreatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
+    newTreatment.value = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
   }
 
 </script>

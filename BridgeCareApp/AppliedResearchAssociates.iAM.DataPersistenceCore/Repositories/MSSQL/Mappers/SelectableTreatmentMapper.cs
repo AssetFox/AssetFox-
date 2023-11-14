@@ -44,8 +44,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 IsUnselectable = dto.IsUnselectable,
 
                 Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
-                AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType,
+                AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType,                
                 ScenarioTreatmentPerformanceFactors = dto.ToScenarioSelectableTreatmentPerformanceFactorEntity(baseEntityProperties),
+           
             };
             BaseEntityPropertySetter.SetBaseEntityProperties(treatment, baseEntityProperties);
             return treatment;

@@ -110,7 +110,7 @@
                         <td v-for="header in deficientConditionGoalGridHeaders">
                             <div>
                                 <editDialog v-if="header.key !== 'criterionLibrary' && header.key !== 'action'"
-                                    :return-value.sync="item.item[header.key]"
+                                    v-model:return-value="item.item[header.key]"
                                     @save="onEditDeficientConditionGoalProperty(item.item,header.key,item.item[header.key])"
                                     size="large"
                                     lazy>

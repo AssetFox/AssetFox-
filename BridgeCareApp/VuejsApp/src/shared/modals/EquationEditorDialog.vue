@@ -20,8 +20,8 @@
             <v-col cols = "12">
               <v-tabs v-model="selectedTab">
                 <v-tab @click="isPiecewise = false">Equation</v-tab>
-                <v-tab @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Piecewise</v-tab>
-                <v-tab @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Time In Rating</v-tab>
+                <v-tab @click="isPiecewise = true">Piecewise</v-tab>
+                <v-tab @click="isPiecewise = true">Time In Rating</v-tab>
               </v-tabs>
             </v-col>
                 <v-window>
@@ -62,8 +62,7 @@
                                 </div>
                               </v-col>
                             </v-row>
-                            
-                            <v-row justify="center"> 
+                            <v-row justify="center" style="padding-top: 10px"> 
                               <div class="math-buttons-container">
                                 <v-btn @click="onAddValueToExpression('+')" class="math-button add circular-button" icon
                                       size="small">
@@ -91,14 +90,16 @@
                                 </v-btn>
                               </div>
                             </v-row>
-                            <v-row style="padding-top: 10px; padding-left: 15px">
+
+                            
+                            <v-row style="padding-left: 15px; padding-top: 11px">
                               <v-textarea :rows="5" @blur="setCursorPosition" @focus="setTextareaCursorPosition"
                                           id="equation_textarea"
                                           no-resize outline
                                           spellcheck="false"
                                           variant="outlined"
                                           density="compact"
-                                          style="max-width: 825px"
+                                          style="max-width: 825px; height: 2.5em"
                                           v-model="expression" class="ghd-text-field-border">
                               </v-textarea>
                             </v-row>
@@ -110,32 +111,24 @@
                           <v-col cols = "5" >
                             <div>                 
                               <div class="data-points-grid">
-                                <v-data-table :header="piecewiseGridHeaders"
-                                              :items="piecewiseGridData"
-                                              sort-icon=ghd-table-sort
-                                              class="v-table__overflow ghd-table"
-                                              hide-actions>
-                                  <template slot="items" slot-scope="props"  v-slot:item="props">
-                                    <td v-for="header in piecewiseGridHeaders">
-                                      <div v-if="header.value !== ''">
-                                        <div v-if="props.item.timeValue === 0">
-                                          {{ props.item[header.value] }}
-                                        </div>
-                                        <div @click="onEditDataPoint(props.item, header.value)" class="edit-data-point-span"
-                                            v-else>
-                                          {{ props.item[header.value] }}
-                                        </div>
-                                      </div>
-                                      <div v-else>
-                                        <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
-                                              icon
-                                              v-if="props.item.timeValue !== 0">
-                                          <img :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
-                                        </v-btn>
-                                      </div>
-                                    </td>
-                                  </template>
-                                </v-data-table>
+                                <v-data-table :headers="piecewiseGridHeaders" :items="piecewiseGridData" class="v-table__overflow ghd-table" hide-actions>
+                                    <template slot="items" slot-scope="props" v-slot:item="props">
+                                      <tr>
+                                        <td v-for="header in piecewiseGridHeaders">
+                                          <div v-if="header.key !== ''">
+                                            <div @click="onEditDataPoint(props.item, header.key)" justify="space-between" style="margin-left: 10px" class="edit-data-point-span">
+                                              {{ props.item[header.key] }}
+                                            </div>
+                                          </div>
+                                          <div v-else>
+                                            <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue" icon v-if="props.item.timeValue !== 0">
+                                              <img :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
+                                            </v-btn>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    </template>
+                                  </v-data-table>
                               </div>
                               <v-row justify="space-between" class="add-addmulti-container">
                                 <v-btn @click="onAddTimeAttributeDataPoint"
@@ -181,29 +174,27 @@
                           <v-col cols = "5">
                             <div>
                               <div class="data-points-grid">
-                                <v-data-table :header="timeInRatingGridHeaders"
-                                              :items="timeInRatingGridData"
-                                              sort-icon=ghd-table-sort
-                                              class="v-table__overflow ghd-table"
-                                              hide-actions>
-                                  <template slot="items" slot-scope="props"  v-slot:item="props">
-                                    <td v-for="header in timeInRatingGridHeaders">
-                                      <div v-if="header.value !== ''">
-                                        <div @click="onEditDataPoint(props.item, header.value)"
-                                            class="edit-data-point-span">
-                                          {{ props.item[header.value] }}
-                                        </div>
-                                      </div>
-                                      <div v-else>
-                                        <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
-                                              icon>
-                                          <img :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
-                                        </v-btn>
-                                      </div>
-                                    </td>
-                                  </template>
-                                </v-data-table>
-                              </div>
+                                <div>
+                                  <v-data-table :headers="timeInRatingGridHeaders" :items="timeInRatingGridData" class="v-table__overflow ghd-table" hide-actions>
+                                    <template slot="items" slot-scope="props" v-slot:item="props">
+                                      <tr>
+                                        <td v-for="header in timeInRatingGridHeaders">
+                                          <div v-if="header.key !== ''">
+                                            <div @click="onEditDataPoint(props.item, header.key)" justify="space-between" style="margin-left: 10px" class="edit-data-point-span">
+                                              {{ props.item[header.key] }}
+                                            </div>
+                                          </div>
+                                          <div v-else>
+                                            <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue" icon v-if="props.item.timeValue !== 0">
+                                              <img :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
+                                            </v-btn>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    </template>
+                                  </v-data-table>
+                                </div>
+                             </div>
                               <v-row justify="space-between" class="add-addmulti-container">
                                 <v-btn @click="onAddTimeAttributeDataPoint"
                                 variant = "flat" class='ghd-blue ghd-button ghd-button-text' >
@@ -416,15 +407,15 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
   const cannotSubmit = ref<boolean>(true);
   const invalidExpressionMessage = ref('');
   const validExpressionMessage = ref('');
-  const piecewiseGridHeaders = ref<DataTableHeader[]>([
-    {text: 'Time', value: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {text: 'Condition', value: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {text: 'Action', value: '', align: 'left', sortable: false, class: '', width: '10px'}
+  const piecewiseGridHeaders = ref<any[]>([
+    {title: 'Time', key: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {title: 'Condition', key: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {title: 'Action', key: '', align: 'left', sortable: false, class: '', width: '10px'}
   ]);
-  const timeInRatingGridHeaders= ref<DataTableHeader[]>([
-    {text: 'Condition', value: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {text: 'Time', value: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {text: 'Action', value: '', align: 'left', sortable: false, class: '', width: '10px'}
+  const timeInRatingGridHeaders= ref<any[]>([
+    {title: 'Condition', key: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {title: 'Time', key: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {title: 'Action', key: '', align: 'left', sortable: false, class: '', width: '10px'}
   ]);
   const piecewiseGridData = ref<TimeConditionDataPoint[]>([]); 
   const timeInRatingGridData = ref<TimeConditionDataPoint[]>([]);
@@ -437,7 +428,6 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
   const multipleDataPoints = ref('');;
   const selectedTab = ref<number>(0);
   const showEditDataPointPopup = ref<boolean>(false);
-  const randEq = ["Equation", "Picewise", "Third one"]
   let editedDataPointProperty: string = '';
   const editedDataPoint = ref<TimeConditionDataPoint>(clone(emptyTimeConditionDataPoint));
   let piecewiseRegex: RegExp = /(\(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*\))/;
@@ -519,12 +509,11 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * onExpressionChanged => expression watcher is used to reset the invalidExpressionMessage and validExpressionMessage
    * objects as well as set the cannotSubmit object.
    */
-  watch(expression,()=>onExpressionChanged())
-  function onExpressionChanged() {
+  watch(expression,()=>{
     invalidExpressionMessage.value = '';
     validExpressionMessage.value = '';
     cannotSubmit.value = !(expression.value === '' && !isPiecewise);
-  }
+  })
 
   /**
    * onParsePiecewiseEquation => function is used to
@@ -832,7 +821,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    */
    function onCheckEquation() {
     const equationValidationParameters: EquationValidationParameters = {
-      expression: isPiecewise ? onParseTimeAttributeDataPoints() : expression.value,
+      expression: isPiecewise.value ? onParseTimeAttributeDataPoints() : expression.value,
       isPiecewise: isPiecewise.value,
       currentUserCriteriaFilter: {...emptyUserCriteriaFilter},
       networkId: getBlankGuid()

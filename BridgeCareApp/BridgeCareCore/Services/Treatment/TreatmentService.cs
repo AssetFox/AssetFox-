@@ -283,13 +283,18 @@ namespace BridgeCareCore.Services
             return CreateExportScenarioTreatmentRuleExportFile(scenarioTreatmentSupersedeRules, fileName);
         }
 
-        public FileInfoDTO ExportTreatmentSupersedeRuleExcelFile(Guid libraryId)
+        public FileInfoDTO ExportLibraryTreatmentSupersedeRuleExcelFile(Guid libraryId)
         {
             var library = _unitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(libraryId);
             var libraryTreatmentSupersedeRules = _unitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRulesByLibraryId(libraryId);
             var fileName = $"TreatmentSupersedeRules_{library.Name.Trim().Replace(" ", "_")}.xlsx";
 
             return CreateExportScenarioTreatmentRuleExportFile(libraryTreatmentSupersedeRules, fileName);
+        }
+
+        public ScenarioTreatmentSupersedeRuleImportResultDTO ImportLibraryTreatmentSupersedeRulesFile(Guid libraryId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
+        {
+            throw new NotImplementedException();
         }
 
         private static FileInfoDTO CreateExportScenarioTreatmentRuleExportFile(List<TreatmentSupersedeRuleExportDTO> treatmentSupersedeRules, string fileName)

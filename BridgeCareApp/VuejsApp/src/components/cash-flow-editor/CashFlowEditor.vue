@@ -1073,6 +1073,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
             hasCreatedLibrary = false;
         }
         initializing = false;
+        clearChanges();
 
         if(hasSelectedLibrary.value)
             onPaginationChanged();

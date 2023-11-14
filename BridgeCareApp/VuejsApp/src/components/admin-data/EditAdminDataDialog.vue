@@ -108,7 +108,6 @@ import { getUrl } from '@/shared/utils/get-url';
                 if(suffix == primarySuffix){
                     type = primarySuffix;
                     value = _.substring(0, _.length - 3);
-                    console.log("test");
                 }
                 else if(suffix === rawDataSuffix){
                     type = rawDataSuffix;
@@ -124,7 +123,6 @@ import { getUrl } from '@/shared/utils/get-url';
 
             toReturn = {value: value, networkType: type};
             return toReturn
-            console.log(toReturn.networkType)
         });
         settingsList.value = clone(DialogData.value.settingsList);
         

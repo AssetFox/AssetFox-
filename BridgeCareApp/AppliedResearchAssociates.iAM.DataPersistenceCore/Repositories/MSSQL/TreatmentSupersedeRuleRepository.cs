@@ -96,13 +96,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException(ScenarioNotFoundErrorMessage);
             }
 
-            var treatments = _unitOfWork.Context.ScenarioSelectableTreatment.Where(_ => _.SimulationId == simulationId).Select(_ => _.ToDto(null));
+            var treatments = _unitOfWork.Context.ScenarioSelectableTreatment.Where(_ => _.SimulationId == simulationId).Select(_ => _.ToDto(null)).ToList();
             var treatmentIds = treatments.Select(_ => _.Id);
             return _unitOfWork.Context.ScenarioTreatmentSupersedeRule.AsNoTracking()
                 .Include(_ => _.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Where(_ => treatmentIds.Contains(_.ScenarioSelectableTreatment.Id))
-                .Select(_ => _.ToExportDto(treatments.ToList()))
+                .Select(_ => _.ToExportDto(treatments))
                 .ToList();
         }
 
@@ -179,13 +179,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException(LibraryNotFoundErrorMessage);
             }
 
-            var treatments = _unitOfWork.Context.SelectableTreatment.Where(_ => _.TreatmentLibraryId == libraryId).Select(_ => _.ToDto(null));
+            var treatments = _unitOfWork.Context.SelectableTreatment.Where(_ => _.TreatmentLibraryId == libraryId).Select(_ => _.ToDto(null)).ToList();
             var treatmentIds = treatments.Select(_ => _.Id);
             return _unitOfWork.Context.TreatmentSupersedeRule.AsNoTracking()
                 .Include(_ => _.CriterionLibraryTreatmentSupersedeRuleJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Where(_ => treatmentIds.Contains(_.SelectableTreatment.Id))
-                .Select(_ => _.ToExportDto(treatments.ToList()))
+                .Select(_ => _.ToExportDto(treatments))
                 .ToList();
         }
     }

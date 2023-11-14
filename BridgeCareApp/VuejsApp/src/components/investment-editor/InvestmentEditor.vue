@@ -496,7 +496,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let firstYearOfAnalysisPeriodShift = shallowRef<number>(0);
 
     let unsavedDialogAllowed = ref<boolean>(true);
-    let trueLibrarySelectItemValue = ref<string|null>('');
+    let trueLibrarySelectItemValue : string | null = '';
     let librarySelectItemValueAllowedChanged: boolean = true;
 
     function addYearLabel() {
@@ -714,18 +714,16 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         else if(librarySelectItemValueAllowedChanged){
             CheckUnsavedDialog(onSelectItemValueChanged, () => {
                 librarySelectItemValueAllowedChanged = false;
-                onSelectItemValueChanged();
-                librarySelectItemValue.value = trueLibrarySelectItemValue.value;              
+                librarySelectItemValue.value = trueLibrarySelectItemValue;              
             });
         }
         parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
         newLibrarySelection = true;
-        scenarioLibraryIsModified.value = false;
         librarySelectItemValueAllowedChanged = true;       
     });
 
     function onSelectItemValueChanged() {      
-        trueLibrarySelectItemValue = librarySelectItemValue
+        trueLibrarySelectItemValue = librarySelectItemValue.value
         selectBudgetLibraryAction(librarySelectItemValue.value);
     }
 

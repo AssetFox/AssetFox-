@@ -22,20 +22,29 @@
                         Add
                     </v-btn>
                 </v-row>
-                <v-list>
+                
+                <v-list style="overflow: hidden; max-height: 100%; ">
                     <v-list-tile
                     v-for="setting in DialogData.AddedItems"
-                    :key="setting">
+                    :key="setting" >
+                    <v-row justify="end">
+                        <v-col cols = "21" >
                         <v-list-tile-content >
                             <v-list-tile-title v-text="setting.value"></v-list-tile-title>
                         </v-list-tile-content>
+                    </v-col>
+                    <v-col>
                         <input type ="radio" v-if="DialogData.settingName == 'InventoryReports'" v-model="setting.networkType" value ="(R)"/>
                         <label v-if="DialogData.settingName == 'InventoryReports'" style="margin-right: 10px;">RAW</label>
                         <input type ="radio" v-if="DialogData.settingName == 'InventoryReports'" v-model="setting.networkType" value ="(P)"/>
                         <label v-if="DialogData.settingName == 'InventoryReports'">PRIMARY</label>
-                        <v-btn @click="onDeleteSettingClick(setting)"  class="ghd-blue" icon>
+                    </v-col>
+                        <v-btn @click="onDeleteSettingClick(setting)"  class="ghd-blue" flat>
                             <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
+                    
+                        
+                    </v-row>
                     </v-list-tile>
                 </v-list>
             </v-card-text>
@@ -77,6 +86,7 @@ import { getUrl } from '@/shared/utils/get-url';
     const settingItems=ref<SelectItem[]>([]);
     const emit = defineEmits(['submit'])
     const settingSelectItemValue =  ref<string>('');
+    const networkTypeSelected = ref<string>('')
     let primarySuffix: string = "(P)"
     let rawDataSuffix: string = "(R)"
     let primaryType: string  = "PRIMARY"
@@ -84,15 +94,19 @@ import { getUrl } from '@/shared/utils/get-url';
     const { DialogData } = toRefs(props);
     //watchers
     watch(DialogData, () =>  {
+        
+        
        DialogData.value.AddedItems = DialogData.value.selectedSettings.map(_ => {
             let toReturn: {value: string, networkType: string} 
             let type = "";
             let value = "";
+            
             const suffix = _.substring(_.length - 3);
             if(DialogData.value.settingName == "InventoryReports"){
-                if(suffix === primarySuffix){
+                if(suffix == primarySuffix){
                     type = primarySuffix;
                     value = _.substring(0, _.length - 3);
+                    console.log("test");
                 }
                 else if(suffix === rawDataSuffix){
                     type = rawDataSuffix;
@@ -108,18 +122,17 @@ import { getUrl } from '@/shared/utils/get-url';
 
             toReturn = {value: value, networkType: type};
             return toReturn
+            console.log(toReturn.networkType)
         });
         settingsList.value = clone(DialogData.value.settingsList);
-        DialogData.value.selectedItem = '';
+        
     })
     watch(settingsList,() => {
         settingItems.value = settingsList.value.map(_ => {
             return {text: _, value: _}
         });
     })
-    watch(selectedSettings,() => {
-    }
-    )
+    
     function onDeleteSettingClick(setting:any){
         DialogData.value.AddedItems = DialogData.value.AddedItems.filter(_ => _.value !== setting.value);
     }

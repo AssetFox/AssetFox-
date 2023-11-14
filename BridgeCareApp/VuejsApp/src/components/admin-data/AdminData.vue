@@ -388,13 +388,12 @@ import { Console } from 'console';
     }
     function onEditInventoryReportsClick(){
         editAdminDataDialogData.selectedItem=''
-        editAdminDataDialogData.AddedItems = selectedInventoryReports.value.map(str=>
-        {
-            return {value:str, networkType:''}
-        })
-        
         editAdminDataDialogData.showDialog = true;
         editAdminDataDialogData.selectedSettings = clone(  selectedInventoryReports.value);
+        editAdminDataDialogData.AddedItems = selectedInventoryReports.value.map(str=>
+        {
+            return {value:str, networkType:str.substring(str.length - 3)};
+        })
         editAdminDataDialogData.settingName =   inventoryReportsName;
         editAdminDataDialogData.settingsList = clone(inventoryReports);
     }

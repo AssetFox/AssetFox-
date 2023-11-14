@@ -475,7 +475,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
       selectedTab.value = 1;
       onParsePiecewiseEquation();
     } else {
-      isPiecewise.value = true;
+      isPiecewise.value = false;
     }
   }
 
@@ -821,7 +821,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    */
    function onCheckEquation() {
     const equationValidationParameters: EquationValidationParameters = {
-      expression: isPiecewise ? onParseTimeAttributeDataPoints() : expression.value,
+      expression: isPiecewise.value ? onParseTimeAttributeDataPoints() : expression.value,
       isPiecewise: isPiecewise.value,
       currentUserCriteriaFilter: {...emptyUserCriteriaFilter},
       networkId: getBlankGuid()

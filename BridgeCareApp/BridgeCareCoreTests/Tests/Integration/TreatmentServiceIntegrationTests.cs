@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentCost;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Services;
@@ -46,7 +42,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var dataAsString = fileInfo.FileData;
             var bytes = Convert.FromBase64String(dataAsString);
             var stream = new MemoryStream(bytes);
-            //File.WriteAllBytes("zzzzz.xlsx", bytes);
+            File.WriteAllBytes("zzzzz.xlsx", bytes);
             var excelPackage = new ExcelPackage(stream);
             var userCriteria = new UserCriteriaDTO();
             TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteTreatment(treatment, libraryId);
@@ -100,7 +96,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var dataAsString = fileInfo.FileData;
             var bytes = Convert.FromBase64String(dataAsString);
             var stream = new MemoryStream(bytes);
-            //File.WriteAllBytes("zzzzz.xlsx", bytes);
+            File.WriteAllBytes("zzzzz.xlsx", bytes);
             var excelPackage = new ExcelPackage(stream);
             var userCriteria = new UserCriteriaDTO();
             TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatment(treatment, simulationId);
@@ -120,6 +116,70 @@ namespace BridgeCareCoreTests.Tests.Integration
                 t => t.Consequences[0].Equation.Id,
                 t => t.Consequences[0].CriterionLibrary.Id,
                 t => t.PerformanceFactors[0].Id);
+        }
+
+        [Fact]
+        public void DownloadScenarioTreatmentSupersedeRulesSpreadsheet_ThenUpload_Same()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var simulationId = Guid.NewGuid();
+            var simulationName = RandomStrings.WithPrefix("Simulation");
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName);
+
+            // Add treatments
+            var budget = BudgetDtos.New();
+            var budgets = new List<BudgetDTO> { budget };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
+
+            var treatmentBudget = TreatmentBudgetDtos.Dto(budget.Name);
+            var treatmentBudgets = new List<TreatmentBudgetDTO> { treatmentBudget };
+            var treatmentBudgetIds = new List<Guid> { treatmentBudget.Id };
+            var treatmentId = Guid.NewGuid();
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfSimulation(treatmentId, name: "Bridge Replacement", criterionExpression: "treatment criterion", budgets: treatmentBudgets, budgetIds: treatmentBudgetIds);
+
+            var preventTreatmentBudget = TreatmentBudgetDtos.Dto(budget.Name);
+            var preventTreatmentBudgets = new List<TreatmentBudgetDTO> { preventTreatmentBudget };
+            var preventTreatmentBudgetIds = new List<Guid> { preventTreatmentBudget.Id };
+            var preventTreatmentId = Guid.NewGuid();
+            var preventTreatment = TreatmentTestSetup.ModelForSingleTreatmentOfSimulation(preventTreatmentId, name: "Deck Replacement", criterionExpression: "treatment criterion", budgets: preventTreatmentBudgets, budgetIds: preventTreatmentBudgetIds);
+
+            var dtos = new List<TreatmentDTO> { treatment, preventTreatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
+
+            // Add supersede rule
+            var supersedeRule = TreatmentDtos.SupersedeRule(preventTreatment, "Age > 20");
+            var scenarioTreatmentSupersedeRulesPerTreatmentId = TreatmentTestSetup.ModelScenarioTreatmentSupersedeRules(treatmentId, new List<TreatmentSupersedeRuleDTO> { supersedeRule });
+            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(scenarioTreatmentSupersedeRulesPerTreatmentId, simulationId);
+                        
+            // Get treatment supersede rules
+            var supersedeRules = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetScenarioTreatmentSupersedeRules(treatmentId, simulationId);
+
+            var service = CreateTreatmentService(TestHelper.UnitOfWork);
+            // Export
+            var fileInfo = service.ExportScenarioTreatmentSupersedeRuleExcelFile(simulationId);
+            var dataAsString = fileInfo.FileData;
+            var bytes = Convert.FromBase64String(dataAsString);
+            var stream = new MemoryStream(bytes);
+            File.WriteAllBytes("ScenarioTreatmentSupersedeRules.xlsx", bytes);
+            var excelPackage = new ExcelPackage(stream);
+
+            // This was attempting to delete via supersede object.            
+            var supersedeDictionary = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> { { treatmentId, new List<TreatmentSupersedeRuleDTO>() } };
+            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(supersedeDictionary, simulationId);
+
+            // Get treatment supersede rules            
+            var treatmentSupersedeRulesEmpty = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetScenarioTreatmentSupersedeRules(treatmentId, simulationId);
+            Assert.Empty(treatmentSupersedeRulesEmpty);
+
+            // Import and Get
+            service.ImportScenarioTreatmentSupersedeRulesFile(simulationId, excelPackage);
+            var supersedeRulesSame = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetScenarioTreatmentSupersedeRules(treatmentId, simulationId);
+
+            var treatmentSupersedeRule = supersedeRules.Single();
+            var treatmentSupersedeRuleSame = supersedeRulesSame.Single();
+            ObjectAssertions.EquivalentExcluding(treatmentSupersedeRule, treatmentSupersedeRuleSame,
+                _ => _.Id, _ => _.CriterionLibrary.Id, _ => _.CriterionLibrary.Name);
         }
     }
 }

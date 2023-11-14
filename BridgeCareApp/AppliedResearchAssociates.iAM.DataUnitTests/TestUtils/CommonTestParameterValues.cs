@@ -32,6 +32,6 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.TestUtils
 
         public static DateTime TimeStamp = DateTime.Today;
 
-        public static string DefaultEquation = "[DECK_AREA]";
+        public const string DefaultEquation = "[DECK_AREA]";
     }
 }

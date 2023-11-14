@@ -4,6 +4,8 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using EFCore.BulkExtensions;
@@ -32,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             {
                 var locationIdentifier = RandomStrings.WithPrefix("Location");
                 var location = Locations.Section(locationIdentifier);
-                var maintainableAsset = new MaintainableAsset(assetPair.Id, networkId, location, "[Deck_Area]");
+                var maintainableAsset = MaintainableAssets.InNetwork(networkId, CommonTestParameterValues.DefaultEquation, assetPair.Id);
                 maintainableAssets.Add(maintainableAsset);
             }
             var network = NetworkTestSetup.ModelForEntityInDb(unitOfWork, maintainableAssets, networkId);

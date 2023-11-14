@@ -163,6 +163,8 @@ namespace BridgeCareCore.StartupExtension
                                                                    Claim.TreatmentUpdatePermittedFromLibraryAccess,
                                                                    Claim.TreatmentDeleteAnyFromLibraryAccess,
                                                                    Claim.TreatmentDeletePermittedFromLibraryAccess));
+                options.AddPolicy(Policy.ImportTreatmentSupersedeRuleFromScenario,
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentSupersedeRuleImportAnyFromScenarioAccess, Claim.TreatmentSupersedeRuleImportPermittedFromScenarioAccess));
 
                 // Analysis Method
                 options.AddPolicy(Policy.ViewAnalysisMethod,

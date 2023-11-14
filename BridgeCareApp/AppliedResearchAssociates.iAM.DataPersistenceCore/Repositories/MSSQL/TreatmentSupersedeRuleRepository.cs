@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var entityIds = scenarioTreatmentSupersedeRuleEntities.Select(_ => _.Id).ToList();
 
-            var existingEntityIds = _unitOfWork.Context.ScenarioTreatmentSupersedeRule.AsNoTracking()
+            var existingEntityIds = _unitOfWork.Context.ScenarioTreatmentSupersedeRule.AsNoTracking().Include(_ => _.ScenarioSelectableTreatment)
                 .Where(_ => _.ScenarioSelectableTreatment.SimulationId == simulationId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
@@ -55,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         {
                             Id = Guid.NewGuid(),
                             MergedCriteriaExpression = treatmentSupersedeRule.CriterionLibrary.MergedCriteriaExpression,
-                            Name = $"{treatmentSupersedeRule} Criterion",
+                            Name = treatmentSupersedeRule.CriterionLibrary.Name + " ScenarioTreatmentSupersedeRuleCriterion",
                             IsSingleUse = true
                         };
                         criterionJoins.Add(new CriterionLibraryScenarioTreatmentSupersedeRuleEntity

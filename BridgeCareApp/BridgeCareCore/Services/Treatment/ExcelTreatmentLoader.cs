@@ -8,6 +8,8 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Utils;
+using Humanizer;
+using NuGet.Packaging;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.Treatment
@@ -92,7 +94,7 @@ namespace BridgeCareCore.Services.Treatment
                     var equationValidationResult = ValidateEquation(equation);
                     if (!equationValidationResult.IsValid)
                     {
-                        validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 1)}: { equationValidationResult.ValidationMessage}");
+                        validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 1)}: {equationValidationResult.ValidationMessage}");
                     }
                     var equationDto = new EquationDTO
                     {
@@ -268,7 +270,7 @@ namespace BridgeCareCore.Services.Treatment
 
                 if (!string.IsNullOrEmpty(attribute) && !string.IsNullOrEmpty(pf))
                 {
-                    performanceFactors.Add(new TreatmentPerformanceFactorDTO() { Attribute = attribute, PerformanceFactor = ParseFloat(pf) , Id = Guid.NewGuid()});
+                    performanceFactors.Add(new TreatmentPerformanceFactorDTO() { Attribute = attribute, PerformanceFactor = ParseFloat(pf), Id = Guid.NewGuid() });
                 }
             }
 
@@ -301,7 +303,8 @@ namespace BridgeCareCore.Services.Treatment
                 ShadowForSameTreatment = ParseInt(yearsBeforeSame),
                 Costs = loadCosts.Costs,
                 Consequences = loadConsequences.Consequences,
-                CriterionLibrary = criterion != default ? new CriterionLibraryDTO() {
+                CriterionLibrary = criterion != default ? new CriterionLibraryDTO()
+                {
                     Id = Guid.NewGuid(),
                     MergedCriteriaExpression = criterion,
                     IsSingleUse = true,
@@ -325,10 +328,61 @@ namespace BridgeCareCore.Services.Treatment
             var treatmentLoadResult = LoadTreatment(worksheet);
             var loadBudgets = LoadBudgets(worksheet, scenarioBudgets);
 
-            treatmentLoadResult.Treatment.BudgetIds = loadBudgets.budgetIds;                        
+            treatmentLoadResult.Treatment.BudgetIds = loadBudgets.budgetIds;
             treatmentLoadResult.ValidationMessages.AddRange(loadBudgets.ValidationMessages);
 
             return treatmentLoadResult;
         }
+
+        // TODO check if library version can use same method for loading
+        public TreatmentSupersedeRulesLoadResult LoadTreatmentSupersedeRules(ExcelWorksheet worksheet, List<TreatmentDTO> treatments)
+        {
+            var supersedeRulesPerTreatmentId = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>>();
+            // var treatmentSupersedeRules = new List<TreatmentSupersedeRuleDTO>();
+            var validationMessages = new List<string>();
+
+            var index = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.SupersedeTreatmentName, 1);
+            if (index == 0)
+            {
+                throw new Exception($"Cell with content {TreatmentExportStringConstants.SupersedeTreatmentName} not found!");
+            }
+
+            var height = worksheet.Dimension.End.Row;
+            for (var i = index + 1; i <= height; i++)
+            {
+                var treatmentName = worksheet.Cells[i, 1].Text;
+                var supersededTreatmentName = worksheet.Cells[i, 2].Text;
+                var criteria = worksheet.Cells[i, 3].Text;
+                var treatment = treatments.FirstOrDefault(_ => _.Name.Equals(treatmentName));
+                var supersededTreatment = treatments.FirstOrDefault(_ => _.Name.Equals(supersededTreatmentName));
+                if (treatment != null && supersededTreatment != null)
+                {
+                    var criterionLibrary = new CriterionLibraryDTO
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "FromExcelImport",
+                        MergedCriteriaExpression = criteria,
+                        IsSingleUse = true,
+                    };
+
+                    if (supersedeRulesPerTreatmentId.ContainsKey(treatment.Id))
+                    {
+                        supersedeRulesPerTreatmentId[treatment.Id].Add(new TreatmentSupersedeRuleDTO() { Id = Guid.NewGuid(), CriterionLibrary = criterionLibrary, treatment = supersededTreatment });
+                    }
+                    else
+                    {
+                        supersedeRulesPerTreatmentId.Add(treatment.Id, new List<TreatmentSupersedeRuleDTO>() { new TreatmentSupersedeRuleDTO() { Id = Guid.NewGuid(), CriterionLibrary = criterionLibrary, treatment = supersededTreatment } });
+                    }
+                }
+                else
+                {
+                    var name = treatment == null ? treatmentName : string.Empty;
+                    name = supersededTreatment == null ? (string.IsNullOrEmpty(name) ? supersededTreatmentName : ", " + supersededTreatmentName) : string.Empty;
+                    validationMessages.Add("Scenario treatment(s) " + name + " does not exist.");
+                }
+            }
+            return new TreatmentSupersedeRulesLoadResult { supersedeRulesPerTreatmentId = supersedeRulesPerTreatmentId, ValidationMessages = validationMessages };
+        }
     }
 }
+

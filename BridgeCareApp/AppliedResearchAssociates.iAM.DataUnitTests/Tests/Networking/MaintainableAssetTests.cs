@@ -40,7 +40,6 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Networking
             (Attribute attribute, (int year, double value)) attributeYearValueTupple = (mockAttribute.Object, (CommonTestParameterValues.TimeStamp.Year, CommonTestParameterValues.DoubleValue));
 
             mockAggregationRule.Setup(m => m.Apply(attributeData, mockAttribute.Object)).Returns(new List<(Attribute attribute, (int year, double value))> { attributeYearValueTupple });
-
             var maintainableAsset = new MaintainableAsset(guId, networkId, sectionLocation, CommonTestParameterValues.DefaultEquation);
             maintainableAsset.AssignAttributeData(attributeData);
             

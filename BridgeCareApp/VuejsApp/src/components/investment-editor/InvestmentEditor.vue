@@ -1533,8 +1533,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         if (hasUnsavedChanges.value && unsavedDialogAllowed.value) {
             confirm.require({
                 message: "You have unsaved changes. Are you sure you wish to continue?",
-                header: "Unsaved Changes",
-                icon: 'pi pi-question-circle',
+                acceptLabel: "Continue",
+                rejectLabel: "Close",
                 accept: ()=>next(),
                 reject: ()=>otherwise()
             });

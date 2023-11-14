@@ -5,6 +5,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using Newtonsoft.Json;
@@ -360,37 +361,39 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return result;
         }
 
+        private const string DefaultEquation = CommonTestParameterValues.DefaultEquation;
+
         private static List<MaintainableAsset> CompleteMaintainableAssets => new List<MaintainableAsset>()
         {
             new MaintainableAsset(
                 MaintainableAssetId1,
                 NetworkId,
                 new SectionLocation(Guid.NewGuid(), "1"),
-                "[DECK_AREA]"
+                DefaultEquation
             ),
             new MaintainableAsset(
                 MaintainableAssetId2,
                 NetworkId,
                 new SectionLocation(Guid.NewGuid(), "2"),
-                "[DECK_AREA]"
+                DefaultEquation
             ),
             new MaintainableAsset(
                 Guid.Parse("cf28e62e-0a02-4195-8d28-5cdb9646dd58"),
                 NetworkId,
                 new SectionLocation(Guid.NewGuid(), "3"),
-                "[DECK_AREA]"
+                DefaultEquation
             ),
             new MaintainableAsset(
                 Guid.Parse("75b07f98-e168-438f-84b6-fcc57b3e3d8f"),
                 NetworkId,
                 new SectionLocation(Guid.NewGuid(), "4"),
-                "[DECK_AREA]"
+                DefaultEquation
             ),
             new MaintainableAsset(
                 Guid.Parse("dd10baa8-142d-41ec-a8f6-5410d8d1a141"),
                 NetworkId,
                 new SectionLocation(Guid.NewGuid(), "5"),
-                "[DECK_AREA]"
+                DefaultEquation
             )
         };
 

@@ -38,18 +38,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(network.MaintainableAssets.ToList(), network.Id);
         }
 
-        public void CreateNetwork(Analysis.Network network) => _unitOfWork.Context.AddEntity(network.ToEntity(), _unitOfWork.UserEntity?.Id);
-
-        public List<Network> GetAllNetworks()
-        {
-            var domain = _unitOfWork.Context.Network
-                .Include(n => n.MaintainableAssets)
-                .ThenInclude(ma => ma.MaintainableAssetLocation)
-                .Select(e => e.ToDomain(_unitOfWork.EncryptionKey))
-                .ToList();
-            return domain;
-        }
-
         public Task<List<NetworkDTO>> Networks()
         {
             if (!_unitOfWork.Context.Network.Any())
@@ -67,11 +55,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToDto(attributeDbSet, _unitOfWork.EncryptionKey))
                 .ToList();
             });
-        }
-
-        public List<NetworkDTO> GetNetworksByIdsNoChildren(List<Guid> ids)
-        {
-            return _unitOfWork.Context.Network.Where(_ => ids.Contains(_.Id)).Select(_ => _.ToDto(null, _unitOfWork.EncryptionKey)).ToList();
         }
 
         public NetworkEntity GetMainNetwork()

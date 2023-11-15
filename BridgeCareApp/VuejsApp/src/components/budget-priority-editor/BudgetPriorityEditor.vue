@@ -104,10 +104,10 @@
                                 </div>
                                 <div v-else-if="header.key === 'criteria'">
                                     <v-row align="center" style='flex-wrap:nowrap'>
-                                        <v-menu bottom min-height='500px' min-width='500px'>
-                                            <template v-slot:activator>
+                                        <v-menu location="end" min-height='500px' min-width='500px'>
+                                            <template v-slot:activator="{ props }">
                                                 <div v-if='stateScenarioSimpleBudgetDetails.length > 5'>
-                                                    <v-btn class='ara-blue ghd-button-text' flat>
+                                                    <v-btn class='ara-blue ghd-button-text' v-bind="props" flat>
                                                         <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                                     </v-btn>
                                                 </div>
@@ -327,8 +327,8 @@ import { getUrl } from '@/shared/utils/get-url';
     let actionHeader: any = { title: 'Action', key: '', align: 'left', sortable: false, class: '', width: ''}
     let budgetPriorityGridHeaders: any[] = [
         { title: 'Priority', key: 'priorityLevel', align: 'left', sortable: true, class: '', width: '5%' },
-        { title: 'Year', key: 'year', align: 'left', sortable: false, class: '', width: '10%' },
-        { title: 'Criteria', key: 'criteria', align: 'left', sortable: false, class: '', width: '' },
+        { title: 'Year', key: 'year', align: 'left', sortable: false, class: '', width: '5%' },
+        { title: 'Criteria', key: 'criteria', align: 'left', sortable: false, class: '', width: '5%' },
         actionHeader
     ];
     let selectedBudgetPriorityGridRows = ref<BudgetPriorityGridDatum[]>([]);
@@ -440,8 +440,7 @@ import { getUrl } from '@/shared/utils/get-url';
 
     watch(currentPage, onBudgetPrioritiesChanged)
     function onBudgetPrioritiesChanged() {
-        setGridCriteriaColumnWidth();
-        setGridHeaders();
+        
         setGridData();
         currentPage.value.forEach((item) => {
             currentPriorityList.push(item.priorityLevel);
@@ -526,6 +525,11 @@ import { getUrl } from '@/shared/utils/get-url';
         checkHasUnsavedChanges();
     }
 
+    watch(stateScenarioSimpleBudgetDetails, () => {
+        setGridCriteriaColumnWidth();
+        setGridHeaders();
+    })
+
     function hasBudgetPercentagePairsThatMatchBudgets(budgetPriority: BudgetPriority) {
         if (!hasValue(stateScenarioSimpleBudgetDetails)) {
             return true;
@@ -571,6 +575,8 @@ import { getUrl } from '@/shared/utils/get-url';
                 case 5:
                     criteriaColumnWidth = '25%';
                     break;
+                default:
+                    criteriaColumnWidth = '10%';
             }
         }
 

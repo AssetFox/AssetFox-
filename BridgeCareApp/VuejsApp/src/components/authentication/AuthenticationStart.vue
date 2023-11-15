@@ -51,7 +51,7 @@ import config from '@/../public/config.json';
 
     const $router = useRouter();
 
-    onMounted(() => mounted)
+    onMounted(() => mounted())
     function mounted() {
         const hasAuthInfo: boolean =
             securityType === SecurityTypes.esec

@@ -1344,8 +1344,8 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
             confirm.require({
                 message: "You have unsaved changes. Are you sure you wish to continue?",
-                header: "Unsaved Changes",
-                icon: 'pi pi-question-circle',
+                acceptLabel: "Continue",
+                rejectLabel: "Close",
                 accept: ()=>next(),
                 reject: ()=>otherwise()
             });

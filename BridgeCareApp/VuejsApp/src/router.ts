@@ -11,6 +11,7 @@ import {
     onHandleLogout,
 } from '@/shared/utils/authentication-utils';
 import { createRouter, createWebHistory } from 'vue-router';
+import { useConfirm } from 'primevue/useconfirm';
 
 // Lazily-loaded pages
 const Scenario = () =>
@@ -127,15 +128,15 @@ import(
 const onHandlingUnsavedChanges = (to: any, next: any): void => {
     // @ts-ignore
     if (store.state.unsavedChangesFlagModule.hasUnsavedChanges) {
-        next();
         // @ts-ignore
-        // Vue.dialog
-        //     .confirm(
-        //         'You have unsaved changes. Are you sure you wish to continue?',
-        //         { reverse: true },
-        //     )
-        //     .then(() => next())
-        //     .catch(() => next(false));
+        const confirm = useConfirm(); 
+        confirm.require({
+            message: "You have unsaved changes. Are you sure you wish to continue?",
+            acceptLabel: "Continue",
+            rejectLabel: "Close",
+            accept: ()=>next(),
+            reject: ()=>next(false)
+        });
     } else {
         next();
     }

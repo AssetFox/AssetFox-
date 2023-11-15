@@ -238,7 +238,7 @@
                 <v-flex xs2>
                     <div class="dev-and-ver-div">
                         <div class="font-weight-light">iAM</div>
-                        <div>{{implementationName}}</div>
+                        <div id="App-FooterImplementationName-div">{{implementationName}}</div>
                         <div>{{ packageVersion }}</div>
                     </div>
                 </v-flex>

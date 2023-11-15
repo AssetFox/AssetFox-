@@ -29,20 +29,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var entityIds = scenarioTreatmentSupersedeRuleEntities.Select(_ => _.Id).ToList();
 
-            var existingEntityIds = _unitOfWork.Context.ScenarioTreatmentSupersedeRule.AsNoTracking()
+            var existingEntityIds = _unitOfWork.Context.ScenarioTreatmentSupersedeRule.AsNoTracking().Include(_ => _.ScenarioSelectableTreatment)
                 .Where(_ => _.ScenarioSelectableTreatment.SimulationId == simulationId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
+            // Delete
+            var toDeleteScenarioTreatmentSupersedeRuleIds = _unitOfWork.Context.ScenarioTreatmentSupersedeRule.AsNoTracking().Where(_ =>
+               _.ScenarioSelectableTreatment.SimulationId == simulationId && !entityIds.Contains(_.Id)).Select(_ => _.Id).ToList();
+            var libraryEnityIds = _unitOfWork.Context.CriterionLibraryScenarioTreatmentSupersedeRule.AsNoTracking().Where(_ => toDeleteScenarioTreatmentSupersedeRuleIds.Contains(_.ScenarioTreatmentSupersedeRuleId)).Select(_ => _.CriterionLibraryId).ToList();
+            _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ => libraryEnityIds.Contains(_.Id));
+            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentSupersedeRuleEntity>(_ =>
+               _.ScenarioTreatmentSupersedeRule.ScenarioSelectableTreatment.SimulationId == simulationId && !entityIds.Contains(_.ScenarioTreatmentSupersedeRuleId));
             _unitOfWork.Context.DeleteAll<ScenarioTreatmentSupersedeRuleEntity>(_ =>
                _.ScenarioSelectableTreatment.SimulationId == simulationId && !entityIds.Contains(_.Id));
 
+            // Update
             _unitOfWork.Context.UpdateAll(scenarioTreatmentSupersedeRuleEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList());
 
-            _unitOfWork.Context.AddAll(scenarioTreatmentSupersedeRuleEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
+            // Add
+            _unitOfWork.Context.AddAll(scenarioTreatmentSupersedeRuleEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());           
 
-            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentSupersedeRuleEntity>(_ =>
-                _.ScenarioTreatmentSupersedeRule.ScenarioSelectableTreatment.SimulationId == simulationId && existingEntityIds.Contains(_.ScenarioTreatmentSupersedeRuleId));
-
+            // Joins and related entity Add
             var treatmentSupersedeRules = scenarioTreatmentSupersedeRulesPerTreatmentId.SelectMany(_ => _.Value).ToList();
             if (treatmentSupersedeRules.Any(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty))
             {
@@ -55,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         {
                             Id = Guid.NewGuid(),
                             MergedCriteriaExpression = treatmentSupersedeRule.CriterionLibrary.MergedCriteriaExpression,
-                            Name = $"{treatmentSupersedeRule} Criterion",
+                            Name = treatmentSupersedeRule.CriterionLibrary.Name + " ScenarioTreatmentSupersedeRuleCriterion",
                             IsSingleUse = true
                         };
                         criterionJoins.Add(new CriterionLibraryScenarioTreatmentSupersedeRuleEntity
@@ -65,6 +72,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         });
                         return criterion;
                     }).ToList();
+
+                // Delete any existing for related supersede rules                
+                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentSupersedeRuleEntity>(_ => existingEntityIds.Contains(_.ScenarioTreatmentSupersedeRuleId));
 
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);

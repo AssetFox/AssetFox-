@@ -305,7 +305,7 @@ watch(stateUsers,()=>onUserCriteriaChanged())
     criteriaFilterEditorDialogData.value = {
       showDialog: true,
       userId: currentUser.id,
-      name: userFilter.name,
+      name: currentUser.name,
       criteriaId: userFilter.criteriaId,
       description: currentUser.description,
       criteria: userFilter.criteria,

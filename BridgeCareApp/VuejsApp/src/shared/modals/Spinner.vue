@@ -2,10 +2,12 @@
     <v-row>
         <v-dialog content content-class="centered-dialog" persistent v-model="showDialogComputed">
             <v-container>
-                <v-row align-center column justify-center>
-                    <v-progress-circular :size="70" :width="7" class="ara-blue-pantone-281"
-                                         indeterminate></v-progress-circular>
-                    <h1>Please wait</h1>
+                <v-row   justify="center">
+                    <v-col align="center">
+                        <v-progress-circular :size="70" :width="7" class="ara-blue-pantone-281" indeterminate></v-progress-circular>
+                        <h1>Please wait</h1>
+                    </v-col>
+                    
                 </v-row>
             </v-container>
         </v-dialog>
@@ -14,9 +16,8 @@
 
 <script lang="ts" setup>
     import Vue, { computed } from 'vue';
-    import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+
 
 let store = useStore();
 let showDialogComputed = computed<boolean>(() => store.state.busyModule.isBusy);

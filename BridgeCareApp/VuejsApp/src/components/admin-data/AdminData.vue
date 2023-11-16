@@ -1,33 +1,37 @@
 
 <template>
-    <v-row column class="Montserrat-font-family">
+    <v-row class="Montserrat-font-family">
         <v-col cols="12">
             <v-col cols="6" class="ghd-constant-header">
                 <v-row style="margin-bottom: 20px;">
-                    <v-row column>
-                        <v-subheader class="ghd-md-gray ghd-control-label">Primary Network</v-subheader>
-                        <v-select :items="selectPrimaryNetworkItems"  id="AdminData-PrimaryNetwork-select"                       
-                            variant="outlined"
-                            item-title="text"  
-                            item-value="value"
-                            v-model="selectPrimaryNetworkItemValue"
-                            style="padding-left: 17px;"                         
-                            class="ghd-select ghd-text-field ghd-text-field-border">
-                        </v-select>                           
+                    <v-row >
+                        <v-col>
+                            <v-subheader class="ghd-md-gray ghd-control-label">Primary Network</v-subheader>
+                            <v-select :items="selectPrimaryNetworkItems"  id="AdminData-PrimaryNetwork-select"                       
+                                variant="outlined"
+                                item-title="text"  
+                                item-value="value"
+                                v-model="selectPrimaryNetworkItemValue"                   
+                                class="ghd-select ghd-text-field ghd-text-field-border">
+                            </v-select>  
+                        </v-col>
+                                                 
                     </v-row>
                 </v-row>
                 <v-row style="margin-bottom: 20px;">
                     <v-row column>
-                        <v-subheader  class="ghd-md-gray ghd-control-label">Raw Data Network</v-subheader>
-                        <v-select :items="selectRawDataNetworkItems"
-                            variant="outlined"
-                            item-title="text"
-                            style="margin-left: 5px;"
-                            item-value="value"
-                            id="AdminData-rawDataNetwork-select" 
-                            v-model="selectRawdataNetworkItemValue"
-                            class="ghd-select ghd-text-field ghd-text-field-border">
-                        </v-select>
+                        <v-col>
+                            <v-subheader  class="ghd-md-gray ghd-control-label">Raw Data Network</v-subheader>
+                            <v-select :items="selectRawDataNetworkItems"
+                                variant="outlined"
+                                item-title="text"
+                                item-value="value"
+                                id="AdminData-rawDataNetwork-select" 
+                                v-model="selectRawdataNetworkItemValue"
+                                class="ghd-select ghd-text-field ghd-text-field-border">
+                            </v-select>
+                        </v-col>
+                        
                     </v-row>
                 </v-row>
             </v-col>

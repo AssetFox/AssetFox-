@@ -2,24 +2,28 @@
   <v-dialog max-width="450px" persistent v-model ="dialogData.showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
-         <v-row justify-space-between align-center>
+         <v-row justify="space-between" align="center">
             <div class="ghd-control-dialog-header">New Network</div>
           </v-row>
         </v-card-title>           
       <v-card-text class="ghd-dialog-box-padding-center">
-        <v-row column>
-          <v-text-field outline 
-            label="Name"
+        <v-row>
+          <v-col>
+            <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>      
+            <v-text-field variant="outlined" 
+
             id="AddNetworkDialog-NetworkName-vtextfield"
             v-model="networkName"
             class="ghd-text-field-border ghd-text-field"/>
+          </v-col>
+          
         </v-row>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
-        <v-row justify-center row>
-          <v-btn id="AddNetworkDialog-Cancel-vbtn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button'  style="margin-right:auto; margin-left:auto;" variant = "flat">Cancel</v-btn>
+        <v-row justify="center">
+          <v-btn id="AddNetworkDialog-Cancel-vbtn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button'   variant = "flat">Cancel</v-btn>
           <v-btn id="AddNetworkDialog-Save-vbtn" @click="onSubmit(true)"
-                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-right:auto; margin-left:auto;" variant = "outlined">
+                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'  variant = "outlined">
             Save
           </v-btn>          
         </v-row>

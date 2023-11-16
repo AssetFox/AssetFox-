@@ -5,13 +5,14 @@
                 <v-subheader class="ghd-control-label ghd-md-gray">Deterioration Model Library</v-subheader>
                 <v-select
                     id="PerformanceCurveEditor-library-select"
-                    class="ghd-control-border ghd-control-text ghd-select"
+                    class="ghd-control-border ghd-control-text ghd-select "
                     :items="librarySelectItems"
                     append-icon=ghd-down
                     variant="outlined"
                     v-model="librarySelectItemValue"
                     item-title="text" 
                     item-value="value" 
+                    density="compact"
                 >
                 </v-select>
                 <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}                    

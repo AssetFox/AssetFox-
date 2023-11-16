@@ -14,10 +14,11 @@
                             variant="outlined"
                             style="margin-left:1%;"
                             append-icon="@/assets/icons/down.svg"
-                            v-model='selectAttributeItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
+                            v-model='selectAttributeItemValue' class="ghd-select ghd-text-field ghd-text-field-border"
+                            density="compact">
                         </v-select>                           
                     </v-row>
-                    <v-btn id="Attributes-addAttribute-vbtn" @click="addAttribute" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
+                    <v-btn style="margin-top: -11px;" id="Attributes-addAttribute-vbtn" @click="addAttribute" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                         Add Attribute
                     </v-btn>
                 </v-row>
@@ -28,8 +29,8 @@
             <v-row>
                 <v-col cols="2"> 
                     <v-subheader class="ghd-md-gray ghd-control-label" style="margin-left:2%;">Attribute</v-subheader>
-                    <v-text-field id="Attributes-attributeName-vtextfield" outline class="ghd-text-field-border ghd-text-field"
-                         v-model='selectedAttribute.name'/>
+                    <v-text-field id="Attributes-attributeName-vtextfield" variant="outlined" class="ghd-text-field-border ghd-text-field"
+                         v-model='selectedAttribute.name' density="compact"/>
                 </v-col>
                 <v-col cols="2">
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Type</v-subheader>
@@ -40,7 +41,8 @@
                         variant="outlined"
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='typeSelectValues'
-                        v-model='selectedAttribute.type'>
+                        v-model='selectedAttribute.type'
+                        density="compact">
                     </v-select>                           
                 </v-col>
                 <v-col cols="4">
@@ -54,7 +56,8 @@
                         variant="outlined"
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='aggregationRuleSelectValues'
-                        v-model='selectedAttribute.aggregationRuleType'>
+                        v-model='selectedAttribute.aggregationRuleType'
+                        density="compact">
                     </v-select>                           
                 </v-col>
             </v-row>
@@ -62,27 +65,27 @@
         <v-col cols="12" v-if="hasSelectedAttribute">
             <v-col cols="10">
                 <v-row>
-                    <v-col cols="2">
+                    <v-col cols="2" class="pl-0">
                         <v-subheader class="ghd-md-gray ghd-control-label">Default Value</v-subheader>
-                        <v-text-field id="Attributes-attributeDefaultString-vtextfield" v-if="selectedAttribute.type == 'STRING'" outline class="ghd-text-field-border ghd-text-field"
-                            v-model='selectedAttribute.defaultValue'/>
-                        <v-text-field id="Attributes-attributeDefaultNumber-vtextfield" v-if="selectedAttribute.type != 'STRING'" outline class="ghd-text-field-border ghd-text-field"
+                        <v-text-field id="Attributes-attributeDefaultString-vtextfield" v-if="selectedAttribute.type == 'STRING'" variant="outlined" class="ghd-text-field-border ghd-text-field"
+                            v-model='selectedAttribute.defaultValue' density="compact"/>
+                        <v-text-field id="Attributes-attributeDefaultNumber-vtextfield" v-if="selectedAttribute.type != 'STRING'" variant="outlined" class="ghd-text-field-border ghd-text-field"
                             v-model='selectedAttribute.defaultValue'
-                            />
+                            density="compact"/>
                     </v-col>
                     <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Minimum Value</v-subheader>
-                        <v-text-field id="Attributes-attributeMinimumValue-vtextfield" outline class="ghd-text-field-border ghd-text-field"                            
+                        <v-text-field id="Attributes-attributeMinimumValue-vtextfield" variant="outlined" class="ghd-text-field-border ghd-text-field"                            
                             v-model.number='selectedAttribute.minimum'
-                            />
+                            density="compact"/>
                     </v-col>
                     <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Maximum Value</v-subheader>
-                        <v-text-field id="Attributes-attributeMaximumValue-vtextfield" outline class="ghd-text-field-border ghd-text-field"
+                        <v-text-field id="Attributes-attributeMaximumValue-vtextfield" variant="outlined" class="ghd-text-field-border ghd-text-field"
                             v-model.number='selectedAttribute.maximum'
-                            />
+                            density="compact"/>
                     </v-col>
-                    <v-col cols="4" style="padding-top:50px;">
+                    <v-col cols="4" style="padding-top:40px;">
                         <v-row>
                         <v-switch id="Attributes-attributeCalculated-vswitch" class='sharing header-text-content'  label='Calculated' 
                             v-model='selectedAttribute.isCalculated'/>
@@ -107,7 +110,8 @@
                         variant="outlined"
                         v-model='selectDatasourceItemValue'
                         :items='selectDatasourceItems'                     
-                        class="ghd-select ghd-text-field ghd-text-field-border">
+                        class="ghd-select ghd-text-field ghd-text-field-border"
+                        density="compact">
                     </v-select>                           
                 </v-row>
             </v-col>
@@ -146,14 +150,15 @@
                         item-value="value"
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='selectExcelColumns'
-                        v-model='selectedAttribute.command'>
+                        v-model='selectedAttribute.command'
+                        density="compact">
                     </v-select>                           
                 </v-row>
             </v-col>
         </v-col>
         <!-- The Buttons  -->
         <v-col cols="12" v-if="hasSelectedAttribute">        
-            <v-row justify-center>
+            <v-row justify="center">
                 <v-btn id="Attributes-cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Cancel
                 </v-btn>  

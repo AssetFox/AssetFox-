@@ -36,14 +36,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.Id).ToList();
 
             // Delete
-            var toDeleteScenarioTreatmentSupersedeRuleIds = _unitOfWork.Context.ScenarioTreatmentSupersedeRule.AsNoTracking().Where(_ =>
+            var scenarioTreatmentSupersedeRuleIdsToDelete = _unitOfWork.Context.ScenarioTreatmentSupersedeRule.AsNoTracking().Where(_ =>
                _.ScenarioSelectableTreatment.SimulationId == simulationId && !entityIds.Contains(_.Id)).Select(_ => _.Id).ToList();
-            var libraryEnityIds = _unitOfWork.Context.CriterionLibraryScenarioTreatmentSupersedeRule.AsNoTracking().Where(_ => toDeleteScenarioTreatmentSupersedeRuleIds.Contains(_.ScenarioTreatmentSupersedeRuleId)).Select(_ => _.CriterionLibraryId).ToList();
-            _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ => libraryEnityIds.Contains(_.Id));
-            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentSupersedeRuleEntity>(_ =>
-               _.ScenarioTreatmentSupersedeRule.ScenarioSelectableTreatment.SimulationId == simulationId && !entityIds.Contains(_.ScenarioTreatmentSupersedeRuleId));
-            _unitOfWork.Context.DeleteAll<ScenarioTreatmentSupersedeRuleEntity>(_ =>
-               _.ScenarioSelectableTreatment.SimulationId == simulationId && !entityIds.Contains(_.Id));
+            var libraryEnityIdsToDelete = _unitOfWork.Context.CriterionLibraryScenarioTreatmentSupersedeRule.AsNoTracking().Where(_ => scenarioTreatmentSupersedeRuleIdsToDelete.Contains(_.ScenarioTreatmentSupersedeRuleId)).Select(_ => _.CriterionLibraryId).ToList();
+            _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ => libraryEnityIdsToDelete.Contains(_.Id));
+            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentSupersedeRuleEntity>(_ => scenarioTreatmentSupersedeRuleIdsToDelete.Contains(_.ScenarioTreatmentSupersedeRuleId));
+            _unitOfWork.Context.DeleteAll<ScenarioTreatmentSupersedeRuleEntity>(_ => scenarioTreatmentSupersedeRuleIdsToDelete.Contains(_.Id));
 
             // Update
             _unitOfWork.Context.UpdateAll(scenarioTreatmentSupersedeRuleEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList());
@@ -51,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // Add
             _unitOfWork.Context.AddAll(scenarioTreatmentSupersedeRuleEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());           
 
-            // Joins and related entity Add
+            // Joins
             var treatmentSupersedeRules = scenarioTreatmentSupersedeRulesPerTreatmentId.SelectMany(_ => _.Value).ToList();
             if (treatmentSupersedeRules.Any(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty))
             {
@@ -75,9 +73,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         return criterion;
                     }).ToList();
 
-                // Delete any existing for related supersede rules                
+                // Delete any existing entries for related supersede rules                
                 _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentSupersedeRuleEntity>(_ => existingEntityIds.Contains(_.ScenarioTreatmentSupersedeRuleId));
 
+                // Add
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }
@@ -90,12 +89,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException(ScenarioTreatmentNotFoundErrorMessage);
             }
 
-            var treatments = _unitOfWork.Context.ScenarioSelectableTreatment.Where(_ => _.SimulationId == simulationId).Select(_ => _.ToDto(null));
+            var treatments = _unitOfWork.Context.ScenarioSelectableTreatment.Where(_ => _.SimulationId == simulationId).Select(_ => _.ToDto(null)).ToList();
             return _unitOfWork.Context.ScenarioTreatmentSupersedeRule.AsNoTracking()
                 .Include(_ => _.CriterionLibraryScenarioTreatmentSupersedeRuleJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Where(_ => _.ScenarioSelectableTreatment.Id == treatmentId)
-                .Select(_ => _.ToDto(treatments.ToList()))
+                .Select(_ => _.ToDto(treatments))
                 .ToList();
         }
 
@@ -124,20 +123,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var entityIds = treatmentSupersedeRuleEntities.Select(_ => _.Id).ToList();
 
-            var existingEntityIds = _unitOfWork.Context.TreatmentSupersedeRule.AsNoTracking()
+            var existingEntityIds = _unitOfWork.Context.TreatmentSupersedeRule.AsNoTracking().Include(_ => _.SelectableTreatment)
                 .Where(_ => _.SelectableTreatment.TreatmentLibraryId == libraryId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
-            _unitOfWork.Context.DeleteAll<TreatmentSupersedeRuleEntity>(_ =>
-               _.SelectableTreatment.TreatmentLibraryId == libraryId && !entityIds.Contains(_.Id));
+            // Delete
+            var libraryTreatmentSupersedeRuleIdsToDelete = _unitOfWork.Context.TreatmentSupersedeRule.AsNoTracking().Where(_ =>
+               _.SelectableTreatment.TreatmentLibraryId == libraryId && !entityIds.Contains(_.Id)).Select(_ => _.Id).ToList();
+            var libraryEnityIdsToDelete = _unitOfWork.Context.CriterionLibraryTreatmentSupersedeRule.AsNoTracking().Where(_ => libraryTreatmentSupersedeRuleIdsToDelete.Contains(_.TreatmentSupersedeRuleId)).Select(_ => _.CriterionLibraryId).ToList();
+            _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ => libraryEnityIdsToDelete.Contains(_.Id));
+            _unitOfWork.Context.DeleteAll<CriterionLibraryTreatmentSupersedeRuleEntity>(_ => libraryTreatmentSupersedeRuleIdsToDelete.Contains(_.TreatmentSupersedeRuleId));
+            _unitOfWork.Context.DeleteAll<TreatmentSupersedeRuleEntity>(_ => libraryTreatmentSupersedeRuleIdsToDelete.Contains(_.Id));
 
             _unitOfWork.Context.UpdateAll(treatmentSupersedeRuleEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList());
 
-            _unitOfWork.Context.AddAll(treatmentSupersedeRuleEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
+            _unitOfWork.Context.AddAll(treatmentSupersedeRuleEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());            
 
-            _unitOfWork.Context.DeleteAll<CriterionLibraryTreatmentSupersedeRuleEntity>(_ =>
-                _.TreatmentSupersedeRule.SelectableTreatment.TreatmentLibraryId == libraryId && existingEntityIds.Contains(_.TreatmentSupersedeRuleId));
-
+            // Joins
             var treatmentSupersedeRules = supersedeRulesPerTreatmentId.SelectMany(_ => _.Value).ToList();
             if (treatmentSupersedeRules.Any(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty))
             {
@@ -150,7 +152,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         {
                             Id = Guid.NewGuid(),
                             MergedCriteriaExpression = treatmentSupersedeRule.CriterionLibrary.MergedCriteriaExpression,
-                            Name = $"{treatmentSupersedeRule} Criterion",
+                            Name = treatmentSupersedeRule.CriterionLibrary.Name + " LibraryTreatmentSupersedeRuleCriterion",                            
                             IsSingleUse = true
                         };
                         criterionJoins.Add(new CriterionLibraryTreatmentSupersedeRuleEntity
@@ -161,6 +163,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         return criterion;
                     }).ToList();
 
+                // Delete any existing entries for related supersede rules                                
+                _unitOfWork.Context.DeleteAll<CriterionLibraryTreatmentSupersedeRuleEntity>(_ => existingEntityIds.Contains(_.TreatmentSupersedeRuleId));
+
+                // Add
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }
@@ -173,12 +179,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException(TreatmentNotFoundErrorMessage);
             }
 
-            var treatments = _unitOfWork.Context.SelectableTreatment.Where(_ => _.TreatmentLibraryId == libraryId).Select(_ => _.ToDto(null));
+            var treatments = _unitOfWork.Context.SelectableTreatment.Where(_ => _.TreatmentLibraryId == libraryId).Select(_ => _.ToDto(null)).ToList();
             return _unitOfWork.Context.TreatmentSupersedeRule.AsNoTracking()
                 .Include(_ => _.CriterionLibraryTreatmentSupersedeRuleJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Where(_ => _.SelectableTreatment.Id == treatmentId)
-                .Select(_ => _.ToDto(treatments.ToList()))
+                .Select(_ => _.ToDto(treatments))
                 .ToList();
         }
 

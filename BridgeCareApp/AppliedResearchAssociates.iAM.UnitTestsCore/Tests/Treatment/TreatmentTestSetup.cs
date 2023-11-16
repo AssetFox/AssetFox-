@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment;
@@ -17,6 +14,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var dto = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(id, name);
             var dtos = new List<TreatmentDTO> { dto };
             unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dtos, treatmentLibraryId);
+            return dto;
+        }
+
+        public static TreatmentDTO ModelForSingleTreatmentOfLibrary(Guid? id = null, string name = "Treatment name", string criterionExpression = null)
+        {
+            var dto = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists(id, name, criterionExpression);
+
             return dto;
         }
 
@@ -49,12 +53,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return dto;
         }
 
-        public static Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> ModelScenarioTreatmentSupersedeRules(Guid treatmentId,List<TreatmentSupersedeRuleDTO> supersedeRules)
+        public static Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> ModelTreatmentSupersedeRules(Guid treatmentId, List<TreatmentSupersedeRuleDTO> supersedeRules)
         {
             var scenarioTreatmentSupersedeRulesPerTreatmentId = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>>
             {
                 { treatmentId, supersedeRules }
             };
+
             return scenarioTreatmentSupersedeRulesPerTreatmentId;
         }
     }   

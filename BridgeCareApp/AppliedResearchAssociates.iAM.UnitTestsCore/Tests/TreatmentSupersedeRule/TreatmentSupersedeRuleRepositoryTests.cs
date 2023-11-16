@@ -34,7 +34,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
         public void UpsertOrDeleteTreatmentSupersedeRules_DoesNotThrow()
         {
             // Arrange
-            Setup();
             var dto = new TreatmentLibraryDTO
             {
                 Id = Guid.NewGuid(),
@@ -144,7 +143,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
         }
 
         [Fact]
-        public void GetScenarioTreatmentSupersedeRules_Succeeds()
+        public void GetScenarioTreatmentSupersedeRulesWithTwoParams_Succeeds()
         {
             // Arrange
             Setup();
@@ -159,7 +158,53 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
             // Assert
             Assert.IsType<List<TreatmentSupersedeRuleDTO>>(result);
             Assert.Equal(1, result?.Count);
-        }                
+        }
+
+        [Fact]
+        public void GetScenarioTreatmentSupersedeRulesBysimulationId_Succeeds()
+        {
+            // Arrange
+            Setup();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            CreateScenarioTestData(simulation.Id);
+
+            // Act
+            var result = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetScenarioTreatmentSupersedeRulesBysimulationId(simulation.Id);
+
+            // Assert
+            Assert.IsType<List<TreatmentSupersedeRuleExportDTO>>(result);
+            Assert.Equal(1, result?.Count);
+        }
+
+        [Fact]
+        public void GetLibraryTreatmentSupersedeRulesWithTwoParams_Succeeds()
+        {
+            // Arrange                        
+            CreateLibraryTestData();
+            var dtos = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(_testTreatmentLibrary.Id);
+
+            // Act
+            var result = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRules(_testTreatment.Id, _testTreatmentLibrary.Id);
+
+            // Assert
+            Assert.IsType<List<TreatmentSupersedeRuleDTO>>(result);
+            Assert.Equal(1, result?.Count);
+        }
+
+        [Fact]
+        public void GetLibraryTreatmentSupersedeRulesBysimulationId_Succeeds()
+        {
+            // Arrange
+            CreateLibraryTestData();
+            var dtos = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(_testTreatmentLibrary.Id);
+
+            // Act
+            var result = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRulesByLibraryId(_testTreatmentLibrary.Id);
+
+            // Assert
+            Assert.IsType<List<TreatmentSupersedeRuleExportDTO>>(result);
+            Assert.Equal(1, result?.Count);
+        }
 
         private void CreateScenarioTestData(Guid simulationId)
         {
@@ -231,7 +276,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
         }
 
         private int GetSupersedeRulesCount(TreatmentDTO treatmentDTO) =>
-            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRules(treatmentDTO.Id, _testTreatmentLibrary.Id).Count;
-        
+            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRules(treatmentDTO.Id, _testTreatmentLibrary.Id).Count;        
     }
 }

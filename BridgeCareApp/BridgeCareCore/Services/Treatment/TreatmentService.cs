@@ -230,21 +230,78 @@ namespace BridgeCareCore.Services
             return fileInfoResult;
         }
 
-        public ScenarioTreatmentSupersedeRuleImportResultDTO ImportScenarioTreatmentSupersedeRulesFile(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
+        public TreatmentSupersedeRuleImportResultDTO ImportScenarioTreatmentSupersedeRulesFile(Guid simulationId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
-            queueLog ??= new DoNothingWorkQueueLog();
-            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+            queueLog ??= new DoNothingWorkQueueLog();            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
             {
-                return new ScenarioTreatmentSupersedeRuleImportResultDTO();
+                return new TreatmentSupersedeRuleImportResultDTO();
             }
             queueLog.UpdateWorkQueueStatus("Loading Excel");
 
             var worksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
-            var scenarioTreatments = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);            
+            var scenarioTreatments = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
             var treatmentSupersedeRuleResult = _treatmentLoader.LoadTreatmentSupersedeRules(worksheet, scenarioTreatments);
+            var scenarioTreatmentSupersedeRuleImportResult = GetTreatmentSupersedeRuleImportResultDTO(treatmentSupersedeRuleResult);
 
-            var validationMessages = treatmentSupersedeRuleResult.ValidationMessages;
+            if (scenarioTreatmentSupersedeRuleImportResult.WarningMessage.Length == 0)
+            {
+                if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                {
+                    return new TreatmentSupersedeRuleImportResultDTO();
+                }
+                queueLog.UpdateWorkQueueStatus("Upserting Scenario Treatment Supersede Rules");
+                _unitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(scenarioTreatmentSupersedeRuleImportResult.supersedeRulesPerTreatmentIdDict, simulationId);
+            }
+            return scenarioTreatmentSupersedeRuleImportResult;
+        }
+
+        public FileInfoDTO ExportScenarioTreatmentSupersedeRuleExcelFile(Guid simulationId)
+        {
+            var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);            
+            var scenarioTreatmentSupersedeRules = _unitOfWork.TreatmentSupersedeRuleRepo.GetScenarioTreatmentSupersedeRulesBysimulationId(simulationId); 
+            var fileName = $"ScenarioTreatmentSupersedeRules_{simulation.Name.Trim().Replace(" ", "_")}.xlsx";
+
+            return CreateExportScenarioTreatmentRuleExportFile(scenarioTreatmentSupersedeRules, fileName);
+        }
+
+        public FileInfoDTO ExportLibraryTreatmentSupersedeRuleExcelFile(Guid libraryId)
+        {
+            var library = _unitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibaryNoChildren(libraryId) ?? throw new NullReferenceException("No Treatment Library found for given id");
+            var libraryTreatmentSupersedeRules = _unitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRulesByLibraryId(libraryId);
+            var fileName = $"TreatmentSupersedeRules_{library.Name.Trim().Replace(" ", "_")}.xlsx";
+
+            return CreateExportScenarioTreatmentRuleExportFile(libraryTreatmentSupersedeRules, fileName);
+        }
+
+        public TreatmentSupersedeRuleImportResultDTO ImportLibraryTreatmentSupersedeRulesFile(Guid libraryId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
+        {
+            queueLog ??= new DoNothingWorkQueueLog();            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+            {
+                return new TreatmentSupersedeRuleImportResultDTO();
+            }
+            queueLog.UpdateWorkQueueStatus("Loading Excel");
+
+            var worksheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
+            var libraryTreatments = _unitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(libraryId);
+            var treatmentSupersedeRuleResult = _treatmentLoader.LoadTreatmentSupersedeRules(worksheet, libraryTreatments);
+            var treatmentSupersedeRuleImportResult = GetTreatmentSupersedeRuleImportResultDTO(treatmentSupersedeRuleResult);
+
+            if (treatmentSupersedeRuleImportResult.WarningMessage.Length == 0)
+            {
+                if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+                {
+                    return new TreatmentSupersedeRuleImportResultDTO();
+                }
+                queueLog.UpdateWorkQueueStatus("Upserting Scenario Treatment Supersede Rules");
+                _unitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteTreatmentSupersedeRules(treatmentSupersedeRuleImportResult.supersedeRulesPerTreatmentIdDict, libraryId);
+            }
+            return treatmentSupersedeRuleImportResult;
+        }
+
+        private static TreatmentSupersedeRuleImportResultDTO GetTreatmentSupersedeRuleImportResultDTO(TreatmentSupersedeRulesLoadResult treatmentSupersedeRuleResult)
+        {
             var combinedValidationMessage = string.Empty;
+            var validationMessages = treatmentSupersedeRuleResult.ValidationMessages;
             if (validationMessages.Any())
             {
                 var combinedValidationMessageBuilder = new StringBuilder();
@@ -255,46 +312,13 @@ namespace BridgeCareCore.Services
                 combinedValidationMessage = combinedValidationMessageBuilder.ToString();
             }
 
-            var scenarioTreatmentSupersedeRuleImportResult = new ScenarioTreatmentSupersedeRuleImportResultDTO
+            var scenarioTreatmentSupersedeRuleImportResult = new TreatmentSupersedeRuleImportResultDTO
             {
-                supersedeRulesPerTreatmentId = treatmentSupersedeRuleResult.supersedeRulesPerTreatmentId,
+                supersedeRulesPerTreatmentIdDict = treatmentSupersedeRuleResult.supersedeRulesPerTreatmentIdDict,
                 WarningMessage = combinedValidationMessage,
             };
 
-            if (combinedValidationMessage.Length == 0)
-            {
-                if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
-                {
-                    return new ScenarioTreatmentSupersedeRuleImportResultDTO();
-                }
-                queueLog.UpdateWorkQueueStatus("Upserting Scenario Treatment Supersede Rules");
-                _unitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(scenarioTreatmentSupersedeRuleImportResult.supersedeRulesPerTreatmentId, simulationId);
-            }
             return scenarioTreatmentSupersedeRuleImportResult;
-        }
-
-        public FileInfoDTO ExportScenarioTreatmentSupersedeRuleExcelFile(Guid simulationId)
-        {
-            var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
-            var simulationName = simulation.Name;
-            var scenarioTreatmentSupersedeRules = _unitOfWork.TreatmentSupersedeRuleRepo.GetScenarioTreatmentSupersedeRulesBysimulationId(simulationId); 
-            var fileName = $"ScenarioTreatmentSupersedeRules_{simulationName.Trim().Replace(" ", "_")}.xlsx";
-
-            return CreateExportScenarioTreatmentRuleExportFile(scenarioTreatmentSupersedeRules, fileName);
-        }
-
-        public FileInfoDTO ExportLibraryTreatmentSupersedeRuleExcelFile(Guid libraryId)
-        {
-            var library = _unitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(libraryId);
-            var libraryTreatmentSupersedeRules = _unitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRulesByLibraryId(libraryId);
-            var fileName = $"TreatmentSupersedeRules_{library.Name.Trim().Replace(" ", "_")}.xlsx";
-
-            return CreateExportScenarioTreatmentRuleExportFile(libraryTreatmentSupersedeRules, fileName);
-        }
-
-        public ScenarioTreatmentSupersedeRuleImportResultDTO ImportLibraryTreatmentSupersedeRulesFile(Guid libraryId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
-        {
-            throw new NotImplementedException();
         }
 
         private static FileInfoDTO CreateExportScenarioTreatmentRuleExportFile(List<TreatmentSupersedeRuleExportDTO> treatmentSupersedeRules, string fileName)

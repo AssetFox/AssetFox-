@@ -277,9 +277,9 @@
                 <v-spacer></v-spacer>
                 <v-col cols = "1">
                     <div class="dev-and-ver-div" >
-                        <div class="font-weight-light"  >iAM</div>
-                        <div>{{implementationName}}</div>
-                        <div>{{ packageVersion }}</div>
+                        <div>iAM</div> &nbsp;
+                        <div>{{implementationName}}</div> &nbsp;
+                        <div>{{packageVersionEnv}}</div>
                     </div>
                 </v-col>
                 <v-spacer></v-spacer>
@@ -408,10 +408,11 @@ import { getUrl } from './shared/utils/get-url';
     let currentURL: any = '';
     let unauthorizedError: string = '';
     const implementationName =ref<string>('');
+    let packageVersionEnv = ref<string>('');
     const agencyLogo= ref<string>('');
     const productLogo= ref<string>('');
     let inventoryReportName: string = '';
-    let alert: Ref<boolean> = ref(false);   
+    let alert: Ref<boolean> = ref(false);
 
     const $emitter = mitt()
     
@@ -503,6 +504,8 @@ import { getUrl } from './shared/utils/get-url';
     }
     
     function created() {
+        packageVersionEnv.value = import.meta.env.VITE_APP_VERSION // declared in .env files
+
         // create a request handler
         async function requestHandler(
             request: AxiosRequestConfig,

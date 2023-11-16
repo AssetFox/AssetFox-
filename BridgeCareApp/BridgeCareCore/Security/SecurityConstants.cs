@@ -47,6 +47,7 @@
             public const string ImportTreatmentFromLibrary = "ImportTreatmentFromLibrary";
             public const string ImportTreatmentFromScenario = "ImportTreatmentFromScenario";
             public const string ImportTreatmentSupersedeRuleFromScenario = "ImportTreatmentSupersedeRuleFromScenario";
+            public const string ImportTreatmentSupersedeRuleFromLibrary = "ImportTreatmentSupersedeRuleFromLibrary";
             public const string ModifyOrDeleteTreatmentFromLibrary = "ModifyOrDeleteTreatmentFromLibrary";
             public const string ViewAnalysisMethod = "ViewAnalysisMethod";
             public const string ModifyAnalysisMethod = "ModifyAnalysisMethod";
@@ -157,6 +158,8 @@
             public const string TreatmentViewAnyFromScenarioAccess = "TreatmentViewAnyFromScenarioAccess";
             public const string TreatmentSupersedeRuleImportAnyFromScenarioAccess = "TreatmentSupersedeRuleImportAnyFromScenarioAccess";
             public const string TreatmentSupersedeRuleImportPermittedFromScenarioAccess = "TreatmentSupersedeRuleImportPermittedFromScenarioAccess";
+            public const string TreatmentSupersedeRuleImportAnyFromLibraryAccess = "TreatmentSupersedeRuleImportAnyFromLibraryAccess";
+            public const string TreatmentSupersedeRuleImportPermittedFromLibraryAccess = "TreatmentSupersedeRuleImportPermittedFromLibraryAccess";
             public const string UserCriteriaModifyAccess = "UserCriteriaModifyAccess";
             public const string UserCriteriaViewAccess = "UserCriteriaViewAccess";
             public const string AnalysisMethodModifyAnyAccess = "AnalysisMethodModifyAnyAccess";

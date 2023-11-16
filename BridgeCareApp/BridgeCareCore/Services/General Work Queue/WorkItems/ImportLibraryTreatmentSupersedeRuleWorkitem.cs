@@ -1,32 +1,32 @@
-﻿using System;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
-using System.Threading;
 using AppliedResearchAssociates.iAM.WorkQueue;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
-using Microsoft.Extensions.DependencyInjection;
 using OfficeOpenXml;
+using System.Threading;
+using System;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
-    public record ImportScenarioTreatmentSupersedeRuleWorkitem(Guid SimulationId, ExcelPackage ExcelPackage, string UserId, string simulationName) : IWorkSpecification<WorkQueueMetadata>
+    public record ImportLibraryTreatmentSupersedeRuleWorkitem(Guid LibraryId, ExcelPackage ExcelPackage, string UserId, string LibraryName) : IWorkSpecification<WorkQueueMetadata>
     {
-        public string WorkId => WorkQueueWorkIdFactory.CreateId(SimulationId, WorkType.ImportScenarioTreatmentSupersedeRule);
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(LibraryId, WorkType.ImportLibraryTreatmentSupersedeRule);
 
         public DateTime StartTime { get; set; }
 
-        public string WorkDescription => "Import Scenario Treatments Supersede Rules";
+        public string WorkDescription => "Import Library Treatments Supersede Rules";
 
         public WorkQueueMetadata Metadata =>
-            new WorkQueueMetadata() { WorkType = WorkType.ImportScenarioTreatmentSupersedeRule, DomainType = DomainType.Treatment, DomainId = SimulationId };
+            new WorkQueueMetadata() { WorkType = WorkType.ImportLibraryTreatmentSupersedeRule, DomainType = DomainType.Treatment, DomainId = LibraryId };
 
-        public string WorkName => simulationName;
+        public string WorkName => LibraryName;
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
@@ -36,7 +36,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _treatmentService = scope.ServiceProvider.GetRequiredService<ITreatmentService>();
             var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
-            var importResult = _treatmentService.ImportScenarioTreatmentSupersedeRulesFile(SimulationId, ExcelPackage, cancellationToken, _queueLogger);
+            var importResult = _treatmentService.ImportLibraryTreatmentSupersedeRulesFile(LibraryId, ExcelPackage, cancellationToken, _queueLogger);
             if (importResult.WarningMessage != null && importResult.WarningMessage.Trim() != "")
             {
                 _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastWarning, importResult.WarningMessage);
@@ -48,7 +48,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
 
-            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"{TreatmentController.TreatmentError}::ImportScenarioTreatmentSupersedeRulesFile - {errorMessage}");
+            _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"{TreatmentController.TreatmentError}::ImportLibraryTreatmentSupersedeRulesFile - {errorMessage}");
         }
 
         public void OnCompletion(IServiceProvider serviceProvider)
@@ -69,5 +69,6 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastFastWorkQueueUpdate, WorkId);
         }
+
     }
 }

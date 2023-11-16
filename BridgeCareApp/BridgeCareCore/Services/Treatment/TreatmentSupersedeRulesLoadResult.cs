@@ -6,7 +6,7 @@ namespace BridgeCareCore.Services.Treatment
 {
     public class TreatmentSupersedeRulesLoadResult
     {        
-        public Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> supersedeRulesPerTreatmentId { get; set; }
+        public Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> supersedeRulesPerTreatmentIdDict { get; set; }
 
         public List<string> ValidationMessages { get; set; }
     }

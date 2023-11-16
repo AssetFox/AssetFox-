@@ -103,8 +103,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // Update last modified date
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
-
-     
+             
         private void JoinTreatmentsWithBudgets(Dictionary<Guid, List<Guid>> budgetIdsPerTreatmentId)
         {
             var treatmentBudgetJoins = new List<ScenarioSelectableTreatmentScenarioBudgetEntity>();
@@ -876,7 +875,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
         }
 
-
         public void DeleteScenarioSelectableTreatments(List<TreatmentDTO> scenarioSelectableTreatments, Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
@@ -988,32 +986,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Single(_ => _.Id == id)
                 .ToDtoWithSimulationId();
-        }
-
-        public TreatmentDTO GetSelectableTreatmentById(Guid id)
-        {
-            return _unitOfWork.Context.SelectableTreatment.AsNoTracking()
-                .Include(_ => _.TreatmentCosts)
-                .ThenInclude(_ => _.TreatmentCostEquationJoin)
-                .ThenInclude(_ => _.Equation)
-                .Include(_ => _.TreatmentCosts)
-                .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
-                .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.TreatmentConsequences.OrderBy(__ => __.Attribute.Name))
-                .ThenInclude(_ => _.Attribute)
-                .Include(_ => _.TreatmentConsequences)
-                .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
-                .ThenInclude(_ => _.Equation)
-                .Include(_ => _.TreatmentConsequences)
-                .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
-                .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.CriterionLibrarySelectableTreatmentJoin)
-                .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_=>_.TreatmentSupersedeRules)
-                .ThenInclude(_=>_.CriterionLibraryTreatmentSupersedeRuleJoin)
-                .ThenInclude(_ => _.CriterionLibrary)
-                .Single(_ => _.Id == id)
-                .ToDto();
         }
 
         public TreatmentLibraryDTO GetTreatmentLibraryWithSingleTreatmentByTreatmentId(Guid treatmentId)

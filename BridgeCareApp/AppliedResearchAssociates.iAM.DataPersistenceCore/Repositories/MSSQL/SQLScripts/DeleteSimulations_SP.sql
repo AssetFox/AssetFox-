@@ -1345,15 +1345,14 @@ AS
 
             BEGIN TRY
 
-			ALTER TABLE Simulation_User NOCHECK CONSTRAINT all
+			--ALTER TABLE Simulation_User NOCHECK CONSTRAINT all
 
 			Delete l2 
 			FROM  Simulation  AS l1
 			JOIN Simulation_User AS l2 ON l2.SimulationId = l1.Id
 			WHERE l1.Id IN (SELECT Guid FROM #SimTempGuids);
 
-			ALTER TABLE Simulation_User WITH CHECK CHECK CONSTRAINT all
-
+			--ALTER TABLE Simulation_User WITH CHECK CHECK CONSTRAINT all
  
             END TRY 
 			BEGIN CATCH

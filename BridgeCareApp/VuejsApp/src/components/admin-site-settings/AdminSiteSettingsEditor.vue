@@ -31,6 +31,7 @@
         <v-flex xs12>
           <v-layout column>
             <v-btn
+              id="AdminSiteSettingsEditor-SaveImplementationName-btn"
               class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button"
               style="padding-left: 10px"
               @click="onSaveImplementationName"

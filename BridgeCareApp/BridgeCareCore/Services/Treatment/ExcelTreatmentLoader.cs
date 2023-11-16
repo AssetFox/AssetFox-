@@ -359,7 +359,6 @@ namespace BridgeCareCore.Services.Treatment
                         IsSingleUse = true,
                     };
 
-                    // TODO test with multiple rules per treatment
                     if (supersedeRulesPerTreatmentId.ContainsKey(treatment.Id))
                     {
                         supersedeRulesPerTreatmentId[treatment.Id].Add(new TreatmentSupersedeRuleDTO() { Id = Guid.NewGuid(), CriterionLibrary = criterionLibrary, treatment = supersededTreatment });

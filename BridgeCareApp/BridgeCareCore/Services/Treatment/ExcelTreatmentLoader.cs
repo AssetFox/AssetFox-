@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Utils;
-using Humanizer;
-using NuGet.Packaging;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.Treatment
@@ -335,11 +331,9 @@ namespace BridgeCareCore.Services.Treatment
             return treatmentLoadResult;
         }
 
-        // TODO check if library version can use same method for loading
         public TreatmentSupersedeRulesLoadResult LoadTreatmentSupersedeRules(ExcelWorksheet worksheet, List<TreatmentDTO> treatments)
         {
-            var supersedeRulesPerTreatmentId = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>>();
-            // var treatmentSupersedeRules = new List<TreatmentSupersedeRuleDTO>();
+            var supersedeRulesPerTreatmentId = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>>();            
             var validationMessages = new List<string>();
 
             var index = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.SupersedeTreatmentName, 1);
@@ -379,10 +373,10 @@ namespace BridgeCareCore.Services.Treatment
                 {
                     var name = treatment == null ? treatmentName : string.Empty;
                     name = supersededTreatment == null ? (string.IsNullOrEmpty(name) ? supersededTreatmentName : ", " + supersededTreatmentName) : string.Empty;
-                    validationMessages.Add("Scenario treatment(s) " + name + " does not exist.");
+                    validationMessages.Add("Treatment(s) " + name + " does not exist.");
                 }
             }
-            return new TreatmentSupersedeRulesLoadResult { supersedeRulesPerTreatmentId = supersedeRulesPerTreatmentId, ValidationMessages = validationMessages };
+            return new TreatmentSupersedeRulesLoadResult { supersedeRulesPerTreatmentIdDict = supersedeRulesPerTreatmentId, ValidationMessages = validationMessages };
         }
     }
 }

@@ -123,7 +123,7 @@
     <None Update="DownloadTemplates\Library_treatments_template.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DownloadTemplates\Scenario_treatmentSupersedeRules_template.xlsx">
+    <None Update="DownloadTemplates\TreatmentSupersedeRules_template.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="DownloadTemplates\Scenario_treatments_template.xlsx">

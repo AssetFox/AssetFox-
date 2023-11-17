@@ -11,12 +11,12 @@
                         v-model="librarySelectItemValue"
                         item-title="text"
                         item-value="value"
-                        class="ghd-select ghd-text-field ghd-text-field-border">
+                        class="ghd-select ghd-text-field ghd-text-field-border" density="compact">
                     </v-select>
                     <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>{{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
                 </v-col>
                 <v-col cols = "4" class="ghd-constant-header">    
-                    <v-row row v-show='hasSelectedLibrary || hasScenario' style="padding-top: 28px !important">
+                    <v-row row v-show='hasSelectedLibrary || hasScenario' style="padding-top: 38px !important">
                         <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content" style="padding-top: 7px !important">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
@@ -30,7 +30,7 @@
                     </v-row>  
                 </v-col>
                 <v-col cols = "4" class="ghd-constant-header">                   
-                    <v-row row align-end style="padding-top: 22px !important">
+                    <v-row row align-end style="padding-top: 38px !important">
                         <v-spacer></v-spacer>
                         <v-btn @click="showAddCashFlowRuleDialog = true" v-show="hasSelectedLibrary || hasScenario"
                             id="CashFlowEditor-addCashFlowRule-btn" 

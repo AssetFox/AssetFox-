@@ -17,19 +17,19 @@
         <v-col cols="8">
           <v-row column style="padding-right: 100px">
             <v-text-field
-            variant="underlined"
+            variant="outlined"
               id="AdminSiteSettingsEditor-EditImplementationName-textfield"
               v-model="ImplementationID"
               type="text"
               hide-details
               clearable
-              single-line
-              
+              single-line           
               style="padding-left: 0px; width: 250%"
+              density="compact"
             >
             </v-text-field>
             <v-col >
-          <v-row column style="padding-left: 300px; margin-top: -55px; margin-left: 25px;">
+          <v-row column style="padding-left: 300px; margin-top: -46px; margin-left: 25px;">
             <v-btn
               class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button"
               style="padding-left: 10px"

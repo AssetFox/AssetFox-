@@ -18,7 +18,7 @@
                     <v-text-field id="CreateCalculatedAttributeLibraryDialog-name-textfield"
                         v-model="newCalculatedAttributeLibrary.name"
                         :rules="rules['generalRules'].valueIsNotEmpty"
-                        outline
+                        variant="outlined"
                         class="ghd-text-field-border ghd-text-field"/>
                 </v-row>
                 <v-row>
@@ -28,7 +28,7 @@
                     <v-textarea id="CreateCalculatedAttributeLibraryDialog-description-textfield"
                         v-model="newCalculatedAttributeLibrary.description"
                         no-resize
-                      outline
+                        variant="outlined"
                         rows="3"
                         class="ghd-text-field-border"/>
                 </v-row>

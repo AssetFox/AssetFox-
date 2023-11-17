@@ -20,26 +20,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public AnalysisMethodRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
-
-        private void CreateAnalysisMethodBudgetPriorities(SimulationEntity simulationEntity, List<BudgetPriority> budgetPriorities) =>
-            _unitOfWork.BudgetPriorityRepo.CreateBudgetPriorities(budgetPriorities, simulationEntity.Id);
-
-        private void CreateAnalysisMethodTargetConditionGoals(SimulationEntity simulationEntity, List<TargetConditionGoal> targetConditionGoals)
-        {
-            _unitOfWork.TargetConditionGoalRepo.CreateTargetConditionGoals(targetConditionGoals, simulationEntity.Id);
-        }
-
-        private void CreateAnalysisMethodDeficientConditionGoals(SimulationEntity simulationEntity, List<DeficientConditionGoal> deficientConditionGoals)
-        {
-            _unitOfWork.DeficientConditionGoalRepo.CreateDeficientConditionGoals(deficientConditionGoals, simulationEntity.Id);
-        }
-
-        private void CreateAnalysisMethodRemainingLifeLimits(SimulationEntity simulationEntity,
-            List<RemainingLifeLimit> remainingLifeLimits)
-        {
-            _unitOfWork.RemainingLifeLimitRepo.CreateRemainingLifeLimits(remainingLifeLimits, simulationEntity.Id);
-        }
-
         public void GetSimulationAnalysisMethod(Simulation simulation, string userCriteria)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))

@@ -8,7 +8,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-
             migrationBuilder.Sql("Delete FROM dbo.[BudgetPercentagePair] WHERE NOT EXISTS(SELECT * FROM dbo.[ScenarioBudget] AS parent WHERE parent.Id = [BudgetPercentagePair].ScenarioBudgetId);");
             migrationBuilder.Sql("Delete FROM dbo.[BudgetPercentagePair] WHERE NOT EXISTS(SELECT * FROM dbo.[ScenarioBudgetPriority] AS parent WHERE parent.Id = [BudgetPercentagePair].ScenarioBudgetPriorityId);");
             migrationBuilder.Sql("ALTER TABLE [BudgetPercentagePair] NOCHECK CONSTRAINT all;");

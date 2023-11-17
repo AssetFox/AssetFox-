@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20231110171035_RemoveColumnBudgetIdFromTableBudgetPercentagePair")]
+    [Migration("20231117220510_RemoveColumnBudgetIdFromTableBudgetPercentagePair")]
     partial class RemoveColumnBudgetIdFromTableBudgetPercentagePair
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

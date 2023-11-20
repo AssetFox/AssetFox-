@@ -31,7 +31,9 @@
                                     @change="reorderList(props.item)" 
                                     @mousedown="setCurrentOrder(props.item)" 
                                     variant="underlined" style="width: 20px;"
-                                    />
+                                />
+                            </td>
+                            <td>
                                 <v-btn class="ghd-blue" flat>
                                     <v-icon title="up" @click="swapItemOrder(props.item, 'up')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-up
                                     </v-icon>
@@ -125,9 +127,10 @@ const { dialogData } = toRefs(props);
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
 
 let editBudgetsDialogGridHeaders: any[] = [
-        { title: 'Order', key: 'order', sortable: false, align: 'left', class: '', width: '10%' },
-        { title: 'Budget', key: 'name', sortable: false, align: 'left', class: '', width: '25%' },
-        { title: 'Criteria', key: 'criterionLibrary', sortable: false, align: 'left', class: '', width: '50%' },
+        { title: 'Order', key: 'order', sortable: false, align: 'center', class: '', width: '5%' },
+        { title: '', key: '', sortable: false, align: 'left', class: '', width: '' },
+        { title: 'Budget', key: 'name', sortable: false, align: 'left', class: '', width: '30%' },
+        { title: 'Criteria', key: 'criterionLibrary', sortable: false, align: 'left', class: '', width: '40%' },
         { title: 'Actions', key: 'actions', sortable: false, align: 'left', class: '', width: '10%' }
     ];
 let editBudgetsDialogGridData = ref<Budget[]>([]);

@@ -24,28 +24,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public BudgetRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
-        public void CreateScenarioBudgets(List<Budget> budgets, Guid simulationId)
-        {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                throw new RowNotInTableException("No simulation was found for the given scenario.");
-            }
-
-            var budgetEntities = budgets.Select(_ => _.ToScenarioEntity(simulationId))
-                .ToList();
-
-            _unitOfWork.Context.AddAll(budgetEntities);
-
-            if (budgets.Any(_ => _.YearlyAmounts.Any()))
-            {
-                var budgetAmountsPerBudgetId = budgets
-                    .Where(_ => _.YearlyAmounts.Any())
-                    .ToDictionary(_ => _.Id, _ => _.YearlyAmounts.ToList());
-
-                _unitOfWork.BudgetAmountRepo.CreateScenarioBudgetAmounts(budgetAmountsPerBudgetId, simulationId);
-            }
-        }
-
         public List<SimpleBudgetDetailDTO> GetScenarioSimpleBudgetDetails(Guid simulationId)
         {
             if (simulationId == Guid.Empty)

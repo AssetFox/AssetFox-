@@ -199,7 +199,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
       
 
-        [Fact (Skip ="Fails for reasons WJ does not understand.")]
+        [Fact]
         public void SimulationInDbWithBudgetAndAmount_Delete_DeletesAll()
         {
             var unitOfWork = TestHelper.UnitOfWork;

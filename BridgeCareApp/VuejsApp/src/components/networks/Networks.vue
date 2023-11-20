@@ -263,17 +263,17 @@ import mitt from 'mitt';
     let networkDataAssignmentPercentage = ref<number>(0);
     let networkDataAssignmentStatus = ref<string>('Waiting on server.');
 
-    let selectedKeyAttributeItem = ref<string>('');
-    let selectedKeyAttribute = ref<Attribute>(clone(emptyAttribute));
-    let selectedNetwork = ref<Network>(clone(emptyNetwork));
-    let selectNetworkItemValue = ref<string>('');
-    let selectDataSourceId = ref<string>('');
-    let hasSelectedNetwork = ref<boolean>(false);
-    let isNewNetwork = ref<boolean>(false);
-    let hasStartedAggregation = ref<boolean>(false);
-    let isKeyPropertySelectedAttribute = ref<boolean>(false);
-    let spatialWeightingEquationValue = ref<Equation>(clone(emptyEquation)); //placeholder until network dto and api changes
-    let equationEditorDialogData = ref(clone(
+    const selectedKeyAttributeItem = ref<string>('');
+    const selectedKeyAttribute = ref<Attribute>(clone(emptyAttribute));
+    const selectedNetwork = ref<Network>(clone(emptyNetwork));
+    const selectNetworkItemValue = ref<string>('');
+    const selectDataSourceId = ref<string>('');
+    const hasSelectedNetwork = ref<boolean>(false);
+    const isNewNetwork = ref<boolean>(false);
+    const hasStartedAggregation = ref<boolean>(false);
+    const isKeyPropertySelectedAttribute = ref<boolean>(false);
+    const spatialWeightingEquationValue = ref<Equation>(clone(emptyEquation)); //placeholder until network dto and api changes
+    const equationEditorDialogData = ref(clone(
         emptyEquationEditorDialogData,
     ));
     
@@ -317,11 +317,12 @@ import mitt from 'mitt';
         stateDataSources.value.forEach(_ => {
             selectDataSourceItems.value.push({text:_.name,value:_.id})
         })
+        console.log(stateDataSources.value);
+        console.log(selectDataSourceItems.value);
     })
 
     watch(selectNetworkItemValue, () =>  {
         selectNetworkAction(selectNetworkItemValue.value);
-        console.log(attributeRows.value);
         if(selectNetworkItemValue.value != getBlankGuid() || isNewNetwork.value)
             hasSelectedNetwork.value = true;
         else
@@ -336,6 +337,7 @@ import mitt from 'mitt';
         else {
             isKeyPropertySelectedAttribute.value  = false;
         }
+        console.log(selectedAttributeRows.value);
     })
     
     watch(stateSelectedNetwork, () => {

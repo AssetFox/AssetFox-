@@ -1390,8 +1390,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
             });
     }
     
-    function onSubmitImportSupersedeDialogResult(result: ImportSupersedeDialogResult) {
-        alert('in');
+    function onSubmitImportSupersedeDialogResult(result: ImportSupersedeDialogResult) {        
         showImportSupersedeDialog.value = false;
 
         if (hasValue(result) && hasValue(result.file)) {

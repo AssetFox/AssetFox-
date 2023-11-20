@@ -268,6 +268,10 @@ namespace BridgeCareCore.Services
 
         public FileInfoDTO ExportLibraryTreatmentSupersedeRuleExcelFile(Guid libraryId)
         {
+            if (libraryId.Equals(Guid.Empty))
+            {
+                return null;
+            }
             var library = _unitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibaryNoChildren(libraryId) ?? throw new NullReferenceException("No Treatment Library found for given id");
             var libraryTreatmentSupersedeRules = _unitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRulesByLibraryId(libraryId);
             var fileName = $"TreatmentSupersedeRules_{library.Name.Trim().Replace(" ", "_")}.xlsx";

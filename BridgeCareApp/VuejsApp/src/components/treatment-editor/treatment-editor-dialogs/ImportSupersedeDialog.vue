@@ -8,7 +8,7 @@
             </v-btn>
             </v-row>
             <v-row >
-                <FileSelector :closed='closed' :useTreatment="true" @submit='onFileSelectorChange' />
+                <FileSelector :closed='closed' :useTreatment="false" @submit='onFileSelectorChange' />
             </v-row>
             <v-row justify="center">
                 <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "flat">Cancel</v-btn>

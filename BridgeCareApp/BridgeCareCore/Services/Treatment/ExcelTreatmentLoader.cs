@@ -345,35 +345,38 @@ namespace BridgeCareCore.Services.Treatment
             var height = worksheet.Dimension.End.Row;
             for (var i = index + 1; i <= height; i++)
             {
-                var treatmentName = worksheet.Cells[i, 1].Text;
-                var supersededTreatmentName = worksheet.Cells[i, 2].Text;
-                var criteria = worksheet.Cells[i, 3].Text;
-                var treatment = treatments.FirstOrDefault(_ => _.Name.Equals(treatmentName));
-                var supersededTreatment = treatments.FirstOrDefault(_ => _.Name.Equals(supersededTreatmentName));
-                if (treatment != null && supersededTreatment != null)
+                if (!(worksheet.Cells[i, 1].Text == string.Empty && worksheet.Cells[i, 2].Text == string.Empty && worksheet.Cells[i, 3].Text == string.Empty))
                 {
-                    var criterionLibrary = new CriterionLibraryDTO
+                    var treatmentName = worksheet.Cells[i, 1].Text;
+                    var supersededTreatmentName = worksheet.Cells[i, 2].Text;
+                    var criteria = worksheet.Cells[i, 3].Text;
+                    var treatment = treatments.FirstOrDefault(_ => _.Name.Equals(treatmentName));
+                    var supersededTreatment = treatments.FirstOrDefault(_ => _.Name.Equals(supersededTreatmentName));
+                    if (treatment != null && supersededTreatment != null)
                     {
-                        Id = Guid.NewGuid(),
-                        Name = "FromExcelImport",
-                        MergedCriteriaExpression = criteria,
-                        IsSingleUse = true,
-                    };
+                        var criterionLibrary = new CriterionLibraryDTO
+                        {
+                            Id = Guid.NewGuid(),
+                            Name = "FromExcelImport",
+                            MergedCriteriaExpression = criteria,
+                            IsSingleUse = true,
+                        };
 
-                    if (supersedeRulesPerTreatmentId.ContainsKey(treatment.Id))
-                    {
-                        supersedeRulesPerTreatmentId[treatment.Id].Add(new TreatmentSupersedeRuleDTO() { Id = Guid.NewGuid(), CriterionLibrary = criterionLibrary, treatment = supersededTreatment });
+                        if (supersedeRulesPerTreatmentId.ContainsKey(treatment.Id))
+                        {
+                            supersedeRulesPerTreatmentId[treatment.Id].Add(new TreatmentSupersedeRuleDTO() { Id = Guid.NewGuid(), CriterionLibrary = criterionLibrary, treatment = supersededTreatment });
+                        }
+                        else
+                        {
+                            supersedeRulesPerTreatmentId.Add(treatment.Id, new List<TreatmentSupersedeRuleDTO>() { new TreatmentSupersedeRuleDTO() { Id = Guid.NewGuid(), CriterionLibrary = criterionLibrary, treatment = supersededTreatment } });
+                        }
                     }
                     else
                     {
-                        supersedeRulesPerTreatmentId.Add(treatment.Id, new List<TreatmentSupersedeRuleDTO>() { new TreatmentSupersedeRuleDTO() { Id = Guid.NewGuid(), CriterionLibrary = criterionLibrary, treatment = supersededTreatment } });
+                        var name = treatment == null ? treatmentName : string.Empty;
+                        name = supersededTreatment == null ? (string.IsNullOrEmpty(name) ? supersededTreatmentName : ", " + supersededTreatmentName) : string.Empty;
+                        validationMessages.Add("Treatment(s) " + name + " does not exist.");
                     }
-                }
-                else
-                {
-                    var name = treatment == null ? treatmentName : string.Empty;
-                    name = supersededTreatment == null ? (string.IsNullOrEmpty(name) ? supersededTreatmentName : ", " + supersededTreatmentName) : string.Empty;
-                    validationMessages.Add("Treatment(s) " + name + " does not exist.");
                 }
             }
             return new TreatmentSupersedeRulesLoadResult { supersedeRulesPerTreatmentIdDict = supersedeRulesPerTreatmentId, ValidationMessages = validationMessages };

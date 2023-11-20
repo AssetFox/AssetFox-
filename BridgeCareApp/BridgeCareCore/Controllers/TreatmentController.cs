@@ -967,7 +967,7 @@ namespace BridgeCareCore.Controllers
                     throw new ConstraintException("Treatment Supersede Rule file not found.");
                 }
 
-                if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("libraryId", out var id))
+                if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("libraryId", out var id) || id == Guid.Empty.ToString())
                 {
                     throw new ConstraintException("Request contained no library id.");
                 }

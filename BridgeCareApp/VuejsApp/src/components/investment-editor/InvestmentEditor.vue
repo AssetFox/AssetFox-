@@ -1,5 +1,5 @@
 <template>
-    <v-card height="1000px" class="elevation-0 vcard-main-layout">
+    <v-card class="elevation-0 vcard-main-layout">
     <v-row>
         <v-col cols="12">
             <v-row justify="space-between">
@@ -54,7 +54,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label"><span>First Year of Analysis Period</span></v-subheader>
                     <v-text-field id="InvestmentEditor-firstYearAnalysisPeriod-textField"
                                   variant="outlined"
-                                  @change='onEditInvestmentPlan("firstYearOfAnalysisPeriod", $event)'
+                                  @update:model-value ='onEditInvestmentPlan("firstYearOfAnalysisPeriod", $event)'
                                   :rules="[rules['generalRules'].valueIsNotEmpty]"
                                   :mask="'####'"
                                   v-model='investmentPlan.firstYearOfAnalysisPeriod' 
@@ -64,7 +64,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label"><span>Number of Years in Analysis Period</span></v-subheader>
                     <v-text-field id="InvestmentEditor-numberYearsAnalysisPeriod-textField"
                                   readonly variant="outlined"
-                                  @change='onEditInvestmentPlan("numberOfYearsInAnalysisPeriod", $event)'
+                                  @update:model-value='onEditInvestmentPlan("numberOfYearsInAnalysisPeriod", $event)'
                                   v-model='investmentPlan.numberOfYearsInAnalysisPeriod'
                                   class="ghd-text-field-border ghd-text-field" />
                 </v-col>
@@ -72,7 +72,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label"><span>Minimum Project Cost Limit</span></v-subheader>
                     <currencyTextbox outline 
                                   id='InvestmentEditor-minimumProjectCostLimit-textField'
-                                  @change='onEditInvestmentPlan("minimumProjectCostLimit", $event)'
+                                  @update:model-value='onEditInvestmentPlan("minimumProjectCostLimit", $event)'
                                   v-model='investmentPlan.minimumProjectCostLimit'
                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]"
                                   :disabled="!hasAdminAccess"
@@ -84,7 +84,7 @@
                     <v-text-field id="InvestmentEditor-inflationRatePercentage-textField"
                                   variant="outlined"
                                   v-model='investmentPlan.inflationRatePercentage'
-                                  @change='onEditInvestmentPlan("inflationRatePercentage", $event)'
+                                  @update:model-value='onEditInvestmentPlan("inflationRatePercentage", $event)'
                                   :mask="'###'"
                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(investmentPlan.inflationRatePercentage, [0,100])]"
                                   :disabled="!hasAdminAccess"
@@ -97,7 +97,7 @@
                               label="Allow Funding Carryover"
                               :disabled="!hasAdminAccess"
                               v-model="investmentPlan.shouldAccumulateUnusedBudgetAmounts"
-                              @change='onEditInvestmentPlan("shouldAccumulateUnusedBudgetAmounts", $event)' />
+                              @update:model-value='onEditInvestmentPlan("shouldAccumulateUnusedBudgetAmounts", $event)' />
                 </v-col>
             </v-row>
             <v-divider :thickness="2" class="border-opacity-100" v-show ='hasScenario || hasSelectedLibrary' />
@@ -1261,11 +1261,9 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
     function onEditBudgetYearValue(year: number, budgetName: string, value: number) {//check out
         if (any(propEq('name', budgetName), currentPage.value)) {
-            console.log("YES")
             const budget: Budget = find(propEq('name', budgetName), currentPage.value) as Budget;
 
             if (any(propEq('year', year), budget.budgetAmounts)) {
-                console.log("YES2")
                 const budgetAmount: BudgetAmount = find(propEq('year', year), budget.budgetAmounts) as BudgetAmount;
                 const updatedRow: BudgetAmount = {
                     ...budgetAmount,

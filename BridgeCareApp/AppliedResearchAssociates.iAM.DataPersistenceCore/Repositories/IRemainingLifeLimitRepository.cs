@@ -7,8 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IRemainingLifeLimitRepository
     {
-        void CreateRemainingLifeLimits(List<RemainingLifeLimit> remainingLifeLimits, Guid simulationId);
-
         List<RemainingLifeLimitLibraryDTO> GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits();
 
         List<RemainingLifeLimitLibraryDTO> GetAllRemainingLifeLimitLibrariesNoChildren();

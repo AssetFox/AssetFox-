@@ -33,8 +33,7 @@
                     style='float:right;'
                     >
                     Download
-                </v-btn> 
-                <!--TODO-->
+                </v-btn>
                 <v-btn :disabled='false' @click='showImportSupersedeDialog = true'
                 variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'
@@ -349,7 +348,9 @@
         :dialogData='confirmBeforeDeleteTreatmentAlertData'
         @submit='onSubmitConfirmDeleteTreatmentAlertResult'
     />
-    <ConfirmDialog></ConfirmDialog>
+    <ConfirmDialog></ConfirmDialog>    
+    <ImportSupersedeDialog :showDialog='showImportSupersedeDialog'
+        @submit='onSubmitImportSupersedeDialogResult' />
 </template>
 
 <script setup lang='ts'>
@@ -382,7 +383,8 @@ import {
     TreatmentDetails,
     TreatmentLibrary,
     TreatmentLibraryUser,
-    TreatmentsFileImport
+    TreatmentsFileImport,
+    SupersedeFileImport
 } from '@/shared/models/iAM/treatment';
 import {
     emptyPerformanceCurve,
@@ -419,8 +421,10 @@ import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import {hasUnsavedChangesCore, isEqual } from '@/shared/utils/has-unsaved-changes-helper';
 import { getUserName } from '@/shared/utils/get-user-info';
 import ImportExportTreatmentsDialog from '@/components/treatment-editor/treatment-editor-dialogs/ImportExportTreatmentsDialog.vue';
+import ImportSupersedeDialog from '@/components/treatment-editor/treatment-editor-dialogs/ImportSupersedeDialog.vue';
 import ImportNewTreatmentDialog from '@/components/treatment-editor/treatment-editor-dialogs/ImportNewTreatmentDialog.vue';
 import { ImportExportTreatmentsDialogResult } from '@/shared/models/modals/import-export-treatments-dialog-result';
+import { ImportSupersedeDialogResult }from '@/shared/models/modals/import-supersede-dialog-result';
 import TreatmentService from '@/services/treatment.service';
 import { AxiosResponse } from 'axios';
 import { FileInfo } from '@/shared/models/iAM/file-info';
@@ -531,6 +535,14 @@ async function importLibraryTreatmentsFileAction(payload?: any): Promise<any> {
   await store.dispatch('importLibraryTreatmentsFile', payload);
 }
 
+async function importScenarioTreatmentSupersedeRulesFileAction(payload?: any): Promise<any> {
+  await store.dispatch('importScenarioTreatmentSupersedeRulesFile', payload);
+}
+
+async function importLibraryTreatmentSupersedeRulesFileAction(payload?: any): Promise<any> {
+  await store.dispatch('importLibraryTreatmentSupersedeRulesFile', payload);
+}
+
 async function deleteTreatmentAction(payload?: any): Promise<any> {
   await store.dispatch('deleteTreatment', payload);
 }
@@ -594,6 +606,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     let disableCrudButtonsResult: boolean = false;
     let hasLibraryEditPermission: boolean | Promise<boolean> = false;
     const showImportTreatmentsDialog = ref<boolean>(false);
+    const showImportSupersedeDialog = ref<boolean>(false);
     const confirmBeforeDeleteTreatmentAlertData = ref<AlertData>(clone(emptyAlertData));
     let isNoTreatmentSelected = ref(false);
     let hasImport: boolean = false;
@@ -1368,7 +1381,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
 
     function OnDownloadSupersedeTemplateClick()
     {
-        TreatmentService.downloadSupersedeRulesTemplate(hasScenario.value)
+        TreatmentService.downloadSupersedeRulesTemplate()
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const fileInfo: FileInfo = response.data as FileInfo;
@@ -1376,6 +1389,31 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
                 }
             });
     }
+    
+    function onSubmitImportSupersedeDialogResult(result: ImportSupersedeDialogResult) {
+        alert('in');
+        showImportSupersedeDialog.value = false;
+
+        if (hasValue(result) && hasValue(result.file)) {
+            const data: SupersedeFileImport = {
+                file: result.file
+            };
+
+            if (hasScenario.value) {
+                importScenarioTreatmentSupersedeRulesFileAction({
+                    ...data,
+                    id: selectedScenarioId
+                }).then(() => {                                 
+                });
+            } else {
+                importLibraryTreatmentSupersedeRulesFileAction({
+                    ...data,
+                    id: selectedTreatmentLibrary.value.id
+                }).then(() => {                                   
+                });
+            }
+        }
+     }
 
     function importCompleted(data: any){
         var importComp = data.importComp as importCompletion

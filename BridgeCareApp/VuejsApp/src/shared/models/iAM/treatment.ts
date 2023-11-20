@@ -190,3 +190,7 @@ export const treatmentCategoryReverseMap: Map<TreatmentCategory, string> = new M
 export interface TreatmentsFileImport {
     file: File;
 }
+
+export interface SupersedeFileImport {
+    file: File;
+}

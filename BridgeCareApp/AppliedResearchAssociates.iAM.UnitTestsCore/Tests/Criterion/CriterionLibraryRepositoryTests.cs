@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
 
@@ -56,6 +59,55 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Criterion
 
             // Assert
             Assert.Contains(dtos, cl => cl.Id == criterionLibrary.Id);
+        }
+
+        [Fact]
+        public void DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForSimulation_SimulationInDbWithBudgetWithCriterionLibrary_DeletesCriterionLibrary()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var budgetId = Guid.NewGuid();
+            var budgetName = RandomStrings.WithPrefix("budget ");
+            var budget = BudgetDtos.New(budgetId, budgetName);
+            var criterionLibrary = CriterionLibraryDtos.Dto();
+            budget.CriterionLibrary = criterionLibrary;
+            var budgets = new List<BudgetDTO> { budget };
+            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteScenarioBudgets(budgets, simulation.Id);
+            var budgetNames = new List<string> { budgetName };
+            var scenarioBudgetsBefore = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
+            var criterionLibraryBefore = scenarioBudgetsBefore.Single().CriterionLibrary;
+
+            TestHelper.UnitOfWork.CriterionLibraryRepo.DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForSimulation(simulation.Id, budgetNames);
+
+            var scenarioBudgetsAfter = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
+            var criterionLibraryAfter = scenarioBudgetsAfter.Single().CriterionLibrary;
+            Assert.Equal(Guid.Empty, criterionLibraryAfter.Id);
+            Assert.NotEqual(Guid.Empty, criterionLibraryBefore.Id);
+        }
+
+        [Fact]
+        public void DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForBudgetLibrary_BudgetInDbWithBudgetLibraryAndCriterionLibrary_Deletes()
+        {
+            var budgetLibrary = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var budgetId = Guid.NewGuid();
+            var budgetName = RandomStrings.WithPrefix("budget ");
+            var budget = BudgetDtos.New(budgetId, budgetName);
+            var criterionLibrary = CriterionLibraryDtos.Dto();
+            budget.CriterionLibrary = criterionLibrary;
+            var budgets = new List<BudgetDTO> { budget };
+            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteBudgets(budgets, budgetLibrary.Id);
+            var budgetNames = new List<string> { budgetName };
+            var budgetLibraryBefore = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(budgetLibrary.Id);
+            var criterionLibraryBefore = budgetLibraryBefore.Budgets.Single().CriterionLibrary;
+
+            TestHelper.UnitOfWork.CriterionLibraryRepo.DeleteAllSingleUseCriterionLibrariesWithBudgetNamesForBudgetLibrary(budgetLibrary.Id, budgetNames);
+
+            var budgetLibraryAfter = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(budgetLibrary.Id);
+            var criterionLibraryAfter = budgetLibraryAfter.Budgets.Single().CriterionLibrary;
+
+            Assert.NotEqual(Guid.Empty, criterionLibraryBefore.Id);
+            Assert.Equal(Guid.Empty, criterionLibraryAfter.Id);
         }
     }
 }

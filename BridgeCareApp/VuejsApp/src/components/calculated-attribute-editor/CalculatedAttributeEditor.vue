@@ -784,17 +784,16 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
             }
         }
     }
-    watch(attributeTimingSelectItemValue,() => onAttributeTimingSelectItemValue)
-    function onAttributeTimingSelectItemValue() {
+    watch(attributeTimingSelectItemValue,() => {
         // Change in timings select box
         if (
-            isNil(attributeTimingSelectItemValue) ||
+            isNil(attributeTimingSelectItemValue.value) ||
             attributeTimingSelectItemValue.value == ''
         ) {
             isTimingSelectedItemValue = false;
         } else {
             isTimingSelectedItemValue = true;
-            var localTiming = attributeTimingSelectItemValue as unknown as Timing;
+            var localTiming = attributeTimingSelectItemValue.value as unknown as Timing;
             var item = calculatedAttributeGridData.value.find(
                 _ => _.attribute == attributeSelectItemValue.value,
             );
@@ -806,7 +805,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                 onPaginationChanged();
             }
         }
-    }
+    })
 
     watch(stateSelectedCalculatedAttributeLibrary,() => {
         
@@ -1347,7 +1346,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         var localTiming =  attributeTimingSelectItems.value.find(
             _ => _.value == selectedItem,
         )!.text;
-         attributeTimingSelectItemValue.value = selectedItem.toString();
+         attributeTimingSelectItemValue.value = localTiming;
          isTimingSelectedItemValue = true;
     }
     function setDefaultAttributeOnLoad(localCalculatedAttribute: CalculatedAttribute) {

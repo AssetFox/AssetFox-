@@ -12,7 +12,7 @@
             <v-text-field v-model="newCalculatedAttribute.name"
                           :rules="[rules['generalRules'].valueIsNotEmpty]"
                           label="Name"
-                          outline/>
+                          variant="outlined"/>
             <v-select v-model="newCalculatedAttribute.attribute"
                       :items="attributeSelectItems"
                       append-icon=$vuetify.icons.ghd-down

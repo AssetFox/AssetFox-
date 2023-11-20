@@ -13,7 +13,8 @@
                                   v-model="librarySelectItemValue"
                                   item-title="text" 
                                     item-value="value" 
-                                  class="ghd-select ghd-text-field ghd-text-field-border">
+                                  class="ghd-select ghd-text-field ghd-text-field-border"
+                                  density="compact">
                         </v-select>
                         <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
                 </v-col>
@@ -21,30 +22,31 @@
                     <v-row align-end>
                         <v-text-field
                                     id="CalculatedAttribute-search-textField"
-                                    prepend-inner-icon=ghd-search
-                                    hide-details
+                                    prepend-inner-icon=ghd-search                                   
                                     lablel="Search"
                                     placeholder="Search Calcultated Attribute"
                                     single-line
                                     v-model="gridSearchTerm"
                                     variant="outlined"
-                                    outline
                                     clearable
                                     @click:clear="onClearClick()"
-                                    class="ghd-text-field-border ghd-text-field search-icon-general"
-                                    style="margin-top:20px !important">
+                                    style="margin-top:20px !important" density="compact">
                         </v-text-field>
-                        <v-col cols = "5" style="margin-top: 20px">
-                        <v-btn id="CalculatedAttribute-search-btn" style="position: relative; top: 3px; margin-right: 1px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" @click="onSearchClick()">Search</v-btn>
-                        <v-btn id="CalculatedAttribute-createNewLibrary-btn"
-                            @click="onShowCreateCalculatedAttributeLibraryDialog(false)"
-                            class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                            variant = "outlined"
-                            v-show="!hasScenario"
-                            style="top: 2px !important; position: right; margin-left: 5px">
-                            Create New Library
-                        </v-btn>
-                    </v-col>
+                        <v-col cols = "5" style="margin-top: 10px">
+                        
+                            <v-btn id="CalculatedAttribute-search-btn"  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                                variant = "outlined" @click="onSearchClick()">
+                                Search
+                            </v-btn>
+                            <v-btn id="CalculatedAttribute-createNewLibrary-btn"
+                                @click="onShowCreateCalculatedAttributeLibraryDialog(false)"
+                                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                                variant = "outlined"
+                                v-show="!hasScenario"
+                                style=" margin-left: 5px">
+                                Create New Library
+                            </v-btn>
+                        </v-col>
                     </v-row>
                 </v-col>
             </v-row>
@@ -75,7 +77,8 @@
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         item-title="text" 
                         item-value="value" 
-                        v-model="attributeSelectItemValue">
+                        v-model="attributeSelectItemValue"
+                        density="compact">
                     </v-select>
                 </v-row>
                 <v-col cols = "2">
@@ -94,7 +97,7 @@
                         item-title="text" 
                         item-value="value" 
                         class="ghd-select ghd-text-field ghd-text-field-border"
-                        v-on:change="setTiming">
+                        v-on:change="setTiming" density="compact">
                     </v-select>
                 </v-row>
                 </v-col>
@@ -781,17 +784,16 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
             }
         }
     }
-    watch(attributeTimingSelectItemValue,() => onAttributeTimingSelectItemValue)
-    function onAttributeTimingSelectItemValue() {
+    watch(attributeTimingSelectItemValue,() => {
         // Change in timings select box
         if (
-            isNil(attributeTimingSelectItemValue) ||
+            isNil(attributeTimingSelectItemValue.value) ||
             attributeTimingSelectItemValue.value == ''
         ) {
             isTimingSelectedItemValue = false;
         } else {
             isTimingSelectedItemValue = true;
-            var localTiming = attributeTimingSelectItemValue as unknown as Timing;
+            var localTiming = attributeTimingSelectItemValue.value as unknown as Timing;
             var item = calculatedAttributeGridData.value.find(
                 _ => _.attribute == attributeSelectItemValue.value,
             );
@@ -803,7 +805,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                 onPaginationChanged();
             }
         }
-    }
+    })
 
     watch(stateSelectedCalculatedAttributeLibrary,() => {
         
@@ -1344,7 +1346,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         var localTiming =  attributeTimingSelectItems.value.find(
             _ => _.value == selectedItem,
         )!.text;
-         attributeTimingSelectItemValue.value = selectedItem.toString();
+         attributeTimingSelectItemValue.value = localTiming;
          isTimingSelectedItemValue = true;
     }
     function setDefaultAttributeOnLoad(localCalculatedAttribute: CalculatedAttribute) {

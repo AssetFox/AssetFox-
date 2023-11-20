@@ -2,7 +2,7 @@
     <v-dialog max-width="600px" persistent v-model="DialogData.showDialog">
         <v-card>
             <v-card-title class="ghd-dialog-box-padding-top">
-            <v-row justify-space-between align-center>
+            <v-row justify="space-between" align="center">
                 <div id="EditAdminDataDialog-header-div" class="ghd-control-dialog-header">Change {{DialogData.settingName}}</div>
             </v-row>
             </v-card-title>
@@ -14,7 +14,8 @@
                     item-value="value"
                     v-model='DialogData.selectedItem'                         
                     id="EditAdminDataDialog-addNewItems-select"
-                    class="ghd-select ghd-text-field ghd-text-field-border">
+                    class="ghd-select ghd-text-field ghd-text-field-border"
+                    density="compact">
                     </v-select>   
                     <v-btn style="margin-top: 2px !important; margin-left: 10px !important"
                     id="EditAdminDataDialog-addNewItems-btn"
@@ -51,7 +52,7 @@
                 </v-list>
             </v-card-text>
             <v-card-actions class="ghd-dialog-box-padding-bottom">
-            <v-row justify-center row>
+            <v-row justify="center" row>
                 <v-btn id="EditAdminDataDialog-cancel-btn" @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
                 Cancel
                 </v-btn >

@@ -1,6 +1,6 @@
 <template>
     <v-app class="paper-white-bg">
-        <v-main>
+        <v-main style="font-family: roboto;">
             <v-toolbar app class="paper-white-bg elevation-2">
                 <v-toolbar-title  >
                     <v-row  >
@@ -10,14 +10,14 @@
 
                 <v-toolbar-title >
                     <v-row justify="start">
-                        <v-col cols ="1">
+                        <v-col >
                             <img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')"  /></v-col>
                         
                         
                     </v-row>
                 </v-toolbar-title>
                 <v-toolbar-items >
-                    <v-btn-toggle>
+                    <v-btn-toggle style="height: 100%;">
                         <v-btn
                             id="App-scenarios-btn"
                             @click="onNavigate('/Scenarios/')"

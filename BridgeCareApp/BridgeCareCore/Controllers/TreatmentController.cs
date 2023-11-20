@@ -371,7 +371,7 @@ namespace BridgeCareCore.Controllers
                         _claimHelper.CheckUserLibraryModifyAuthorization(libraryAccess, UserId);
                         dto.Treatments = items;
                     }
-                    UnitOfWork.TreatmentLibraryUserRepo.UpsertTreatmentLibraryUser(dto, UserId);
+                    UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatmentLibraryTreatmentsAndPossiblyUsers(dto, upsertRequest.IsNewLibrary, UserId);
                 });
 
                 return Ok();

@@ -6,15 +6,16 @@
             </v-row>
             <v-col cols = "8" >
                 <v-row>
-                        <v-select :items="selectNetworkItems"
-                            id="Networks-selectNetwork-vselect"
-                            variant="outlined"
-                            item-title = "text"
-                            item-value = "value"
-                            v-model="selectNetworkItemValue"          
-                            class="ghd-select ghd-text-field ghd-text-field-border">
-                        </v-select>                           
-                    <v-btn style="margin-top: 10px !important; margin-left: 20px !important" 
+                    <v-select :items="selectNetworkItems"
+                        id="Networks-selectNetwork-vselect"
+                        variant="outlined"
+                        item-title = "text"
+                        item-value = "value"
+                        v-model="selectNetworkItemValue"          
+                        class="ghd-select ghd-text-field ghd-text-field-border"
+                        density="compact">
+                    </v-select>                           
+                    <v-btn style="margin-top: 2px !important; margin-left: 20px !important" 
                         id="Networks-addNetwork-vbtn"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onAddNetworkDialog">
@@ -40,7 +41,8 @@
                             :disabled="!isNewNetwork"
                             append-icon="@/assets/icons/down.svg"
                             v-model="selectedKeyAttributeItem"
-                            :items='selectKeyAttributeItems'>
+                            :items='selectKeyAttributeItems'
+                            density="compact">
                         </v-select>  
                     </v-row>                         
                 </v-col>
@@ -56,9 +58,10 @@
                         item-value="value"
                         :items="selectDataSourceItems"                       
                         class="ghd-select ghd-text-field ghd-text-field-border shifted-label"
-                        v-model="selectDataSourceId">
+                        v-model="selectDataSourceId"
+                        density="compact">
                     </v-select>  
-                    <v-btn style="margin-top: 10px !important; margin-left: 20px;"  
+                    <v-btn style="margin-top: 2px !important; margin-left: 20px;"  
                         id="Networks-SelectAllFromSource-vbtn"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="selectAllFromSource">
@@ -89,7 +92,7 @@
                                         <v-icon class="ghd-blue">fas fa-edit</v-icon> 
                                     </v-btn> -->
                                     <v-row style="width: 70% !important; margin-bottom: 5px; margin-left: 1px;" >
-                                <v-text-field id="Networks-EditSpatialWeightingEquation-vtextfield" outline class="ghd-text-field-border ghd-text-field" 
+                                <v-text-field density="compact" id="Networks-EditSpatialWeightingEquation-vtextfield" variant="outlined" class="ghd-text-field-border ghd-text-field" 
                                      v-model="spatialWeightingEquationValue.expression"/>
                                 </v-row>
                                 </v-col>
@@ -132,7 +135,7 @@
                                     Remove All
                                 </v-btn>
                             </v-row>
-                            <v-data-table id="Networks-Attributes-vdatatable" :header='dataSourceGridHeaders' :items='attributeRows'
+                            <v-data-table id="Networks-Attributes-vdatatable" :headers='dataSourceGridHeaders' :items='attributeRows'
                                 class='v-table__overflow ghd-table' item-key='id' select-all
                                 v-model="selectedAttributeRows"
                                 :must-sort='true'
@@ -160,7 +163,7 @@
         </v-col>
         <!-- The Buttons  -->
         <v-col cols = "12"  v-show="hasSelectedNetwork">        
-            <v-row justify-center style="padding-top: 30px !important">
+            <v-row justify="center" style="padding-top: 30px !important">
                 <v-btn id="Networks-Cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges'
                 variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Cancel
@@ -237,12 +240,10 @@ import mitt from 'mitt';
 
     let rules = ref<InputValidationRules>(validationRules);
 
-    let dataSourceGridHeaders = ref<DataTableHeader[]>([
-        { text: 'Name', value: 'name', align: 'left', sortable: true, class: '', width: '' },
-        { text: 'Data Source', value: 'data source', align: 'left', sortable: true, class: '', width: '' },
-    ]);
-
-
+    let dataSourceGridHeaders: any[] = [
+        { title: 'Name', key: 'name', align: 'left', sortable: true, class: '', width: '' },
+        { title: 'Data Source', key: 'data source', align: 'left', sortable: true, class: '', width: '' },
+    ];
 
     const addNetworkDialogData = reactive<AddNetworkDialogData>(emptyAddNetworkDialogData);
     let pagination: Pagination = emptyPagination;
@@ -272,9 +273,9 @@ import mitt from 'mitt';
     let hasStartedAggregation = ref<boolean>(false);
     let isKeyPropertySelectedAttribute = ref<boolean>(false);
     let spatialWeightingEquationValue = ref<Equation>(clone(emptyEquation)); //placeholder until network dto and api changes
-    let equationEditorDialogData: EquationEditorDialogData = clone(
+    let equationEditorDialogData = ref(clone(
         emptyEquationEditorDialogData,
-    );
+    ));
     
     const $emitter = mitt()
 
@@ -365,6 +366,7 @@ import mitt from 'mitt';
 
     function addNetwork(network: Network)
     {
+        addNetworkDialogData.showDialog = false;
         selectNetworkItems.value.push({
             text: network.name,
             value: network.id
@@ -379,14 +381,14 @@ import mitt from 'mitt';
         selectedNetwork.value = clone(stateSelectedNetwork.value);
     }
     function onSubmitEquationEditorDialogResult(equation: Equation) {
-        equationEditorDialogData = clone(emptyEquationEditorDialogData);
+        equationEditorDialogData.value = clone(emptyEquationEditorDialogData);
 
         if (!isNil(equation)) {
             spatialWeightingEquationValue.value  = clone(equation)
         }
     }
     function onShowEquationEditorDialog() {
-        equationEditorDialogData = {
+        equationEditorDialogData.value = {
             showDialog: true,
             equation: spatialWeightingEquationValue.value,
         };      

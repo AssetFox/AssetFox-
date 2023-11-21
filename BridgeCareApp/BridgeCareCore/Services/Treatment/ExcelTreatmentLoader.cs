@@ -374,7 +374,7 @@ namespace BridgeCareCore.Services.Treatment
                     else
                     {
                         var name = treatment == null ? treatmentName : string.Empty;
-                        name = supersededTreatment == null ? (string.IsNullOrEmpty(name) ? supersededTreatmentName : ", " + supersededTreatmentName) : string.Empty;
+                        name = supersededTreatment == null ? (string.IsNullOrEmpty(name) ? supersededTreatmentName : ", " + supersededTreatmentName) : name;
                         validationMessages.Add("Treatment(s) " + name + " does not exist.");
                     }
                 }

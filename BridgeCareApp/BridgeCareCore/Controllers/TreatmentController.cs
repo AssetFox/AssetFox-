@@ -898,7 +898,7 @@ namespace BridgeCareCore.Controllers
         [HttpGet]
         [Route("DownloadTreatmentSupersedeRuleTemplate")]
         [Authorize]
-        // Note: Scenario settings and Libraries both places can consume same API
+        // Note: Scenario settings and Libraries will use same API
         public async Task<IActionResult> DownloadTreatmentSupersedeRuleTemplate()
         {
             try

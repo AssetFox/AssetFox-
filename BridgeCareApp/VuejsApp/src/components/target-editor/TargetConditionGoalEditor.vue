@@ -1,5 +1,5 @@
 <template>
-    <v-card height="900px" class="elevation-0 vcard-main-layout">
+    <v-card class="elevation-0 vcard-main-layout">
     <v-row>
         <v-col>
             <v-row class="ghd-constant-header" align="center" justify="space-between">
@@ -56,7 +56,7 @@
                 </v-col>
             </v-row>
         </v-col>
-        <div class="targets-data-table" v-if="hasSelectedLibrary || hasScenario" >
+        <v-col v-show='hasSelectedLibrary || hasScenario' cols="12">
                 <v-data-table-server
                     id="TargetConditionGoalEditor-targetConditionGoals-vdatatable"
                     :headers="targetConditionGoalGridHeaders"
@@ -70,11 +70,12 @@
                                         {value: 10, title: '10'},
                                         {value: 25, title: '25'},
                                     ]"
-                    :v-model:sort-by="pagination.sort"
-                    :v-model:page="pagination.page"
-                    :v-model:items="pagination.rowsPerPage"
+                    v-model:sort-by="pagination.sort"
+                    v-model:page="pagination.page"
+                    v-model:items-per-page="pagination.rowsPerPage"
                     @update:options="onPaginationChanged"
-                    class="elevation-1 fixed-header v-table__overflow"
+                    class='v-table__overflow ghd-table'
+                    sort-icon=ghd-table-sort
                     item-key="id"
                     show-select
                     return-object
@@ -168,7 +169,7 @@
                         </tr>
                     </template>
                 </v-data-table-server>
-        </div>
+        </v-col>
         <v-divider
             :thickness="2"
             class="border-opacity-100"
@@ -195,11 +196,11 @@
 
         </v-col>
         <v-col>
-            <v-row align="center" v-show="hasSelectedLibrary || hasScenario" style="padding: 10px;" justify="center">
+            <v-row v-show="hasSelectedLibrary || hasScenario" style="padding-bottom: 40px;" justify="center">
                 <v-btn flat
                     id="TargetConditionGoalEditor-deleteLibrary-btn"
                     @click="onShowConfirmDeleteAlert"
-                    class="ghd-white-bg ghd-blue"
+                    class='ghd-white-bg ghd-blue ghd-button-text'
                     v-show="!hasScenario"
                     :disabled="!hasSelectedLibrary"
                 >
@@ -207,8 +208,8 @@
                 </v-btn>
                 <v-btn :disabled='!hasUnsavedChanges' flat
                     @click="onDiscardChanges"
-                    class="ghd-white-bg ghd-blue"
-                    style="margin: 5px;"
+                    class='ghd-white-bg ghd-blue ghd-button-text'
+                    style="margin-left: 5px;"
                     v-show="hasScenario"
                     variant="text"
                 >
@@ -219,16 +220,16 @@
                     id="TargetConditionGoalEditor-CreateAsNewLibrary-btn"
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                    style="margin: 5px;"
+                    style="margin-left: 5px;"
                     :disabled="disableCrudButtons()"
                 >
                     Create as New Library
                 </v-btn>
                 <v-btn
                     @click="onUpsertScenarioTargetConditionGoals"
-                    class="ghd-blue-bg ghd-white"
+                    class='ghd-blue-bg ghd-white ghd-button-text'
                     v-show="hasScenario"
-                    style="margin: 5px;"
+                    style="margin-left: 5px;"
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
                 >
                     Save
@@ -236,7 +237,8 @@
                 <v-btn
                     id="TargetConditionGoalEditor-UpdateLibrary-btn"
                     @click="onUpsertTargetConditionGoalLibrary"
-                    class="ghd-blue-bg ghd-white"
+                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
+                    style="margin-left: 5px;"
                     v-show="!hasScenario"
                     :disabled="disableCrudButtons() || !hasUnsavedChanges || !hasLibraryEditPermission"
                 >
@@ -276,7 +278,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, ref, computed, onMounted, watch } from 'vue'; 
+import { onBeforeUnmount, ref, shallowReactive, computed, onMounted, watch } from 'vue'; 
 import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import {
     emptyTargetConditionGoal,
@@ -373,7 +375,8 @@ import { getUrl } from '@/shared/utils/get-url';
 
     let gridSearchTerm = '';
     let currentSearch = ref<string>('');
-    const pagination = ref<Pagination>(clone(emptyPagination));
+    //const pagination = ref<Pagination>(clone(emptyPagination));
+    const pagination: Pagination = shallowReactive(clone(emptyPagination));
     let isPageInit = false;
     let totalItems = ref(0);
     const currentPage = ref<TargetConditionGoal[]>([]);
@@ -443,7 +446,7 @@ import { getUrl } from '@/shared/utils/get-url';
         }
     ];
     const numericAttributeNames = ref<string[]>([]);
-    const selectedGridRows= ref<TargetConditionGoal[]>([]);
+    let selectedGridRows= ref<TargetConditionGoal[]>([]);
     const selectedTargetConditionGoalIds = ref<string[]>([]);
     let selectedTargetConditionGoalForCriteriaEdit: TargetConditionGoal = clone(
         emptyTargetConditionGoal,
@@ -574,7 +577,7 @@ import { getUrl } from '@/shared/utils/get-url';
     watch(currentPage,()=> {
 
         // Get parent name from library id
-        librarySelectItems.value.forEach(library => {pagination
+        librarySelectItems.value.forEach(library => {
             if (library.value === parentLibraryId) {
                 parentLibraryName.value = library.text;
             }
@@ -591,7 +594,7 @@ import { getUrl } from '@/shared/utils/get-url';
         if(initializing)
             return;
         checkHasUnsavedChanges();
-        const { sort, descending, page, rowsPerPage } = pagination.value;
+        const { sort, descending, page, rowsPerPage } = pagination;
         const request: PagingRequest<TargetConditionGoal>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -910,7 +913,7 @@ import { getUrl } from '@/shared/utils/get-url';
     }
 
     function resetPage(){
-        pagination.value.page = 1;
+        pagination.page = 1;
         onPaginationChanged();
     }
 

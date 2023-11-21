@@ -1,5 +1,5 @@
 <template>
-    <v-card height="800px" class="elevation-0 vcard-main-layout">
+    <v-card class="elevation-0 vcard-main-layout">
         <v-col cols = "12">
             <v-row justify-space-between>
                 <v-col cols = "4" class="ghd-constant-header">
@@ -50,8 +50,7 @@
             </v-row>
         </v-col>
         <v-col v-show="hasSelectedLibrary || hasScenario" xs12>
-            <div class="cash-flow-library-tables">
-
+            <div>
                 <v-data-table-server
                     id="CashFlowEditor-cashFlowRules-table"
                     :headers="cashFlowRuleGridHeaders"
@@ -65,6 +64,7 @@
                     return-object
                     show-select               
                     :items-length="totalItems"
+                    :rows-per-page-items=[5,10,25]
                     :items-per-page-options="[
                         {value: 5, title: '5'},
                         {value: 10, title: '10'},
@@ -73,7 +73,6 @@
                     v-model:sort-by="pagination.sort"
                     v-model:page="pagination.page"
                     v-model:items-per-page="pagination.rowsPerPage"
-                    item-value="name"
                     @update:options="onPaginationChanged">
                     <template v-slot:item="item" slot="items" slot-scope="props">
                         <tr>
@@ -82,10 +81,10 @@
                         </td>
                         <td>
                             <editDialog
-                                v-model:return-value="item.item.name"
-                                large
+                                :return-value="item.item.name"
+                                size="large"
                                 lazy
-                                @save="onEditSelectedLibraryListData(item,'description')"
+                                @save="onEditSelectedLibraryListData(item.item,'description')"
                                 >
                                 <v-text-field
                                     id="CashFlowEditor-ruleName-text"
@@ -194,9 +193,7 @@
             </v-row>
         </v-col>
         <v-col cols = "12">
-            <v-row
-                justify="center"
-                v-show="hasSelectedLibrary || hasScenario">
+            <v-row justify="center" style="padding-bottom: 40px;" v-show="hasSelectedLibrary || hasScenario">
                 <v-btn variant = "outlined"
                     @click="onDeleteCashFlowRuleLibrary"
                     id="CashFlowEditor-deleteLibrary-btn"

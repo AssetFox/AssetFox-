@@ -19,8 +19,7 @@
                 <v-select id="TreatmentDetailsTab-category-vselect"
                 class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                     :items="Array.from(treatmentCategoryMap.keys())"
-                    append-icon=ghd-down
-                    @update:model-value="onEditTreatmentType('category', treatmentCategoryBinding)"
+                    append-icon=ghd-down   
                     label="Category"
                     variant="outlined"
                     density="compact"
@@ -35,7 +34,6 @@
                 class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                 :items="Array.from(assetTypeMap.keys())"
                 append-icon=ghd-down
-                @update:model-value="onEditAssetType('assetType', assetTypeBinding)"
                 label="Asset type"
                 variant="outlined"
                 density="compact"
@@ -47,7 +45,7 @@
                 <v-text-field id="TreatmentDetailsTab-yearsBeforeAny-vtext"
                     class='ghd-control-border ghd-control-text ghd-control-width-sm'
                     :mask="'####'"
-                    @update:model-value="onEditTreatmentDetails('shadowForAnyTreatment', selectedTreatmentDetails.shadowForAnyTreatment)"
+                    @update:model-value="onEditTreatmentDetails('shadowForAnyTreatment', $event)"
                     label="Years Before Any"
                     variant="outlined"
                     density="compact"
@@ -62,7 +60,7 @@
                     class='ghd-control-border ghd-control-text ghd-control-width-sm'
                     :mask="'####'"
                     rows="4"
-                    @update:model-value="onEditTreatmentDetails('shadowForSameTreatment', selectedTreatmentDetails.shadowForSameTreatment)"
+                    @update:model-value="onEditTreatmentDetails('shadowForSameTreatment', $event)"
                     label="Years Before Same"
                     variant="outlined"
                     density="compact"
@@ -197,9 +195,17 @@ import { getUrl } from '@/shared/utils/get-url';
     let treatmentCategoryReverseMapValue: Map<TreatmentCategory, string> = clone(treatmentCategoryReverseMap);
     let assetTypeReverseMapValue: Map<AssetType, string> = clone(assetTypeReverseMap);
     let treatmentCategoryBinding = ref('');
+    let categories = Array.from(treatmentCategoryMap.keys());
     let assetTypeMapValue: Map<string, AssetType> = clone(assetTypeMap);
     let assetTypeBinding = ref('');
 
+    watch(assetTypeBinding, () => {
+        onEditAssetType('assetType', assetTypeBinding.value)
+    })
+
+    watch(treatmentCategoryBinding, () => {
+        onEditTreatmentType('category', treatmentCategoryBinding.value)
+    })
     watch(selectedTreatmentDetails, () => {
         treatmentCategoryBinding.value = treatmentCategoryReverseMap.get(selectedTreatmentDetails.value.category)!;
         assetTypeBinding.value = assetTypeReverseMap.get(selectedTreatmentDetails.value.assetType)!;

@@ -68,11 +68,8 @@
     const message = props.dialogDataPreChecks.message;
 
     if (props.dialogDataPreChecks.message) {
-        // Remove the first 9 characters
-        const remainingMessage = message.substring(9);
-
         // Split the message by periods and filter out empty strings
-        const sentences = remainingMessage.split('.').filter(sentence => sentence.trim() !== '');
+        const sentences = message.split('. ');
 
         return sentences;
     }

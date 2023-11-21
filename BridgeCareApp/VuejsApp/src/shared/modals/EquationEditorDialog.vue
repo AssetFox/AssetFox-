@@ -244,7 +244,7 @@
             <v-col cols = "12">
                 <v-row justify="center">
                   <v-btn @click="onSubmit(false)" variant = "outlined" class='ghd-blue ghd-button ghd-button-text' id="EquationEditorDialog-Cancel-Btn">Cancel</v-btn>
-                  <v-btn :disabled="cannotSubmit" @click="onSubmit(false)" variant = "outlined" class='ghd-blue ghd-button ghd-button-text' id="EquationEditorDialog-Save-Btn">Save</v-btn>
+                  <v-btn :disabled="cannotSubmit" @click="onSubmit(true)" variant = "outlined" class='ghd-blue ghd-button ghd-button-text' id="EquationEditorDialog-Save-Btn">Save</v-btn>
                 </v-row>
             </v-col>
           </v-row>
@@ -512,7 +512,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
   watch(expression,()=>{
     invalidExpressionMessage.value = '';
     validExpressionMessage.value = '';
-    cannotSubmit.value = !(expression.value === '' && !isPiecewise);
+    cannotSubmit.value = !(expression.value === '' && !isPiecewise.value);
   })
 
   /**
@@ -812,7 +812,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
   }
 
   function disableEquationCheck() {
-        return isPiecewise ? !hasValue(onParseTimeAttributeDataPoints()) : !hasValue(expression.value);
+        return isPiecewise.value ? !hasValue(onParseTimeAttributeDataPoints()) : !hasValue(expression.value);
     }
 
   /**
@@ -861,7 +861,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
     resetComponentCalculatedProperties();
 
     if (submit) {
-      equation.expression = isPiecewise ? onParseTimeAttributeDataPoints() : expression.value;
+      equation.expression = isPiecewise.value ? onParseTimeAttributeDataPoints() : expression.value;
       emit('submit', equation);
     } else {
       emit('submit', null);

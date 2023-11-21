@@ -22,6 +22,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class CriterionLibraryRepository : ICriterionLibraryRepository
     {
+        // This class formerly contained the following method, which allowed one to add joins of arbitrary type:
+        //        public void JoinEntitiesWithCriteria(Dictionary<string, List<Guid>> entityIdsPerExpression, string joinEntity, string prependName)
+        // It was unused and deleted in commit a938b6aa7253d4ea0a0ab39483eb36178c51210f on 11/20/23.
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         public CriterionLibraryRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));

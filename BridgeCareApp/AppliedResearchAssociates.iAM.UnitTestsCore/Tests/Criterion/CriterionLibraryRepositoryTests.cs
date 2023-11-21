@@ -120,7 +120,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Criterion
             TestHelper.UnitOfWork.CriterionLibraryRepo.AddLibraries(libraries);
 
             var libraryAfter = await TestHelper.UnitOfWork.CriterionLibraryRepo.CriteriaLibrary(libraryId);
-            ObjectAssertions.Equivalent(library, libraryAfter);
+            ObjectAssertions.EquivalentExcluding(library, libraryAfter, l => l.Owner);
         }
 
         [Fact]

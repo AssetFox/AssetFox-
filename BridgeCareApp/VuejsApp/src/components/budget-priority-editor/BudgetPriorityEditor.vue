@@ -103,18 +103,18 @@
                                     </editDialog>
                                 </div>
                                 <div v-else-if="header.key === 'criteria'">
-                                    <v-row align="center" style='flex-wrap:nowrap'>
-                                        <v-menu location="end" min-height='500px' min-width='500px'>
+                                    <v-row>
+                                        <v-menu >
                                             <template v-slot:activator="{ props }">
-                                                <div v-if='stateScenarioSimpleBudgetDetails.length > 5'>
-                                                    <v-btn class='ara-blue ghd-button-text' v-bind="props" flat>
-                                                        <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
-                                                    </v-btn>
-                                                </div>
-                                                <div v-else class='priority-criteria-output'>
-                                                    <v-text-field readonly single-line class='sm-txt' variant="underlined"
-                                                                :model-value='item.item.criteria' />
-                                                </div>
+                                                    <div style="display: flex; align-items: center;" v-if='stateScenarioSimpleBudgetDetails.length > 5'>
+                                                        <v-btn class='ara-blue ghd-button-text' v-bind="props" flat>
+                                                            <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
+                                                        </v-btn>
+                                                    </div>
+                                                    <div v-else class='priority-criteria-output' style="width: 1000px;">
+                                                        <v-text-field readonly single-line class='sm-txt' variant="underlined"
+                                                                    :model-value='item.item.criteria' />                                        
+                                                    </div>
                                             </template>
                                             <v-card>
                                                 <v-card-text>
@@ -123,9 +123,6 @@
                                                 </v-card-text>
                                             </v-card>
                                         </v-menu>
-                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' flat>
-                                            <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
-                                        </v-btn>
                                     </v-row>
                                 </div>
                                 <div v-else-if="header.title.endsWith('%')">
@@ -143,6 +140,9 @@
                                     </editDialog>
                                 </div>
                                 <div v-else>
+                                    <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' flat>
+                                            <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                        </v-btn>
                                     <v-btn  id="BudgetPriorityEditor-deleteBudgetPriority-btn" @click="onRemoveBudgetPriority(item.item.id)" flat>
                                         <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>

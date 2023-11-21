@@ -554,6 +554,7 @@ import { getUrl } from '@/shared/utils/get-url';
 
         clearChanges();
         initializing = false;
+        checkHasUnsavedChanges();
         if(hasSelectedLibrary.value)
             onPaginationChanged();
     })

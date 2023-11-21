@@ -533,7 +533,7 @@ import { getUrl } from '@/shared/utils/get-url';
     })
 
     function hasBudgetPercentagePairsThatMatchBudgets(budgetPriority: BudgetPriority) {
-        if (!hasValue(stateScenarioSimpleBudgetDetails)) {
+        if (!hasValue(stateScenarioSimpleBudgetDetails.value)) {
             return true;
         }
 
@@ -542,7 +542,7 @@ import { getUrl } from '@/shared/utils/get-url';
                 id: budgetPercentagePair.budgetId, name: budgetPercentagePair.budgetName,
             })) as SimpleBudgetDetail[];
 
-        return isEqual(sortNonObjectLists(simpleBudgetDetails), sortNonObjectLists(clone(stateScenarioSimpleBudgetDetails)));
+        return isEqual(sortNonObjectLists(simpleBudgetDetails), sortNonObjectLists(clone(stateScenarioSimpleBudgetDetails.value)));
     }
 
     function createNewBudgetPercentagePairsFromBudgets() {

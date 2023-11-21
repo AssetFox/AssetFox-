@@ -97,7 +97,7 @@
                         item-title="text" 
                         item-value="value" 
                         class="ghd-select ghd-text-field ghd-text-field-border"
-                        v-on:change="setTiming" density="compact">
+                        @update:modelValue="setTiming($event)" density="compact">
                     </v-select>
                 </v-row>
                 </v-col>
@@ -690,9 +690,9 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     }
     function setAttributeTimingSelectItems() {
         attributeTimingSelectItems.value = [
-            { text: 'Pre Deterioration', value: Timing.PreDeterioration },
-            { text: 'Post Deterioration', value: Timing.PostDeterioration },
-            { text: 'On Demand', value: Timing.OnDemand },
+            { text: 'Pre Deterioration', value: Timing.PreDeterioration.toString() },
+            { text: 'Post Deterioration', value: Timing.PostDeterioration.toString()  },
+            { text: 'On Demand', value: Timing.OnDemand.toString()  },
         ];
     }
     watch(stateCalculatedAttributeLibraries, onStateCalculatedAttributeLibrariesChanged)
@@ -784,7 +784,8 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
             }
         }
     }
-    watch(attributeTimingSelectItemValue,() => {
+    watch(attributeTimingSelectItemValue, onAttributeTimingSelectItemValue)
+    function onAttributeTimingSelectItemValue() {
         // Change in timings select box
         if (
             isNil(attributeTimingSelectItemValue.value) ||
@@ -793,7 +794,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
             isTimingSelectedItemValue = false;
         } else {
             isTimingSelectedItemValue = true;
-            var localTiming = attributeTimingSelectItemValue.value as unknown as Timing;
+            var localTiming = +attributeTimingSelectItemValue.value as Timing;
             var item = calculatedAttributeGridData.value.find(
                 _ => _.attribute == attributeSelectItemValue.value,
             );
@@ -809,13 +810,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
 
     watch(stateSelectedCalculatedAttributeLibrary,() => {
         
-        selectedCalculatedAttributeLibrary.value.calculatedAttributes = clone(stateSelectedCalculatedAttributeLibrary.value.calculatedAttributes)
-        selectedCalculatedAttributeLibrary.value.description = clone(stateSelectedCalculatedAttributeLibrary.value.description)
-        selectedCalculatedAttributeLibrary.value.id = clone(stateSelectedCalculatedAttributeLibrary.value.id)
-        selectedCalculatedAttributeLibrary.value.isDefault = clone(stateSelectedCalculatedAttributeLibrary.value.isDefault)
-        selectedCalculatedAttributeLibrary.value.name = clone(stateSelectedCalculatedAttributeLibrary.value.name)
-        selectedCalculatedAttributeLibrary.value.owner = clone(stateSelectedCalculatedAttributeLibrary.value.owner)
-        selectedCalculatedAttributeLibrary.value.users = clone(stateSelectedCalculatedAttributeLibrary.value.users)
+        selectedCalculatedAttributeLibrary.value = clone(stateSelectedCalculatedAttributeLibrary.value)
 
         isDefaultBool.value = selectedCalculatedAttributeLibrary.value.isDefault;
         onselectedCalculatedAttributeLibraryChanged();
@@ -925,6 +920,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         //} 
     }
     function setTiming(selectedItem: number) {
+        console.log('foo');
          setTimingsMultiSelect(selectedItem);
     }
 

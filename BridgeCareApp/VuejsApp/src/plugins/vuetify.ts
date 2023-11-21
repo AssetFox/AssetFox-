@@ -12,11 +12,6 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
 import GhdDownSvg from '@/shared/icons/GhdDownSvg.vue';
 import GhdTableSortSvg from '@/shared/icons/GhdTableSortSvg.vue';
 import { mdi } from 'vuetify/iconsets/mdi';
-import {
-  VDataTable,
-  VDataTableServer,
-  VDataTableVirtual,
-} from "vuetify/labs/VDataTable";
 
 const ghdSearchIconSet: IconSet = {
     component: (props: IconProps) => {

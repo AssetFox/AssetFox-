@@ -242,7 +242,7 @@
             :thickness="2"
             class="border-opacity-100"
         ></v-divider>
-            <v-row justify="center" v-show="(hasSelectedLibrary || hasScenario) && selectedTreatment.name !== ''">
+            <v-row justify="center" v-show="(hasSelectedLibrary || hasScenario) ">
                 <v-col cols="6">
                     <v-btn :disabled='!hasUnsavedChanges'
                         @click='onDiscardChanges'

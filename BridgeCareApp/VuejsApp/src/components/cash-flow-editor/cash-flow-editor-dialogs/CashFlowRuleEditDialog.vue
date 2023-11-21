@@ -211,7 +211,7 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
   let isDataValid = ref(true);
 
   let cashFlowDistributionRuleGridData = ref<CashFlowDistributionRule[]>([])
-  let processedGridData: CashFlowDistributionRule[] = [];
+  let processedGridData = ref<CashFlowDistributionRule[]>([]);
 
   let cashFlowRuleDistributionGridHeaders: any[] = [
     {
@@ -253,7 +253,7 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
   function onSubmit(submit: boolean) {
     if (submit) {
       hasUnsavedChanges.value = false;
-      emit('submit', processedGridData);
+      emit('submit', processedGridData.value);
     } else {
       onSelectedSplitTreatmentIdChanged()
       emit('submit', null);      
@@ -262,7 +262,7 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 
 function onEditSelectedLibraryListData(data: any, property: string) {
         let changedRule = data as CashFlowDistributionRule
-        let rule = processedGridData.find(o => o.id === changedRule.id)
+        let rule = processedGridData.value.find(o => o.id === changedRule.id)
         if(!isNil(rule))
             switch (property) {
                 case 'durationInYears':
@@ -280,7 +280,7 @@ function onEditSelectedLibraryListData(data: any, property: string) {
 
     function onAddCashFlowDistributionRule() {
         const newCashFlowDistributionRule: CashFlowDistributionRule = modifyNewCashFlowDistributionRuleDefaultValues();
-        processedGridData.push(clone(newCashFlowDistributionRule))
+        processedGridData.value.push(clone(newCashFlowDistributionRule))
         cashFlowDistributionRuleGridData.value.push(newCashFlowDistributionRule);
     }
 
@@ -300,7 +300,7 @@ function onEditSelectedLibraryListData(data: any, property: string) {
                 ) + 1;
             const costCeiling: number = getLastPropertyValue(
                 'costCeiling',
-                processedGridData,
+                processedGridData.value,
             );
             const yearlyPercentages = getNewCashFlowDistributionRuleYearlyPercentages(
                 durationInYears,
@@ -363,7 +363,7 @@ function onEditSelectedLibraryListData(data: any, property: string) {
         cashFlowDistributionRuleGridData.value = hasValue(props.selectedCashFlowRule.cashFlowDistributionRules)
             ? clone(props.selectedCashFlowRule.cashFlowDistributionRules) : [];
         
-        processedGridData = hasValue(props.selectedCashFlowRule.cashFlowDistributionRules)
+        processedGridData.value = hasValue(props.selectedCashFlowRule.cashFlowDistributionRules)
             ? clone(props.selectedCashFlowRule.cashFlowDistributionRules) : [];
     }
 
@@ -373,7 +373,7 @@ function onEditSelectedLibraryListData(data: any, property: string) {
             hasUnsavedChanges.value = 
                 hasUnsavedChangesCore(
                     '',
-                    processedGridData,
+                    processedGridData.value,
                     props.selectedCashFlowRule.cashFlowDistributionRules,
                 )
     }
@@ -381,8 +381,8 @@ function onEditSelectedLibraryListData(data: any, property: string) {
     function checkIsDataValid() : boolean
     {
         let rule =  clone(emptyCashFlowRule)
-        rule.cashFlowDistributionRules = processedGridData;
-        isDataValid.value = processedGridData.every((
+        rule.cashFlowDistributionRules = processedGridData.value;
+        isDataValid.value = processedGridData.value.every((
                         distributionRule: CashFlowDistributionRule,
                         index: number,
                     ) => {
@@ -441,6 +441,6 @@ function onEditSelectedLibraryListData(data: any, property: string) {
 
     function onDeleteCashFlowDistributionRule(id: string) {
         cashFlowDistributionRuleGridData.value = cashFlowDistributionRuleGridData.value.filter((rule: CashFlowDistributionRule) => rule.id !== id)
-        processedGridData = processedGridData.filter((rule: CashFlowDistributionRule) => rule.id !== id)
+        processedGridData.value = processedGridData.value.filter((rule: CashFlowDistributionRule) => rule.id !== id)
     }
 </script>

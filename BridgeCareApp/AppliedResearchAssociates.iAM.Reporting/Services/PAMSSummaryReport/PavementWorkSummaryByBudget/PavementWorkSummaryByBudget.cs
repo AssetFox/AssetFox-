@@ -109,14 +109,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 }
 
                 var workTypeTotals = _pavementWorkSummaryComputationHelper.CalculateWorkTypeTotals(costAndLengthPerTreatmentPerYear, simulationTreatments);
-                costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears,
+                costBudgetsWorkSummary.FillCostBudgetWorkSummarySectionsbyBudget(worksheet, currentCell, simulationYears,
                     yearlyBudgetAmount,
                     costAndLengthPerTreatmentPerYear,
                     yearlyCostCommittedProj,
                     costAndLengthPerTreatmentGroupPerYear, // We only care about cost here
                     simulationTreatments, // This should be filtered by budget/year; do we already have this by this point?
                     workTypeTotals,
-                    committedProjects);
+                    committedProjects,
+                    budgetSummaryModel,
+                    reportOutputData);
 
                 // Finally, advance for next budget label
                 currentCell.Row++;

@@ -8,13 +8,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ICriterionLibraryRepository
     {
-        void JoinEntitiesWithCriteria(Dictionary<string, List<Guid>> entityIdsPerExpression, string joinEntity,
-            string simulationName);
-
-        void UpsertCriterionLibraries(List<CriterionLibraryEntity> criterionLibraryEntities);
-
-        void JoinSelectableTreatmentEntitiesWithCriteria(Dictionary<Guid, List<string>> expressionsPerSelectableTreatmentEntityId, string prependName);
-
         Task<List<CriterionLibraryDTO>> CriterionLibraries();
 
         Task<CriterionLibraryDTO> CriteriaLibrary(Guid libraryId);

@@ -84,6 +84,7 @@ import { useStore } from 'vuex';
 
     onMounted(() =>  {
         setAttributeSelectItems();
+        buildDataFromCurves();
         onTreatmentChange();
     });
 
@@ -91,7 +92,7 @@ import { useStore } from 'vuex';
         setAttributeSelectItems();
     });
 
-    watch(selectedTreatment, onTreatmentChange);
+    watch(() => props.selectedTreatment, onTreatmentChange);
     function onTreatmentChange(){
         if (selectedTreatmentPerformanceFactors.value.length <= 0) {
            buildDataFromCurves(); 

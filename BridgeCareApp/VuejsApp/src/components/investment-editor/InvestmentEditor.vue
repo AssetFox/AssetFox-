@@ -1,5 +1,5 @@
 <template>
-    <v-card height="1000px" class="elevation-0 vcard-main-layout">
+    <v-card class="elevation-0 vcard-main-layout">
     <v-row>
         <v-col cols="12">
             <v-row justify="space-between">

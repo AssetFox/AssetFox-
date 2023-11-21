@@ -1,5 +1,5 @@
 <template>
-    <v-card height="800px" class="elevation-0 vcard-main-layout">
+    <v-card class="elevation-0 vcard-main-layout">
     <v-row>
         <v-col col="12">
             <v-row align="center" justify="space-between" >              
@@ -171,7 +171,7 @@
             </v-textarea>
         </v-col>
         <v-col cols = "12">           
-            <v-row style="padding-bottom: 80px;" justify="center" v-show='hasSelectedLibrary || hasScenario'>
+            <v-row style="padding-bottom: 40px;" justify="center" v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn  variant = "flat" @click='onDiscardChanges'
                        v-show='hasScenario' :disabled='!hasUnsavedChanges' style="margin: 5px;" class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
@@ -215,7 +215,7 @@
 </template>
 
 <script setup lang='ts'>
-    import { ref, watch, onBeforeUnmount, ShallowRef, shallowRef, computed } from 'vue';
+    import { ref, watch, shallowReactive, onBeforeUnmount, ShallowRef, shallowRef, computed } from 'vue';
     import editDialog from '@/shared/modals/Edit-Dialog.vue'
     import {
         BudgetPercentagePair,
@@ -303,7 +303,9 @@ import { getUrl } from '@/shared/utils/get-url';
     let rowCache: BudgetPriority[] = [];
     let gridSearchTerm = '';
     let currentSearch = '';
-    let pagination: ShallowRef<Pagination> = shallowRef(clone(emptyPagination));
+    //const pagination: ShallowRef<Pagination> = shallowRef(clone(emptyPagination));
+    const pagination: Pagination = shallowReactive(clone(emptyPagination));
+
     let isPageInit = false;
     let totalItems = ref(0);
     let currentPage: ShallowRef<BudgetPriority[]> = shallowRef([]);
@@ -463,12 +465,12 @@ import { getUrl } from '@/shared/utils/get-url';
         isShared.value = isSharedLibrary.value;
     }
 
-    watch(pagination, onPaginationChanged)
+    watch(pagination, () => onPaginationChanged)
     async function onPaginationChanged() {
         if(initializing)
             return;
         checkHasUnsavedChanges();
-        const { sort, descending, page, rowsPerPage } = pagination.value;
+        const { sort, descending, page, rowsPerPage } = pagination;
         const request: PagingRequest<BudgetPriority>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -913,7 +915,7 @@ import { getUrl } from '@/shared/utils/get-url';
     }
 
     function resetPage(){
-        pagination.value.page = 1;
+        pagination.page = 1;
         onPaginationChanged();
     }
 
@@ -1009,7 +1011,7 @@ import { getUrl } from '@/shared/utils/get-url';
         });
     }
     function initializePages(){
-        const { sort, descending, page, rowsPerPage } = pagination.value;
+        const { sort, descending, page, rowsPerPage } = pagination;
         const request: PagingRequest<BudgetPriority>= {
             page: 1,
             rowsPerPage: 5,

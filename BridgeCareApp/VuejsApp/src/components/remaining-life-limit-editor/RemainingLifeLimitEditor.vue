@@ -1,5 +1,5 @@
 <template>
-    <v-card height="900px" class="elevation-0 vcard-main-layout">
+    <v-card class="elevation-0 vcard-main-layout">
     <v-row>
         <v-col>
             <v-row align="center" justify="space-between">
@@ -198,7 +198,7 @@
             </v-textarea>
         </v-col>
         <v-col>
-            <v-row v-show="hasSelectedLibrary" style="padding-bottom: 80px;" align-content="center" justify="center">
+            <v-row v-show="hasSelectedLibrary" style="padding-bottom: 40px;" align-content="center" justify="center">
                 <v-btn id="RemainingLifeLimitEditor-cancel-btn" style="margin: 5px;" class="ghd-blue" variant = "outlined" v-show="hasScenario" @click="onDiscardChanges" :disabled="!hasUnsavedChanges">Cancel</v-btn>
                 <v-btn id="RemainingLifeLimitEditor-deleteLibrary-btn" style="margin: 5px;" class="ghd-blue" variant = "outlined" v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
                 <v-btn id="RemainingLifeLimitEditor-createAsNewLibrary-btn" style="margin: 5px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" variant = "outlined">Create as New Library</v-btn>

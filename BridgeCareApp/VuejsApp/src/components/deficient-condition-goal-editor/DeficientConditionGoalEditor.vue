@@ -1,5 +1,5 @@
 <template>
-    <v-card height="800px" class="elevation-0 vcard-main-layout">
+    <v-card class="elevation-0 vcard-main-layout">
     <v-row style="margin: 5px;">
         <v-row align="center" >
                 <v-col cols="6">
@@ -68,7 +68,9 @@
             </v-btn>
         </v-row>
     </v-row>
-    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
+    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>
+        <b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b>
+    </div>  
         <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
             <div class="deficients-data-table">
                 <v-data-table-server
@@ -239,7 +241,7 @@
             </v-row>
         </v-col>
         <v-col v-show="hasSelectedLibrary || hasScenario">
-            <v-row justify="center">
+            <v-row justify="center" style="padding-bottom: 40px;">
                 <v-btn
                     @click="onDiscardChanges"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
@@ -318,7 +320,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, Ref, ShallowRef, shallowRef, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, Ref, shallowReactive, ShallowRef, shallowRef, watch } from 'vue';
 import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import {
     DeficientConditionGoal,
@@ -484,7 +486,8 @@ import { getUrl } from '@/shared/utils/get-url';
     let rowCache: DeficientConditionGoal[] = [];
     let gridSearchTerm = '';
     let currentSearch = '';
-    let pagination: ShallowRef<Pagination> = shallowRef(clone(emptyPagination));
+    //let pagination: ShallowRef<Pagination> = shallowRef(clone(emptyPagination));
+    const pagination: Pagination = shallowReactive(clone(emptyPagination));
     let isPageInit = false;
     let totalItems = 0;
     let currentPage: ShallowRef<DeficientConditionGoal[]> = shallowRef([]);
@@ -644,7 +647,7 @@ import { getUrl } from '@/shared/utils/get-url';
         if(initializing)
             return;
         checkHasUnsavedChanges();
-        const { sort, descending, page, rowsPerPage } = pagination.value;
+        const { sort, descending, page, rowsPerPage } = pagination;
         const request: PagingRequest<DeficientConditionGoal>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -968,7 +971,7 @@ import { getUrl } from '@/shared/utils/get-url';
     }
 
     function resetPage(){
-        pagination.value.page = 1;
+        pagination.page = 1;
         onPaginationChanged();
     }
 

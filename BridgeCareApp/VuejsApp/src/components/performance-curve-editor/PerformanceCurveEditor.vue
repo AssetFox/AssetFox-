@@ -1,5 +1,5 @@
 <template>
-    <v-card height="1000px" class="elevation-0 vcard-main-layout" >
+    <v-card class="elevation-0 vcard-main-layout" >
         <v-row class="p-0" justify="start" style="height:96px">
             <v-col cols = "5">
                 <v-subheader class="ghd-control-label ghd-md-gray">Deterioration Model Library</v-subheader>
@@ -106,11 +106,11 @@
         </v-row>
         <v-row class="data-table" justify="start" v-show="hasSelectedLibrary || hasScenario" xs12>
             <v-col cols = "12">
-                <v-card class="elevation-0">
+                <!-- <v-card class="elevation-0"> -->
                     <v-data-table-server
                         id="PerformanceCurveEditor-deteriorationModels-datatable"                    
                         show-select
-                        class="fixed-header ghd-table v-table__overflow"
+                        class='v-table__overflow ghd-table'
                         item-key="id"
 
                         :headers="performanceCurveGridHeaders"
@@ -328,7 +328,7 @@
                     >
                         Delete Selected
                     </v-btn>                        
-                </v-card>
+                <!-- </v-card> -->
             </v-col>
         </v-row>
         <v-row class="header-height" justify="start" v-show="hasSelectedLibrary || hasScenario">
@@ -362,7 +362,7 @@
                 />
             </v-col>
         </v-row>
-        <v-row
+        <v-row style="padding-bottom: 40px;"
             justify="center"
             row
             v-show='hasSelectedLibrary || hasScenario'

@@ -1,5 +1,5 @@
 <template>
-    <v-card height="900px" class="elevation-0 vcard-main-layout">
+    <v-card class="elevation-0 vcard-main-layout">
     <v-row>
         <v-col cols = "12">
             <v-row justify-space-between>
@@ -237,7 +237,7 @@
         </v-col>
         <!-- buttons -->
         <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
-            <v-row justify="center" v-show='hasSelectedLibrary || hasScenario'>
+            <v-row justify="center" style="padding-bottom: 40px;" v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn
                     :disabled="!hasUnsavedChanges"
                     v-if="hasAdminAccess && hasScenario"

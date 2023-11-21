@@ -74,7 +74,7 @@
             </v-row>
         </v-col>
         <v-col>
-            <v-row justify-end row v-show="hasSelectedCriterionLibrary">
+            <v-row justify-end style="padding-bottom: 40px;" row v-show="hasSelectedCriterionLibrary">
                 <v-btn
                     @click="onUpsertCriterionLibrary(selectedCriterionLibrary)"
                     class="ara-blue-bg text-white"

@@ -83,7 +83,7 @@
                         offset-
                         min-width="21%"
                         max-width="21%"
-                        max-height="455%"
+                        max-height="500%"
                         :close-on-content-click="false"
                     >
                     
@@ -117,7 +117,7 @@
                                 </v-badge>
                             </button>
                         </template>            
-                        <v-card class="mx-auto" style="width: 2200%; min-height: 500%; left: -170px; top: 20px;">
+                        <v-card class="mx-auto" style="width: 1950%; min-height: 80vh; left: -170px; top: 25px;">
                             <v-toolbar 
                                 id = "App-notification-toolbar"
                                 color="#002E6C" dark>
@@ -159,7 +159,7 @@
                                         </v-list-item-content>
                                     </v-col>
                                     <v-col> 
-                                        <v-btn icon size="16" justify-end position="absolute" style="margin-left:20%;">
+                                        <v-btn icon size="16" justify-end position="absolute" style="margin-left:15%;">
                                                 <v-icon
                                                     size="small"
                                                     @click="

@@ -109,5 +109,61 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Criterion
             Assert.NotEqual(Guid.Empty, criterionLibraryBefore.Id);
             Assert.Equal(Guid.Empty, criterionLibraryAfter.Id);
         }
+
+        [Fact]
+        public async Task AddLibraries_Does()
+        {
+            var libraryId = Guid.NewGuid();
+            var library = CriterionLibraryDtos.Dto(libraryId);
+            var libraries = new List<CriterionLibraryDTO> { library };
+
+            TestHelper.UnitOfWork.CriterionLibraryRepo.AddLibraries(libraries);
+
+            var libraryAfter = await TestHelper.UnitOfWork.CriterionLibraryRepo.CriteriaLibrary(libraryId);
+            ObjectAssertions.Equivalent(library, libraryAfter);
+        }
+
+        [Fact]
+        public void AddLibraryBudgetJoins_CriterionLibraryAndBudgetInDb_Does()
+        {
+            var budgetId = Guid.NewGuid();
+            var library = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
+            var libraryId = library.Id;
+            var budgetLibraryJoin = new CriterionLibraryBudgetDTO
+            {
+                BudgetId = budgetId,
+                CriterionLibraryId = libraryId,
+            };
+            var budgetLibraryJoins = new List<CriterionLibraryBudgetDTO> { budgetLibraryJoin };
+
+            TestHelper.UnitOfWork.CriterionLibraryRepo.AddLibraryBudgetJoins(budgetLibraryJoins);
+
+            var budgetLibraryJoinAfter = TestHelper.UnitOfWork.Context.CriterionLibraryBudget.Single(c => c.BudgetId == budgetId);
+            Assert.Equal(libraryId, budgetLibraryJoinAfter.CriterionLibraryId);
+        }
+
+        [Fact]
+        public void AddScenarioBudgetJoins_CriterionLibraryAndBudgetInDb_Does()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var simulationId = Guid.NewGuid();
+            var simulation = SimulationTestSetup.CreateSimulation(
+                TestHelper.UnitOfWork, simulationId);
+            var budgetId = Guid.NewGuid();
+            var library = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
+            var libraryId = library.Id;
+            var budgetLibraryJoin = new CriterionLibraryScenarioBudgetDTO
+            {
+                ScenarioBudgetId = budgetId,
+                CriterionLibraryId = libraryId,
+            };
+            var budgetLibraryJoins = new List<CriterionLibraryScenarioBudgetDTO> { budgetLibraryJoin };
+
+            TestHelper.UnitOfWork.CriterionLibraryRepo.AddLibraryScenarioBudgetJoins(budgetLibraryJoins);
+
+            var budgetLibraryJoinAfter = TestHelper.UnitOfWork.Context.CriterionLibraryScenarioBudget.Single(c => c.ScenarioBudgetId == budgetId);
+            Assert.Equal(libraryId, budgetLibraryJoinAfter.CriterionLibraryId);
+        }
     }
 }

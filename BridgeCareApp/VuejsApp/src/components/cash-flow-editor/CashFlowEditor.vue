@@ -50,8 +50,7 @@
             </v-row>
         </v-col>
         <v-col v-show="hasSelectedLibrary || hasScenario" xs12>
-            <div class="cash-flow-library-tables">
-
+            <div>
                 <v-data-table-server
                     id="CashFlowEditor-cashFlowRules-table"
                     :headers="cashFlowRuleGridHeaders"

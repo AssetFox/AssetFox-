@@ -54,7 +54,7 @@
                 </v-col>
             </v-row>
         </v-col>
-        <div class="remaininglife-data-table" v-show="librarySelectItemValue != null || hasScenario">
+        <div v-show="librarySelectItemValue != null || hasScenario">
             <v-data-table-server
             id="RemainingLifeLimitEditor-attributes-dataTable"
             :headers="gridHeaders"

@@ -255,7 +255,7 @@
             class="border-opacity-100"
         ></v-divider>
         <v-col>
-            <v-row justify="center">
+            <v-row justify="center" style="padding-bottom: 40px;">
                 <v-btn 
                 id="CommittedProjectsEditor-cancel-vbtn"
                 @click="onCancelClick" :disabled='!hasUnsavedChanges' class="ghd-white-bg ghd-blue ghd-button-text" variant="text">Cancel</v-btn>    

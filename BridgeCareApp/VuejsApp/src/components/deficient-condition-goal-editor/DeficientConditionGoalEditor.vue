@@ -2,7 +2,7 @@
     <v-card class="elevation-0 vcard-main-layout">
     <v-row style="margin: 5px;">
         <v-row align="center" >
-                <v-col cols="6">
+                <v-col cols="auto">
                     <v-subheader class="ghd-md-gray ghd-control-label">Select a Deficient Condition Goal Library</v-subheader>
                     <v-select
                         id="DeficientConditionGoalEditor-librarySelect-vselect"
@@ -72,7 +72,7 @@
         <b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b>
     </div>  
         <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
-            <div class="deficients-data-table">
+            <div>
                 <v-data-table-server
                     id="DeficientConditionGoalEditor-deficientConditionGoals-vdatatable"
                     :headers="deficientConditionGoalGridHeaders"
@@ -80,7 +80,7 @@
                     :pagination.sync="pagination"
                     :must-sort='true'
                     sort-icon=ghd-table-sort
-                    class=" ghd-table v-table__overflow"
+                    class="ghd-table v-table__overflow"
                     item-key="id"
                     show-select
                     v-model="selectedGridRows"                

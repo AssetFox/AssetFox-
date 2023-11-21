@@ -243,6 +243,22 @@
                                 </v-card-text>
                             </v-card>
                         </v-window-item>
+                        <v-window-item>
+                            <v-card>
+                                <v-card-text
+                                    class='card-tab-content'
+                                >
+                                <SupersedeTab
+                                        :selectedTreatmentSupersedeRules='selectedTreatment.supersedeRules'
+                                        :callFromScenario='hasScenario'
+                                        :callFromLibrary='!hasScenario'
+                                        @onAddSupersedeRule='addSelectedTreatmentSupersedeRule'
+                                        @onModifySupersedeRule='modifySelectedTreatmentSupersedeRule'
+                                        @onRemoveSupersedeRule='removeSelectedTreatmentSupersedeRule'
+                                    />                                    
+                                </v-card-text>
+                            </v-card>
+                        </v-window-item>
                     </v-window>
                 </div>                                             
             </v-col>                    
@@ -408,6 +424,7 @@ import CostsTab from '@/components/treatment-editor/treatment-editor-tabs/CostsT
 import PerformanceFactorTab from '@/components/treatment-editor/treatment-editor-tabs/PerformanceFactorTab.vue';
 import ConsequencesTab from '@/components/treatment-editor/treatment-editor-tabs/ConsequencesTab.vue';
 import BudgetsTab from '@/components/treatment-editor/treatment-editor-tabs/BudgetsTab.vue';
+import SupersedeTab from '@/components/treatment-editor/treatment-editor-tabs/SupersedeTab.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import {
@@ -590,7 +607,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     let selectedTreatment = ref(clone(emptyTreatment));
     let selectedTreatmentDetails: TreatmentDetails = clone(emptyTreatmentDetails);
     let activeTab = ref(0);
-    let treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Consequences'];
+    let treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Consequences', 'Supersede'];
     const createTreatmentLibraryDialogData = ref<CreateTreatmentLibraryDialogData>(clone(emptyCreateTreatmentLibraryDialogData));
     let showCreateTreatmentDialog = ref(false);
     const showImportTreatmentDialog = ref<boolean>(false);

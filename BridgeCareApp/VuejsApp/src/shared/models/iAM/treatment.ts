@@ -61,6 +61,7 @@ export interface Treatment {
     isModified: boolean;
     libraryId: string;
     isUnselectable: boolean;
+    TreatmentSupersedeRules: TreatmentSupersedeRule[]
 }
 
 export interface SimpleTreatment {
@@ -131,6 +132,7 @@ export const emptyTreatment: Treatment = {
     isModified: false,
     libraryId:  getBlankGuid(),
     isUnselectable: false,
+    TreatmentSupersedeRules: []
 };
 
 export const emptyTreatmentLibrary: TreatmentLibrary = {
@@ -194,3 +196,15 @@ export interface TreatmentsFileImport {
 export interface SupersedeFileImport {
     file: File;
 }
+
+export interface TreatmentSupersedeRule {
+    id: string;
+    treatment: Treatment;
+    criterionLibrary: CriterionLibrary;
+}
+
+export const emptySupersedeRule: TreatmentSupersedeRule = {
+    id: getBlankGuid(),
+    treatment: clone(emptyTreatment),
+    criterionLibrary: clone(emptyCriterionLibrary),
+};

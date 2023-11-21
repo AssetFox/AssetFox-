@@ -93,6 +93,7 @@
                             <v-switch style="margin-left:10px;margin-top:30px;"
                                 id="EditAnalysisMethod-allowMultiBudgetFunding-switch"
                                 class="ghd-checkbox"
+                                color="#2A578D"
                                 label="Allow Multi Budget Funding"
                                 :disabled="!hasAdminAccess"
                                 v-model="analysisMethod.shouldUseExtraFundsAcrossBudgets"

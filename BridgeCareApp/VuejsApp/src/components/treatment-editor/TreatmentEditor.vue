@@ -220,6 +220,24 @@
                                 <v-card-text
                                     class='card-tab-content'
                                 >
+                                <SupersedeTab
+                                        :selectedTreatmentSupersedeRules='selectedTreatment.TreatmentSupersedeRules'
+                                        :treatmentSelectItems='treatmentSelectItems'
+                                        :rules='rules'
+                                        :callFromScenario='hasScenario'
+                                        :callFromLibrary='!hasScenario'                                        
+                                        @onAddSupersedeRule='addSelectedTreatmentSupersedeRule'
+                                        @onModifySupersedeRule='modifySelectedTreatmentSupersedeRule'
+                                        @onRemoveSupersedeRule='removeSelectedTreatmentSupersedeRule'
+                                    />                                    
+                                </v-card-text>
+                            </v-card>
+                        </v-window-item>
+                        <v-window-item>
+                            <v-card>
+                                <v-card-text
+                                    class='card-tab-content'
+                                >
                                 <BudgetsTab :selectedTreatmentBudgets='selectedTreatment.budgetIds'
                                                 :addTreatment='selectedTreatment.addTreatment'
                                                 :fromLibrary='hasSelectedLibrary'
@@ -242,23 +260,7 @@
                                     />
                                 </v-card-text>
                             </v-card>
-                        </v-window-item>
-                        <v-window-item>
-                            <v-card>
-                                <v-card-text
-                                    class='card-tab-content'
-                                >
-                                <SupersedeTab
-                                        :selectedTreatmentSupersedeRules='selectedTreatment.supersedeRules'
-                                        :callFromScenario='hasScenario'
-                                        :callFromLibrary='!hasScenario'
-                                        @onAddSupersedeRule='addSelectedTreatmentSupersedeRule'
-                                        @onModifySupersedeRule='modifySelectedTreatmentSupersedeRule'
-                                        @onRemoveSupersedeRule='removeSelectedTreatmentSupersedeRule'
-                                    />                                    
-                                </v-card-text>
-                            </v-card>
-                        </v-window-item>
+                        </v-window-item>                       
                     </v-window>
                 </div>                                             
             </v-col>                    
@@ -400,7 +402,8 @@ import {
     TreatmentLibrary,
     TreatmentLibraryUser,
     TreatmentsFileImport,
-    SupersedeFileImport
+    SupersedeFileImport,
+    TreatmentSupersedeRule
 } from '@/shared/models/iAM/treatment';
 import {
     emptyPerformanceCurve,
@@ -1234,6 +1237,37 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         }
     }
 
+    function addSelectedTreatmentSupersedeRule(newSupersedeRule: TreatmentSupersedeRule) {
+        if (hasSelectedTreatment.value) {
+            modifySelectedTreatment({
+                ...clone(selectedTreatment.value),
+                TreatmentSupersedeRules: prepend(newSupersedeRule, selectedTreatment.value.TreatmentSupersedeRules,),
+            });
+        }
+    }
+
+    function  modifySelectedTreatmentSupersedeRule(modifiedSupersedeRule: TreatmentSupersedeRule,) {
+        if (hasSelectedTreatment.value) {
+            modifySelectedTreatment({
+                ...clone(selectedTreatment.value),
+                TreatmentSupersedeRules: update(
+                    findIndex(propEq('id', modifiedSupersedeRule.id), selectedTreatment.value.TreatmentSupersedeRules,),
+                    modifiedSupersedeRule,
+                    selectedTreatment.value.TreatmentSupersedeRules,
+                ),
+            });
+        }
+    }
+
+    function removeSelectedTreatmentSupersedeRule(supersedeRuleId: string) {
+        if (hasSelectedTreatment.value) {
+            modifySelectedTreatment({
+                ...clone(selectedTreatment.value),
+                TreatmentSupersedeRules: reject(propEq('id', supersedeRuleId), selectedTreatment.value.TreatmentSupersedeRules,),
+            });
+        }
+    }
+
     function modifySelectedTreatment(treatment: Treatment) {
         selectedTreatment.value = treatment;
 
@@ -1279,7 +1313,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         }
     }
 
-    function disableCrudButtons() {
+    function disableCrudButtons() { // TODO for supersedes?
         const rows = addedRows.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const allDataIsValid: boolean = rows.every((treatment: Treatment) => {
             const allSubDataIsValid: boolean = treatment.consequences.every((consequence: TreatmentConsequence) => {

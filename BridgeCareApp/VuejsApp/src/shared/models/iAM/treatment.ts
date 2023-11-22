@@ -44,6 +44,17 @@ export interface TreatmentConsequence {
     criterionLibrary: CriterionLibrary;
 }
 
+export interface SimpleTreatment {
+    id: string;
+    name: string;
+}
+
+export interface TreatmentSupersedeRule {
+    id: string;
+    treatment: SimpleTreatment;
+    criterionLibrary: CriterionLibrary;
+}
+
 export interface Treatment {
     id: string;
     name: string;
@@ -62,11 +73,6 @@ export interface Treatment {
     libraryId: string;
     isUnselectable: boolean;
     TreatmentSupersedeRules: TreatmentSupersedeRule[]
-}
-
-export interface SimpleTreatment {
-    id: string;
-    name: string;
 }
 
 export interface TreatmentLibraryUser {
@@ -189,6 +195,11 @@ export const treatmentCategoryReverseMap: Map<TreatmentCategory, string> = new M
     [5, 'Other'],
 ]);
 
+export const emptySimpleTreatment: SimpleTreatment = {
+    id: getBlankGuid(),
+    name: '',
+}
+
 export interface TreatmentsFileImport {
     file: File;
 }
@@ -197,14 +208,8 @@ export interface SupersedeFileImport {
     file: File;
 }
 
-export interface TreatmentSupersedeRule {
-    id: string;
-    treatment: Treatment;
-    criterionLibrary: CriterionLibrary;
-}
-
 export const emptySupersedeRule: TreatmentSupersedeRule = {
     id: getBlankGuid(),
-    treatment: clone(emptyTreatment),
+    treatment: clone(emptySimpleTreatment),
     criterionLibrary: clone(emptyCriterionLibrary),
 };

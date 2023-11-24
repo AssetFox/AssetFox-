@@ -129,15 +129,15 @@ import { getUrl } from '@/shared/utils/get-url';
         emit('onAddSupersedeRule', newSupersedeRule);
     }
 
-    function onEditSupersedeRuleProperty(supersedeRule: TreatmentSupersedeRule, property: string, value: any) {
+    // function onEditSupersedeRuleProperty(supersedeRule: TreatmentSupersedeRule, property: string, value: any) {
 
-        emit('onModifySupersedeRule', setItemPropertyValue(property, value, supersedeRule));
-    }
+    //     emit('onModifySupersedeRule', setItemPropertyValue(property, value, supersedeRule));
+    // }
 
     function onChangeSupersedeRuleTreatment(supersedeRule: TreatmentSupersedeRule, value: string) {
         if (!isNil(value)) {            
             emit('onModifySupersedeRule', setItemPropertyValue('treatment', 
-            {...supersedeRule.treatment, name: value} as SimpleTreatment, 
+            {...supersedeRule.treatment, id: value} as SimpleTreatment, 
             supersedeRule));
         }
     }

@@ -221,7 +221,7 @@
                                     class='card-tab-content'
                                 >
                                 <SupersedeTab
-                                        :selectedTreatmentSupersedeRules='selectedTreatment.TreatmentSupersedeRules'
+                                        :selectedTreatmentSupersedeRules='selectedTreatment.supersedeRules'
                                         :treatmentSelectItems='treatmentSelectItems'
                                         :rules='rules'
                                         :callFromScenario='hasScenario'
@@ -1241,7 +1241,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         if (hasSelectedTreatment.value) {
             modifySelectedTreatment({
                 ...clone(selectedTreatment.value),
-                TreatmentSupersedeRules: prepend(newSupersedeRule, selectedTreatment.value.TreatmentSupersedeRules,),
+                supersedeRules: prepend(newSupersedeRule, selectedTreatment.value.supersedeRules,),
             });
         }
     }
@@ -1250,10 +1250,10 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         if (hasSelectedTreatment.value) {
             modifySelectedTreatment({
                 ...clone(selectedTreatment.value),
-                TreatmentSupersedeRules: update(
-                    findIndex(propEq('id', modifiedSupersedeRule.id), selectedTreatment.value.TreatmentSupersedeRules,),
+                supersedeRules: update(
+                    findIndex(propEq('id', modifiedSupersedeRule.id), selectedTreatment.value.supersedeRules,),
                     modifiedSupersedeRule,
-                    selectedTreatment.value.TreatmentSupersedeRules,
+                    selectedTreatment.value.supersedeRules,
                 ),
             });
         }
@@ -1263,7 +1263,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         if (hasSelectedTreatment.value) {
             modifySelectedTreatment({
                 ...clone(selectedTreatment.value),
-                TreatmentSupersedeRules: reject(propEq('id', supersedeRuleId), selectedTreatment.value.TreatmentSupersedeRules,),
+                supersedeRules: reject(propEq('id', supersedeRuleId), selectedTreatment.value.supersedeRules,),
             });
         }
     }

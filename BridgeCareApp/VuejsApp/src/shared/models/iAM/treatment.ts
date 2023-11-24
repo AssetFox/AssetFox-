@@ -72,7 +72,7 @@ export interface Treatment {
     isModified: boolean;
     libraryId: string;
     isUnselectable: boolean;
-    TreatmentSupersedeRules: TreatmentSupersedeRule[]
+    supersedeRules: TreatmentSupersedeRule[]
 }
 
 export interface TreatmentLibraryUser {
@@ -138,7 +138,7 @@ export const emptyTreatment: Treatment = {
     isModified: false,
     libraryId:  getBlankGuid(),
     isUnselectable: false,
-    TreatmentSupersedeRules: []
+    supersedeRules: []
 };
 
 export const emptyTreatmentLibrary: TreatmentLibrary = {

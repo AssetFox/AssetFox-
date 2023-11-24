@@ -226,9 +226,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return result;
         }
 
-        public static TreatmentDTOWithSimulationId ToDtoWithSimulationId(this ScenarioSelectableTreatmentEntity entity)
+        public static TreatmentDTOWithSimulationId ToDtoWithSimulationId(this ScenarioSelectableTreatmentEntity entity, List<TreatmentDTO> treatmentList = null)
         {
-            var treatmentDto = entity.ToDto();
+            var treatmentDto = entity.ToDto(treatmentList);
             return new TreatmentDTOWithSimulationId
             {
                 SimulationId
@@ -255,7 +255,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return treatmentPerformanceFactors;
         }
 
-        public static TreatmentLibraryDTO ToDto(this TreatmentLibraryEntity entity) =>
+        public static TreatmentLibraryDTO ToDto(this TreatmentLibraryEntity entity, List<TreatmentDTO> treatmentList = null) =>
             new TreatmentLibraryDTO
             {
                 Id = entity.Id,
@@ -264,7 +264,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Owner = entity.CreatedBy,
                 IsShared = entity.IsShared,
                 Treatments = entity.Treatments.Any()
-                    ? entity.Treatments.Select(_ => _.ToDto()).OrderBy(t => t.Name).ToList()
+                    ? entity.Treatments.Select(_ => _.ToDto(treatmentList)).OrderBy(t => t.Name).ToList()
                     : new List<TreatmentDTO>()
             };
 

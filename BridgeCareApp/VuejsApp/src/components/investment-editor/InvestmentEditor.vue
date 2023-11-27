@@ -586,7 +586,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     });
         
     // Watchers
-    watch(pagination, ()=> onPaginationChanged)
     async function onPaginationChanged() {
         if(initializing)
             return;
@@ -612,12 +611,13 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 firstYearAnalysisBudgetShift: firstYearOfAnalysisPeriodShift.value,
                 isModified: scenarioLibraryIsModified.value
             },           
-            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : 'year',
             isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: currentSearch
         };
         
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL){
+            
             await InvestmentService.getScenarioInvestmentPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;

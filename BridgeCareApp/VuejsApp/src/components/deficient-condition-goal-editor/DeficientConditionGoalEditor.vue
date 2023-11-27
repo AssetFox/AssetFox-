@@ -573,7 +573,7 @@ import { getUrl } from '@/shared/utils/get-url';
 
     function onSelectItemValueChanged() {
         trueLibrarySelectItemValue = librarySelectItemValue.value
-        if(!hasScenario.value || isNil(librarySelectItemValue))
+        if(!hasScenario.value || isNil(librarySelectItemValue.value))
             selectDeficientConditionGoalLibraryAction({
                 libraryId: librarySelectItemValue.value,
             });
@@ -976,6 +976,7 @@ import { getUrl } from '@/shared/utils/get-url';
     }
 
     function checkHasUnsavedChanges(){
+
         const hasUnsavedChanges: boolean = 
             deletionIds.length > 0 || 
             addedRows.value.length > 0 ||

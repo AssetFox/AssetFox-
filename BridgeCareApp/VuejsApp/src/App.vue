@@ -4,16 +4,13 @@
             <v-toolbar app class="paper-white-bg elevation-2">
                 <v-toolbar-title  >
                     <v-row  >
-                        <v-col  ><img v-bind:src="agencyLogo"  @click="onNavigate('/Scenarios/')"></v-col>                    
+                        <v-col><v-img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')"/></v-col>                    
                     </v-row>
                 </v-toolbar-title>
 
                 <v-toolbar-title >
                     <v-row justify="start">
-                        <v-col >
-                            <img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')"  /></v-col>
-                        
-                        
+                        <v-col><img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')"/></v-col>
                     </v-row>
                 </v-toolbar-title>
                 <v-toolbar-items >

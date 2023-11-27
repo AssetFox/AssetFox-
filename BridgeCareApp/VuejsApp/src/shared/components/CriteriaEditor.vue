@@ -473,7 +473,7 @@ const tab = ref<any>(null);
     }
 
     function getValueForTextarea(index: number) {
-        return isAndConjunction() ? subCriteriaClauses.value.join(' ') : subCriteriaClauses.value[index];
+        return isAndConjunction() ? subCriteriaClauses.value.join(' AND ') : subCriteriaClauses.value[index];
     }
 
     function setQueryBuilderRules() {

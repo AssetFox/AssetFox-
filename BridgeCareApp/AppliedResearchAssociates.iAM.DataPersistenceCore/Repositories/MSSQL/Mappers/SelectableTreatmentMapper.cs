@@ -117,10 +117,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static TreatmentLibraryEntity ToEntity(this TreatmentLibraryDTO dto) =>
             new TreatmentLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description, IsShared = dto.IsShared };
 
-        public static SelectableTreatment CreateSelectableTreatment(this ScenarioSelectableTreatmentEntity entity, Simulation simulation)
+        public static SelectableTreatment CreateSelectableTreatment(this ScenarioSelectableTreatmentEntity entity, Simulation simulation, List<ScenarioSelectableTreatmentEntity> simpleTreatments)
         {
             var selectableTreatment = simulation.AddTreatment();
-            PopulateSelectableTreatment(entity, selectableTreatment, simulation);
+            PopulateSelectableTreatment(entity, selectableTreatment, simulation, simpleTreatments);
 
             if (selectableTreatment.Name == "No Treatment")
             {
@@ -129,14 +129,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return selectableTreatment;
         }
 
-        public static SelectableTreatment ToDomain(this ScenarioSelectableTreatmentEntity entity, Simulation simulation)
+        public static SelectableTreatment ToDomain(this ScenarioSelectableTreatmentEntity entity, Simulation simulation, List<ScenarioSelectableTreatmentEntity> simpleTreatments)
         {
             var selectableTreatment = new SelectableTreatment(simulation);
-            PopulateSelectableTreatment(entity, selectableTreatment, simulation);
+            PopulateSelectableTreatment(entity, selectableTreatment, simulation, simpleTreatments);
             return selectableTreatment;
         }
 
-        private static void PopulateSelectableTreatment(ScenarioSelectableTreatmentEntity entity, SelectableTreatment selectableTreatment, Simulation simulation)
+        private static void PopulateSelectableTreatment(ScenarioSelectableTreatmentEntity entity, SelectableTreatment selectableTreatment, Simulation simulation, List<ScenarioSelectableTreatmentEntity> simpleTreatments)
         {
             selectableTreatment.Id = entity.Id;
             selectableTreatment.Name = entity.Name;
@@ -184,7 +184,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (entity.ScenarioTreatmentSupersedeRules.Any())
             {
-                entity.ScenarioTreatmentSupersedeRules.ForEach(_ => _.CreateTreatmentSupersedeRule(selectableTreatment, simulation));
+                entity.ScenarioTreatmentSupersedeRules.ForEach(_ => _.CreateTreatmentSupersedeRule(selectableTreatment, simulation, simpleTreatments));
             }
         }
 

@@ -168,7 +168,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.ScenarioTreatmentPerformanceFactors)
                 .ToList();
 
-            treatments.ForEach(_ => _.CreateSelectableTreatment(simulation));
+            var simpleTreatments = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
+                .Where(_ => _.SimulationId == simulation.Id).ToList();
+
+            treatments.ForEach(_ => _.CreateSelectableTreatment(simulation, simpleTreatments));
         }
 
         public void GetScenarioSelectableTreatmentsNoChildren(Simulation simulation)
@@ -187,7 +190,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.SimulationId == simulation.Id)
                 .ToList();
 
-            treatments.ForEach(_ => _.CreateSelectableTreatment(simulation));
+            treatments.ForEach(_ => _.CreateSelectableTreatment(simulation, treatments));
         }
 
         public TreatmentLibraryDTO GetSingleTreatmentLibary(Guid libraryId)

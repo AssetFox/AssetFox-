@@ -52,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
             var treatmentEntity = simulationSource.SelectableTreatments.First();
 
             // Act
-            var selectableTreatment = treatmentEntity.CreateSelectableTreatment(testSimulation);
+            var selectableTreatment = treatmentEntity.CreateSelectableTreatment(testSimulation, null);
 
             // Assert
             Assert.NotNull(selectableTreatment);
@@ -70,9 +70,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         {
             // Arrange
             var treatmentEntity = simulationSource.SelectableTreatments.FirstOrDefault(_ => _.Name == "TestTreatmentWithRules");
+            var simpleTreatments = simulationSource.SelectableTreatments.ToList();
 
             // Act
-            var selectableTreatment = treatmentEntity.ToDomain(testSimulation);
+            var selectableTreatment = treatmentEntity.ToDomain(testSimulation, simpleTreatments);
 
             // Assert
             Assert.NotNull(selectableTreatment);

@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DeficientConditionGoal;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
@@ -462,6 +463,20 @@ namespace BridgeCareCoreTests.Tests
                 .GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()
                 .Single(lib => lib.Id == library.Id);
             Assert.Null(libraryAfter.Description);
+        }
+
+        [Fact]
+        public void GetLibraryModifiedDate_Does()
+        {
+            var libraryId = Guid.NewGuid();
+            var libraryDto = DeficientConditionGoalLibraryDtos.Empty(libraryId);
+            var before = DateTime.Now;
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibrary(libraryDto);
+            var after = DateTime.Now;
+
+            var date = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetLibraryModifiedDate(libraryId);
+
+            DateTimeAssertions.Between(before, after, date, TimeSpan.FromSeconds(1));
         }
     }
 }

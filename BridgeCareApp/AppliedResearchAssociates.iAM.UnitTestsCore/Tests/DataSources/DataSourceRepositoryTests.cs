@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +25,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         private IQueryable<AttributeEntity> _testAttributeSourceList;
         private Mock<IAMContext> _mockedContext;
         private Mock<DbSet<DataSourceEntity>> _mockedDataSourceSet;
-        private Mock<DbSet<AttributeEntity>> _mockedAttributeSet;
 
         public DataSourceRepositoryTests()
         {
@@ -35,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             _testAttributeSourceList = TestEntitiesForDataSources.SimpleAttributeRepo(encryptionKey).AsQueryable();
 
             _mockedDataSourceSet = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.DataSource, _testDataSourceList);
-            _mockedAttributeSet = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Attribute, _testAttributeSourceList);
+            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Attribute, _testAttributeSourceList);
 
             var mockedRepo = new UnitOfDataPersistenceWork(TestHelper.UnitOfWork.Config, _mockedContext.Object);
             _testRepo = mockedRepo;
@@ -72,20 +71,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         }
 
         [Fact]
-        public void GetReturnsNullWhenIdDoesNotExist()
+        public void Get_DatasourceDoesNotExist_ReturnsNull()
         {
             // Arrange
-            var repo = new DataSourceRepository(_testRepo);
+            var repo = TestHelper.UnitOfWork.DataSourceRepo;
 
             // Act
-            var result = repo.GetDataSource(new Guid("5bd3dcb8-c8a4-409e-915f-b5bf8875f652"));
+            var result = repo.GetDataSource(Guid.NewGuid());
 
             // Assert
-            Assert.Equal(null, result);
+            Assert.Null(result);
         }
 
         [Fact]
-        public void SuccessfullyDeletesValid()
+        public void Delete_DatasourceExists_Deletes()
         {
             // Arrange
             var repo = new DataSourceRepository(_testRepo);
@@ -100,13 +99,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
 
 
         [Fact]
-        public void DeleteHandlesIdDoesNotExist()
+        public void Delete_DatasourceDoesNotExist_Throws()
         {
             // Arrange
-            var repo = new DataSourceRepository(_testRepo);
+            var repo = TestHelper.UnitOfWork.DataSourceRepo;
 
             // Act & Assert
-            Assert.Throws<RowNotInTableException>(() => repo.DeleteDataSource(new Guid("5bd3dcb8-c8a4-409e-915f-b5bf8875f652")));
+            Assert.Throws<RowNotInTableException>(() => repo.DeleteDataSource(Guid.NewGuid()));
         }
 
         // We should test a successful addition here, but since it is an extension we cannot do that

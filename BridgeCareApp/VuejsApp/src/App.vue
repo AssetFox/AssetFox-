@@ -173,14 +173,14 @@
                                     </v-col>
                                     </v-row>
                                         </v-list-tile>
-                                        <v-list-item-tile class="notification-long-message" v-if="notification.active">
+                                        <v-list-tile class="notification-long-message" v-if="notification.active">
                                             <v-list-item-title
                                                 class="text-wrap"
                                                 v-text="
                                                     notification.longMessage
                                                 "
                                             ></v-list-item-title>
-                                        </v-list-item-tile>
+                                        </v-list-tile>
                                     </template>
                                     
                                     <v-spacer></v-spacer>

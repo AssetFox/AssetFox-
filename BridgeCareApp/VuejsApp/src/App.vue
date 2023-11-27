@@ -169,18 +169,18 @@
                                                     "
                                                     >fas fa-times-circle</v-icon
                                                 >
-                                            </v-btn>
-                                        </v-col>
+                                        </v-btn>
+                                    </v-col>
                                     </v-row>
                                         </v-list-tile>
-                                        <v-list-tile v-if="notification.active">
+                                        <v-list-item-tile class="notification-long-message" v-if="notification.active">
                                             <v-list-item-title
-                                                class="notification-long-message"
+                                                class="text-wrap"
                                                 v-text="
                                                     notification.longMessage
                                                 "
                                             ></v-list-item-title>
-                                    </v-list-tile>
+                                        </v-list-item-tile>
                                     </template>
                                     
                                     <v-spacer></v-spacer>

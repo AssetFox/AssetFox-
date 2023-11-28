@@ -28,10 +28,10 @@
                                     <BudgetPrioritySvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Budget Priority'"/>  
                                     <AnalysisMethodSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Analysis Method'"/>  
                                     <CalculatedAttributeSvg style="height: 32px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Calculated Attribute'"/>  
-                                    <CommittedProjectSvg style="height: 32px; width: 24px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Committed Projects'"/>  
-                                    <ReportsSvg style="height: 38px; width: 22px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Reports & Outputs'"/>  
+                                    <CommittedProjectSvg style="height: 32px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Committed Projects'"/>  
+                                    <ReportsSvg style="height: 38px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Reports & Outputs'"/>  
                             </template>
-                            <v-list-item-title style="width: auto;" v-text="navigationTab.tabName"></v-list-item-title>
+                            <v-list-item-title style="width: auto; padding-left: 5px;" v-text="navigationTab.tabName"></v-list-item-title>
                         </v-list-item>
                     </v-list-item>
                 </v-list>

@@ -21,7 +21,7 @@
                                     <DataSourceSvg id="EditAdmin-site-btn" style="height: 30px; width: 36px" class="raw-data-icon" v-if="navigationTab.tabName === 'Site'"/>
                                     <NetworksSvg id="EditAdmin-data-btn" style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'Data'"/>                            
                             </template>
-                            <v-list-item-title style="width: auto;" v-text="navigationTab.tabName"></v-list-item-title>
+                            <v-list-item-title style="width: auto; padding-left: 5px;" v-text="navigationTab.tabName"></v-list-item-title>
                         </v-list-item>
                         
                     </v-list-item>

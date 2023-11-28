@@ -27,7 +27,7 @@
                                     <BudgetPrioritySvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Budget Priority'"/>  
                                     <CalculatedAttributeSvg style="height: 32px; width: 32px"  class="library-icon-stroke" v-if="navigationTab.tabName === 'Calculated Attribute'"/>  
                             </template>
-                                <v-list-item-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-item-title>
+                                <v-list-item-title style="text-decoration: none; padding-left: 5px;">{{navigationTab.tabName}}</v-list-item-title>
                         </v-list-item>
                     </v-list-item>
                 </v-list>

@@ -4,16 +4,13 @@
             <v-toolbar app class="paper-white-bg elevation-2">
                 <v-toolbar-title  >
                     <v-row  >
-                        <v-col  ><img v-bind:src="agencyLogo"  @click="onNavigate('/Scenarios/')"></v-col>                    
+                        <v-col><v-img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')"/></v-col>                    
                     </v-row>
                 </v-toolbar-title>
 
                 <v-toolbar-title >
                     <v-row justify="start">
-                        <v-col >
-                            <img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')"  /></v-col>
-                        
-                        
+                        <v-col><img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')"/></v-col>
                     </v-row>
                 </v-toolbar-title>
                 <v-toolbar-items >
@@ -83,7 +80,7 @@
                         offset-
                         min-width="21%"
                         max-width="21%"
-                        max-height="455%"
+                        max-height="500%"
                         :close-on-content-click="false"
                     >
                     
@@ -117,7 +114,7 @@
                                 </v-badge>
                             </button>
                         </template>            
-                        <v-card class="mx-auto" style="width: 2200%; min-height: 500%; left: -170px; top: 20px;">
+                        <v-card class="mx-auto" style="width: 1950%; min-height: 80vh; left: -170px; top: 25px;">
                             <v-toolbar 
                                 id = "App-notification-toolbar"
                                 color="#002E6C" dark>
@@ -159,7 +156,7 @@
                                         </v-list-item-content>
                                     </v-col>
                                     <v-col> 
-                                        <v-btn icon size="16" justify-end position="absolute" style="margin-left:20%;">
+                                        <v-btn icon size="16" justify-end position="absolute" style="margin-left:15%;">
                                                 <v-icon
                                                     size="small"
                                                     @click="
@@ -169,18 +166,18 @@
                                                     "
                                                     >fas fa-times-circle</v-icon
                                                 >
-                                            </v-btn>
-                                        </v-col>
+                                        </v-btn>
+                                    </v-col>
                                     </v-row>
                                         </v-list-tile>
-                                        <v-list-tile v-if="notification.active">
+                                        <v-list-tile class="notification-long-message" v-if="notification.active">
                                             <v-list-item-title
-                                                class="notification-long-message"
+                                                class="text-wrap"
                                                 v-text="
                                                     notification.longMessage
                                                 "
                                             ></v-list-item-title>
-                                    </v-list-tile>
+                                        </v-list-tile>
                                     </template>
                                     
                                     <v-spacer></v-spacer>

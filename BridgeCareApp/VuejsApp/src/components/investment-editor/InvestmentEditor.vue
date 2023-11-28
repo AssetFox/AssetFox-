@@ -93,6 +93,7 @@
                 <v-col cols = "4" class="ghd-constant-header">
                     <v-switch id="InvestmentEditor-allowFundingCarryover-switch"
                               style="margin-left:10px;margin-top:50px;"
+                              color="#2A578D"
                               class="ghd-checkbox"
                               label="Allow Funding Carryover"
                               :disabled="!hasAdminAccess"

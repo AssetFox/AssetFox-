@@ -629,7 +629,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     totalItems.value = data.totalItems;
                     investmentPlan.value = data.investmentPlan;                   
                     lastYear = data.lastYear;
-                    
+                    fillAmounts();
                     syncInvestmentPlanWithBudgets();
                     
                 }
@@ -655,6 +655,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     budgetAmountCache.value = currentPage.value.flatMap(_ => _.budgetAmounts)
                     totalItems.value = data.totalItems;
                     lastYear = data.lastYear
+                    fillAmounts();
                 }
             }); 
         }                
@@ -1158,6 +1159,40 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             budgets: clone(BudgetCache.value),
             scenarioId: selectedScenarioId,
         };
+    }
+
+    function fillAmounts() {
+        const isLastPage = pagination.page == Math.ceil(totalItems.value/pagination.rowsPerPage)
+        let budgets = currentPage.value.filter(_ => _.budgetAmounts.length < pagination.rowsPerPage);
+        let modelbudget = currentPage.value.find(_ => _.budgetAmounts.length === pagination.rowsPerPage ||
+        (isLastPage && _.budgetAmounts.length == totalItems.value % pagination.rowsPerPage))
+        if(!isNil(budgets) && !isNil(modelbudget)){
+            
+            budgets.forEach(_ =>{
+                let amounts: BudgetAmount[] = [];
+                let addedAmounts: BudgetAmount[] = [];
+                modelbudget!.budgetAmounts.forEach(__ => {
+                    let foundAmount = _.budgetAmounts.find(amount => amount.year === __.year);
+                    const newAmount: BudgetAmount = {
+                        id: isNil(foundAmount) ? getNewGuid() : foundAmount.id,
+                        budgetName: _.name,
+                        year: __.year,
+                        value: isNil(foundAmount) ? 0 : foundAmount.value,
+                    }
+                    if(isNil(foundAmount))
+                        addedAmounts.push(clone(newAmount))
+                    amounts.push(clone(newAmount)) 
+                })
+                _.budgetAmounts = clone(amounts)
+                let addedMap = addedBudgetAmounts.value.get(_.name);
+                if(!isNil(addedMap)){
+                    addedMap = addedMap.concat(addedAmounts);
+                    addedBudgetAmounts.value.set(_.name, clone(addedMap))
+                }                 
+                else
+                    addedBudgetAmounts.value.set(_.name, clone(addedAmounts));
+            })
+        }
     }
 
     function onSubmitEditBudgetsDialogResult(budgetChanges: EmitedBudgetChanges) {        

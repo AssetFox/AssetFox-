@@ -27,6 +27,29 @@ namespace BridgeCareCore.Services.Paging
             budgets.ForEach(b => FixNullAmounts(b));
         }
 
+        private void FillNewBudgets(List<BudgetDTO> budgets)
+        {
+            var unfilledBudgets = budgets.Where(_ => _.BudgetAmounts.Count < budgets.First().BudgetAmounts.Count).ToList();
+            unfilledBudgets.ForEach(_ =>
+            {
+                var amounts = new List<BudgetAmountDTO>();
+                budgets.First().BudgetAmounts.ForEach(__ =>
+                {
+                    var foundAmount = _.BudgetAmounts.FirstOrDefault(amount => amount.Year == __.Year);
+                    var newAmount = new BudgetAmountDTO()
+                    {
+                        Id = foundAmount == null ? Guid.NewGuid() : foundAmount.Id,
+                        BudgetName = _.Name,
+                        Value = foundAmount == null ? 0 : foundAmount.Value,
+                        Year = __.Year
+                    };
+                    amounts.Add(newAmount);
+
+                });
+                _.BudgetAmounts = amounts;
+            });
+        }
+
         public InvestmentPagingService(IUnitOfWork unitOfWork,
             IInvestmentDefaultDataService investmentDefaultDataService)
         {
@@ -156,6 +179,7 @@ namespace BridgeCareCore.Services.Paging
                     _unitOfWork.BudgetRepo.GetBudgetLibrary(request.LibraryId.Value).Budgets;
             budgets = SyncedDataset(budgets, request);
             FixNullAmounts(budgets);
+            FillNewBudgets(budgets);
 
             if (request.LibraryId != null)
             {
@@ -244,7 +268,7 @@ namespace BridgeCareCore.Services.Paging
                             budget.BudgetAmounts[o] = amount;
                     }
             }
-
+           
             return budgets;
         }
     }

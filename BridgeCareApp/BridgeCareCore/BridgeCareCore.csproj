@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Configurations>Debug;Release;MsSqlDebug;LiteDbDebug;Test</Configurations>
+    <Configurations>Debug;Release;MsSqlDebug;Test</Configurations>
     <UserSecretsId>7bf892ee-3d69-4247-9888-2f7660ebee57</UserSecretsId>
   </PropertyGroup>
 
@@ -14,10 +14,6 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LiteDbDebug|AnyCPU'">
-    <DefineConstants>DEBUG;TRACE;LiteDbDebug</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MsSqlDebug|AnyCPU'">

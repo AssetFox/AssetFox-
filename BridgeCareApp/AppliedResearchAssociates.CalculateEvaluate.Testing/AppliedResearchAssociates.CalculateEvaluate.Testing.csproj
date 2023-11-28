@@ -5,7 +5,7 @@
 
     <IsPackable>false</IsPackable>
 
-    <Configurations>Debug;Release;MsSqlDebug;LiteDbDebug;Test</Configurations>
+    <Configurations>Debug;Release;MsSqlDebug;Test</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

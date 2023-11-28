@@ -2,11 +2,11 @@
     <v-dialog
         persistent
         v-model="dialogData.showDialog"
-        class="criterion-library-editor-dialog"
+        class="criterion-library-editor-dialog" width="auto"
     >
         <v-card>
             <v-card-text>
-                <v-row >
+                <v-row>
                     <div>
                       <CriteriaEditor :criteriaEditorData="criteriaEditorData"
                                       @submitCriteriaEditorResult="onSubmitCriteriaEditorResult"/>

@@ -1,6 +1,6 @@
 <template>
     <v-row>
-        <v-col cols="6" >
+        <v-col>
             <h3 class="ghd-dialog">Output</h3>
             <v-card class="elevation-0" style="border: 1px solid;" width="600px">
                         <div class="conjunction-and-messages-container" >
@@ -12,7 +12,7 @@
                                 }"
                             >
                             <v-col cols = "4">
-                                <v-row style="padding: 15px;">
+                                <v-row style="padding: 20px;">
                                 <v-select
                                     :items="conjunctionSelectListItems"
                                     class="ghd-control-border ghd-control-text ghd-select"
@@ -91,51 +91,37 @@
                             </div>
                         </div>
                     </v-card-text>
-                        <v-card-actions
-                            :class="{
-                                'validation-actions':
-                                    criteriaEditorData.isLibraryContext,
-                            }"
-                        >
-                            <v-row>
-                                <div class="validation-check-btn-container">
-                                    <v-btn
-                                        id="CriteriaEditor-checkOutput-btn"
-                                        :disabled="onDisableCheckOutputButton()"
-                                        @click="onCheckCriteria"
-                                        class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                                        variant = "flat"
-                                    >
-                                        Check Output
-                                    </v-btn>
-                                </div>
-                                <div class="validation-messages-container">
-                                    <p
-                                        class="invalid-message"
-                                        v-if="invalidCriteriaMessage !== null"
-                                    >
-                                        <strong>{{
-                                            invalidCriteriaMessage
-                                        }}</strong>
-                                    </p>
-                                    <p
-                                        id="CriteriaEditor-validOutput-p"
-                                        class="valid-message"
-                                        v-if="validCriteriaMessage !== null"
-                                    >
-                                        {{ validCriteriaMessage }}
-                                    </p>
-                                    <p v-if="checkOutput">
-                                        Please click here to check entire rule
-                                    </p>
-                                </div>
-                            </v-row>
-                        </v-card-actions>
+                    <v-card-actions :class="{'validation-actions':criteriaEditorData.isLibraryContext,}">
+                        <v-row>
+                            <div class="validation-check-btn-container">
+                                <v-btn
+                                    id="CriteriaEditor-checkOutput-btn"
+                                    :disabled="onDisableCheckOutputButton()"
+                                    @click="onCheckCriteria"
+                                    class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
+                                    variant = "flat"
+                                >
+                                    Check Output
+                                </v-btn>
+                            </div>
+                            <div style="padding: 10px;">
+                                <p class="invalid-message" v-if="invalidCriteriaMessage !== null">
+                                    <strong>{{ invalidCriteriaMessage }}</strong>
+                                </p>
+                                <p id="CriteriaEditor-validOutput-p" class="valid-message" v-if="validCriteriaMessage !== null">
+                                    <strong>{{ validCriteriaMessage }}</strong>
+                                </p>
+                                <p v-if="checkOutput">
+                                    Please click here to check entire rule
+                                </p>
+                            </div>
+                        </v-row>
+                    </v-card-actions>
             </v-card>
         </v-col>
         <v-col>
             <h3 class="ghd-dialog">Criteria Editor</h3>
-            <v-card class="elevation-0" style="border: 1px solid;" width="600px" height="685px">
+            <v-card class="elevation-0" style="border: 1px solid;" width="600px">
                         <v-card-text
                             :class="{
                                 'criteria-editor-card-dialog':
@@ -189,35 +175,11 @@
                             </v-window>
 
                         </v-card-text>
-                        <v-card-actions
-                            :class="{
-                                'validation-actions':
-                                    criteriaEditorData.isLibraryContext,
-                            }"
-                        >
-                            <v-row column>
-                                <div class="validation-messages-container">
-                                    <p
-                                        class="invalid-message"
-                                        v-if="
-                                            invalidSubCriteriaMessage !== null
-                                        "
-                                    >
-                                        <strong>{{
-                                            invalidSubCriteriaMessage
-                                        }}</strong>
-                                    </p>
-                                    <p
-                                        class="valid-message"
-                                        v-if="validSubCriteriaMessage !== null"
-                                    >
-                                        {{ validSubCriteriaMessage }}
-                                    </p>
-                                </div>
+                        <v-card-actions :class="{ 'validation-actions':criteriaEditorData.isLibraryContext, }">
+                            <v-row>
                                 <div class="validation-check-btn-container">
                                     <v-btn
                                         id="CriteriaEditor-updateSubcriteria-btn"
-                                        
                                         @click="onCheckSubCriteria"
                                         class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
                                         variant = "flat"
@@ -225,6 +187,16 @@
                                         Update Subcriteria
                                     </v-btn>
                                 </div>
+                                <div>
+                                    <p class="invalid-message" v-if="invalidSubCriteriaMessage !== null">
+                                        <strong>{{
+                                            invalidSubCriteriaMessage
+                                        }}</strong>
+                                    </p>
+                                    <p class="valid-message" v-if="validSubCriteriaMessage !== null">
+                                        {{ validSubCriteriaMessage }}
+                                    </p>
+                                </div>       
                             </v-row>
                         </v-card-actions>
             </v-card>
@@ -353,14 +325,16 @@ const tab = ref<any>(null);
                 : '',
             addErrorNotificationAction,
         ) as Criteria;
-        setSubCriteriaClauses(mainCriteria);
 
+        selectedConjunction.value = mainCriteria.logicalOperator;
+        setSubCriteriaClauses(mainCriteria);
 
         if (hasValue(stateAttributes)) {
             setQueryBuilderRules();
         }
     });
 
+    // doesn't seem like excecuted at all 
     watch(criteriaEditorData,() => {
         //TODO
         /*const mainCriteria: Criteria = parseCriteriaString(
@@ -499,7 +473,7 @@ const tab = ref<any>(null);
     }
 
     function getValueForTextarea(index: number) {
-        return isAndConjunction() ? subCriteriaClauses.value.join(' ') : subCriteriaClauses.value[index];
+        return isAndConjunction() ? subCriteriaClauses.value.join(' AND ') : subCriteriaClauses.value[index];
     }
 
     function setQueryBuilderRules() {

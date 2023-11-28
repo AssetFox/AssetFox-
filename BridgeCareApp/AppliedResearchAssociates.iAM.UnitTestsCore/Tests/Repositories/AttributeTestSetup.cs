@@ -12,8 +12,10 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
+using AttributesTextAttribute = AppliedResearchAssociates.iAM.Data.Attributes.TextAttribute;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
@@ -36,20 +38,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             return dto;
         }
 
-        public static TextAttribute Text(Guid? id = null, string name = null, ConnectionType connectionType = ConnectionType.MSSQL, bool calculated = false)
+        public static AttributesTextAttribute Text(Guid? id = null, string name = null, ConnectionType connectionType = ConnectionType.MSSQL, bool calculated = false)
         {
             var resolvedId = id ?? Guid.NewGuid();
             var randomName = name ?? ValidAttributeName();
-            var attribute = new TextAttribute("defaultValue", resolvedId, randomName, "PREDOMINANT", "command", connectionType, "connectionString", calculated, true, Guid.Empty);
+            var attribute = new AttributesTextAttribute("defaultValue", resolvedId, randomName, "PREDOMINANT", "command", connectionType, "connectionString", calculated, true, Guid.Empty);
             return attribute;
         }
 
 
         private static bool AttributesHaveBeenCreated = false;
         private static readonly object AttributeLock = new object();
-        private static SQLDataSourceDTO CacheDataSourceForAttributes { get; set; }
+        private static ExcelDataSourceDTO CacheDataSourceForAttributes { get; set; }
 
-        public static SQLDataSourceDTO CreateAttributes(IUnitOfWork unitOfWork)
+        public static ExcelDataSourceDTO CreateAttributes(IUnitOfWork unitOfWork)
         {
             if (!AttributesHaveBeenCreated)
             {
@@ -58,20 +60,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                     if (!AttributesHaveBeenCreated)
                     {
                         var config = TestConfiguration.Get();
-                        SQLDataSourceDTO dataSourceToApply = null;
-                        if (!unitOfWork.DataSourceRepo.GetDataSources().Any(_ => _.Type == "SQL"))
+                        ExcelDataSourceDTO dataSourceToApply = null;
+                        if (!unitOfWork.DataSourceRepo.GetDataSources().Any(_ => _.Type == "EXCEL"))
                         {
-                            dataSourceToApply = new SQLDataSourceDTO
+                            dataSourceToApply = new ExcelDataSourceDTO
                             {
                                 Id = Guid.NewGuid(),
-                                Name = "Test SQL DataSource",
-                                ConnectionString = config.GetConnectionString("BridgeCareConnex")
+                                Name = "Test Excel DataSource",
+                                LocationColumn = TestAttributeNames.BrKey,
+                                DateColumn = "Date",
                             };
                             unitOfWork.DataSourceRepo.UpsertDatasource(dataSourceToApply);
                         }
                         else
                         {
-                            dataSourceToApply = (SQLDataSourceDTO)unitOfWork.DataSourceRepo.GetDataSources().First(_ => _.Type == "SQL");
+                            dataSourceToApply = (ExcelDataSourceDTO)unitOfWork.DataSourceRepo.GetDataSources().First(_ => _.Type == "Excel");
                         }
                         CacheDataSourceForAttributes = dataSourceToApply;
                         var attributesToInsert = AttributeDtoLists.AttributeSetupDtos();

@@ -1,20 +1,18 @@
 using System;
-using System.Data;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Xunit;
-using Moq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore;
+using Moq;
+using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
 {
@@ -146,6 +144,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             // Act & Assert
             var exception = Assert.Throws<ArgumentException>(() => repo.UpsertDatasource(newSource));
             Assert.Equal("The data source could not be validated", exception.Message);
+        }
+
+        [Fact]
+        public void GetRawData_MatchingRawDataDtoInDb_Gets()
+        {
+            var dataSource = AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var attribute = AttributeDtos.District(dataSource);
+            var dictionary = new Dictionary<AttributeDTO, string>
+            {
+                { attribute, "11" }
+            };
+            var dataSourceId = attribute.DataSource.Id;
+            var excelRawDataDto = ExcelRawDataDtos.Dto(dataSourceId);
+            TestHelper.UnitOfWork.ExcelWorksheetRepository.AddExcelRawData(excelRawDataDto);
+            var rawData = TestHelper.UnitOfWork.DataSourceRepo.GetRawData(dictionary);
+            var brKey = rawData["BRKEY"];
+            Assert.Equal("1", brKey);
         }
     }
 }

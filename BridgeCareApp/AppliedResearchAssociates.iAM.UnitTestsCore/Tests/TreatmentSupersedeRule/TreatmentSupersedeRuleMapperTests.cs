@@ -69,9 +69,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
             var treatmentSupersedeRuleEntity = treatmentEntity.ScenarioTreatmentSupersedeRules.FirstOrDefault();
             var selectableTreatment = TreatmentSupersedeRuleTestSetup.TreatmentSupersedeDomain(simulationSource, testSimulation);
             var cntBefore = selectableTreatment.SupersedeRules.Count;
+            var simpleTreatments = simulationSource.SelectableTreatments.ToList();
 
             // Act
-            treatmentSupersedeRuleEntity.CreateTreatmentSupersedeRule(selectableTreatment, testSimulation);
+            treatmentSupersedeRuleEntity.CreateTreatmentSupersedeRule(selectableTreatment, testSimulation, simpleTreatments);
 
             // Assert on selectableTreatment
             Assert.True(cntBefore == 0);

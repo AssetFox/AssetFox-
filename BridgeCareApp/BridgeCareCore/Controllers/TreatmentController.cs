@@ -18,9 +18,7 @@ using BridgeCareCore.Utils.Interfaces;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using BridgeCareCore.Services.General_Work_Queue.WorkItems;
-using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCore.Controllers
 {
@@ -75,8 +73,6 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-
-
 
         [HttpGet]
         [Route("GetTreatmentLibraries")]
@@ -480,7 +476,6 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-
         [HttpPost]
         [Route("ImportLibraryTreatmentsFile")]
         [Authorize(Policy = Policy.ImportTreatmentFromLibrary)]
@@ -541,7 +536,6 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-
 
         [HttpPost]
         [Route("ImportLibraryTreatmentsFileSingle")]
@@ -882,7 +876,6 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                // Rename
                 var result =
                     await Task.Factory.StartNew(() => _treatmentService.ExportScenarioTreatmentSupersedeRuleExcelFile(simulationId));
 
@@ -891,7 +884,7 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportScenarioScenarioTreatmentSupersedeRuleFile for {simulationName} - {HubService.errorList["Unauthorized"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportScenarioTreatmentSupersedeRuleExcelFile for {simulationName} - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
             catch (Exception e)
@@ -903,17 +896,18 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("DownloadScenarioTreatmentSupersedeRuleTemplate")]
+        [Route("DownloadTreatmentSupersedeRuleTemplate")]
         [Authorize]
-        public async Task<IActionResult> DownloadScenarioTreatmentSupersedeRuleTemplate()
+        // Note: Scenario settings and Libraries will use same API
+        public async Task<IActionResult> DownloadTreatmentSupersedeRuleTemplate()
         {
             try
             {
-                var filePath = AppDomain.CurrentDomain.BaseDirectory + "DownloadTemplates\\Scenario_treatment_supersede_rule_template.xlsx";
+                var filePath = AppDomain.CurrentDomain.BaseDirectory + "DownloadTemplates\\TreatmentSupersedeRules_template.xlsx";
                 var fileData = System.IO.File.ReadAllBytes(filePath);
                 var result = await Task.Factory.StartNew(() => new FileInfoDTO
                 {
-                    FileName = "Scenario_treatment_supersede_rule_template",
+                    FileName = "TreatmentSupersedeRules_template",
                     FileData = Convert.ToBase64String(fileData),
                     MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 });
@@ -922,12 +916,93 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DownloadScenarioTreatmentSupersedeRuleTemplate - {HubService.errorList["Unauthorized"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DownloadTreatmentSupersedeRuleTemplate - {HubService.errorList["Unauthorized"]}");
                 throw;
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DownloadScenarioTreatmentSupersedeRuleTemplate - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DownloadTreatmentSupersedeRuleTemplate - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("ExportTreatmentSupersedeRuleExcelFile/{libraryId}")]
+        [Authorize]
+        public async Task<IActionResult> ExportTreatmentSupersedeRuleExcelFile(Guid libraryId)
+        {
+            try
+            {
+                var result =
+                    await Task.Factory.StartNew(() => _treatmentService.ExportLibraryTreatmentSupersedeRuleExcelFile(libraryId));
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportTreatmentSupersedeRuleExcelFile - {HubService.errorList["Unauthorized"]}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportTreatmentSupersedeRuleExcelFile - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("ImportLibraryTreatmentSupersedeRulesFile")]
+        [Authorize(Policy = Policy.ImportTreatmentSupersedeRuleFromLibrary)]
+        public async Task<IActionResult> ImportLibraryTreatmentSupersedeRulesFile()
+        {
+            try
+            {
+                if (!ContextAccessor.HttpContext.Request.HasFormContentType)
+                {
+                    throw new ConstraintException("Request MIME type is invalid.");
+                }
+
+                if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
+                {
+                    throw new ConstraintException("Treatment Supersede Rule file not found.");
+                }
+
+                if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("libraryId", out var id) || id == Guid.Empty.ToString())
+                {
+                    throw new ConstraintException("Request contained no library id.");
+                }
+
+                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+                var libraryId = Guid.Parse(id.ToString());
+                var libraryName = string.Empty;
+                await Task.Factory.StartNew(() =>
+                {
+                    var existingTreatmentLibrary = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(libraryId);
+                    if (existingTreatmentLibrary != null)
+                    {
+                        libraryName = existingTreatmentLibrary.Name;
+                        if (_claimHelper.RequirePermittedCheck())
+                        {
+                            var accessModel = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(libraryId, UserId);
+                            _claimHelper.CheckUserLibraryRecreateAuthorization(accessModel, UserId);
+                        }
+                    }
+                });
+
+                var workItem = new ImportLibraryTreatmentSupersedeRuleWorkitem(libraryId, excelPackage, UserInfo.Name, libraryName);
+                var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, libraryId.ToString());
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ImportLibraryTreatmentSupersedeRulesFile - {HubService.errorList["Unauthorized"]}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ImportLibraryTreatmentSupersedeRulesFile - {e.Message}");
                 throw;
             }
         }
@@ -969,6 +1044,7 @@ namespace BridgeCareCore.Controllers
         {
             return Ok(true);
         }
+
         [HttpGet]
         [Route("GetIsSharedLibrary/{treatmentLibraryId}")]
         [Authorize]
@@ -997,6 +1073,7 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
         private List<TreatmentLibraryDTO> GetAllTreatmentLibraries()
         {
             return UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();

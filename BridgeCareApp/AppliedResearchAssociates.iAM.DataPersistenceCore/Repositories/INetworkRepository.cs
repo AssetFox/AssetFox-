@@ -15,17 +15,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         void CreateNetwork(Network network);
 
-        void CreateNetwork(Analysis.Network network);
-
         Task<List<NetworkDTO>> Networks();
-
-        List<Network> GetAllNetworks();
 
         NetworkEntity GetMainNetwork();
 
         NetworkEntity GetRawNetwork();
-
-        List<NetworkDTO> GetNetworksByIdsNoChildren(List<Guid> ids);
 
         Analysis.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true, Guid? simulationId = null);
 

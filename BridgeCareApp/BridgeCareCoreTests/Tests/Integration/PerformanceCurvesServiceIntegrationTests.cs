@@ -97,7 +97,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var curves3 = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(libraryId);
             var curve1 = curves1.Single();
             var curve3 = curves3.Single();
-            ObjectAssertions.EquivalentExcluding(curve1, curve3, c => c.Id, c => c.Equation.Id);
+            ObjectAssertions.EquivalentExcluding(curve1, curve3, c => c.Id, c => c.Equation.Id, c => c.CriterionLibrary.Id);
         }
 
     }

@@ -13,6 +13,7 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
         Percentage,
         PercentageDecimal2,
         DecimalPrecision3,
+        PercentDecimal4,
         Accounting
     }
     public static class ExcelHelper
@@ -119,6 +120,9 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
                 break;
             case ExcelHelperCellFormat.DecimalPrecision3:
                 cells.Style.Numberformat.Format = "#0.000";
+                break;
+            case ExcelHelperCellFormat.PercentDecimal4:
+                cells.Style.Numberformat.Format = "#0.00##%";
                 break;
             case ExcelHelperCellFormat.Accounting:
                 cells.Style.Numberformat.Format = "_-$* #,##0.00_-;-$* #,##0.00_-;_-$* \"-\"??_-;_-@_-";

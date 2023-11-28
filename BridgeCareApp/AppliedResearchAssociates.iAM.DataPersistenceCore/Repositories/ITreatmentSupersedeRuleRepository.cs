@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
@@ -11,8 +10,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         public List<TreatmentSupersedeRuleDTO> GetScenarioTreatmentSupersedeRules(Guid treatmentId, Guid simulationId);
 
+        public List<TreatmentSupersedeRuleExportDTO> GetScenarioTreatmentSupersedeRulesBysimulationId(Guid simulationId);
+
         public void UpsertOrDeleteTreatmentSupersedeRules(Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> supersedeRulesPerTreatmentId, Guid libraryId);
 
-        public List<TreatmentSupersedeRuleDTO> GetTreatmentSupersedeRules(Guid treatmentId, Guid libraryId);        
+        public List<TreatmentSupersedeRuleDTO> GetLibraryTreatmentSupersedeRules(Guid treatmentId, Guid libraryId);
+
+        public List<TreatmentSupersedeRuleExportDTO> GetLibraryTreatmentSupersedeRulesByLibraryId(Guid libraryId);
     }
 }

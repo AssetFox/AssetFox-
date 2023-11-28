@@ -1,5 +1,47 @@
 <template>
-    <v-card height="1000px" class="elevation-0 vcard-main-layout">
+    <v-card height="1000px" class="elevation-0 vcard-main-layout" style="margin-top: -20px;">
+    <v-row style="float:right;margin-top: 1px;">
+        <v-col class="ghd-blue ghd-button-text ghd-text-padding" style="border-style: solid;border-width: 2px; border-color: lightgray;margin-right: 5px;">Treatments<br>
+            <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
+                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Download Template
+                </v-btn> 
+                <v-btn :disabled='false' @click='OnExportTreamentsClick()'
+                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Download
+                </v-btn> 
+                <v-btn :disabled='false' @click='showImportTreatmentsDialog = true'
+                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Upload
+            </v-btn>
+        </v-col>        
+        <v-col class="ghd-blue ghd-button-text ghd-text-padding" style="border-style: solid;border-width: 2px; border-color: lightgray;">Supersede<br>
+            <v-btn :disabled='false' @click='OnDownloadSupersedeTemplateClick()'
+                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Download Template
+                </v-btn> 
+                <v-btn :disabled='false' @click='OnExportSupersedeClick()'
+                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Download
+                </v-btn>
+                <v-btn :disabled='false' @click='showImportSupersedeDialog = true'
+                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Upload
+            </v-btn>
+        </v-col>
+    </v-row><br>
     <v-row style="margin-top: 5px;">
         <v-col>
             <v-select
@@ -91,24 +133,6 @@
                 >
                     <span class="ghd-right-padding">Add Treatment</span>
                     <v-icon>fas fa-plus</v-icon>
-                </v-btn>                
-                <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
-                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
-                    style='float:right;'
-                    >
-                    Download Template
-                </v-btn> 
-                <v-btn :disabled='false' @click='OnExportTreamentsClick()'
-                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
-                    style='float:right;'
-                    >
-                    Download
-                </v-btn> 
-                <v-btn :disabled='false' @click='showImportTreatmentsDialog = true'
-                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
-                    style='float:right;'
-                    >
-                    Upload
                 </v-btn>
             </div>    
             <div>
@@ -196,6 +220,24 @@
                                 <v-card-text
                                     class='card-tab-content'
                                 >
+                                <SupersedeTab
+                                        :selectedTreatmentSupersedeRules='selectedTreatment.supersedeRules'
+                                        :treatmentSelectItems='treatmentSelectItems'
+                                        :rules='rules'
+                                        :callFromScenario='hasScenario'
+                                        :callFromLibrary='!hasScenario'                                        
+                                        @onAddSupersedeRule='addSelectedTreatmentSupersedeRule'
+                                        @onModifySupersedeRule='modifySelectedTreatmentSupersedeRule'
+                                        @onRemoveSupersedeRule='removeSelectedTreatmentSupersedeRule'
+                                    />                                    
+                                </v-card-text>
+                            </v-card>
+                        </v-window-item>
+                        <v-window-item>
+                            <v-card>
+                                <v-card-text
+                                    class='card-tab-content'
+                                >
                                 <BudgetsTab :selectedTreatmentBudgets='selectedTreatment.budgetIds'
                                                 :addTreatment='selectedTreatment.addTreatment'
                                                 :fromLibrary='hasSelectedLibrary'
@@ -218,7 +260,7 @@
                                     />
                                 </v-card-text>
                             </v-card>
-                        </v-window-item>
+                        </v-window-item>                       
                     </v-window>
                 </div>                                             
             </v-col>                    
@@ -324,7 +366,9 @@
         :dialogData='confirmBeforeDeleteTreatmentAlertData'
         @submit='onSubmitConfirmDeleteTreatmentAlertResult'
     />
-    <ConfirmDialog></ConfirmDialog>
+    <ConfirmDialog></ConfirmDialog>    
+    <ImportSupersedeDialog :showDialog='showImportSupersedeDialog'
+        @submit='onSubmitImportSupersedeDialogResult' />
 </template>
 
 <script setup lang='ts'>
@@ -357,7 +401,9 @@ import {
     TreatmentDetails,
     TreatmentLibrary,
     TreatmentLibraryUser,
-    TreatmentsFileImport
+    TreatmentsFileImport,
+    SupersedeFileImport,
+    TreatmentSupersedeRule
 } from '@/shared/models/iAM/treatment';
 import {
     emptyPerformanceCurve,
@@ -381,6 +427,7 @@ import CostsTab from '@/components/treatment-editor/treatment-editor-tabs/CostsT
 import PerformanceFactorTab from '@/components/treatment-editor/treatment-editor-tabs/PerformanceFactorTab.vue';
 import ConsequencesTab from '@/components/treatment-editor/treatment-editor-tabs/ConsequencesTab.vue';
 import BudgetsTab from '@/components/treatment-editor/treatment-editor-tabs/BudgetsTab.vue';
+import SupersedeTab from '@/components/treatment-editor/treatment-editor-tabs/SupersedeTab.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import {
@@ -394,8 +441,10 @@ import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import {hasUnsavedChangesCore, isEqual } from '@/shared/utils/has-unsaved-changes-helper';
 import { getUserName } from '@/shared/utils/get-user-info';
 import ImportExportTreatmentsDialog from '@/components/treatment-editor/treatment-editor-dialogs/ImportExportTreatmentsDialog.vue';
+import ImportSupersedeDialog from '@/components/treatment-editor/treatment-editor-dialogs/ImportSupersedeDialog.vue';
 import ImportNewTreatmentDialog from '@/components/treatment-editor/treatment-editor-dialogs/ImportNewTreatmentDialog.vue';
 import { ImportExportTreatmentsDialogResult } from '@/shared/models/modals/import-export-treatments-dialog-result';
+import { ImportSupersedeDialogResult }from '@/shared/models/modals/import-supersede-dialog-result';
 import TreatmentService from '@/services/treatment.service';
 import { AxiosResponse } from 'axios';
 import { FileInfo } from '@/shared/models/iAM/file-info';
@@ -506,6 +555,14 @@ async function importLibraryTreatmentsFileAction(payload?: any): Promise<any> {
   await store.dispatch('importLibraryTreatmentsFile', payload);
 }
 
+async function importScenarioTreatmentSupersedeRulesFileAction(payload?: any): Promise<any> {
+  await store.dispatch('importScenarioTreatmentSupersedeRulesFile', payload);
+}
+
+async function importLibraryTreatmentSupersedeRulesFileAction(payload?: any): Promise<any> {
+  await store.dispatch('importLibraryTreatmentSupersedeRulesFile', payload);
+}
+
 async function deleteTreatmentAction(payload?: any): Promise<any> {
   await store.dispatch('deleteTreatment', payload);
 }
@@ -553,7 +610,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     let selectedTreatment = ref(clone(emptyTreatment));
     let selectedTreatmentDetails: TreatmentDetails = clone(emptyTreatmentDetails);
     let activeTab = ref(0);
-    let treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Consequences'];
+    let treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Consequences', 'Supersede'];
     const createTreatmentLibraryDialogData = ref<CreateTreatmentLibraryDialogData>(clone(emptyCreateTreatmentLibraryDialogData));
     let showCreateTreatmentDialog = ref(false);
     const showImportTreatmentDialog = ref<boolean>(false);
@@ -569,6 +626,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     let disableCrudButtonsResult: boolean = false;
     let hasLibraryEditPermission: boolean | Promise<boolean> = false;
     const showImportTreatmentsDialog = ref<boolean>(false);
+    const showImportSupersedeDialog = ref<boolean>(false);
     const confirmBeforeDeleteTreatmentAlertData = ref<AlertData>(clone(emptyAlertData));
     let isNoTreatmentSelected = ref(false);
     let hasImport: boolean = false;
@@ -1179,6 +1237,37 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         }
     }
 
+    function addSelectedTreatmentSupersedeRule(newSupersedeRule: TreatmentSupersedeRule) {
+        if (hasSelectedTreatment.value) {
+            modifySelectedTreatment({
+                ...clone(selectedTreatment.value),
+                supersedeRules: prepend(newSupersedeRule, selectedTreatment.value.supersedeRules,),
+            });
+        }
+    }
+
+    function  modifySelectedTreatmentSupersedeRule(modifiedSupersedeRule: TreatmentSupersedeRule,) {
+        if (hasSelectedTreatment.value) {
+            modifySelectedTreatment({
+                ...clone(selectedTreatment.value),
+                supersedeRules: update(
+                    findIndex(propEq('id', modifiedSupersedeRule.id), selectedTreatment.value.supersedeRules,),
+                    modifiedSupersedeRule,
+                    selectedTreatment.value.supersedeRules,
+                ),
+            });
+        }
+    }
+
+    function removeSelectedTreatmentSupersedeRule(supersedeRuleId: string) {
+        if (hasSelectedTreatment.value) {
+            modifySelectedTreatment({
+                ...clone(selectedTreatment.value),
+                supersedeRules: reject(propEq('id', supersedeRuleId), selectedTreatment.value.supersedeRules,),
+            });
+        }
+    }
+
     function modifySelectedTreatment(treatment: Treatment) {
         selectedTreatment.value = treatment;
 
@@ -1224,7 +1313,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         }
     }
 
-    function disableCrudButtons() {
+    function disableCrudButtons() { // TODO for supersedes?
         const rows = addedRows.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const allDataIsValid: boolean = rows.every((treatment: Treatment) => {
             const allSubDataIsValid: boolean = treatment.consequences.every((consequence: TreatmentConsequence) => {
@@ -1329,6 +1418,52 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
                 }
             });
     }
+
+    function OnExportSupersedeClick(){
+        const id: string = hasScenario.value ? selectedScenarioId : selectedTreatmentLibrary.value.id;
+        TreatmentService.exportSupersedeRules(id, hasScenario.value)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    const fileInfo: FileInfo = response.data as FileInfo;
+                    FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                }
+            });
+     }
+
+    function OnDownloadSupersedeTemplateClick()
+    {
+        TreatmentService.downloadSupersedeRulesTemplate()
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    const fileInfo: FileInfo = response.data as FileInfo;
+                    FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                }
+            });
+    }
+    
+    function onSubmitImportSupersedeDialogResult(result: ImportSupersedeDialogResult) {        
+        showImportSupersedeDialog.value = false;
+
+        if (hasValue(result) && hasValue(result.file)) {
+            const data: SupersedeFileImport = {
+                file: result.file
+            };
+
+            if (hasScenario.value) {
+                importScenarioTreatmentSupersedeRulesFileAction({
+                    ...data,
+                    id: selectedScenarioId
+                }).then(() => {                                 
+                });
+            } else {
+                importLibraryTreatmentSupersedeRulesFileAction({
+                    ...data,
+                    id: selectedTreatmentLibrary.value.id
+                }).then(() => {                                   
+                });
+            }
+        }
+     }
 
     function importCompleted(data: any){
         var importComp = data.importComp as importCompletion

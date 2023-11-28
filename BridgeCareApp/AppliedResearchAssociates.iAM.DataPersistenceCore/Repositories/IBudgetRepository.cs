@@ -9,8 +9,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IBudgetRepository
     {
-        void CreateScenarioBudgets(List<Budget> budgets, Guid simulationId);
-
         List<SimpleBudgetDetailDTO> GetScenarioSimpleBudgetDetails(Guid simulationId);
 
         List<BudgetLibraryDTO> GetBudgetLibraries();

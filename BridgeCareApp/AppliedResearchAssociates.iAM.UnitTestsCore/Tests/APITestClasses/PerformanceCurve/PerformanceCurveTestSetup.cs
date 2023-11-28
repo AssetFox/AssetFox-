@@ -19,6 +19,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 CriterionLibrary = new CriterionLibraryDTO
                 {
                     Id = libraryId,
+                    MergedCriteriaExpression = "mergedCriteriaExpression",
                 },
                 Name = randomName,
                 Attribute = attributeName,

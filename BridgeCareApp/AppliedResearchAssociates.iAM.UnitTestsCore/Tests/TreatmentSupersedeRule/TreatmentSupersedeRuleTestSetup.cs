@@ -30,11 +30,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
         public static Analysis.TreatmentSupersedeRule TreatmentSupersedeRuleDomain(SimulationEntity simulationEntity, Simulation simulation)
         {
             var treatmentEntity = simulationEntity.SelectableTreatments.FirstOrDefault();
-            var selectableTreatment = treatmentEntity.CreateSelectableTreatment(simulation);
+            var selectableTreatment = treatmentEntity.CreateSelectableTreatment(simulation, null);
             TreatmentEntityId = selectableTreatment.Id;
             var supersedeRule = selectableTreatment.AddSupersedeRule();
             var preventTreatmentEntity = simulationEntity.SelectableTreatments.Last();
-            var preventTreatment = preventTreatmentEntity.CreateSelectableTreatment(simulation);
+            var preventTreatment = preventTreatmentEntity.CreateSelectableTreatment(simulation, null);
             supersedeRule.Treatment = preventTreatment;            
             return supersedeRule;
         }
@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
         public static Analysis.SelectableTreatment TreatmentSupersedeDomain(SimulationEntity simulationEntity, Simulation simulation)
         {
             var treatmentEntity = simulationEntity.SelectableTreatments.Last();
-            var selectableTreatment = treatmentEntity.CreateSelectableTreatment(simulation);            
+            var selectableTreatment = treatmentEntity.CreateSelectableTreatment(simulation, null);            
             return selectableTreatment;
         }        
     }

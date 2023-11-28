@@ -98,20 +98,18 @@ internal sealed class AssetContext : CalculateEvaluateScope
         return result;
     }
 
-    public double GetBenefit() => GetBenefit(true);
-
-    public double GetBenefit(bool withWeighting)
+    public (double rawBenefit, double lruBenefit, double weight, double benefit) GetBenefitData()
     {
         var rawBenefit = GetNumber(AnalysisMethod.Benefit.Attribute.Name);
-        var benefit = AnalysisMethod.Benefit.GetValueRelativeToLimit(rawBenefit);
 
-        if (withWeighting && AnalysisMethod.Weighting != null)
-        {
-            var weight = GetNumber(AnalysisMethod.Weighting.Name);
-            benefit *= weight;
-        }
+        // "Limit-Relativized Unweighted"
+        var lruBenefit = AnalysisMethod.Benefit.GetValueRelativeToLimit(rawBenefit);
 
-        return benefit;
+        var weight = AnalysisMethod.Weighting != null
+            ? GetNumber(AnalysisMethod.Weighting.Name)
+            : 1;
+
+        return (rawBenefit, lruBenefit, weight, lruBenefit * weight);
     }
 
     public double GetCostOfTreatment(Treatment treatment) => treatment.GetCost(this, AnalysisMethod.ShouldApplyMultipleFeasibleCosts);

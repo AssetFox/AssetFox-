@@ -49,7 +49,7 @@ public sealed class AssetDetail : AssetSummaryDetail
     public List<TreatmentOptionDetail> TreatmentOptions { get; } = new List<TreatmentOptionDetail>();
 
     /// <summary>
-    ///     List of rejection reasosns for treatments that could be applied to this asset.
+    ///     List of rejection reasons for treatments that could be applied to this asset.
     /// </summary>
     public List<TreatmentRejectionDetail> TreatmentRejections { get; } = new List<TreatmentRejectionDetail>();
 

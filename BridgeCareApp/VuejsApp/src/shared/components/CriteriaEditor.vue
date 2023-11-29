@@ -49,7 +49,7 @@
                             style="padding-left:0px;"
                             variant="outlined"
                             :value="getValueForTextarea(-1)"
-                            @click="onClickSubCriteriaClauseTextarea(subCriteriaClauses.join(' '), -1)"
+                            @click="onClickSubCriteriaClauseTextarea(subCriteriaClauses.join(' AND '), -1)"
                             class="ghd-control-text"
                             full-width
                             no-resize
@@ -139,7 +139,7 @@
                             >
                             </v-row>
                             <v-tabs class="ghd-control-text" style="margin-left:4px;margin-right:4px;"
-                                v-if="selectedSubCriteriaClauseIndex !== -1" v-model="tab"
+                                 v-model="tab"
                             >
                                 <v-tab @click="onParseRawSubCriteria" id="CriteriaEditor-treeView-tab" value="tree">
                                     Tree View
@@ -553,6 +553,9 @@ const tab = ref<any>(null);
                 if (!hasValue(selectedSubCriteriaClause.value?.logicalOperator)) {
                     selectedSubCriteriaClause.value!.logicalOperator = 'AND';
                 }
+                // fix until treeview is implemented - show SubCriteria on Raw Criteria tab
+                selectedRawSubCriteriaClause.value = subCriteriaClause;
+
             } else {
                 invalidSubCriteriaMessage.value =
                     'Unable to parse selected criteria';
@@ -781,11 +784,20 @@ const tab = ref<any>(null);
             return;
         }
 
-        subCriteriaClauses.value= update(
-            selectedSubCriteriaClauseIndex.value,
-            criteria as any,
-            subCriteriaClauses.value,
-        );
+        // fix until treeview is implemented
+        // added the if clause for AND, to copy expression from raw criteria tab to the SubCriteria textarea on left
+        if (isAndConjunction()) {
+            subCriteriaClauses.value = [];
+            subCriteriaClauses.value.push(criteria);
+        }
+        else {
+            subCriteriaClauses.value= update(
+                selectedSubCriteriaClauseIndex.value,
+                criteria as any,
+                subCriteriaClauses.value,
+            );
+        }
+
         resetCriteriaValidationProperties();
         checkOutput.value = true;
         resetSubCriteriaValidationProperties();

@@ -454,6 +454,7 @@ table.v-table tbody td input {
 
 .notification-long-message {
     display: inline-block;
+    min-inline-size: 90%;
     max-width: 100%; 
     padding: 10pt;
     margin: 10pt;
@@ -472,6 +473,7 @@ table.v-table tbody td input {
 
 .notification-message {
     text-align: left;
+    cursor: pointer;
 }
 
 /* Tabbing */

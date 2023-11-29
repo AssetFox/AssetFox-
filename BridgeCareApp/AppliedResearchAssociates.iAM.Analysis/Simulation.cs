@@ -46,10 +46,16 @@ public sealed class Simulation : WeakEntity, IValidator
     public string ShortDescription => Name;
 
     /// <summary>
+    ///     Whether to always consider and apply all feasible treatments together, as a single
+    ///     "bundle" of treatments. This option exists to support a PAMS requirement.
+    /// </summary>
+    public bool ShouldBundleFeasibleTreatments { get; set; } = DefaultSettings.ShouldBundleFeasibleTreatments;
+
+    /// <summary>
     ///     Whether to always pre-apply the passive treatment just after deterioration. This
     ///     feature exists in order to provide v1-compatible analysis behavior.
     /// </summary>
-    public bool ShouldPreapplyPassiveTreatment { get; set; } = true;
+    public bool ShouldPreapplyPassiveTreatment { get; set; } = DefaultSettings.ShouldPreapplyPassiveTreatment;
 
     public ValidatorBag Subvalidators => new() { AnalysisMethod, CommittedProjects, InvestmentPlan, PerformanceCurves, Treatments };
 
@@ -178,4 +184,11 @@ public sealed class Simulation : WeakEntity, IValidator
     private readonly List<PerformanceCurve> _PerformanceCurves = new();
     private readonly WeakReference<SimulationOutput> _Results = new(null);
     private readonly List<SelectableTreatment> _Treatments = new();
+
+    public static class DefaultSettings
+    {
+        public static bool ShouldBundleFeasibleTreatments { get; set; } = false;
+
+        public static bool ShouldPreapplyPassiveTreatment { get; set; } = true;
+    }
 }

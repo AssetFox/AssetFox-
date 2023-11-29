@@ -774,9 +774,9 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     watch(investmentPlan,() => {
         checkHasUnsavedChanges()
         if(hasScenario.value){
-            const firstYear = +investmentPlan.value.firstYearOfAnalysisPeriod;
+            const localFirstYear = +investmentPlan.value.firstYearOfAnalysisPeriod;
             const stateFirstYear = +stateInvestmentPlan.value.firstYearOfAnalysisPeriod;
-            firstYearOfAnalysisPeriodShift.value = (firstYear - originalFirstYear) - (firstYear === 0 ? 0 : (firstYear - originalFirstYear));
+            firstYearOfAnalysisPeriodShift.value = (localFirstYear - originalFirstYear) - (firstYear === 0 ? 0 : (firstYear - originalFirstYear));
         }
             
         if(investmentPlan.value.id === uuidNIL)

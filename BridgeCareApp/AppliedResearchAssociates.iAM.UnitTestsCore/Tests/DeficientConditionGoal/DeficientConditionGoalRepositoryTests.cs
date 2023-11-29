@@ -16,6 +16,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyModel;
 using Xunit;
 
 namespace BridgeCareCoreTests.Tests
@@ -477,6 +478,57 @@ namespace BridgeCareCoreTests.Tests
             var date = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetLibraryModifiedDate(libraryId);
 
             DateTimeAssertions.Between(before, after, date, TimeSpan.FromSeconds(1));
+        }
+
+        [Fact]
+        public async Task GetDeficientConditionGoalLibrariesNoChildrenAccessibleToUser_Expected()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, false);
+            TestHelper.UnitOfWork.SetUser(user.Username);
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var libraryId = Guid.NewGuid();
+            var libraryDto = DeficientConditionGoalLibraryDtos.Empty(libraryId);
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibrary(libraryDto);
+            var dto = DeficientConditionGoalDtos.CulvDurationN();
+            var dtos = new List<DeficientConditionGoalDTO> { dto };
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteDeficientConditionGoals(dtos, libraryId);
+            var accessibleLibrariesBefore = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesNoChildrenAccessibleToUser(user.Id);
+            Assert.Empty(accessibleLibrariesBefore);
+            var newUser = new LibraryUserDTO
+            {
+                AccessLevel = LibraryAccessLevel.Read,
+                UserId = user.Id,
+            };
+            var users = new List<LibraryUserDTO> { newUser };
+
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteUsers(libraryId, users);
+
+            var accessibleLibrariesAfter = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesNoChildrenAccessibleToUser(user.Id);
+            var accessibleLibraryAfter = accessibleLibrariesAfter.Single();
+            ObjectAssertions.EquivalentExcluding(libraryDto, accessibleLibraryAfter, lib => lib.Owner, lib => lib.DeficientConditionGoals);
+            Assert.Empty(accessibleLibraryAfter.DeficientConditionGoals);
+        }
+
+        [Fact]
+        public void AddLibraryIdToDeficientConditionGoal_Does()
+        {
+            var dto = DeficientConditionGoalDtos.DtoWithCriterionLibrary();
+            var dtos = new List<DeficientConditionGoalDTO> { dto };
+            var libraryId = Guid.NewGuid();
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo.AddLibraryIdToScenarioDeficientConditionGoal(dtos, libraryId);
+            Assert.Equal(libraryId, dto.LibraryId);
+        }
+
+        [Fact]
+        public void AddModifiedToDeficientConditionGoal_Does()
+        {
+            var dto = DeficientConditionGoalDtos.DtoWithCriterionLibrary();
+            var dtos = new List<DeficientConditionGoalDTO> { dto };
+           
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo.AddModifiedToScenarioDeficientConditionGoal(dtos, true);
+            Assert.True(dto.IsModified);
+            TestHelper.UnitOfWork.DeficientConditionGoalRepo.AddModifiedToScenarioDeficientConditionGoal(dtos, false);
+            Assert.False(dto.IsModified);
         }
     }
 }

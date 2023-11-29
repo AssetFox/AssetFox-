@@ -32,8 +32,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<LibraryUserDTO> GetLibraryUsers(Guid deficientConditionGoalLibraryId);
 
+        /// <summary>Adds the library id to the DTOs, but does NOT change the database.</summary> 
         void AddLibraryIdToScenarioDeficientConditionGoal(List<DeficientConditionGoalDTO> deficientConditionGoalDTOs, Guid? libraryId);
 
+        /// <summary>Sets modified in the DTOs, but does NOT change the database.</summary> 
         void AddModifiedToScenarioDeficientConditionGoal(List<DeficientConditionGoalDTO> deficientConditionGoalDTOs, bool IsModified);
         void UpsertDeficientConditionGoalLibraryAndGoals(DeficientConditionGoalLibraryDTO dto);
     }

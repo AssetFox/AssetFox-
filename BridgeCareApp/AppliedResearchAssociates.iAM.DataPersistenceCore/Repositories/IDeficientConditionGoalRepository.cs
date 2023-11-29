@@ -7,8 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IDeficientConditionGoalRepository
     {
-        void CreateDeficientConditionGoals(List<DeficientConditionGoal> deficientConditionGoals, Guid simulationId);
-
         List<DeficientConditionGoalLibraryDTO> GetDeficientConditionGoalLibrariesWithDeficientConditionGoals();
         List<DeficientConditionGoalLibraryDTO> GetDeficientConditionGoalLibrariesNoChildren();
 

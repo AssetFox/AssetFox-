@@ -639,10 +639,10 @@ public sealed class SimulationRunner
             static double getBenefitImprovement(AssetContext context, Treatment treatment)
             {
                 var copyOfContext = new AssetContext(context);
-                var benefitBeforeTreatment = copyOfContext.GetBenefit(false);
+                var beforeTreatment = copyOfContext.GetBenefitData();
                 copyOfContext.ApplyTreatmentConsequences(treatment);
-                var benefitAfterTreatment = copyOfContext.GetBenefit(false);
-                return benefitAfterTreatment - benefitBeforeTreatment;
+                var afterTreatment = copyOfContext.GetBenefitData();
+                return afterTreatment.lruBenefit - beforeTreatment.lruBenefit;
             }
 
             if (feasibleTreatments.Count > 0)

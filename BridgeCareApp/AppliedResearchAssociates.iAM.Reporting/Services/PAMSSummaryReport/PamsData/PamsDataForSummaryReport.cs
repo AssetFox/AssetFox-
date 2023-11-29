@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 "End Segment",
                 "District",
                 "County",
-                "Co No",
+                "CNTY NO",
                 "Route",                
 
                 "Length",
@@ -96,13 +96,32 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
             FillData(worksheet, reportOutputData, currentCell);
             FillDynamicData(worksheet, reportOutputData, currentCell);
-
             worksheet.Cells.AutoFitColumns();
-            var spacerBeforeFirstYear = _spacerColumnNumbers[0] - 11;
-            worksheet.Column(spacerBeforeFirstYear).Width = 3;
+
+            const double minimumColumnWidth = 15;
+            for (int col = 1; col <= worksheet.Dimension.End.Column; col++)
+            {
+                if (worksheet.Column(col).Width < minimumColumnWidth)
+                {
+                    worksheet.Column(col).Width = minimumColumnWidth;
+                }
+            }
+
             foreach (var spacerNumber in _spacerColumnNumbers)
             {
-                worksheet.Column(spacerNumber).Width = 3;
+                bool isColumnEmpty = true; 
+                for (int row = 1; row <= worksheet.Dimension.End.Row; row++)
+                {
+                    if (worksheet.Cells[row, spacerNumber].Value != null)
+                    {
+                        isColumnEmpty = false;
+                        break; 
+                    }
+                }
+                if (isColumnEmpty)
+                {
+                    worksheet.Column(spacerNumber).Width = 3;
+                }
             }
             var lastColumn = worksheet.Dimension.Columns + 1;
             worksheet.Column(lastColumn).Width = 3;
@@ -132,7 +151,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 worksheet.Cells[headerRow, column + 1].Value = headers[column];
                 ExcelHelper.MergeCells(worksheet, headerRow, column + 1, headerRow + 1, column + 1);
             }
-
+            worksheet.Cells[headerRow, 1, headerRow + 1, headers.Count].AutoFitColumns();
             var currentCell = new CurrentCell { Row = headerRow, Column = headers.Count };
             BuildDynamicHeadersCells(worksheet, currentCell, simulationYears);
             return currentCell;
@@ -154,13 +173,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1], Color.FromArgb(244, 176, 132));
             }
 
-            worksheet.Cells[row, ++column].Value = "Work Done"; 
-            worksheet.Cells[row, ++column].Value = "Work Done more than once";            
-            worksheet.Cells[row, ++column].Value = "Total";
+            worksheet.Cells[row, ++column].Value = "Work Planned";
+            // Merge "Work Planned" header with the cell below it
+            ExcelHelper.MergeCells(worksheet, row, column, row + 1, column);
 
             ExcelHelper.ApplyStyle(worksheet.Cells[row, column-2, row, column]);
-            ExcelHelper.ApplyColor(worksheet.Cells[row, column-2, row, column], Color.FromArgb(244, 176, 132));
-
+            
             worksheet.Row(row).Height = 40;            
             currentCell.Column = column;
 
@@ -201,6 +219,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
                 currentCell.Column = ++column;
             }
+            worksheet.Cells[row, 1, row, worksheet.Dimension.End.Column].AutoFitColumns();
             ExcelHelper.ApplyBorder(worksheet.Cells[row, initialColumn, row + 1, worksheet.Dimension.Columns]);
             currentCell.Row = currentCell.Row + 2;
         }
@@ -215,7 +234,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
             return column;
         }
-
 
         private void FillData(ExcelWorksheet worksheet, SimulationOutput reportOutputData, CurrentCell currentCell)
         {
@@ -252,9 +270,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "YR_BUILT");
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "YEAR_LAST_OVERLAY");
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LAST_STRUCTURAL_OVERLAY");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "AADT");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "TRK_PERCENT");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "RISKSCORE"); 
+                worksheet.Cells[rowNo, columnNo++].Value = Math.Round(_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "AADT"));
+                worksheet.Cells[rowNo, columnNo++].Value = Math.Round(_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "TRK_PERCENT"));
+                worksheet.Cells[rowNo, columnNo++].Value = Math.Round(_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "RISKSCORE"));
+
 
                 if (rowNo % 2 == 0) { ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGray); }
             }
@@ -322,32 +341,25 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
             // work done information
             row = 4; // setting row back to start
-            column++;
-            var totalWorkMoreThanOnce = 0;
+
             foreach (var wdInfo in workDoneData)
             {
                 // Work Done
-                worksheet.Cells[row, column - 1].Value = wdInfo >= 1 ? "Yes" : "--";
-                // Work done more than once
-                worksheet.Cells[row, column].Value = wdInfo > 1 ? "Yes" : "--";
-                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column - 1, row, column]);
-                if (row % 2 == 0) { ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1, row, column + 1], Color.LightGray); }
+                worksheet.Cells[row, column].Value = wdInfo >= 1 ? "Yes" : "--";
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column]);
+                if (row % 2 == 0) { ExcelHelper.ApplyColor(worksheet.Cells[row, column], Color.LightGray); }
                 row++;
-                totalWorkMoreThanOnce += wdInfo > 1 ? 1 : 0;
             }
 
-            // "Total" column
-            worksheet.Cells[3, column + 1].Value = totalWorkMoreThanOnce;
-            ExcelHelper.ApplyStyle(worksheet.Cells[3, column + 1]);
-
+          
             row = 4; // setting row back to start
-            var initialColumn = column + 1;
-            foreach (var intialsection in outputResults.InitialAssetSummaries)
+            var initialColumn = column;
+            foreach (var initialSection in outputResults.InitialAssetSummaries)
             {
-                TrackInitialYearDataForParametersTAB(intialsection);
+                TrackInitialYearDataForParametersTAB(initialSection);
 
-                column = initialColumn; // This is to reset the column
-                column = AddSimulationYearData(worksheet, row, column, intialsection, null);
+                column = initialColumn; // Reset the column to the starting point for new data
+                column = AddSimulationYearData(worksheet, row, column, initialSection, null);
                 row++;
             }
 

@@ -43,7 +43,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private IBudgetRepository _budgetRepo;
         private ICashFlowDistributionRuleRepository _cashFlowDistributionRuleRepo;
         private ICashFlowRuleRepository _cashFlowRuleRepo;
-        private ICommittedProjectConsequenceRepository _committedProjectConsequenceRepo;
         private ICommittedProjectRepository _committedProjectRepo;      
         private ICriterionLibraryRepository _criterionLibraryRepo;
         private IDeficientConditionGoalRepository _deficientConditionGoalRepo;
@@ -98,8 +97,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public ICashFlowDistributionRuleRepository CashFlowDistributionRuleRepo => _cashFlowDistributionRuleRepo ??= new CashFlowDistributionRuleRepository(this);
 
         public ICashFlowRuleRepository CashFlowRuleRepo => _cashFlowRuleRepo ??= new CashFlowRuleRepository(this);
-
-        public ICommittedProjectConsequenceRepository CommittedProjectConsequenceRepo => _committedProjectConsequenceRepo ??= new CommittedProjectConsequenceRepository(this);
 
         public ICommittedProjectRepository CommittedProjectRepo => _committedProjectRepo ??= new CommittedProjectRepository(this);
 

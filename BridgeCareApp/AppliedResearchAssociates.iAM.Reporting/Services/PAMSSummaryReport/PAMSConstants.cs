@@ -77,6 +77,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
         public const string PercentBudgetSpentMPMS = "% of Budget - MPMS";
         public const string PercentBudgetSpentPAMS = "% of Budget - PAMS";
         public const string PercentBudgetSpentSAP = "% of Budget - SAP";
+        public const string PercentBudgetSpentProjectBuilder = "% of Budget - Project Builder";
         public const string RemainingBudget = "Remaining Budget";
 
         public const string Poor = "Poor";

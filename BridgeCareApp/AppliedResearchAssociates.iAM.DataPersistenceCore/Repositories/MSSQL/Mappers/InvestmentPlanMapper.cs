@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using MoreLinq;
+using System.IO;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -78,7 +79,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     sortedBudgetAmountEntities.ForEach(__ =>
                     {
                         var year = __.Year;
-                        var yearOffset = year - simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
+                        var firstYearOfAnalysisPeriod = simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
+                        var yearOffset = year - firstYearOfAnalysisPeriod;
+                        if (yearOffset < 0)
+                        {
+                            throw new InvalidDataException("Invalid budget year " + year + ", it is prior to 'First Year of Analysis Period' setting " + firstYearOfAnalysisPeriod + ".");
+                        }
                         budget.YearlyAmounts[yearOffset].Id = __.Id;
                         budget.YearlyAmounts[yearOffset].Value = __.Value;
                     });

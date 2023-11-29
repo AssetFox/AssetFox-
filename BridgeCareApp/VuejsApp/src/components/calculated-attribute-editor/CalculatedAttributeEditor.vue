@@ -806,7 +806,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                 onPaginationChanged();
             }
         }
-    })
+    }
 
     watch(stateSelectedCalculatedAttributeLibrary,() => {
         

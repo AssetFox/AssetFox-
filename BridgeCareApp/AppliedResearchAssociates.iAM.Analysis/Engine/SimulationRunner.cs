@@ -618,6 +618,8 @@ public sealed class SimulationRunner
                 return isSuperseded;
             });
 
+            // this is where we would "bundle" multiple treatments. replace all treatments with just one aggregated treatment.
+
             _ = feasibleTreatments.RemoveWhere(treatment =>
             {
                 var cost = context.GetCostOfTreatment(treatment);
@@ -817,6 +819,8 @@ public sealed class SimulationRunner
             return CostCoverage.Full;
         }
 
+        // At this point, we know we are not dealing with a committed project.
+
         var applicableBudgets = BudgetContexts.Zip(treatmentConsideration.BudgetUsages, BudgetInfo.Create).Where(budgetIsApplicable).ToArray();
 
         bool budgetIsApplicable(BudgetInfo info)
@@ -829,7 +833,7 @@ public sealed class SimulationRunner
             }
 
             var budgetConditions = ConditionsPerBudget[budgetContext.Budget];
-            var budgetConditionIsMet = treatment is CommittedProject || !budgetConditions.Any() || budgetConditions.Any(condition => condition.Criterion.EvaluateOrDefault(assetContext));
+            var budgetConditionIsMet = !budgetConditions.Any() || budgetConditions.Any(condition => condition.Criterion.EvaluateOrDefault(assetContext));
             if (!budgetConditionIsMet)
             {
                 budgetUsageDetail.Status = BudgetUsageStatus.ConditionNotMet;
@@ -1014,7 +1018,7 @@ public sealed class SimulationRunner
         return CostCoverage.Full;
 
         void tryToAllocateCost(
-            IEnumerable<BudgetInfo> budgets,
+            IEnumerable<BudgetInfo> applicableBudgets,
             ref decimal cost,
             Action<decimal, BudgetContext> costAllocationAction,
             IReadOnlyDictionary<BudgetContext, decimal> costCoverageFractionPerBudget,
@@ -1024,10 +1028,9 @@ public sealed class SimulationRunner
             costCoverageFractionsWereSatisfied = true;
 
             // "cost" is a variable that is being *indirectly* updated by "costAllocationAction".
-
             var originalCost = cost;
 
-            foreach (var (budgetContext, budgetUsageDetail) in budgets)
+            foreach (var (budgetContext, budgetUsageDetail) in applicableBudgets)
             {
                 if (cost <= 0)
                 {
@@ -1035,6 +1038,9 @@ public sealed class SimulationRunner
                 }
 
                 var availableAmount = getAvailableAmount(budgetContext);
+
+                decimal? maximumCoverableCost = null;
+                // = (treatment as TreatmentBundle)?.BundledTreatments.Where(t => t.CanUseBudget(b)).Sum(t => t.GetCost(xyz));
 
                 if (costCoverageFractionPerBudget is null)
                 {

@@ -198,6 +198,8 @@ public sealed class SelectableTreatment : Treatment
         var feasibleCosts = Costs.Where(cost => cost.Criterion.EvaluateOrDefault(scope)).ToArray();
         if (feasibleCosts.Length == 0)
         {
+            // [REVIEW] This doesn't look right. Ask about this no later than the PR. (In other
+            // words, don't let this comment through a PR.)
             return 0;
         }
 

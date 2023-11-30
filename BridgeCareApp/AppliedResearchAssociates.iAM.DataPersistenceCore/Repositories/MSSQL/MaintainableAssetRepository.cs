@@ -107,84 +107,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return asset.ToDomain(_unitOfWork.EncryptionKey);
         }
 
-        public void CreateMaintainableAssets(List<AnalysisMaintainableAsset> maintainableAssets, Guid networkId)
-        {
-            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
-            {
-                throw new RowNotInTableException($"No network found having id {networkId}");
-            }
-
-            var attributeEntities = _unitOfWork.Context.Attribute.ToList();
-            var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
-            var assetAttributeNames = maintainableAssets
-                .SelectMany(_ => _.HistoricalAttributes.Select(__ => __.Name))
-                .Distinct().ToList();
-            if (assetAttributeNames.Any() && !assetAttributeNames.All(assetAttributeName => attributeNames.Contains(assetAttributeName)))
-            {
-                var missingAttributes = assetAttributeNames.Except(attributeNames).ToList();
-                if (missingAttributes.Count == 1)
-                {
-                    throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
-                }
-
-                throw new RowNotInTableException(
-                    $"No attributes found having names: {string.Join(", ", missingAttributes)}.");
-            }
-
-            var attributeIdPerName = attributeEntities.ToDictionary(_ => _.Name, _ => _.Id);
-
-            var numericAttributeValueHistoryPerMaintainableAssetIdAttributeIdTuple =
-                new Dictionary<(Guid sectionId, Guid attributeId), IAttributeValueHistory<double>>();
-            var textAttributeValueHistoryPerMaintainableAssetIdAttributeIdTuple =
-                new Dictionary<(Guid sectionId, Guid attributeId), IAttributeValueHistory<string>>();
-
-            var maintainableAssetEntities = maintainableAssets.Select(_ =>
-            {
-                var maintainableAssetEntity = _.ToEntity(networkId);
-
-                if (_.HistoricalAttributes.Any())
-                {
-                    _.HistoricalAttributes.ForEach(attribute =>
-                    {
-                        if (attribute is NumberAttribute numberAttribute)
-                        {
-                            numericAttributeValueHistoryPerMaintainableAssetIdAttributeIdTuple.Add(
-                                (_.Id, attributeIdPerName[numberAttribute.Name]), _.GetHistory(numberAttribute)
-                            );
-                        }
-
-                        if (attribute is Analysis.TextAttribute textAttribute)
-                        {
-                            textAttributeValueHistoryPerMaintainableAssetIdAttributeIdTuple.Add(
-                                (_.Id, attributeIdPerName[textAttribute.Name]), _.GetHistory(textAttribute)
-                            );
-                        }
-                    });
-                }
-
-                return maintainableAssetEntity;
-            }).ToList();
-
-            _unitOfWork.Context.AddAll(maintainableAssetEntities, _unitOfWork.UserEntity?.Id);
-
-            var maintainableAssetLocationEntities =
-                maintainableAssetEntities.Select(_ => _.CreateMaintainableAssetLocation()).ToList();
-
-            _unitOfWork.Context.AddAll(maintainableAssetLocationEntities, _unitOfWork.UserEntity?.Id);
-
-            if (numericAttributeValueHistoryPerMaintainableAssetIdAttributeIdTuple.Any())
-            {
-                _unitOfWork.AggregatedResultRepo.CreateAggregatedResults(
-                    numericAttributeValueHistoryPerMaintainableAssetIdAttributeIdTuple);
-            }
-
-            if (textAttributeValueHistoryPerMaintainableAssetIdAttributeIdTuple.Any())
-            {
-                _unitOfWork.AggregatedResultRepo.CreateAggregatedResults(
-                    textAttributeValueHistoryPerMaintainableAssetIdAttributeIdTuple);
-            }
-        }
-
         public void UpdateMaintainableAssetsSpatialWeighting(List<Data.Networking.MaintainableAsset> maintainableAssets)
         {
             var networkId = maintainableAssets.First().NetworkId;
@@ -195,7 +117,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.UpdateAll(maintainableAssetEntities, _unitOfWork.UserEntity?.Id, config);
         }
 
-        public void CreateMaintainableAssets(List<Data.Networking.MaintainableAsset> maintainableAssets, Guid networkId)
+        public void CreateMaintainableAssets(List<MaintainableAsset> maintainableAssets, Guid networkId)
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {

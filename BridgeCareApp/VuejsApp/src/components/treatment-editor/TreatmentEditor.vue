@@ -73,41 +73,7 @@
                     Upload
             </v-btn>
         </v-col>
-    </v-row><br>
-    <v-row style="margin-top: 5px;">
-        <v-col>
-            <v-select
-                id="TreatmentEditor-treatmentLibrary-select"
-                :items='librarySelectItems'
-                append-icon=ghd-down
-                class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
-                label='Select a Treatment Library'
-                variant="outlined"
-                density="compact"
-                item-title="text"
-                item-value="value"
-                v-model='librarySelectItemValue' 
-            >
-            </v-select>
-            <div class="ghd-md-gray ghd-control-subheader treatment-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
-        </v-col>
-        <v-col>
-            <v-select
-            id="TreatmentEditor-treatment-select"
-                :items='treatmentSelectItems'
-                append-icon=ghd-down
-                class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
-                label='Select a Treatment'
-                variant="outlined"
-                density="compact"
-                item-title="text"
-                item-value="value"
-                v-model='treatmentSelectItemValue'
-                v-show='hasSelectedLibrary'
-            >
-            </v-select>
-        </v-col>
-    </v-row>
+    </v-row><br>    
     <v-row>
         <v-col style="padding-right: 5px;margin-top: -50px;">                       
             <v-btn

@@ -1,8 +1,8 @@
 <template>
     <v-card class="elevation-0 vcard-main-layout">
     <v-row>
-        <v-col col="12">
-            <v-row align="center" justify="space-between" >              
+        <v-col cols="12">
+            <v-row align="center" justify="space-between">              
                 <v-col cols ="auto">   
                     <div style="margin-bottom: 10px;">              
                         <v-subheader class="ghd-md-gray ghd-control-label">Budget Priority Library</v-subheader>
@@ -21,13 +21,14 @@
                 </v-col>
                 <v-col cols = "auto">
                     <v-row v-show='hasSelectedLibrary || hasScenario'>
-                        <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content owner-padding">
+                        <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content owner-padding" style="margin-top:6px;">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
-                        <v-divider class="owner-shared-divider" vertical
+                        <!-- <v-divider class="owner-shared-divider" vertical
                             v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
-                        </v-divider>
-                        <v-btn id="BudgetPriorityEditor-shareLibrary-vbtn" @click='onShowShareBudgetPriorityLibraryDialog(selectedBudgetPriorityLibrary)' style="margin: 5px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        </v-divider> -->
+                        <v-btn id="BudgetPriorityEditor-shareLibrary-vbtn" @click='onShowShareBudgetPriorityLibraryDialog(selectedBudgetPriorityLibrary)'
+                             style="margin: 10px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
                         </v-btn>
@@ -87,7 +88,7 @@
                                             class='sm-txt'
                                             :model-value="item.item[header.key]"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                        <v-text-field 
+                                        <v-text-field style="width: 75px;"
                                             v-else readonly single-line class='sm-txt'
                                             variant="underlined"
                                             :model-value='item.item[header.key]' 
@@ -154,7 +155,7 @@
             <v-btn flat
                 :disabled='selectedBudgetPriorityIds.length === 0'
                 @click='onRemoveBudgetPriorities'
-                class="ghd-control-label ghd-blue"
+                class='ghd-blue ghd-button'
                 variant="text">
                 Delete Selected
             </v-btn>

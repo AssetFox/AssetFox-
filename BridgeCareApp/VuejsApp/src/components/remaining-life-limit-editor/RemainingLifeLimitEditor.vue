@@ -21,14 +21,15 @@
                     <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>                   
                 </v-col>
                 <v-col cols = "auto" class="ghd-constant-header">
-                    <v-row v-if="hasSelectedLibrary && !hasScenario" style="padding-top: 10px; padding-left: 10px">
-                        <div class="header-text-content owner-padding">
+                    <v-row v-if="hasSelectedLibrary && !hasScenario" style="padding-left: 10px">
+                        <div class="header-text-content owner-padding" style="padding-top: 8px;">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
-                        <v-divider vertical 
+                        <!-- <v-divider vertical 
                             v-if="hasSelectedLibrary && !hasScenario">
-                        </v-divider>
-                        <v-btn id="RemainingLifeLimitEditor-shareLibrary-vbtn" @click='onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        </v-divider> -->
+                        <v-btn id="RemainingLifeLimitEditor-shareLibrary-vbtn" @click='onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)'
+                             class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-left: 10px" variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
                         </v-btn>
@@ -38,7 +39,6 @@
                     <v-btn 
                         id="RemainingLifeLimitEditor-addRemainingLifeLimit-btn"
                         class="ghd-white-bg ghd-blue ghd-button"
-                        style="margin: 5px;"
                         @click="onShowCreateRemainingLifeLimitDialog"
                         v-show="librarySelectItemValue != null || hasScenario"
                         variant = "outlined">Add Remaining Life Limit

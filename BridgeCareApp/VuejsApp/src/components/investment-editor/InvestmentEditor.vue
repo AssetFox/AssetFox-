@@ -22,21 +22,19 @@
 
                 <!-- these are only in library -->
                 <v-col cols = "auto" v-if='!hasScenario' class="ghd-constant-header">
-                    <v-row v-if='hasSelectedLibrary && !hasScenario' row class="header-alignment-padding-center">
+                    <v-row v-if='hasSelectedLibrary && !hasScenario'  class="header-alignment-padding-center">
                         <div class="header-text-content invest-owner-padding">
-                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
                         </div>
-                        <div class="header-text-content invest-owner-padding">
-                            Date Modified: {{ modifiedDate }}
-                        </div>
-                        <v-btn id="InvestmentEditor-ShareLibrary-vbtn" @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        <v-btn id="InvestmentEditor-ShareLibrary-vbtn" @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)'
+                                style="margin-left: 10px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                                v-show='!hasScenario'>
                             Share Library
                         </v-btn>
                     </v-row>
                 </v-col>
                 <v-col cols = "auto" v-if='!hasScenario' class="ghd-constant-header">
-                    <v-row align-end justify-end class="header-alignment-padding-right">
+                    <v-row align-end justify-end class="header-alignment-padding-center">
                         <!-- <v-spacer></v-spacer> -->
                         <v-btn id="InvestmentEditor-CreateNewLibrary-vbtn" @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
@@ -426,7 +424,7 @@ function budgetLibraryMutator(payload:any){store.commit('budgetLibraryMutator', 
 function selectedBudgetLibraryMutator(payload:any){store.commit('selectedBudgetLibraryMutator', payload);}
 function investmentPlanMutator(payload:any){store.commit('investmentPlanMutator', payload);}
 function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImportMutator', payload);}
-    let modifiedDate: string;
+    let modifiedDate = ref<string>();
 
     let addedBudgets = ref<Budget[]>([]);
     let updatedBudgetsMap = ref<Map<string, [Budget, Budget]>>(new Map<string, [Budget, Budget]>());//0: original value | 1: updated value
@@ -643,7 +641,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
-                      modifiedDate = data.slice(0, 10);
+                      modifiedDate.value = data.slice(0, 10);
                    }
              });
 

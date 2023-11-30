@@ -3,8 +3,8 @@
     <v-row>
         <v-col cols = "12">
             <v-row justify-space-between>
-                <v-col cols = "5" class="ghd-constant-header" style="margin-right: 10px; margin-left: 10px">
-                        <v-subheader class="ghd-control-label ghd-md-gray"><span>Select an Investment library</span></v-subheader>
+                <v-col cols = "4" class="ghd-constant-header" style="margin-right: 10px; margin-left: 10px">
+                        <v-subheader class="ghd-control-label ghd-md-gray"><span>Calculated Attribute</span></v-subheader>
                         <v-select
                                   id="CalculatedAttribute-CalculatedAttribute-select"
                                   :items="librarySelectItems"
@@ -18,13 +18,13 @@
                         </v-select>
                         <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
                 </v-col>
+                <v-spacer/>
                 <v-col cols = "6" class="ghd-constant-header" style="margin-right: 10px; margin-top: 15px">
                     <v-row align-end>
                         <v-text-field
                                     id="CalculatedAttribute-search-textField"
-                                    prepend-inner-icon=ghd-search                                   
-                                    lablel="Search"
-                                    placeholder="Search Calcultated Attribute"
+                                    prepend-inner-icon=ghd-search                                                                  
+                                    placeholder="Search Calculated Attribute"
                                     single-line
                                     v-model="gridSearchTerm"
                                     variant="outlined"
@@ -32,8 +32,7 @@
                                     @click:clear="onClearClick()"
                                     style="margin-top:20px !important" density="compact">
                         </v-text-field>
-                        <v-col cols = "5" style="margin-top: 10px">
-                        
+                        <v-col cols = "auto" style="margin-top: 10px">                       
                             <v-btn id="CalculatedAttribute-search-btn"  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
                                 variant = "outlined" @click="onSearchClick()">
                                 Search
@@ -43,7 +42,7 @@
                                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                                 variant = "outlined"
                                 v-show="!hasScenario"
-                                style=" margin-left: 5px">
+                                style=" margin-left: 10px">
                                 Create New Library
                             </v-btn>
                         </v-col>
@@ -52,20 +51,20 @@
             </v-row>
         </v-col>
         <v-col cols = "6" class="ghd-constant-header" style="margin-left: 15px; margin-bottom: 15px">
-            <v-row v-if='hasSelectedLibrary && !hasScenario' align-center>
+            <v-row v-if='hasSelectedLibrary && !hasScenario' align="center">
                 <div class="header-text-content owner-padding">
                      Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
                 </div>
-                <v-divider class="owner-shared-divider" inset vertical></v-divider>
+                <!-- <v-divider class="owner-shared-divider" inset vertical></v-divider> -->
                     <v-btn id="CalculatedAttribute-shareLibrary-btn" @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
-                v-show='!hasScenario'>
-                Share Library
-            </v-btn>
-        </v-row>
+                        style="margin-left: 10px" v-show='!hasScenario'>
+                    Share Library
+                    </v-btn>
+            </v-row>
         </v-col>
         <!-- attributes and timing -->
         <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
-            <v-row justify-space-between>
+            <v-row justify-space-between style="margin-top: 20px;">
                 <v-col cols = "6">
                 <v-row column style="float:left; width: 100%; margin-left: 10px">
                     <v-select
@@ -430,7 +429,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     let initializing: boolean = true;
     let uuidNIL: string = getBlankGuid();
     let isShared: boolean = false;
-    let modifiedDate: string;
+    let modifiedDate = ref<string>('');
 
     const shareCalculatedAttributeLibraryDialogData = ref<ShareCalculatedAttributeLibraryDialogData>(clone(emptyShareCalculatedAttributeLibraryDialogData));
 
@@ -597,7 +596,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
-                      modifiedDate = data.slice(0, 10);
+                      modifiedDate.value = data.slice(0, 10);
                    }
                    initializing = false;
              });
@@ -906,6 +905,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                  onCalculatedAttributeGridDataChanged();
             })          
         }         
+        getModifiedDate();
     }
     
     watch(isSharedLibrary,()=> onStateSharedAccessChanged())
@@ -920,21 +920,30 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         //} 
     }
     function setTiming(selectedItem: number) {
-        console.log('foo');
          setTimingsMultiSelect(selectedItem);
     }
 
     function getOwnerUserName(): string {
-
         if (! hasCreatedLibrary) {
         return  getUserNameByIdGetter( selectedCalculatedAttributeLibrary.value.owner);
-        }
-        
+        }     
         return getUserName();
+    }
+    function getModifiedDate(){
+        if(selectedCalculatedAttributeLibrary.value.id !== uuidNIL)
+        {
+            CalculatedAttributeService.getCalculatedLibraryModifiedDate(selectedCalculatedAttributeLibrary.value.id).then(response => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                {
+                    var data = response.data as string;
+                    modifiedDate.value = data.slice(0, 10);
+                }
+            });
+        }   
+        return modifiedDate.value;
     }
 
     function onUpsertScenarioCalculatedAttribute() {
-
         if ( selectedCalculatedAttributeLibrary.value.id ===  uuidNIL ||  hasUnsavedChanges.value &&  newLibrarySelection ===false) { scenarioLibraryIsModified = true;}
         else {  scenarioLibraryIsModified = false; }
 

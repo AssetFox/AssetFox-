@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class AggregatedResultTestSetup
     {
-        public static void AddNumericAggregatedResultsToDb(IUnitOfWork unitOfWork, List<MaintainableAsset> maintainableAssets, List<IamAttribute> resultAttributes)
+        public static void AddNumericAggregatedResultsToDb(IUnitOfWork unitOfWork, List<MaintainableAsset> maintainableAssets, List<IamAttribute> resultAttributes, double value = 1.23)
         {
             var results = new List<IAggregatedResult>();
             foreach (var asset in maintainableAssets)
@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 foreach (var attribute in resultAttributes)
                 {
                     var resultDatum = (
-                        attribute, (2022, 1.23));
+                        attribute, (2022, value));
                     resultData.Add(resultDatum);
                 }
                 var result = new AggregatedResult<double>(

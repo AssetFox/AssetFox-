@@ -331,13 +331,32 @@ internal sealed class AssetContext : CalculateEvaluateScope
         if (treatment != SimulationRunner.Simulation.DesignatedPassiveTreatment)
         {
             FirstUnshadowedYearForAnyTreatment = year + treatment.ShadowForAnyTreatment;
-            FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
+
+            if (treatment is TreatmentBundle bundle)
+            {
+                // [REVIEW] The assumption that any treatment has just one same-treatment shadow
+                // (i.e. that a Treatment object is always atomic) was thoroughly baked into the
+                // data design of the analysis engine rewrite back in 2020. We haven't yet
+                // accumulated budget (especially time) for refactoring with such a large splash
+                // radius, so this is, for now, how we're handling same-treatment shadows for a
+                // treatment that is actually multiple treatments.
+
+                foreach (var bundledTreatment in bundle.BundledTreatments)
+                {
+                    FirstUnshadowedYearForSameTreatment[bundledTreatment.Name] = year + bundledTreatment.ShadowForSameTreatment;
+                }
+            }
+            else
+            {
+                FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
+            }
 
             foreach (var (attribute, factor) in treatment.PerformanceCurveAdjustmentFactors)
             {
                 MostRecentAdjustmentFactorsForPerformanceCurves[attribute] = factor;
             }
         }
+
 
         Detail.AppliedTreatment = treatment.Name;
         Detail.TreatmentStatus = TreatmentStatus.Applied;

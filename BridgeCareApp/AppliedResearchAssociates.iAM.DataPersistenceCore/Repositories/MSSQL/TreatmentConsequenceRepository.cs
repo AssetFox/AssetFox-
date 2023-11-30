@@ -191,6 +191,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         return equation;
                     }).ToList();
 
+                // Delete any existing entries for related treatment consequences               
+                _unitOfWork.Context.DeleteAll<ConditionalTreatmentConsequenceEquationEntity>(_ => existingEntityIds.Contains(_.ConditionalTreatmentConsequenceId));
+
                 _unitOfWork.Context.AddAll(equations, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(equationJoins, _unitOfWork.UserEntity?.Id);
             }
@@ -220,6 +223,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         });
                         return criterion;
                     }).ToList();
+
+                // Delete any existing entries for related treatment consequences               
+                _unitOfWork.Context.DeleteAll<CriterionLibraryConditionalTreatmentConsequenceEntity>(_ => existingEntityIds.Contains(_.ConditionalTreatmentConsequenceId));
 
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
@@ -290,6 +296,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         return equationEntity;
                     }).ToList();
 
+                // Delete any existing entries for related treatment consequences               
+                _unitOfWork.Context.DeleteAll<ScenarioConditionalTreatmentConsequenceEquationEntity>(_ => existingEntityIds.Contains(_.ScenarioConditionalTreatmentConsequenceId));
+
                 _unitOfWork.Context.AddAll(equations, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(equationJoins, _unitOfWork.UserEntity?.Id);
             }
@@ -319,6 +328,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         });
                         return criterion;
                     }).ToList();
+
+                // Delete any existing entries for related treatment consequences               
+                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>(_ => existingEntityIds.Contains(_.ScenarioConditionalTreatmentConsequenceId));
 
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);

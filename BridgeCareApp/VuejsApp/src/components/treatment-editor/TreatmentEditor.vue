@@ -75,7 +75,8 @@
             >
             </v-select>
         </v-col>
-        <v-row>
+    </v-row>
+    <v-row>
         <v-col style="padding-right: 20px">                       
             <v-btn
                 @click='showImportTreatmentDialog = true'
@@ -102,21 +103,20 @@
                 style="margin-left: 5px;"
                 v-show="!hasScenario"
                 variant = "outlined"
-
             >
                 Create New Library
             </v-btn>                                                          
         </v-col>
     </v-row>
-    <v-col cols="6">
-            <v-row v-if='hasSelectedLibrary && !hasScenario' style="margin: 10px; !important">
-                <div class="ghd-control-label">
-                Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> | Date Modified: {{ modifiedDate }}   
-                <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
-                       v-show='!hasScenario'>
-                    Share Library
-                </v-btn>
-
+        <v-col cols="auto">
+            <v-row v-if='hasSelectedLibrary && !hasScenario' style="margin-top: 10px; !important">
+                <div class="header-text-content owner-padding">
+                    Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}   
+                    <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)'
+                        style=" margin-left: 10px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        v-show='!hasScenario'>
+                        Share Library
+                    </v-btn>
                 </div>  
             </v-row>
         </v-col>
@@ -284,7 +284,7 @@
             :thickness="2"
             class="border-opacity-100"
         ></v-divider>
-            <v-row justify="center" v-show="(hasSelectedLibrary || hasScenario) ">
+            <v-row style="padding-bottom: 100px;" justify="center" v-show="(hasSelectedLibrary || hasScenario) ">
                 <v-col cols="6">
                     <v-btn :disabled='!hasUnsavedChanges'
                         @click='onDiscardChanges'
@@ -335,7 +335,7 @@
                 </v-col>
             </v-row>
         </v-col>
-    </v-row>
+    <!-- </v-row> -->
 </v-card>
     <ConfirmDeleteAlert
         :dialogData='confirmBeforeDeleteAlertData'
@@ -630,7 +630,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     const confirmBeforeDeleteTreatmentAlertData = ref<AlertData>(clone(emptyAlertData));
     let isNoTreatmentSelected = ref(false);
     let hasImport: boolean = false;
-    let modifiedDate: string = '';
+    let modifiedDate = ref<string>('');
 
     let deletionIds: ShallowRef<string[]> = ref([]);
     let addedRows: Treatment[] = [];
@@ -759,6 +759,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         scenarioLibraryIsModified = false;
         newLibrarySelection = true;
     }
+
     function onSelectItemValueChanged() {
         trueLibrarySelectItemValue = librarySelectItemValue.value;
         selectTreatmentLibraryAction({
@@ -800,6 +801,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         if (hasSelectedLibrary.value) {
             checkLibraryEditPermission();
             hasCreatedLibrary = false;
+            getDateModified();
             ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedTreatmentLibrary.value.id, workType: WorkType.ImportLibraryTreatment}).then(response => {
                 if(response.data){
                     setAlertMessageAction("A treatment import has been added to the work queue")
@@ -911,6 +913,19 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         }
         
         return getUserName();
+    }
+     function getDateModified() {
+        if(hasSelectedLibrary.value) 
+        { 
+              TreatmentService.getTreatmentLibraryModifiedDate(selectedTreatmentLibrary.value.id).then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      modifiedDate.value = data.slice(0, 10);
+                   }
+             });
+        }
+        return modifiedDate.value;
     }
 
    function checkLibraryEditPermission() {

@@ -1,47 +1,5 @@
 <template>
-    <v-card height="1000px" class="elevation-0 vcard-main-layout" style="margin-top: -20px;">
-    <v-row style="float:right;margin-top: 1px;">
-        <v-col class="ghd-blue ghd-button-text ghd-text-padding" style="border-style: solid;border-width: 2px; border-color: lightgray;margin-right: 5px;">Treatments<br>
-            <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
-                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
-                    style='float:right;'
-                    >
-                    Download Template
-                </v-btn> 
-                <v-btn :disabled='false' @click='OnExportTreamentsClick()'
-                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
-                    style='float:right;'
-                    >
-                    Download
-                </v-btn> 
-                <v-btn :disabled='false' @click='showImportTreatmentsDialog = true'
-                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
-                    style='float:right;'
-                    >
-                    Upload
-            </v-btn>
-        </v-col>        
-        <v-col class="ghd-blue ghd-button-text ghd-text-padding" style="border-style: solid;border-width: 2px; border-color: lightgray;">Supersede<br>
-            <v-btn :disabled='false' @click='OnDownloadSupersedeTemplateClick()'
-                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
-                    style='float:right;'
-                    >
-                    Download Template
-                </v-btn> 
-                <v-btn :disabled='false' @click='OnExportSupersedeClick()'
-                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
-                    style='float:right;'
-                    >
-                    Download
-                </v-btn>
-                <v-btn :disabled='false' @click='showImportSupersedeDialog = true'
-                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
-                    style='float:right;'
-                    >
-                    Upload
-            </v-btn>
-        </v-col>
-    </v-row><br>
+    <v-card height="1000px" class="elevation-0 vcard-main-layout" style="margin-top: -20px;">    
     <v-row style="margin-top: 5px;">
         <v-col>
             <v-select
@@ -75,9 +33,49 @@
             >
             </v-select>
         </v-col>
-    </v-row>
+        <v-col class="ghd-blue ghd-button-text ghd-text-padding" style="border-style: solid;border-width: 2px; border-color: lightgray;margin-right: 5px;margin-bottom: 50px;">Treatments<br>
+            <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
+                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Download Template
+                </v-btn> 
+                <v-btn :disabled='false' @click='OnExportTreamentsClick()'
+                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Download
+                </v-btn> 
+                <v-btn :disabled='false' @click='showImportTreatmentsDialog = true'
+                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Upload
+            </v-btn>
+        </v-col>        
+        <v-col class="ghd-blue ghd-button-text ghd-text-padding" style="border-style: solid;border-width: 2px; border-color: lightgray;margin-bottom: 50px;">Supersede<br>
+            <v-btn :disabled='false' @click='OnDownloadSupersedeTemplateClick()'
+                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Download Template
+                </v-btn> 
+                <v-btn :disabled='false' @click='OnExportSupersedeClick()'
+                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Download
+                </v-btn>
+                <v-btn :disabled='false' @click='showImportSupersedeDialog = true'
+                variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Upload
+            </v-btn>
+        </v-col>
+    </v-row><br>    
     <v-row>
-        <v-col style="padding-right: 20px">                       
+        <v-col style="padding-right: 5px;margin-top: -50px;">                       
             <v-btn
                 @click='showImportTreatmentDialog = true'
                 variant = "outlined"
@@ -120,7 +118,6 @@
                 </div>  
             </v-row>
         </v-col>
-
         <v-divider style="margin-top:10px" v-show='hasSelectedLibrary || hasScenario'></v-divider>        
         <v-row>
             <div v-show='hasSelectedLibrary || hasScenario' style="width:100%;margin-top:0px;margin-bottom:-15px; margin-left: 20px;">                
@@ -334,8 +331,8 @@
                     </v-btn>
                 </v-col>
             </v-row>
-        </v-col>
-    <!-- </v-row> -->
+    </v-col>
+    
 </v-card>
     <ConfirmDeleteAlert
         :dialogData='confirmBeforeDeleteAlertData'

@@ -1254,7 +1254,7 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 
     async function fetchTreatmentLibrary(simulationId: string) {
         try {
-            const response = await TreatmentService.getTreatmentLibraryBySimulationId(simulationId).then(() => {
+            await TreatmentService.getTreatmentLibraryBySimulationId(simulationId).then(response => {
                 if (hasValue(response, 'data')) {
                     const treatmentLibrary = response.data as TreatmentLibrary;
                     store.commit('scenarioTreatmentLibraryMutator', treatmentLibrary);

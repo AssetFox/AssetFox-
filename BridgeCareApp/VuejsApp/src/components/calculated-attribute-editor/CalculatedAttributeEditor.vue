@@ -380,6 +380,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import mitt from 'mitt';
 import { computed } from 'vue';
 import { getUrl } from '@/shared/utils/get-url';
+import { TimelineEmits } from 'primevue/timeline';
 
 let store = useStore();
 const confirm = useConfirm();
@@ -793,7 +794,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
             isTimingSelectedItemValue = false;
         } else {
             isTimingSelectedItemValue = true;
-            var localTiming = +attributeTimingSelectItemValue.value as Timing;
+            var localTiming = +attributeTimingSelectItemValue.value;
             var item = calculatedAttributeGridData.value.find(
                 _ => _.attribute == attributeSelectItemValue.value,
             );
@@ -1350,8 +1351,8 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         }
         var localTiming =  attributeTimingSelectItems.value.find(
             _ => _.value == selectedItem,
-        )!.text;
-         attributeTimingSelectItemValue.value = localTiming;
+        )!.value;
+         attributeTimingSelectItemValue.value = localTiming as string;
          isTimingSelectedItemValue = true;
     }
     function setDefaultAttributeOnLoad(localCalculatedAttribute: CalculatedAttribute) {
@@ -1384,6 +1385,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     }
 
     function onUpdateCalcAttr(rowId: string, updatedRow: CalculatedAttribute){
+        
         var addedrow =  addedCalcAttr.find(_ => _.id === rowId);
         if(!isNil(addedrow)){
             addedrow = updatedRow;
@@ -1479,7 +1481,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
          onPaginationChanged();
     }
 
-    function checkHasUnsavedChanges(){
+    function checkHasUnsavedChanges(){       
         const hasUnsavedChanges: boolean = 
              deletionPairsIds.size > 0 || 
              addedCalcPairs.size > 0 ||

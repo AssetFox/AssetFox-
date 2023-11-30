@@ -1,9 +1,12 @@
 <template>
     <v-card class="elevation-0 vcard-main-layout">
-        <v-col cols = "12">
-            <v-row justify-space-between>
-                <v-col cols = "4" class="ghd-constant-header">
-                    <v-subheader class="ghd-md-gray ghd-control-label">Select a Cash Flow Library</v-subheader>
+    <v-row>
+        <v-col cols="12">
+            <v-row align="center" justify="space-between">
+                <v-col cols = "auto" >
+                    <div style="margin-bottom: 10px;">
+                        <v-subheader class="ghd-md-gray ghd-control-label">Select a Cash Flow Library</v-subheader>
+                    </div>
                     <v-select
                         :items="librarySelectItems"
                         id="CashFlowEditor-SelectLibrary-vselect"
@@ -15,26 +18,26 @@
                     </v-select>
                     <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>{{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
                 </v-col>
-                <v-col cols = "4" class="ghd-constant-header">    
-                    <v-row row v-show='hasSelectedLibrary || hasScenario' style="padding-top: 38px !important">
-                        <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content" style="padding-top: 7px !important">
+                <v-col cols = "auto" >    
+                    <v-row v-show='hasSelectedLibrary || hasScenario'>
+                        <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content" style="padding-top: 7px">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
-                        <v-divider class="owner-shared-divider" inset vertical
+                        <!-- <v-divider class="owner-shared-divider" inset vertical
                             v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
-                        </v-divider>
-                        <v-btn id="CashFlowEditor-shareLibrary-btn" @click='onShowShareCashFlowRuleLibraryDialog(selectedCashFlowRuleLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        </v-divider> -->
+                        <v-btn id="CashFlowEditor-shareLibrary-btn" @click='onShowShareCashFlowRuleLibraryDialog(selectedCashFlowRuleLibrary)'
+                             class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-left: 10px" variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
-                    </v-btn>
+                        </v-btn>
                     </v-row>  
                 </v-col>
-                <v-col cols = "4" class="ghd-constant-header">                   
-                    <v-row row align-end style="padding-top: 38px !important">
-                        <v-spacer></v-spacer>
+                <v-col cols = "auto" class="ghd-constant-header">                   
+                    <!-- <v-row> -->
+                        <!-- <v-spacer></v-spacer> -->
                         <v-btn @click="showAddCashFlowRuleDialog = true" v-show="hasSelectedLibrary || hasScenario"
                             id="CashFlowEditor-addCashFlowRule-btn" 
-                            style="margin-right: 5px;"
                             variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                             Add Cash Flow Rule
                         </v-btn>
@@ -45,12 +48,20 @@
                             v-show="!hasScenario">
                             Create New Library
                         </v-btn>
-                    </v-row>
+                    <!-- </v-row> -->
                 </v-col>
+                <!-- <v-col>
+                        <v-btn @click="showAddCashFlowRuleDialog = true" v-show="hasSelectedLibrary || hasScenario"
+                            id="CashFlowEditor-addCashFlowRule-btn" 
+                            style="margin-left: 5px;"
+                            variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                            Add Cash Flow Rule
+                        </v-btn>
+                </v-col> -->
             </v-row>
         </v-col>
-        <v-col v-show="hasSelectedLibrary || hasScenario" xs12>
-            <div>
+        <v-col v-show="hasSelectedLibrary || hasScenario" cols="12">
+            <!-- <div> -->
                 <v-data-table-server
                     id="CashFlowEditor-cashFlowRules-table"
                     :headers="cashFlowRuleGridHeaders"
@@ -174,9 +185,9 @@
                     class='ghd-blue ghd-button' variant = "text">
                     Delete Selected
                 </v-btn>
-            </div>
+            <!-- </div> -->
         </v-col>
-        <v-col v-show="hasSelectedLibrary && !hasScenario" xs12>
+        <v-col v-show="hasSelectedLibrary && !hasScenario" cols="12">
             <v-row justify-center>
                 <v-col>
                     <v-subheader class="ghd-subheader ">Description</v-subheader>
@@ -259,6 +270,7 @@
             :showDialog="showAddCashFlowRuleDialog"
             @submit="onSubmitAddCashFlowRule"/>
         <ConfirmDialog></ConfirmDialog>
+    </v-row>
     </v-card>
 </template>
 
@@ -374,7 +386,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
     let selectedScenarioId: any = getBlankGuid();
     let librarySelectItems  = ref<SelectItem[]>([]);
     let selectedCashFlowRuleLibrary = ref<CashFlowRuleLibrary>(clone(emptyCashFlowRuleLibrary));
-    let dateModified: string;
+    let dateModified = ref<string>();
 
     const $router = useRouter();
 
@@ -530,6 +542,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
         ? clone(selectedCashFlowRule.value.cashFlowDistributionRules)
         : [];
     });
+
     async function onPaginationChanged() {
         if(initializing)
             return;
@@ -551,7 +564,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
             search: currentSearch
         };
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL)
-            await CashFlowService.getScenarioCashFlowRulePage(selectedScenarioId, request).then(response => {
+             CashFlowService.getScenarioCashFlowRulePage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<CashFlowRule>;
                     currentPage.value = data.items;
@@ -560,7 +573,14 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
                 }
             });
         else if(hasSelectedLibrary.value)
-             CashFlowService.getLibraryCashFlowRulePage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
+            await CashFlowService.getCashLibraryDate(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '').then(response => {
+                  if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                   {
+                      var data = response.data as string;
+                      dateModified.value = data.slice(0, 10);
+                   }
+             }),
+             await CashFlowService.getLibraryCashFlowRulePage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<CashFlowRule>;
                     currentPage.value = data.items;
@@ -569,7 +589,6 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
                     if (!isNil(selectedCashFlowRuleLibrary.value.id) ) {
                         getIsSharedLibraryAction(selectedCashFlowRuleLibrary.value).then(() =>isShared = isSharedLibrary.value);
                     }
-
             }
         });     
     }

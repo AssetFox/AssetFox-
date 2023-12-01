@@ -61,7 +61,7 @@
                                 item-value="value"
                                 variant="outlined"
                                 density="compact"
-                                v-model="analysisMethod.benefit.attribute"
+                                v-model="benefit.attribute"
                                 @update:model-value="onSetBenefitProperty('attribute', $event)"
                                 :disabled="!hasAdminAccess"
                             >
@@ -78,7 +78,7 @@
                                 density="compact"
                                 type="number"
                                 min="0"
-                                :value.number="analysisMethod.benefit.limit"
+                                :value.number="benefit.limit"
                                 :rules="[
                                     rules['generalRules'].valueIsNotEmpty,
                                     rules['generalRules'].valueIsNotNegative(
@@ -160,12 +160,14 @@
                     <v-btn
                         id="EditAnalysisMethod-cancel-btn"
                         @click="onDiscardChanges"
+                        :disabled="!hasUnsavedChanges"
                         class="ghd-white-bg ghd-blue ghd-button-text ghd-button"
                         variant = "flat"
                         >Cancel</v-btn
                     >
                     <v-btn
                         id="EditAnalysisMethod-save-btn"
+                        :disabled="(criteriaIsInvalid() || !valid) || !hasUnsavedChanges"
                         @click="onUpsertAnalysisMethod"
                         variant = "flat"
                         class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
@@ -177,6 +179,7 @@
                 :dialogData="criterionEditorDialogData"
                 @submit="onCriterionEditorDialogSubmit"
             />
+            <ConfirmDialog></ConfirmDialog>
 </template>
 
 <script lang="ts" setup>
@@ -188,6 +191,7 @@ import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import {
     AnalysisMethod,
+    Benefit,
     emptyAnalysisMethod,
     OptimizationStrategy,
     SpendingStrategy,
@@ -203,6 +207,7 @@ import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData
 import { useStore } from 'vuex'; 
 import { useRouter } from 'vue-router'; 
 import { getUrl } from '@/shared/utils/get-url';
+import ConfirmDialog from 'primevue/confirmdialog';
 
     let store = useStore(); 
     const router = useRouter(); 
@@ -225,6 +230,7 @@ import { getUrl } from '@/shared/utils/get-url';
 
     const selectedScenarioId = ref<string>(getBlankGuid());
     const analysisMethod = ref<AnalysisMethod>(clone(emptyAnalysisMethod));
+    let benefit = computed<Benefit>(() => analysisMethod.value.benefit)
     const optimizationStrategy: SelectItem[] = [
         { text: 'Benefit', value: OptimizationStrategy.Benefit },
         {
@@ -265,6 +271,7 @@ import { getUrl } from '@/shared/utils/get-url';
     const rules = ref<InputValidationRules>(validationRules);
     const valid = ref<boolean>(true);
     const criteriaIsIntentionallyEmpty = ref<boolean>(false);
+    let hasUnsavedChanges = ref<boolean>(false)
 
     //beforeRouteEnter(to: any, from: any, next: any) {
        //next((vm: any) => {
@@ -313,11 +320,13 @@ import { getUrl } from '@/shared/utils/get-url';
         };
     });
 
-    watch(analysisMethod, () => onAnalysisChanged)
+    // watch(benefit, onAnalysisChanged)
+    watch(analysisMethod, onAnalysisChanged)
     function onAnalysisChanged() {
+        hasUnsavedChanges.value = !equals(analysisMethod.value, stateAnalysisMethod.value)
         setHasUnsavedChangesAction({
             value:
-                !equals(analysisMethod.value, stateAnalysisMethod.value),
+                hasUnsavedChanges.value
         });
 
         setBenefitAttributeIfEmpty();        
@@ -431,5 +440,7 @@ import { getUrl } from '@/shared/utils/get-url';
     function onDiscardChanges() {
         analysisMethod.value = clone(stateAnalysisMethod.value);
     }
+
+
 
 </script>

@@ -611,7 +611,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     const createTreatmentLibraryDialogData = ref<CreateTreatmentLibraryDialogData>(clone(emptyCreateTreatmentLibraryDialogData));
     let showCreateTreatmentDialog = ref(false);
     const showImportTreatmentDialog = ref<boolean>(false);
-    let confirmBeforeDeleteAlertData: AlertData = clone(emptyAlertData);
+    let confirmBeforeDeleteAlertData = ref(clone(emptyAlertData));
     let hasSelectedTreatment = ref(false);
     let rules: InputValidationRules = clone(validationRules);
     let uuidNIL: string = getBlankGuid();
@@ -1308,7 +1308,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     }
 
     function onShowConfirmDeleteAlert() {
-        confirmBeforeDeleteAlertData = {
+        confirmBeforeDeleteAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1317,7 +1317,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     }
 
     function onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        confirmBeforeDeleteAlertData = clone(emptyAlertData);
+        confirmBeforeDeleteAlertData.value = clone(emptyAlertData);
 
         if (submit) {
             librarySelectItemValue.value = "";

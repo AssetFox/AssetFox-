@@ -812,7 +812,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
   }
 
   function disableEquationCheck() {
-        return isPiecewise ? !hasValue(onParseTimeAttributeDataPoints()) : !hasValue(expression.value);
+        return isPiecewise.value ? !hasValue(onParseTimeAttributeDataPoints()) : !hasValue(expression.value);
     }
 
   /**

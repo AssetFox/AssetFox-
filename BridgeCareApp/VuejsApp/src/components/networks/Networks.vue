@@ -78,28 +78,27 @@
                     <v-row column>
                         <v-row style="height=12px;padding-bottom:0px;">
                                 <v-col cols = "12" class="ghd-constant-header" style="height=12px;padding-bottom:0px">
-                                    <v-subheader class="ghd-control-label ghd-md-gray" style="padding-top: 14px !important">                             
+                                    <v-subheader class="ghd-control-label ghd-md-gray" style="padding-top: 14px !important;">                             
                                         Spatial Weighting Equation</v-subheader>
                                 </v-col>
-                                <v-col xs1 style="height=12px;">
-                                    <!-- <v-btn
-                                        id="Networks-EditSpatialWeightingEquation-vbtn"
-                                        style="padding-right:20px !important;"
-                                        class="edit-icon ghd-control-label"
+                                <v-row style="width: 70% !important; margin-bottom: 5px; margin-left: 1px;; padding-top: 10px" >
+                                    <v-text-field style="margin-left: 10px; margin-right: 10px" 
+                                    :disabled="!isNewNetwork" density="compact" 
+                                    id="Networks-EditSpatialWeightingEquation-vtextfield"
+                                    variant="outlined" 
+                                    class="ghd-text-field-border ghd-text-field" 
+                                    v-model="spatialWeightingEquationValue.expression"/>
+
+                                    <btn id="Networks-EditSpatialWeightingEquation-vbtn"
+                                        style="margin-top: 10px; margin-right: 32px; cursor: pointer;"
+                                        class="edit-icon ghd-control-label" 
                                         :disabled="!isNewNetwork"
                                         append-icon="ghd-blue"
                                         @click="onShowEquationEditorDialog">
-                                        <v-icon class="ghd-blue">fas fa-edit</v-icon> 
-                                    </v-btn> -->
-                                    <v-row style="width: 70% !important; margin-bottom: 5px; margin-left: 1px;" >
-                                <v-text-field density="compact" id="Networks-EditSpatialWeightingEquation-vtextfield" variant="outlined" class="ghd-text-field-border ghd-text-field" 
-                                     v-model="spatialWeightingEquationValue.expression"/>
+                                        <v-icon v-if="isNewNetwork" class="ghd-blue" variant = "outlined">fas fa-edit</v-icon>
+                                    </btn>
                                 </v-row>
-                                </v-col>
-                          
                             </v-row>
-                            
-                                                 
                     </v-row>
                     <v-row v-show="hasStartedAggregation">
                         <v-col>
@@ -124,7 +123,7 @@
                     <v-row column>
                         <div class='priorities-data-table' v-show="!isNewNetwork">
                             <v-row justify-center>
-                                <v-btn id="Networks-AddAll-vbtn" variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                                <v-btn style="margin-left: 130px" id="Networks-AddAll-vbtn" variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                                     @click="onAddAll">
                                     Add All
                                 </v-btn>
@@ -136,24 +135,25 @@
                                 </v-btn>
                             </v-row>
                             <v-data-table id="Networks-Attributes-vdatatable" :headers='dataSourceGridHeaders' :items='attributeRows'
-                                class='v-table__overflow ghd-table' item-key='id' select-all
+                                class='v-table__overflow ghd-table' item-key='id'
                                 v-model="selectedAttributeRows"
                                 :must-sort='true'
                                 hide-actions
                                 :pagination.sync="pagination">
                                 <template slot='items' slot-scope='props' v-slot:item="{item}">
                                     <tr>
-                                    <td>
-                                        <v-checkbox id="Networks-SelectAttribute-vcheckbox" hide-details primary></v-checkbox>
-                                    </td>
-                                    <td>
-                                        {{
-                                            item.name 
-                                        }}
-                                    </td> 
-
-                                    <td>{{ item.dataSource.type}}</td> 
-                                </tr>
+                                        <td>
+                                            <v-checkbox v-model="selectedAttributeRows"
+                                            :value="item" 
+                                            id="Networks-SelectAttribute-vcheckbox" hide-details primary></v-checkbox>
+                                        </td>
+                                        <td>
+                                            {{
+                                                item.name 
+                                            }}
+                                        </td> 
+                                        <td>{{ item.dataSource.type}}</td> 
+                                    </tr>
                                 </template>
                             </v-data-table>    
                         </div>               
@@ -169,16 +169,15 @@
                     Cancel
                 </v-btn>  
                 <p>&nbsp;&nbsp;&nbsp;</p>
-                <v-btn id="Networks-Aggregate-vbtn" @click='aggregateNetworkData' :disabled='isNewNetwork'  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
+                <v-btn v-show="!isNewNetwork" id="Networks-Aggregate-vbtn" @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate()'  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Aggregate
                 </v-btn>
                 <p>&nbsp;&nbsp;&nbsp;</p>
-                <v-btn id="Networks-Delete-vbtn" @click='onDeleteClick' :disabled='isNewNetwork'  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
+                <v-btn v-show="!isNewNetwork" id="Networks-Delete-vbtn" @click='onDeleteClick' :disabled='isNewNetwork'  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Delete
                 </v-btn>
                 <p>&nbsp;&nbsp;&nbsp;</p>
-                <v-btn id="Networks-Create-vbtn" @click='createNetwork'  :disabled='!isNewNetwork'
-                   
+                <v-btn v-show="isNewNetwork" id="Networks-Create-vbtn" @click='createNetwork'  :disabled='disableCrudButtonsCreate()'
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Create
                 </v-btn>            
@@ -221,7 +220,7 @@ import mitt from 'mitt';
 
     let store = useStore();
     let stateNetworks = computed<Network[]>(()=>store.state.networkModule.networks);
-    let stateSelectedNetwork = computed<Network> (() => store.state.networkModule.selectedNetwork) ;
+    let stateSelectedNetwork = computed<Network>(()=>store.state.networkModule.selectedNetwork) ;
     let stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
     let stateDataSources = computed<Datasource[]>(() => store.state.datasourceModule.dataSources) ;
     let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
@@ -302,14 +301,14 @@ import mitt from 'mitt';
     
     watch(stateNetworks, () =>  {
         stateNetworks.value.forEach(_ => {
-        selectNetworkItems.value.push({text:_.name,value:_.name})
+        selectNetworkItems.value.push({text:_.name,value:_.id})
         });
     })
 
     watch(stateAttributes, () => { 
         attributeRows.value = clone(stateAttributes.value);
         stateAttributes.value.forEach(_ => {
-        selectKeyAttributeItems.value.push({text:_.name,value:_.name})
+        selectKeyAttributeItems.value.push({text:_.name,value:_.id})
         })
         });
 
@@ -317,8 +316,6 @@ import mitt from 'mitt';
         stateDataSources.value.forEach(_ => {
             selectDataSourceItems.value.push({text:_.name,value:_.id})
         })
-        console.log(stateDataSources.value);
-        console.log(selectDataSourceItems.value);
     })
 
     watch(selectNetworkItemValue, () =>  {
@@ -337,11 +334,10 @@ import mitt from 'mitt';
         else {
             isKeyPropertySelectedAttribute.value  = false;
         }
-        console.log(selectedAttributeRows.value);
     })
     
     watch(stateSelectedNetwork, () => {
-        if (!isNewNetwork) {
+        if (isNewNetwork) {
             selectedNetwork.value = clone(stateSelectedNetwork.value);
         }
     })
@@ -386,7 +382,7 @@ import mitt from 'mitt';
         equationEditorDialogData.value = clone(emptyEquationEditorDialogData);
 
         if (!isNil(equation)) {
-            spatialWeightingEquationValue.value  = clone(equation)
+            spatialWeightingEquationValue.value.expression  = clone(equation.expression);
         }
     }
     function onShowEquationEditorDialog() {
@@ -396,7 +392,7 @@ import mitt from 'mitt';
         };      
     }
     function selectAllFromSource(){
-        selectedAttributeRows.value = clone(stateAttributes.value.filter((attr: Attribute) => attr.dataSource.id == selectDataSourceId.value));
+        selectedAttributeRows.value = clone(stateAttributes.value);
     }
     function onAddAll(){
         selectedAttributeRows.value = clone(attributeRows.value)
@@ -430,8 +426,7 @@ import mitt from 'mitt';
         return !allValid;
     }
     function disableCrudButtonsAggregate() {
-        let isKeyPropertySelectedAttribute: Boolean = any(propEq('id', selectedNetwork.value.KeyAttribute), selectedAttributeRows.value);
-
+        let isKeyPropertySelectedAttribute: Boolean = any(propEq('id', selectedNetwork.value.keyAttribute), selectedAttributeRows.value);
         let allValid = rules.value['generalRules'].valueIsNotEmpty(selectedNetwork.value.name) === true
             && rules.value['generalRules'].valueIsNotEmpty(selectedAttributeRows.value) === true
             && isKeyPropertySelectedAttribute === true

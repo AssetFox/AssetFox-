@@ -190,6 +190,7 @@
         />
         <AddNetworkDialog :dialogData='addNetworkDialogData'
                                 @submit='addNetwork' />
+        <ConfirmDialog></ConfirmDialog>
     </v-row>
 </template>
 
@@ -217,6 +218,7 @@ import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { useStore } from 'vuex';
 import mitt from 'mitt';
+import ConfirmDialog from 'primevue/confirmdialog';
 
     let store = useStore();
     let stateNetworks = computed<Network[]>(()=>store.state.networkModule.networks);

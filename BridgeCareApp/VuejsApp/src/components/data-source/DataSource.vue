@@ -144,6 +144,7 @@
         </v-row>
         <CreateDataSourceDialog :dialogData='createDataSourceDialogData'
                                 @submit='onCreateNewDataSource' />
+        <ConfirmDialog></ConfirmDialog>
     </v-row>
 </template>
 
@@ -174,6 +175,7 @@ import DataSourceService from '@/services/data-source.service';
 import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
+import ConfirmDialog from 'primevue/confirmdialog';
 
     let store = useStore();
     const emit = defineEmits(['submit'])

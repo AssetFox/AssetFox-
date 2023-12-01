@@ -7,8 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IBudgetPriorityRepository
     {
-        void CreateBudgetPriorities(List<BudgetPriority> budgetPriorities, Guid simulationId);
-
         List<BudgetPriorityLibraryDTO> GetBudgetPriorityLibraries();
 
         DateTime GetLibraryModifiedDate(Guid budgetPriorityLibraryId);

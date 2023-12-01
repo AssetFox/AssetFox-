@@ -1,9 +1,12 @@
 <template>
-    <v-card height="800px" class="elevation-0 vcard-main-layout">
-    <v-row style="margin: 5px;">
-        <v-row align="center" >
-                <v-col cols="6">
-                    <v-subheader class="ghd-md-gray ghd-control-label">Select a Deficient Condition Goal Library</v-subheader>
+    <v-card class="elevation-0 vcard-main-layout">
+    <v-row>
+        <v-col cols="12">
+            <v-row align="center" justify="space-between">
+                <v-col cols="auto">
+                    <div style="margin-bottom: 10px;">
+                        <v-subheader class="ghd-md-gray ghd-control-label">Select a Deficient Condition Goal Library</v-subheader>
+                    </div>
                     <v-select
                         id="DeficientConditionGoalEditor-librarySelect-vselect"
                         :items="librarySelectItems"
@@ -15,62 +18,67 @@
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
                 </v-col>
-                <v-btn v-if="hasScenario" 
-                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
-                    @click="importLibrary()"
-                    :disabled="importLibraryDisabled"
-                    style="margin-right: 5px;"
-                >
-                    Import
-                </v-btn>
-
-                <v-col>
-                <div
-                    v-if="!hasScenario && hasSelectedLibrary"
-                    class="header-text-content owner-padding" 
-                    style="padding-top: 7px;padding-left: 0px;padding-right: 0px;"
-                >
-                    Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
-                </div>
-                    <v-btn 
-                        id="DeficientConditionGoalEditor-shareLibrary-vbtn" 
-                        @click='onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)' 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                        variant = "outlined"
-                        v-show='!hasScenario && hasSelectedLibrary'>
-                      Share Library
+                <v-col cols="auto">
+                    <v-btn v-if="hasScenario" 
+                        class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
+                        @click="importLibrary()"
+                        :disabled="importLibraryDisabled"
+                        style="margin-right: 5px;"
+                    >
+                        Import
                     </v-btn>
                 </v-col>
-        </v-row>
-        <v-row justify="end">
-            <!-- <v-btn v-if="hasScenario" 
-                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
-                    @click="importLibrary()"
-                    :disabled="importLibraryDisabled"
-                    style="margin-right: 5px;"
-                >
-                    Import
-                </v-btn> -->
-            <v-btn
-                id="DeficientConditionGoalEditor-addDeficientConditionGoal-vbtn"
-                @click="showCreateDeficientConditionGoalDialog = true"
-                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                v-show="hasSelectedLibrary || hasScenario"
-                variant = "outlined"
-                style="margin-right: 5px;">
-                Add Deficient Condition Goal
-            </v-btn>
-            <v-btn id="DeficientConditionGoalEditor-createNewLibrary-vbtn" @click="onShowCreateDeficientConditionGoalLibraryDialog(false)"
-                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                v-show="!hasScenario"
-                variant = "outlined">    
-                Create New Library        
-            </v-btn>
-        </v-row>
+                <v-col cols="auto">
+                    <v-row v-show="hasSelectedLibrary && ! hasScenario">
+                        <div v-if="!hasScenario && hasSelectedLibrary" class="header-text-content owner-padding" align="center"                        >
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
+                        </div>
+                        <v-btn 
+                            id="DeficientConditionGoalEditor-shareLibrary-vbtn" 
+                            @click='onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)' 
+                            class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-left: 10px"
+                            variant = "outlined"
+                            v-show='!hasScenario && hasSelectedLibrary'>
+                        Share Library
+                        </v-btn>
+                    </v-row>
+                </v-col>
+                <v-col cols = "auto">
+                    <v-btn id="DeficientConditionGoalEditor-createNewLibrary-vbtn" @click="onShowCreateDeficientConditionGoalLibraryDialog(false)"
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin: 5px;"
+                        v-show="!hasScenario"
+                        variant = "outlined">    
+                        Create New Library        
+                    </v-btn>
+                </v-col>
+        
+                <v-col cols="auto" >
+                    <!-- <v-btn v-if="hasScenario" 
+                            class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
+                            @click="importLibrary()"
+                            :disabled="importLibraryDisabled"
+                            style="margin-right: 5px;"
+                        >
+                            Import
+                        </v-btn> -->
+                    <v-btn
+                        id="DeficientConditionGoalEditor-addDeficientConditionGoal-vbtn"
+                        @click="showCreateDeficientConditionGoalDialog = true"
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        v-show="hasSelectedLibrary || hasScenario"
+                        variant = "outlined"
+                        style="margin-right: 5px;">
+                        Add Deficient Condition Goal
+                    </v-btn>          
+                </v-col>
+            </v-row>
+        </v-col>
     </v-row>
-    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
+    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>
+        <b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b>
+    </div>  
         <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
-            <div class="deficients-data-table">
+            <div>
                 <v-data-table-server
                     id="DeficientConditionGoalEditor-deficientConditionGoals-vdatatable"
                     :headers="deficientConditionGoalGridHeaders"
@@ -78,7 +86,7 @@
                     :pagination.sync="pagination"
                     :must-sort='true'
                     sort-icon=ghd-table-sort
-                    class=" ghd-table v-table__overflow"
+                    class="ghd-table v-table__overflow"
                     item-key="id"
                     show-select
                     v-model="selectedGridRows"                
@@ -202,7 +210,8 @@
                                     </v-btn>
                                 </v-row>
                                 <div v-if="header.key === 'action'" style="margin-bottom: 10px;">
-                                    <v-btn id="DeficientConditionGoalEditor-deleteDeficientConditionGoal-vbtn" @click="onRemoveSelectedDeficientConditionGoal(item.item.id)"  class="ghd-blue" flat>
+                                    <v-btn id="DeficientConditionGoalEditor-deleteDeficientConditionGoal-vbtn" @click="onRemoveSelectedDeficientConditionGoal(item.item.id)"
+                                          class="ghd-blue" style="margin-top: 10px;" flat>
                                         <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </div>                               
@@ -215,7 +224,7 @@
                     id="DeficientConditionGoalEditor-deleteSelected-vbtn"
                     :disabled="selectedDeficientConditionGoalIds.length === 0"
                     @click="onRemoveSelectedDeficientConditionGoals"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='ghd-blue ghd-button'
                     variant="text">
 
                     Delete Selected
@@ -239,7 +248,7 @@
             </v-row>
         </v-col>
         <v-col v-show="hasSelectedLibrary || hasScenario">
-            <v-row justify="center">
+            <v-row justify="center" style="padding-bottom: 40px;">
                 <v-btn
                     @click="onDiscardChanges"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
@@ -318,7 +327,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, Ref, ShallowRef, shallowRef, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, Ref, shallowReactive, ShallowRef, shallowRef, watch } from 'vue';
 import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import {
     DeficientConditionGoal,
@@ -409,7 +418,7 @@ import { getUrl } from '@/shared/utils/get-url';
     let librarySelectItems  = ref<SelectItem[]>([]);
     const selectedDeficientConditionGoalLibrary = ref<DeficientConditionGoalLibrary>(clone(emptyDeficientConditionGoalLibrary));
     let hasSelectedLibrary = ref(false);
-    let dateModified: string;
+    let dateModified = ref<string>();
     let deficientConditionGoalGridHeaders: any[] = [
         {
             title: 'Name',
@@ -484,7 +493,8 @@ import { getUrl } from '@/shared/utils/get-url';
     let rowCache: DeficientConditionGoal[] = [];
     let gridSearchTerm = '';
     let currentSearch = '';
-    let pagination: ShallowRef<Pagination> = shallowRef(clone(emptyPagination));
+    //let pagination: ShallowRef<Pagination> = shallowRef(clone(emptyPagination));
+    const pagination: Pagination = shallowReactive(clone(emptyPagination));
     let isPageInit = false;
     let totalItems = 0;
     let currentPage: ShallowRef<DeficientConditionGoal[]> = shallowRef([]);
@@ -570,7 +580,7 @@ import { getUrl } from '@/shared/utils/get-url';
 
     function onSelectItemValueChanged() {
         trueLibrarySelectItemValue = librarySelectItemValue.value
-        if(!hasScenario.value || isNil(librarySelectItemValue))
+        if(!hasScenario.value || isNil(librarySelectItemValue.value))
             selectDeficientConditionGoalLibraryAction({
                 libraryId: librarySelectItemValue.value,
             });
@@ -644,7 +654,7 @@ import { getUrl } from '@/shared/utils/get-url';
         if(initializing)
             return;
         checkHasUnsavedChanges();
-        const { sort, descending, page, rowsPerPage } = pagination.value;
+        const { sort, descending, page, rowsPerPage } = pagination;
         const request: PagingRequest<DeficientConditionGoal>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -673,7 +683,7 @@ import { getUrl } from '@/shared/utils/get-url';
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
-                      dateModified = data.slice(0, 10);
+                      dateModified.value = data.slice(0, 10);
                    }
              }),    
              await DeficientConditionGoalService.getLibraryDeficientConditionGoalPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
@@ -968,11 +978,12 @@ import { getUrl } from '@/shared/utils/get-url';
     }
 
     function resetPage(){
-        pagination.value.page = 1;
+        pagination.page = 1;
         onPaginationChanged();
     }
 
     function checkHasUnsavedChanges(){
+
         const hasUnsavedChanges: boolean = 
             deletionIds.length > 0 || 
             addedRows.value.length > 0 ||

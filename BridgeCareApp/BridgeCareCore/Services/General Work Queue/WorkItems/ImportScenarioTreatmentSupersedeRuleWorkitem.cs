@@ -24,7 +24,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
         public string WorkDescription => "Import Scenario Treatments Supersede Rules";
 
         public WorkQueueMetadata Metadata =>
-            new WorkQueueMetadata() { WorkType = WorkType.ImportScenarioTreatmentSupersedeRule, DomainType = DomainType.Simulation, DomainId = SimulationId };
+            new WorkQueueMetadata() { WorkType = WorkType.ImportScenarioTreatmentSupersedeRule, DomainType = DomainType.Treatment, DomainId = SimulationId };
 
         public string WorkName => simulationName;
 

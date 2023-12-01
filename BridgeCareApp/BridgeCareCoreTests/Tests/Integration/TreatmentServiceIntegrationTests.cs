@@ -121,6 +121,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         [Fact]
         public void DownloadScenarioTreatmentSupersedeRulesSpreadsheet_ThenUpload_Same()
         {
+            // Create simulation
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
@@ -142,14 +143,14 @@ namespace BridgeCareCoreTests.Tests.Integration
             var preventTreatmentBudgets = new List<TreatmentBudgetDTO> { preventTreatmentBudget };
             var preventTreatmentBudgetIds = new List<Guid> { preventTreatmentBudget.Id };
             var preventTreatmentId = Guid.NewGuid();
-            var preventTreatment = TreatmentTestSetup.ModelForSingleTreatmentOfSimulation(preventTreatmentId, name: "Deck Replacement", criterionExpression: "treatment criterion", budgets: preventTreatmentBudgets, budgetIds: preventTreatmentBudgetIds);
+            var preventTreatment = TreatmentTestSetup.ModelForSingleTreatmentOfSimulation(preventTreatmentId, name: "Deck Replacement", criterionExpression: "prevent treatment criterion", budgets: preventTreatmentBudgets, budgetIds: preventTreatmentBudgetIds);
 
             var dtos = new List<TreatmentDTO> { treatment, preventTreatment };
             TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
 
             // Add supersede rule
             var supersedeRule = TreatmentDtos.SupersedeRule(preventTreatment, "Age > 20");
-            var scenarioTreatmentSupersedeRulesPerTreatmentId = TreatmentTestSetup.ModelScenarioTreatmentSupersedeRules(treatmentId, new List<TreatmentSupersedeRuleDTO> { supersedeRule });
+            var scenarioTreatmentSupersedeRulesPerTreatmentId = TreatmentTestSetup.ModelTreatmentSupersedeRules(treatmentId, new List<TreatmentSupersedeRuleDTO> { supersedeRule });
             TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(scenarioTreatmentSupersedeRulesPerTreatmentId, simulationId);
                         
             // Get treatment supersede rules
@@ -179,6 +180,121 @@ namespace BridgeCareCoreTests.Tests.Integration
             var treatmentSupersedeRule = supersedeRules.Single();
             var treatmentSupersedeRuleSame = supersedeRulesSame.Single();
             ObjectAssertions.EquivalentExcluding(treatmentSupersedeRule, treatmentSupersedeRuleSame,
+                _ => _.Id, _ => _.CriterionLibrary.Id, _ => _.CriterionLibrary.Name);
+        }
+
+        [Fact]
+        public void DownloadLibraryTreatmentSupersedeRuleSpreadsheet_ThenUpload_Same()
+        {
+            // Create treatment library
+            var libraryId = Guid.NewGuid();
+            var libraryName = RandomStrings.WithPrefix("Library");            
+            var treatmentLibrary = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryId);
+
+            // Add treatments            
+            var treatmentId = Guid.NewGuid();
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibrary(treatmentId, name: "Bridge Replacement", criterionExpression: "treatment criterion");
+
+            var preventTreatmentId = Guid.NewGuid();
+            var preventTreatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibrary(preventTreatmentId, name: "Deck Replacement", criterionExpression: "prevent treatment criterion");
+
+            var dtos = new List<TreatmentDTO> { treatment, preventTreatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dtos, libraryId);
+
+            // Add supersede rule
+            var supersedeRule = TreatmentDtos.SupersedeRule(preventTreatment, "Age > 20");
+            var libraryTeatmentSupersedeRulesPerTreatmentId = TreatmentTestSetup.ModelTreatmentSupersedeRules(treatmentId, new List<TreatmentSupersedeRuleDTO> { supersedeRule });
+            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteTreatmentSupersedeRules(libraryTeatmentSupersedeRulesPerTreatmentId, libraryId);
+
+            // Get treatment supersede rules
+            var supersedeRules = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRules(treatmentId, libraryId);
+
+            var service = CreateTreatmentService(TestHelper.UnitOfWork);
+            // Export
+            var fileInfo = service.ExportLibraryTreatmentSupersedeRuleExcelFile(libraryId);
+            var dataAsString = fileInfo.FileData;
+            var bytes = Convert.FromBase64String(dataAsString);
+            var stream = new MemoryStream(bytes);
+            File.WriteAllBytes("LibraryTreatmentSupersedeRules.xlsx", bytes);
+            var excelPackage = new ExcelPackage(stream);
+
+            // This was attempting to delete via supersede object.            
+            var supersedeDictionary = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> { { treatmentId, new List<TreatmentSupersedeRuleDTO>() } };
+            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteTreatmentSupersedeRules(supersedeDictionary, libraryId);
+
+            // Get treatment supersede rules            
+            var treatmentSupersedeRulesEmpty = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRules(treatmentId, libraryId);
+            // Assert
+            Assert.Empty(treatmentSupersedeRulesEmpty);
+
+            // Import and Get
+            service.ImportLibraryTreatmentSupersedeRulesFile(libraryId, excelPackage);
+            var supersedeRulesSame = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRules(treatmentId, libraryId);
+
+            // Assert
+            var treatmentSupersedeRule = supersedeRules.Single();
+            var treatmentSupersedeRuleSame = supersedeRulesSame.Single();
+            ObjectAssertions.EquivalentExcluding(treatmentSupersedeRule, treatmentSupersedeRuleSame,
+                _ => _.Id, _ => _.CriterionLibrary.Id, _ => _.CriterionLibrary.Name);
+        }
+
+        [Fact]
+        public void DownloadLibraryTreatmentSupersedeRulesSpreadsheet_ThenUpload_Same()
+        {
+            // Create treatment library
+            var libraryId = Guid.NewGuid();
+            var libraryName = RandomStrings.WithPrefix("Library");
+            var treatmentLibrary = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryId);
+
+            // Add treatments            
+            var treatmentId = Guid.NewGuid();
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibrary(treatmentId, name: "Bridge Replacement", criterionExpression: "treatment criterion");
+
+            var preventTreatment1Id = Guid.NewGuid();
+            var preventTreatment1 = TreatmentTestSetup.ModelForSingleTreatmentOfLibrary(preventTreatment1Id, name: "Deck Replacement", criterionExpression: "prevent treatment criterion");
+
+            var preventTreatment2Id = Guid.NewGuid();
+            var preventTreatment2 = TreatmentTestSetup.ModelForSingleTreatmentOfLibrary(preventTreatment2Id, name: "Test DeckReplacement2", criterionExpression: "prevent treatment2 criterion");
+
+            var dtos = new List<TreatmentDTO> { treatment, preventTreatment1, preventTreatment2 };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dtos, libraryId);
+
+            // Add supersede rule
+            var supersedeRule1 = TreatmentDtos.SupersedeRule(preventTreatment1, "Age > 20");
+            var supersedeRule2 = TreatmentDtos.SupersedeRule(preventTreatment2, "Age < 5");
+            var libraryTeatmentSupersedeRulesPerTreatmentId = TreatmentTestSetup.ModelTreatmentSupersedeRules(treatmentId, new List<TreatmentSupersedeRuleDTO> { supersedeRule1, supersedeRule2 });
+            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteTreatmentSupersedeRules(libraryTeatmentSupersedeRulesPerTreatmentId, libraryId);
+
+            // Get treatment supersede rules
+            var supersedeRules = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRules(treatmentId, libraryId);
+
+            var service = CreateTreatmentService(TestHelper.UnitOfWork);
+            // Export
+            var fileInfo = service.ExportLibraryTreatmentSupersedeRuleExcelFile(libraryId);
+            var dataAsString = fileInfo.FileData;
+            var bytes = Convert.FromBase64String(dataAsString);
+            var stream = new MemoryStream(bytes);
+            File.WriteAllBytes("LibraryTreatmentSupersedeRules.xlsx", bytes);
+            var excelPackage = new ExcelPackage(stream);
+
+            // This was attempting to delete via supersede object.            
+            var supersedeDictionary = new Dictionary<Guid, List<TreatmentSupersedeRuleDTO>> { { treatmentId, new List<TreatmentSupersedeRuleDTO>() } };
+            TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteTreatmentSupersedeRules(supersedeDictionary, libraryId);
+
+            // Get treatment supersede rules            
+            var treatmentSupersedeRulesEmpty = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRules(treatmentId, libraryId);
+            // Assert
+            Assert.Empty(treatmentSupersedeRulesEmpty);
+
+            // Import and Get
+            service.ImportLibraryTreatmentSupersedeRulesFile(libraryId, excelPackage);
+            var supersedeRulesSame = TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRules(treatmentId, libraryId);
+
+            // Assert
+            var treatmentSupersedeRule2 = supersedeRules.FirstOrDefault(_=>_.Id == preventTreatment2Id);
+            var treatmentSupersedeRule2Same = supersedeRulesSame.FirstOrDefault(_ => _.Id == preventTreatment2Id);
+            Assert.Equal(supersedeRules.Count, supersedeRulesSame.Count);
+            ObjectAssertions.EquivalentExcluding(treatmentSupersedeRule2, treatmentSupersedeRule2Same,
                 _ => _.Id, _ => _.CriterionLibrary.Id, _ => _.CriterionLibrary.Name);
         }
     }

@@ -80,6 +80,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
             case TreatmentCause.SelectedTreatment:
                 return "PAMS Pick";
             case TreatmentCause.CommittedProject:
+                if (projectSource.Equals("committed", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "MPMS";
+                }
                 return projectSource;
             default:
                 return treatmentCause.ToString();

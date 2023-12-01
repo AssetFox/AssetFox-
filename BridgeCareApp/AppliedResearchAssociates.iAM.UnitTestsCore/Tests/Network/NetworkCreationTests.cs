@@ -10,17 +10,18 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DataUnitTests;
+using System.Threading.Tasks;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class NetworkCreationTests
     {
         [Fact]
-        public void CreateNetworkViaFactoryAndRepository_Does()
+        public async Task CreateNetworkViaFactoryAndRepository_Does()
         {
             var networkName = RandomStrings.WithPrefix("Network");
             var config = TestConfiguration.Get();
-            var allNetworksBefore = TestHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
+            var allNetworksBefore = await TestHelper.UnitOfWork.NetworkRepo.Networks();
             var connectionString = TestConnectionStrings.BridgeCare(config);
             var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(TestHelper.UnitOfWork, connectionString);
             var attribute = UnitTestsCoreAttributeTestSetup.ExcelAttributeForEntityInDb(dataSourceDto);
@@ -37,8 +38,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             // insert network domain data into the data source
             TestHelper.UnitOfWork.NetworkRepo.CreateNetwork(network);
 
-            var allNetworks = TestHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
+            var networkIds = new List<Guid> { networkId };
+            var allNetworks = await TestHelper.UnitOfWork.NetworkRepo.Networks();
             var actual = allNetworks.Single(n => n.Id == networkId);
+            Assert.Equal(allNetworksBefore.Count + 1, allNetworks.Count);
+            Assert.Equal(networkName, actual.Name);
         }
     }
 }

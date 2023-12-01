@@ -12,6 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AttributeValueHistoryRepository : IAttributeValueHistoryRepository
     {
+        // As of 11/9/23, Jake does not want this unused repo to be put under test.
         private static readonly List<string> Props = new List<string>
         {
             "Id", "CreatedDate", "LastModifiedDate", "CreatedBy", "LastModifiedBy", "SectionId", "AttributeId", "Year", "Value"

@@ -17,7 +17,7 @@
         <v-col cols="8">
           <v-row column style="padding-right: 100px">
             <v-text-field
-            variant="outlined"
+              variant="outlined"
               id="AdminSiteSettingsEditor-EditImplementationName-textfield"
               v-model="ImplementationID"
               type="text"
@@ -31,6 +31,7 @@
             <v-col >
           <v-row column style="padding-left: 300px; margin-top: -46px; margin-left: 25px;">
             <v-btn
+              id="AdminSiteSettingsEditor-SaveImplementationName-btn"
               class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button"
               style="padding-left: 10px"
               @click="onSaveImplementationName"
@@ -113,14 +114,14 @@
   let implementationName = computed<string>(()=>store.state.adminSiteSettingsModule.implementationName);
   let agencyLogo = computed<string>(()=>store.state.adminSiteSettingsModule.agencyLogo);
   let implementationLogo = computed<string>(()=>store.state.adminSiteSettingsModule.implementationLogo);
-  let ImplementationID:string = '';
+  let ImplementationID = ref('');
   async function getImplementationNameAction(payload?: any): Promise<any> {await store.dispatch('getImplementationName',payload);}
   async function importImplementationNameAction(implementationName:string): Promise<any> {await store.dispatch('importImplementationName',implementationName);}
   async function importAgencyLogoAction(payload?: any): Promise<any> {await store.dispatch('importAgencyLogo',payload);}
   async function importProductLogoAction(payload?: any): Promise<any> {await store.dispatch('importProductLogo',payload);}
 
   function onSaveImplementationName(){
-    importImplementationNameAction(ImplementationID);
+    importImplementationNameAction(ImplementationID.value);
   }
   function onUploadImplementationLogo(){
       document.getElementById("implementationImageUpload")?.click();

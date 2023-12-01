@@ -4,16 +4,13 @@
             <v-toolbar app class="paper-white-bg elevation-2">
                 <v-toolbar-title  >
                     <v-row  >
-                        <v-col  ><img v-bind:src="agencyLogo"  @click="onNavigate('/Scenarios/')"></v-col>                    
+                        <v-col><v-img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')"/></v-col>                    
                     </v-row>
                 </v-toolbar-title>
 
                 <v-toolbar-title >
                     <v-row justify="start">
-                        <v-col >
-                            <img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')"  /></v-col>
-                        
-                        
+                        <v-col><img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')"/></v-col>
                     </v-row>
                 </v-toolbar-title>
                 <v-toolbar-items >
@@ -83,10 +80,8 @@
                         offset-
                         min-width="21%"
                         max-width="21%"
-                        max-height="455%"
                         :close-on-content-click="false"
                     >
-                    
                         <template v-slot:activator="{ props }">
                             <button
                                 style="margin-left: 170%;"  
@@ -117,72 +112,50 @@
                                 </v-badge>
                             </button>
                         </template>            
-                        <v-card class="mx-auto" style="width: 2200%; min-height: 500%; left: -170px; top: 20px;">
-                            <v-toolbar 
-                                id = "App-notification-toolbar"
-                                color="#002E6C" dark>
-
-
+                        <v-card class="mx-auto" style="width: 1950%; min-height: 500%; max-height: min-content; left: -170px; top: 25px;">
+                            <v-toolbar id = "App-notification-toolbar"
+                                       color="#002E6C" 
+                                       dark>
                                 <v-toolbar-title>Notifications</v-toolbar-title>
-
                             </v-toolbar>
-                            <v-list class="h-100">
+                            <v-list>
                                 <v-list-group
-                                    v-for="(notification,index) in notifications"
-                                    :key="notification.id"
-                                    
+                                    v-for="(notification, index) in notifications"
+                                    :key="notification.id"                                    
                                     v-model="notification.active"
                                     append-icon=""
                                     class="notification-message"
                                     style="border-bottom: 1px solid; padding:5%;"
-                                    @click="toggleExpand(notification.active,index)"
-                                >
-                               
-                                    <template v-slot:activator justify-end   >
-                                        
-                                        <v-list-tile 
-                                            id="App-notification-vListTile">
+                                    @click="toggleExpand(notification.active, index)"
+                                >                               
+                                    <template v-slot:activator>                                        
+                                        <v-list-tile id="App-notification-vListTile">
                                             <v-row justify="end">
-                                            <v-col cols ="9">
-                                                <v-icon class="notificationIcon"
-                                        :color="notification.iconColor"
-                                        >{{ notification.icon }}</v-icon
-                                    >
-                                            
-                                            <v-list-item-content
-                                                style="margin-bottom: 10px;"
-                                                v-text="
-                                                    notification.shortMessage
-                                                "
-                                            >
-                                            
-                                        </v-list-item-content>
-                                    </v-col>
-                                    <v-col> 
-                                        <v-btn icon size="16" justify-end position="absolute" style="margin-left:20%;">
-                                                <v-icon
-                                                    size="small"
-                                                    @click="
-                                                        onRemoveNotification(
-                                                            notification.id,
-                                                        )
-                                                    "
-                                                    >fas fa-times-circle</v-icon
-                                                >
-                                            </v-btn>
-                                        </v-col>
-                                    </v-row>
+                                                <v-col cols ="9">
+                                                    <v-icon class="notificationIcon"
+                                                            :color="notification.iconColor">
+                                                        {{ notification.icon }}
+                                                    </v-icon>                                                        
+                                                    <v-list-item-content style="margin-bottom: 10px;">
+                                                        {{ notification.shortMessage }}                                            
+                                                    </v-list-item-content>
+                                                </v-col>
+                                                <v-col> 
+                                                    <v-btn icon size="16" position="absolute" style="margin-left:15%;">
+                                                            <v-icon size="small"
+                                                                    @click="onRemoveNotification(notification.id)"
+                                                                >fas fa-times-circle
+                                                            </v-icon>
+                                                    </v-btn>
+                                                </v-col>
+                                            </v-row>
                                         </v-list-tile>
-                                        <v-list-tile v-if="notification.active">
-                                            <v-list-item-title
-                                                class="notification-long-message"
-                                                v-text="
-                                                    notification.longMessage
-                                                "
-                                            ></v-list-item-title>
-                                    </v-list-tile>
-                                    </template>
-                                    
+                                        <v-list-tile class="notification-long-message" v-if="notification.active">
+                                            <v-list-item-title class="text-wrap">
+                                                {{ notification.longMessage }}
+                                            </v-list-item-title>
+                                        </v-list-tile>
+                                    </template>                                    
                                     <v-spacer></v-spacer>
                                 </v-list-group>
                             </v-list>         

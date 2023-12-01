@@ -1,5 +1,5 @@
 <template>
-    <v-card height="1000px" class="elevation-0 vcard-main-layout">
+    <v-card class="elevation-0 vcard-main-layout">
     <v-row>
         <v-col cols="12">
             <v-row justify="space-between">
@@ -22,21 +22,19 @@
 
                 <!-- these are only in library -->
                 <v-col cols = "auto" v-if='!hasScenario' class="ghd-constant-header">
-                    <v-row v-if='hasSelectedLibrary && !hasScenario' row class="header-alignment-padding-center">
+                    <v-row v-if='hasSelectedLibrary && !hasScenario'  class="header-alignment-padding-center">
                         <div class="header-text-content invest-owner-padding">
-                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
                         </div>
-                        <div class="header-text-content invest-owner-padding">
-                            Date Modified: {{ modifiedDate }}
-                        </div>
-                        <v-btn id="InvestmentEditor-ShareLibrary-vbtn" @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        <v-btn id="InvestmentEditor-ShareLibrary-vbtn" @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)'
+                                style="margin-left: 10px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                                v-show='!hasScenario'>
                             Share Library
                         </v-btn>
                     </v-row>
                 </v-col>
                 <v-col cols = "auto" v-if='!hasScenario' class="ghd-constant-header">
-                    <v-row align-end justify-end class="header-alignment-padding-right">
+                    <v-row align-end justify-end class="header-alignment-padding-center">
                         <!-- <v-spacer></v-spacer> -->
                         <v-btn id="InvestmentEditor-CreateNewLibrary-vbtn" @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
@@ -48,13 +46,13 @@
             </v-row>
 
             <!-- only for scenario -->
-            <v-row style="margin-top:80px;" v-if='hasInvestmentPlanForScenario' align="end">
+            <v-row style="margin-top:40px;" v-if='hasInvestmentPlanForScenario' align="end">
                 <!-- text boxes for scenario only -->
                 <v-col cols = "2" class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-label"><span>First Year of Analysis Period</span></v-subheader>
                     <v-text-field id="InvestmentEditor-firstYearAnalysisPeriod-textField"
                                   variant="outlined"
-                                  @change='onEditInvestmentPlan("firstYearOfAnalysisPeriod", $event)'
+                                  @update:model-value ='onEditInvestmentPlan("firstYearOfAnalysisPeriod", $event)'
                                   :rules="[rules['generalRules'].valueIsNotEmpty]"
                                   :mask="'####'"
                                   v-model='investmentPlan.firstYearOfAnalysisPeriod' 
@@ -64,7 +62,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label"><span>Number of Years in Analysis Period</span></v-subheader>
                     <v-text-field id="InvestmentEditor-numberYearsAnalysisPeriod-textField"
                                   readonly variant="outlined"
-                                  @change='onEditInvestmentPlan("numberOfYearsInAnalysisPeriod", $event)'
+                                  @update:model-value='onEditInvestmentPlan("numberOfYearsInAnalysisPeriod", $event)'
                                   v-model='investmentPlan.numberOfYearsInAnalysisPeriod'
                                   class="ghd-text-field-border ghd-text-field" />
                 </v-col>
@@ -72,7 +70,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label"><span>Minimum Project Cost Limit</span></v-subheader>
                     <currencyTextbox outline 
                                   id='InvestmentEditor-minimumProjectCostLimit-textField'
-                                  @change='onEditInvestmentPlan("minimumProjectCostLimit", $event)'
+                                  @update:model-value='onEditInvestmentPlan("minimumProjectCostLimit", $event)'
                                   v-model='investmentPlan.minimumProjectCostLimit'
                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]"
                                   :disabled="!hasAdminAccess"
@@ -84,7 +82,7 @@
                     <v-text-field id="InvestmentEditor-inflationRatePercentage-textField"
                                   variant="outlined"
                                   v-model='investmentPlan.inflationRatePercentage'
-                                  @change='onEditInvestmentPlan("inflationRatePercentage", $event)'
+                                  @update:model-value='onEditInvestmentPlan("inflationRatePercentage", $event)'
                                   :mask="'###'"
                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(investmentPlan.inflationRatePercentage, [0,100])]"
                                   :disabled="!hasAdminAccess"
@@ -93,11 +91,12 @@
                 <v-col cols = "4" class="ghd-constant-header">
                     <v-switch id="InvestmentEditor-allowFundingCarryover-switch"
                               style="margin-left:10px;margin-top:50px;"
+                              color="#2A578D"
                               class="ghd-checkbox"
                               label="Allow Funding Carryover"
                               :disabled="!hasAdminAccess"
                               v-model="investmentPlan.shouldAccumulateUnusedBudgetAmounts"
-                              @change='onEditInvestmentPlan("shouldAccumulateUnusedBudgetAmounts", $event)' />
+                              @update:model-value='onEditInvestmentPlan("shouldAccumulateUnusedBudgetAmounts", $event)' />
                 </v-col>
             </v-row>
             <v-divider :thickness="2" class="border-opacity-100" v-show ='hasScenario || hasSelectedLibrary' />
@@ -425,7 +424,7 @@ function budgetLibraryMutator(payload:any){store.commit('budgetLibraryMutator', 
 function selectedBudgetLibraryMutator(payload:any){store.commit('selectedBudgetLibraryMutator', payload);}
 function investmentPlanMutator(payload:any){store.commit('investmentPlanMutator', payload);}
 function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImportMutator', payload);}
-    let modifiedDate: string;
+    let modifiedDate = ref<string>();
 
     let addedBudgets = ref<Budget[]>([]);
     let updatedBudgetsMap = ref<Map<string, [Budget, Budget]>>(new Map<string, [Budget, Budget]>());//0: original value | 1: updated value
@@ -586,7 +585,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     });
         
     // Watchers
-    watch(pagination, ()=> onPaginationChanged)
     async function onPaginationChanged() {
         if(initializing)
             return;
@@ -612,12 +610,13 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 firstYearAnalysisBudgetShift: firstYearOfAnalysisPeriodShift.value,
                 isModified: scenarioLibraryIsModified.value
             },           
-            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : 'year',
             isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
             search: currentSearch
         };
         
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL){
+            
             await InvestmentService.getScenarioInvestmentPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
@@ -629,7 +628,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     totalItems.value = data.totalItems;
                     investmentPlan.value = data.investmentPlan;                   
                     lastYear = data.lastYear;
-                    
+                    fillAmounts();
                     syncInvestmentPlanWithBudgets();
                     
                 }
@@ -642,7 +641,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
-                      modifiedDate = data.slice(0, 10);
+                      modifiedDate.value = data.slice(0, 10);
                    }
              });
 
@@ -655,6 +654,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     budgetAmountCache.value = currentPage.value.flatMap(_ => _.budgetAmounts)
                     totalItems.value = data.totalItems;
                     lastYear = data.lastYear
+                    fillAmounts();
                 }
             }); 
         }                
@@ -772,9 +772,9 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     watch(investmentPlan,() => {
         checkHasUnsavedChanges()
         if(hasScenario.value){
-            const firstYear = +investmentPlan.value.firstYearOfAnalysisPeriod;
+            const localFirstYear = +investmentPlan.value.firstYearOfAnalysisPeriod;
             const stateFirstYear = +stateInvestmentPlan.value.firstYearOfAnalysisPeriod;
-            firstYearOfAnalysisPeriodShift.value = (firstYear - originalFirstYear) - (firstYear === 0 ? 0 : (firstYear - originalFirstYear));
+            firstYearOfAnalysisPeriodShift.value = (localFirstYear - originalFirstYear) - (firstYear === 0 ? 0 : (firstYear - originalFirstYear));
         }
             
         if(investmentPlan.value.id === uuidNIL)
@@ -1160,6 +1160,40 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         };
     }
 
+    function fillAmounts() {
+        const isLastPage = pagination.page == Math.ceil(totalItems.value/pagination.rowsPerPage)
+        let budgets = currentPage.value.filter(_ => _.budgetAmounts.length < pagination.rowsPerPage);
+        let modelbudget = currentPage.value.find(_ => _.budgetAmounts.length === pagination.rowsPerPage ||
+        (isLastPage && _.budgetAmounts.length == totalItems.value % pagination.rowsPerPage))
+        if(!isNil(budgets) && !isNil(modelbudget)){
+            
+            budgets.forEach(_ =>{
+                let amounts: BudgetAmount[] = [];
+                let addedAmounts: BudgetAmount[] = [];
+                modelbudget!.budgetAmounts.forEach(__ => {
+                    let foundAmount = _.budgetAmounts.find(amount => amount.year === __.year);
+                    const newAmount: BudgetAmount = {
+                        id: isNil(foundAmount) ? getNewGuid() : foundAmount.id,
+                        budgetName: _.name,
+                        year: __.year,
+                        value: isNil(foundAmount) ? 0 : foundAmount.value,
+                    }
+                    if(isNil(foundAmount))
+                        addedAmounts.push(clone(newAmount))
+                    amounts.push(clone(newAmount)) 
+                })
+                _.budgetAmounts = clone(amounts)
+                let addedMap = addedBudgetAmounts.value.get(_.name);
+                if(!isNil(addedMap)){
+                    addedMap = addedMap.concat(addedAmounts);
+                    addedBudgetAmounts.value.set(_.name, clone(addedMap))
+                }                 
+                else
+                    addedBudgetAmounts.value.set(_.name, clone(addedAmounts));
+            })
+        }
+    }
+
     function onSubmitEditBudgetsDialogResult(budgetChanges: EmitedBudgetChanges) {        
         editBudgetsDialogData.value = clone(emptyEditBudgetsDialogData);
         if(!isNil(budgetChanges)){
@@ -1261,11 +1295,9 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
     function onEditBudgetYearValue(year: number, budgetName: string, value: number) {//check out
         if (any(propEq('name', budgetName), currentPage.value)) {
-            console.log("YES")
             const budget: Budget = find(propEq('name', budgetName), currentPage.value) as Budget;
 
             if (any(propEq('year', year), budget.budgetAmounts)) {
-                console.log("YES2")
                 const budgetAmount: BudgetAmount = find(propEq('year', year), budget.budgetAmounts) as BudgetAmount;
                 const updatedRow: BudgetAmount = {
                     ...budgetAmount,

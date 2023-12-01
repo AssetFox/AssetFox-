@@ -1,8 +1,10 @@
 <template>
-    <v-card height="1000px" class="elevation-0 vcard-main-layout" >
-        <v-row class="p-0" justify="start" style="height:96px">
-            <v-col cols = "5">
-                <v-subheader class="ghd-control-label ghd-md-gray">Deterioration Model Library</v-subheader>
+    <v-card class="elevation-0 vcard-main-layout" >
+        <v-row>
+            <v-col cols = "auto">
+                <div style="margin-bottom: 10px;">
+                    <v-subheader class="ghd-control-label ghd-md-gray">Deterioration Model Library</v-subheader>
+                </div>
                 <v-select
                     id="PerformanceCurveEditor-library-select"
                     class="ghd-control-border ghd-control-text ghd-select "
@@ -31,7 +33,6 @@
                     style="margin-top:0px;"
                     prepend-inner-icon=ghd-search
                     hide-details
-                    label="Search Deterioration Equations"
                     placeholder="Search Deterioration Equations"
                     single-line
                     variant="outlined"
@@ -44,8 +45,8 @@
                 <v-btn id="PerformanceCurveEditor-search-button"  class='m-2 ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" @click="onSearchClick()">Search</v-btn>
                 </v-row>
             </v-col>
-            <v-spacer cols = "5" v-show="!(hasSelectedLibrary || hasScenario)"/>                
-            <v-col cols = "2" v-show='!hasScenario'>
+            <v-spacer cols = "auto" v-show="!(hasSelectedLibrary || hasScenario)"/>                
+            <v-col cols = "auto" v-show='!hasScenario'>
                 <v-subheader class="ghd-control-label ghd-md-gray"> </v-subheader>
                 <v-row align="end" justify="end">
                     <v-btn
@@ -60,24 +61,26 @@
             </v-col>                    
         </v-row>
         <v-row style="height:48px;">
-            <v-col cols = "9" v-show="!hasScenario">
+            <v-col cols = "auto" v-show="!hasScenario">
                 <v-row>
                         <div style="margin-top:6px;"
                             v-if='hasSelectedLibrary && !hasScenario'
-                            class="ghd-control-label ghd-md-gray"
+                            class="header-text-content owner-padding"
                         > 
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
                         <v-btn
                             id="PerformanceCurveEditor-shareLibrary-button"
-                            @click='onShowSharePerformanceCurveLibraryDialog(selectedPerformanceCurveLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                            @click='onShowSharePerformanceCurveLibraryDialog(selectedPerformanceCurveLibrary)'
+                            style="margin-left: 10px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
                         </v-btn>
                         </div>
                 </v-row>
             </v-col>
-            <v-spacer  v-show="hasScenario"/>
-            <v-col cols = "3" v-show="hasScenario || hasSelectedLibrary">
+            <!-- <v-spacer  v-show="hasScenario"/> -->
+            <v-spacer></v-spacer>
+            <v-col cols = "auto" v-show="hasScenario || hasSelectedLibrary">
                 <v-row row align="end" style="margin-top:-4px;height:40px;">
                     <v-btn
                         id="PerformanceCurveEditor-upload-button"
@@ -106,11 +109,11 @@
         </v-row>
         <v-row class="data-table" justify="start" v-show="hasSelectedLibrary || hasScenario" xs12>
             <v-col cols = "12">
-                <v-card class="elevation-0">
+                <!-- <v-card class="elevation-0"> -->
                     <v-data-table-server
                         id="PerformanceCurveEditor-deteriorationModels-datatable"                    
                         show-select
-                        class="fixed-header ghd-table v-table__overflow"
+                        class='v-table__overflow ghd-table'
                         item-key="id"
 
                         :headers="performanceCurveGridHeaders"
@@ -328,16 +331,15 @@
                     >
                         Delete Selected
                     </v-btn>                        
-                </v-card>
+                <!-- </v-card> -->
             </v-col>
         </v-row>
-        <v-row class="header-height" justify="start" v-show="hasSelectedLibrary || hasScenario">
+        <v-row class="header-height" justify="start" style="margin-bottom: 15px;" v-show="hasSelectedLibrary || hasScenario">
             <v-col cols = "3">
                 <v-btn
                     id="PerformanceCurveEditor-addDeteriorationModel-button"
                     @click="showCreatePerformanceCurveDialog = true"
-                    class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border ghd-outline-button-padding"
-                                    
+                    class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border ghd-outline-button-padding"                                  
                     variant = "outlined"
                 >
                     Add Deterioration Model
@@ -362,7 +364,7 @@
                 />
             </v-col>
         </v-row>
-        <v-row
+        <v-row style="padding-bottom: 40px;"
             justify="center"
             row
             v-show='hasSelectedLibrary || hasScenario'
@@ -590,7 +592,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let hasSelectedLibrary = ref(false);
     let hasScenario = ref(false);
     let librarySelectItems  = ref<SelectItem[]>([]);
-    let modifiedDate: string; 
+    let modifiedDate = ref<string>(''); 
     
     let performanceCurveGridHeaders: any[] = [
         {
@@ -771,7 +773,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
-                      modifiedDate = data.slice(0, 10);
+                      modifiedDate.value = data.slice(0, 10);
                    }
              });
 

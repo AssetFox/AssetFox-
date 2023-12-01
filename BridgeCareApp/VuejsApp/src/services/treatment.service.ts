@@ -69,7 +69,6 @@ export default class TreatmentService {
         );
     }
 
-
     static importLibraryTreatments(
         file: File,
         id: string,
@@ -192,5 +191,50 @@ export default class TreatmentService {
     }
     static upsertOrDeleteTreatmentLibraryUsers(libraryId: string, proposedUsers: LibraryUser[]): AxiosPromise {
         return coreAxiosInstance.post(`${API.Treatment}/UpsertOrDeleteTreatmentLibraryUsers/${libraryId}`, proposedUsers);
+    }
+
+    static exportSupersedeRules(
+        id: string,
+        forScenario: boolean = false,
+    ): AxiosPromise {
+        return forScenario
+            ?     
+               coreAxiosInstance.get(               
+                  `${API.Treatment}/ExportScenarioTreatmentSupersedeRuleExcelFile/${id}`,
+              )
+            : coreAxiosInstance.get(                
+                  `${API.Treatment}/ExportTreatmentSupersedeRuleExcelFile/${id}`,
+              );
+    }
+
+    static downloadSupersedeRulesTemplate(
+        forScenario: boolean = false,
+    ): AxiosPromise {
+        return coreAxiosInstance.get(               
+            `${API.Treatment}/DownloadTreatmentSupersedeRuleTemplate`,
+        );
+    }
+
+    static importSupersedeRules(
+        file: File,
+        id: string,
+        forScenario: boolean
+    ) {
+        let formData = new FormData();
+        formData.append('file', file);
+        formData.append(forScenario ? 'simulationId' : 'libraryId', id);
+      
+        return forScenario            
+            ?
+              coreAxiosInstance.post(
+                  `${API.Treatment}/ImportScenarioTreatmentSupersedeRulesFile`,
+                  formData,
+                  { headers: { 'Content-Type': 'multipart/form-data' } },
+              )
+            : coreAxiosInstance.post(
+                  `${API.Treatment}/ImportLibraryTreatmentSupersedeRulesFile`,
+                  formData,
+                  { headers: { 'Content-Type': 'multipart/form-data' } },
+              );
     }
 }

@@ -1,5 +1,5 @@
 <template>
-    <v-card height="800px" class="elevation-0 vcard-main-layout">
+    <v-card class="elevation-0 vcard-main-layout">
     <v-div>
         <v-row class="Montserrat-font-family" justify="space-between">
             <v-col>
@@ -104,20 +104,12 @@
                         v-model:page="projectPagination.page"
                         v-model:items-per-page="projectPagination.rowsPerPage"
                         item-value="name"
-                        show-select
-                        return-object
+                        v-model="selectedCpItems"
                         @update:options="onPaginationChanged"
                         class=" fixed-header v-table__overflow">
                             <template v-slot:item="item">
                                 <tr>
-                                <td>
-                                    <v-checkbox
-                                    id="CommittedProjectsEditor-selectForDelete-vcheckbox"
-                                    hide-details
-                                    primary
-                                    v-model="selectedCpItems" :value="item.item"
-                                    ></v-checkbox>
-                                    </td>
+                                
                                 <td v-for="header in cpGridHeaders">
                                     <div>
                                         <v-select v-if="header.key === 'treatment'"
@@ -151,12 +143,20 @@
                                                 && header.key !== 'keyAttr' 
                                                 && header.key !== 'treatment'
                                                 && header.key !== 'cost'
-                                                && header.key !== 'projectSource'"
+                                                && header.key !== 'projectSource'
+                                                && header.key !== 'category'"
                                                 readonly
                                                 class="sm-txt"
                                                 density="compact"
                                                 variant="underlined"
                                                 :model-value="item.item[header.key]"
+                                                :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
+                                            <v-text-field v-if="header.key === 'category'"
+                                                readonly
+                                                class="sm-txt"
+                                                density="compact"
+                                                variant="underlined"
+                                                :model-value="reverseCatMap.get(item.item[header.key])"
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
                                             <v-text-field v-if="header.key === 'budget'"
                                                 readonly
@@ -200,6 +200,8 @@
                                                     :items="budgetSelectItems"
                                                     label="Select a Budget"
                                                     variant="outlined"
+                                                    item-title="text"  
+                                                    item-value="value"
                                                     v-model="item.item[header.key]">
                                                 </v-select>
 
@@ -207,6 +209,8 @@
                                                     :items="categorySelectItems"
                                                     label="Select a Category"
                                                     variant="outlined"
+                                                    item-title="text"  
+                                                    item-value="value"
                                                     v-model="item.item[header.key]">
                                                 </v-select>
                                                 
@@ -255,7 +259,7 @@
             class="border-opacity-100"
         ></v-divider>
         <v-col>
-            <v-row justify="center">
+            <v-row justify="center" style="padding-bottom: 40px;">
                 <v-btn 
                 id="CommittedProjectsEditor-cancel-vbtn"
                 @click="onCancelClick" :disabled='!hasUnsavedChanges' class="ghd-white-bg ghd-blue ghd-button-text" variant="text">Cancel</v-btn>    
@@ -285,6 +289,7 @@
             :dialogData="alertDataForDeletingCommittedProjects"
             @submit="onDeleteCommittedProjectsSubmit"
         />
+        <ConfirmDialog></ConfirmDialog>
     </v-div>
 </v-card>
 </template>
@@ -333,6 +338,7 @@ import Column from 'primevue/column';
 import TreatmentService from '@/services/treatment.service';
 import { getUrl } from '@/shared/utils/get-url';
 import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
+import ConfirmDialog from 'primevue/confirmdialog';
 
     let store = useStore();
     const $router = useRouter();    
@@ -351,7 +357,7 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
     let attributeSelectItems: SelectItem[] = [];
     const treatmentSelectItems = ref< string[] >([]);
     const projectSourceOptions = ref< string [] >([]);
-    const budgetSelectItems = ref< any[] >([]);
+    const budgetSelectItems = ref< SelectItem[] >([]);
     const categorySelectItems = ref<SelectItem[]>([]);
     let categories: string[] = [];
     let scenarioId: string = getBlankGuid();
@@ -526,8 +532,10 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
             });
             $router.push('/Scenarios/');
         }
+        let i = 0
         reverseCatMap.forEach(cat => {
-            categorySelectItems.value.push({text: cat, value: cat})        
+            categorySelectItems.value.push({text: cat, value: i})     
+            i++   
         });
         fetchTreatmentLibrary(scenarioId);
 
@@ -559,7 +567,7 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
                     setAlertMessageAction("Committed project import has been added to the work queue")
                 }
             });
-            initializePages();
+            await initializePages();
             if (scenarioId !== undefined) {  
                             await fetchTreatmentLibrary(scenarioId);
                             await fetchProjectSources();
@@ -617,7 +625,7 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
         }
     });
 
-    watch(selectedLibraryTreatments, () => onSelectedLibraryTreatmentsChanged)
+    watch(selectedLibraryTreatments, onSelectedLibraryTreatmentsChanged)
     function onSelectedLibraryTreatmentsChanged() {
         treatmentSelectItems.value = selectedLibraryTreatments.value.map(
             (treatment: Treatment) => (treatment.name)
@@ -628,13 +636,13 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
     watch(stateScenarioSimpleBudgetDetails, () => {
         budgetSelectItems.value = stateScenarioSimpleBudgetDetails.value.map(
             (budget: SimpleBudgetDetail) => ({
-                title: budget.name,
-                key: budget.name
+                text: budget.name,
+                value: budget.name
             }),
         );
         budgetSelectItems.value.push({
-            title: 'None',
-            key: ''
+            text: 'None',
+            value: ''
         });
     });
 
@@ -654,7 +662,6 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
            selectedCommittedProject.value = selectedCpItems.value[0].id;
     });
 
-    watch(projectPagination, onPaginationChanged)
     async function onPaginationChanged() {
         if(isRunning)
             return;
@@ -705,6 +712,7 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 
     //Events
     function onCancelClick() {
+
         clearChanges()
         selectedCommittedProject.value = '';
         selectedCpItems.value = [];
@@ -817,7 +825,6 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
                 let cat = reverseCatMap.get(row.category);
                 if (!isNil(cat))
                     scp.category = row.category;
-                    // scp.category = cat;
                 updateCommittedProject(row, row.cost, 'cost')  
                 onPaginationChanged();
             }
@@ -877,8 +884,6 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
                 handleProjectSourceChange(row, scp, value)
             }
             else{
-                if(property === 'category')
-                    value = catMap.get(value);
                 updateCommittedProject(row, value, property)
                 onPaginationChanged()
             }
@@ -1089,6 +1094,7 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
     function fetchProjectSources() {
     CommittedProjectsService.getProjectSources().then((response: AxiosResponse) => {
         if (hasValue(response, 'data')) {
+
             projectSourceOptions.value = response.data.filter(
                 (option: string) => option !== "None" && option !== "ProjectPick"
                 );
@@ -1238,7 +1244,7 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
     function committedProjectsAreChanged() : boolean{
         return  deletionIds.value.length > 0 || 
             addedRows.value.length > 0 ||
-            updatedRowsMap.size > 0 || (hasScenario && hasSelectedLibrary)
+            updatedRowsMap.size > 0 
     }
 
     function importCompleted(data: any){
@@ -1254,7 +1260,7 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 
     async function fetchTreatmentLibrary(simulationId: string) {
         try {
-            const response = await TreatmentService.getTreatmentLibraryBySimulationId(simulationId).then(() => {
+            await TreatmentService.getTreatmentLibraryBySimulationId(simulationId).then(response => {
                 if (hasValue(response, 'data')) {
                     const treatmentLibrary = response.data as TreatmentLibrary;
                     store.commit('scenarioTreatmentLibraryMutator', treatmentLibrary);
@@ -1274,6 +1280,7 @@ import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
         selectTreatmentLibraryAction(libraryId);
         hasSelectedLibrary = true;
         const library = stateTreatmentLibraries.value.find((o) => o.id === libraryId);
+        librarySelectItemValue.value = libraryId;
 
         if (!isNil(library)) {
           selectedLibraryTreatments.value = library.treatments;

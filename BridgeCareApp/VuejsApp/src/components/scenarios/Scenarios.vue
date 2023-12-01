@@ -1533,6 +1533,7 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
         runAnalysisScenario = selectedScenario;
 
         if (submit == "pre-checks") {
+            preCheckMessages = [];
                 if (submit && selectedScenario.id !== getBlankGuid()) 
                 {
                     await ScenarioService.upsertValidateSimulation(selectedScenario.networkId, selectedScenario.id).then((response: AxiosResponse) => {

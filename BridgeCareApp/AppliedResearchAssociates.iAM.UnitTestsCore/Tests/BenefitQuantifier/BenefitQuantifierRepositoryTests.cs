@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.BenefitQuantifier
             var network = NetworkTestSetup.ModelForEntityInDb(
                 TestHelper.UnitOfWork, new List<MaintainableAsset>(), networkId);
             var dto = BenefitQuantifierDtos.Dto(networkId);
-            TestHelper.UnitOfWork.BenefitQuantifierRepo.UpsertBenefitQuantifierNonAtomic(dto);
+            TestHelper.UnitOfWork.BenefitQuantifierRepo.UpsertBenefitQuantifier(dto);
 
             var benefitQuantifierInDb = TestHelper.UnitOfWork.Context.BenefitQuantifier
                 .SingleOrDefault(bc => bc.NetworkId == networkId);

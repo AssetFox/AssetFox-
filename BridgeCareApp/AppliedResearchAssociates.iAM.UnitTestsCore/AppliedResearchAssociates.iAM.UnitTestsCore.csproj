@@ -88,6 +88,5 @@
 
   <ItemGroup>
     <Folder Include="Tests\Location\" />
-    <Folder Include="Tests\MaintainableAsset\" />
   </ItemGroup>
 </Project>

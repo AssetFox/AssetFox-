@@ -36,12 +36,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return entity.Id;
         }
 
-        public ExcelRawDataDTO GetExcelRawData(Guid excelPackageId)
-        {
-            var entity = _unitOfWork.Context.ExcelRawData.FirstOrDefault(ew => ew.Id == excelPackageId);
-            return ExcelDatabaseWorksheetMapper.ToDTONullPropagating(entity);
-        }
-
         public ExcelRawDataDTO GetExcelRawDataByDataSourceId(Guid dataSourceId)
         {
             var entity = _unitOfWork.Context.ExcelRawData.FirstOrDefault(ew => ew.DataSourceId == dataSourceId);

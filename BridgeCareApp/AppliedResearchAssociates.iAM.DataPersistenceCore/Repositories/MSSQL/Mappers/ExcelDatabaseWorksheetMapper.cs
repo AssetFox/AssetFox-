@@ -29,6 +29,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = entity.Id,
                 SerializedWorksheetContent = entity.SerializedContent,
+                DataSourceId = entity.DataSourceId,
             };
             return returnValue;
         }

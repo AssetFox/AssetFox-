@@ -18,9 +18,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class DeficientConditionGoalRepository : IDeficientConditionGoalRepository
     {
-        private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         public DeficientConditionGoalRepository(UnitOfDataPersistenceWork unitOfWork)

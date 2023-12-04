@@ -332,22 +332,20 @@ internal sealed class AssetContext : CalculateEvaluateScope
         {
             FirstUnshadowedYearForAnyTreatment = year + treatment.ShadowForAnyTreatment;
             FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
+
+            foreach (var (attribute, factor) in treatment.PerformanceCurveAdjustmentFactors)
+            {
+                MostRecentAdjustmentFactorsForPerformanceCurves[attribute] = factor;
+            }
         }
 
         Detail.AppliedTreatment = treatment.Name;
         Detail.TreatmentStatus = TreatmentStatus.Applied;
-
-        foreach (var (attribute, factor) in treatment.PerformanceCurveAdjustmentFactors)
-        {
-            MostRecentAdjustmentFactorsForPerformanceCurves[attribute] = factor;
-        }
     }
-
-    private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve, MostRecentAdjustmentFactorsForPerformanceCurves);
 
     private double CalculateValueOnCurve(PerformanceCurve curve, Action<double> handle)
     {
-        var value = CalculateValueOnCurve(curve);
+        var value = curve.Equation.Compute(this, curve, MostRecentAdjustmentFactorsForPerformanceCurves);
         handle(value);
         return value;
     }

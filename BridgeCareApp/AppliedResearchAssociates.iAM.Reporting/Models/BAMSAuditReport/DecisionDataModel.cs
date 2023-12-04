@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport
 
     public class DecisionTreatment
     {
-        public string Feasiable { get; set; }
+        public string Feasible { get; set; }
 
         public double? CIImprovement { get; set; }
         public string BudgetPriorityLevel { get; set; }
@@ -31,6 +31,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport
 
         public string BudgetsUsed { get; set; }
 
-        public string RejectionReason { get; set ; }        
+        public string BudgetUsageStatuses { get; set ; }        
     }
 }

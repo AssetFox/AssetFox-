@@ -17,10 +17,5 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests
             var connectionString = unitOfWork.Context.Database.GetConnectionString();
             RunBatch.SetupStoredProcedures(unitOfWork, connectionString);
         }
-
-        public static void EnsureDatabaseExists(UnitOfDataPersistenceWork unitOfWork)
-        {
-            unitOfWork.Context.Database.EnsureCreated();
-        }
     }
 }

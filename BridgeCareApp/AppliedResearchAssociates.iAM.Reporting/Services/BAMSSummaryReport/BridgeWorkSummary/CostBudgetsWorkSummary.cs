@@ -361,7 +361,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 decimal committedTotalCost = 0;
                 row = currentCell.Row;
-                //column = ++column;
                 foreach (var data in yearlyItem.Value)
                 {
                     // Check that the projectSource is neither 'Maintenance' nor 'ProjectBuilder'
@@ -382,23 +381,23 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost + 2].Value = data.Value.treatmentCost;
                         }
                         committedTotalCost += data.Value.treatmentCost;
-                    }
 
-                    // setting up data for Work type totals
-                    if (map.ContainsKey(data.Key))
-                    {
-                        var category = map[data.Key];
-                        var treatmentCost = data.Value.treatmentCost;
-                        var currYear = yearlyItem.Key;
-                        FillWorkTypeTotalMPMS(workTypeTotalMPMS, category, simulationYears, currYear, treatmentCost);
-                    }
-                    else
-                    {
-                        var treatmentCost = data.Value.treatmentCost;
-                        var currYear = yearlyItem.Key;
-                        var category = TreatmentCategory.Other;
-                        FillWorkTypeTotalMPMS(workTypeTotalMPMS, category, simulationYears, currYear, treatmentCost);
+                        // setting up data for Work type totals
+                        if (map.ContainsKey(data.Key))
+                        {
+                            var category = map[data.Key];
+                            var treatmentCost = data.Value.treatmentCost;
+                            var currYear = yearlyItem.Key;
+                            FillWorkTypeTotalMPMS(workTypeTotalMPMS, category, simulationYears, currYear, treatmentCost);
+                        }
+                        else
+                        {
+                            var treatmentCost = data.Value.treatmentCost;
+                            var currYear = yearlyItem.Key;
+                            var category = TreatmentCategory.Other;
+                            FillWorkTypeTotalMPMS(workTypeTotalMPMS, category, simulationYears, currYear, treatmentCost);
 
+                        }
                     }
                 }
                 TotalCommittedSpent.Add(yearlyItem.Key, committedTotalCost);
@@ -464,7 +463,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             uniqueTreatments.Add(data.Key, currentCell.Row);
                             worksheet.Cells[row++, column].Value = data.Key;
 
-                            var cellToEnterCost = yearlyItem.Key - startYear; 
+                            var cellToEnterCost = yearlyItem.Key - startYear;
                             worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost + 2].Value = data.Value.treatmentCost;
 
                             costForTreatments.Add(data.Key, data.Value.treatmentCost);
@@ -472,25 +471,25 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         }
                         else
                         {
-                            var cellToEnterCost = yearlyItem.Key - startYear; 
-                            worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost + 2].Value = data.Value.treatmentCost; 
+                            var cellToEnterCost = yearlyItem.Key - startYear;
+                            worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost + 2].Value = data.Value.treatmentCost;
                         }
                         sapTotalCost += data.Value.treatmentCost;
-                    }
 
-                    if (map.ContainsKey(data.Key))
-                    {
-                        var category = map[data.Key];
-                        var treatmentCost = data.Value.treatmentCost;
-                        var currYear = yearlyItem.Key;
-                        FillWorkTypeTotalSAP(workTypeTotalSAP, category, simulationYears, currYear, treatmentCost);
-                    }
-                    else
-                    {
-                        var treatmentCost = data.Value.treatmentCost;
-                        var currYear = yearlyItem.Key;
-                        var category = TreatmentCategory.Other;
-                        FillWorkTypeTotalSAP(workTypeTotalSAP, category, simulationYears, currYear, treatmentCost);
+                        if (map.ContainsKey(data.Key))
+                        {
+                            var category = map[data.Key];
+                            var treatmentCost = data.Value.treatmentCost;
+                            var currYear = yearlyItem.Key;
+                            FillWorkTypeTotalSAP(workTypeTotalSAP, category, simulationYears, currYear, treatmentCost);
+                        }
+                        else
+                        {
+                            var treatmentCost = data.Value.treatmentCost;
+                            var currYear = yearlyItem.Key;
+                            var category = TreatmentCategory.Other;
+                            FillWorkTypeTotalSAP(workTypeTotalSAP, category, simulationYears, currYear, treatmentCost);
+                        }
                     }
                 }
 
@@ -559,14 +558,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 foreach (var data in yearlyItem.Value)
                 {
-                    if (data.Value.projectSource == "ProjectBuilder") 
+                    if (data.Value.projectSource == "ProjectBuilder")
                     {
                         if (!uniqueTreatments.ContainsKey(data.Key))
                         {
                             uniqueTreatments.Add(data.Key, currentCell.Row);
                             worksheet.Cells[row++, column].Value = data.Key;
 
-                            var cellToEnterCost = yearlyItem.Key - startYear + 2; 
+                            var cellToEnterCost = yearlyItem.Key - startYear + 2;
                             worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost].Value = data.Value.treatmentCost;
 
                             costForTreatments.Add(data.Key, data.Value.treatmentCost);
@@ -578,21 +577,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost].Value = data.Value.treatmentCost;
                         }
                         projectBuilderTotalCost += data.Value.treatmentCost;
-                    }
 
-                    if (map.ContainsKey(data.Key))
-                    {
-                        var category = map[data.Key];
-                        var treatmentCost = data.Value.treatmentCost;
-                        var currYear = yearlyItem.Key;
-                        FillWorkTypeTotalProjectBuilder(workTypeTotalProjectBuilder, category, simulationYears, currYear, treatmentCost); 
-                    }
-                    else
-                    {
-                        var treatmentCost = data.Value.treatmentCost;
-                        var currYear = yearlyItem.Key;
-                        var category = TreatmentCategory.Other;
-                        FillWorkTypeTotalProjectBuilder(workTypeTotalProjectBuilder, category, simulationYears, currYear, treatmentCost);
+                        if (map.ContainsKey(data.Key))
+                        {
+                            var category = map[data.Key];
+                            var treatmentCost = data.Value.treatmentCost;
+                            var currYear = yearlyItem.Key;
+                            FillWorkTypeTotalProjectBuilder(workTypeTotalProjectBuilder, category, simulationYears, currYear, treatmentCost);
+                        }
+                        else
+                        {
+                            var treatmentCost = data.Value.treatmentCost;
+                            var currYear = yearlyItem.Key;
+                            var category = TreatmentCategory.Other;
+                            FillWorkTypeTotalProjectBuilder(workTypeTotalProjectBuilder, category, simulationYears, currYear, treatmentCost);
+                        }
                     }
                 }
 

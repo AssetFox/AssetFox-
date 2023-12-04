@@ -248,13 +248,11 @@
             </v-container>
             <v-footer app color ="#00204B"  fixed>
                 <v-spacer></v-spacer>
-                <v-col cols = "1">
-                    <div class="dev-and-ver-div" >
-                        <div>iAM</div> &nbsp;
-                        <div>{{implementationName}}</div> &nbsp;
-                        <div>{{packageVersionEnv}}</div>
+                    <div class="dev-and-ver-div" style="display: flex; align-items: center">
+                    <div>iAM</div> &nbsp;
+                    <div>{{implementationName}}</div> &nbsp;
+                    <div>{{packageVersionEnv}}</div>
                     </div>
-                </v-col>
                 <v-spacer></v-spacer>
             </v-footer>
             <Spinner />

@@ -799,7 +799,7 @@ public sealed class SimulationRunner
         var treatmentConsideration = new TreatmentConsiderationDetail(treatment.Name);
 
         treatmentConsideration.BudgetsAtDecisionTime.AddRange(
-            BudgetContexts.Select(context => new BudgetDetail(context.Budget, context.CurrentAmount)));
+            BudgetContexts.Select(context => new BudgetDetail(context.Budget, getAvailableAmount(context))));
 
         treatmentConsideration.BudgetUsages.AddRange(BudgetContexts.Select(budgetContext => new BudgetUsageDetail(budgetContext.Budget.Name)
         {

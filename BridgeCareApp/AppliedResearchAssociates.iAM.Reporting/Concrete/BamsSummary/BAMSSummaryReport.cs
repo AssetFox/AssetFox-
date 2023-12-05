@@ -23,7 +23,6 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;using AppliedResearchAssociates.iAM.Reporting.Services;using System.Threading;using AppliedResearchAssociates.iAM.Common.Logging;using AppliedResearchAssociates.iAM.WorkQueue;
-using Newtonsoft.Json.Linq;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -351,11 +350,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 }
             }
 
-            using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
-
-            // Create Simluation parameters TAB
+            using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
+            // Create Simluation parameters TAB
             var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
-
             checkCancelled(cancellationToken, simulationId);
             // Bridge Data TAB
             reportDetailDto.Status = $"Creating Bridge Data TAB";
@@ -373,7 +370,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation, reportOutputData);
-
+
             checkCancelled(cancellationToken, simulationId);
             // Funded Treatment List TAB
             reportDetailDto.Status = $"Creating Funded Treatment List TAB";
@@ -384,7 +381,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _fundedTreatmentList.Fill(fundedTreatmentWorksheet, reportOutputData);
 
             // unfunded tab will be uncommented and redone in a future release
-
+
             checkCancelled(cancellationToken, simulationId);
             //// Unfunded Treatment - Final List TAB
             reportDetailDto.Status = $"Creating Unfunded Treatment - Final List TAB";
@@ -411,7 +408,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Bridge work summary TAB            
             var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
             var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
-                                                        simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
+                                                        simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments, treatmentCategoryLookup);
 
             checkCancelled(cancellationToken, simulationId);
             reportDetailDto.Status = $"Creating Bridge Work Summary by Budget TAB";

@@ -80,7 +80,8 @@ public sealed class SimulationRunner
     {
 #if dump_analysis_input
         var inputDumpPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "Downloads",
             "iAM analysis dumps",
             $"{DateTime.Now:yyyy-MM-dd-HHmmssfff} iAM analysis input dump.json");
 
@@ -267,7 +268,8 @@ public sealed class SimulationRunner
 
 #if dump_analysis_output
         var outputDumpPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "Downloads",
             "iAM analysis dumps",
             $"{DateTime.Now:yyyy-MM-dd-HHmmssfff} iAM analysis output dump.json");
 

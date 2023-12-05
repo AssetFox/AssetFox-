@@ -167,7 +167,7 @@
                     >
                     <v-btn
                         id="EditAnalysisMethod-save-btn"
-                        :disabled="(criteriaIsInvalid() || !valid) || !hasUnsavedChanges"
+                        :disabled="(criteriaIsInvalid() || !valid) || !hasUnsavedChanges || !criteriaIsIntentionallyEmpty"
                         @click="onUpsertAnalysisMethod"
                         variant = "flat"
                         class="ghd-blue-bg ghd-white ghd-button-text ghd-button"

@@ -31,15 +31,17 @@ internal sealed class BudgetContext
 
     public void AllocateCost(decimal cost, int targetYear) => _AllocateCost(cost, targetYear - FirstYearOfAnalysisPeriod);
 
-    public void MoveToNextYear() => SetYearIndex(CurrentYearIndex + 1);
+    public void MoveToNextYear()
+    {
+        ++CurrentYearIndex;
+        SetPriority(null);
+    }
 
     public void SetPriority(BudgetPriority budgetPriority)
     {
         var prioritizedFraction = budgetPriority?.GetBudgetPercentagePair(Budget).Percentage / 100;
         CurrentPrioritizedAmount = CurrentAmount * prioritizedFraction;
     }
-
-    public void SetYear(int year) => SetYearIndex(year - FirstYearOfAnalysisPeriod);
 
     internal BudgetContext(BudgetContext original)
     {
@@ -78,11 +80,5 @@ internal sealed class BudgetContext
                     CumulativeAmountPerYear[yearIndex]);
             }
         }
-    }
-
-    private void SetYearIndex(int yearIndex)
-    {
-        CurrentYearIndex = yearIndex;
-        SetPriority(null);
     }
 }

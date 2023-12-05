@@ -524,7 +524,7 @@ import { getUrl } from './shared/utils/get-url';
                     error.response.headers,
                 );
             }    
-            decrementProcessCounterAction();
+            setProcessCounterAction(0);
             unauthorizedError = hasValue(unauthorizedError) ? error.response!.data : "User is not authorized!";
             if (error.response!.status === 500) return;
             

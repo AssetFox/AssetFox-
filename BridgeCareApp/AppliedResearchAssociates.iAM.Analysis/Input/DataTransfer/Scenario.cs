@@ -200,7 +200,7 @@ public sealed class Scenario
         InflationRatePercentage = source.InflationRatePercentage,
         MinimumProjectCostLimit = source.MinimumProjectCostLimit,
         NumberOfYearsInAnalysisPeriod = source.NumberOfYearsInAnalysisPeriod,
-        ShouldAccumulateUnusedBudgetAmounts = source.ShouldAccumulateUnusedBudgetAmounts,
+        AllowFundingCarryover = source.AllowFundingCarryover,
     };
 
     private static Network Convert(Analysis.Network source) => new()
@@ -500,7 +500,7 @@ public sealed class Scenario
             target.InflationRatePercentage = source.InflationRatePercentage;
             target.MinimumProjectCostLimit = source.MinimumProjectCostLimit;
             target.NumberOfYearsInAnalysisPeriod = source.NumberOfYearsInAnalysisPeriod;
-            target.ShouldAccumulateUnusedBudgetAmounts = source.ShouldAccumulateUnusedBudgetAmounts;
+            target.AllowFundingCarryover = source.AllowFundingCarryover;
 
             foreach (var item in source.Budgets)
             {

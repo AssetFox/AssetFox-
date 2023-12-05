@@ -10,7 +10,7 @@ internal sealed class BudgetContext
         Budget = budget ?? throw new ArgumentNullException(nameof(budget));
         FirstYearOfAnalysisPeriod = firstYearOfAnalysisPeriod;
 
-        if (Budget.InvestmentPlan.ShouldAccumulateUnusedBudgetAmounts)
+        if (Budget.InvestmentPlan.AllowFundingCarryover)
         {
             var cumulativeAmount = 0m;
             CumulativeAmountPerYear = Budget.YearlyAmounts.Select(amount => cumulativeAmount += amount.Value).ToArray();
@@ -63,7 +63,7 @@ internal sealed class BudgetContext
         CurrentPrioritizedAmount -= cost;
         CumulativeAmountPerYear[targetYearIndex] -= cost;
 
-        if (Budget.InvestmentPlan.ShouldAccumulateUnusedBudgetAmounts)
+        if (Budget.InvestmentPlan.AllowFundingCarryover)
         {
             for (var yearIndex = targetYearIndex + 1; yearIndex < CumulativeAmountPerYear.Length; ++yearIndex)
             {

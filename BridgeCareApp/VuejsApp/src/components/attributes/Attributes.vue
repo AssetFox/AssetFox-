@@ -174,6 +174,7 @@
                 </v-btn>               
             </v-row>
         </v-col>
+        <ConfirmDialog></ConfirmDialog>
     </v-row>
 </template>
 
@@ -193,6 +194,7 @@ import { any, clone, find, isNil, propEq } from 'ramda';
 import Vue, { computed, onBeforeMount, onBeforeUnmount, Ref, ref, shallowRef, ShallowRef, watch } from 'vue';
 import { Console } from 'console';
 import { useStore } from 'vuex';
+import ConfirmDialog from 'primevue/confirmdialog';
 
     let store = useStore();
     let hasSelectedAttribute = ref<boolean>(false);

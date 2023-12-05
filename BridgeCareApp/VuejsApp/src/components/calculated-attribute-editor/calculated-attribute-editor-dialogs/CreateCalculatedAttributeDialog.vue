@@ -15,7 +15,7 @@
                           variant="outlined"/>
             <v-select v-model="newCalculatedAttribute.attribute"
                       :items="attributeSelectItems"
-                      append-icon=$vuetify.icons.ghd-down
+                      menu-icon=custom:GhdDownSvg
                       :rules="[rules['generalRules'].valueIsNotEmpty]"
                       label="Select Attribute"
                       variant="outlined" />

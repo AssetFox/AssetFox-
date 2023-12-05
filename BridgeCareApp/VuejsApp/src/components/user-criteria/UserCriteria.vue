@@ -58,7 +58,8 @@
             :rows-per-page-items=[5,10,25]
             item-key="userId"
             class='elevation-1'
-            
+            sort-asc-icon="custom:GhdTableSortAscSvg"
+            sort-desc-icon="custom:GhdTableSortDescSvg"
           >
           <template v-slot:headers="props">
               <tr>

@@ -13,6 +13,8 @@
         <v-data-table id="ShareDeficientConditionGoalLibraryDialog-table-vdatatable" 
                       :headers="deficientConditionGoalLibraryUserGridHeaders"
                       :items="deficientConditionGoalLibraryUserGridRows"
+                      sort-asc-icon="custom:GhdTableSortAscSvg"
+                      sort-desc-icon="custom:GhdTableSortDescSvg"
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="{item}">
             <tr>

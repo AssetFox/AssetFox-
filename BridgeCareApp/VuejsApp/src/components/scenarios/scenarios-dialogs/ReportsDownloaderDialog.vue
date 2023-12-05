@@ -19,6 +19,7 @@
           <v-row align-start row>
             <v-select style="padding:0px !important"
                 :items='reports'
+                menu-icon=custom:GhdDownSvg
                 v-model='selectedReport'>
             </v-select>
             <v-chip

@@ -19,7 +19,7 @@
                 <v-select id="TreatmentDetailsTab-category-vselect"
                 class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                     :items="Array.from(treatmentCategoryMap.keys())"
-                    append-icon=ghd-down   
+                    menu-icon=custom:GhdDownSvg  
                     label="Category"
                     variant="outlined"
                     density="compact"

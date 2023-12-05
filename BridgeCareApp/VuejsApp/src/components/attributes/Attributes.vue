@@ -13,6 +13,7 @@
                             id="Attributes-selectAttribute-vselect"
                             variant="outlined"
                             style="margin-left:1%;"
+                            menu-icon=custom:GhdDownSvg
                             append-icon="@/assets/icons/down.svg"
                             v-model='selectAttributeItemValue' class="ghd-select ghd-text-field ghd-text-field-border"
                             density="compact">
@@ -37,6 +38,7 @@
                     <v-select
                           item-title="text"
                             item-value="value"
+                            menu-icon=custom:GhdDownSvg
                         id="Attributes-attributeDataType-vselect"
                         variant="outlined"
                         class="ghd-select ghd-text-field ghd-text-field-border"
@@ -50,8 +52,9 @@
                         Aggregation Rule
                     </v-subheader>
                     <v-select
-                            item-title="text"
-                            item-value="value"
+                        item-title="text"
+                        item-value="value"
+                        menu-icon=custom:GhdDownSvg
                         id="Attributes-attributeAggregationRule-vselect"
                         variant="outlined"
                         class="ghd-select ghd-text-field ghd-text-field-border"
@@ -104,8 +107,9 @@
                 </v-row>
                 <v-row column>
                     <v-select
-                            item-title="text"
-                            item-value="value"
+                        item-title="text"
+                        item-value="value"
+                        menu-icon=custom:GhdDownSvg
                         id="Attributes-attributeDataSource-vselect"
                         variant="outlined"
                         v-model='selectDatasourceItemValue'
@@ -147,6 +151,7 @@
                         id="Attributes-attributeColumnName-vselect"
                         variant="outlined"
                         item-title="text"
+                        menu-icon=custom:GhdDownSvg
                         item-value="value"
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='selectExcelColumns'

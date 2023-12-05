@@ -14,7 +14,8 @@
                 <v-data-table-virtual :headers='budgetHeaders' :items='budgets'
                               id="BudgetsTab-Budgets-datatable"
                               class='elevation-1 v-table__overflow budgets-data-table ghd-control-text'
-                              sort-icon=ghd-table-sort
+                              sort-asc-icon="custom:GhdTableSortAscSvg"
+                              sort-desc-icon="custom:GhdTableSortDescSvg"
                               hide-actions
                               item-key='id' show-select
                               return-object 

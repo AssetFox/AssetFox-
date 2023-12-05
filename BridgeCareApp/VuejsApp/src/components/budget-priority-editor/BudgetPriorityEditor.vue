@@ -8,7 +8,8 @@
                         <v-subheader class="ghd-md-gray ghd-control-label">Budget Priority Library</v-subheader>
                     </div> 
                     <v-select id="BudgetPriorityEditor-library-vselect"
-                        :items='librarySelectItems'                            
+                        :items='librarySelectItems'  
+                        menu-icon=custom:GhdDownSvg                          
                         item-title="text"
                         item-value="value" 
                         v-model='librarySelectItemValue'
@@ -65,7 +66,8 @@
                     show-select
                     return-object 
                     class='v-table__overflow ghd-table' :item-value="'id'"
-                    sort-icon=ghd-table-sort                              
+                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                    sort-desc-icon="custom:GhdTableSortDescSvg"                           
                     v-model='selectedBudgetPriorityGridRows'                                       
                     v-model:sort-by="pagination.sort"
                     v-model:page="pagination.page"

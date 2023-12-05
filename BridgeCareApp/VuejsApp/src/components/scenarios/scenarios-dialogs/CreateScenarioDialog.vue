@@ -18,6 +18,7 @@
                     :items="stateNetworks"
                     label="Select a network"
                     item-title="name"
+                    menu-icon=custom:GhdDownSvg
                     v-model="networkMetaData"
                     return-object
                     @update:modelValue="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"

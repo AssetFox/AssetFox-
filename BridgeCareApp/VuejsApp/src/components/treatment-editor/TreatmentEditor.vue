@@ -5,7 +5,7 @@
             <v-select
                 id="TreatmentEditor-treatmentLibrary-select"
                 :items='librarySelectItems'
-                append-icon=ghd-down
+                menu-icon=custom:GhdDownSvg
                 class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                 label='Select a Treatment Library'
                 variant="outlined"
@@ -21,7 +21,7 @@
             <v-select
             id="TreatmentEditor-treatment-select"
                 :items='treatmentSelectItems'
-                append-icon=ghd-down
+                menu-icon=custom:GhdDownSvg
                 class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                 label='Select a Treatment'
                 variant="outlined"

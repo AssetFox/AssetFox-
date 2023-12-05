@@ -11,6 +11,7 @@
                         id="TargetConditionGoalEditor-SelectLibrary-select"
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items="librarySelectItems"
+                        menu-icon=custom:GhdDownSvg
                         item-title="text"
                         item-value="value"
                         v-model="librarySelectItemValue"
@@ -78,7 +79,8 @@
                     v-model:items-per-page="pagination.rowsPerPage"
                     @update:options="onPaginationChanged"
                     class='v-table__overflow ghd-table'
-                    sort-icon=ghd-table-sort
+                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                    sort-desc-icon="custom:GhdTableSortDescSvg"
                     item-key="id"
                     show-select
                     return-object
@@ -117,7 +119,7 @@
                                         <v-select v-if="header.key === 'attribute'"
                                             id="TargetConditionGoalEditor-editTargetConditionGoalAttribute-vselect"
                                             :items="numericAttributeNames"
-                                            append-icon=ghd-down
+                                            menu-icon=custom:GhdDownSvg
                                             label="Select an Attribute"
                                             variant="outlined"
                                             v-model="item.item[header.key]"

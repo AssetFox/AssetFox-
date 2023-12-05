@@ -12,7 +12,7 @@
                             :items="selectListItems"
                             item-title="text"
                             item-value="value"
-                            append-icon=ghd-down
+                            menu-icon=custom:GhdDownSvg
                             v-model="librarySelectItemValue"
                             variant="outlined"
                             density="compact"
@@ -60,7 +60,8 @@
             :headers="gridHeaders"
             :pagination.sync="pagination"
             :must-sort='true'
-            sort-icon=ghd-table-sort
+            sort-asc-icon="custom:GhdTableSortAscSvg"
+            sort-desc-icon="custom:GhdTableSortDescSvg"
             class="elevation-1 fixed-header v-table__overflow"
             v-model="selectedGridRows"
 
@@ -117,7 +118,7 @@
                                         :items="numericAttributeSelectItems"
                                         item-title="text"
                                         item-value="value"
-                                        append-icon=ghd-down
+                                        menu-icon=custom:GhdDownSvg
                                         label="Select an Attribute"
                                         variant="outlined"
                                         v-model="props.item.attribute"

@@ -12,7 +12,8 @@
       <v-card-text>
         <v-data-table id="SharePerformanceCurveLibraryDialog-table-vdatatable" :headers="performanceCurveLibraryUserGridHeaders"
                       :items="performanceCurveLibraryUserGridRows"
-                      sort-icon=ghd-table-sort
+                      sort-asc-icon="custom:GhdTableSortAscSvg"
+                      sort-desc-icon="custom:GhdTableSortDescSvg"
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="props">
             <tr>

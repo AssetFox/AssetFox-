@@ -14,7 +14,8 @@
                       :headers="budgetPriorityLibraryUserGridHeaders"
                       :items="budgetPriorityLibraryUserGridRows"
                       :items-length="budgetPriorityLibraryUserGridRows.length"
-                      sort-icon=$vuetify.icons.ghd-table-sort
+                      sort-asc-icon="custom:GhdTableSortAscSvg"
+                      sort-desc-icon="custom:GhdTableSortDescSvg"
                       :search="searchTerm">
           <template v-slot:item="{item}" slot="items" slot-scope="props">
             <tr>

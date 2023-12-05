@@ -14,6 +14,7 @@
                             <v-col cols = "4">
                                 <v-row style="padding: 20px;">
                                 <v-select
+                                    menu-icon=custom:GhdDownSvg
                                     :items="conjunctionSelectListItems"
                                     class="ghd-control-border ghd-control-text ghd-select"
                                     v-model="selectedConjunction"

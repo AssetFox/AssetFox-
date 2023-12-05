@@ -12,7 +12,8 @@
       <v-card-text>
         <v-data-table :headers="treatmentLibraryUserGridHeaders"
                       :items="treatmentLibraryUserGridRows"
-                      sort-icon=ghd-table-sort
+                      sort-asc-icon="custom:GhdTableSortAscSvg"
+                      sort-desc-icon="custom:GhdTableSortDescSvg"
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="props">
             <tr>

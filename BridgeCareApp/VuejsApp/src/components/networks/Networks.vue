@@ -11,6 +11,7 @@
                         variant="outlined"
                         item-title = "text"
                         item-value = "value"
+                        menu-icon=custom:GhdDownSvg
                         v-model="selectNetworkItemValue"          
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         density="compact">
@@ -34,6 +35,7 @@
                     <v-row column>
                         <v-select
                             item-title="text"
+                            menu-icon=custom:GhdDownSvg
                             item-value="value"
                             id="Networks-KeyAttribute-vselect"
                             variant="outlined"
@@ -56,6 +58,7 @@
                         variant="outlined"
                         item-title="text"
                         item-value="value"
+                        menu-icon=custom:GhdDownSvg
                         :items="selectDataSourceItems"                       
                         class="ghd-select ghd-text-field ghd-text-field-border shifted-label"
                         v-model="selectDataSourceId"
@@ -138,6 +141,8 @@
                             <v-data-table id="Networks-Attributes-vdatatable" :headers='dataSourceGridHeaders' :items='attributeRows'
                                 class='v-table__overflow ghd-table' item-key='id' select-all
                                 v-model="selectedAttributeRows"
+                                sort-asc-icon="custom:GhdTableSortAscSvg"
+                                sort-desc-icon="custom:GhdTableSortDescSvg"
                                 :must-sort='true'
                                 hide-actions
                                 :pagination.sync="pagination">

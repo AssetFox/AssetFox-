@@ -13,7 +13,8 @@
         <v-data-table id="ShareScenarioDialog-table-vdatatable"
                       :headers="scenarioUserGridHeaders"
                       :items="scenarioUserGridRows"
-                      sort-icon=ghd-table-sort
+                      sort-asc-icon="custom:GhdTableSortAscSvg"
+                      sort-desc-icon="custom:GhdTableSortDescSvg"
                       :search="searchTerm">
           <template slot="items" slot-scope="props" v-slot:item="{item}">
             <tr>

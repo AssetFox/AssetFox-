@@ -18,6 +18,7 @@
                     label="Select a network"
                     item-title="name"
                     v-model="networkMetaData"
+                    menu-icon=custom:GhdDownSvg
                     return-object
                     @update:modelValue="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
                     density="default"

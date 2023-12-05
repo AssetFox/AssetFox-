@@ -10,6 +10,7 @@
                         <v-select 
                         id="InvestmentEditor-investmentLibrary-select"
                         :items='librarySelectItems'
+                        menu-icon=custom:GhdDownSvg
                         item-title="text"
                         item-value="value"
                         v-model='librarySelectItemValue'
@@ -179,7 +180,8 @@
                     class='v-table__overflow ghd-table'        
                     show-select 
                     return-object
-                    sort-icon=ghd-table-sort
+                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                    sort-desc-icon="custom:GhdTableSortDescSvg"
                     v-model='selectedBudgetYearsGridData' 
                     v-model:sort-by="pagination.sort"
                     v-model:page="pagination.page"

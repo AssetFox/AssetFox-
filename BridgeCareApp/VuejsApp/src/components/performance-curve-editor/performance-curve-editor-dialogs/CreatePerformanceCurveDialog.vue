@@ -20,6 +20,7 @@
             <v-subheader class="ghd-control-label ghd-md-gray">Select Attribute</v-subheader>            
             <v-select
               id="CreatePerformanceCurveDialog-attribute-select"
+              menu-icon=custom:GhdDownSvg
               class="ghd-select ghd-control-text ghd-control-border"
               v-model="newPerformanceCurve.attribute"
               :items="attributeSelectItems"

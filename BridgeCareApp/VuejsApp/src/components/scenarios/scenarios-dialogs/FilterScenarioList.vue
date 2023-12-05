@@ -19,6 +19,7 @@
                     item-title="name"
                     v-model="FilterCategory"
                     return-object
+                    menu-icon=custom:GhdDownSvg
                     @update:modelValue="selectedFilter(`${FilterCategory}`, `${FilterValue}`)"
                     density="default"
                     variant = "outlined"

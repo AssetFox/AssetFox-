@@ -12,6 +12,7 @@
                     variant="outlined"
                     item-title="text"
                     item-value="value"
+                    menu-icon=custom:GhdDownSvg
                     v-model='DialogData.selectedItem'                         
                     id="EditAdminDataDialog-addNewItems-select"
                     class="ghd-select ghd-text-field ghd-text-field-border"

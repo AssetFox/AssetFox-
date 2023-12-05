@@ -11,6 +11,7 @@
                     </v-btn>
                     <v-select
                         v-model="librarySelectItemValue"
+                        menu-icon=custom:GhdDownSvg
                         v-if="!hasSelectedCriterionLibrary"
                         :items="criterionLibrarySelectItems"
                         label="Select a Criteria Library"

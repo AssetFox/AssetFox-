@@ -33,6 +33,7 @@
                     label='Select a Template'
                     style="width: 20% !important;"
                     v-model="templateItemSelected"
+                    menu-icon=custom:GhdDownSvg
                     variant="outlined"
                     density="compact">
                     </v-select>
@@ -93,6 +94,8 @@
                         :items-length="totalItems"
                         :items="currentPage"
                         item-key='id'
+                        sort-asc-icon="custom:GhdTableSortAscSvg"
+                        sort-desc-icon="custom:GhdTableSortDescSvg"
                         :pagination.sync="projectPagination"
                         :total-items="totalItems"
                         :items-per-page-options="[
@@ -114,6 +117,7 @@
                                     <div>
                                         <v-select v-if="header.key === 'treatment'"
                                             :items="treatmentSelectItems"
+                                            menu-icon=custom:GhdDownSvg
                                             class="ghd-down-small"
                                             density="compact"
                                             variant="underlined"
@@ -124,6 +128,7 @@
                                         <v-select
                                             v-else-if="header.key === 'projectSource'"
                                             :items="projectSourceOptions"
+                                            menu-icon=custom:GhdDownSvg
                                             class="ghd-down-small"
                                             density="compact"
                                             variant="underlined"
@@ -198,6 +203,7 @@
 
                                                 <v-select v-if="header.key === 'budget'"
                                                     :items="budgetSelectItems"
+                                                    menu-icon=custom:GhdDownSvg
                                                     label="Select a Budget"
                                                     variant="outlined"
                                                     item-title="text"  
@@ -207,6 +213,7 @@
 
                                                 <v-select v-if="header.key === 'category'"
                                                     :items="categorySelectItems"
+                                                    menu-icon=custom:GhdDownSvg
                                                     label="Select a Category"
                                                     variant="outlined"
                                                     item-title="text"  

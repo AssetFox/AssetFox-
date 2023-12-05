@@ -12,7 +12,8 @@
       <v-card-text>
         <v-data-table id="ShareCashFlowRuleLibraryDialog-table-vdatatable" :headers="shareCashFlowRuleLibraryUserGridHeaders"
                       :items="shareCashFlowRuleLibraryUserGridRows"
-                      sort-icon=ghd-table-sort
+                      sort-asc-icon="custom:GhdTableSortAscSvg"
+                      sort-desc-icon="custom:GhdTableSortDescSvg"
                       :search="searchTerm">
           <template v-slot:item="{item}" slot="items" slot-scope="props">
             <tr>

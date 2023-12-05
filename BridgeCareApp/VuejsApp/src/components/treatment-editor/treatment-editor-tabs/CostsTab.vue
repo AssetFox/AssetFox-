@@ -5,7 +5,8 @@
                 <v-data-table
                     hide-default-header id="CostsTab-vdatatable"
                     :headers="costsGridHeaders"
-                    sort-icon=ghd-table-sort
+                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                    sort-desc-icon="custom:GhdTableSortDescSvg"
                     :items="costsGridData"
                     class="elevation-1 v-table__overflow ghd-padding-top"
                     hide-actions

@@ -111,7 +111,9 @@
                           <v-col cols = "5" >
                             <div>                 
                               <div class="data-points-grid">
-                                <v-data-table :headers="piecewiseGridHeaders" :items="piecewiseGridData" class="v-table__overflow ghd-table" hide-actions>
+                                <v-data-table :headers="piecewiseGridHeaders" :items="piecewiseGridData" class="v-table__overflow ghd-table" hide-actions
+                                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                                    sort-desc-icon="custom:GhdTableSortDescSvg">
                                     <template slot="items" slot-scope="props" v-slot:item="props">
                                       <tr>
                                         <td v-for="header in piecewiseGridHeaders">
@@ -175,7 +177,9 @@
                             <div>
                               <div class="data-points-grid">
                                 <div>
-                                  <v-data-table :headers="timeInRatingGridHeaders" :items="timeInRatingGridData" class="v-table__overflow ghd-table" hide-actions>
+                                  <v-data-table :headers="timeInRatingGridHeaders" :items="timeInRatingGridData" class="v-table__overflow ghd-table" hide-actions
+                                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                                    sort-desc-icon="custom:GhdTableSortDescSvg">
                                     <template slot="items" slot-scope="props" v-slot:item="props">
                                       <tr>
                                         <td v-for="header in timeInRatingGridHeaders">

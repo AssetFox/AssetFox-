@@ -10,6 +10,7 @@
                                   :items="librarySelectItems"
                                   append-icon="ghd-down"
                                   variant="outlined"
+                                  menu-icon=custom:GhdDownSvg
                                   v-model="librarySelectItemValue"
                                   item-title="text" 
                                     item-value="value" 
@@ -23,7 +24,7 @@
                     <v-row align-end>
                         <v-text-field
                                     id="CalculatedAttribute-search-textField"
-                                    prepend-inner-icon=ghd-search                                                                  
+                                    prepend-inner-icon=custom:GhdSearchSvg                                                           
                                     placeholder="Search Calculated Attribute"
                                     single-line
                                     v-model="gridSearchTerm"
@@ -69,6 +70,7 @@
                 <v-row column style="float:left; width: 100%; margin-left: 10px">
                     <v-select
                         id="CalculatedAttribute-Attribute-select"   
+                        menu-icon=custom:GhdDownSvg
                         :items="attributeSelectItems"
                         append-icon=ghd-down
                         label="Attribute"
@@ -86,6 +88,7 @@
                 <v-col cols = "6">
                 <v-row column style="float:right; width: 100%">
                     <v-select
+                        menu-icon=custom:GhdDownSvg
                         id="CalculatedAttribute-Timing-select"
                         :items="attributeTimingSelectItems"
                         label="Timing"
@@ -140,7 +143,8 @@
                 :items="selectedGridItem"
                 :pagination.sync="pagination"
                 class="v-table__overflow ghd-table"
-                sort-icon=ghd-table-sort
+                sort-asc-icon="custom:GhdTableSortAscSvg"
+                sort-desc-icon="custom:GhdTableSortDescSvg"
                 item-key="calculatedAttributeLibraryEquationId"                            
                 :items-length="totalItems"
                 :items-per-page-options="[

@@ -18,7 +18,8 @@
                                   :headers='editBudgetsDialogGridHeaders'
                                   :items="editBudgetsDialogGridData"
                                   :items-length="editBudgetsDialogGridData.length"
-                                  sort-icon=ghd-table-sort
+                                  sort-asc-icon="custom:GhdTableSortAscSvg"
+                                  sort-desc-icon="custom:GhdTableSortDescSvg"
                                   hide-actions
                                   item-key='id'
                                   v-model='selectedGridRows'

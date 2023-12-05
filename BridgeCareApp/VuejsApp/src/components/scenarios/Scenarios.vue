@@ -32,7 +32,7 @@
                                                 hide-details
                                                 single-line
                                                 v-model="searchMine"
-                                                prepend-inner-icon=ghd-search 
+                                                prepend-inner-icon=custom:GhdSearchSvg
                                                 variant="outlined"
                                                 density="compact"
                                                 clearable
@@ -99,6 +99,8 @@
                                     v-model:sort-by="userScenariosPagination.sort"
                                     v-model:page="userScenariosPagination.page"
                                     v-model:items-per-page="userScenariosPagination.rowsPerPage"
+                                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                                    sort-desc-icon="custom:GhdTableSortDescSvg"
                                     item-value="name"
                                     :hover="true"
                                     @update:options="onUserScenariosPagination"
@@ -248,6 +250,7 @@
                                                 variant="outlined"
                                                 hide-details
                                                 single-line
+                                                prepend-inner-icon=custom:GhdSearchSvg
                                                 v-model="searchShared"
                                                 clearable
                                                 @click:clear="onSharedClearClick()"
@@ -302,6 +305,8 @@
                                     :hover="true"
                                     v-model:sort-by="sharedScenariosPagination.sort"
                                     v-model:page="sharedScenariosPagination.page"
+                                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                                    sort-desc-icon="custom:GhdTableSortDescSvg"
                                     v-model:items-per-page="sharedScenariosPagination.rowsPerPage"
                                     item-value="name"
                                     @update:options="onSharedScenariosPagination"
@@ -434,7 +439,9 @@
                                     :headers="workQueueGridHeaders"
                                     :totalItems="totalQueuedSimulations"
                                     :pagination.sync="workQueuePagination"
-                                    :items="currentWorkQueuePage"                      
+                                    :items="currentWorkQueuePage"              
+                                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                                    sort-desc-icon="custom:GhdTableSortDescSvg"        
                                     :items-length="totalQueuedSimulations"
                                     :items-per-page-options="[
                                         {value: 5, title: '5'},
@@ -517,6 +524,8 @@
                                     :totalItems="totalFastQueuedItems"
                                     :pagination.sync="fastWorkQueuePagination"                  
                                     :items-length="totalFastQueuedItems"
+                                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                                    sort-desc-icon="custom:GhdTableSortDescSvg"
                                     :items-per-page-options="[
                                         {value: 5, title: '5'},
                                         {value: 10, title: '10'},
@@ -668,7 +677,7 @@
 
 <script lang="ts" setup>
 import { getUrl } from '@/shared/utils/get-url';
-import { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, onMounted, inject, readonly, computed, reactive } from 'vue'; 
+import { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, computed, reactive } from 'vue'; 
 import moment from 'moment';
 import {
     emptyScenario,
@@ -735,6 +744,7 @@ import mitt from 'mitt';
 import $vuetify from '@/plugins/vuetify';
 import { onBeforeMount } from 'vue';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
+import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
 
     let store = useStore(); 
     const $router = useRouter();     
@@ -1125,6 +1135,7 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
     }
 
     function onUserScenariosPagination() {
+        let foo = $vuetify.icons.sets.ghdSearchIconSet;
         if(initializing)
             return;
         const { sort, descending, page, rowsPerPage } = userScenariosPagination;

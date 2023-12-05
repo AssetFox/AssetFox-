@@ -11,7 +11,8 @@
                                 variant="outlined"
                                 item-title="text"  
                                 item-value="value"
-                                v-model="selectPrimaryNetworkItemValue"                   
+                                v-model="selectPrimaryNetworkItemValue"    
+                                menu-icon=custom:GhdDownSvg               
                                 class="ghd-select ghd-text-field ghd-text-field-border">
                             </v-select>  
                         </v-col>
@@ -25,6 +26,7 @@
                             <v-select :items="selectRawDataNetworkItems"
                                 variant="outlined"
                                 item-title="text"
+                                menu-icon=custom:GhdDownSvg
                                 item-value="value"
                                 id="AdminData-rawDataNetwork-select" 
                                 v-model="selectRawdataNetworkItemValue"

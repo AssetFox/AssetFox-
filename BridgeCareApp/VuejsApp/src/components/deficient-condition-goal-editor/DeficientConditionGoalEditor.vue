@@ -12,6 +12,7 @@
                         :items="librarySelectItems"
                         variant="outlined"
                         v-model="librarySelectItemValue"
+                        menu-icon=custom:GhdDownSvg
                         item-title="text"
                         item-value="value" 
                         density="compact"
@@ -85,7 +86,8 @@
                     :items="currentPage"  
                     :pagination.sync="pagination"
                     :must-sort='true'
-                    sort-icon=ghd-table-sort
+                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                    sort-desc-icon="custom:GhdTableSortDescSvg"
                     class="ghd-table v-table__overflow"
                     item-key="id"
                     show-select
@@ -151,7 +153,7 @@
                                         <v-select v-if="header.key === 'attribute'"
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalAttribute-vselect"
                                             :items="numericAttributeNames"
-                                            append-icon=ghd-down
+                                            menu-icon=custom:GhdDownSvg
                                             label="Select an Attribute"
                                             variant="outlined"
                                             v-model="item.item[header.key]"

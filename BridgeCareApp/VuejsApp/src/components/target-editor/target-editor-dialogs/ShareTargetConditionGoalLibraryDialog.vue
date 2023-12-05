@@ -12,6 +12,8 @@
       <v-card-text>
         <v-data-table id="ShareTargetConditionGoalLibraryDialog-table-vdatatable" :headers="targetConditionGoalLibraryUserGridHeaders"
                       :items="targetConditionGoalLibraryUserGridRows"
+                      sort-asc-icon="custom:GhdTableSortAscSvg"
+                      sort-desc-icon="custom:GhdTableSortDescSvg"
                       :search="searchTerm"
                       :rows-per-page-items=[5,10,25]
                       :items-per-page-options="[

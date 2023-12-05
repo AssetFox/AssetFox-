@@ -24,6 +24,8 @@
         <v-data-table-virtual :headers="tableHeaders"
                              :items="files"
                              :items-length="files.length"
+                             sort-asc-icon="custom:GhdTableSortAscSvg"
+                             sort-desc-icon="custom:GhdTableSortDescSvg"
                              class="fixed-header v-table__overflow Montserrat-font-family"
                              >
             <template slot="items" slot-scope="props" v-slot:item="props">

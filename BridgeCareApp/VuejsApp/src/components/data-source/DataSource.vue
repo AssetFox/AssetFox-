@@ -8,7 +8,8 @@
                 <v-row> 
                     <v-select
                       item-title = "text"
-                     item-value = "value"
+                      menu-icon=custom:GhdDownSvg
+                      item-value = "value"
                       id="DataSource-DataSourceSelect-vselect"
                       class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family"
                       :items="dsItems"
@@ -40,6 +41,7 @@
             <v-row>
                 <v-select
                 id="DataSource-SourceType-vselect"
+                menu-icon=custom:GhdDownSvg
                 class="ghd-select ghd-text-field ghd-text-field-border ds-style Montserrat-font-family"
                 :items="dsTypeItems"
                 item-title = "text"
@@ -79,6 +81,7 @@
                 <v-select
                 id="DataSource-Location-vselect"
                 :items="locColumns"
+                menu-icon=custom:GhdDownSvg
                 v-model="currentExcelLocationColumn"
                 v-show="showExcel  && !isNewDataSource"
                 item-title = "text"
@@ -91,6 +94,7 @@
                 </v-select>
                 <v-subheader  v-show="showExcel  && !isNewDataSource" class="ghd-control-label ghd-md-gray Montserrat-font-family">Date Column</v-subheader>
                 <v-select
+                menu-icon=custom:GhdDownSvg
                 id="DataSource-Date-vselect"
                 :items="datColumns"
                 v-show="showExcel  && !isNewDataSource"

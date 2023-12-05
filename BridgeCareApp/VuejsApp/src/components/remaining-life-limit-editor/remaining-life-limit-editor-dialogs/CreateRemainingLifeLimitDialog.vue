@@ -19,6 +19,7 @@
                       :items="dialogData.numericAttributeSelectItems"
                       item-title="text"
                       item-value="value"
+                      menu-icon=custom:GhdDownSvg
                       v-model="newRemainingLifeLimit.attribute"
                       :rules="[rules['generalRules'].valueIsNotEmpty]"
                       variant="outlined"

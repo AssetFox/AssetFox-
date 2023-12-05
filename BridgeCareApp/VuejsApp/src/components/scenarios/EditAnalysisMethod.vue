@@ -12,6 +12,7 @@
             item-title="text"
             item-value="value"
             density="compact"
+            menu-icon=custom:GhdDownSvg
             v-model="analysisMethod.attribute"
             :disabled="!hasAdminAccess"
             @update:model-value="onSetAnalysisMethodProperty('attribute',$event)"
@@ -28,6 +29,7 @@
             item-value="value"
             variant="outlined"
             density="compact"
+            menu-icon=custom:GhdDownSvg
             v-model="analysisMethod.optimizationStrategy"
             @update:model-value="onSetAnalysisMethodProperty('optimizationStrategy',$event)"
             :disabled="!hasAdminAccess"
@@ -44,6 +46,7 @@
                                 item-title="text"
                                 item-value="value"
                                 density="compact"
+                                menu-icon=custom:GhdDownSvg
                                 v-model="analysisMethod.spendingStrategy"
                                 @update:model-value="onSetAnalysisMethodProperty('spendingStrategy',$event)"
                             >
@@ -62,6 +65,7 @@
                                 variant="outlined"
                                 density="compact"
                                 v-model="benefit.attribute"
+                                menu-icon=custom:GhdDownSvg
                                 @update:model-value="onSetBenefitProperty('attribute', $event)"
                                 :disabled="!hasAdminAccess"
                             >

@@ -36,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
             List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount
-            , IReadOnlyCollection<SelectableTreatment> selectableTreatments)
+            , IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup)
         {
             var startYear = simulationYears[0];
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
@@ -80,9 +80,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                         {
                             var category = TreatmentCategory.Other;
-                            if (map.ContainsKey(section.AppliedTreatment))
+                            var categoryKey = treatmentCategoryLookup[section.AppliedTreatment];
+                            if (map.ContainsKey(categoryKey))
                             {
-                                category = map[section.AppliedTreatment];
+                                category = map[categoryKey];
                             }
                             summaryData.YearlyData.Add(new YearsData
                             {

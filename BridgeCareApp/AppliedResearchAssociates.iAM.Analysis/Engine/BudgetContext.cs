@@ -73,7 +73,9 @@ internal sealed class BudgetContext
             for (var yearIndex = targetYearIndex; yearIndex > 0; --yearIndex)
             {
                 var previousYearIndex = yearIndex - 1;
-                CumulativeAmountPerYear[previousYearIndex] = Math.Min(CumulativeAmountPerYear[previousYearIndex], CumulativeAmountPerYear[yearIndex]);
+                CumulativeAmountPerYear[previousYearIndex] = Math.Min(
+                    CumulativeAmountPerYear[previousYearIndex],
+                    CumulativeAmountPerYear[yearIndex]);
             }
         }
     }

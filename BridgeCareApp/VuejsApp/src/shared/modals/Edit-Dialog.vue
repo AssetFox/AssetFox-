@@ -50,14 +50,13 @@ import { computed, ref, watch } from 'vue';
       }
     })
 
-    watch(dialog, (newVal, oldVal) =>  onDialogChanged(newVal))
-    function onDialogChanged(val: boolean){
-        if(val = true){
+    watch(dialog, (newVal, oldVal) =>
+    {
+        if(newVal = true){
             emit('open')
             prevVal = clone(props.returnValue)
         }
-            
-    }
+    })
 
     function onSave(){
         emit('save');
@@ -65,7 +64,7 @@ import { computed, ref, watch } from 'vue';
     }
 
     function onCancel(){
-      value.value = prevVal
-      dialog.value = false
+      value.value = prevVal;
+      dialog.value = false;
     }
 </script>

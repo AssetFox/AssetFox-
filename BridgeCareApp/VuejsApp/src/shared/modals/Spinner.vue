@@ -20,7 +20,7 @@ import { useStore } from 'vuex';
 
 
 let store = useStore();
-let showDialogComputed = computed<boolean>(() => store.state.busyModule.isBusy);
+let showDialogComputed = computed<boolean>(() => store.state.busyModule.processCounter !== 0)
 
 </script>
 

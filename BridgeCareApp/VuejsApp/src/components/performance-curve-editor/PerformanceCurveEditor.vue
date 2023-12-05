@@ -680,39 +680,31 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let modifiedStatus : string = "";
 
     created();
-    function created() {
+    async function created() {
         librarySelectItemValue.value= null;           
-            getPerformanceCurveLibrariesAction().then(() => {
-                getHasPermittedAccessAction().then(() => {
-                    if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.PerformanceCurve) !== -1) {
-                        selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
+        await getPerformanceCurveLibrariesAction()
+        await getHasPermittedAccessAction()
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.PerformanceCurve) !== -1) {
+            selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
 
-                        if (selectedScenarioId === uuidNIL) {
-                            addErrorNotificationAction({
-                                message: 'Unable to identify selected scenario.',
-                            });
-                            $router.push('/Scenarios/');
-                        }
-
-                        hasScenario.value = true;
-                        ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioPerformanceCurve}).then(response => {
-                            if(response.data){
-                                setAlertMessageAction("A performance curve import has been added to the work queue")
-                            }
-                            initializePages().then(() =>{
-                                hasScenario.value = true;
-                                getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-                                    selectScenarioAction({ scenarioId: selectedScenarioId });        
-                            });
-                        });
-                            
-                        })
-
-                    }
-
-                    
+            if (selectedScenarioId === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Unable to identify selected scenario.',
                 });
-            });
+                $router.push('/Scenarios/');
+            }
+            hasScenario.value = true;
+            await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioPerformanceCurve}).then(async response => {
+                if(response.data){
+                    setAlertMessageAction("A performance curve import has been added to the work queue")
+                }
+                await initializePages()
+                hasScenario.value = true;
+                await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})   
+                selectScenarioAction({ scenarioId: selectedScenarioId });        
+            })
+
+        }
     }
     onMounted(()=>mounted())
     function mounted() {

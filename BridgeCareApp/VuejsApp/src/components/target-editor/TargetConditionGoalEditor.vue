@@ -497,10 +497,9 @@ import { getUrl } from '@/shared/utils/get-url';
             }
 
             hasScenario.value = true;
-            getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-                selectScenarioAction({ scenarioId: selectedScenarioId });     
-                initializePages();
-            });                                        
+            await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})
+            selectScenarioAction({ scenarioId: selectedScenarioId });     
+            await initializePages();                                   
         }
     });            
     onBeforeUnmount(()=> beforeDestroy());
@@ -963,7 +962,7 @@ import { getUrl } from '@/shared/utils/get-url';
         parentLibraryName.value = foundLibrary.name;
     }
 
-    function initializePages(){
+    async function initializePages(){
         const request: PagingRequest<TargetConditionGoal>= {
             page: 1,
             rowsPerPage: 5,
@@ -979,7 +978,7 @@ import { getUrl } from '@/shared/utils/get-url';
             search: ''
         };
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL)
-            TargetConditionGoalService.getScenarioTargetConditionGoalPage(selectedScenarioId, request).then(response => {
+            await TargetConditionGoalService.getScenarioTargetConditionGoalPage(selectedScenarioId, request).then(response => {
                 initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<TargetConditionGoal>;

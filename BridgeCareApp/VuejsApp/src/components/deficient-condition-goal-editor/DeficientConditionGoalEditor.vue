@@ -519,29 +519,27 @@ import { getUrl } from '@/shared/utils/get-url';
     created();
     function created() {
     }
-    onMounted(() => {
+    onMounted(async () => {
         librarySelectItemValue.value = null;
-        getDeficientConditionGoalLibrariesAction().then(() => {
-            numericAttributeNames = getPropertyValues('name', getNumericAttributesGetter);
-            getHasPermittedAccessAction().then(() => {
-                if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.DeficientConditionGoal) !== -1) {
-                    selectedScenarioId.value = $router.currentRoute.value.query.scenarioId as string;
+        await getDeficientConditionGoalLibrariesAction()
+        numericAttributeNames = getPropertyValues('name', getNumericAttributesGetter);
+        await getHasPermittedAccessAction()
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.DeficientConditionGoal) !== -1) {
+            selectedScenarioId.value = $router.currentRoute.value.query.scenarioId as string;
 
-                    if (selectedScenarioId.value === uuidNIL) {
-                        addErrorNotificationAction({
-                            message: 'Found no selected scenario for edit',
-                        });
-                        $router.push('/Scenarios/');
-                    }
+            if (selectedScenarioId.value === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Found no selected scenario for edit',
+                });
+                $router.push('/Scenarios/');
+            }
 
-                    hasScenario.value = true;
-                    getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId.value}).then(() => {         
-                        selectScenarioAction({ scenarioId: selectedScenarioId.value });        
-                        initializePages();
-                    });                                               
-                }
-            });     
-        });       
+            hasScenario.value = true;
+            await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId.value})       
+            selectScenarioAction({ scenarioId: selectedScenarioId.value });        
+            await initializePages();                                      
+        }
+                
     });
     onBeforeUnmount(() => beforeDestroy); 
     function beforeDestroy() {
@@ -1071,7 +1069,7 @@ import { getUrl } from '@/shared/utils/get-url';
         parentLibraryId = foundLibrary.id;
         parentLibraryName = foundLibrary.name;
     }
-    function initializePages(){
+    async function initializePages(){
         const request: PagingRequest<DeficientConditionGoal>= {
             page: 1,
             rowsPerPage: 5,
@@ -1087,7 +1085,7 @@ import { getUrl } from '@/shared/utils/get-url';
             search: ''
         };
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId.value !== uuidNIL)
-            DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(selectedScenarioId.value, request).then(response => {
+            await DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(selectedScenarioId.value, request).then(response => {
                 initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<DeficientConditionGoal>;

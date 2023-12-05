@@ -486,29 +486,25 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
     let libraryImported: boolean = false;
 
     created();
-    function created() {
+    async function created() {
         librarySelectItemValue.value = "";
-        
-        getCashFlowRuleLibrariesAction().then(() => {
-            getHasPermittedAccessAction().then(() => {
-                if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CashFlow) !== -1) {
-                    selectedScenarioId = $router.currentRoute.value.query.scenarioId;
-                    if (selectedScenarioId === uuidNIL) {
-                        addErrorNotificationAction({
-                            message: 'Unable to identify selected scenario.',
-                        });
-                        $router.push('/Scenarios/');
-                        return;
-                    }
+        await getCashFlowRuleLibrariesAction()
+        await getHasPermittedAccessAction()
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CashFlow) !== -1) {
+            selectedScenarioId = $router.currentRoute.value.query.scenarioId;
+            if (selectedScenarioId === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Unable to identify selected scenario.',
+                });
+                $router.push('/Scenarios/');
+                return;
+            }
 
-                    hasScenario.value = true;
-                    getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-                        selectScenarioAction({ scenarioId: selectedScenarioId });        
-                        initializePages();
-                    });                                                
-                }
-            });
-        });
+            hasScenario.value = true;
+            await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})     
+            selectScenarioAction({ scenarioId: selectedScenarioId });        
+            await initializePages();                                   
+        }
     }
 
 
@@ -1105,7 +1101,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
         } 
     }
 
-    function initializePages(){
+    async function initializePages(){
         
         const request: PagingRequest<CashFlowRule>= {
             page: 1,
@@ -1122,7 +1118,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
             search: ''
         };
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL) {
-            CashFlowService.getScenarioCashFlowRulePage(selectedScenarioId, request).then(response => {
+            await CashFlowService.getScenarioCashFlowRulePage(selectedScenarioId, request).then(response => {
                 initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<CashFlowRule>;

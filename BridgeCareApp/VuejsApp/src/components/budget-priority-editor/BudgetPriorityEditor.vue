@@ -270,6 +270,7 @@
     import { useConfirm } from 'primevue/useconfirm';
     import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
+import { faL } from '@fortawesome/free-solid-svg-icons';
 
     let store = useStore();
     const confirm = useConfirm();
@@ -294,7 +295,7 @@ import { getUrl } from '@/shared/utils/get-url';
     async function setHasUnsavedChangesAction(payload?: any): Promise<any>{await store.dispatch('setHasUnsavedChanges', payload) }
     async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification', payload)}
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>{await store.dispatch( 'getCurrentUserOrSharedScenario', payload)}
-    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario', payload)}
+    function selectScenarioAction(payload?: any): void { store.dispatch('selectScenario', payload)}
     
     let getUserNameByIdGetter: any = store.getters.getUserNameById;
     function budgetPriorityLibraryMutator(payload: any){store.commit('budgetPriorityLibraryMutator', payload);}
@@ -374,14 +375,11 @@ import { getUrl } from '@/shared/utils/get-url';
                 $router.push('/Scenarios/');
             }
             hasScenario.value = true;
-            getScenarioSimpleBudgetDetailsAction({ scenarioId: selectedScenarioId }).then(() => {
-                getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-                    selectScenarioAction({ scenarioId: selectedScenarioId });        
-                    initializePages();
-                });                                        
-            });             
+            await getScenarioSimpleBudgetDetailsAction({ scenarioId: selectedScenarioId })
+            await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})
+            selectScenarioAction({ scenarioId: selectedScenarioId });        
+            await initializePages();             
         }
-
     }
     onBeforeUnmount(() => onBeforeUnmountFunc())
     function onBeforeUnmountFunc() {
@@ -760,26 +758,25 @@ import { getUrl } from '@/shared/utils/get-url';
         selectedBudgetPriorityForCriteriaEdit = clone(emptyBudgetPriority);
     }
 
-    function onUpsertScenarioBudgetPriorities() {
+    async function onUpsertScenarioBudgetPriorities() {
         if (selectedBudgetPriorityLibrary.value.id === uuidNIL || hasUnsavedChanges.value && newLibrarySelection ===false) {scenarioLibraryIsModified.value = true;}
         else { scenarioLibraryIsModified.value = false; }
 
-        BudgetPriorityService.upsertScenarioBudgetPriorities({
+        let response = await BudgetPriorityService.upsertScenarioBudgetPriorities({
             libraryId: selectedBudgetPriorityLibrary.value.id === uuidNIL ? null : selectedBudgetPriorityLibrary.value.id,
             rowsForDeletion: deletionIds.value,
             updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
             addedRows: addedRows.value,
             isModified: scenarioLibraryIsModified.value
-        }, selectedScenarioId).then((response: AxiosResponse) => {
-            if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
-                clearChanges();
-                librarySelectItemValue.value = null;
-                addSuccessNotificationAction({message: "Modified scenario's budget priorities"});
-                currentPage.value = sortByProperty("priorityLevel", currentPage.value);
-                onPaginationChanged();
-            }           
-        });
+        }, selectedScenarioId)
+        if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+            parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
+            clearChanges();
+            librarySelectItemValue.value = null;
+            addSuccessNotificationAction({message: "Modified scenario's budget priorities"});
+            currentPage.value = sortByProperty("priorityLevel", currentPage.value);
+            await onPaginationChanged();
+        }           
     }
 
     function onUpsertBudgetPriorityLibrary() {
@@ -1013,7 +1010,7 @@ import { getUrl } from '@/shared/utils/get-url';
             }
         });
     }
-    function initializePages(){
+    async function initializePages(){
         const { sort, descending, page, rowsPerPage } = pagination;
         const request: PagingRequest<BudgetPriority>= {
             page: 1,
@@ -1030,7 +1027,7 @@ import { getUrl } from '@/shared/utils/get-url';
             search: ''
         };
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL)
-            BudgetPriorityService.getScenarioBudgetPriorityPage(selectedScenarioId, request).then(response => {
+            await BudgetPriorityService.getScenarioBudgetPriorityPage(selectedScenarioId, request).then(response => {
                 initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<BudgetPriority>;

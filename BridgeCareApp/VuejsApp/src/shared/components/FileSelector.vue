@@ -65,7 +65,6 @@ const props = defineProps<{
 const { useTreatment, closed } = toRefs(props);
 
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
-async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('setIsBusy', payload);}
 
     const applyNoTreatment = ref<boolean>(true);
     const fileSelect = ref<HTMLInputElement>({} as HTMLInputElement);

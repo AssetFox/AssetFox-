@@ -296,7 +296,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import editDialog from '@/shared/modals/Edit-Dialog.vue'
-import { watch, ref, onMounted, onBeforeUnmount, shallowRef, computed } from 'vue'
+import { watch, ref, shallowReactive, onMounted, onBeforeUnmount, shallowRef, computed } from 'vue'
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { CommittedProjectFillTreatmentReturnValues, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
 import { getBlankGuid, getNewGuid } from '../../shared/utils/uuid-utils';
@@ -389,7 +389,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     const selectedLibraryTreatments = ref<Treatment[]>([]);
     let isKeyAttributeValidMap: Map<string, boolean> = new Map<string, boolean>();
 
-    let projectPagination = shallowRef<Pagination>(clone(emptyPagination));
+    let projectPagination = shallowReactive<Pagination>(clone(emptyPagination));
 
     const currentUserCriteriaFilter = computed<UserCriteriaFilter>(() => store.state.userModule.currentUserCriteriaFilter);
     const stateSectionCommittedProjects = computed<SectionCommittedProject[]>(() => store.state.committedProjectsModule.sectionCommittedProjects);
@@ -667,7 +667,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             return;
         isRunning = true
         checkHasUnsavedChanges();
-        const { sort, descending, page, rowsPerPage } = projectPagination.value;
+        const { sort, descending, page, rowsPerPage } = projectPagination;
 
         const request: PagingRequest<SectionCommittedProject>= {
             page: page,
@@ -1232,7 +1232,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }
 
     function resetPage(){
-        projectPagination.value.page = 1;
+        projectPagination.page = 1;
         onPaginationChanged();
     }
 
@@ -1250,7 +1250,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     function importCompleted(data: any){
         var importComp = data.importComp as importCompletion
         if(importComp.id === scenarioId && importComp.workType == WorkType.ImportCommittedProject){
-            projectPagination.value.page = 1
+            projectPagination.page = 1
             clearChanges();
             onPaginationChanged().then(() => {
                 setAlertMessageAction('');

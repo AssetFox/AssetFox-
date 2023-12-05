@@ -128,14 +128,14 @@
                                 </div>
                                 <div v-else-if="header.title.endsWith('%')">
                                     <editDialog
-                                        v-model:return-value='item.item[header.key]'
+                                        :return-value='item.item[header.key]'
                                         @save='onEditBudgetPercentagePair(item.item, header.key, item.item[header.key])'
                                         size="large" lazy>
-                                        <v-text-field readonly single-line class='sm-txt' :model-value='item.item[header.key]' variant="underlined"
+                                        <v-text-field readonly single-line class='sm-txt' :model-value="item.item[header.key]" variant="underlined"
                                                     :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.item[header.key], [0, 100])]" />
                                         <template v-slot:input>
                                             <v-text-field :mask="'###'" label='Edit' single-line
-                                                        :model-value.number="item.item[header.key]"
+                                                        v-model="item.item[header.key]"
                                                         :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.item[header.key], [0, 100])]" />
                                         </template>
                                     </editDialog>

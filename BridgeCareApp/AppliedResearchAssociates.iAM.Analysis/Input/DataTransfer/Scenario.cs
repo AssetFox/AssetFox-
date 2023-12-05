@@ -50,7 +50,7 @@ public sealed class Scenario
         AllowFundingFromMultipleBudgets = source.AllowFundingFromMultipleBudgets,
         BenefitAttributeName = source.Benefit.Attribute.Name,
         BenefitLimit = source.Benefit.Limit,
-        BenefitWeightAttributeName = source.Weighting.Name,
+        BenefitWeightAttributeName = source.Weighting?.Name,
         BudgetPriorities = source.BudgetPriorities.Select(Convert).ToList(),
         DeficientConditionGoals = source.DeficientConditionGoals.Select(Convert).ToList(),
         FilterExpression = source.Filter.Expression,

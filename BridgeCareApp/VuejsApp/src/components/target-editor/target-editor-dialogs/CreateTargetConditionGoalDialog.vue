@@ -23,6 +23,7 @@
           <v-subheader class="ghd-control-label ghd-md-gray">Select Attribute</v-subheader>
           <v-select id="CreateTargetConditionGoalDialog-attribute-vselect"
                     :items="numericAttributeNames"
+                    menu-icon=custom:GhdDownSvg
                     density="compact"
                     class="ghd-select ghd-control-text ghd-text-field ghd-text-field-border"
                     variant="outlined" v-model="newTargetConditionGoal.attribute"

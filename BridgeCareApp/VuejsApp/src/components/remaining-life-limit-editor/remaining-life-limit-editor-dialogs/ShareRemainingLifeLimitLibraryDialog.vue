@@ -16,7 +16,8 @@
                           :headers="remainingLifeLimitLibraryUserGridHeaders"
                           :items="remainingLifeLimitLibraryUserGridRows"
                           :items-length="remainingLifeLimitLibraryUserGridRows.length"
-                          sort-icon=$vuetify.icons.ghd-table-sort
+                          sort-asc-icon="custom:GhdTableSortAscSvg"
+                          sort-desc-icon="custom:GhdTableSortDescSvg"
                           :search="searchTerm">
               <template v-slot:item="props">
                 <tr>

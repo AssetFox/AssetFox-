@@ -21,7 +21,7 @@
             id="CreateCommittedProjectConsequenceDialog-attribute-vFlex">
             <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
             <v-select :items="attributeNames"
-              append-icon=ghd-down
+              menu-icon=custom:GhdDownSvg
               variant="outlined"
               v-model="newConsequence.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
               class="ghd-select ghd-text-field ghd-text-field-border">

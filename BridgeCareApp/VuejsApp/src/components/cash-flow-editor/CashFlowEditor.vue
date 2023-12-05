@@ -12,6 +12,7 @@
                         id="CashFlowEditor-SelectLibrary-vselect"
                         variant="outlined"
                         v-model="librarySelectItemValue"
+                        menu-icon=custom:GhdDownSvg
                         item-title="text"
                         item-value="value"
                         class="ghd-select ghd-text-field ghd-text-field-border" density="compact">
@@ -68,7 +69,8 @@
                     :items="currentPage"  
                     :pagination.sync="pagination"
                     :must-sort='true'
-                    sort-icon=ghd-table-sort
+                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                    sort-desc-icon="custom:GhdTableSortDescSvg"
                     v-model='selectedCashRuleGridRows'
                     class="ghd-table v-table__overflow"
                     item-key="id"

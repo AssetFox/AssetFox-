@@ -9,7 +9,7 @@
                     id="PerformanceCurveEditor-library-select"
                     class="ghd-control-border ghd-control-text ghd-select "
                     :items="librarySelectItems"
-                    append-icon=ghd-down
+                    menu-icon=custom:GhdDownSvg
                     variant="outlined"
                     v-model="librarySelectItemValue"
                     item-title="text" 
@@ -31,7 +31,7 @@
                     id="PerformanceCurveEditor-searchDeteriorationEquations-textField"
                     class="ghd-text-field-border ghd-text-field search-icon-general"
                     style="margin-top:0px;"
-                    prepend-inner-icon=ghd-search
+                    prepend-inner-icon=custom:GhdSearchSvg
                     hide-details
                     placeholder="Search Deterioration Equations"
                     single-line
@@ -115,11 +115,11 @@
                         show-select
                         class='v-table__overflow ghd-table'
                         item-key="id"
-
                         :headers="performanceCurveGridHeaders"
                         :pagination.sync="performancePagination"
                         :must-sort='true'
-                        sort-icon=ghd-table-sort
+                        sort-asc-icon="custom:GhdTableSortAscSvg"
+                        sort-desc-icon="custom:GhdTableSortDescSvg"
                         v-model="selectedPerformanceEquations"
                         return-object
                         :items="currentPage"                      
@@ -211,7 +211,7 @@
                                     <template v-slot:input>
                                         <v-select
                                             :items="attributeSelectItems"
-                                            append-icon=ghd-down
+                                            menu-icon=custom:GhdDownSvg
                                             label="Edit"
                                             variant="outlined"
                                             v-model="item.item.attribute"

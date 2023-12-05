@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         public static SectionCommittedProjectDTO Dto2(Guid id, Guid simulationId)
             => new SectionCommittedProjectDTO
             {
-                Id = Guid.Parse("c6fd501b-83f3-49e0-a728-8444c14b6262"),
+                Id = id,
                 Year = 2024,
                 Treatment = "Simple again",
                 ShadowForAnyTreatment = 1,

@@ -42,7 +42,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var attributeName = RandomStrings.WithPrefix("attribute");
             var attribute = AttributeTestSetup.Text(keyAttributeId, attributeName);
             maintainableAssets.Add(maintainableAsset);
-            var network = NetworkTestSetup.ModelForEntityInDbWithKeyAttribute(
+            var network = NetworkTestSetup.ModelForEntityInDbWithNewKeyTextAttribute(
                 TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, attributeName);
             var attributes = new List<IamAttribute> { attribute };
             AggregatedResultTestSetup.SetTextAggregatedResultsInDb(TestHelper.UnitOfWork,
@@ -85,7 +85,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             AttributeTestSetup.CreateSingleTextAttribute(TestHelper.UnitOfWork,
                 resultAttributeId, resultAttributeName, ConnectionType.EXCEL, keyAttributeName);
             maintainableAssets.Add(maintainableAsset);
-            var network = NetworkTestSetup.ModelForEntityInDbWithKeyAttribute(
+            var network = NetworkTestSetup.ModelForEntityInDbWithNewKeyTextAttribute(
                 TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, keyAttributeName);
             var attributes = new List<IamAttribute> { keyAttribute, resultAttribute };
             AggregatedResultTestSetup.SetTextAggregatedResultsInDb(TestHelper.UnitOfWork,
@@ -136,7 +136,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             AttributeTestSetup.CreateSingleTextAttribute(TestHelper.UnitOfWork,
                 resultAttributeId, resultAttributeName, ConnectionType.EXCEL, keyAttributeName);
             maintainableAssets.Add(maintainableAsset);
-            var network = NetworkTestSetup.ModelForEntityInDbWithKeyAttribute(
+            var network = NetworkTestSetup.ModelForEntityInDbWithNewKeyTextAttribute(
                 TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, keyAttributeName);
             AdminSettingsTestSetup.SetupBamsAdminSettings(TestHelper.UnitOfWork, network.Name, keyAttributeName, keyAttributeName);
             var attributes = new List<IamAttribute> { keyAttribute, resultAttribute };
@@ -218,7 +218,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var keyAttributeName = RandomStrings.WithPrefix("locationAttribute");
             var keyAttribute = AttributeTestSetup.Text(keyAttributeId, keyAttributeName, ConnectionType.EXCEL);
             maintainableAssets.Add(maintainableAsset);
-            var network = NetworkTestSetup.ModelForEntityInDbWithKeyAttribute(
+            var network = NetworkTestSetup.ModelForEntityInDbWithNewKeyTextAttribute(
                 TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, keyAttributeName);
             AdminSettingsTestSetup.SetupBamsAdminSettings(TestHelper.UnitOfWork, network.Name, keyAttributeName, keyAttributeName);
             var service = CreateCommittedProjectService();

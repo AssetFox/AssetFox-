@@ -2997,7 +2997,7 @@ AS
 
             BEGIN TRY
 
-			ALTER TABLE Simulation_User NOCHECK CONSTRAINT all
+			--ALTER TABLE Simulation_User NOCHECK CONSTRAINT all
 
 			Print ''Simulation_User '';
 
@@ -3007,7 +3007,7 @@ AS
 			JOIN Simulation_User AS l3 ON l3.SimulationId = l2.Id
 			WHERE l1.Id IN (@NetworkId);
 
-			ALTER TABLE Simulation_User WITH CHECK CHECK CONSTRAINT all
+			--ALTER TABLE Simulation_User WITH CHECK CHECK CONSTRAINT all
 
  
             END TRY 

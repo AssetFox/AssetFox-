@@ -7021,7 +7021,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 
                 CREATE NONCLUSTERED INDEX [IX_MaintainableAsset_NetworkId] ON [dbo].[MaintainableAsset]
-                ([NetworkId] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+                ([NetworkId] ASC) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 
                 -----------------------------------------
 
@@ -7086,7 +7086,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                 CREATE NONCLUSTERED INDEX [IX_ScenarioCalculatedAttributePair_ScenarioCalculatedAttribute_ScenarioCalculatedAttributeId] ON [dbo].[ScenarioCalculatedAttributePair]
                 ([ScenarioCalculatedAttributeId] ASC
-                )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+                ) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 
                 -----------------------------------------
 
@@ -7121,8 +7121,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 [SimulationId] ASC) INCLUDE ([Description],[Name],[ShadowForAnyTreatment],[ShadowForSameTreatment],[AssetType],[Category],[IsModified],[LibraryId],[IsUnselectable])
                 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 
-
-
                 -----------------------------------------
 
                 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N''IX_SimulationLog_SimulationId'')
@@ -7133,10 +7131,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 [SimulationId] ASC) INCLUDE ([Status],[Subject],[Message])
                 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 
-
-
                 -----------------------------------------
-
 
                 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N''IX_MaintainableAssetLocation_MaintainableAssetId'')
                 DROP INDEX [IX_MaintainableAssetLocation_MaintainableAssetId] ON [dbo].[MaintainableAssetLocation]
@@ -7146,11 +7141,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 [MaintainableAssetId] ASC) INCLUDE ([Discriminator],[LocationIdentifier],[Start],[End],[Direction])
                 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 
-
                 -----------------------------------------------------------
-  
-
-
 
                 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N''IX_AssetSummaryDetail_MaintainableAssetId'')
                 DROP INDEX [IX_AssetSummaryDetail_MaintainableAssetId] ON [dbo].[AssetSummaryDetail]
@@ -7171,9 +7162,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 [TreatmentConsiderationDetailId] ASC ) INCLUDE ([CashFlowRuleName],[ReasonAgainstCashFlow])
                 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 
-
                 -----------------------------------------
-
 
                 IF EXISTS (SELECT name FROM sys.indexes WHERE name = N''IX_BudgetPercentagePair_ScenarioBudgetId'')
                 DROP INDEX [IX_BudgetPercentagePair_ScenarioBudgetId] ON [dbo].[BudgetPercentagePair]
@@ -7193,7 +7182,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 CREATE UNIQUE NONCLUSTERED INDEX [IX_CriterionLibrary_ScenarioPerformanceCurve_ScenarioPerformanceCurveId] ON [dbo].[CriterionLibrary_ScenarioPerformanceCurve]
                 (
                 [ScenarioPerformanceCurveId] ASC
-                )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+                ) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 
 
                 -----------------------------------------
@@ -7218,7 +7207,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                 CREATE UNIQUE NONCLUSTERED INDEX [IX_CriterionLibrary_ScenarioTreatmentConsequence_ScenarioConditionalTreatmentConsequenceId] ON [dbo].[CriterionLibrary_ScenarioTreatmentConsequence]
                 ([ScenarioConditionalTreatmentConsequenceId] ASC
-                )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+                ) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 
                 ---------------------------------------------------------
 
@@ -7228,9 +7217,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                 CREATE NONCLUSTERED INDEX [IX_ScenarioTreatmentCost_ScenarioSelectableTreatmentId] ON [dbo].[ScenarioTreatmentCost]
                 ([ScenarioSelectableTreatmentId] ASC
-                )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-
-
+                ) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 
 
                 IF EXISTS (SELECT name FROM sys.indexes  WHERE name = N''IX_TreatmentConsequence_SelectableTreatmentId'')   
@@ -7317,8 +7304,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 
                 CREATE NONCLUSTERED INDEX [IX_ScenarioSelectableTreatment_ScenarioBudget_ScenarioBudgetId] ON [dbo].[ScenarioSelectableTreatment_ScenarioBudget]
-                (
-                [ScenarioBudgetId] ASC
+                ( [ScenarioBudgetId] ASC
                 ) INCLUDE([ScenarioSelectableTreatmentId])   WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 
 
@@ -7424,7 +7410,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                 CREATE NONCLUSTERED INDEX [IX_BudgetDetail_SimulationYearDetailId] ON [dbo].[BudgetDetail]
                 ([SimulationYearDetailId] ASC)
-                INCLUDE ([AvailableFunding],[BudgetName])WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+                INCLUDE ([AvailableFunding],[BudgetName]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
  
                  --22sec
                  --2:40 total

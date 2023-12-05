@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20231201174457_AddDeleteSProcsandIndexes")]
+    [Migration("20231205172506_AddDeleteSProcsandIndexes")]
     partial class AddDeleteSProcsandIndexes
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

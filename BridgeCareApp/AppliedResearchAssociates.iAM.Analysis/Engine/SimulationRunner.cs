@@ -524,7 +524,7 @@ public sealed class SimulationRunner
                             workingContext,
                             option.CandidateTreatment,
                             year,
-                            context => context.CurrentPrioritizedAmount ?? context.CurrentAmount);
+                            context => context.CurrentPriorityAmount ?? context.CurrentAmount);
 
                         var considerationDetail = workingContext.Detail.TreatmentConsiderations.Last();
                         considerationDetail.BudgetPriorityLevel = priority.PriorityLevel;

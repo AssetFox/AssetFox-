@@ -3,29 +3,39 @@ using System.Linq;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
+/// <summary>
+///     Represents a budget evolving through the analysis period.
+/// </summary>
 internal sealed class BudgetContext
 {
+    private readonly decimal[] AmountPerYear;
+
+    private readonly int FirstYearOfAnalysisPeriod;
+
+    private int CurrentYearIndex = 0;
+
     public BudgetContext(Budget budget, int firstYearOfAnalysisPeriod)
     {
         Budget = budget ?? throw new ArgumentNullException(nameof(budget));
         FirstYearOfAnalysisPeriod = firstYearOfAnalysisPeriod;
+        AmountPerYear = Budget.YearlyAmounts.Select(amount => amount.Value).ToArray();
+    }
 
-        if (Budget.InvestmentPlan.AllowFundingCarryover)
-        {
-            var cumulativeAmount = 0m;
-            CumulativeAmountPerYear = Budget.YearlyAmounts.Select(amount => cumulativeAmount += amount.Value).ToArray();
-        }
-        else
-        {
-            CumulativeAmountPerYear = Budget.YearlyAmounts.Select(amount => amount.Value).ToArray();
-        }
+    public BudgetContext(BudgetContext original)
+    {
+        Budget = original.Budget;
+        FirstYearOfAnalysisPeriod = original.FirstYearOfAnalysisPeriod;
+        AmountPerYear = original.AmountPerYear.ToArray();
+
+        CurrentYearIndex = original.CurrentYearIndex;
+        CurrentPriorityAmount = original.CurrentPriorityAmount;
     }
 
     public Budget Budget { get; }
 
-    public decimal CurrentAmount => CumulativeAmountPerYear[CurrentYearIndex];
+    public decimal CurrentAmount => AmountPerYear[CurrentYearIndex];
 
-    public decimal? CurrentPrioritizedAmount { get; private set; }
+    public decimal? CurrentPriorityAmount { get; private set; }
 
     public void AllocateCost(decimal cost) => _AllocateCost(cost, CurrentYearIndex);
 
@@ -34,50 +44,74 @@ internal sealed class BudgetContext
     public void MoveToNextYear()
     {
         ++CurrentYearIndex;
+        if (CurrentYearIndex == AmountPerYear.Length)
+        {
+            throw new InvalidOperationException("Budget advanced beyond analysis period.");
+        }
+
         SetPriority(null);
+
+        if (Budget.InvestmentPlan.AllowFundingCarryover)
+        {
+            AmountPerYear[CurrentYearIndex] += AmountPerYear[CurrentYearIndex - 1];
+        }
     }
 
     public void SetPriority(BudgetPriority budgetPriority)
     {
-        var prioritizedFraction = budgetPriority?.GetBudgetPercentagePair(Budget).Percentage / 100;
-        CurrentPrioritizedAmount = CurrentAmount * prioritizedFraction;
+        var priorityFraction = budgetPriority?.GetBudgetPercentagePair(Budget).Percentage / 100;
+        CurrentPriorityAmount = CurrentAmount * priorityFraction;
     }
-
-    internal BudgetContext(BudgetContext original)
-    {
-        Budget = original.Budget;
-        FirstYearOfAnalysisPeriod = original.FirstYearOfAnalysisPeriod;
-
-        CumulativeAmountPerYear = original.CumulativeAmountPerYear.ToArray();
-
-        CurrentYearIndex = original.CurrentYearIndex;
-        CurrentPrioritizedAmount = original.CurrentPrioritizedAmount;
-    }
-
-    private readonly decimal[] CumulativeAmountPerYear;
-
-    private readonly int FirstYearOfAnalysisPeriod;
-
-    private int CurrentYearIndex = 0;
 
     private void _AllocateCost(decimal cost, int targetYearIndex)
     {
-        CurrentPrioritizedAmount -= cost;
-        CumulativeAmountPerYear[targetYearIndex] -= cost;
-
-        if (Budget.InvestmentPlan.AllowFundingCarryover)
+        if (cost < 0)
         {
-            for (var yearIndex = targetYearIndex + 1; yearIndex < CumulativeAmountPerYear.Length; ++yearIndex)
-            {
-                CumulativeAmountPerYear[yearIndex] -= cost;
-            }
+            throw new ArgumentOutOfRangeException(nameof(cost));
+        }
 
-            for (var yearIndex = targetYearIndex; yearIndex > 0; --yearIndex)
+        if (targetYearIndex < CurrentYearIndex)
+        {
+            throw new ArgumentOutOfRangeException(nameof(targetYearIndex));
+        }
+
+        if (cost > 0)
+        {
+            if (Budget.InvestmentPlan.AllowFundingCarryover)
             {
-                var previousYearIndex = yearIndex - 1;
-                CumulativeAmountPerYear[previousYearIndex] = Math.Min(
-                    CumulativeAmountPerYear[previousYearIndex],
-                    CumulativeAmountPerYear[yearIndex]);
+                for (var yearIndex = targetYearIndex; yearIndex > CurrentYearIndex; --yearIndex)
+                {
+                    var availableAmount = AmountPerYear[yearIndex];
+                    if (availableAmount > 0)
+                    {
+                        if (cost <= availableAmount)
+                        {
+                            AmountPerYear[yearIndex] -= cost;
+                            return;
+                        }
+
+                        AmountPerYear[yearIndex] -= availableAmount;
+
+                        cost -= availableAmount;
+                        if (cost < 0)
+                        {
+                            throw new InvalidOperationException("Remaining cost is negative.");
+                        }
+                    }
+                }
+
+                AmountPerYear[CurrentYearIndex] -= cost;
+
+                CurrentPriorityAmount -= cost;
+            }
+            else
+            {
+                AmountPerYear[targetYearIndex] -= cost;
+
+                if (targetYearIndex == CurrentYearIndex)
+                {
+                    CurrentPriorityAmount -= cost;
+                }
             }
         }
     }

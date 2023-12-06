@@ -13,7 +13,7 @@
                 </v-card-title>
                 <div style='height: 500px; max-width:900px; margin-top:20px;' class="ghd-dialog-box-padding-center">
                     <div style='max-height: 450px; overflow-y:auto;'>
-                        <v-data-table-virtual
+                        <v-data-table-server
                                   id="EditBudgetsDialog-budgets-dataTable"
                                   :headers='editBudgetsDialogGridHeaders'
                                   :items="editBudgetsDialogGridData"
@@ -22,8 +22,9 @@
                                   sort-desc-icon="custom:GhdTableSortDescSvg"
                                   hide-actions
                                   item-key='id'
-                                  v-model='selectedGridRows'
+                                  v-model='selectedGridRows'                              
                                   class="ghd-table">
+                                  <template #bottom></template>
                         <template slot='items' slot-scope='props' v-slot:item="props">
                          <tr>  
                             <td>
@@ -57,7 +58,7 @@
                                 </editDialog>
                             </td>
                             <td>
-                                <v-text-field 
+                                <v-text-field
                                     readonly single-line class='sm-txt'
                                     variant="underlined"
                                     :model-value='props.item.criterionLibrary.mergedCriteriaExpression'>
@@ -76,7 +77,7 @@
                             </td>
                         </tr>    
                         </template>
-                    </v-data-table-virtual>
+                    </v-data-table-server>
                     </div>
                     <v-row row align-end style="margin:0 !important">
                         <v-btn id="EditBudgetsDialog-add-btn" @click='onAddBudget' class='ghd-blue ghd-button' variant = "flat">

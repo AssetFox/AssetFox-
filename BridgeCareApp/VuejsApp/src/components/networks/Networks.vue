@@ -222,7 +222,7 @@ import { Hub } from '@/connectionHub';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { useStore } from 'vuex';
-import mitt from 'mitt';
+import mitt, { Emitter, EventType } from 'mitt';
 import ConfirmDialog from 'primevue/confirmdialog';
 
     let store = useStore();
@@ -283,7 +283,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
         emptyEquationEditorDialogData,
     ));
     
-    const $emitter = mitt()
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
 
     created();
     function created() {

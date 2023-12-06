@@ -677,7 +677,7 @@
 
 <script lang="ts" setup>
 import { getUrl } from '@/shared/utils/get-url';
-import { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, computed, reactive } from 'vue'; 
+import { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, computed, reactive, inject } from 'vue'; 
 import moment from 'moment';
 import {
     emptyScenario,
@@ -740,7 +740,7 @@ import { PagingRequest } from '@/shared/models/iAM/paging';
 import ScenarioService from '@/services/scenario.service';
 import { useStore } from 'vuex'; 
 import { useRouter } from 'vue-router'; 
-import mitt from 'mitt';
+import mitt, { Emitter, EventType } from 'mitt';
 import $vuetify from '@/plugins/vuetify';
 import { onBeforeMount } from 'vue';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
@@ -748,7 +748,7 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
 
     let store = useStore(); 
     const $router = useRouter();     
-    const $emitter = mitt()
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
     
     const stateNetworks = computed<Network[]>(() => store.state.networkModule.networks) ;
     const stateScenarios = computed<Scenario[]>(() => store.state.scenarioModule.scenarios); 

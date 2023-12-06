@@ -303,7 +303,7 @@ import NewsDialog from '@/components/NewsDialog.vue'
 import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcement';
 import { useStore } from 'vuex';
 import router from './router';
-import mitt from 'mitt'
+import mitt, { Emitter, EventType } from 'mitt'
 import vuetify from '@/plugins/vuetify';
 import config from '../public/config.json';
 import { getUrl } from './shared/utils/get-url';
@@ -387,7 +387,7 @@ import { getUrl } from './shared/utils/get-url';
     let inventoryReportName: string = '';
     let alert: Ref<boolean> = ref(false);
 
-    const $emitter = mitt()
+        const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
     
     created();
 

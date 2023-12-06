@@ -68,6 +68,7 @@
                         placeholder="Search"
                         single-line
                         v-model="gridSearchTerm"
+                        prepend-inner-icon=custom:GhdSearchSvg
                         variant="outlined"
                         density="compact"
                         clearable
@@ -303,7 +304,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import editDialog from '@/shared/modals/Edit-Dialog.vue'
-import { watch, ref, shallowReactive, onMounted, onBeforeUnmount, shallowRef, computed } from 'vue'
+import { watch, ref, shallowReactive, onMounted, onBeforeUnmount, shallowRef, computed, inject } from 'vue'
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { CommittedProjectFillTreatmentReturnValues, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
 import { getBlankGuid, getNewGuid } from '../../shared/utils/uuid-utils';
@@ -339,7 +340,7 @@ import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 import { storeKey, useStore } from 'vuex';
 import { createDecipheriv } from 'crypto';
-import mitt from 'mitt';
+import mitt, { Emitter, EventType } from 'mitt';
 import Dialog from 'primevue/dialog';
 import Column from 'primevue/column';
 import TreatmentService from '@/services/treatment.service';
@@ -349,7 +350,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     let store = useStore();
     const $router = useRouter();    
-    const $emitter = mitt()
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
     created();
 
     let searchItems = '';
@@ -522,7 +523,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
     ]);
 
     function created() {
-
         $emitter.on(
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
             importCompleted,

@@ -6,7 +6,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
 internal sealed class TreatmentBundle : Treatment
 {
-    public TreatmentBundle(IEnumerable<Treatment> bundledTreatments)
+    private readonly IReadOnlyList<ITreatmentScheduling> TreatmentSchedulings;
+
+    public TreatmentBundle(IEnumerable<SelectableTreatment> bundledTreatments)
     {
         BundledTreatments = bundledTreatments?.ToList() ?? throw new ArgumentNullException(nameof(bundledTreatments));
 
@@ -14,15 +16,23 @@ internal sealed class TreatmentBundle : Treatment
         // properties afterward. This is a safe assumption, because this type is only used inside
         // the analysis engine.
 
+        Name = "<bundle>"; // TODO
+
         PerformanceCurveAdjustmentFactors = bundledTreatments
             .SelectMany(t => t.PerformanceCurveAdjustmentFactors)
             .GroupBy(kv => kv.Key)
             .ToDictionary(g => g.Key, g => g.Max(kv => kv.Value));
 
         ShadowForAnyTreatment = bundledTreatments.Max(t => t.ShadowForAnyTreatment);
+
+        TreatmentSchedulings = BundledTreatments
+            .SelectMany(t => t.Schedulings)
+            .GroupBy(s => s.OffsetToFutureYear)
+            .Select(BundleScheduling.Create)
+            .ToList();
     }
 
-    public IReadOnlyList<Treatment> BundledTreatments { get; }
+    public IReadOnlyList<SelectableTreatment> BundledTreatments { get; }
 
     public override IReadOnlyDictionary<NumberAttribute, double> PerformanceCurveAdjustmentFactors { get; }
 
@@ -36,5 +46,11 @@ internal sealed class TreatmentBundle : Treatment
 
     internal override double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts) => throw new NotImplementedException();
 
-    internal override IEnumerable<TreatmentScheduling> GetSchedulings() => throw new NotImplementedException();
+    internal override IEnumerable<ITreatmentScheduling> GetSchedulings() => TreatmentSchedulings;
+
+    private sealed record BundleScheduling(int OffsetToFutureYear, Treatment TreatmentToSchedule) : ITreatmentScheduling
+    {
+        public static BundleScheduling Create(IGrouping<int, TreatmentScheduling> g)
+            => new(g.Key, new TreatmentBundle(g.Select(s => s.TreatmentToSchedule)));
+    }
 }

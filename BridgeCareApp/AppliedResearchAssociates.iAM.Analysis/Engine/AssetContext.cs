@@ -320,11 +320,11 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
             if (EventSchedule.ContainsKey(schedulingYear))
             {
-                Detail.TreatmentSchedulingCollisions.Add(new TreatmentSchedulingCollisionDetail(schedulingYear, scheduling.Treatment.Name));
+                Detail.TreatmentSchedulingCollisions.Add(new TreatmentSchedulingCollisionDetail(schedulingYear, scheduling.TreatmentToSchedule.Name));
             }
             else
             {
-                EventSchedule.Add(schedulingYear, scheduling.Treatment);
+                EventSchedule.Add(schedulingYear, scheduling.TreatmentToSchedule);
             }
         }
 

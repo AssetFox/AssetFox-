@@ -268,7 +268,7 @@ public sealed class Scenario
     private static TreatmentScheduling Convert(Analysis.TreatmentScheduling source) => new()
     {
         OffsetToFutureYear = source.OffsetToFutureYear,
-        TreatmentName = source.Treatment.Name,
+        TreatmentName = source.TreatmentToSchedule.Name,
     };
 
     private static TreatmentSupersedeRule Convert(Analysis.TreatmentSupersedeRule source) => new()
@@ -395,7 +395,7 @@ public sealed class Scenario
             target.Schedulings.Add(result);
 
             ActionsToPerformAtEndOfConversion.Enqueue(
-                () => result.Treatment = TreatmentByName[source.TreatmentName]);
+                () => result.TreatmentToSchedule = TreatmentByName[source.TreatmentName]);
         }
 
         private static void Convert(CriterionEquationPair source, Analysis.SelectableTreatment target)

@@ -31,11 +31,11 @@ public abstract class Treatment : WeakEntity, IValidator
         return results;
     }
 
-    internal abstract IEnumerable<TreatmentScheduling> GetSchedulings();
-
     internal abstract bool CanUseBudget(Budget budget);
 
     internal abstract IReadOnlyCollection<Action> GetConsequenceActions(AssetContext scope);
 
     internal abstract double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts);
+
+    internal abstract IEnumerable<ITreatmentScheduling> GetSchedulings();
 }

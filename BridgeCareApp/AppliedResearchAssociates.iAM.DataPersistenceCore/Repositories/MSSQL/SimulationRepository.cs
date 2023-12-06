@@ -137,15 +137,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public List<SimulationDTO> GetScenariosWithIds(List<Guid> simulationIds)
         {
             var users = _unitOfWork.Context.User.ToList();
-            var simulations = _unitOfWork.Context.Simulation
-                .Include(_ => _.SimulationAnalysisDetail)
-                .Include(_ => _.SimulationUserJoins)
-                .ThenInclude(_ => _.User)
-                .Include(_ => _.Network)
-                .ToList()
-                .Where(_ => simulationIds.Contains(_.Id))
-                .Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
-                .ToList();
+
+            var simulations = new List<SimulationDTO>();
+
+            if (simulationIds?.Any() == true)
+            {
+                simulations = _unitOfWork.Context.Simulation
+                             .Include(_ => _.SimulationAnalysisDetail)
+                             .Include(_ => _.SimulationUserJoins)
+                             .ThenInclude(_ => _.User)
+                             .Include(_ => _.Network)
+                             .ToList()
+                             .Where(_ => simulationIds.Contains(_.Id))
+                             .Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
+                             .ToList();
+            }
+
             return simulations;
         }
 

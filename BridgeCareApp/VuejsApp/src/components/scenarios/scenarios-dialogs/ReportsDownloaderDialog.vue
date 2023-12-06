@@ -68,7 +68,6 @@ import { useStore } from 'vuex';
 
     const props = defineProps<{dialogData: ReportsDownloaderDialogData}>();
     let showDialogComputed = computed(() => props.dialogData.showModal);
-    let isBusy = ref<boolean>(store.state.busyModule.isBusy);
 
     let stateSimulationReportNames: string[] = (store.state.adminDataModule.simulationReportNames)
 

@@ -329,7 +329,6 @@ import { getUrl } from './shared/utils/get-url';
     const stateAlertMessage = computed<string>(() => store.state.alertModule.alertMessage);
     const stateAlert = ref<boolean>(store.state.alertModule.alert);
     async function logOutAction(payload?: any): Promise<any> {await store.dispatch('logOut', payload);}
-    async function setIsBusyAction(payload?: any): Promise<any> { await store.dispatch('setIsBusy', payload);}
     async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks', payload);}
     async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes', payload);}
     async function getAnnouncementsAction(payload?: any): Promise<any> { await store.dispatch('getAnnouncements', payload);}
@@ -353,6 +352,9 @@ import { getUrl } from './shared/utils/get-url';
     async function getProductLogoAction(payload?: any): Promise<any> { await store.dispatch('getProductLogo', payload);} 
     async function getInventoryReportsAction(payload?: any): Promise<any> { await store.dispatch('getInventoryReports', payload);} 
     async function setAlertMessageAction(payload?: any): Promise<any> { await store.dispatch('setAlertMessage', payload);} 
+    function incrementProcessCounterAction(payload?: any): void {  store.dispatch('incrementProcessCounter', payload);}
+    function decrementProcessCounterAction(payload?: any): void {  store.dispatch('decrementProcessCounter', payload);}
+    function setProcessCounterAction(payload?: any): void {  store.dispatch('setProcessCounter', payload);}
 
     let drawer: boolean = false;
     let latestNewsDate: string = '0001-01-01';
@@ -486,12 +488,10 @@ import { getUrl } from './shared/utils/get-url';
                 await new Promise(_ => setTimeout(_, 5000));
             }
 
+
             request.headers = setAuthHeader(request.headers);
-            setIsBusyAction({
-                isBusy: ignoredAPIs.every(
-                    (ignored: string) => request.url!.indexOf(ignored) === -1,
-                ),
-            });
+            if(ignoredAPIs.every((ignored: string) => request.url!.indexOf(ignored) === -1,))
+                incrementProcessCounterAction();
             return request;
         }
 
@@ -510,7 +510,7 @@ import { getUrl } from './shared/utils/get-url';
         // create a success & error handler
         const successHandler = (response: AxiosResponse) => {
             response.headers = setContentTypeCharset(response.headers);
-            setIsBusyAction({ isBusy: false });
+            new Promise(_ => setTimeout(_, 10)).then(() => decrementProcessCounterAction()) 
             return response;
         };
         const errorHandler = (error: AxiosError) => {
@@ -523,8 +523,8 @@ import { getUrl } from './shared/utils/get-url';
                 error.response.headers = setContentTypeCharset(
                     error.response.headers,
                 );
-            }
-            setIsBusyAction({ isBusy: false });            
+            }    
+            setProcessCounterAction(0);
             unauthorizedError = hasValue(unauthorizedError) ? error.response!.data : "User is not authorized!";
             if (error.response!.status === 500) return;
             

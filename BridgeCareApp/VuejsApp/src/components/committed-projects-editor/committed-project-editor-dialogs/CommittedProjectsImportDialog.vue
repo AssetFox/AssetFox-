@@ -45,7 +45,6 @@ import { useStore } from 'vuex';
     const emit = defineEmits(['submit', 'delete']);
 
     async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification',payload); }
-    async function setIsBusyAction(payload?: any): Promise<any> { await store.dispatch('setIsBusy',payload); }
 
     const committedProjectsFile = ref< File | null > ( null );
     const applyNoTreatment = ref<boolean>(true);

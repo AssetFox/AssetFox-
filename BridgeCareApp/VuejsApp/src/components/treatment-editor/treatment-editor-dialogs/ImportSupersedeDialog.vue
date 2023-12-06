@@ -33,10 +33,6 @@ import FileSelector from '@/shared/components/FileSelector.vue';
         await store.dispatch('addErrorNotification', payload);
     }
 
-    async function setIsBusyAction(payload?: any): Promise<any> {
-        await store.dispatch('setIsBusy');
-    }   
-
     const SupersedeRulesFile = ref<File | null>(null);
     const closed = ref<boolean>(false);
     let store = useStore();

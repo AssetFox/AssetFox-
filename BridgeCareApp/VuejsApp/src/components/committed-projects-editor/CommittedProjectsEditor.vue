@@ -528,8 +528,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             importCompleted,
         );
     }
-    onMounted(() => {
-
+    onMounted(async() => {
         scenarioId = $router.currentRoute.value.query.scenarioId as string;
         networkId = $router.currentRoute.value.query.networkId as string;
         
@@ -544,48 +543,45 @@ import ConfirmDialog from 'primevue/confirmdialog';
             categorySelectItems.value.push({text: cat, value: i})     
             i++   
         });
-        fetchTreatmentLibrary(scenarioId);
-
-        (async () => { 
-            hasScenario = true;
-            await getNetworksAction();
-            await InvestmentService.getScenarioBudgetYears(scenarioId).then(response => {  
-                if(response.data) {
-                    if (response.data.length === 0) {
-                        investmentYears.value = [];
-                    } else {
-                        investmentYears.value = response.data;
-                    }
+        await fetchTreatmentLibrary(scenarioId);
+        hasScenario = true;
+        await getNetworksAction();
+        await InvestmentService.getScenarioBudgetYears(scenarioId).then(response => {  
+            if(response.data) {
+                if (response.data.length === 0) {
+                    investmentYears.value = [];
+                } else {
+                    investmentYears.value = response.data;
                 }
-            });
-            await ScenarioService.getNoTreatmentBeforeCommitted(scenarioId).then(response => {
-                    if(!isNil(response.data)){
-                        isNoTreatmentBeforeCache.value = response.data;
-                        isNoTreatmentBefore.value = response.data;
-                    }
-            });
-            await getScenarioSimpleBudgetDetailsAction({scenarioId: scenarioId});
-            await getAttributesAction();
-            await getTreatmentLibrariesAction();
-            await getCurrentUserOrSharedScenarioAction({simulationId: scenarioId});
-            await selectScenarioAction({ scenarioId: scenarioId });
-            await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: scenarioId, workType: WorkType.ImportCommittedProject}).then(response => {
-                if(response.data){
-                    setAlertMessageAction("Committed project import has been added to the work queue")
-                }
-            });
-            await initializePages();
-            if (scenarioId !== undefined) {  
-                            await fetchTreatmentLibrary(scenarioId);
-                            await fetchProjectSources();
-                        }
+            }
+        });
+        await ScenarioService.getNoTreatmentBeforeCommitted(scenarioId).then(response => {
+            if(!isNil(response.data)){
+                isNoTreatmentBeforeCache.value = response.data;
+                isNoTreatmentBefore.value = response.data;
+            }
+        });
+        await getScenarioSimpleBudgetDetailsAction({scenarioId: scenarioId});
+        await getAttributesAction();
+        await getTreatmentLibrariesAction();
+        await getCurrentUserOrSharedScenarioAction({simulationId: scenarioId});
+        await selectScenarioAction({ scenarioId: scenarioId });
+        await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: scenarioId, workType: WorkType.ImportCommittedProject}).then(response => {
+            if(response.data){
+                setAlertMessageAction("Committed project import has been added to the work queue")
+            }
+        });
+        await initializePages();
+        if (scenarioId !== undefined) {  
+            await fetchTreatmentLibrary(scenarioId);
+            await fetchProjectSources();
+        }
 
-                await CommittedProjectsService.getUploadedCommittedProjectTemplates().then(response => {
-                    if(!isNil(response.data)){
-                            templateSelectItems.value = response.data;
-                        }
-           });            
-        })();                    
+        await CommittedProjectsService.getUploadedCommittedProjectTemplates().then(response => {
+            if(!isNil(response.data)){
+                    templateSelectItems.value = response.data;
+            }
+        });            
     });
     onBeforeUnmount(() => beforeDestroy())
     function beforeDestroy() {

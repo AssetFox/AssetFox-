@@ -588,6 +588,7 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
    store.dispatch('setAlertMessage', payload);
 }
 
+
 async function addedOrUpdatedTreatmentLibraryMutator(payload?: any): Promise<any> {
   await store.commit('addedOrUpdatedTreatmentLibraryMutator', payload);
 }
@@ -662,9 +663,9 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
 
     
     beforeRouteEnter();
-    function beforeRouteEnter() {
+    async function beforeRouteEnter() {
         librarySelectItemValue.value = "";
-        getTreatmentLibrariesAction();
+        await getTreatmentLibrariesAction();
         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Treatment) !== -1) {
             selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
             loadedScenarioId = selectedScenarioId;
@@ -675,23 +676,21 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
                 $router.push('/Scenarios/');
             }
             hasScenario.value = true;
-            getSimpleScenarioSelectableTreatmentsAction(selectedScenarioId);
-            getTreatmentLibraryBySimulationIdAction(selectedScenarioId);
-            getScenarioPerformanceCurvesAction(selectedScenarioId);
+            await getSimpleScenarioSelectableTreatmentsAction(selectedScenarioId);
+            await getTreatmentLibraryBySimulationIdAction(selectedScenarioId);
+            await getScenarioPerformanceCurvesAction(selectedScenarioId);
             
             treatmentTabs = [...treatmentTabs, 'Budgets', 'Performance Factor'];
-            getScenarioSimpleBudgetDetailsAction({ scenarioId: selectedScenarioId, }).then(()=> {
-                getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-                    selectScenarioAction({ scenarioId: selectedScenarioId });   
-                });
-            });
-            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioTreatment}).then(response => {
+            await getScenarioSimpleBudgetDetailsAction({ scenarioId: selectedScenarioId, })
+            await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})
+            selectScenarioAction({ scenarioId: selectedScenarioId });   
+              
+            await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioTreatment}).then(response => {
                 if(response.data){
                     setAlertMessageAction("A treatment curve has been added to the work queue")
                 }
             })
         }
-
     }
 
     onMounted(() => mounted());

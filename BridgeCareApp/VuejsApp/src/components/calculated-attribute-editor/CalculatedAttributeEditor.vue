@@ -524,32 +524,29 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     const $router = useRouter();
     const $emitter = mitt();
     
-    onMounted(()=> {
+    onMounted(async ()=> {
         librarySelectItemValue.value = '';
-            attributeSelectItemValue.value = '';
-
-            getCalculatedAttributesAction().then( () => {
-                getCalculatedAttributeLibrariesAction().then(() => {
-                    setAttributeSelectItems()
-                    setAttributeTimingSelectItems();
-                    if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CalculatedAttribute) !== -1) {
-                        
-                            selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
-                        if (selectedScenarioId === uuidNIL) {
-                            addErrorNotificationAction({
-                                message: 'Unable to identify selected scenario.',
-                            });
-                            $router.push('/Scenarios/');
-                        }
-                        hasScenario.value = true;
-                        getScenarioCalculatedAttributeAction(selectedScenarioId).then(()=> {
-                            getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-                                selectScenarioAction({ scenarioId: selectedScenarioId });        
-                            });
-                        });
-                    }
-                });                
-            });
+        attributeSelectItemValue.value = '';
+        await getCalculatedAttributesAction()
+        await getCalculatedAttributeLibrariesAction()
+        setAttributeSelectItems()
+        setAttributeTimingSelectItems();
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CalculatedAttribute) !== -1) {
+            
+                selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
+            if (selectedScenarioId === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Unable to identify selected scenario.',
+                });
+                $router.push('/Scenarios/');
+            }
+            hasScenario.value = true;
+            await getScenarioCalculatedAttributeAction(selectedScenarioId)
+            await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})   
+            selectScenarioAction({ scenarioId: selectedScenarioId });        
+            
+        
+        }           
     });
 
     onBeforeUnmount(()=>beforeDestroy())

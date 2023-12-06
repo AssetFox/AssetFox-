@@ -1135,7 +1135,6 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
     }
 
     function onUserScenariosPagination() {
-        let foo = $vuetify.icons.sets.ghdSearchIconSet;
         if(initializing)
             return;
         const { sort, descending, page, rowsPerPage } = userScenariosPagination;
@@ -1426,7 +1425,7 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
         );
     });
 
-    function initializeScenarioPages(){
+    async function initializeScenarioPages(){
         const { sort, descending, page, rowsPerPage } = sharedScenariosPagination;
 
         const request: PagingRequest<Scenario> = {
@@ -1457,22 +1456,21 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
             isDescending: false,
             search: ''
         };        
-        getSharedScenariosPageAction(request).then(() =>
-        getUserScenariosPageAction(request).then(() =>
-        getWorkQueuePageAction(workQueueRequest).then(() => 
-        getFastWorkQueuePageAction(workQueueRequest).then(() => {
-            initializing = false;
-            initializingWorkQueue = false;
-            initializingFastWorkQueue = false;
-            totalUserScenarios.value = stateTotalUserScenarios.value;
-            totalSharedScenarios.value = stateTotalSharedScenarios.value;
-            totalQueuedSimulations.value = stateTotalQueuedSimulations.value;
-            totalFastQueuedItems.value = stateTotalFastQueuedItems.value;
-            currentUserScenariosPage.value = clone(stateUserScenariosPage.value);
-            currentSharedScenariosPage.value = clone(stateSharedScenariosPage.value);
-            currentWorkQueuePage.value = clone(stateWorkQueuePage.value);
-            currentFastWorkQueuePage.value = clone(stateFastWorkQueuePage.value);
-        })))); 
+        await getSharedScenariosPageAction(request)
+        await getUserScenariosPageAction(request)
+        await getWorkQueuePageAction(workQueueRequest)
+        await getFastWorkQueuePageAction(workQueueRequest)
+        initializing = false;
+        initializingWorkQueue = false;
+        initializingFastWorkQueue = false;
+        totalUserScenarios.value = stateTotalUserScenarios.value;
+        totalSharedScenarios.value = stateTotalSharedScenarios.value;
+        totalQueuedSimulations.value = stateTotalQueuedSimulations.value;
+        totalFastQueuedItems.value = stateTotalFastQueuedItems.value;
+        currentUserScenariosPage.value = clone(stateUserScenariosPage.value);
+        currentSharedScenariosPage.value = clone(stateSharedScenariosPage.value);
+        currentWorkQueuePage.value = clone(stateWorkQueuePage.value);
+        currentFastWorkQueuePage.value = clone(stateFastWorkQueuePage.value);
     }
 
     function formatDate(dateToFormat: Date) {

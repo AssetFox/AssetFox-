@@ -33,9 +33,6 @@ import TreatmentsFileSelector from '@/shared/components/FileSelector.vue';
         await store.dispatch('addErrorNotification');
     }
 
-    async function setIsBusyAction(payload?: any): Promise<any> {
-        await store.dispatch('setIsBusy');
-    }   
     const TreatmentsFile = ref<File | null>(null);
     let overwriteBudgets: boolean = true;
     const closed = ref<boolean>(false);

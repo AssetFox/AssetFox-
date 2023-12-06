@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20231117220510_RemoveColumnBudgetIdFromTableBudgetPercentagePair")]
-    partial class RemoveColumnBudgetIdFromTableBudgetPercentagePair
+    [Migration("20231206220510_RemoveColumnBudgetIdFromTableCommittedProject")]
+    partial class RemoveColumnBudgetIdFromTableCommittedProject
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

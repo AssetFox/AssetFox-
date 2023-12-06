@@ -9,10 +9,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("ALTER TABLE [CommittedProject] DROP CONSTRAINT IF EXISTS [FK_BudgetPercentagePair_Budget_BudgetId];");
-            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_BudgetPercentagePair_BudgetId] ON [BudgetPercentagePair]");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_CommittedProject_BudgetId] ON [CommittedProject]");
+            migrationBuilder.Sql("ALTER TABLE [CommittedProject] DROP CONSTRAINT IF EXISTS [FK_CommittedProject_Budget_BudgetId];");
             migrationBuilder.Sql("ALTER TABLE [CommittedProject] DROP COLUMN IF EXISTS [BudgetId];");
-            migrationBuilder.Sql("ALTER TABLE [CommittedProject] WITH CHECK CHECK CONSTRAINT all;");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

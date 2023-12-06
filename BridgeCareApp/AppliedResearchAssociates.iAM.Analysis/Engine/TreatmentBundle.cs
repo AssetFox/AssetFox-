@@ -44,7 +44,8 @@ internal sealed class TreatmentBundle : Treatment
 
     internal override IReadOnlyCollection<Action> GetConsequenceActions(AssetContext scope) => throw new NotImplementedException();
 
-    internal override double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts) => throw new NotImplementedException();
+    internal override double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts)
+        => BundledTreatments.Sum(t => t.GetCost(scope, shouldApplyMultipleFeasibleCosts));
 
     internal override IEnumerable<ITreatmentScheduling> GetSchedulings() => TreatmentSchedulings;
 

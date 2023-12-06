@@ -16,7 +16,7 @@ internal sealed class TreatmentBundle : Treatment
         // properties afterward. This is a safe assumption, because this type is only used inside
         // the analysis engine.
 
-        Name = "<bundle>"; // TODO
+        Name = "Bundle[" + string.Join('|', bundledTreatments.Select(t => t.Name)) + "]";
 
         PerformanceCurveAdjustmentFactors = bundledTreatments
             .SelectMany(t => t.PerformanceCurveAdjustmentFactors)

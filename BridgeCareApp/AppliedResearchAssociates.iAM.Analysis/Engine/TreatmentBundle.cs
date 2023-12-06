@@ -40,7 +40,7 @@ internal sealed class TreatmentBundle : Treatment
 
     public override int ShadowForSameTreatment => throw new NotSupportedException("A treatment bundle does not have just one same-treatment shadow.");
 
-    internal override bool CanUseBudget(Budget budget) => throw new NotImplementedException();
+    internal override bool CanUseBudget(Budget budget) => BundledTreatments.All(t => t.CanUseBudget(budget));
 
     internal override IReadOnlyCollection<Action> GetConsequenceActions(AssetContext scope) => throw new NotImplementedException();
 

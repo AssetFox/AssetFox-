@@ -93,7 +93,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AdminSettings
             var resultAttributeId = Guid.NewGuid();
             AttributeTestSetup.CreateSingleTextAttribute(TestHelper.UnitOfWork,
                 resultAttributeId, resultAttributeName, ConnectionType.EXCEL, keyAttributeName);
-            var networkEntity2 = NetworkTestSetup.ModelForEntityInDbWithKeyAttribute(
+            var networkEntity2 = NetworkTestSetup.ModelForEntityInDbWithNewKeyTextAttribute(
                 TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, keyAttributeName);
 
             TestHelper.UnitOfWork.AdminSettingsRepo.SetPrimaryNetwork(networkEntity1.Name);

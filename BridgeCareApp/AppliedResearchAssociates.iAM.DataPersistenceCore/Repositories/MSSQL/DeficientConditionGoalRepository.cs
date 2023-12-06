@@ -18,9 +18,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class DeficientConditionGoalRepository : IDeficientConditionGoalRepository
     {
-        private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         public DeficientConditionGoalRepository(UnitOfDataPersistenceWork unitOfWork)
@@ -30,8 +27,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public DateTime GetLibraryModifiedDate(Guid deficientLibraryId)
         {
-            var dtos = _unitOfWork.Context.DeficientConditionGoalLibrary.Where(_ => _.Id == deficientLibraryId).FirstOrDefault().LastModifiedDate;
-            return dtos;
+            var date = _unitOfWork.Context.DeficientConditionGoalLibrary.Where(_ => _.Id == deficientLibraryId).FirstOrDefault().LastModifiedDate;
+            return date;
         }
 
         public List<DeficientConditionGoalLibraryDTO> GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()
@@ -360,10 +357,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void AddLibraryIdToScenarioDeficientConditionGoal(List<DeficientConditionGoalDTO> deficientConditionGoalDTOs, Guid? libraryId)
         {
-            if (libraryId == null) return;
-            foreach (var dto in deficientConditionGoalDTOs)
+            if (libraryId != null)
             {
-                dto.LibraryId = (Guid)libraryId;
+                foreach (var dto in deficientConditionGoalDTOs)
+                {
+                    dto.LibraryId = (Guid)libraryId;
+                }
             }
         }
 

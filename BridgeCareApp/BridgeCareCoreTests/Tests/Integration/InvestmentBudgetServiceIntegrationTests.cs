@@ -84,7 +84,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             AttributeTestSetup.CreateSingleTextAttribute(TestHelper.UnitOfWork,
                 resultAttributeId, resultAttributeName, ConnectionType.EXCEL, keyAttributeName);
             maintainableAssets.Add(maintainableAsset);
-            var network = NetworkTestSetup.ModelForEntityInDbWithKeyAttribute(
+            var network = NetworkTestSetup.ModelForEntityInDbWithNewKeyTextAttribute(
                 TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, keyAttributeName);
             AdminSettingsTestSetup.SetupBamsAdminSettings(TestHelper.UnitOfWork, network.Name, keyAttributeName, keyAttributeName);
             var attributes = new List<IamAttribute> { keyAttribute, resultAttribute };

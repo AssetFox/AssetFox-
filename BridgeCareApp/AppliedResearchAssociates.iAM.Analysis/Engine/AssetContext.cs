@@ -98,20 +98,18 @@ internal sealed class AssetContext : CalculateEvaluateScope
         return result;
     }
 
-    public double GetBenefit() => GetBenefit(true);
-
-    public double GetBenefit(bool withWeighting)
+    public (double rawBenefit, double lruBenefit, double weight, double benefit) GetBenefitData()
     {
         var rawBenefit = GetNumber(AnalysisMethod.Benefit.Attribute.Name);
-        var benefit = AnalysisMethod.Benefit.GetValueRelativeToLimit(rawBenefit);
 
-        if (withWeighting && AnalysisMethod.Weighting != null)
-        {
-            var weight = GetNumber(AnalysisMethod.Weighting.Name);
-            benefit *= weight;
-        }
+        // "Limit-Relativized Unweighted"
+        var lruBenefit = AnalysisMethod.Benefit.GetValueRelativeToLimit(rawBenefit);
 
-        return benefit;
+        var weight = AnalysisMethod.Weighting != null
+            ? GetNumber(AnalysisMethod.Weighting.Name)
+            : 1;
+
+        return (rawBenefit, lruBenefit, weight, lruBenefit * weight);
     }
 
     public double GetCostOfTreatment(Treatment treatment) => treatment.GetCost(this, AnalysisMethod.ShouldApplyMultipleFeasibleCosts);
@@ -334,22 +332,20 @@ internal sealed class AssetContext : CalculateEvaluateScope
         {
             FirstUnshadowedYearForAnyTreatment = year + treatment.ShadowForAnyTreatment;
             FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
+
+            foreach (var (attribute, factor) in treatment.PerformanceCurveAdjustmentFactors)
+            {
+                MostRecentAdjustmentFactorsForPerformanceCurves[attribute] = factor;
+            }
         }
 
         Detail.AppliedTreatment = treatment.Name;
         Detail.TreatmentStatus = TreatmentStatus.Applied;
-
-        foreach (var (attribute, factor) in treatment.PerformanceCurveAdjustmentFactors)
-        {
-            MostRecentAdjustmentFactorsForPerformanceCurves[attribute] = factor;
-        }
     }
-
-    private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve, MostRecentAdjustmentFactorsForPerformanceCurves);
 
     private double CalculateValueOnCurve(PerformanceCurve curve, Action<double> handle)
     {
-        var value = CalculateValueOnCurve(curve);
+        var value = curve.Equation.Compute(this, curve, MostRecentAdjustmentFactorsForPerformanceCurves);
         handle(value);
         return value;
     }

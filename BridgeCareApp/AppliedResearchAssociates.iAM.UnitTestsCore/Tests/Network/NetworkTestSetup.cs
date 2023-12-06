@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
@@ -58,18 +59,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return CacheNetworkEntity;
         }
 
-        public static TNetwork ModelForEntityInDbWithKeyAttribute(
+        public static TNetwork ModelForEntityInDbWithNewKeyTextAttribute(
             IUnitOfWork unitOfWork,
             List<MaintainableAsset> maintainableAssets,
             Guid? networkId = null,
             Guid? keyAttributeId = null,
             string keyAttributeName = null)
         {
+            var attribute = AttributeTestSetup.CreateSingleTextAttribute(unitOfWork, keyAttributeId, keyAttributeName, Data.ConnectionType.EXCEL, keyAttributeName);
+            return ModelForEntityInDbWithExistingKeyAttribute(unitOfWork, maintainableAssets, attribute.Id, networkId);
+        }
+
+        public static TNetwork ModelForEntityInDbWithExistingKeyAttribute(IUnitOfWork unitOfWork, List<MaintainableAsset> maintainableAssets, Guid keyAttributeId, Guid? networkId = null)
+        {
             var name = RandomStrings.WithPrefix("Network");
             var resolveNetworkId = networkId ?? Guid.NewGuid();
-            var attribute = AttributeTestSetup.CreateSingleTextAttribute(unitOfWork, keyAttributeId, keyAttributeName, Data.ConnectionType.EXCEL, keyAttributeName);
             var network = new TNetwork(maintainableAssets, resolveNetworkId, name);
-            network.KeyAttributeId = attribute.Id;
+            network.KeyAttributeId = keyAttributeId;
             unitOfWork.NetworkRepo.CreateNetwork(network);
             return network;
         }

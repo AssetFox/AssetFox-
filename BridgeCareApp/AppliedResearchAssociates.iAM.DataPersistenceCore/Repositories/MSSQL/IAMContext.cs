@@ -45,6 +45,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .ConnectionStrings;
 
                 optionsBuilder.UseSqlServer(migrationConnection.BridgeCareConnex);
+
+                optionsBuilder.UseSqlServer(migrationConnection.BridgeCareConnex,
+                        opts => opts.CommandTimeout((int)TimeSpan.FromMinutes(60).TotalSeconds));
+
             }
         }
 

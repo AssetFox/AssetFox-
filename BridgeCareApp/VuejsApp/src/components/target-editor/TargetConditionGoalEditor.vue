@@ -95,7 +95,7 @@
                             </td>
                             <td v-for="header in targetConditionGoalGridHeaders">
                                 <editDialog v-if="header.key !== 'criterionLibrary' && header.key !== 'actions'"
-                                    :return-value.sync="item.item[header.key]"
+                                    v-model:return-value.sync="item.item[header.key]"
                                     @save="onEditTargetConditionGoalProperty(item.item,header.key,item.item[header.key])"
                                     size="large"
                                     lazy>

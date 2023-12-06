@@ -15,10 +15,5 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests
             unitOfWork.Context.Database.EnsureDeleted();
             unitOfWork.Context.Database.Migrate();
         }
-
-        public static void EnsureDatabaseExists(UnitOfDataPersistenceWork unitOfWork)
-        {
-            unitOfWork.Context.Database.EnsureCreated();
-        }
     }
 }

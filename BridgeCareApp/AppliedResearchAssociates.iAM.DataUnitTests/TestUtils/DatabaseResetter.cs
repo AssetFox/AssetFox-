@@ -13,9 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests
         public static void ResetDatabase(UnitOfDataPersistenceWork unitOfWork)
         {
             unitOfWork.Context.Database.EnsureDeleted();
-            unitOfWork.Context.Database.EnsureCreated();
-            var connectionString = unitOfWork.Context.Database.GetConnectionString();
-            RunBatch.SetupStoredProcedures(unitOfWork, connectionString);
+            unitOfWork.Context.Database.Migrate();
         }
 
         public static void EnsureDatabaseExists(UnitOfDataPersistenceWork unitOfWork)

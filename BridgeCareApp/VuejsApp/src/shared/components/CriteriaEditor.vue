@@ -160,6 +160,10 @@
                                         v-model="selectedSubCriteriaClause"
                                     >
                                     </vue-query-builder> -->
+                                    <advanced-query-builder id="CriteriaEditor-criteria-vuequerybuilder" 
+                                        :config="queryBuilderConfig">
+
+                                    </advanced-query-builder>
                                 </v-window-item>
                                 <v-window-item value="raw">
                                     <v-textarea
@@ -173,7 +177,6 @@
                                     ></v-textarea>
                                 </v-window-item>
                             </v-window>
-
                         </v-card-text>
                         <v-card-actions :class="{ 'validation-actions':criteriaEditorData.isLibraryContext, }">
                             <v-row>
@@ -271,6 +274,7 @@ import { ref, onMounted, computed, toRefs, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { getUrl } from "../utils/get-url";
+import AdvancedQueryBuilder from "vue3-advanced-query-builder";
 
 let store = useStore();
 const $router = useRouter();
@@ -300,6 +304,33 @@ const tab = ref<any>(null);
         addGroup: 'Add Group',
         removeGroup: `<img class='img-general' src="${getUrl("assets/icons/trash-ghd-blue.svg")}"/>`,
         textInputPlaceholder: 'value',
+    };
+    const advQueryBuilderRules = ref<any[]>([]);
+    const queryBuilderConfig = {
+        levelOperators: [
+            {
+                name: 'and',
+                identifier: 'AND'
+            },
+            {
+                name: 'or',
+                identifier:'OR'
+            },
+        ],
+        ruleOperators: [
+            {
+                name: 'equals',
+                indentifier: 'equals'
+            }
+        ],
+        rules: [
+            {
+                name: 'Name',
+                identifier: 'name',
+                type: 'text',
+                operators: ['=', '<>', '<', '<=', '>', '>=']
+            }
+        ]
     };
     const cannotSubmit = ref<boolean>(true);
     const validCriteriaMessage = ref<string | null>(null);
@@ -484,6 +515,17 @@ const tab = ref<any>(null);
                 id: attribute.name,
                 operators: ['=', '<>', '<', '<=', '>', '>='],
             }),
+        );
+    }
+
+    function buildAdvancedQueryRules() {
+        advQueryBuilderRules.value = stateAttributes.value.map(
+            (attribute: Attribute) => ({
+                name: attribute.name, 
+                identifier: attribute.id, 
+                type: attribute.type,
+                operators: ['=', '<>', '<', '<=', '>', '>=']
+            })
         );
     }
 

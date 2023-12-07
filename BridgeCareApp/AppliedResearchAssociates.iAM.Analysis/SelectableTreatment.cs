@@ -11,8 +11,6 @@ public sealed class SelectableTreatment : Treatment
 {
     private const int DEFAULT_SHADOW = 1;
 
-    private static readonly IComparer<ChangeApplicator> ChangeApplicatorComparer = SelectionComparer<ChangeApplicator>.Create(applicator => applicator.Number.Value);
-
     private readonly List<ConditionalTreatmentConsequence> _Consequences = new();
 
     private readonly List<TreatmentCost> _Costs = new();
@@ -145,11 +143,11 @@ public sealed class SelectableTreatment : Treatment
 
     internal override bool CanUseBudget(Budget budget) => Budgets.Contains(budget);
 
-    internal override IReadOnlyCollection<Action> GetConsequenceActions(AssetContext scope)
+    internal override IReadOnlyCollection<ConsequenceApplicator> GetConsequenceApplicators(AssetContext scope)
     {
-        return ConsequencesPerAttribute.SelectMany(getConsequenceAction).ToArray();
+        return ConsequencesPerAttribute.SelectMany(getConsequenceApplicator).ToArray();
 
-        IEnumerable<Action> getConsequenceAction(IGrouping<Attribute, ConditionalTreatmentConsequence> consequences)
+        ConsequenceApplicator[] getConsequenceApplicator(IGrouping<Attribute, ConditionalTreatmentConsequence> consequences)
         {
             consequences.Channel(
                 consequence => scope.Evaluate(consequence.Criterion),
@@ -158,18 +156,22 @@ public sealed class SelectableTreatment : Treatment
                 out var applicableConsequences,
                 out var defaultConsequences);
 
-            var operativeConsequences = applicableConsequences.Count > 0 ? applicableConsequences : defaultConsequences;
+            var operativeConsequences = applicableConsequences.Count > 0
+                ? applicableConsequences
+                : defaultConsequences;
 
-            var changeApplicators = operativeConsequences.SelectMany(consequence => consequence.GetChangeApplicators(scope, this)).ToArray();
+            var consequenceApplicators = operativeConsequences
+                .SelectMany(consequence => consequence.GetConsequenceApplicators(scope, this))
+                .ToArray();
 
-            if (changeApplicators.Length == 0)
+            if (consequenceApplicators.Length == 0)
             {
-                return Enumerable.Empty<Action>();
+                return Array.Empty<ConsequenceApplicator>();
             }
 
-            if (changeApplicators.Length == 1)
+            if (consequenceApplicators.Length == 1)
             {
-                return changeApplicators[0].Action.Once();
+                return consequenceApplicators;
             }
 
             if (consequences.Key is not NumberAttribute numberAttribute)
@@ -185,11 +187,11 @@ public sealed class SelectableTreatment : Treatment
                 throw new SimulationException(messageBuilder.ToString());
             }
 
-            Array.Sort(changeApplicators, ChangeApplicatorComparer);
+            var worstConsequenceApplicator = numberAttribute.IsDecreasingWithDeterioration
+                ? consequenceApplicators.MinBy(static ca => ca.NewValue.Value)
+                : consequenceApplicators.MaxBy(static ca => ca.NewValue.Value);
 
-            var worstConsequence = numberAttribute.IsDecreasingWithDeterioration ? changeApplicators.First() : changeApplicators.Last();
-
-            return worstConsequence.Action.Once();
+            return new[] { worstConsequenceApplicator };
         }
     }
 

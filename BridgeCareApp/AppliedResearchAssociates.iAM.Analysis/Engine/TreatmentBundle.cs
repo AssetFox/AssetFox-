@@ -42,7 +42,54 @@ internal sealed class TreatmentBundle : Treatment
 
     internal override bool CanUseBudget(Budget budget) => BundledTreatments.All(t => t.CanUseBudget(budget));
 
-    internal override IReadOnlyCollection<Action> GetConsequenceActions(AssetContext scope) => throw new NotImplementedException();
+    internal override IReadOnlyCollection<ConsequenceApplicator> GetConsequenceApplicators(AssetContext scope)
+    {
+        var bestApplicators = new List<ConsequenceApplicator>();
+
+        var applicatorsPerTarget = BundledTreatments
+            .SelectMany(t => t.GetConsequenceApplicators(scope))
+            .GroupBy(ca => ca.Target);
+
+        foreach (var g in applicatorsPerTarget)
+        {
+            var applicators = g.ToArray();
+            if (applicators.Length == 1)
+            {
+                bestApplicators.Add(applicators[0]);
+            }
+            else if (applicators.Length > 1)
+            {
+                if (g.Key is NumberAttribute target)
+                {
+                    scope.SimulationRunner.Send(new SimulationLogMessageBuilder
+                    {
+                        Message = "Multiple treatments in a bundle are applying consequences to a single number attribute.",
+                        SimulationId = scope.SimulationRunner.Simulation.Id,
+                        Status = DTOs.Enums.SimulationLogStatus.Warning,
+                        Subject = DTOs.Enums.SimulationLogSubject.Calculation,
+                    });
+
+                    var bestApplicator = target.IsDecreasingWithDeterioration
+                        ? applicators.MaxBy(a => a.NewValue)
+                        : applicators.MinBy(a => a.NewValue);
+
+                    bestApplicators.Add(bestApplicator);
+                }
+                else
+                {
+                    scope.SimulationRunner.Send(new SimulationLogMessageBuilder
+                    {
+                        Message = "Multiple treatments in a bundle are applying consequences to a single non-number attribute.",
+                        SimulationId = scope.SimulationRunner.Simulation.Id,
+                        Status = DTOs.Enums.SimulationLogStatus.Fatal,
+                        Subject = DTOs.Enums.SimulationLogSubject.Calculation,
+                    });
+                }
+            }
+        }
+
+        return bestApplicators;
+    }
 
     internal override double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts)
         => BundledTreatments.Sum(t => t.GetCost(scope, shouldApplyMultipleFeasibleCosts));

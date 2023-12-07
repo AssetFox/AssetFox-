@@ -68,10 +68,10 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     public void ApplyTreatmentConsequences(Treatment treatment)
     {
-        var consequenceActions = treatment.GetConsequenceActions(this);
-        foreach (var consequenceAction in consequenceActions)
+        var consequenceApplicators = treatment.GetConsequenceApplicators(this);
+        foreach (var consequenceApplicator in consequenceApplicators)
         {
-            consequenceAction();
+            consequenceApplicator.Change();
         }
     }
 

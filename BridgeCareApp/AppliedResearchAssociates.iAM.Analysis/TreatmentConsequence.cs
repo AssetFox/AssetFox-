@@ -27,11 +27,11 @@ public class TreatmentConsequence : WeakEntity, IValidator
 
     public string ShortDescription => nameof(TreatmentConsequence);
 
-    internal virtual IEnumerable<ChangeApplicator> GetChangeApplicators(AssetContext scope, Treatment treatment)
+    internal virtual IEnumerable<ConsequenceApplicator> GetConsequenceApplicators(AssetContext scope, Treatment treatment)
     {
-        var changeApplicator = Change.GetApplicator(scope);
-        return changeApplicator is null
-            ? Array.Empty<ChangeApplicator>()
-            : (new[] { changeApplicator });
+        var applicator = Change.GetApplicator(scope);
+        return applicator is null
+            ? Array.Empty<ConsequenceApplicator>()
+            : (new[] { applicator });
     }
 }

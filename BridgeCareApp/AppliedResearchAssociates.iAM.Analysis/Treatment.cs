@@ -33,7 +33,7 @@ public abstract class Treatment : WeakEntity, IValidator
 
     internal abstract bool CanUseBudget(Budget budget);
 
-    internal abstract IReadOnlyCollection<Action> GetConsequenceActions(AssetContext scope);
+    internal abstract IReadOnlyCollection<ConsequenceApplicator> GetConsequenceApplicators(AssetContext scope);
 
     internal abstract double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts);
 

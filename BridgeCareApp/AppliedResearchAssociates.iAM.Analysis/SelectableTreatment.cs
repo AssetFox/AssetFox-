@@ -203,7 +203,9 @@ public sealed class SelectableTreatment : Treatment
             return 0;
         }
 
-        return shouldApplyMultipleFeasibleCosts ? feasibleCosts.Sum(cost => getCost(cost, scope)) : feasibleCosts.Max(cost => getCost(cost, scope));
+        return shouldApplyMultipleFeasibleCosts
+            ? feasibleCosts.Sum(cost => getCost(cost, scope))
+            : feasibleCosts.Max(cost => getCost(cost, scope));
     }
 
     internal override IEnumerable<TreatmentScheduling> GetSchedulings() => Schedulings;

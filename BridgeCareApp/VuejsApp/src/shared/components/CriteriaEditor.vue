@@ -599,12 +599,15 @@ const tab = ref<any>(null);
         resetCriteriaValidationProperties();
 
         if (criteriaEditorData.value.isLibraryContext) {
-            if (!hasValue(subCriteriaClauses)) {
+            //if (!hasValue(subCriteriaClauses)) {
+            if(subCriteriaClauses.value.length === 0) {
                 emit('submitCriteriaEditorResult', {
                     validated: true,
                     criteria: '',
                 });
-            } else if (hasValue(subCriteriaClause)) {
+            }
+             //else if (hasValue(subCriteriaClause)) {
+            else if (subCriteriaClauses.value.length != 0) {
                 emit('submitCriteriaEditorResult', {
                     validated: false,
                     criteria: null,

@@ -283,6 +283,7 @@ function onEditSelectedLibraryListData(data: any, property: string) {
         const newCashFlowDistributionRule: CashFlowDistributionRule = modifyNewCashFlowDistributionRuleDefaultValues();
         processedGridData.value.push(clone(newCashFlowDistributionRule))
         cashFlowDistributionRuleGridData.value.push(newCashFlowDistributionRule);
+        hasUnsavedChanges.value = true;
     }
 
     function modifyNewCashFlowDistributionRuleDefaultValues() {

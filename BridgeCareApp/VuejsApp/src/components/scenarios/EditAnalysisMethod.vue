@@ -171,7 +171,7 @@
                     >
                     <v-btn
                         id="EditAnalysisMethod-save-btn"
-                        :disabled="(criteriaIsInvalid() || !valid) || !hasUnsavedChanges || !criteriaIsIntentionallyEmpty"
+                        :disabled="(criteriaIsInvalid() || !valid) || !hasUnsavedChanges"
                         @click="onUpsertAnalysisMethod"
                         variant = "flat"
                         class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
@@ -366,6 +366,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             value,
             analysisMethod.value.benefit,
         );
+        onAnalysisChanged();
     }
 
     function setBenefitAndWeightingAttributes() {
@@ -418,7 +419,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }
 
     function criteriaIsInvalid() {
-        return criteriaIsEmpty() && !criteriaIsIntentionallyEmpty;
+        return criteriaIsEmpty() && !criteriaIsIntentionallyEmpty.value;
     }    
 
     async function onUpsertAnalysisMethod() {

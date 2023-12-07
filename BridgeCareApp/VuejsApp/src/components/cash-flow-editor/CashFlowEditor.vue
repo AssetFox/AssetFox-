@@ -94,7 +94,7 @@
                         </td>
                         <td>
                             <editDialog
-                                :return-value="item.item.name"
+                                v-model:return-value="item.item.name"
                                 size="large"
                                 lazy
                                 @save="onEditSelectedLibraryListData(item.item,'description')"

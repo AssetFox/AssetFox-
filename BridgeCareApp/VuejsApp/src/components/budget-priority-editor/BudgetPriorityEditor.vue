@@ -130,7 +130,7 @@
                                 </div>
                                 <div v-else-if="header.title.endsWith('%')">
                                     <editDialog
-                                        :return-value='item.item[header.key]'
+                                        v-model:return-value='item.item[header.key]'
                                         @save='onEditBudgetPercentagePair(item.item, header.key, item.item[header.key])'
                                         size="large" lazy>
                                         <v-text-field readonly single-line class='sm-txt' :model-value="item.item[header.key]" variant="underlined"

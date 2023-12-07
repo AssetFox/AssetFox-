@@ -369,7 +369,7 @@
 </template>
 
 <script setup lang='ts'>
-import { ShallowRef, computed, shallowRef, watch } from 'vue';
+import { ShallowRef, computed, inject, shallowRef, watch } from 'vue';
 import { ref, onMounted, onBeforeUnmount, Ref} from 'vue';
 import { useStore } from 'vuex';
 import CreateTreatmentLibraryDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentLibraryDialog.vue';
@@ -456,13 +456,13 @@ import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 import { ImportNewTreatmentDialogResult } from '@/shared/models/modals/import-new-treatment-dialog-result';
 import { useRouter } from 'vue-router';
-import mitt from 'mitt';
+import mitt, { Emitter, EventType } from 'mitt';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
 
     const emit = defineEmits(['submit'])    
-    const $emitter = mitt()
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
     const $router = useRouter();
     const confirm = useConfirm();
     let store = useStore();

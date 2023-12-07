@@ -7,7 +7,6 @@ import { SimulationAnalysisDetail } from '@/shared/models/iAM/simulation-analysi
 import { SimulationReportDetail } from '@/shared/models/iAM/simulation-report-detail';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 import { hasValue } from '@/shared/utils/has-value-util';
-
 import has = Reflect.has;
 import { getUserName } from '@/shared/utils/get-user-info';
 import { queuedWorkStatusUpdate } from './shared/models/iAM/queuedWorkStatusUpdate';
@@ -16,7 +15,7 @@ import mitt from 'mitt';
 import { WorkType } from './shared/models/iAM/scenario';
 
 export default {
-    install(Vue: any) {
+    install: (app: any, options: any) => {
         const connection = new HubConnectionBuilder()
             .withUrl(
                 `${import.meta.env.VITE_APP_BRIDGECARE_CORE_URL}/bridgecarehub/`,
@@ -28,7 +27,6 @@ export default {
             .build();
 
         const emitter = mitt()
-        //Vue.prototype.$emiiter = emitter;
 
         connection.on(
             Hub.BroadcastType.BroadcastAssignDataStatus,
@@ -138,7 +136,7 @@ export default {
                 task,
             });
         });
-
+        app.provide('emitter', emitter);
         let startedPromise: any | null = null;
 
         function start() {

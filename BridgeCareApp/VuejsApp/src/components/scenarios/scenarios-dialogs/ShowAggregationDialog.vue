@@ -160,10 +160,10 @@ import { any, clone, find, findIndex, isNil, propEq, update } from 'ramda';
 import { Hub } from '@/connectionHub';
 import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, inject, computed } from 'vue'; 
 import { useStore } from 'vuex'; 
-import mitt from 'mitt';
+import mitt, { Emitter, EventType } from 'mitt';
 
     let store = useStore();     
-    const $emitter = mitt()
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
 
     const props = defineProps<{dialogData: any}>();
     let showDialogComputed = computed(() => props.dialogData.showDialog);

@@ -381,7 +381,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
-import mitt from 'mitt';
+import mitt, { Emitter, EventType } from 'mitt';
 import { computed } from 'vue';
 import { getUrl } from '@/shared/utils/get-url';
 import { TimelineEmits } from 'primevue/timeline';
@@ -522,7 +522,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     ];
     
     const $router = useRouter();
-    const $emitter = mitt();
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
     
     onMounted(async ()=> {
         librarySelectItemValue.value = '';

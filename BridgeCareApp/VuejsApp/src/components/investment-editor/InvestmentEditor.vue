@@ -379,7 +379,7 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 import {inject, reactive, ref, shallowReactive, onMounted, onBeforeUnmount, computed, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import mitt from 'mitt';
+import mitt, { Emitter, EventType } from 'mitt';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
@@ -389,7 +389,7 @@ let store = useStore();
 const confirm = useConfirm();
 const emit = defineEmits(['submit'])
 const $router = useRouter();
-const $emitter = mitt()
+const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
       
 const stateBudgetLibraries = computed<BudgetLibrary[]>(() => store.state.investmentModule.budgetLibraries) ;  
 

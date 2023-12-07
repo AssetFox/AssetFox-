@@ -160,8 +160,9 @@
                                         v-model="selectedSubCriteriaClause"
                                     >
                                     </vue-query-builder> -->
-                                    <advanced-query-builder id="CriteriaEditor-criteria-vuequerybuilder" 
-                                        :config="queryBuilderConfig">
+                                    <advanced-query-builder id="CriteriaEditor-criteria-vuequerybuilder"         
+                                        :config="queryBuilderConfig"
+                                        :v-model="currentQuery">
 
                                     </advanced-query-builder>
                                 </v-window-item>
@@ -274,7 +275,7 @@ import { ref, onMounted, computed, toRefs, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { getUrl } from "../utils/get-url";
-import AdvancedQueryBuilder from "vue3-advanced-query-builder";
+import { Rule, RuleOperator, QueryBuilderConfig } from '../utils/query-builder';
 
 let store = useStore();
 const $router = useRouter();
@@ -305,8 +306,9 @@ const tab = ref<any>(null);
         removeGroup: `<img class='img-general' src="${getUrl("assets/icons/trash-ghd-blue.svg")}"/>`,
         textInputPlaceholder: 'value',
     };
-    const advQueryBuilderRules = ref<any[]>([]);
-    const queryBuilderConfig = {
+    
+    const currentQuery = ref([]);
+    const queryBuilderConfig: QueryBuilderConfig = {
         levelOperators: [
             {
                 name: 'and',
@@ -317,20 +319,8 @@ const tab = ref<any>(null);
                 identifier:'OR'
             },
         ],
-        ruleOperators: [
-            {
-                name: 'equals',
-                indentifier: 'equals'
-            }
-        ],
-        rules: [
-            {
-                name: 'Name',
-                identifier: 'name',
-                type: 'text',
-                operators: ['=', '<>', '<', '<=', '>', '>=']
-            }
-        ]
+        ruleOperators: [],
+        rules: []
     };
     const cannotSubmit = ref<boolean>(true);
     const validCriteriaMessage = ref<string | null>(null);
@@ -361,7 +351,8 @@ const tab = ref<any>(null);
         setSubCriteriaClauses(mainCriteria);
 
         if (hasValue(stateAttributes)) {
-            setQueryBuilderRules();
+            // setQueryBuilderRules();
+            createAdvanceQueryBuilderConfig();
         }
     });
 
@@ -518,15 +509,33 @@ const tab = ref<any>(null);
         );
     }
 
-    function buildAdvancedQueryRules() {
-        advQueryBuilderRules.value = stateAttributes.value.map(
-            (attribute: Attribute) => ({
-                name: attribute.name, 
-                identifier: attribute.id, 
-                type: attribute.type,
-                operators: ['=', '<>', '<', '<=', '>', '>=']
-            })
-        );
+    function createAdvanceQueryBuilderConfig() {
+        queryBuilderConfig.rules = setAdvancedQueryBuilderRules();
+        queryBuilderConfig.ruleOperators = setAdvancedQueryBuilderRuleOperators();
+    }
+
+    function setAdvancedQueryBuilderRules(): Rule[] {
+        return stateAttributes.value.map((attr: Attribute) => ({
+            name: attr.name,
+            identifier: attr.id,
+            type: attr.type,
+            operators: ['=', '<>', '<', '<=', '>', '>=']
+        }));
+    } 
+
+    const queryBuilderRuleOperatorTypes = [
+        { name: '=', identifier: '=' },
+        { name: '<>', identifier: '<>'},
+        {name: '<', identifier: '<'},
+        {name: '<=', identifier: '<=>'},
+        {name: '>', identifier: '>'},
+        {name: '>=', identifier: '>='},
+    ]
+    function setAdvancedQueryBuilderRuleOperators(): RuleOperator[] {
+        return queryBuilderRuleOperatorTypes.map(op => ({
+            name: op.name,
+            identifier: op.identifier
+        }));
     }
 
     function setSubCriteriaClauses(mainCriteria: Criteria) {
@@ -1003,7 +1012,10 @@ const tab = ref<any>(null);
 
 </script>
 
-<style>
+<style lang="scss">
+
+@import 'vue3-advanced-query-builder/dist/styles.css';
+
 .invalid-message {
     color: red;
 }

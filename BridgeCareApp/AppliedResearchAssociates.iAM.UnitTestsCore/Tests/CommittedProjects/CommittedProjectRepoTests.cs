@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -15,6 +16,7 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -46,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         }
 
         [Fact]
-        public void GetForSimulationWorksWithCommittedProjects()
+        public async Task GetForSimulationWorksWithCommittedProjects()
         {
             // Arrange
             var repo = new CommittedProjectRepository(TestHelper.UnitOfWork);
@@ -70,9 +72,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var testMaintainableAsset = maintainableAssetEntity.ToDomain(locationIdentifier);
             maintainableAssets.Add(testMaintainableAsset);
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId, TestAttributeIds.CulvDurationNId);
-
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             // Setup a simulation based on network
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"), "Test Simulation", new Guid(), networkId);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"), "Test Simulation", user.Id, networkId);
             simulation.NetworkId = network.Id;
 
             // Set up a selectable treatment for the test with sample budgets
@@ -128,7 +130,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         }
 
         [Fact]
-        public void GetForSimulationWorksWithoutCommittedProjects()
+        public async Task GetForSimulationWorksWithoutCommittedProjects()
         {
             // Arrange
             var repo = new CommittedProjectRepository(TestHelper.UnitOfWork);
@@ -154,7 +156,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId, TestAttributeIds.CulvDurationNId);
 
             // Setup a simulation based on network
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, TestDataForCommittedProjects.NoCommitSimulationId, "Test Simulation", new Guid(), networkId);
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, TestDataForCommittedProjects.NoCommitSimulationId, "Test Simulation", user.Id, networkId);
             simulation.NetworkId = network.Id;
 
             // Set up a selectable treatment for the test with sample budgets

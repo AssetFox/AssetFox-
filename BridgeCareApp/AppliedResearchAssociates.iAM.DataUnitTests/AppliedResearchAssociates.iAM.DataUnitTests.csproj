@@ -12,10 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-<!---->    <None Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\Repositories\MSSQL\SQLScripts\Master_SP.sql" Link="DataTestSetup\SqlScripts\Master_SP.sql">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-<!---->    <None Include="..\AppliedResearchAssociates.iAM.TestHelpers\testConnections.json" Link="testConnections.json">
+    <None Include="..\AppliedResearchAssociates.iAM.TestHelpers\testConnections.json" Link="testConnections.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

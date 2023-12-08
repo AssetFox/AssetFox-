@@ -44,7 +44,7 @@ public sealed class InvestmentPlan : WeakEntity, IValidator
         }
     }
 
-    public bool ShouldAccumulateUnusedBudgetAmounts { get; set; }
+    public bool AllowFundingCarryover { get; set; }
 
     public ValidatorBag Subvalidators => new ValidatorBag { BudgetConditions, Budgets, CashFlowRules };
 

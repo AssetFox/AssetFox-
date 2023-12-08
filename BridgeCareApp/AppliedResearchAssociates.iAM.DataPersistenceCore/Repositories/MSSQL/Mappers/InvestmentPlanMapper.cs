@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 InflationRatePercentage = domain.InflationRatePercentage,
                 MinimumProjectCostLimit = domain.MinimumProjectCostLimit,
                 NumberOfYearsInAnalysisPeriod = domain.NumberOfYearsInAnalysisPeriod,
-                ShouldAccumulateUnusedBudgetAmounts = domain.ShouldAccumulateUnusedBudgetAmounts
+                ShouldAccumulateUnusedBudgetAmounts = domain.AllowFundingCarryover
             };
 
         public static InvestmentPlanEntity ToEntity(this InvestmentPlanDTO dto, Guid simulationId, BaseEntityProperties baseEntityProperties = null)
@@ -66,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             simulation.InvestmentPlan.InflationRatePercentage = entity.InflationRatePercentage;
             simulation.InvestmentPlan.MinimumProjectCostLimit = entity.MinimumProjectCostLimit;
             simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod = entity.NumberOfYearsInAnalysisPeriod;
-            simulation.InvestmentPlan.ShouldAccumulateUnusedBudgetAmounts = entity.ShouldAccumulateUnusedBudgetAmounts;
+            simulation.InvestmentPlan.AllowFundingCarryover = entity.ShouldAccumulateUnusedBudgetAmounts;
             
             entity.Simulation.Budgets?.OrderBy(_ => _.BudgetOrder).ForEach(_ =>
             {

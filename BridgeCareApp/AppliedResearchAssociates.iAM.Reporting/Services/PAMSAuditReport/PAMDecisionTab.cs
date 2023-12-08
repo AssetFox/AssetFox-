@@ -110,7 +110,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             {
                 var decisionsTreatment = new PAMSDecisionTreatment();
                 var treatmentRejection = section.TreatmentRejections.FirstOrDefault(_ => _.TreatmentName == treatment);
-                decisionsTreatment.Feasiable = isCashFlowProject ? "-" : (treatmentRejection == null ? PAMSAuditReportConstants.Yes : PAMSAuditReportConstants.No);
+                decisionsTreatment.Feasible = isCashFlowProject ? "-" : (treatmentRejection == null ? PAMSAuditReportConstants.Yes : PAMSAuditReportConstants.No);
                 var currentCIImprovement = Convert.ToDouble(decisionDataModel.CurrentAttributesValues.Last());
                 var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.CIImprovement = treatmentOption?.ConditionChange;
@@ -122,7 +122,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 var budgetsUsed = treatmentConsideration?.BudgetUsages.Where(_ => _.CoveredCost > 0);
                 var budgetsUsedValue = budgetsUsed != null && budgetsUsed.Any() ? string.Join(", ", budgetsUsed.Select(_ => _.BudgetName)) : string.Empty; // currently this will be single value
                 decisionsTreatment.BudgetsUsed = budgetsUsedValue;
-                decisionsTreatment.RejectionReason = treatmentConsideration == null ? string.Empty : (budgetsUsed != null && budgetsUsed.Any() ? string.Join(", ", budgetsUsed.Select(_ => _.BudgetName + ": " + _.Status)) : string.Join(", ", treatmentConsideration.BudgetUsages.Where(_ => _.Status != BudgetUsageStatus.ConditionNotMet).Select(_ => _.BudgetName + ": " + _.Status)));
+
+                decisionsTreatment.BudgetUsageStatuses = treatmentConsideration == null
+                    ? string.Empty
+                    : (budgetsUsed != null && budgetsUsed.Any()
+                        ? string.Join(", ", budgetsUsed.Select(_ => _.BudgetName + ": " + _.Status))
+                        : string.Join(", ", treatmentConsideration.BudgetUsages
+                            .Where(_ => _.Status != BudgetUsageStatus.ConditionNotMet)
+                            .Select(_ => _.BudgetName + ": " + _.Status)));
 
                 decisionsTreatments.Add(decisionsTreatment);
             }
@@ -177,7 +184,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             foreach (var decisionsTreatment in decisionsDataModel.DecisionsTreatments)
             {
                 ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
-                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Feasiable;
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Feasible;
                 SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.CIImprovement;
                 SetAccountingFormat(decisionsWorksheet.Cells[row, column]);
@@ -190,7 +197,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.AmountSpent;
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.BudgetsUsed;
                 decisionsWorksheet.Cells[row, column - 1].Style.WrapText = true;
-                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.RejectionReason;
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.BudgetUsageStatuses;
             }
             ExcelHelper.ApplyBorder(decisionsWorksheet.Cells[row, 1, row, column - 1]);
 
@@ -318,14 +325,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
         {
             return new List<string>
             {
-                "Feasiable?",
+                "Feasible?",
                 "CI\r\nImprovement",
                 "Cost",
                 "B/C\r\nRatio",
                 "Selected?",
                 "Amount\r\nSpent",
                 "Budget(s)\r\nUsed",
-                "Rejection Reason"
+                "Budget Usage Status(es)"
             };
         }
 

@@ -653,7 +653,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     const shareTreatmentLibraryDialogData = ref<ShareTreatmentLibraryDialogData>(clone(emptyShareTreatmentLibraryDialogData));
     let loadedScenarioId: string = '';
     let parentLibraryId: string  = uuidNIL;
-    let parentLibraryName: string = 'None';
+    let parentLibraryName = ref('None');
     let scenarioParentLIbrary: string | null = null;
     let scenarioLibraryIsModified: boolean = false;
     let loadedParentName: string = "";
@@ -733,10 +733,11 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     
     watch(stateScenarioTreatmentLibrary, () => onStateScenarioTreatmentLibraryChanged())
     function onStateScenarioTreatmentLibraryChanged() {
+
         setParentLibraryName(stateScenarioTreatmentLibrary.value ? stateScenarioTreatmentLibrary.value.id : "None");
         scenarioLibraryIsModified = stateScenarioTreatmentLibrary.value ? stateScenarioTreatmentLibrary.value.isModified : false;
         loadedParentId = stateScenarioTreatmentLibrary.value ? stateScenarioTreatmentLibrary.value.id : uuidNIL;
-        loadedParentName = parentLibraryName;
+        loadedParentName = parentLibraryName.value;
     }
 
     watch(librarySelectItemValue, () => onLibrarySelectItemValueChangedCheckUnsaved())
@@ -1063,7 +1064,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
 
     function setParentLibraryName(libraryId: string) {
         if (libraryId === "None" || libraryId === uuidNIL) {
-            parentLibraryName = "None";
+            parentLibraryName.value = "None";
             return;
         }
         let foundLibrary: TreatmentLibrary = emptyTreatmentLibrary;
@@ -1073,7 +1074,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
             }
         });
         parentLibraryId = foundLibrary.id;
-        parentLibraryName = foundLibrary.name;
+        parentLibraryName.value = foundLibrary.name;
     }
 
     function onUpsertScenarioTreatments() {
@@ -1295,7 +1296,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
                 simpleTreatments.value = clone(stateSimpleScenarioSelectableTreatments.value);
             }
         });
-        parentLibraryName = loadedParentName;
+        parentLibraryName.value = loadedParentName;
         parentLibraryId = loadedParentId;
     }
 

@@ -281,7 +281,7 @@ import {
 } from '@/shared/utils/http-utils';
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
-import { bind, clone } from 'ramda';
+import { bind, clone, isNil } from 'ramda';
 import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { newsAccessDateComparison, getDateOnly, getCurrentDateOnly } from '@/shared/utils/date-utils';
@@ -488,7 +488,6 @@ import { getUrl } from './shared/utils/get-url';
                 await new Promise(_ => setTimeout(_, 5000));
             }
 
-
             request.headers = setAuthHeader(request.headers);
             if(ignoredAPIs.every((ignored: string) => request.url!.indexOf(ignored) === -1,))
                 incrementProcessCounterAction();
@@ -510,10 +509,14 @@ import { getUrl } from './shared/utils/get-url';
         // create a success & error handler
         const successHandler = (response: AxiosResponse) => {
             response.headers = setContentTypeCharset(response.headers);
-            new Promise(_ => setTimeout(_, 10)).then(() => decrementProcessCounterAction()) 
+            if(!isNil(response.config.url)){
+                if(ignoredAPIs.every((ignored: string) => response.config.url!.indexOf(ignored) === -1,))
+                    new Promise(_ => setTimeout(_, 10)).then(() => decrementProcessCounterAction()) 
+            }         
             return response;
         };
         const errorHandler = (error: AxiosError) => {
+            
             if (error.request) {
                 error.request.headers = setContentTypeCharset(
                     error.request.headers,

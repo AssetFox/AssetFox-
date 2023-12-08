@@ -184,6 +184,8 @@
         <v-col cols="12">
             <v-btn flat
                 v-show="hasSelectedLibrary || hasScenario"
+                :disabled="selectedTargetConditionGoalIds.length === 0"
+                variant="text"
                 id="TargetConditionGoalEditor-deleteSelected-vbtn"
                 class='ghd-blue ghd-button'
                 @click="onRemoveTargetConditionGoals"> 

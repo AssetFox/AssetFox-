@@ -145,7 +145,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             selectableTreatment.Description = entity.Description;
             selectableTreatment.Category = (TreatmentCategory)entity.Category;
             selectableTreatment.AssetCategory = (AssetCategory)(AssetCategories)entity.AssetType;
-            //selectableTreatment.ForCommittedProjectsOnly = entity.IsUnselectable;
+            selectableTreatment.ForCommittedProjectsOnly = entity.IsUnselectable;
 
             if (entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Any())
             {

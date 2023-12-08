@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
@@ -260,6 +262,28 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Null(budgetAmountEntityAfter);
             Assert.Null(scenarioBudgetEntityAfter);
             Assert.Null(investmentPlanEntityAfter);
+        }
+
+        [Fact (Skip ="Fails. Keeping around until related discussion is complete.")]
+        public async Task FailureInASingleTest()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            // Set up a network with maintainable assets
+            Guid networkId = Guid.NewGuid();
+            var maintainableAssets = new List<MaintainableAsset>();
+            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId, TestAttributeIds.CulvDurationNId);
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"), "Test Simulation", Guid.NewGuid(), networkId);
+            // changing the owner Id to user.Id above causes this to pass.
+
+            // Arrange
+            var simulation2 = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+
+            // Act
+            //  TestHelper.UnitOfWork.SimulationRepo.DeleteSimulation(simulation.Id);
+            TestHelper.UnitOfWork.SimulationRepo.DeleteSimulation(simulation2.Id);
+
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,9 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests
         public static void ResetDatabase(UnitOfDataPersistenceWork unitOfWork)
         {
             unitOfWork.Context.Database.EnsureDeleted();
-            unitOfWork.Context.Database.EnsureCreated();
-            var connectionString = unitOfWork.Context.Database.GetConnectionString();
-            RunBatch.SetupStoredProcedures(unitOfWork, connectionString);
+            unitOfWork.Context.Database.Migrate();
         }
     }
 }

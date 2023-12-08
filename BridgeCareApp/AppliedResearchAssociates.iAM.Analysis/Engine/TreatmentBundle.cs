@@ -10,20 +10,22 @@ internal sealed class TreatmentBundle : Treatment
 
     public TreatmentBundle(IEnumerable<SelectableTreatment> bundledTreatments)
     {
-        BundledTreatments = bundledTreatments?.ToList() ?? throw new ArgumentNullException(nameof(bundledTreatments));
+        BundledTreatments = bundledTreatments?.OrderBy(t => t.Name).ToList()
+            ?? throw new ArgumentNullException(nameof(bundledTreatments));
 
         // These initializations assume that each bundled treatment doesn't change its relevant
         // properties afterward. This is a safe assumption, because this type is only used inside
         // the analysis engine.
 
-        Name = "Bundle[" + string.Join('|', bundledTreatments.Select(t => t.Name)) + "]";
+        var joinedNames = string.Join('|', BundledTreatments.Select(t => t.Name));
+        Name = $"Bundle[{joinedNames}]";
 
-        PerformanceCurveAdjustmentFactors = bundledTreatments
+        PerformanceCurveAdjustmentFactors = BundledTreatments
             .SelectMany(t => t.PerformanceCurveAdjustmentFactors)
             .GroupBy(kv => kv.Key)
             .ToDictionary(g => g.Key, g => g.Max(kv => kv.Value));
 
-        ShadowForAnyTreatment = bundledTreatments.Max(t => t.ShadowForAnyTreatment);
+        ShadowForAnyTreatment = BundledTreatments.Max(t => t.ShadowForAnyTreatment);
 
         TreatmentSchedulings = BundledTreatments
             .SelectMany(t => t.Schedulings)
@@ -61,7 +63,7 @@ internal sealed class TreatmentBundle : Treatment
             {
                 if (g.Key is NumberAttribute target)
                 {
-                    scope.SimulationRunner.Send(new SimulationLogMessageBuilder
+                    scope.SimulationRunner.Send(new()
                     {
                         Message = "Multiple treatments in a bundle are applying consequences to a single number attribute.",
                         SimulationId = scope.SimulationRunner.Simulation.Id,
@@ -77,7 +79,7 @@ internal sealed class TreatmentBundle : Treatment
                 }
                 else
                 {
-                    scope.SimulationRunner.Send(new SimulationLogMessageBuilder
+                    scope.SimulationRunner.Send(new()
                     {
                         Message = "Multiple treatments in a bundle are applying consequences to a single non-number attribute.",
                         SimulationId = scope.SimulationRunner.Simulation.Id,

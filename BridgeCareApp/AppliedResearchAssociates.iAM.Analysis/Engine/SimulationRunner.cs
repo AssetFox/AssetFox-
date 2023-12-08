@@ -618,10 +618,11 @@ public sealed class SimulationRunner
                 return isSuperseded;
             });
 
-            if (Simulation.ShouldBundleFeasibleTreatments)
+            if (feasibleTreatments.Count > 1 && Simulation.ShouldBundleFeasibleTreatments)
             {
-                // this is where we would "bundle" multiple treatments. replace all treatments with
-                // just one aggregated treatment.
+                var bundle = new TreatmentBundle(feasibleTreatments);
+                feasibleTreatments.Clear();
+                feasibleTreatments.Add(bundle);
             }
 
             _ = feasibleTreatments.RemoveWhere(treatment =>

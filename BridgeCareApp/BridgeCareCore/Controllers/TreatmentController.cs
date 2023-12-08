@@ -147,7 +147,7 @@ namespace BridgeCareCore.Controllers
                     }
                     else
                     {
-                        var library = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == selectableTreatment.LibraryId);
+                        var library = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibaryNoChildren(selectableTreatment.LibraryId);
                         if (library != null) library.IsModified = selectableTreatment.IsModified;
                         result = library;
                     }                                         

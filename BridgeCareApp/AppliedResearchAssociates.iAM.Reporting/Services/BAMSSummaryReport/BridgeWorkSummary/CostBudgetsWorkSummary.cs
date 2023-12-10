@@ -28,6 +28,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private int BridgeTotalRow = 0;
         private int CulvertTotalRow = 0;
         private int CommittedTotalRow = 0;
+        private int TotalSpentRow = 0;
 
         public CostBudgetsWorkSummary(WorkSummaryModel workSummaryModel)
         {
@@ -70,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 WorkTypeTotalProjectBuilder = workTypeTotalProjectBuilder,
                 WorkTypeTotalWorkOutsideScope = workTypeTotalWorkOutsideScope
             };
-            // TODO test it
+            
             var workTypeTotalRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, yearlyBudgetAmount, workTypeTotalAggregated);
 
             var bpnTotalRow = FillBpnSection(worksheet, currentCell, simulationYears, bpnCostPerYear);
@@ -79,7 +80,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         #region Private methods
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> AddCostOfWorkOutsideScope(List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
-        {            
+        {
             var workTypeTotalWorkOutsideScope = new Dictionary<TreatmentCategory, SortedDictionary<int, decimal>>();
             var category = TreatmentCategory.WorkOutsideScope;
 
@@ -91,7 +92,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 if (!workTypeTotalWorkOutsideScope.ContainsKey(category))
                 {
                     workTypeTotalWorkOutsideScope.Add(category, new SortedDictionary<int, decimal>());
-                    workTypeTotalWorkOutsideScope[category].Add(currYear, 0);                    
+                }
+                if (!workTypeTotalWorkOutsideScope[category].ContainsKey(currYear))
+                {
+                    workTypeTotalWorkOutsideScope[category].Add(currYear, 0);
                 }
                 workTypeTotalWorkOutsideScope[category][currYear] += treatmentCost;
             }
@@ -197,6 +201,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var lastContentRow = firstContentRow + workTypes.Count - 1;
             currentCell.Row += workTypes.Count();
             var totalSpentRow = currentCell.Row;
+            TotalSpentRow = totalSpentRow;
             worksheet.Cells[totalSpentRow, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(totalSpentRow, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1); ;
             worksheet.Cells[totalSpentRow, 1].Value = "Total Spent";
             for (var columnIndex = 3; columnIndex < 3 + numberOfYears; columnIndex++)
@@ -204,6 +209,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 var startAddress = worksheet.Cells[firstContentRow, columnIndex].Address;
                 var endAddress = worksheet.Cells[lastContentRow, columnIndex].Address;
                 worksheet.Cells[currentCell.Row, columnIndex].Formula = ExcelFormulas.RangeSum(startAddress, endAddress);
+                worksheet.Cells[currentCell.Row, columnIndex].Calculate();
             }
 
             // Adding percentage after the Total (all years)
@@ -819,8 +825,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 row = startRow;
                 column = ++column;
-                var totalSpent = Convert.ToDouble(worksheet.Cells[CulvertTotalRow, column].Value) +
-                    Convert.ToDouble(worksheet.Cells[BridgeTotalRow, column].Value) +
+                var totalSpent = Convert.ToDouble(worksheet.Cells[TotalSpentRow, column].Value) +
                 Convert.ToDouble(worksheet.Cells[CommittedTotalRow, column].Value);
 
                 worksheet.Cells[row, column].Value = Convert.ToDouble(worksheet.Cells[budgetTotalRow, column].Value) - totalSpent;

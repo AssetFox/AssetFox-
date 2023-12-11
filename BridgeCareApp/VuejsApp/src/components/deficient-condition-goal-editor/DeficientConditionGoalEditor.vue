@@ -478,7 +478,7 @@ import { getUrl } from '@/shared/utils/get-url';
     const showCreateDeficientConditionGoalDialog = ref<boolean>(false);
     const criterionEditorDialogData = ref< GeneralCriterionEditorDialogData >(clone(emptyGeneralCriterionEditorDialogData));
     const createDeficientConditionGoalLibraryDialogData = ref<CreateDeficientConditionGoalLibraryDialogData>(clone(emptyCreateDeficientConditionGoalLibraryDialogData));
-    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    const confirmDeleteAlertData = ref<AlertData>(clone(emptyAlertData));
     let rules: InputValidationRules = validationRules;
     let uuidNIL: string = getBlankGuid();
     let hasScenario = ref(false);
@@ -900,7 +900,7 @@ import { getUrl } from '@/shared/utils/get-url';
     }
 
     function onShowConfirmDeleteAlert() {
-        confirmDeleteAlertData = {
+        confirmDeleteAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -909,7 +909,7 @@ import { getUrl } from '@/shared/utils/get-url';
     }
 
     function onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        confirmDeleteAlertData = clone(emptyAlertData);
+        confirmDeleteAlertData.value = clone(emptyAlertData);
 
         if (submit) {
             librarySelectItemValue.value = null;

@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             TreatmentCategory.Replacement => "Replacement",
             TreatmentCategory.Maintenance => "Maintenance",
             TreatmentCategory.Other => "Other",
-            TreatmentCategory.WorkOutsideScope => "Work Outside Scope",
+            TreatmentCategory.WorkOutsideScope => "Work Outside Scope/Jurisdiction",
             _ => name.ToString(),
         };
     }

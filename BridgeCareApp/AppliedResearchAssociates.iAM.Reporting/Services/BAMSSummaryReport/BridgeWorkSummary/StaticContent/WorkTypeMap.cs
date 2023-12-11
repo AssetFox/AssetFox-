@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 { "Replacement", TreatmentCategory.Replacement },
                 { "Maintenance", TreatmentCategory.Maintenance },
                 { "Other", TreatmentCategory.Other },
-                { "Work Outside Scope", TreatmentCategory.WorkOutsideScope }
+                { "Work Outside Scope/Jurisdiction", TreatmentCategory.WorkOutsideScope }
             };
     }
 }

@@ -143,6 +143,7 @@
                 </v-card>
             </v-menu>
             <v-switch
+                color="#2A578D"
                 v-model="TreatmentIsUnSelectable"
                 label="Mark treatment as unselectable by scenario engine"
                 style="margin-left: 0px; margin-top: 10px;"

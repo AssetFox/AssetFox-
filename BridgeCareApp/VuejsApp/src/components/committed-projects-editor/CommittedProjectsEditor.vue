@@ -308,7 +308,7 @@ import { watch, ref, shallowReactive, onMounted, onBeforeUnmount, shallowRef, co
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { CommittedProjectFillTreatmentReturnValues, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
 import { getBlankGuid, getNewGuid } from '../../shared/utils/uuid-utils';
-import { emptyTreatmentLibrary, Treatment, treatmentCategoryMap, treatmentCategoryReverseMap, TreatmentLibrary } from '@/shared/models/iAM/treatment';
+import { emptyTreatmentLibrary, SimpleTreatment, Treatment, treatmentCategoryMap, treatmentCategoryReverseMap, TreatmentLibrary } from '@/shared/models/iAM/treatment';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import CommittedProjectsService from '@/services/committed-projects.service';
 import { Attribute } from '@/shared/models/iAM/attribute';
@@ -394,7 +394,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     const currentPage = ref<SectionCommittedProjectTableData[]>([]);
     let isRunning: boolean = true;
 
-    const selectedLibraryTreatments = ref<Treatment[]>([]);
+    const selectedLibraryTreatments = ref<SimpleTreatment[]>([]);
     let isKeyAttributeValidMap: Map<string, boolean> = new Map<string, boolean>();
 
     let projectPagination = shallowReactive<Pagination>(clone(emptyPagination));
@@ -631,7 +631,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     watch(selectedLibraryTreatments, onSelectedLibraryTreatmentsChanged)
     function onSelectedLibraryTreatmentsChanged() {
         treatmentSelectItems.value = selectedLibraryTreatments.value.map(
-            (treatment: Treatment) => (treatment.name)
+            (treatment: SimpleTreatment) => (treatment.name)
         );
     };
     watch(selectedStateTreatmentLibrary, () => {
@@ -1279,15 +1279,20 @@ import ConfirmDialog from 'primevue/confirmdialog';
         }
     }
 
-    function handleLibrarySelectChange(libraryId: string) {
+    async function handleLibrarySelectChange(libraryId: string) {
         selectTreatmentLibraryAction(libraryId);
         hasSelectedLibrary = true;
         const library = stateTreatmentLibraries.value.find((o) => o.id === libraryId);
         librarySelectItemValue.value = libraryId;
 
         if (!isNil(library)) {
-          selectedLibraryTreatments.value = library.treatments;
-          onSelectedLibraryTreatmentsChanged();
+            await TreatmentService.getSimpleTreatmentsByLibraryId(libraryId).then(response => {
+                if (hasValue(response, 'data')) {
+                    let treatments = response.data as SimpleTreatment[]
+                    selectedLibraryTreatments.value = clone(treatments);
+                    onSelectedLibraryTreatmentsChanged();
+                }
+            })         
         } 
     }   
 

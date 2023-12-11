@@ -9,6 +9,7 @@
     <v-row justify="start">     
         <v-col cols="10">
             <v-switch
+                color="#2A578D"
                 v-show="useTreatment"
                 label="No Treatment"
                 class="ghd-control-label ghd-md-gray Montserrat-font-family my-2"

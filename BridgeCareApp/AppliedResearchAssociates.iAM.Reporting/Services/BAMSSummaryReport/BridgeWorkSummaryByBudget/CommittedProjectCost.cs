@@ -8,8 +8,9 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary;
 using AppliedResearchAssociates.iAM.Reporting.Models;
-using NLog.Internal;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget
 {
@@ -24,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         internal void FillCostOfCommittedWork(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
             List<YearsData> costForCommittedBudgets, HashSet<string> committedTreatments,
-            Dictionary<int, double> totalBudgetPerYearForCommittedWork, WorkTypeTotal workTypeTotal)
+            Dictionary<int, double> totalBudgetPerYearForCommittedWork, WorkTypeTotal workTypeTotal, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
         {
             var startYear = simulationYears[0];
             currentCell.Row += 1;
@@ -57,6 +58,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     totalAmount += item.Amount;
                     worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
                     WorkTypeTotalHelper.FillWorkTypeTotals(item, workTypeTotal);
+
+                    // Remove from committedProjectsForWorkOutsideScope
+                    var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Treatment == item.Treatment && _.Year == item.Year && _.ProjectSource.ToString() == item.ProjectSource && _.Category == item.TreatmentCategory);
+                    if (toRemove != null)
+                    {
+                        committedProjectsForWorkOutsideScope.Remove(toRemove);
+                    }
                 }
             }
             worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.BridgeTotal;
@@ -86,7 +94,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             List<YearsData> costForSAPBudgets,
             HashSet<string> sapTreatments,
             Dictionary<int, double> totalBudgetPerYearForSAPWork,
-            WorkTypeTotal workTypeTotal)
+            WorkTypeTotal workTypeTotal,
+            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
         {
             var startYear = simulationYears[0];
             currentCell.Row += 1; 
@@ -112,6 +121,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     totalAmount += item.Amount;
                     worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
                     WorkTypeTotalHelper.FillWorkTypeTotals(item, workTypeTotal);
+
+                    // Remove from committedProjectsForWorkOutsideScope
+                    var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Treatment == item.Treatment && _.Year == item.Year && _.ProjectSource.ToString() == item.ProjectSource && _.Category == item.TreatmentCategory);
+                    if (toRemove != null)
+                    {
+                        committedProjectsForWorkOutsideScope.Remove(toRemove);
+                    }
                 }
             }
             worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.BridgeTotal;
@@ -145,7 +161,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             List<YearsData> costForProjectBuilderBudgets,
             HashSet<string> projectBuilderTreatments,
             Dictionary<int, double> totalBudgetPerYearForProjectBuilderWork,
-            WorkTypeTotal workTypeTotal)
+            WorkTypeTotal workTypeTotal,
+            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
         {
             var startYear = simulationYears[0];
             currentCell.Row += 1;  
@@ -171,6 +188,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     totalAmount += item.Amount;
                     worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
                     WorkTypeTotalHelper.FillWorkTypeTotals(item, workTypeTotal);
+
+                    // Remove from committedProjectsForWorkOutsideScope
+                    var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Treatment == item.Treatment && _.Year == item.Year && _.ProjectSource.ToString() == item.ProjectSource && _.Category == item.TreatmentCategory);
+                    if (toRemove != null)
+                    {
+                        committedProjectsForWorkOutsideScope.Remove(toRemove);
+                    }
                 }
             }
             worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.BridgeTotal;
@@ -190,6 +214,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
             ExcelHelper.SetTextColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.White);
             currentCell.Row++; 
+        }
+
+        internal void AddCostOfWorkOutsideScope(WorkTypeTotal workTypeTotal, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
+        {
+            foreach(var committedProjectForWorkOutsideScope in committedProjectsForWorkOutsideScope)
+            {
+                var yearsData = new YearsData { TreatmentCategory = TreatmentCategory.WorkOutsideScope, Year = committedProjectForWorkOutsideScope.Year, Amount = committedProjectForWorkOutsideScope.Cost };
+                WorkTypeTotalHelper.FillWorkTypeTotals(yearsData, workTypeTotal);
+            }
         }
     }
 }

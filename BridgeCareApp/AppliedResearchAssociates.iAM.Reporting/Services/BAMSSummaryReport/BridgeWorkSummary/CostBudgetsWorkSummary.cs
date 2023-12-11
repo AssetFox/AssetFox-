@@ -10,7 +10,6 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -25,8 +24,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private Dictionary<int, decimal> TotalSAPSpent = new Dictionary<int, decimal>();
         private Dictionary<int, decimal> TotalProjectBuilderSpent = new Dictionary<int, decimal>();
 
-        private int BridgeTotalRow = 0;
-        private int CulvertTotalRow = 0;
         private int CommittedTotalRow = 0;
         private int TotalSpentRow = 0;
 
@@ -425,7 +422,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                         // Remove from committedProjectsForWorkOutsideScope
                         var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Treatment == data.Key && _.Year == yearlyItem.Key && _.ProjectSource.ToString() == dataValue.projectSource && _.Category.ToString() == dataValue.treatmentCategory);
-                        committedProjectsForWorkOutsideScope.Remove(toRemove);
+                        if (toRemove != null)
+                        {
+                            committedProjectsForWorkOutsideScope.Remove(toRemove);
+                        }
                     }
                 }
                 TotalCommittedSpent.Add(yearlyItem.Key, committedTotalCost);
@@ -523,7 +523,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                         // Remove from committedProjectsForWorkOutsideScope
                         var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Treatment == data.Key && _.Year == yearlyItem.Key && _.ProjectSource.ToString() == dataValue.projectSource && _.Category.ToString() == dataValue.treatmentCategory);
-                        committedProjectsForWorkOutsideScope.Remove(toRemove);
+                        if (toRemove != null)
+                        {
+                            committedProjectsForWorkOutsideScope.Remove(toRemove);
+                        }
                     }
                 }
 
@@ -631,7 +634,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                         // Remove from committedProjectsForWorkOutsideScope
                         var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Treatment == data.Key && _.Year == yearlyItem.Key && _.ProjectSource.ToString() == dataValue.projectSource && _.Category.ToString() == dataValue.treatmentCategory);
-                        committedProjectsForWorkOutsideScope.Remove(toRemove);
+                        if (toRemove != null)
+                        {
+                            committedProjectsForWorkOutsideScope.Remove(toRemove);
+                        }
                     }
                 }
 
@@ -738,7 +744,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.SetTextColor(worksheet.Cells[culvertTotalRow, fromColumn, culvertTotalRow, column], Color.White);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
 
-            CulvertTotalRow = culvertTotalRow;
             return workTypeTotalCulvert;
         }
 
@@ -807,7 +812,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.ApplyColor(worksheet.Cells[bridgeTotalRow, fromColumn, bridgeTotalRow, column], Color.FromArgb(84, 130, 53));
             ExcelHelper.SetTextColor(worksheet.Cells[bridgeTotalRow, fromColumn, bridgeTotalRow, column], Color.White);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
-            BridgeTotalRow = bridgeTotalRow;
             return workTypeTotalBridge;
         }
 

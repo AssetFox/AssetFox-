@@ -145,12 +145,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             selectableTreatment.Description = entity.Description;
             selectableTreatment.Category = (TreatmentCategory)entity.Category;
             selectableTreatment.AssetCategory = (AssetCategory)(AssetCategories)entity.AssetType;
+            selectableTreatment.ForCommittedProjectsOnly = entity.IsUnselectable;
+
             if (entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Any())
             {
-                var budgetIds = entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Select(_ => _.ScenarioBudget.Id).ToList();
-                simulation.InvestmentPlan.Budgets.Where(_ => budgetIds.Contains(_.Id)).ToList()
+                var budgetIds = entity.ScenarioSelectableTreatmentScenarioBudgetJoins
+                    .Select(_ => _.ScenarioBudget.Id)
+                    .ToList();
+
+                simulation.InvestmentPlan.Budgets
+                    .Where(_ => budgetIds.Contains(_.Id))
+                    .ToList()
                     .ForEach(budget => selectableTreatment.Budgets.Add(budget));
             }
+
             if (entity.ScenarioTreatmentPerformanceFactors.Any())
             {
                 entity.ScenarioTreatmentPerformanceFactors.ForEach(_ =>
@@ -165,6 +173,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     }
                 });
             }
+
             if (entity.ScenarioTreatmentConsequences.Any())
             {
                 entity.ScenarioTreatmentConsequences.ForEach(_ => _.CreateConditionalTreatmentConsequence(selectableTreatment, simulation.Network.Explorer.AllAttributes));
@@ -174,6 +183,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 entity.ScenarioTreatmentCosts.ForEach(_ => _.CreateTreatmentCost(selectableTreatment));
             }
+
             var feasibility = selectableTreatment.AddFeasibilityCriterion();
             feasibility.Expression = entity.CriterionLibraryScenarioSelectableTreatmentJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
 

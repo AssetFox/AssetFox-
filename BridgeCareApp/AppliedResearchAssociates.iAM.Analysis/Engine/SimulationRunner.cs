@@ -570,60 +570,16 @@ public sealed class SimulationRunner
         {
             if (context.YearIsWithinShadowForAnyTreatment(year))
             {
-                var rejections = ActiveTreatments.Select(treatment => new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForAnyTreatment, getBenefitImprovement(context, treatment)));
+                var rejections = ActiveTreatments.Select(treatment => new TreatmentRejectionDetail(
+                    treatment.Name,
+                    TreatmentRejectionReason.WithinShadowForAnyTreatment,
+                    getBenefitImprovement(context, treatment)));
+
                 context.Detail.TreatmentRejections.AddRange(rejections);
                 return;
             }
 
-            var feasibleTreatments = ActiveTreatments.ToHashSet();
-
-            _ = feasibleTreatments.RemoveWhere(treatment =>
-            {
-                var isRejected = context.YearIsWithinShadowForSameTreatment(year, treatment);
-                if (isRejected)
-                {
-                    context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForSameTreatment, getBenefitImprovement(context, treatment)));
-                }
-
-                return isRejected;
-            });
-
-            _ = feasibleTreatments.RemoveWhere(treatment =>
-            {
-                var isFeasible = treatment.IsFeasible(context);
-                if (!isFeasible)
-                {
-                    context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.NotFeasible, getBenefitImprovement(context, treatment)));
-                }
-
-                return !isFeasible;
-            });
-
-            var supersededTreatmentsQuery =
-                from treatment in feasibleTreatments
-                from supersedeRule in treatment.SupersedeRules
-                where supersedeRule.Criterion.EvaluateOrDefault(context)
-                select supersedeRule.Treatment;
-
-            var supersededTreatments = supersededTreatmentsQuery.ToHashSet();
-
-            _ = feasibleTreatments.RemoveWhere(treatment =>
-            {
-                var isSuperseded = supersededTreatments.Contains(treatment);
-                if (isSuperseded)
-                {
-                    context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.Superseded, getBenefitImprovement(context, treatment)));
-                }
-
-                return isSuperseded;
-            });
-
-            if (feasibleTreatments.Count > 1 && Simulation.ShouldBundleFeasibleTreatments)
-            {
-                var bundle = new TreatmentBundle(feasibleTreatments);
-                feasibleTreatments.Clear();
-                feasibleTreatments.Add(bundle);
-            }
+            var feasibleTreatments = getFeasibleTreatments(context, year);
 
             _ = feasibleTreatments.RemoveWhere(treatment =>
             {
@@ -632,27 +588,31 @@ public sealed class SimulationRunner
                 {
                     if (convertedCost < Simulation.InvestmentPlan.MinimumProjectCostLimit)
                     {
-                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.CostIsBelowMinimumProjectCostLimit, getBenefitImprovement(context, treatment)));
+                        context.Detail.TreatmentRejections.Add(new(
+                            treatment.Name,
+                            TreatmentRejectionReason.CostIsBelowMinimumProjectCostLimit,
+                            getBenefitImprovement(context, treatment)));
+
                         return true;
                     }
 
                     return false;
                 }
 
-                context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost, getBenefitImprovement(context, treatment)));
-                var messageBuilder = SimulationLogMessageBuilders.InvalidTreatmentCost(context.Asset, treatment, cost, context.SimulationRunner.Simulation.Id);
+                context.Detail.TreatmentRejections.Add(new(
+                    treatment.Name,
+                    TreatmentRejectionReason.InvalidCost,
+                    getBenefitImprovement(context, treatment)));
+
+                var messageBuilder = SimulationLogMessageBuilders.InvalidTreatmentCost(
+                    context.Asset,
+                    treatment,
+                    cost,
+                    context.SimulationRunner.Simulation.Id);
+
                 Send(messageBuilder);
                 return true;
             });
-
-            static double getBenefitImprovement(AssetContext context, Treatment treatment)
-            {
-                var copyOfContext = new AssetContext(context);
-                var beforeTreatment = copyOfContext.GetBenefitData();
-                copyOfContext.ApplyTreatmentConsequences(treatment);
-                var afterTreatment = copyOfContext.GetBenefitData();
-                return afterTreatment.lruBenefit - beforeTreatment.lruBenefit;
-            }
 
             if (feasibleTreatments.Count > 0)
             {
@@ -662,7 +622,12 @@ public sealed class SimulationRunner
                     group limit.Value by limit.Attribute into attributeLimitValues
                     select new RemainingLifeCalculator.Factory(attributeLimitValues));
 
-                var baselineOutlook = new TreatmentOutlook(this, context, Simulation.DesignatedPassiveTreatment, year, remainingLifeCalculatorFactories);
+                var baselineOutlook = new TreatmentOutlook(
+                    this,
+                    context,
+                    Simulation.DesignatedPassiveTreatment,
+                    year,
+                    remainingLifeCalculatorFactories);
 
                 foreach (var treatment in feasibleTreatments)
                 {
@@ -672,6 +637,78 @@ public sealed class SimulationRunner
 
                     context.Detail.TreatmentOptions.Add(option.Detail);
                 }
+            }
+
+            HashSet<Treatment> getFeasibleTreatments(AssetContext context, int year)
+            {
+                var treatments = ActiveTreatments.ToHashSet();
+
+                _ = treatments.RemoveWhere(treatment =>
+                {
+                    var isRejected = context.YearIsWithinShadowForSameTreatment(year, treatment);
+                    if (isRejected)
+                    {
+                        context.Detail.TreatmentRejections.Add(new(
+                            treatment.Name,
+                            TreatmentRejectionReason.WithinShadowForSameTreatment,
+                            getBenefitImprovement(context, treatment)));
+                    }
+
+                    return isRejected;
+                });
+
+                _ = treatments.RemoveWhere(treatment =>
+                {
+                    var isFeasible = treatment.IsFeasible(context);
+                    if (!isFeasible)
+                    {
+                        context.Detail.TreatmentRejections.Add(new(
+                            treatment.Name,
+                            TreatmentRejectionReason.NotFeasible,
+                            getBenefitImprovement(context, treatment)));
+                    }
+
+                    return !isFeasible;
+                });
+
+                var supersededTreatmentsQuery =
+                    from treatment in treatments
+                    from supersedeRule in treatment.SupersedeRules
+                    where supersedeRule.Criterion.EvaluateOrDefault(context)
+                    select supersedeRule.Treatment;
+
+                var supersededTreatments = supersededTreatmentsQuery.ToHashSet();
+
+                _ = treatments.RemoveWhere(treatment =>
+                {
+                    var isSuperseded = supersededTreatments.Contains(treatment);
+                    if (isSuperseded)
+                    {
+                        context.Detail.TreatmentRejections.Add(new(
+                            treatment.Name,
+                            TreatmentRejectionReason.Superseded,
+                            getBenefitImprovement(context, treatment)));
+                    }
+
+                    return isSuperseded;
+                });
+
+                if (treatments.Count > 1 && Simulation.ShouldBundleFeasibleTreatments)
+                {
+                    var bundle = new TreatmentBundle(treatments);
+                    return new() { bundle };
+                }
+
+                return treatments.ToHashSet<Treatment>();
+            }
+
+            static double getBenefitImprovement(AssetContext context, Treatment treatment)
+            {
+                var copyOfContext = new AssetContext(context);
+                var beforeTreatment = copyOfContext.GetBenefitData();
+                copyOfContext.ApplyTreatmentConsequences(treatment);
+                var afterTreatment = copyOfContext.GetBenefitData();
+                return afterTreatment.lruBenefit - beforeTreatment.lruBenefit;
             }
         }
 

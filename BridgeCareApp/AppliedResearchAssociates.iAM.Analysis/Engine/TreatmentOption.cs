@@ -4,7 +4,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
 internal sealed class TreatmentOption
 {
-    public TreatmentOption(AssetContext context, SelectableTreatment candidateTreatment, double cost, double benefit, double? remainingLife, double conditionChange)
+    public TreatmentOption(AssetContext context, Treatment candidateTreatment, double cost, double benefit, double? remainingLife, double conditionChange)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
         CandidateTreatment = candidateTreatment ?? throw new ArgumentNullException(nameof(candidateTreatment));
@@ -16,7 +16,7 @@ internal sealed class TreatmentOption
 
     public double Benefit { get; }
 
-    public SelectableTreatment CandidateTreatment { get; }
+    public Treatment CandidateTreatment { get; }
 
     public double ConditionChange { get; }
 

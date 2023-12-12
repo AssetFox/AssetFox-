@@ -1061,7 +1061,7 @@ public sealed class SimulationRunner
 
         void tryToAllocateCost(
             IEnumerable<BudgetInfo> applicableBudgets,
-            ref decimal cost,
+            ref decimal remainingCost,
             Action<decimal, BudgetContext> costAllocationAction,
             IReadOnlyDictionary<BudgetContext, decimal> costCoverageFractionPerBudget,
             out bool costCoverageFractionsWereSatisfied)
@@ -1070,25 +1070,22 @@ public sealed class SimulationRunner
             costCoverageFractionsWereSatisfied = true;
 
             // "cost" is a variable that is being *indirectly* updated by "costAllocationAction".
-            var originalCost = cost;
+            var originalCost = remainingCost;
 
             foreach (var (budgetContext, budgetUsageDetail) in applicableBudgets)
             {
-                if (cost <= 0)
+                if (remainingCost <= 0)
                 {
                     break;
                 }
 
                 var availableAmount = getAvailableAmount(budgetContext);
 
-                decimal? maximumCoverableCost = null;
-                // = (treatment as TreatmentBundle)?.BundledTreatments.Where(t => t.CanUseBudget(b)).Sum(t => t.GetCost(xyz));
-
                 if (costCoverageFractionPerBudget is null)
                 {
-                    if (SpendingLimit == SpendingLimit.NoLimit || cost <= availableAmount)
+                    if (SpendingLimit == SpendingLimit.NoLimit || remainingCost <= availableAmount)
                     {
-                        coverCost(cost);
+                        coverCost(remainingCost);
                         break;
                     }
 
@@ -1129,7 +1126,7 @@ public sealed class SimulationRunner
             // error condition, but rounding (to the nearest tenth of a cent) should take care of
             // it. If rounding doesn't take care of it, then there's probably more to it than just
             // floating-point error.
-            if (Math.Round(cost, 3) < 0)
+            if (Math.Round(remainingCost, 3) < 0)
             {
                 throw new InvalidOperationException(MessageStrings.RemainingCostIsNegative);
             }

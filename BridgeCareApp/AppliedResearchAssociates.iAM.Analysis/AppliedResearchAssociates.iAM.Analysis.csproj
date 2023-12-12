@@ -15,6 +15,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+    <PackageReference Include="Google.OrTools" Version="9.8.3296" />
     <PackageReference Include="Humanizer.Core" Version="2.8.26" />
     <PackageReference Include="MathNet.Numerics" Version="4.11.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

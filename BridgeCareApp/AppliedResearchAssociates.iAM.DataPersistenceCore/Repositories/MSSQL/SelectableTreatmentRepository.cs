@@ -1027,7 +1027,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             try
             {
                 var scenarioSelectableTreatments = GetScenarioSelectableTreatments(simulationId);
-                var defaultTreatment = scenarioSelectableTreatments.SingleOrDefault(_ => _.CriterionLibrary == null || string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression));
+                var defaultTreatment = scenarioSelectableTreatments
+                    .Where(_ => _.IsUnselectable == false)  // trying to be explicit
+                    .SingleOrDefault(_ => _.CriterionLibrary == null || string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression));
                 if (defaultTreatment == null)
                     return null;
                 return defaultTreatment;
@@ -1044,7 +1046,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             try
             {
                 var scenarioSelectableTreatments = GetScenarioSelectableTreatments(simulationId);
-                var defaultTreatment = scenarioSelectableTreatments.SingleOrDefault(_ => _.CriterionLibrary == null || string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression));
+                var defaultTreatment = scenarioSelectableTreatments
+                    .Where(_ => _.IsUnselectable == false)  // trying to be explicit
+                    .SingleOrDefault(_ => _.CriterionLibrary == null || string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression));
                 if (defaultTreatment == null)
                     return null;
                 return _unitOfWork.Context.ScenarioSelectableTreatment.FirstOrDefault(_ => _.Id == defaultTreatment.Id);

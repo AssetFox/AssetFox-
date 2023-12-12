@@ -62,5 +62,31 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             Assert.Equal("Network name", name);
         }
+
+        [Fact]
+
+        public async Task UpsertNetworkRollupDetail_NetworkInDb_Does()
+        {
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+
+            TestHelper.UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, "Test rollup status");
+
+            var networksAfter = await TestHelper.UnitOfWork.NetworkRepo.Networks();
+            var networkAfter = networksAfter.Single(n => n.Id == networkId);
+            Assert.Equal("Test rollup status", networkAfter.Status);
+        }
+
+        [Fact]
+        public void GetNetworkKeyAttribute_NetworkInDb_GetsAttributeName()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+
+            var keyAttribute = TestHelper.UnitOfWork.NetworkRepo.GetNetworkKeyAttribute(networkId);
+
+            Assert.Equal("BRKEY_", keyAttribute);
+        }
     }
 }

@@ -14,7 +14,6 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Attributes
             // Arrange
             var config = TestConfiguration.Get();
             var unitOfWork = UnitOfWorkSetup.New(config);
-            DatabaseResetter.ResetDatabase(unitOfWork);
             var dataSource = DataSourceTestSetup.DtoForExcelDataSourceInDb(unitOfWork);
             var attribute = AttributeConnectionAttributes.ForExcelTestData(dataSource.Id);
             var importedSpreadsheet = ExcelRawDataSetup.RawData(dataSource.Id);

@@ -8,11 +8,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-
-            migrationBuilder.Sql(@"CREATE OR ALTER PROCEDURE dbo.usp_orphan_cleanup(@RetMessage VARCHAR(250) OUTPUT)
-	          AS
-	              BEGIN 
-	
+            var createProcSql = @"EXEC('CREATE OR ALTER PROCEDURE dbo.usp_orphan_cleanup(@RetMessage VARCHAR(250) OUTPUT)
+ 	          AS
+	           BEGIN 
 	            DECLARE @CustomErrorMessage NVARCHAR(MAX),
 	           @ErrorNumber int,
 	           @ErrorSeverity int,
@@ -20,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	           @ErrorProcedure nvarchar(126),
 	           @ErrorLine int,
 	           @ErrorMessage nvarchar(4000);
-	           Set  @RetMessage = 'Success';
+	           Set  @RetMessage = ''Success'';
 	           DECLARE @CurrentDateTime DATETIME;
 	           DECLARE @BatchSize INT = 100000;
 	           DECLARE @RowsDeleted INT = 1;
@@ -239,15 +237,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	           COMMIT TRANSACTION;
 	          END TRY
 	          BEGIN CATCH
-				        Set @RetMessage = 'Failed ' + @RetMessage;
-		        Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()
-		        Print 'Rolled Back Orphan SP:  ' + @ErrorMessage;
+				        Set @RetMessage = ''Failed '' + @RetMessage;
+		        Set @ErrorMessage =  ERROR_PROCEDURE() + '' (Error At Line: '' + cast( ERROR_LINE() as Varchar(5)) + '' ): '' + char(13) + char(10)  + ERROR_MESSAGE()
+		        Print ''Rolled Back Orphan SP:  '' + @ErrorMessage;
 		        ROLLBACK TRANSACTION;
 		        RAISERROR  (@RetMessage, 16, 1);  
 	          END CATCH
-      END");
+            END')";
 
-            migrationBuilder.Sql(@"CREATE OR ALTER PROCEDURE dbo.usp_delete_network(@NetworkId AS uniqueidentifier=NULL,@RetMessage VARCHAR(250) OUTPUT)
+            migrationBuilder.Sql(createProcSql);
+
+            createProcSql = @"EXEC('CREATE OR ALTER PROCEDURE dbo.usp_delete_network(@NetworkId AS uniqueidentifier=NULL,@RetMessage VARCHAR(250) OUTPUT)
 	          AS
 	              BEGIN 
 		          BEGIN TRY
@@ -259,7 +259,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	                @ErrorProcedure nvarchar(126),
 	                @ErrorLine int,
 	                @ErrorMessage nvarchar(4000);
-	                Set  @RetMessage = 'Success';
+	                Set  @RetMessage = ''Success'';
 	                DECLARE @CurrentDateTime DATETIME;
 	                DECLARE @BatchSize INT = 100000;
 	                DECLARE @RowsDeleted INT = 0;
@@ -272,7 +272,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                           ALTER TABLE BenefitQuantifier NOCHECK CONSTRAINT all
 
-		  	                Print 'BenefitQuantifier ';
+		  	                Print ''BenefitQuantifier '';
 
 			                Delete l2 
 			                FROM Network AS l1
@@ -290,7 +290,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in Network --> BenefitQuantifier'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in Network --> BenefitQuantifier''
 		                         RAISERROR (@CustomErrorMessage, 16, 1);
 				                 Set @RetMessage = @CustomErrorMessage;
 
@@ -306,7 +306,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE NetworkRollupDetail NOCHECK CONSTRAINT all
 
-			                Print 'NetworkRollupDetail ';
+			                Print ''NetworkRollupDetail '';
 
 			                Delete l2 
 			                FROM Network AS l1
@@ -324,7 +324,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in Network -->  NetworkRollupDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in Network -->  NetworkRollupDetail''
 		                         RAISERROR (@CustomErrorMessage, 16, 1);
 				                 Set @RetMessage = @CustomErrorMessage;
 
@@ -339,7 +339,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                            ALTER TABLE NetworkAttribute NOCHECK CONSTRAINT all
 
-		                   Print 'NetworkAttribute ';
+		                   Print ''NetworkAttribute '';
 
 			                Delete l2 
 			                FROM Network AS l1
@@ -357,7 +357,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in Network --> NetworkAttribute'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in Network --> NetworkAttribute''
 		                         RAISERROR (@CustomErrorMessage, 16, 1);
 				                 Set @RetMessage = @CustomErrorMessage;
 
@@ -372,7 +372,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                           ALTER TABLE AnalysisMaintainableAsset NOCHECK CONSTRAINT all
 
-		                  Print 'AnalysisMaintainableAsset ';
+		                  Print ''AnalysisMaintainableAsset '';
 
 			                Delete l2 
 			                FROM Network AS l1
@@ -390,7 +390,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in Network --> AnalysisMaintainableAsset'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in Network --> AnalysisMaintainableAsset''
 		                         RAISERROR (@CustomErrorMessage, 16, 1);
 				                 Set @RetMessage = @CustomErrorMessage;
 
@@ -409,7 +409,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ALTER TABLE AggregatedResult NOCHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON AggregatedResult DISABLE;
 		
-		                Print 'AggregatedResult ';
+		                Print ''AggregatedResult '';
 
 		                Select l3.* INTO #tempAggregatedResult
 		                FROM Network AS l1
@@ -429,7 +429,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 		                Drop table #tempAggregatedResult;
 				
-		                ----Print 'Rows Affected Network --> MaintainableAsset-->AggregatedResult: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		                ----Print ''Rows Affected Network --> MaintainableAsset-->AggregatedResult: '' +  convert(NVARCHAR(50), @RowsDeleted);
 					
 		                ALTER TABLE AggregatedResult WITH CHECK CHECK CONSTRAINT all
 		                --ALTER INDEX ALL ON AggregatedResult REBUILD;
@@ -438,7 +438,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	                BEGIN CATCH
 		                ALTER TABLE AggregatedResult WITH CHECK CHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON AggregatedResult REBUILD;
-		                Print 'Query Error in  Network --> MaintainableAsset-->AggregatedResult ***Failed***';
+		                Print ''Query Error in  Network --> MaintainableAsset-->AggregatedResult ***Failed***'';
 		                SELECT ERROR_NUMBER() AS ErrorNumber
 		                ,ERROR_SEVERITY() AS ErrorSeverity
 		                ,ERROR_STATE() AS ErrorState
@@ -446,7 +446,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ,ERROR_LINE() AS ErrorLine
 		                ,ERROR_MESSAGE() AS ErrorMessage;
 
-		                SELECT @CustomErrorMessage = 'Query Error in  Network --> MaintainableAsset-->AggregatedResult'
+		                SELECT @CustomErrorMessage = ''Query Error in  Network --> MaintainableAsset-->AggregatedResult''
 		                RAISERROR (@CustomErrorMessage, 16, 1);
 		                Set @RetMessage = @CustomErrorMessage;
 	                END CATCH;
@@ -465,7 +465,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ALTER TABLE AttributeDatumLocation NOCHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON AttributeDatumLocation DISABLE;
 
-		                Print 'AttributeDatumLocation ';
+		                Print ''AttributeDatumLocation '';
 
 		                SELECT l4.*  INTO #tempAttributeDatumLocation
 		                FROM Network AS l1
@@ -487,7 +487,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 		                Drop table #tempAttributeDatumLocation;
 				
-		                --Print 'Rows Affected Network --> MaintainableAsset-->AttributeDatum-->AttributeDatumLocation: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		                --Print ''Rows Affected Network --> MaintainableAsset-->AttributeDatum-->AttributeDatumLocation: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
 		                ALTER TABLE AttributeDatumLocation WITH CHECK CHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON AttributeDatumLocation REBUILD;
@@ -496,7 +496,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	                BEGIN CATCH
 			                ALTER TABLE AttributeDatumLocation WITH CHECK CHECK CONSTRAINT all;
 			                --ALTER INDEX ALL ON AttributeDatumLocation REBUILD;
-			                Print 'Query Error in Network --> MaintainableAsset-->AttributeDatum-->AttributeDatumLocationt ***Failed***';
+			                Print ''Query Error in Network --> MaintainableAsset-->AttributeDatum-->AttributeDatumLocationt ***Failed***'';
 			                SELECT ERROR_NUMBER() AS ErrorNumber
 			                ,ERROR_SEVERITY() AS ErrorSeverity
 			                ,ERROR_STATE() AS ErrorState
@@ -504,7 +504,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                ,ERROR_LINE() AS ErrorLine
 			                ,ERROR_MESSAGE() AS ErrorMessage;
 
-			                SELECT @CustomErrorMessage = 'Query Error in  Network --> MaintainableAsset-->AttributeDatum-->AttributeDatumLocation'
+			                SELECT @CustomErrorMessage = ''Query Error in  Network --> MaintainableAsset-->AttributeDatum-->AttributeDatumLocation''
 			                RAISERROR (@CustomErrorMessage, 16, 1);
 			                Set @RetMessage = @CustomErrorMessage;
 	                END CATCH;
@@ -522,7 +522,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ALTER TABLE AttributeDatum NOCHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON AttributeDatum DISABLE;
 
-		                Print 'AttributeDatum ';
+		                Print ''AttributeDatum '';
 
 		                SELECT l3.*  INTO #tempAttributeDatumA
 		                FROM Network AS l1
@@ -542,7 +542,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 		                Drop table #tempAttributeDatumA;
 				
-		                --Print 'Rows Affected Network --> MaintainableAsset-->AttributeDatum: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		                --Print ''Rows Affected Network --> MaintainableAsset-->AttributeDatum: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
 		                ALTER TABLE AttributeDatum WITH CHECK CHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON AttributeDatum REBUILD;
@@ -551,7 +551,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	                BEGIN CATCH
 		                ALTER TABLE AttributeDatum WITH CHECK CHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON AttributeDatum REBUILD
-		                Print 'Query Error in Network --> MaintainableAsset-->AttributeDatum-->AttributeDatum ***Failed***';
+		                Print ''Query Error in Network --> MaintainableAsset-->AttributeDatum-->AttributeDatum ***Failed***'';
 		                SELECT ERROR_NUMBER() AS ErrorNumber
 		                ,ERROR_SEVERITY() AS ErrorSeverity
 		                ,ERROR_STATE() AS ErrorState
@@ -559,7 +559,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ,ERROR_LINE() AS ErrorLine
 		                ,ERROR_MESSAGE() AS ErrorMessage;
 
-		                SELECT @CustomErrorMessage = 'Query Error in  Network --> MaintainableAsset-->AttributeDatum-->AttributeDatum'
+		                SELECT @CustomErrorMessage = ''Query Error in  Network --> MaintainableAsset-->AttributeDatum-->AttributeDatum''
 		                RAISERROR (@CustomErrorMessage, 16, 1);
 		                Set @RetMessage = @CustomErrorMessage;
 	                END CATCH
@@ -577,7 +577,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ALTER TABLE AssetSummaryDetailValueIntId NOCHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON AssetSummaryDetailValueIntId DISABLE;
 
-		                Print 'AssetSummaryDetailValueIntId ';
+		                Print ''AssetSummaryDetailValueIntId '';
 
 		                Select l4.* INTO #tempAssetSummaryDetailValueIntId
 						                FROM Network AS l1
@@ -599,7 +599,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 		                Drop table #tempAssetSummaryDetailValueIntId;
 					
-		                --Print 'Rows Affected MaintainableAsset --> AssetSummaryDetail --> AssetSummaryDetailValueIntId: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		                --Print ''Rows Affected MaintainableAsset --> AssetSummaryDetail --> AssetSummaryDetailValueIntId: '' +  convert(NVARCHAR(50), @RowsDeleted);
 					
 		                ALTER TABLE AssetSummaryDetailValueIntId WITH CHECK CHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON AssetSummaryDetailValueIntId REBUILD;
@@ -608,7 +608,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	                BEGIN CATCH
 		                ALTER TABLE AssetSummaryDetailValueIntId WITH CHECK CHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON AssetSummaryDetailValueIntId REBUILD;
-		                Print 'Query Error in Network --> MaintainableAsset --> AssetSummaryDetail --> AssetSummaryDetailValueIntId ***Failed***';
+		                Print ''Query Error in Network --> MaintainableAsset --> AssetSummaryDetail --> AssetSummaryDetailValueIntId ***Failed***'';
 		                SELECT ERROR_NUMBER() AS ErrorNumber
 		                ,ERROR_SEVERITY() AS ErrorSeverity
 		                ,ERROR_STATE() AS ErrorState
@@ -616,7 +616,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ,ERROR_LINE() AS ErrorLine
 		                ,ERROR_MESSAGE() AS ErrorMessage;
 
-		                SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetSummaryDetail --> AssetSummaryDetailValueIntId'
+		                SELECT @CustomErrorMessage = ''Query Error in  Network -->MaintainableAsset --> AssetSummaryDetail --> AssetSummaryDetailValueIntId''
 		                RAISERROR (@CustomErrorMessage, 16, 1);
 		                Set @RetMessage = @CustomErrorMessage;
 
@@ -630,7 +630,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ALTER TABLE AssetSummaryDetail NOCHECK CONSTRAINT all
 		                SET @RowsDeleted = 1;
 		    
-		                Print 'AssetSummaryDetail ';
+		                Print ''AssetSummaryDetail '';
 
 		                WHILE @RowsDeleted > 0
 		                BEGIN
@@ -646,7 +646,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 		                DROP TABLE #tempAssetSummaryDetail;
 					
-		                --Print 'Rows Affected --MaintainableAsset --> AssetSummaryDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		                --Print ''Rows Affected --MaintainableAsset --> AssetSummaryDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
  
 		                END
 		
@@ -656,7 +656,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	                BEGIN CATCH
 		                ALTER TABLE AssetSummaryDetail WITH CHECK CHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON AssetSummaryDetail REBUILD;
-		                Print 'Query Error in Network --> MaintainableAsset --> AssetSummaryDetail ***Failed***';
+		                Print ''Query Error in Network --> MaintainableAsset --> AssetSummaryDetail ***Failed***'';
 		                SELECT ERROR_NUMBER() AS ErrorNumber
 		                ,ERROR_SEVERITY() AS ErrorSeverity
 		                ,ERROR_STATE() AS ErrorState
@@ -664,7 +664,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ,ERROR_LINE() AS ErrorLine
 		                ,ERROR_MESSAGE() AS ErrorMessage;
 
-		                SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetSummaryDetail'
+		                SELECT @CustomErrorMessage = ''Query Error in  Network -->MaintainableAsset --> AssetSummaryDetail''
 		                RAISERROR (@CustomErrorMessage, 16, 1);
 		                Set @RetMessage = @CustomErrorMessage;
 	                END CATCH
@@ -681,7 +681,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ALTER TABLE BudgetUsageDetail NOCHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON BudgetUsageDetail DISABLE;
 
-		                Print 'BudgetUsageDetail1 ';
+		                Print ''BudgetUsageDetail1 '';
 
 		                Select l5.* INTO  #tempBudgetUsageDetail
 			                FROM Network AS l1
@@ -705,7 +705,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 		                Drop table #tempBudgetUsageDetail;
 					
-		                --Print 'Rows Affected --MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		                --Print ''Rows Affected --MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
 					
 		                ALTER TABLE BudgetUsageDetail NOCHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON BudgetUsageDetail DISABLE;
@@ -714,7 +714,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	                BEGIN CATCH
 		                ALTER TABLE BudgetUsageDetail NOCHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON BudgetUsageDetail DISABLE;
-		                Print 'Query Error in Network --> MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail ***Failed***';
+		                Print ''Query Error in Network --> MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail ***Failed***'';
 		                SELECT ERROR_NUMBER() AS ErrorNumber
 		                ,ERROR_SEVERITY() AS ErrorSeverity
 		                ,ERROR_STATE() AS ErrorState
@@ -722,7 +722,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ,ERROR_LINE() AS ErrorLine
 		                ,ERROR_MESSAGE() AS ErrorMessage;
 
-		                SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail'
+		                SELECT @CustomErrorMessage = ''Query Error in  Network -->MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail''
 		                RAISERROR (@CustomErrorMessage, 16, 1);
 		                Set @RetMessage = @CustomErrorMessage;
 	                END CATCH
@@ -739,7 +739,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ALTER TABLE CashFlowConsiderationDetail NOCHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON CashFlowConsiderationDetail DISABLE;
 
-		                Print 'CashFlowConsiderationDetail ';
+		                Print ''CashFlowConsiderationDetail '';
 
 		                Select l5.* INTO  #tempCashFlowConsiderationDetail
 			                FROM Network AS l1
@@ -763,7 +763,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 		                Drop table #tempCashFlowConsiderationDetail;
 					
-		                --Print 'Rows Affected --MaintainableAsset --> AssetDetail --> CashFlowConsiderationDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		                --Print ''Rows Affected --MaintainableAsset --> AssetDetail --> CashFlowConsiderationDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
 		
 		                ALTER TABLE CashFlowConsiderationDetail NOCHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON CashFlowConsiderationDetail DISABLE;
@@ -772,7 +772,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	                BEGIN CATCH
 		                ALTER TABLE CashFlowConsiderationDetail NOCHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON CashFlowConsiderationDetail DISABLE;
-		                Print 'Query Error in Network --> MaintainableAsset --> AssetDetail --> CashFlowConsiderationDetail ***Failed***';
+		                Print ''Query Error in Network --> MaintainableAsset --> AssetDetail --> CashFlowConsiderationDetail ***Failed***'';
 		                SELECT ERROR_NUMBER() AS ErrorNumber
 		                ,ERROR_SEVERITY() AS ErrorSeverity
 		                ,ERROR_STATE() AS ErrorState
@@ -780,7 +780,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ,ERROR_LINE() AS ErrorLine
 		                ,ERROR_MESSAGE() AS ErrorMessage;
 
-		                SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetDetail --> CashFlowConsiderationDetail'
+		                SELECT @CustomErrorMessage = ''Query Error in  Network -->MaintainableAsset --> AssetDetail --> CashFlowConsiderationDetail''
 		                RAISERROR (@CustomErrorMessage, 16, 1);
 		                Set @RetMessage = @CustomErrorMessage;
 	                END CATCH
@@ -797,7 +797,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ALTER TABLE TreatmentConsiderationDetail NOCHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON TreatmentConsiderationDetail DISABLE;
 
-		                Print 'TreatmentConsiderationDetail1 ';
+		                Print ''TreatmentConsiderationDetail1 '';
 
 		                SELECT l4.* INTO #tempTreatmentConsiderationDetail
 		                FROM Network AS l1
@@ -819,7 +819,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 		                Drop table #tempTreatmentConsiderationDetail;
 					
-		                --Print 'Rows Affected --MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		                --Print ''Rows Affected --MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
 		
 		                ALTER TABLE TreatmentConsiderationDetail NOCHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON TreatmentConsiderationDetail DISABLE;
@@ -828,7 +828,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	                BEGIN CATCH
 		                ALTER TABLE TreatmentConsiderationDetail NOCHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON TreatmentConsiderationDetail DISABLE;
-		                Print 'Query Error in Network --> MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail ***Failed***';
+		                Print ''Query Error in Network --> MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail ***Failed***'';
 		                SELECT ERROR_NUMBER() AS ErrorNumber
 		                ,ERROR_SEVERITY() AS ErrorSeverity
 		                ,ERROR_STATE() AS ErrorState
@@ -836,7 +836,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ,ERROR_LINE() AS ErrorLine
 		                ,ERROR_MESSAGE() AS ErrorMessage;
 
-		                SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail'
+		                SELECT @CustomErrorMessage = ''Query Error in  Network -->MaintainableAsset --> AssetDetail --> TreatmentConsiderationDetail''
 		                RAISERROR (@CustomErrorMessage, 16, 1);
 		                Set @RetMessage = @CustomErrorMessage;
 	                END CATCH
@@ -853,7 +853,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ALTER TABLE AssetDetailValueIntId NOCHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON AssetDetailValueIntId DISABLE;
 
-		                Print 'AssetDetailValueIntId ';
+		                Print ''AssetDetailValueIntId '';
 
 		                Select l4.* INTO #tempAssetDetailValueIntId
 		                FROM Network AS l1 
@@ -875,7 +875,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 		                Drop table #tempAssetDetailValueIntId;
 					
-		                --Print 'Rows Affected Network --> MaintainableAsset --> AssetDetail --> AssetDetailValueIntId: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		                --Print ''Rows Affected Network --> MaintainableAsset --> AssetDetail --> AssetDetailValueIntId: '' +  convert(NVARCHAR(50), @RowsDeleted);
 					
 		                ALTER TABLE AssetDetailValueIntId WITH CHECK CHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON AssetDetailValueIntId REBUILD;
@@ -884,7 +884,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	                BEGIN CATCH
 		                ALTER TABLE AssetDetailValueIntId WITH CHECK CHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON AssetDetailValueIntId REBUILD;
-		                Print 'Query Error in Network --> MaintainableAsset --> AssetSummaryDetail --> AssetDetailValueIntId ***Failed***';
+		                Print ''Query Error in Network --> MaintainableAsset --> AssetSummaryDetail --> AssetDetailValueIntId ***Failed***'';
 		                SELECT ERROR_NUMBER() AS ErrorNumber
 		                ,ERROR_SEVERITY() AS ErrorSeverity
 		                ,ERROR_STATE() AS ErrorState
@@ -892,7 +892,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ,ERROR_LINE() AS ErrorLine
 		                ,ERROR_MESSAGE() AS ErrorMessage;
 
-		                SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetSummaryDetail --> AssetDetailValueIntId'
+		                SELECT @CustomErrorMessage = ''Query Error in  Network -->MaintainableAsset --> AssetSummaryDetail --> AssetDetailValueIntId''
 		                RAISERROR (@CustomErrorMessage, 16, 1);
 		                Set @RetMessage = @CustomErrorMessage;
 
@@ -908,7 +908,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ALTER TABLE TreatmentOptionDetail NOCHECK CONSTRAINT all
 
 		                SET @RowsDeleted = 1;
-		                Print 'TreatmentOptionDetail ';
+		                Print ''TreatmentOptionDetail '';
 
 		                WHILE @RowsDeleted > 0
 		                BEGIN
@@ -925,9 +925,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                SET @RowsDeleted = @@ROWCOUNT;
 
 		                DROP TABLE #tempTreatmentOptionDetail;
-		                --WAITFOR DELAY '00:00:01';
+		                --WAITFOR DELAY ''00:00:01'';
 
-		                --Print 'Rows Affected MaintainableAsset --> AssetDetail --> TreatmentOptionDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		                --Print ''Rows Affected MaintainableAsset --> AssetDetail --> TreatmentOptionDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
 		                END
 		                ALTER TABLE TreatmentOptionDetail WITH CHECK CHECK CONSTRAINT all
 
@@ -935,7 +935,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	                BEGIN CATCH
 		                ALTER TABLE TreatmentOptionDetail WITH CHECK CHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON TreatmentOptionDetail REBUILD;
-		                Print 'Query Error in Network --> MaintainableAsset --> AssetDetail --> TreatmentOptionDetaild ***Failed***';
+		                Print ''Query Error in Network --> MaintainableAsset --> AssetDetail --> TreatmentOptionDetaild ***Failed***'';
 		                SELECT ERROR_NUMBER() AS ErrorNumber
 		                ,ERROR_SEVERITY() AS ErrorSeverity
 		                ,ERROR_STATE() AS ErrorState
@@ -943,7 +943,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ,ERROR_LINE() AS ErrorLine
 		                ,ERROR_MESSAGE() AS ErrorMessage;
 
-		                SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetDetail --> TreatmentOptionDetail'
+		                SELECT @CustomErrorMessage = ''Query Error in  Network -->MaintainableAsset --> AssetDetail --> TreatmentOptionDetail''
 		                RAISERROR (@CustomErrorMessage, 16, 1);
 		                Set @RetMessage = @CustomErrorMessage;
 	                END CATCH
@@ -962,7 +962,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ALTER TABLE TreatmentRejectionDetail NOCHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON TreatmentRejectionDetail DISABLE;
 
-		                Print 'TreatmentRejectionDetail ';
+		                Print ''TreatmentRejectionDetail '';
 
 		                Select l4.* INTO #tempTreatmentRejectionDetail		
 				                FROM Network AS l1
@@ -984,7 +984,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 		                Drop table #tempTreatmentRejectionDetail;
 					
-		                --Print 'Rows Affected Network --> MaintainableAsset --> AssetDetail --> TreatmentRejectionDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		                --Print ''Rows Affected Network --> MaintainableAsset --> AssetDetail --> TreatmentRejectionDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
 					
 		                ALTER TABLE TreatmentRejectionDetail WITH CHECK CHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON TreatmentRejectionDetail REBUILD;
@@ -993,7 +993,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	                BEGIN CATCH
 		                ALTER TABLE TreatmentOptionDetail WITH CHECK CHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON TreatmentOptionDetail REBUILD;
-		                Print 'Query Error in Network --> MaintainableAsset --> AssetDetail --> TreatmentRejectionDetail ***Failed***';
+		                Print ''Query Error in Network --> MaintainableAsset --> AssetDetail --> TreatmentRejectionDetail ***Failed***'';
 		                SELECT ERROR_NUMBER() AS ErrorNumber
 		                ,ERROR_SEVERITY() AS ErrorSeverity
 		                ,ERROR_STATE() AS ErrorState
@@ -1001,7 +1001,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ,ERROR_LINE() AS ErrorLine
 		                ,ERROR_MESSAGE() AS ErrorMessage;
 
-		                SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetDetail --> TreatmentRejectionDetail'
+		                SELECT @CustomErrorMessage = ''Query Error in  Network -->MaintainableAsset --> AssetDetail --> TreatmentRejectionDetail''
 		                RAISERROR (@CustomErrorMessage, 16, 1);
 		                Set @RetMessage = @CustomErrorMessage;
 
@@ -1017,7 +1017,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                --ALTER INDEX ALL ON TreatmentSchedulingCollisionDetail DISABLE;
 
 		                SET @RowsDeleted = 1;
-		                Print 'TreatmentSchedulingCollisionDetail ';
+		                Print ''TreatmentSchedulingCollisionDetail '';
 
 		                WHILE @RowsDeleted > 0
 		                BEGIN
@@ -1034,9 +1034,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                SET @RowsDeleted = @@ROWCOUNT;
 
 		                DROP TABLE #tempTreatmentSchedulingCollisionDetail;
-		                --WAITFOR DELAY '00:00:01';
+		                --WAITFOR DELAY ''00:00:01'';
 						
-		                --Print 'Rows Affected Network --> MaintainableAsset-->AssetDetail --> TreatmentSchedulingCollisionDetail : ' +  convert(NVARCHAR(50), @RowsDeleted);
+		                --Print ''Rows Affected Network --> MaintainableAsset-->AssetDetail --> TreatmentSchedulingCollisionDetail : '' +  convert(NVARCHAR(50), @RowsDeleted);
 		                ALTER TABLE TreatmentSchedulingCollisionDetail WITH CHECK CHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON TreatmentSchedulingCollisionDetail REBUILD;
 		                END
@@ -1052,7 +1052,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ,ERROR_LINE() AS ErrorLine
 		                ,ERROR_MESSAGE() AS ErrorMessage;
 
-		                SELECT @CustomErrorMessage = 'Query Error in Network --> MaintainableAsset-->AssetDetail -->  TreatmentSchedulingCollisionDetail'
+		                SELECT @CustomErrorMessage = ''Query Error in Network --> MaintainableAsset-->AssetDetail -->  TreatmentSchedulingCollisionDetail''
 		                RAISERROR (@CustomErrorMessage, 16, 1);
 		                Set @RetMessage = @CustomErrorMessage;
 
@@ -1067,7 +1067,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ALTER TABLE AssetDetail NOCHECK CONSTRAINT all
 
 		                SET @RowsDeleted = 1;
-		                Print 'AssetDetail ';
+		                Print ''AssetDetail '';
 
 		                WHILE @RowsDeleted > 0
 		                BEGIN
@@ -1083,9 +1083,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                SET @RowsDeleted = @@ROWCOUNT;
 
 		                DROP TABLE #tempAssetDetailId;
-		                ----WAITFOR DELAY '00:00:01';
+		                ----WAITFOR DELAY ''00:00:01'';
 				
-		                --Print 'Rows Affected Network --> MaintainableAsset-->AssetDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+		                --Print ''Rows Affected Network --> MaintainableAsset-->AssetDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
 		                END
 
 		                ALTER TABLE AssetDetail WITH CHECK CHECK CONSTRAINT all
@@ -1094,7 +1094,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	                BEGIN CATCH
 		                ALTER TABLE AssetDetail WITH CHECK CHECK CONSTRAINT all;
 		                --ALTER INDEX ALL ON AssetDetail REBUILD;
-		                Print 'Query Error in Network --> MaintainableAsset --> AssetDetail ***Failed***';
+		                Print ''Query Error in Network --> MaintainableAsset --> AssetDetail ***Failed***'';
 		                SELECT ERROR_NUMBER() AS ErrorNumber
 		                ,ERROR_SEVERITY() AS ErrorSeverity
 		                ,ERROR_STATE() AS ErrorState
@@ -1102,7 +1102,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ,ERROR_LINE() AS ErrorLine
 		                ,ERROR_MESSAGE() AS ErrorMessage;
 
-		                SELECT @CustomErrorMessage = 'Query Error in  Network -->MaintainableAsset --> AssetDetail '
+		                SELECT @CustomErrorMessage = ''Query Error in  Network -->MaintainableAsset --> AssetDetail ''
 		                RAISERROR (@CustomErrorMessage, 16, 1);
 		                Set @RetMessage = @CustomErrorMessage;
 
@@ -1118,7 +1118,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             ALTER TABLE CommittedProjectConsequence NOCHECK CONSTRAINT all
 
-			                Print 'CommittedProjectConsequence ';
+			                Print ''CommittedProjectConsequence '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -1128,7 +1128,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 			                SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected Network Delete CommittedProjectConsequence: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected Network Delete CommittedProjectConsequence: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			                ALTER TABLE CommittedProjectConsequence WITH CHECK CHECK CONSTRAINT all
  	
@@ -1141,7 +1141,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CommittedProjectConsequence'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CommittedProjectConsequence''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1155,7 +1155,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             ALTER TABLE CommittedProjectLocation NOCHECK CONSTRAINT all
 
-			                Print 'CommittedProjectLocation ';
+			                Print ''CommittedProjectLocation '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -1165,7 +1165,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 			                SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected Network Delete CommittedProjectLocation: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected Network Delete CommittedProjectLocation: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			                ALTER TABLE CommittedProjectLocation WITH CHECK CHECK CONSTRAINT all
  	
@@ -1178,7 +1178,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CommittedProjectLocation'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CommittedProjectLocation''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1192,7 +1192,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE CommittedProject NOCHECK CONSTRAINT all
 
-			                Print 'CommittedProject ';
+			                Print ''CommittedProject '';
 
 			                Delete l3 
 			                FROM Network AS l1
@@ -1201,7 +1201,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 			                SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected Network Delete CommittedProject: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected Network Delete CommittedProject: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			                ALTER TABLE CommittedProject WITH CHECK CHECK CONSTRAINT all
 
@@ -1214,7 +1214,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CommittedProject'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CommittedProject''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1231,7 +1231,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             ALTER TABLE MaintainableAssetLocation NOCHECK CONSTRAINT all
 
-		  	                Print 'MaintainableAssetLocation ';
+		  	                Print ''MaintainableAssetLocation '';
 
 			                Delete l3
 			                FROM Network AS l1
@@ -1240,7 +1240,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 			                SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected Network --> MaintainableAsset-->MaintainableAssetLocation: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected Network --> MaintainableAsset-->MaintainableAssetLocation: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
                             ALTER TABLE MaintainableAssetLocation WITH CHECK CHECK CONSTRAINT all
 
@@ -1253,7 +1253,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in Network --> MaintainableAsset-->MaintainableAssetLocation'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in Network --> MaintainableAsset-->MaintainableAssetLocation''
 		                         RAISERROR (@CustomErrorMessage, 16, 1);
 				                 Set @RetMessage = @CustomErrorMessage;
 
@@ -1267,7 +1267,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             ALTER TABLE MaintainableAsset NOCHECK CONSTRAINT all
 
-			                Print 'MaintainableAsset';
+			                Print ''MaintainableAsset'';
 
 			                Delete l2 
 			                FROM Network AS l1
@@ -1275,7 +1275,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 			                SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected Network --> MaintainableAsset: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected Network --> MaintainableAsset: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
                             ALTER TABLE MaintainableAsset WITH CHECK CHECK CONSTRAINT all
 
@@ -1288,7 +1288,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in Network --> MaintainableAsset'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in Network --> MaintainableAsset''
 		                         RAISERROR (@CustomErrorMessage, 16, 1);
 				                 Set @RetMessage = @CustomErrorMessage;
 
@@ -1299,14 +1299,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                ----- Start Simulation Path
 			
 		                    --SET @CurrentDateTime = GETDATE();
-			                --PRINT 'Start Simulation Delete: ' + CONVERT(NVARCHAR, @CurrentDateTime, 120);
+			                --PRINT ''Start Simulation Delete: '' + CONVERT(NVARCHAR, @CurrentDateTime, 120);
 			                -----Start AnalysisMethod Path-----------------------------------------
 
                             BEGIN TRY
  
                             ALTER TABLE Benefit NOCHECK CONSTRAINT all
 
-			                Print 'Benefit ';
+			                Print ''Benefit '';
 			                --AnalysisMethod	Benefit							FK_Benefit_AnalysisMethod_AnalysisMethodId
 			                --AnalysisMethod	CriterionLibrary_AnalysisMethod	FK_CriterionLibrary_AnalysisMethod_AnalysisMethod_AnalysisMethodId
 
@@ -1318,7 +1318,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 			                SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected Network --> Benefit: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected Network --> Benefit: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
                             ALTER TABLE Benefit WITH CHECK CHECK CONSTRAINT all
 
@@ -1331,7 +1331,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in Benefit'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in Benefit''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1344,7 +1344,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             ALTER TABLE CriterionLibrary_AnalysisMethod NOCHECK CONSTRAINT all
 
-			                Print 'CriterionLibrary_AnalysisMethod ';
+			                Print ''CriterionLibrary_AnalysisMethod '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -1354,7 +1354,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 			                SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected Network --> CriterionLibrary_AnalysisMethod: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected Network --> CriterionLibrary_AnalysisMethod: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
                             ALTER TABLE CriterionLibrary_AnalysisMethod WITH CHECK CHECK CONSTRAINT all
 
@@ -1367,7 +1367,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_AnalysisMethod'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_AnalysisMethod''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1378,7 +1378,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             ALTER TABLE AnalysisMethod NOCHECK CONSTRAINT all
 
-			                Print 'AnalysisMethod ';
+			                Print ''AnalysisMethod '';
 
 			                Delete l3 
 			                FROM Network AS l1
@@ -1387,7 +1387,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 			                SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected Network --> AnalysisMethod: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected Network --> AnalysisMethod: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			                ALTER TABLE AnalysisMethod WITH CHECK CHECK CONSTRAINT all
  
@@ -1400,7 +1400,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in AnalysisMethod'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in AnalysisMethod''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1416,7 +1416,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             ALTER TABLE CommittedProjectConsequence NOCHECK CONSTRAINT all
 
-			                Print 'CommittedProjectConsequence ';
+			                Print ''CommittedProjectConsequence '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -1426,7 +1426,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 			                SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected Network --> CommittedProjectConsequence: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected Network --> CommittedProjectConsequence: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			                ALTER TABLE CommittedProjectConsequence WITH CHECK CHECK CONSTRAINT all
  	
@@ -1439,7 +1439,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CommittedProjectConsequence'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CommittedProjectConsequence''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1453,7 +1453,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             ALTER TABLE CommittedProjectLocation NOCHECK CONSTRAINT all
 
-			                Print 'CommittedProjectLocation ';
+			                Print ''CommittedProjectLocation '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -1463,7 +1463,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 			                SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected Network --> CommittedProjectLocation: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected Network --> CommittedProjectLocation: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			                ALTER TABLE CommittedProjectLocation WITH CHECK CHECK CONSTRAINT all
  	
@@ -1476,7 +1476,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CommittedProjectLocation'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CommittedProjectLocation''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1490,7 +1490,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE CommittedProject NOCHECK CONSTRAINT all
 
-			                Print 'CommittedProject ';
+			                Print ''CommittedProject '';
 
 			                Delete l3 
 			                FROM Network AS l1
@@ -1499,7 +1499,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId)
 
 			                SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected Network --> CommittedProject: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected Network --> CommittedProject: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			                ALTER TABLE CommittedProject WITH CHECK CHECK CONSTRAINT all
 
@@ -1512,7 +1512,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CommittedProject'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CommittedProject''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1527,7 +1527,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE InvestmentPlan NOCHECK CONSTRAINT all
 
-			                Print 'InvestmentPlan';
+			                Print ''InvestmentPlan'';
 
 			                Delete l3 
 			                FROM Network AS l1
@@ -1546,7 +1546,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in InvestmentPlan'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in InvestmentPlan''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1558,7 +1558,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 
                             BEGIN TRY
-			                Print 'ReportIndex';
+			                Print ''ReportIndex'';
 
 			                ALTER TABLE ReportIndex NOCHECK CONSTRAINT all
 
@@ -1579,7 +1579,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ReportIndex'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ReportIndex''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1592,7 +1592,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE BudgetPercentagePair NOCHECK CONSTRAINT all
 
-			                Print 'BudgetPercentagePair';
+			                Print ''BudgetPercentagePair'';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -1612,7 +1612,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in BudgetPercentagePair'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in BudgetPercentagePair''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1626,7 +1626,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             ALTER TABLE CommittedProjectConsequence NOCHECK CONSTRAINT all
 
-			                Print 'CommittedProjectConsequence';
+			                Print ''CommittedProjectConsequence'';
 
 			                Delete l5 
 			                FROM Network AS l1
@@ -1647,7 +1647,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CommittedProjectConsequence'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CommittedProjectConsequence''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1661,7 +1661,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             ALTER TABLE CommittedProjectLocation NOCHECK CONSTRAINT all
 
-			                Print 'CommittedProjectLocation ';
+			                Print ''CommittedProjectLocation '';
 
 			                Delete l5 
 			                FROM Network AS l1
@@ -1682,7 +1682,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CommittedProjectLocation'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CommittedProjectLocation''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1696,7 +1696,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE CommittedProject NOCHECK CONSTRAINT all
 
-			                Print 'CommittedProject ';
+			                Print ''CommittedProject '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -1716,7 +1716,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CommittedProject'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CommittedProject''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1730,7 +1730,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE CriterionLibrary_ScenarioBudget NOCHECK CONSTRAINT all
 
-			                Print 'CriterionLibrary_ScenarioBudget ';
+			                Print ''CriterionLibrary_ScenarioBudget '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -1751,7 +1751,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioBudget'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioBudget''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1764,7 +1764,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioBudgetAmount NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioBudgetAmount';
+			                Print ''ScenarioBudgetAmount'';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -1785,7 +1785,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioBudgetAmount'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioBudgetAmount''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1797,7 +1797,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'ScenarioSelectableTreatment_ScenarioBudget';
+			                Print ''ScenarioSelectableTreatment_ScenarioBudget'';
 
 			                ALTER TABLE ScenarioSelectableTreatment_ScenarioBudget NOCHECK CONSTRAINT all
 
@@ -1819,7 +1819,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioSelectableTreatment_ScenarioBudget'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioSelectableTreatment_ScenarioBudget''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1831,7 +1831,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'ScenarioBudget';
+			                Print ''ScenarioBudget'';
 
 			                ALTER TABLE ScenarioBudget NOCHECK CONSTRAINT all
 
@@ -1852,7 +1852,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioBudget'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioBudget''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1868,7 +1868,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE CriterionLibrary_ScenarioBudgetPriority NOCHECK CONSTRAINT all
 
-			                Print 'CriterionLibrary_ScenarioBudgetPriority ';
+			                Print ''CriterionLibrary_ScenarioBudgetPriority '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -1889,7 +1889,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioBudgetPriority'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioBudgetPriority''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1901,7 +1901,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'BudgetPercentagePair';
+			                Print ''BudgetPercentagePair'';
 
 			                ALTER TABLE BudgetPercentagePair NOCHECK CONSTRAINT all
 
@@ -1924,7 +1924,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in BudgetPercentagePair'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in BudgetPercentagePair''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1938,7 +1938,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioBudgetPriority NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioBudgetPriority ';
+			                Print ''ScenarioBudgetPriority '';
 
 			                Delete l3 
 			                FROM Network AS l1
@@ -1957,7 +1957,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioBudgetPriority'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioBudgetPriority''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -1974,7 +1974,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioCalculatedAttributePair_Criteria NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioCalculatedAttributePair_Criteria';
+			                Print ''ScenarioCalculatedAttributePair_Criteria'';
 
 			                Delete l5 
 			                FROM Network AS l1
@@ -1996,7 +1996,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioCalculatedAttributePair_Criteria'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioCalculatedAttributePair_Criteria''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2010,7 +2010,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioCalculatedAttributePair_Equation NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioCalculatedAttributePair_Equation';
+			                Print ''ScenarioCalculatedAttributePair_Equation'';
 
 			                Delete l5 
 			                FROM Network AS l1
@@ -2031,7 +2031,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioCalculatedAttributePair_Equation'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioCalculatedAttributePair_Equation''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2044,7 +2044,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioCalculatedAttributePair NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioCalculatedAttributePair';
+			                Print ''ScenarioCalculatedAttributePair'';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -2064,7 +2064,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioCalculatedAttributePair'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioCalculatedAttributePair''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2075,7 +2075,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'ScenarioCalculatedAttribute ';
+			                Print ''ScenarioCalculatedAttribute '';
 
 			                ALTER TABLE ScenarioCalculatedAttribute NOCHECK CONSTRAINT all
 
@@ -2096,7 +2096,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioCalculatedAttribute'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioCalculatedAttribute''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2111,7 +2111,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE CriterionLibrary_ScenarioCashFlowRule NOCHECK CONSTRAINT all
 
-			                Print 'CriterionLibrary_ScenarioCashFlowRule ';
+			                Print ''CriterionLibrary_ScenarioCashFlowRule '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -2131,7 +2131,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioCashFlowRule'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioCashFlowRule''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2145,7 +2145,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioCashFlowDistributionRule NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioCashFlowDistributionRule ';
+			                Print ''ScenarioCashFlowDistributionRule '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -2165,7 +2165,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioCashFlowDistributionRule'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioCashFlowDistributionRule''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2178,7 +2178,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioCashFlowRule NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioCashFlowRule ';
+			                Print ''ScenarioCashFlowRule '';
 
 			                Delete l3 
 			                FROM Network AS l1
@@ -2197,7 +2197,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioCashFlowRule'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioCashFlowRule''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2209,7 +2209,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'CriterionLibrary_ScenarioDeficientConditionGoal';
+			                Print ''CriterionLibrary_ScenarioDeficientConditionGoal'';
 
 			                ALTER TABLE CriterionLibrary_ScenarioDeficientConditionGoal NOCHECK CONSTRAINT all
 
@@ -2231,7 +2231,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioDeficientConditionGoal'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioDeficientConditionGoal''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2245,7 +2245,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioDeficientConditionGoal NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioDeficientConditionGoal ';
+			                Print ''ScenarioDeficientConditionGoal '';
 
 			                Delete l3 
 			                FROM Network AS l1
@@ -2264,7 +2264,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioDeficientConditionGoal'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioDeficientConditionGoal''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2277,7 +2277,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'CriterionLibrary_ScenarioPerformanceCurve';
+			                Print ''CriterionLibrary_ScenarioPerformanceCurve'';
 
 			                ALTER TABLE CriterionLibrary_ScenarioPerformanceCurve NOCHECK CONSTRAINT all
 
@@ -2299,7 +2299,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioPerformanceCurve'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioPerformanceCurve''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2312,7 +2312,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioPerformanceCurve_Equation NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioPerformanceCurve_Equation ';
+			                Print ''ScenarioPerformanceCurve_Equation '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -2332,7 +2332,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioPerformanceCurve_Equation'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioPerformanceCurve_Equation''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2344,7 +2344,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'ScenarioPerformanceCurve';
+			                Print ''ScenarioPerformanceCurve'';
 
 			                ALTER TABLE ScenarioPerformanceCurve NOCHECK CONSTRAINT all
 
@@ -2365,7 +2365,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioPerformanceCurve'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioPerformanceCurve''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2380,7 +2380,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE CriterionLibrary_ScenarioRemainingLifeLimit NOCHECK CONSTRAINT all
 
-			                Print 'CriterionLibrary_ScenarioRemainingLifeLimit';
+			                Print ''CriterionLibrary_ScenarioRemainingLifeLimit'';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -2400,7 +2400,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioRemainingLifeLimit'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioRemainingLifeLimit''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2414,7 +2414,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioRemainingLifeLimit NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioRemainingLifeLimit';
+			                Print ''ScenarioRemainingLifeLimit'';
 
 			                Delete l3 
 			                FROM Network AS l1
@@ -2433,7 +2433,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioRemainingLifeLimit'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioRemainingLifeLimit''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2449,7 +2449,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE CriterionLibrary_ScenarioTreatmentSupersedeRule NOCHECK CONSTRAINT all
 
-			                Print 'CriterionLibrary_ScenarioTreatmentSupersedeRule';
+			                Print ''CriterionLibrary_ScenarioTreatmentSupersedeRule'';
 
 			                Delete l5
 			                FROM Network AS l1
@@ -2470,7 +2470,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTreatmentSupersedeRule'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioTreatmentSupersedeRule''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2484,7 +2484,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioTreatmentSupersedeRule NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioTreatmentSupersedeRule ';
+			                Print ''ScenarioTreatmentSupersedeRule '';
 
 			                Delete l4
 			                FROM Network AS l1
@@ -2504,7 +2504,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentSupersedeRule'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioTreatmentSupersedeRule''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2516,7 +2516,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'CriterionLibrary_ScenarioTreatmentConsequence';
+			                Print ''CriterionLibrary_ScenarioTreatmentConsequence'';
 
 			                ALTER TABLE CriterionLibrary_ScenarioTreatmentConsequence NOCHECK CONSTRAINT all
 
@@ -2539,7 +2539,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTreatmentConsequence'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioTreatmentConsequence''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2553,7 +2553,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                --ALTER TABLE ScenarioTreatmentConsequence_Equation NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioTreatmentConsequence_Equation';
+			                Print ''ScenarioTreatmentConsequence_Equation'';
 
 			                Delete l5 
 			                FROM Network AS l1
@@ -2574,7 +2574,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentConsequence_Equation'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioTreatmentConsequence_Equation''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2588,7 +2588,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioConditionalTreatmentConsequences NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioConditionalTreatmentConsequences';
+			                Print ''ScenarioConditionalTreatmentConsequences'';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -2609,7 +2609,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioConditionalTreatmentConsequences'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioConditionalTreatmentConsequences''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2623,7 +2623,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                --ALTER TABLE ScenarioTreatmentCost_Equation NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioTreatmentCost_Equation';
+			                Print ''ScenarioTreatmentCost_Equation'';
 
 			                Delete l5 
 			                FROM Network AS l1
@@ -2644,7 +2644,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentCost_Equation'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioTreatmentCost_Equation''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2657,7 +2657,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'CriterionLibrary_ScenarioTreatmentCost ';
+			                Print ''CriterionLibrary_ScenarioTreatmentCost '';
 
 			                ALTER TABLE CriterionLibrary_ScenarioTreatmentCost NOCHECK CONSTRAINT all
 
@@ -2680,7 +2680,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTreatmentCost'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioTreatmentCost''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2693,7 +2693,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioTreatmentCost NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioTreatmentCost ';
+			                Print ''ScenarioTreatmentCost '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -2713,7 +2713,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentCost'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioTreatmentCost''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2728,7 +2728,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioSelectableTreatment_ScenarioBudget NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioSelectableTreatment_ScenarioBudget ';
+			                Print ''ScenarioSelectableTreatment_ScenarioBudget '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -2748,7 +2748,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioSelectableTreatment_ScenarioBudget'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioSelectableTreatment_ScenarioBudget''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2760,7 +2760,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'ScenarioTreatmentPerformanceFactor';
+			                Print ''ScenarioTreatmentPerformanceFactor'';
 
 			                ALTER TABLE ScenarioTreatmentPerformanceFactor NOCHECK CONSTRAINT all
 
@@ -2782,7 +2782,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentPerformanceFactor'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioTreatmentPerformanceFactor''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2795,7 +2795,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE CriterionLibrary_ScenarioTreatment NOCHECK CONSTRAINT all
 
-			                Print 'CriterionLibrary_ScenarioTreatment ';
+			                Print ''CriterionLibrary_ScenarioTreatment '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -2815,7 +2815,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTreatment'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioTreatment''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2829,7 +2829,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioTreatmentScheduling NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioTreatmentScheduling ';
+			                Print ''ScenarioTreatmentScheduling '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -2849,7 +2849,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentScheduling'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioTreatmentScheduling''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2863,7 +2863,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioSelectableTreatment NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioSelectableTreatment ';
+			                Print ''ScenarioSelectableTreatment '';
 
 			                Delete l3 
 			                FROM Network AS l1
@@ -2882,7 +2882,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioSelectableTreatment'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioSelectableTreatment''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2896,7 +2896,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'CriterionLibrary_ScenarioTargetConditionGoal';
+			                Print ''CriterionLibrary_ScenarioTargetConditionGoal'';
 
 			                ALTER TABLE CriterionLibrary_ScenarioTargetConditionGoal NOCHECK CONSTRAINT all
 
@@ -2919,7 +2919,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTargetConditionGoal'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioTargetConditionGoal''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2933,7 +2933,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE ScenarioTargetConditionGoals NOCHECK CONSTRAINT all
 
-			                Print 'ScenarioTargetConditionGoals ';
+			                Print ''ScenarioTargetConditionGoals '';
 
 			                Delete l3 
 			                FROM Network AS l1
@@ -2952,7 +2952,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in ScenarioTargetConditionGoals'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in ScenarioTargetConditionGoals''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2966,7 +2966,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE Simulation_User NOCHECK CONSTRAINT all
 
-			                Print 'Simulation_User ';
+			                Print ''Simulation_User '';
 
 			                Delete l3 
 			                FROM Network AS l1
@@ -2986,7 +2986,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in Simulation_User'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in Simulation_User''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -2998,7 +2998,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'SimulationAnalysisDetail';
+			                Print ''SimulationAnalysisDetail'';
 
 			                ALTER TABLE SimulationAnalysisDetail NOCHECK CONSTRAINT all
 
@@ -3020,7 +3020,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in SimulationAnalysisDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in SimulationAnalysisDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3030,7 +3030,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'SimulationLog';
+			                Print ''SimulationLog'';
 
 			                ALTER TABLE SimulationLog NOCHECK CONSTRAINT all
 
@@ -3052,7 +3052,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in SimulationLog'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in SimulationLog''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3066,13 +3066,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                -------SimulationOutput --> AssetSummaryDetail --> AssetSummaryDetailValueIntI----
 		                --SET @CurrentDateTime = GETDATE();
-		                --PRINT 'Start SimulationOutput Delete: ' + CONVERT(NVARCHAR, @CurrentDateTime, 120);
+		                --PRINT ''Start SimulationOutput Delete: '' + CONVERT(NVARCHAR, @CurrentDateTime, 120);
 
                         BEGIN TRY
 
                           ALTER TABLE AssetSummaryDetailValueIntId NOCHECK CONSTRAINT all
 		                  SET @RowsDeleted = 1;
-		                  Print 'AssetSummaryDetailValueIntId ';
+		                  Print ''AssetSummaryDetailValueIntId '';
 
 		                   WHILE @RowsDeleted > 0
 				                BEGIN
@@ -3091,7 +3091,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 				                SET @RowsDeleted = @@ROWCOUNT;
 
 				                DROP TABLE #tempAssetSummaryDetailValueIntIdSim;
-				                --WAITFOR DELAY '00:00:01';
+				                --WAITFOR DELAY ''00:00:01'';
 			                END	
 
                             ALTER TABLE AssetSummaryDetailValueIntId WITH CHECK CHECK CONSTRAINT all;
@@ -3106,7 +3106,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in AssetSummaryDetailValueIntId'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in AssetSummaryDetailValueIntId''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3118,7 +3118,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'AssetSummaryDetail';
+			                Print ''AssetSummaryDetail'';
 
                           ALTER TABLE AssetSummaryDetail NOCHECK CONSTRAINT all
 
@@ -3140,7 +3140,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in AssetSummaryDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in AssetSummaryDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3156,7 +3156,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                BEGIN TRY
 
-			                Print 'BudgetUsageDetail2';
+			                Print ''BudgetUsageDetail2'';
 
                             ALTER TABLE BudgetUsageDetail NOCHECK CONSTRAINT all
 
@@ -3171,7 +3171,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 		                    SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
                             ALTER TABLE BudgetUsageDetail WITH CHECK CHECK CONSTRAINT all
 
@@ -3184,20 +3184,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in BudgetUsageDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in BudgetUsageDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
                             END CATCH
 
-		                --Print '*******BudgetUsageDetail**************'
+		                --Print ''*******BudgetUsageDetail**************''
 	
 	                ------------------------------------------------------------------
     		                -------SimulationOutput --> AssetSummaryDetail -----
 
                             BEGIN TRY
 
-			                Print 'AssetSummaryDetail';
+			                Print ''AssetSummaryDetail'';
 
                           ALTER TABLE AssetSummaryDetail NOCHECK CONSTRAINT all
 
@@ -3219,7 +3219,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in AssetSummaryDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in AssetSummaryDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3235,7 +3235,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                BEGIN TRY
 
-			                Print 'BudgetUsageDetail';
+			                Print ''BudgetUsageDetail'';
 
                             ALTER TABLE BudgetUsageDetail NOCHECK CONSTRAINT all
 
@@ -3250,7 +3250,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 		                    SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail --> BudgetUsageDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
                             ALTER TABLE BudgetUsageDetail WITH CHECK CHECK CONSTRAINT all
 
@@ -3263,13 +3263,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in BudgetUsageDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in BudgetUsageDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
                             END CATCH
 
-		                --Print '*******BudgetUsageDetail**************'
+		                --Print ''*******BudgetUsageDetail**************''
 	
 	                ------------------------------------------------------------------
 
@@ -3277,7 +3277,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                BEGIN TRY
 
-			                Print 'CashFlowConsiderationDetail';
+			                Print ''CashFlowConsiderationDetail'';
 
                             ALTER TABLE CashFlowConsiderationDetail NOCHECK CONSTRAINT all
 
@@ -3292,7 +3292,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 		                    SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail --> CashFlowConsiderationDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail --> CashFlowConsiderationDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
                             ALTER TABLE CashFlowConsiderationDetail WITH CHECK CHECK CONSTRAINT all
 
@@ -3305,7 +3305,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in CashFlowConsiderationDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in CashFlowConsiderationDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3317,7 +3317,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                BEGIN TRY
 
-			                Print 'TreatmentConsiderationDetail';
+			                Print ''TreatmentConsiderationDetail'';
 
                             ALTER TABLE TreatmentConsiderationDetail NOCHECK CONSTRAINT all
 
@@ -3331,7 +3331,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 		                    SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentConsiderationDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
                             ALTER TABLE TreatmentConsiderationDetail WITH CHECK CHECK CONSTRAINT all
 
@@ -3344,7 +3344,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in TreatmentConsiderationDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in TreatmentConsiderationDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3358,7 +3358,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                BEGIN TRY
 
-			                Print 'TreatmentOptionDetail';
+			                Print ''TreatmentOptionDetail'';
 
                             ALTER TABLE TreatmentOptionDetail NOCHECK CONSTRAINT all
 
@@ -3372,7 +3372,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 		                    SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentOptionDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentOptionDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
 			
                             ALTER TABLE TreatmentOptionDetail WITH CHECK CHECK CONSTRAINT all
 
@@ -3385,7 +3385,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in TreatmentOptionDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in TreatmentOptionDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3398,7 +3398,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                BEGIN TRY
 
-			                Print 'AssetDetailValueIntId';
+			                Print ''AssetDetailValueIntId'';
 
                             ALTER TABLE AssetDetailValueIntId NOCHECK CONSTRAINT all
 			                SET @RowsDeleted = 1;
@@ -3422,7 +3422,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 						                DROP TABLE #tempAssetDetailValueIntId2;
 					
-						                --Print 'Rows Affected Network --> --SimulationOutput --> SimulationYearDetail --> AssetDetail --> AssetDetailValueIntId: ' +  convert(NVARCHAR(50), @RowsDeleted);
+						                --Print ''Rows Affected Network --> --SimulationOutput --> SimulationYearDetail --> AssetDetail --> AssetDetailValueIntId: '' +  convert(NVARCHAR(50), @RowsDeleted);
 			                END			
 						
 						                ALTER TABLE AssetDetailValueIntId WITH CHECK CHECK CONSTRAINT all
@@ -3436,7 +3436,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in AssetDetailValueIntId'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in AssetDetailValueIntId''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3448,7 +3448,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                BEGIN TRY
 
-			                Print 'TreatmentRejectionDetail';
+			                Print ''TreatmentRejectionDetail'';
 
                             ALTER TABLE TreatmentRejectionDetail NOCHECK CONSTRAINT all
 			                SET @RowsDeleted = 1;
@@ -3471,9 +3471,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 						                SET @RowsDeleted = @@ROWCOUNT;
 
 						                DROP TABLE #tempTreatmentRejectionDetailSim;
-						                --WAITFOR DELAY '00:00:01';
+						                --WAITFOR DELAY ''00:00:01'';
 						
-						                --Print 'Rows Affected Network --> --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentRejectionDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+						                --Print ''Rows Affected Network --> --SimulationOutput --> SimulationYearDetail --> AssetDetail --> TreatmentRejectionDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
 			                END						
 						
 						                ALTER TABLE TreatmentRejectionDetail WITH CHECK CHECK CONSTRAINT all
@@ -3487,7 +3487,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in TreatmentRejectionDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in TreatmentRejectionDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3500,7 +3500,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                BEGIN TRY
 
-			                Print 'TreatmentSchedulingCollisionDetail';
+			                Print ''TreatmentSchedulingCollisionDetail'';
 
                             ALTER TABLE TreatmentSchedulingCollisionDetail NOCHECK CONSTRAINT all
 
@@ -3524,7 +3524,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in TreatmentSchedulingCollisionDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in TreatmentSchedulingCollisionDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3536,7 +3536,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			
 			                BEGIN TRY
 
-			                Print 'Simulation\SimulationOutput\SimulationYearDetail\AssetDetail';
+			                Print ''Simulation\SimulationOutput\SimulationYearDetail\AssetDetail'';
 
                             ALTER TABLE AssetDetail NOCHECK CONSTRAINT all
 
@@ -3549,7 +3549,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 			                SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected  Network ->  Simulation ->  SimulationOutput --> SimulationYearDetail-->AssetDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected  Network ->  Simulation ->  SimulationOutput --> SimulationYearDetail-->AssetDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
                             ALTER TABLE AssetDetail WITH CHECK CHECK CONSTRAINT all
 
@@ -3562,7 +3562,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in AssetDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in AssetDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3575,7 +3575,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			
 			                BEGIN TRY
 
-			                Print 'SimulationOutput\SimulationYearDetail\BudgetDetailBudgetDetail';
+			                Print ''SimulationOutput\SimulationYearDetail\BudgetDetailBudgetDetail'';
 
                             ALTER TABLE BudgetDetail NOCHECK CONSTRAINT all
 
@@ -3598,7 +3598,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in BudgetDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in BudgetDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3631,7 +3631,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in DeficientConditionGoalDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in DeficientConditionGoalDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3642,7 +3642,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			
 			                BEGIN TRY
 
-			                Print 'TargetConditionGoalDetail';
+			                Print ''TargetConditionGoalDetail'';
 
                             ALTER TABLE TargetConditionGoalDetail NOCHECK CONSTRAINT all
 
@@ -3665,7 +3665,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in TargetConditionGoalDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in TargetConditionGoalDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3677,7 +3677,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			
 			                BEGIN TRY
 
-			                Print 'SimulationYearDetail ';
+			                Print ''SimulationYearDetail '';
 
                             ALTER TABLE SimulationYearDetail NOCHECK CONSTRAINT all
 
@@ -3699,7 +3699,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in SimulationYearDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in SimulationYearDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3712,7 +3712,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                ALTER TABLE SimulationOutputJson NOCHECK CONSTRAINT all
 
-			                Print 'SimulationOutputJson ';
+			                Print ''SimulationOutputJson '';
 
 			                Delete l4 
 			                FROM Network AS l1
@@ -3732,7 +3732,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in SimulationOutputJson'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in SimulationOutputJson''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3745,7 +3745,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             ALTER TABLE SimulationOutput NOCHECK CONSTRAINT all
 
-			                Print 'SimulationOutput ';
+			                Print ''SimulationOutput '';
 
 			                Delete l3 
 			                FROM Network AS l1
@@ -3764,7 +3764,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in SimulationOutput'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in SimulationOutput''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3773,13 +3773,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 		                   ---------------------------------------------------------------------------
 		                ----End SimulationOutput Delete----------------------------------------
 		                    --SET @CurrentDateTime = GETDATE();
-			                --PRINT 'End SimulationOutput Delete: ' + CONVERT(NVARCHAR, @CurrentDateTime, 120);
+			                --PRINT ''End SimulationOutput Delete: '' + CONVERT(NVARCHAR, @CurrentDateTime, 120);
  
 			                --SimulationOutputJson Delete records where Simulation is the parent
 
                             BEGIN TRY
 
-			                Print 'SimulationOutputJson';
+			                Print ''SimulationOutputJson'';
 
 			                ALTER TABLE SimulationOutputJson NOCHECK CONSTRAINT all
 
@@ -3790,7 +3790,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 			                SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected  Network ->  Simulation ->  SimulationOutputJson: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected  Network ->  Simulation ->  SimulationOutputJson: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			                ALTER TABLE SimulationOutputJson WITH CHECK CHECK CONSTRAINT all
  
@@ -3803,7 +3803,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in SimulationOutputJson'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in SimulationOutputJson''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3815,7 +3815,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'SimulationReportDetail';
+			                Print ''SimulationReportDetail'';
 
 			                ALTER TABLE SimulationReportDetail NOCHECK CONSTRAINT all
 
@@ -3837,7 +3837,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in SimulationReportDetail'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in SimulationReportDetail''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
@@ -3848,7 +3848,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'Simulation';
+			                Print ''Simulation'';
 
 			                ALTER TABLE Simulation NOCHECK CONSTRAINT all
 
@@ -3858,7 +3858,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 			                SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected  Network --> Simulation: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected  Network --> Simulation: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			                ALTER TABLE Simulation WITH CHECK CHECK CONSTRAINT all;
  
@@ -3871,14 +3871,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in Simulation'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in Simulation''
                                  RAISERROR  (@CustomErrorMessage, 16, 1);  
                                  Set @RetMessage = @CustomErrorMessage;
 
                             END CATCH
 		
 		                 --   SET @CurrentDateTime = GETDATE();
-			                --PRINT 'End Simulation Delete: ' + CONVERT(NVARCHAR, @CurrentDateTime, 120);
+			                --PRINT ''End Simulation Delete: '' + CONVERT(NVARCHAR, @CurrentDateTime, 120);
 			                ------End Simulation Delete-------------------------------------------------------------------
 			                -----End  ----Network --> Simulation Path---------
 
@@ -3886,7 +3886,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                             BEGIN TRY
 
-			                Print 'Network';
+			                Print ''Network'';
 
                             ALTER TABLE Network NOCHECK CONSTRAINT all
 
@@ -3895,7 +3895,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                WHERE l1.Id IN (@NetworkId);
 
 			                SET @RowsDeleted = @@ROWCOUNT;
-			                --Print 'Rows Affected  Network: ' +  convert(NVARCHAR(50), @RowsDeleted);
+			                --Print ''Rows Affected  Network: '' +  convert(NVARCHAR(50), @RowsDeleted);
 
 			                ALTER TABLE Network WITH CHECK CHECK CONSTRAINT all
  
@@ -3908,7 +3908,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                        ,ERROR_LINE() AS ErrorLine
                                        ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                         SELECT @CustomErrorMessage = 'Query Error in Network'
+ 		                         SELECT @CustomErrorMessage = ''Query Error in Network''
 		                         RAISERROR (@CustomErrorMessage, 16, 1);
 				                 Set @RetMessage = @CustomErrorMessage;
 
@@ -3916,20 +3916,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 		                   ---------------------------------------------------------------------------
 			                ------End Network Delete-------------------------------------------------------------------
-                    Print 'Delete Network Committed End';
+                    Print ''Delete Network Committed End'';
  	                RAISERROR (@RetMessage, 0, 1);
 	                END TRY
 	                BEGIN CATCH
-  			                Set @RetMessage = 'Failed ' + @RetMessage;
-			                Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-			                Print 'Overall Catch in Network SP:  ' + @ErrorMessage;
+  			                Set @RetMessage = ''Failed '' + @RetMessage;
+			                Set @ErrorMessage =  ERROR_PROCEDURE() + '' (Error At Line: '' + cast( ERROR_LINE() as Varchar(5)) + '' ): '' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
+			                Print ''Overall Catch in Network SP:  '' + @ErrorMessage;
 
 			                RAISERROR  (@RetMessage, 16, 1);  
 	                END CATCH;
+            END')";
 
-                    END");
+            migrationBuilder.Sql(createProcSql);
 
-            migrationBuilder.Sql(@"CREATE OR ALTER PROCEDURE dbo.usp_delete_simulation(@SimGuidList NVARCHAR(MAX)=NULL,@RetMessage VARCHAR(250)=NULL OUTPUT)
+            createProcSql = @"EXEC('CREATE OR ALTER PROCEDURE dbo.usp_delete_simulation(@SimGuidList NVARCHAR(MAX)=NULL,@RetMessage VARCHAR(250)=NULL OUTPUT)
 	          AS
 	          BEGIN 
  	            DECLARE @CustomErrorMessage NVARCHAR(MAX),
@@ -3939,7 +3940,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	            @ErrorProcedure nvarchar(126),
 	            @ErrorLine int,
 	            @ErrorMessage nvarchar(4000);
-	            Set  @RetMessage = 'Success';
+	            Set  @RetMessage = ''Success'';
 	            DECLARE @CurrentDateTime DATETIME;
 	            DECLARE @BatchSize INT = 100000;  -- Adjust batch size as needed
 	            DECLARE @RowsDeleted INT = 1;
@@ -3953,21 +3954,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	
 	            IF @SimGuidList IS NULL OR LEN(@SimGuidList) = 0
 	            BEGIN
-		              PRINT 'String is NULL or empty';
-		              Set  @SimGuidList = '00000000-0000-0000-0000-000000000000';
+		              PRINT ''String is NULL or empty'';
+		              Set  @SimGuidList = ''00000000-0000-0000-0000-000000000000'';
 	            END
 
                 INSERT INTO #SimTempGuids (Guid)
 	            SELECT LEFT(LTRIM(RTRIM(value)), 36)
-                FROM STRING_SPLIT(@SimGuidList, ',');
+                FROM STRING_SPLIT(@SimGuidList, '','');
 
-	            --Select *, '' as 'aaa' from #SimTempGuids;
+	            --Select *, '''' as ''aaa'' from #SimTempGuids;
 
 	            UPDATE #SimTempGuids
-	            SET Guid = '00000000-0000-0000-0000-000000000000'
-	            WHERE TRY_CAST(Guid AS UNIQUEIDENTIFIER) IS NULL OR Guid = '';
+	            SET Guid = ''00000000-0000-0000-0000-000000000000''
+	            WHERE TRY_CAST(Guid AS UNIQUEIDENTIFIER) IS NULL OR Guid = '''';
 	
-	            --Select *, '' as 'bbb' from #SimTempGuids;
+	            --Select *, '''' as ''bbb'' from #SimTempGuids;
 
 		            Begin Transaction
 	            BEGIN TRY
@@ -3996,7 +3997,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in Benefit'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in Benefit''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4026,7 +4027,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_AnalysisMethod'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_AnalysisMethod''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4053,7 +4054,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in AnalysisMethod'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in AnalysisMethod''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4082,7 +4083,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CommittedProjectConsequence'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CommittedProjectConsequence''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4111,7 +4112,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CommittedProjectLocation'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CommittedProjectLocation''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4139,7 +4140,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CommittedProject'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CommittedProject''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4169,7 +4170,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CommittedProjectConsequence'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CommittedProjectConsequence''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4199,7 +4200,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CommittedProjectLocation'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CommittedProjectLocation''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4229,7 +4230,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioBudgetAmount'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioBudgetAmount''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4259,7 +4260,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in BudgetPercentagePair'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in BudgetPercentagePair''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4288,7 +4289,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioBudget'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioBudget''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4318,7 +4319,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioBudgetPriority'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioBudgetPriority''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4348,7 +4349,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in BudgetPercentagePair'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in BudgetPercentagePair''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4377,7 +4378,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioBudgetPriority'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioBudgetPriority''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4408,7 +4409,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioCalculatedAttributePair_Criteria'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioCalculatedAttributePair_Criteria''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4438,7 +4439,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioCalculatedAttributePair_Equation'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioCalculatedAttributePair_Equation''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4467,7 +4468,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioCalculatedAttributePair'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioCalculatedAttributePair''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4495,7 +4496,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioCalculatedAttribute'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioCalculatedAttribute''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4524,7 +4525,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioCashFlowRule'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioCashFlowRule''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4553,7 +4554,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioCashFlowDistributionRule'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioCashFlowDistributionRule''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4581,7 +4582,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioCashFlowRule'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioCashFlowRule''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4610,7 +4611,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioDeficientConditionGoal'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioDeficientConditionGoal''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4638,7 +4639,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioDeficientConditionGoal'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioDeficientConditionGoal''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4667,7 +4668,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioPerformanceCurve'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioPerformanceCurve''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4696,7 +4697,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioPerformanceCurve_Equation'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioPerformanceCurve_Equation''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4724,7 +4725,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioPerformanceCurve'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioPerformanceCurve''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4753,7 +4754,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioRemainingLifeLimit'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioRemainingLifeLimit''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4781,7 +4782,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioRemainingLifeLimit'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioRemainingLifeLimit''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4811,7 +4812,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTreatmentSupersedeRule'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioTreatmentSupersedeRule''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4842,7 +4843,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentSupersedeRule'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioTreatmentSupersedeRule''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4872,7 +4873,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTreatmentConsequence'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioTreatmentConsequence''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4902,7 +4903,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentConsequence_Equation'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioTreatmentConsequence_Equation''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4932,7 +4933,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioConditionalTreatmentConsequences'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioConditionalTreatmentConsequences''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4962,7 +4963,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentCost_Equation'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioTreatmentCost_Equation''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -4994,7 +4995,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTreatmentCost'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioTreatmentCost''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5024,7 +5025,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentCost'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioTreatmentCost''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5054,7 +5055,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioSelectableTreatment_ScenarioBudget'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioSelectableTreatment_ScenarioBudget''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5084,7 +5085,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTreatment'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioTreatment''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5114,7 +5115,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioTreatmentScheduling'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioTreatmentScheduling''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5142,7 +5143,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioSelectableTreatment'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioSelectableTreatment''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5173,7 +5174,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CriterionLibrary_ScenarioTargetConditionGoal'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CriterionLibrary_ScenarioTargetConditionGoal''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5201,7 +5202,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ScenarioTargetConditionGoals'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ScenarioTargetConditionGoals''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5230,7 +5231,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in InvestmentPlan'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in InvestmentPlan''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5259,7 +5260,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in ReportIndex'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in ReportIndex''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5288,7 +5289,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in Simulation_User'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in Simulation_User''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5317,7 +5318,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in SimulationAnalysisDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in SimulationAnalysisDetail''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5329,7 +5330,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                       ALTER TABLE AssetSummaryDetailValueIntId NOCHECK CONSTRAINT all
 		              SET @RowsDeleted = 1;
-		              --Print 'AssetSummaryDetailValueIntId ';
+		              --Print ''AssetSummaryDetailValueIntId '';
 
 		               WHILE @RowsDeleted > 0
 				            BEGIN
@@ -5345,13 +5346,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 						            SET @RowsDeleted = @@ROWCOUNT;
 						            COMMIT TRANSACTION
-						            Print 'Rows Affected AssetSummaryDetailValueIntId: ' +  convert(NVARCHAR(50), @RowsDeleted);
+						            Print ''Rows Affected AssetSummaryDetailValueIntId: '' +  convert(NVARCHAR(50), @RowsDeleted);
 					            END TRY
 					            BEGIN CATCH
 							            ALTER TABLE AssetSummaryDetailValueIntId WITH CHECK CHECK CONSTRAINT all
-  							            Set @RetMessage = 'Failed';
-							            Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-							            Print 'Rolled Back AssetSummaryDetailValueIntId Delete Transaction in Simulation SP:  ' + @ErrorMessage;
+  							            Set @RetMessage = ''Failed'';
+							            Set @ErrorMessage =  ERROR_PROCEDURE() + '' (Error At Line: '' + cast( ERROR_LINE() as Varchar(5)) + '' ): '' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
+							            Print ''Rolled Back AssetSummaryDetailValueIntId Delete Transaction in Simulation SP:  '' + @ErrorMessage;
 							            ROLLBACK TRANSACTION;
 							            RAISERROR  (@RetMessage, 16, 1); 
 							            Return -1;
@@ -5369,7 +5370,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in AssetSummaryDetailValueIntId'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in AssetSummaryDetailValueIntId''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5398,7 +5399,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in AssetSummaryDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in AssetSummaryDetail''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5430,7 +5431,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in BudgetUsageDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in BudgetUsageDetail''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5462,7 +5463,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CashFlowConsiderationDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CashFlowConsiderationDetail''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5493,7 +5494,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in TreatmentConsiderationDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in TreatmentConsiderationDetail''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5524,7 +5525,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in TreatmentOptionDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in TreatmentOptionDetail''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5537,7 +5538,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         ALTER TABLE AssetDetailValueIntId NOCHECK CONSTRAINT all
 
 			            SET @RowsDeleted = 1;
-		  	            --Print 'AssetDetailValueIntId ';
+		  	            --Print ''AssetDetailValueIntId '';
 
 		               WHILE @RowsDeleted > 0
 				            BEGIN
@@ -5554,13 +5555,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 						            SET @RowsDeleted = @@ROWCOUNT;
 						            COMMIT TRANSACTION
-						            Print 'Rows Affected AssetDetailValueIntId: ' +  convert(NVARCHAR(50), @RowsDeleted);
+						            Print ''Rows Affected AssetDetailValueIntId: '' +  convert(NVARCHAR(50), @RowsDeleted);
 					            END TRY
 					            BEGIN CATCH
 							            ALTER TABLE AssetDetailValueIntId WITH CHECK CHECK CONSTRAINT all
-  							            Set @RetMessage = 'Failed';
-							            Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-							            Print 'Rolled Back AssetDetailValueIntId Delete Transaction in Simulation SP  ' + @ErrorMessage;
+  							            Set @RetMessage = ''Failed'';
+							            Set @ErrorMessage =  ERROR_PROCEDURE() + '' (Error At Line: '' + cast( ERROR_LINE() as Varchar(5)) + '' ): '' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
+							            Print ''Rolled Back AssetDetailValueIntId Delete Transaction in Simulation SP  '' + @ErrorMessage;
 							            ROLLBACK TRANSACTION;
 							            RAISERROR  (@RetMessage, 16, 1); 
 							            Return -1;
@@ -5579,7 +5580,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in AssetDetailValueIntId'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in AssetDetailValueIntId''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5591,7 +5592,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                         ALTER TABLE TreatmentRejectionDetail NOCHECK CONSTRAINT all
 
-		  	            --Print 'TreatmentRejectionDetail ';
+		  	            --Print ''TreatmentRejectionDetail '';
 
 		               WHILE @RowsDeleted > 0
 				            BEGIN
@@ -5608,13 +5609,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
  						            SET @RowsDeleted = @@ROWCOUNT;
 						            COMMIT TRANSACTION
-						            Print 'Rows Affected TreatmentRejectionDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+						            Print ''Rows Affected TreatmentRejectionDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
 					            END TRY
 					            BEGIN CATCH
 							            ALTER TABLE TreatmentRejectionDetail WITH CHECK CHECK CONSTRAINT all
-  							            Set @RetMessage = 'Failed';
-							            Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-							            Print 'Rolled Back TreatmentRejectionDetail Delete Transaction in Simulation SP  ' + @ErrorMessage;
+  							            Set @RetMessage = ''Failed'';
+							            Set @ErrorMessage =  ERROR_PROCEDURE() + '' (Error At Line: '' + cast( ERROR_LINE() as Varchar(5)) + '' ): '' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
+							            Print ''Rolled Back TreatmentRejectionDetail Delete Transaction in Simulation SP  '' + @ErrorMessage;
 							            ROLLBACK TRANSACTION;
 							            RAISERROR  (@RetMessage, 16, 1); 
 							            Return -1;
@@ -5633,7 +5634,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in TreatmentRejectionDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in TreatmentRejectionDetail''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5664,7 +5665,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in TreatmentSchedulingCollisionDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in TreatmentSchedulingCollisionDetail''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5694,7 +5695,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in AssetDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in AssetDetail''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5724,7 +5725,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in BudgetDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in BudgetDetail''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5754,7 +5755,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in DeficientConditionGoalDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in DeficientConditionGoalDetail''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5784,7 +5785,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in TargetConditionGoalDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in TargetConditionGoalDetail''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5813,7 +5814,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in SimulationYearDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in SimulationYearDetail''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5837,13 +5838,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
  					            SET @RowsDeleted = @@ROWCOUNT;
 					            COMMIT TRANSACTION
-					            Print 'Rows Affected SimulationOutputJson: ' +  convert(NVARCHAR(50), @RowsDeleted);
+					            Print ''Rows Affected SimulationOutputJson: '' +  convert(NVARCHAR(50), @RowsDeleted);
 					            END TRY
 					            BEGIN CATCH
 							            ALTER TABLE SimulationOutputJson WITH CHECK CHECK CONSTRAINT all
-  							            Set @RetMessage = 'Failed';
-							            Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-							            Print 'Rolled Back SimulationOutputJson Delete Transaction in Simulation SP  ' + @ErrorMessage;
+  							            Set @RetMessage = ''Failed'';
+							            Set @ErrorMessage =  ERROR_PROCEDURE() + '' (Error At Line: '' + cast( ERROR_LINE() as Varchar(5)) + '' ): '' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
+							            Print ''Rolled Back SimulationOutputJson Delete Transaction in Simulation SP  '' + @ErrorMessage;
 							            ROLLBACK TRANSACTION;
 							            RAISERROR  (@RetMessage, 16, 1); 
 							            Return -1;
@@ -5860,7 +5861,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in SimulationOutputJson'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in SimulationOutputJson''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5888,7 +5889,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in Simulation'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in Simulation''
                              RAISERROR  (@CustomErrorMessage, 16, 1);  
                              Set @RetMessage = @CustomErrorMessage;
 
@@ -5898,20 +5899,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	
 	            DROP TABLE #SimTempGuids;
                 COMMIT TRANSACTION
-                Print 'Simulation  Delete Transaction Committed';
+                Print ''Simulation  Delete Transaction Committed'';
    	            --RAISERROR (@RetMessage, 0, 1);
 	            END TRY
 	            BEGIN CATCH
-  			            Set @RetMessage = 'Failed';
-			            Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-			            Print 'Rolled Back Simulation Delete Transaction in Simulation SP:  ' + @ErrorMessage;
+  			            Set @RetMessage = ''Failed'';
+			            Set @ErrorMessage =  ERROR_PROCEDURE() + '' (Error At Line: '' + cast( ERROR_LINE() as Varchar(5)) + '' ): '' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
+			            Print ''Rolled Back Simulation Delete Transaction in Simulation SP:  '' + @ErrorMessage;
 			            ROLLBACK TRANSACTION;
 			            RAISERROR  (@RetMessage, 16, 1);  
 	            END CATCH;
 
-              END");
+            END')";
 
-            migrationBuilder.Sql(@"CREATE OR ALTER PROCEDURE dbo.usp_delete_simulationoutput(@SimOutputGuidList NVARCHAR(MAX)=NULL,@RetMessage VARCHAR(250) OUTPUT)
+            migrationBuilder.Sql(createProcSql);
+
+            createProcSql = @"EXEC('CREATE OR ALTER PROCEDURE dbo.usp_delete_simulationoutput(@SimOutputGuidList NVARCHAR(MAX)=NULL,@RetMessage VARCHAR(250) OUTPUT)
 	          AS
 	          BEGIN 
 	            DECLARE @CustomErrorMessage NVARCHAR(MAX),
@@ -5921,7 +5924,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	            @ErrorProcedure nvarchar(126),
 	            @ErrorLine int,
 	            @ErrorMessage nvarchar(4000);
-	            Set  @RetMessage = 'Success';
+	            Set  @RetMessage = ''Success'';
 	            DECLARE @CurrentDateTime DATETIME;
 	            DECLARE @BatchSize INT = 200000;  -- Adjust batch size as needed
 	            DECLARE @RowsDeleted INT = 1;
@@ -5935,17 +5938,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 	            IF @SimOutputGuidList IS NULL OR LEN(@SimOutputGuidList) = 0
 	            BEGIN
-		              PRINT 'String is NULL or empty';
-		              Set  @SimOutputGuidList = '00000000-0000-0000-0000-000000000000';
+		              PRINT ''String is NULL or empty'';
+		              Set  @SimOutputGuidList = ''00000000-0000-0000-0000-000000000000'';
 	            END
 
                 INSERT INTO #SimOutputTempGuids (Guid)
 	            SELECT LEFT(LTRIM(RTRIM(value)), 36)
-                FROM STRING_SPLIT(@SimOutputGuidList, ',');
+                FROM STRING_SPLIT(@SimOutputGuidList, '','');
 
 	            UPDATE #SimOutputTempGuids
-	            SET Guid = '00000000-0000-0000-0000-000000000000'
-	            WHERE TRY_CAST(Guid AS UNIQUEIDENTIFIER) IS NULL OR Guid = '';
+	            SET Guid = ''00000000-0000-0000-0000-000000000000''
+	            WHERE TRY_CAST(Guid AS UNIQUEIDENTIFIER) IS NULL OR Guid = '''';
 	
 	            Begin Transaction
 	            BEGIN TRY
@@ -5959,7 +5962,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                       ALTER TABLE AssetSummaryDetailValueIntId NOCHECK CONSTRAINT all
 		  
 		              SET @RowsDeleted = 1;
-		              --Print 'AssetSummaryDetailValueIntId ';
+		              --Print ''AssetSummaryDetailValueIntId '';
 
 		               WHILE @RowsDeleted > 0
 				            BEGIN
@@ -5974,13 +5977,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 							            SET @RowsDeleted = @@ROWCOUNT;
 						            COMMIT TRANSACTION
-						            Print 'Rows Affected AssetSummaryDetailValueIntId: ' +  convert(NVARCHAR(50), @RowsDeleted);
+						            Print ''Rows Affected AssetSummaryDetailValueIntId: '' +  convert(NVARCHAR(50), @RowsDeleted);
 					            END TRY
 					            BEGIN CATCH
 							            ALTER TABLE AssetSummaryDetailValueIntId WITH CHECK CHECK CONSTRAINT all
-  							            Set @RetMessage = 'Failed';
-							            Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-							            Print 'Rolled Back AssetSummaryDetailValueIntId Delete Transaction in SimulationOutput SP:  ' + @ErrorMessage;
+  							            Set @RetMessage = ''Failed'';
+							            Set @ErrorMessage =  ERROR_PROCEDURE() + '' (Error At Line: '' + cast( ERROR_LINE() as Varchar(5)) + '' ): '' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
+							            Print ''Rolled Back AssetSummaryDetailValueIntId Delete Transaction in SimulationOutput SP:  '' + @ErrorMessage;
 							            ROLLBACK TRANSACTION;
 							            RAISERROR  (@RetMessage, 16, 1); 
 							            Return -1;
@@ -5998,7 +6001,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in AssetSummaryDetailValueIntId'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in AssetSummaryDetailValueIntId''
 		                     RAISERROR (@CustomErrorMessage, 16, 1);
 				             Set @RetMessage = @CustomErrorMessage;
 
@@ -6028,7 +6031,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in AssetSummaryDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in AssetSummaryDetail''
 		                     RAISERROR (@CustomErrorMessage, 16, 1);
 				             Set @RetMessage = @CustomErrorMessage;
 
@@ -6066,7 +6069,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in BudgetUsageDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in BudgetUsageDetail''
 		                     RAISERROR (@CustomErrorMessage, 16, 1);
 				             Set @RetMessage = @CustomErrorMessage;
 
@@ -6099,7 +6102,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in CashFlowConsiderationDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in CashFlowConsiderationDetail''
 		                     RAISERROR (@CustomErrorMessage, 16, 1);
 				             Set @RetMessage = @CustomErrorMessage;
 
@@ -6131,7 +6134,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in TreatmentConsiderationDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in TreatmentConsiderationDetail''
 		                     RAISERROR (@CustomErrorMessage, 16, 1);
 				             Set @RetMessage = @CustomErrorMessage;
 
@@ -6163,7 +6166,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in TreatmentOptionDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in TreatmentOptionDetail''
 		                     RAISERROR (@CustomErrorMessage, 16, 1);
 				             Set @RetMessage = @CustomErrorMessage;
 
@@ -6178,7 +6181,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         ALTER TABLE AssetDetailValueIntId NOCHECK CONSTRAINT all
 
 			            SET @RowsDeleted = 1;
-		  	            --Print 'AssetDetailValueIntId ';
+		  	            --Print ''AssetDetailValueIntId '';
 
 		               WHILE @RowsDeleted > 0
 				            BEGIN
@@ -6193,13 +6196,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 						            SET @RowsDeleted = @@ROWCOUNT;
 						            COMMIT TRANSACTION
-						            Print 'Rows Affected AssetDetailValueIntId: ' +  convert(NVARCHAR(50), @RowsDeleted);
+						            Print ''Rows Affected AssetDetailValueIntId: '' +  convert(NVARCHAR(50), @RowsDeleted);
 					            END TRY
 					            BEGIN CATCH
 							            ALTER TABLE AssetDetailValueIntId WITH CHECK CHECK CONSTRAINT all
-  							            Set @RetMessage = 'Failed';
-							            Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-							            Print 'Rolled Back AssetDetailValueIntId Delete Transaction in SimulationOutput SP  ' + @ErrorMessage;
+  							            Set @RetMessage = ''Failed'';
+							            Set @ErrorMessage =  ERROR_PROCEDURE() + '' (Error At Line: '' + cast( ERROR_LINE() as Varchar(5)) + '' ): '' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
+							            Print ''Rolled Back AssetDetailValueIntId Delete Transaction in SimulationOutput SP  '' + @ErrorMessage;
 							            ROLLBACK TRANSACTION;
 							            RAISERROR  (@RetMessage, 16, 1); 
 							            Return -1;
@@ -6217,7 +6220,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in AssetDetailValueIntId'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in AssetDetailValueIntId''
 		                     RAISERROR (@CustomErrorMessage, 16, 1);
 				             Set @RetMessage = @CustomErrorMessage;
 
@@ -6232,7 +6235,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         ALTER TABLE TreatmentRejectionDetail NOCHECK CONSTRAINT all
 		  
 		               SET @RowsDeleted = 1;
-		              --Print 'TreatmentRejectionDetail ';
+		              --Print ''TreatmentRejectionDetail '';
 
 		               WHILE @RowsDeleted > 0
 				            BEGIN
@@ -6248,13 +6251,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
  						            SET @RowsDeleted = @@ROWCOUNT;
 						            COMMIT TRANSACTION
-						            Print 'Rows Affected TreatmentRejectionDetail: ' +  convert(NVARCHAR(50), @RowsDeleted);
+						            Print ''Rows Affected TreatmentRejectionDetail: '' +  convert(NVARCHAR(50), @RowsDeleted);
 					            END TRY
 					            BEGIN CATCH
 							            ALTER TABLE TreatmentRejectionDetail WITH CHECK CHECK CONSTRAINT all
-  							            Set @RetMessage = 'Failed';
-							            Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-							            Print 'Rolled Back TreatmentRejectionDetail Delete Transaction in SimulationOutput SP  ' + @ErrorMessage;
+  							            Set @RetMessage = ''Failed'';
+							            Set @ErrorMessage =  ERROR_PROCEDURE() + '' (Error At Line: '' + cast( ERROR_LINE() as Varchar(5)) + '' ): '' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
+							            Print ''Rolled Back TreatmentRejectionDetail Delete Transaction in SimulationOutput SP  '' + @ErrorMessage;
 							            ROLLBACK TRANSACTION;
 							            RAISERROR  (@RetMessage, 16, 1); 
 							            Return -1;
@@ -6272,7 +6275,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in TreatmentRejectionDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in TreatmentRejectionDetail''
 		                     RAISERROR (@CustomErrorMessage, 16, 1);
 				             Set @RetMessage = @CustomErrorMessage;
 
@@ -6305,7 +6308,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in TreatmentSchedulingCollisionDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in TreatmentSchedulingCollisionDetail''
 		                     RAISERROR (@CustomErrorMessage, 16, 1);
 				             Set @RetMessage = @CustomErrorMessage;
 
@@ -6337,7 +6340,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in AssetDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in AssetDetail''
 		                     RAISERROR (@CustomErrorMessage, 16, 1);
 				             Set @RetMessage = @CustomErrorMessage;
 
@@ -6369,7 +6372,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in BudgetDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in BudgetDetail''
 		                     RAISERROR (@CustomErrorMessage, 16, 1);
 				             Set @RetMessage = @CustomErrorMessage;
 
@@ -6401,7 +6404,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in DeficientConditionGoalDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in DeficientConditionGoalDetail''
 		                     RAISERROR (@CustomErrorMessage, 16, 1);
 				             Set @RetMessage = @CustomErrorMessage;
 
@@ -6433,7 +6436,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in TargetConditionGoalDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in TargetConditionGoalDetail''
 		                     RAISERROR (@CustomErrorMessage, 16, 1);
 				             Set @RetMessage = @CustomErrorMessage;
 
@@ -6463,7 +6466,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in SimulationYearDetail'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in SimulationYearDetail''
 		                     RAISERROR (@CustomErrorMessage, 16, 1);
 				             Set @RetMessage = @CustomErrorMessage;
 
@@ -6492,7 +6495,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                    ,ERROR_LINE() AS ErrorLine
                                    ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                     SELECT @CustomErrorMessage = 'Query Error in SimulationOutput'
+ 		                     SELECT @CustomErrorMessage = ''Query Error in SimulationOutput''
 		                     RAISERROR (@CustomErrorMessage, 16, 1);
 				             Set @RetMessage = @CustomErrorMessage;
 
@@ -6503,23 +6506,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 	            DROP TABLE #SimOutputTempGuids;
                 COMMIT TRANSACTION
-                Print 'Delete Transaction Committed';
+                Print ''Delete Transaction Committed'';
    	            RAISERROR (@RetMessage, 0, 1);
 	            END TRY
 	            BEGIN CATCH
-  			            Set @RetMessage = 'Failed ' + @RetMessage;
-			            Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-			            Print 'Rolled Back Entire Delete Transaction in SimulationOutput SP:  ' + @ErrorMessage;
+  			            Set @RetMessage = ''Failed '' + @RetMessage;
+			            Set @ErrorMessage =  ERROR_PROCEDURE() + '' (Error At Line: '' + cast( ERROR_LINE() as Varchar(5)) + '' ): '' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
+			            Print ''Rolled Back Entire Delete Transaction in SimulationOutput SP:  '' + @ErrorMessage;
 			            ROLLBACK TRANSACTION;
 			            RAISERROR  (@RetMessage, 16, 1);  
 	            END CATCH;
+            END')";
 
-              END");
+            migrationBuilder.Sql(createProcSql);
 
-            migrationBuilder.Sql(@"CREATE OR ALTER PROCEDURE dbo.usp_delete_aggregations(@NetworkId AS uniqueidentifier=NULL,@RetMessage VARCHAR(250) OUTPUT)
+            createProcSql = @"EXEC('CREATE OR ALTER PROCEDURE dbo.usp_delete_aggregations(@NetworkId AS uniqueidentifier=NULL,@RetMessage VARCHAR(250) OUTPUT)
 	      	          AS
 	      	          BEGIN 
-
 	                    DECLARE @CustomErrorMessage NVARCHAR(MAX),
 	                    @ErrorNumber int,
 	                    @ErrorSeverity int,
@@ -6527,7 +6530,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 	                    @ErrorProcedure nvarchar(126),
 	                    @ErrorLine int,
 	                    @ErrorMessage nvarchar(4000);
-	                    Set  @RetMessage = 'Success';
+	                    Set  @RetMessage = ''Success'';
 	                    DECLARE @CurrentDateTime DATETIME;
 	                    DECLARE @BatchSize INT = 100000;
 	                    DECLARE @RowsDeleted INT = 1;
@@ -6548,7 +6551,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                               ALTER TABLE AggregatedResult NOCHECK CONSTRAINT all
 		                      SET @RowsDeleted = 1;
-		                      --Print 'AggregatedResult ';
+		                      --Print ''AggregatedResult '';
 
 		                       WHILE @RowsDeleted > 0
 				                    BEGIN
@@ -6571,17 +6574,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 						                    SET @RowsDeleted = @@ROWCOUNT;
 
 						                    DROP TABLE #tempAggregatedResult;
-						                    --WAITFOR DELAY '00:00:01';
+						                    --WAITFOR DELAY ''00:00:01'';
 
 						                    COMMIT TRANSACTION
 						
-						                    Print 'Rows Affected Network --> MaintainableAsset-->AggregatedResult: ' +  convert(NVARCHAR(50), @RowsDeleted);
+						                    Print ''Rows Affected Network --> MaintainableAsset-->AggregatedResult: '' +  convert(NVARCHAR(50), @RowsDeleted);
 					                    END TRY
 					                    BEGIN CATCH
 							                    ALTER TABLE AggregatedResult WITH CHECK CHECK CONSTRAINT all
-  							                    Set @RetMessage = 'Failed';
-							                    Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-							                    Print 'Rolled Back AggregatedResult Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
+  							                    Set @RetMessage = ''Failed'';
+							                    Set @ErrorMessage =  ERROR_PROCEDURE() + '' (Error At Line: '' + cast( ERROR_LINE() as Varchar(5)) + '' ): '' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
+							                    Print ''Rolled Back AggregatedResult Delete Transaction in NetworkDelete SP:  '' + @ErrorMessage;
 							                    ROLLBACK TRANSACTION;
 							                    RAISERROR  (@RetMessage, 16, 1); 
 							                    Return -1;
@@ -6599,7 +6602,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                            ,ERROR_LINE() AS ErrorLine
                                            ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                             SELECT @CustomErrorMessage = 'Query Error in  Network --> MaintainableAsset-->AggregatedResult'
+ 		                             SELECT @CustomErrorMessage = ''Query Error in  Network --> MaintainableAsset-->AggregatedResult''
 		                             RAISERROR (@CustomErrorMessage, 16, 1);
 				                     Set @RetMessage = @CustomErrorMessage;
 
@@ -6616,7 +6619,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                               ALTER TABLE AttributeDatumLocation NOCHECK CONSTRAINT all
 		                      SET @RowsDeleted = 1;
-		  	                    --Print 'AttributeDatumLocation ';
+		  	                    --Print ''AttributeDatumLocation '';
 
 		                      WHILE @RowsDeleted > 0
 				                    BEGIN
@@ -6639,17 +6642,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 						                    SET @RowsDeleted = @@ROWCOUNT;
 
 						                    DROP TABLE #tempAttributeDatumLocation;
-						                    --WAITFOR DELAY '00:00:01';
+						                    --WAITFOR DELAY ''00:00:01'';
 
 						                    COMMIT TRANSACTION
 						
-						                    Print 'Rows Affected Network --> MaintainableAsset-->AttributeDatumLocation: ' +  convert(NVARCHAR(50), @RowsDeleted);
+						                    Print ''Rows Affected Network --> MaintainableAsset-->AttributeDatumLocation: '' +  convert(NVARCHAR(50), @RowsDeleted);
 					                    END TRY
 					                    BEGIN CATCH
 							                    ALTER TABLE AttributeDatumLocation WITH CHECK CHECK CONSTRAINT all
-  							                    Set @RetMessage = 'Failed';
-							                    Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-							                    Print 'Rolled Back AttributeDatumLocation Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
+  							                    Set @RetMessage = ''Failed'';
+							                    Set @ErrorMessage =  ERROR_PROCEDURE() + '' (Error At Line: '' + cast( ERROR_LINE() as Varchar(5)) + '' ): '' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
+							                    Print ''Rolled Back AttributeDatumLocation Delete Transaction in NetworkDelete SP:  '' + @ErrorMessage;
 							                    ROLLBACK TRANSACTION;
 							                    RAISERROR  (@RetMessage, 16, 1); 
 							                    Return -1;
@@ -6667,7 +6670,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                            ,ERROR_LINE() AS ErrorLine
                                            ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                             SELECT @CustomErrorMessage = 'Query Error in Network --> MaintainableAsset-->AttributeDatum-->AttributeDatumLocation'
+ 		                             SELECT @CustomErrorMessage = ''Query Error in Network --> MaintainableAsset-->AttributeDatum-->AttributeDatumLocation''
 		                             RAISERROR (@CustomErrorMessage, 16, 1);
 				                     Set @RetMessage = @CustomErrorMessage;
 
@@ -6681,7 +6684,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
 			                    ALTER TABLE AttributeDatum NOCHECK CONSTRAINT all
 			                    SET @RowsDeleted = 1;
-			                    Print 'AttributeDatum ';
+			                    Print ''AttributeDatum '';
 
 			                    WHILE @RowsDeleted > 0
 				                    BEGIN
@@ -6703,17 +6706,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 						                    SET @RowsDeleted = @@ROWCOUNT;
 
 						                    DROP TABLE #tempAttributeDatum;
-						                    --WAITFOR DELAY '00:00:01';
+						                    --WAITFOR DELAY ''00:00:01'';
 
 						                    COMMIT TRANSACTION
 						
-						                    Print 'Rows Affected Network --> MaintainableAsset-->AttributeDatum: ' +  convert(NVARCHAR(50), @RowsDeleted);
+						                    Print ''Rows Affected Network --> MaintainableAsset-->AttributeDatum: '' +  convert(NVARCHAR(50), @RowsDeleted);
 					                    END TRY
 					                    BEGIN CATCH
 						                    ALTER TABLE AttributeDatum WITH CHECK CHECK CONSTRAINT all
-						                    Set @RetMessage = 'Failed';
-						                    Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-						                    Print 'Rolled Back AttributeDatum Delete Transaction in NetworkDelete SP:  ' + @ErrorMessage;
+						                    Set @RetMessage = ''Failed'';
+						                    Set @ErrorMessage =  ERROR_PROCEDURE() + '' (Error At Line: '' + cast( ERROR_LINE() as Varchar(5)) + '' ): '' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
+						                    Print ''Rolled Back AttributeDatum Delete Transaction in NetworkDelete SP:  '' + @ErrorMessage;
 						                    ROLLBACK TRANSACTION;
 						                    RAISERROR  (@RetMessage, 16, 1); 
 						                    Return -1;
@@ -6731,7 +6734,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                                            ,ERROR_LINE() AS ErrorLine
                                            ,ERROR_MESSAGE() AS ErrorMessage;
 
- 		                             SELECT @CustomErrorMessage = 'Query Error in Network --> MaintainableAsset-->AttributeDatum'
+ 		                             SELECT @CustomErrorMessage = ''Query Error in Network --> MaintainableAsset-->AttributeDatum''
 		                             RAISERROR (@CustomErrorMessage, 16, 1);
 				                     Set @RetMessage = @CustomErrorMessage;
 
@@ -6742,18 +6745,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 			                    -----End AttributeDatum Path--------------------------------------
 
                        --COMMIT TRANSACTION
-                        Print 'Delete Attribute End';
+                        Print ''Delete Attribute End'';
    	                    RAISERROR (@RetMessage, 0, 1);
 	                    END TRY
 	                    BEGIN CATCH
-  			                    Set @RetMessage = 'Failed ' + @RetMessage;
-			                    Set @ErrorMessage =  ERROR_PROCEDURE() + ' (Error At Line: ' + cast( ERROR_LINE() as Varchar(5)) + ' ): ' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
-			                    Print 'Error in AttributeDelete SP:  ' + @ErrorMessage;
+  			                    Set @RetMessage = ''Failed '' + @RetMessage;
+			                    Set @ErrorMessage =  ERROR_PROCEDURE() + '' (Error At Line: '' + cast( ERROR_LINE() as Varchar(5)) + '' ): '' + char(13) + char(10)  + ERROR_MESSAGE()  -- AS ErrorMessage;
+			                    Print ''Error in AttributeDelete SP:  '' + @ErrorMessage;
 			                    --ROLLBACK TRANSACTION;
 			                    RAISERROR  (@RetMessage, 16, 1);  
 	                    END CATCH;
-	      
-                      END");
+
+           END')";
+
+            migrationBuilder.Sql(createProcSql);
 
             migrationBuilder.Sql(@"BEGIN EXEC('
 	                            DECLARE @RetMessage varchar(100);
@@ -7515,14 +7520,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 ---Total Time 32:28
                 ---Last--------------------------------------------------------------------------------------------------------------
                    ')
-
             END");
 
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            var dropProcSql = @"EXEC('DROP PROC IF EXISTS [usp_delete_aggregations];
+                                        DROP PROC IF EXISTS [usp_delete_network];
+                                        DROP PROC IF EXISTS [usp_delete_simulation];
+                                        DROP PROC IF EXISTS [usp_delete_simulationoutput];
+                                        DROP PROC IF EXISTS [usp_orphan_cleanup];
+                                        DROP PROC IF EXISTS [usp_master_procedure];')";
 
+            migrationBuilder.Sql(dropProcSql);
         }
     }
 }

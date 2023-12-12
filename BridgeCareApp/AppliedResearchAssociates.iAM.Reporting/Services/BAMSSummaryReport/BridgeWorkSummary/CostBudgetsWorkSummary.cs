@@ -829,8 +829,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 row = startRow;
                 column = ++column;
-                var totalSpent = Convert.ToDouble(worksheet.Cells[TotalSpentRow, column].Value) +
-                Convert.ToDouble(worksheet.Cells[CommittedTotalRow, column].Value);
+                var totalSpent = Convert.ToDouble(worksheet.Cells[TotalSpentRow, column].Value);
 
                 worksheet.Cells[row, column].Value = Convert.ToDouble(worksheet.Cells[budgetTotalRow, column].Value) - totalSpent;
                 row++;

@@ -164,11 +164,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 {
                     var committedProjectsForWorkOutsideScope = committedProjectList;
                     _committedProjectCost.FillCostOfCommittedWork(worksheet, currentCell, simulationYears, costForCommittedBudgets.ToList(),
-                        committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal, committedProjectsForWorkOutsideScope);
+                        committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal);
                     _committedProjectCost.FillCostOfSAPWork(worksheet, currentCell, simulationYears, costForCommittedBudgets.ToList(),
-                        committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal, committedProjectsForWorkOutsideScope);
+                        committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal);
                     _committedProjectCost.FillCostOfProjectBuilderWork(worksheet, currentCell, simulationYears, costForCommittedBudgets.ToList(),
-                        committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal, committedProjectsForWorkOutsideScope);
+                        committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal);
                     _committedProjectCost.AddCostOfWorkOutsideScope(workTypeTotal, committedProjectsForWorkOutsideScope);
 
                     _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget.ToList(), totalBudgetPerYearForCulvert, simulationYears, workTypeTotal);

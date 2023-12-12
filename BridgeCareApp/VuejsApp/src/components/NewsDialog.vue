@@ -1,8 +1,8 @@
 <template>
-  <Dialog :style="{ width: 'auto', height: 'auto'}" block-scroll modal v-model:visible="showDialog" :closable="false">
+  <Dialog style="width:50%; height:auto" block-scroll modal v-model:visible="showDialog" :closable="false">
     <v-card class='announcement-dialog'>
         <v-toolbar color="#002E6C" dark>
-            <v-app-bar-nav-icon></v-app-bar-nav-icon>
+            <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
             <v-toolbar-title>Latest News</v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn icon @click="closeDialog()">

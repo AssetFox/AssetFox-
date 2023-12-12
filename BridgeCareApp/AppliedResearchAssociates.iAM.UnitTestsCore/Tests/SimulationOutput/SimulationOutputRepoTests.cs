@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
 
@@ -13,6 +14,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void SaveSimulationOutput_Does()
         {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
@@ -22,6 +24,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void SaveSimulationOutput_ThenLoad_Same()
         {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
@@ -37,6 +40,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [InlineData(12)]
         public void SaveMultiYearSimulationOutput_ThenLoad_Same(int numberOfYears)
         {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
@@ -72,6 +76,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public void SaveSimulationOutput_ThenLoad_LastModifiedDate_Expected()
         {
             var numberOfYears = 1;
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
@@ -87,6 +92,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public void SaveSimulationOutput_UpdateSimulation_ThenLoad_LastModifiedDate_MatchesSimulationUpdateDate()
         {
             var numberOfYears = 1;
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);

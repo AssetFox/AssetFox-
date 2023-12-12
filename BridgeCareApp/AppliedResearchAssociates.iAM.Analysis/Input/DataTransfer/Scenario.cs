@@ -25,6 +25,8 @@ public sealed class Scenario
 
     public List<SelectableTreatment> SelectableTreatments { get; init; } = new();
 
+    public bool ShouldBundleFeasibleTreatments { get; set; }
+
     public bool ShouldPreapplyPassiveTreatment { get; set; }
 
     public static Scenario ConvertIn(Simulation source) => new()
@@ -38,6 +40,7 @@ public sealed class Scenario
         NameOfPassiveTreatment = source.DesignatedPassiveTreatment.Name,
         PerformanceCurves = source.PerformanceCurves.Select(Convert).ToList(),
         SelectableTreatments = source.Treatments.Select(Convert).ToList(),
+        ShouldBundleFeasibleTreatments = source.ShouldBundleFeasibleTreatments,
         ShouldPreapplyPassiveTreatment = source.ShouldPreapplyPassiveTreatment,
     };
 
@@ -289,6 +292,7 @@ public sealed class Scenario
 
             result.Name = source.Name;
             result.NumberOfYearsOfTreatmentOutlook = source.NumberOfYearsOfTreatmentOutlook;
+            result.ShouldBundleFeasibleTreatments = source.ShouldBundleFeasibleTreatments;
             result.ShouldPreapplyPassiveTreatment = source.ShouldPreapplyPassiveTreatment;
 
             Convert(source.AnalysisMethod, result.AnalysisMethod);

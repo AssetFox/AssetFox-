@@ -32,7 +32,7 @@
                                     v-model="props.item.budgetOrder" 
                                     @change="reorderList(props.item)" 
                                     @mousedown="setCurrentOrder(props.item)" 
-                                    variant="underlined" style="width: 20px;"
+                                    variant="underlined" style="width: 30px;"
                                 />
                             </td>
                             <td>

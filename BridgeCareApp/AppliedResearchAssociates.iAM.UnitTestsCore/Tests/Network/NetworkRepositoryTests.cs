@@ -79,6 +79,41 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Null(simulationEntityAfter);
         }
 
+        [Fact (Skip ="Unskip before PR")]
+        public async Task DeleteNetwork_NetworkInDbWithBenefitQuantifier_Deletes()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var networkId = Guid.NewGuid();
+            var assetId = Guid.NewGuid();
+            var keyAttributeId = Guid.NewGuid();
+            var keyAttributeName = RandomStrings.WithPrefix("KeyAttribute");
+            var attributeDto = AttributeTestSetup.CreateSingleTextAttribute(TestHelper.UnitOfWork, keyAttributeId, keyAttributeName, ConnectionType.EXCEL, "location");
+            var asset = MaintainableAssets.InNetwork(networkId, keyAttributeName, assetId);
+            var assets = new List<MaintainableAsset> { asset };
+            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, assets, networkId, keyAttributeId);
+            var equation = EquationDtos.AgePlus1();
+            var benefitQuantifierDto = new DTOs.BenefitQuantifierDTO
+            {
+                NetworkId = networkId,
+                Equation = equation,
+            };
+            TestHelper.UnitOfWork.BenefitQuantifierRepo.UpsertBenefitQuantifier(benefitQuantifierDto);
+            var networksBefore = await TestHelper.UnitOfWork.NetworkRepo.Networks();
+            var networkBefore = networksBefore.Single(n => n.Id == networkId);
+            var benefitQuantifierEntityBefore = TestHelper.UnitOfWork.Context.BenefitQuantifier.
+                SingleOrDefault(b => b.NetworkId == networkId);
+            Assert.NotNull(benefitQuantifierEntityBefore);
+
+            TestHelper.UnitOfWork.NetworkRepo.DeleteNetwork(networkId);
+
+            var networksAfter = await TestHelper.UnitOfWork.NetworkRepo.Networks();
+            var networkAfter = networksAfter.SingleOrDefault(n => n.Id == networkId);
+            Assert.Null(networkAfter);
+            var benefitQuantifierEntityAfter = TestHelper.UnitOfWork.Context.BenefitQuantifier.
+                SingleOrDefault(b => b.NetworkId == networkId);
+            Assert.Null(benefitQuantifierEntityAfter);
+        }
+
         [Fact]
         public void GetNetworkName_NetworkInDb_Gets()
         {
@@ -123,7 +158,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public async Task GetRawNetwork_RawNetworkHasBeenSet_Gets()
+        public void GetRawNetwork_RawNetworkHasBeenSet_Gets()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var networkId = Guid.NewGuid();
@@ -132,7 +167,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var keyAttributeName = RandomStrings.WithPrefix("KeyAttribute");
             var asset = MaintainableAssets.InNetwork(networkId, keyAttributeName, assetId);
             var assets = new List<MaintainableAsset> { asset };
-            var networkName = RandomStrings.WithPrefix("Network name");
+            var networkName = RandomStrings.WithPrefix("RawNetwork");
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, assets, networkId, keyAttributeId, networkName);
             TestHelper.UnitOfWork.AdminSettingsRepo.SetRawDataNetwork(networkName);
 
@@ -140,6 +175,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             Assert.Equal(networkName, rawNetwork.Name);
             Assert.Equal(networkId, rawNetwork.Id);
+        }
+
+        [Fact]
+        public void GetMainNetwork_MainNetworkHasBeenSet_Gets()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var networkId = Guid.NewGuid();
+            var assetId = Guid.NewGuid();
+            var keyAttributeId = Guid.NewGuid();
+            var keyAttributeName = RandomStrings.WithPrefix("KeyAttribute");
+            var asset = MaintainableAssets.InNetwork(networkId, keyAttributeName, assetId);
+            var assets = new List<MaintainableAsset> { asset };
+            var networkName = RandomStrings.WithPrefix("MainNetwork");
+            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, assets, networkId, keyAttributeId, networkName);
+            TestHelper.UnitOfWork.AdminSettingsRepo.SetPrimaryNetwork(networkName);
+
+            var mainNetwork = TestHelper.UnitOfWork.NetworkRepo.GetMainNetwork();
+
+            Assert.Equal(networkName, mainNetwork.Name);
+            Assert.Equal(networkId, mainNetwork.Id);
         }
     }
 }

@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -39,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
             List<int> simulationYears, WorkSummaryModel workSummaryModel, Dictionary<string, Budget> yearlyBudgetAmount,
-            IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup)
+            IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectList)
         {
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
@@ -70,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             #endregion Initial work to set some data, which will be used throughout the Work summary TAB
 
             _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj,
-                simulationYears, yearlyBudgetAmount, costPerBPNPerYear, simulationTreatments);
+                simulationYears, yearlyBudgetAmount, costPerBPNPerYear, simulationTreatments, committedProjectList);
 
             _bridgesCulvertsWorkSummary.FillBridgesCulvertsWorkSummarySections(worksheet, currentCell, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj, simulationYears, simulationTreatments);
             _projectsCompletedCount.FillProjectCompletedCountSection(worksheet, currentCell, countForCompletedProject, countForCompletedCommittedProject, simulationYears, simulationTreatments);

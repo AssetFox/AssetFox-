@@ -407,8 +407,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             // Bridge work summary TAB            
             var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
-            var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
-                                                        simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments, treatmentCategoryLookup);
+            var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments, treatmentCategoryLookup, committedProjectList);
 
             checkCancelled(cancellationToken, simulationId);
             reportDetailDto.Status = $"Creating Bridge Work Summary by Budget TAB";
@@ -417,7 +416,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             // Bridge work summary by Budget TAB            
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
-            _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments, treatmentCategoryLookup);
+            _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments, treatmentCategoryLookup, committedProjectList);
             checkCancelled(cancellationToken, simulationId);
             reportDetailDto.Status = $"Creating District County Totals TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);

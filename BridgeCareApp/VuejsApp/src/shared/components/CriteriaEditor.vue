@@ -162,7 +162,7 @@
                                     </vue-query-builder> -->
                                     <advanced-query-builder id="CriteriaEditor-criteria-vuequerybuilder"         
                                         :config="queryBuilderConfig"
-                                        :v-model="currentQuery">
+                                        v-model="currentQuery">
 
                                     </advanced-query-builder>
                                 </v-window-item>
@@ -231,7 +231,6 @@
 </template>
 
 <script lang="ts" setup>
-import VueQueryBuilder from "vue-query-builder/src/VueQueryBuilder.vue";
 import {
     Criteria,
     CriteriaEditorData,
@@ -276,6 +275,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { getUrl } from "../utils/get-url";
 import { Rule, RuleOperator, QueryBuilderConfig } from '../utils/query-builder';
+import { reactive } from 'vue';
 
 let store = useStore();
 const $router = useRouter();
@@ -307,7 +307,11 @@ const tab = ref<any>(null);
         textInputPlaceholder: 'value',
     };
     
-    const currentQuery = ref([]);
+    
+    let currentQuery = ref({
+        rules: [],
+        levelOperators: []
+    }) ;
     const queryBuilderConfig: QueryBuilderConfig = {
         levelOperators: [
             {
@@ -339,7 +343,7 @@ const tab = ref<any>(null);
     let activeTab = 'tree-view';
     const checkOutput = ref<boolean>(false);
 
-    onMounted(()=> {
+    onMounted(()=> {     
         const mainCriteria: Criteria = convertCriteriaExpressionToCriteriaObject(
             criteriaEditorData.value.mergedCriteriaExpression != null
                 ? criteriaEditorData.value.mergedCriteriaExpression

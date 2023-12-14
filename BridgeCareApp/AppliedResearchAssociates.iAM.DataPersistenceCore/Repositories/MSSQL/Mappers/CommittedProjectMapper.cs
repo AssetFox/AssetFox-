@@ -233,10 +233,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var treatment = selectableTreatments.FirstOrDefault(t => t.Name == treatmentName);
 
             committedProject.TemplateTreatment = treatment;
+            var projectSource = ProjectSourceDTO.Committed;
 
             if (Enum.TryParse(entity.ProjectSource, true, out ProjectSourceDTO parsedProjectSource))
             {
                 committedProject.ProjectSource = parsedProjectSource;
+                projectSource = parsedProjectSource;
             }
             else
             {
@@ -261,6 +263,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         projectToAdd.Cost = noTreatmentDefaultCost;
                         projectToAdd.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null; ; // TODO: fix
                         //projectToAdd.Budget = null;  // This would be the better way, but it fails vaildation
+                        projectToAdd.ProjectSource = projectSource;  // Replicate project source
                         projectToAdd.LastModifiedDate = noTreatmentEntity.LastModifiedDate;
                         projectToAdd.TemplateTreatment = noTreatmentEntity.ToDomain(simulation, null);
                     }

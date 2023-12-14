@@ -224,6 +224,7 @@ import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { useStore } from 'vuex';
 import mitt, { Emitter, EventType } from 'mitt';
 import ConfirmDialog from 'primevue/confirmdialog';
+import { NIL } from 'uuid';
 
     let store = useStore();
     let stateNetworks = computed<Network[]>(()=>store.state.networkModule.networks);
@@ -353,9 +354,10 @@ import ConfirmDialog from 'primevue/confirmdialog';
         selectedAttributeRows.value = [];
         hasStartedAggregation.value  = false;
         selectNetworkItemValue.value = selectedNetwork.value.id;
+        if(selectedNetwork.value.keyAttribute != NIL)
         selectedKeyAttributeItem.value = selectedNetwork.value.keyAttribute;
-        spatialWeightingEquationValue.value.expression = selectedNetwork.value.defaultSpatialWeighting;
 
+        spatialWeightingEquationValue.value.expression = selectedNetwork.value.defaultSpatialWeighting;
         const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', selectedNetwork.value, stateSelectedNetwork.value);
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     })

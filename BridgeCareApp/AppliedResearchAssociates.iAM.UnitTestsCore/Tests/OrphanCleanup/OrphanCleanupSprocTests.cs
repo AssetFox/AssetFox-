@@ -39,24 +39,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var orphanId = Guid.NewGuid();
             var nonexistentNetworkId = Guid.NewGuid();
-            var orphan = new AnalysisMaintainableAssetEntity
+            var orphan = new MaintainableAssetEntity
             {
                 Id = orphanId,
-                Name = "orphan",
+                AssetName = "orphan",
                 NetworkId = nonexistentNetworkId,
             };
-            var entities = new List<AnalysisMaintainableAssetEntity> { orphan };
+            var entities = new List<MaintainableAssetEntity> { orphan };
             TestHelper.UnitOfWork.Context.AddAll(entities);
-            var orphanInDbBefore = TestHelper.UnitOfWork.Context.AnalysisMaintainableAsset
+            var orphanInDbBefore = TestHelper.UnitOfWork.Context.MaintainableAsset
                 .SingleOrDefault(a => a.Id == orphanId);
             Assert.NotNull(orphanInDbBefore);
             RunOrphanCleanupSproc();
-            var orphanInDbAfter = TestHelper.UnitOfWork.Context.AnalysisMaintainableAsset
+            var orphanInDbAfter = TestHelper.UnitOfWork.Context.MaintainableAsset
              .SingleOrDefault(a => a.Id == orphanId);
             Assert.Null(orphanInDbAfter);
         }
 
-        [Fact (Skip ="Not working yet")]
+        [Fact]
         public void RunOrphanCleanup_NonOrphanInDb_DoesNotDelete()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
@@ -69,11 +69,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var asset = MaintainableAssets.InNetwork(networkId, keyAttributeName, assetId);
             var assets = new List<MaintainableAsset> { asset };
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, assets, networkId, keyAttributeId);
-            var entityInDbBefore = TestHelper.UnitOfWork.Context.AnalysisMaintainableAsset
+            var entityInDbBefore = TestHelper.UnitOfWork.Context.MaintainableAsset
                 .SingleOrDefault(a => a.Id == assetId);
             Assert.NotNull(entityInDbBefore);
             RunOrphanCleanupSproc();
-            var entityInDbAfter = TestHelper.UnitOfWork.Context.AnalysisMaintainableAsset
+            var entityInDbAfter = TestHelper.UnitOfWork.Context.MaintainableAsset
              .SingleOrDefault(a => a.Id == assetId);
             Assert.NotNull(entityInDbAfter);
         }

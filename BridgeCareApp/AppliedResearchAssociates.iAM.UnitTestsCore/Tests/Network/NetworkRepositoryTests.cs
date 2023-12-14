@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Contains(networkNameOrId.ToString(), networkNameOrId);
         }
 
-        [Fact (Skip ="Test found an issue which needs fixing. Should not be skipped at PR time.")]
+        [Fact]
         public async Task DeleteNetwork_NetworkInDb_Deletes()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
@@ -47,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Null(networkAfter);
         }
 
-        [Fact(Skip = "Should not be skipped at PR time.")]
+        [Fact]
         public async Task DeleteNetwork_NetworkInDbWithSimulation_DeletesBoth()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);

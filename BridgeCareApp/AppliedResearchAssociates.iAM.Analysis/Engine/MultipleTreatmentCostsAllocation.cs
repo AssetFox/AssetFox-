@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
 public static class MultipleTreatmentCostsAllocation
 {
-    public static SolvedBudget[] Solve(
+    public static decimal?[,] Solve(
         bool[,] allowedSpending,
         decimal[] budgetAmounts,
         decimal[] treatmentCosts,
@@ -28,64 +28,93 @@ public static class MultipleTreatmentCostsAllocation
             Round(ref treatmentCosts[t], 2);
         }
 
-        var solution = new SolvedBudget[budgetAmounts.Length];
+        var solution = new decimal?[budgetAmounts.Length, treatmentCosts.Length];
 
         if (allowFundingEachTreatmentWithMultipleBudgets)
         {
             // LP with GLOP
 
-            Variable[,] spentVariables;
+            var spentValues = new double?[budgetAmounts.Length, treatmentCosts.Length];
             var unspentValues = new double[budgetAmounts.Length];
 
-            for (var b_solving = 0; b_solving < budgetAmounts.Length; ++b_solving)
+            for (var bSolving = 0; bSolving < budgetAmounts.Length; ++bSolving)
             {
-                // if no allowed spending, set unspent value and skip to next.
-
                 using var solver = Solver.CreateSolver("GLOP") ??
                     throw new Exception("Solver could not be created.");
 
-                spentVariables = new Variable[budgetAmounts.Length, treatmentCosts.Length];
-                var unspentVariable = solver.MakeNumVar(
-                    0,
-                    (double)budgetAmounts[b_solving],
-                    $"u[{b_solving}]");
+                var spentVariables = new Variable[budgetAmounts.Length, treatmentCosts.Length];
 
-                for (var b_solved = 0; b_solved < b_solving; ++b_solved)
+                for (var bSolved = 0; bSolved < bSolving; ++bSolved)
                 {
-                    var amount = budgetAmounts[b_solved];
                     for (var t = 0; t < treatmentCosts.Length; ++t)
                     {
-                        if (allowedSpending[b_solved, t])
+                        if (allowedSpending[bSolved, t])
                         {
-                            spentVariables[b_solved, t] = solver.MakeNumVar(
+                            spentVariables[bSolved, t] = solver.MakeNumVar(
                                 0,
-                                (double)Math.Min(amount, treatmentCosts[t]),
-                                $"s[{b_solved},{t}]");
+                                (double)Math.Min(budgetAmounts[bSolved], treatmentCosts[t]),
+                                $"s[{bSolved},{t}]");
                         }
                     }
 
-                    // add constraint \sum_t s[b,t] = u_b
+                    var spentConstraint = solver.MakeConstraint(
+                        unspentValues[bSolved],
+                        unspentValues[bSolved],
+                        $"b[{bSolved}]_spent");
+
+                    for (var t = 0; t < treatmentCosts.Length; ++t)
+                    {
+                        spentConstraint.SetCoefficient(spentVariables[bSolved, t], 1);
+                    }
                 }
 
-                // b_solving vars
+                //
 
-                for (var b_unsolved = b_solving + 1; b_unsolved < budgetAmounts.Length; ++b_unsolved)
+                for (var t = 0; t < treatmentCosts.Length; ++t)
                 {
-                    // vars
+                    if (allowedSpending[bSolving, t])
+                    {
+                        spentVariables[bSolving, t] = solver.MakeNumVar(
+                            0,
+                            (double)Math.Min(budgetAmounts[bSolving], treatmentCosts[t]),
+                            $"s[{bSolving},{t}]");
+                    }
                 }
+
+                var unspentVariable = solver.MakeNumVar(
+                    0,
+                    (double)budgetAmounts[bSolving],
+                    $"u[{bSolving}]");
+
+                var spendingConstraint = solver.MakeConstraint(
+                    (double)budgetAmounts[bSolving],
+                    (double)budgetAmounts[bSolving],
+                    $"b[{bSolving}]_spending");
+
+                //
+
+                for (var bUnsolved = bSolving + 1; bUnsolved < budgetAmounts.Length; ++bUnsolved)
+                {
+                    // vars, amount constraint
+                }
+
+                // cost constraints
             }
 
-            // fill solution from latest spent vars and unspent vals
+            // fill solution from latest spent and unspent vals (converting to decimal and
+            // rounding to 2 places)
         }
         else
         {
             // MIP with CP-SAT
+
+            // update allowedSpending by disallowing where amount_b < cost_t. (don't un-disallow anything!)
         }
 
         for (var b = 0; b < budgetAmounts.Length; ++b)
         {
             var (spent, unspent) = solution[b];
-            if (spent.Sum() + unspent != budgetAmounts[b])
+            if (spent.Sum() + unspent > budgetAmounts[b])
             {
                 throw new Exception("Budget spending is invalid.");
             }
@@ -103,6 +132,4 @@ public static class MultipleTreatmentCostsAllocation
     }
 
     private static void Round(ref decimal d, int decimals) => d = Math.Round(d, decimals);
-
-    public sealed record SolvedBudget(decimal?[] Spent, decimal Unspent);
 }

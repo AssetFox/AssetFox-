@@ -81,40 +81,36 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         }
 
 
-        internal void FillDataToUseInExcel(
-            SimulationOutput reportOutputData,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource)>> yearlyCostCommittedProj,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
-            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear
-            )
+        internal void FillDataToUseInExcel(SimulationOutput reportOutputData, Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj, Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndLengthPerTreatmentPerYear, Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear, Dictionary<string, string> treatmentCategoryLookup)
         {
             foreach (var yearData in reportOutputData.Years)
             {
                 costAndLengthPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>());
                 costAndLengthPerTreatmentGroupPerYear.Add(yearData.Year, new Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>());
-                yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource)>();
+                yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>();
                 foreach (var section in yearData.Assets)
                 {
                     var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
                     PopulateTreatmentCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentPerYear);
                     PopulateTreatmentGroupCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentGroupPerYear);
-
+                    var appliedTreatment = section.AppliedTreatment;
+                    var treatmentCategory = treatmentCategoryLookup[appliedTreatment];
                     if (section.TreatmentCause == TreatmentCause.CommittedProject &&
-                        section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment)
+                        appliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                     {
                         var commitedCost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
 
-                        if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(section.AppliedTreatment))
+                        if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
                         {
-                            yearlyCostCommittedProj[yearData.Year].Add(section.AppliedTreatment, (commitedCost, 1, section.ProjectSource));
+                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (commitedCost, 1, section.ProjectSource, treatmentCategory));
                         }
                         else
                         {
-                            var currentRecord = yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment];
+                            var currentRecord = yearlyCostCommittedProj[yearData.Year][appliedTreatment];
                             var treatmentCost = currentRecord.treatmentCost + commitedCost;
                             var bridgeCount = currentRecord.bridgeCount + 1;
                             var projectSource = currentRecord.projectSource;
-                            yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment] = (treatmentCost, bridgeCount, projectSource);
+                            yearlyCostCommittedProj[yearData.Year][appliedTreatment] = (treatmentCost, bridgeCount, projectSource, treatmentCategory);
                         }
                         
                         continue;

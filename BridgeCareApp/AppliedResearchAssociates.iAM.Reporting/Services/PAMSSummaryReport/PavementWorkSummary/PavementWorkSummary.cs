@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Analysis;
 using OfficeOpenXml;
@@ -32,13 +30,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelWorksheet worksheet,
             SimulationOutput reportOutputData,
             List<int> simulationYears,
-            WorkSummaryModel workSummaryModel,
             Dictionary<string, Budget> yearlyBudgetAmount,
             IReadOnlyCollection<SelectableTreatment> selectableTreatments,
-            ICollection<CommittedProject> committedProjects)
+            ICollection<CommittedProject> committedProjects,
+            Dictionary<string, string> treatmentCategoryLookup)
         {
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
-            var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource)>>();
+            var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>>();
             // Getting list of treatments. It will be used in several places throughout this excel TAB
             var simulationTreatments = new List<(string Name, AssetCategories AssetType, TreatmentCategory Category)>();
 
@@ -53,7 +51,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var costAndLengthPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>(); // Year, treatmentName, cost, length
             var costAndLengthPerTreatmentGroupPerYear = new Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>>();
 
-            _pavementWorkSummaryComputationHelper.FillDataToUseInExcel(reportOutputData, yearlyCostCommittedProj, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear);
+            _pavementWorkSummaryComputationHelper.FillDataToUseInExcel(reportOutputData, yearlyCostCommittedProj, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, treatmentCategoryLookup);
             var workTypeTotals = _pavementWorkSummaryComputationHelper.CalculateWorkTypeTotals(costAndLengthPerTreatmentPerYear, simulationTreatments);
 
             var chartRowsModel = _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears, yearlyBudgetAmount, costAndLengthPerTreatmentPerYear, yearlyCostCommittedProj, costAndLengthPerTreatmentGroupPerYear, simulationTreatments, workTypeTotals, committedProjects);

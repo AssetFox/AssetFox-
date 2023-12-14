@@ -1,5 +1,36 @@
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 
+
+export interface VueQuery{
+
+}
+
+export interface LevelOperator{
+    name: string;
+    identifier: string;
+    level: number;
+}
+
+export interface QueryRule{
+    index: number;
+    value: string;
+    level: number;
+    identifier: string;
+    uuid: string;
+    ruleType: QueryRuleType;
+    isGroup: boolean;
+    children: QueryRule[];
+}
+
+export interface QueryRuleType{
+    name: string;
+    identifier: string;
+    type: string;
+    icon: string;
+    initialValue: string;
+    placeholder: string;
+}
+
 export interface Criteria {
     logicalOperator: string;
     children?: CriteriaType[];

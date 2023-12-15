@@ -182,14 +182,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var attrEntity = _unitOfWork.Context.Attribute.AsNoTracking().FirstOrDefault(_ => _.Id == network.KeyAttributeId);
             if (attrEntity == null)
                 return null;
+            MaintainableAsset asset;
 
+            if (attrEntity.DataType == "NUMBER")
+            {
+                asset = _unitOfWork.Context.MaintainableAsset.AsNoTracking().Include(_ => _.AggregatedResults).Include(_ => _.MaintainableAssetLocation)
+                .FirstOrDefault(_ => _.NetworkId == network.Id
+                && _.AggregatedResults.Any(ar => ar.AttributeId == attrEntity.Id && ar.NumericValue.ToString() == attributeValue))
+                ?.ToDomain(_unitOfWork.EncryptionKey);
+            }
+            else
+            {
+                asset = _unitOfWork.Context.MaintainableAsset.AsNoTracking().Include(_ => _.AggregatedResults).Include(_ => _.MaintainableAssetLocation)
+                 .FirstOrDefault(_ => _.NetworkId == network.Id
+                 && _.AggregatedResults.Any(ar => ar.AttributeId == attrEntity.Id && ar.TextValue == attributeValue))
+                 ?.ToDomain(_unitOfWork.EncryptionKey);
 
-            var asset = attrEntity.DataType == "NUMBER" ? _unitOfWork.Context.MaintainableAsset.AsNoTracking().Include(_ => _.AggregatedResults).ThenInclude(_ => _.MaintainableAsset).ThenInclude(_ => _.MaintainableAssetLocation)
-                    .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
-                    .FirstOrDefault(_ => _.AttributeId == attrEntity.Id && _.NumericValue.ToString() == attributeValue)?.MaintainableAsset.ToDomain(_unitOfWork.EncryptionKey) :
-                    _unitOfWork.Context.MaintainableAsset.Include(_ => _.AggregatedResults).ThenInclude(_ => _.MaintainableAsset).ThenInclude(_ => _.MaintainableAssetLocation)
-                    .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
-                    .FirstOrDefault(_ => _.AttributeId == attrEntity.Id && _.TextValue == attributeValue)?.MaintainableAsset.ToDomain(_unitOfWork.EncryptionKey);
+            }
             return asset;
         }
 
@@ -228,7 +237,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public List<Guid> GetMaintainableAssetAttributeIdsByNetworkId(Guid networkId)
-        {            
+        {
             var attributeIds = _unitOfWork.Context.AggregatedResult
                 .Include(_ => _.MaintainableAsset)
                 .Where(ar => ar.MaintainableAsset.NetworkId == networkId)

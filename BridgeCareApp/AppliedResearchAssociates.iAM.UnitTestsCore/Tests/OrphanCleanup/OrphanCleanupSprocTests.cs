@@ -94,7 +94,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var allAttributes = TestHelper.UnitOfWork.AttributeRepo.GetAttributes();
             var keyAttribute = allAttributes.Single(a => a.Id == networkEntity.KeyAttributeId);
             AdminSettingsTestSetup.SetupBamsAdminSettings(TestHelper.UnitOfWork, NetworkTestSetup.TestNetwork().Name, keyAttribute.Name, keyAttribute.Name);
-            var attributeDto = AttributeTestSetup.CreateSingleTextAttribute(TestHelper.UnitOfWork, keyAttribute.Id, keyAttribute.Name, ConnectionType.EXCEL, "location");
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var userId = user.Id;
             var networkId = Guid.NewGuid();

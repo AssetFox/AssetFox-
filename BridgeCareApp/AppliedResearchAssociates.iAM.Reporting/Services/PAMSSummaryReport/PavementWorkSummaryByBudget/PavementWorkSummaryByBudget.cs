@@ -29,9 +29,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             SimulationOutput reportOutputData,
             List<int> simulationYears,
             Dictionary<string, Budget> yearlyBudgetAmount,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int pavementCount, string projectSource)>> yearlyCostCommittedProj,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int pavementCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
             IReadOnlyCollection<SelectableTreatment> selectableTreatments,
-            ICollection<CommittedProject> committedProjects)
+            ICollection<CommittedProject> committedProjects,
+            Dictionary<string, string> treatmentCategoryLookup)
         {
             var workSummaryByBudgetModels = CreateWorkSummaryByBudgetModels(reportOutputData);
             var committedTreatments = new HashSet<string>();
@@ -54,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 {
                     continue;
                 }
-                PopulateYearlyCostCommittedProj(reportOutputData, budgetSummaryModel, yearlyCostCommittedProj);
+                PopulateYearlyCostCommittedProj(reportOutputData, budgetSummaryModel, yearlyCostCommittedProj, treatmentCategoryLookup);
 
                 // Inside iteration since each section has its own budget analysis section.
                 var costBudgetsWorkSummary = new CostBudgetsWorkSummary();
@@ -187,7 +188,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                     WorkSummaryByBudgetModel summaryModel,
                                     Dictionary<int, Dictionary<string,
                                     (decimal treatmentCost, int pavementCount,
-                                    string projectSource)>> yearlyCostCommittedProj)
+                                    string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
+                                    Dictionary<string, string> treatmentCategoryLookup)
         {
             yearlyCostCommittedProj.Clear();
 
@@ -202,24 +204,26 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         {
                             var committedCost = section.TreatmentConsiderations.Sum(_ =>
                                 _.BudgetUsages.Where(b => b.BudgetName == summaryModel.BudgetName).Sum(bu => bu.CoveredCost));
+                            var appliedTreatment = section.AppliedTreatment;
+                            var treatmentCategory = treatmentCategoryLookup[appliedTreatment];
 
                             // Populating yearlyCostCommittedProj dictionary
                             if (!yearlyCostCommittedProj.ContainsKey(yearData.Year))
                             {
-                                yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, (decimal, int, string)>();
+                                yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, (decimal, int, string, string)>();
                             }
 
-                            if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(section.AppliedTreatment))
+                            if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
                             {
-                                yearlyCostCommittedProj[yearData.Year].Add(section.AppliedTreatment, (committedCost, 1, section.ProjectSource));
+                                yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (committedCost, 1, section.ProjectSource, treatmentCategory));
                             }
                             else
                             {
-                                var currentRecord = yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment];
+                                var currentRecord = yearlyCostCommittedProj[yearData.Year][appliedTreatment];
                                 var treatmentCost = currentRecord.treatmentCost + committedCost;
                                 var pavementCount = currentRecord.pavementCount + 1;
                                 var projectSource = currentRecord.projectSource;
-                                yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment] = (treatmentCost, pavementCount, projectSource);
+                                yearlyCostCommittedProj[yearData.Year][appliedTreatment] = (treatmentCost, pavementCount, projectSource, treatmentCategory);
                             }
                         }
                     }

@@ -18,7 +18,5 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             unitOfWork.AdminSettingsRepo.SetKeyFields(keyFields);
             unitOfWork.AdminSettingsRepo.SetRawDataKeyFields(rawKeyFields);
         }
-
-        internal static void SetupBamsAdminSettings(UnitOfDataPersistenceWork unitOfWork, string name) => throw new NotImplementedException();
     }
 }

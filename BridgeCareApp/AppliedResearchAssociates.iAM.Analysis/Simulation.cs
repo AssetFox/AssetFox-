@@ -107,6 +107,14 @@ public sealed class Simulation : WeakEntity, IValidator
             results.Add(ValidationStatus.Error, "Multiple selectable treatments have the same name.", this, nameof(Treatments));
         }
 
+        foreach (var project in CommittedProjects)
+        {
+            if (!Treatments.Contains(project.TemplateTreatment))
+            {
+                results.Add(ValidationStatus.Error, "Simulation does not contain this template treatment.", project, nameof(project.TemplateTreatment));
+            }
+        }
+
         if (CommittedProjects.Select(project => (project.Asset, project.Year)).Distinct().Count() < CommittedProjects.Count)
         {
             results.Add(ValidationStatus.Error, "Multiple projects are committed to the same asset in the same year.", this, nameof(CommittedProjects));

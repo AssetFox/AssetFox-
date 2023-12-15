@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
+  <v-dialog max-width="600px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
         <v-row justify="space-between" style="margin: 5px;">
@@ -14,18 +14,31 @@
                       :items="treatmentLibraryUserGridRows"
                       sort-asc-icon="custom:GhdTableSortAscSvg"
                       sort-desc-icon="custom:GhdTableSortDescSvg"
-                      :search="searchTerm">
+                      :search="searchTerm"
+                      :items-per-page="5"
+                      :items-per-page-options="[
+                        {value: 5, title: '5'},
+                        {value: 10, title: '10'},
+                        {value: 25, title: '25'},
+                    ]">
+          <template v-slot:headers="props">
+            <tr>
+              <th style="font-weight: bold;" v-for="header in treatmentLibraryUserGridHeaders" :key="header.title">
+                  {{header.title}}
+              </th>
+            </tr>
+          </template>
           <template slot="items" slot-scope="props" v-slot:item="props">
             <tr>
             <td>
               {{ props.item.username }}
             </td>
             <td>
-              <v-checkbox label="Is Shared" v-model="props.item.isShared"
+              <v-checkbox v-model="props.item.isShared"
                           @change="removeUserModifyAccess(props.item.id, props.item.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!props.item.isShared   " label="Can Modify" v-model="props.item.canModify"/>
+              <v-checkbox :disabled="!props.item.isShared" v-model="props.item.canModify"/>
             </td>
           </tr>
           </template>

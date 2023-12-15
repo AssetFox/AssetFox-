@@ -9,6 +9,8 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using static HotChocolate.ErrorCodes;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -40,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
             List<int> simulationYears, WorkSummaryModel workSummaryModel, Dictionary<string, Budget> yearlyBudgetAmount,
-            IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectList)
+            IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
         {
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
@@ -64,14 +66,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>>();
             var countForCompletedProject = new Dictionary<int, Dictionary<string, int>>();
             var countForCompletedCommittedProject = new Dictionary<int, Dictionary<string, int>>();
-
             FillDataToUseInExcel(reportOutputData, costPerBPNPerYear, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj,
-                countForCompletedProject, countForCompletedCommittedProject, treatmentCategoryLookup);
+                countForCompletedProject, countForCompletedCommittedProject, treatmentCategoryLookup, committedProjectsForWorkOutsideScope);
 
             #endregion Initial work to set some data, which will be used throughout the Work summary TAB
 
             _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj,
-                simulationYears, yearlyBudgetAmount, costPerBPNPerYear, simulationTreatments, committedProjectList);
+                simulationYears, yearlyBudgetAmount, costPerBPNPerYear, simulationTreatments, committedProjectsForWorkOutsideScope);
 
             _bridgesCulvertsWorkSummary.FillBridgesCulvertsWorkSummarySections(worksheet, currentCell, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj, simulationYears, simulationTreatments);
             _projectsCompletedCount.FillProjectCompletedCountSection(worksheet, currentCell, countForCompletedProject, countForCompletedCommittedProject, simulationYears, simulationTreatments);
@@ -104,7 +105,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
      Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
      Dictionary<int, Dictionary<string, int>> countForCompletedProject,
      Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject,
-     Dictionary<string, string> treatmentCategoryLookup)
+     Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
         {
             var isInitialYear = true;
             foreach (var yearData in reportOutputData.Years)
@@ -153,6 +154,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         else
                         {
                             countForCompletedCommittedProject[yearData.Year][appliedTreatment] += 1;
+                        }
+
+                        // Remove from committedProjectsForWorkOutsideScope
+                        var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Treatment == appliedTreatment && _.Year == yearData.Year && _.ProjectSource.ToString() == section.ProjectSource && _.Category.ToString() == treatmentCategory);
+                        if (toRemove != null)
+                        {
+                            committedProjectsForWorkOutsideScope.Remove(toRemove);
                         }
 
                         continue;

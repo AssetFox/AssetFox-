@@ -133,12 +133,12 @@ public static class Funding
                 fundingConstraints[t] = solver.MakeConstraint(
                     (double)(treatmentCosts[t] - fundingTolerance),
                     (double)(treatmentCosts[t] + fundingTolerance),
-                    $"f[{t}]");
+                    $"funding[{t}]");
             }
 
             for (var b = 0; b < budgetAmounts.Length; ++b)
             {
-                spendingConstraints[b] = solver.MakeConstraint(0, (double)budgetAmounts[b], $"s[{b}]");
+                spendingConstraints[b] = solver.MakeConstraint(0, (double)budgetAmounts[b], $"spending[{b}]");
                 allocationVariablesPerBudget[b] = new(treatmentCosts.Length);
 
                 for (var t = 0; t < treatmentCosts.Length; ++t)
@@ -146,7 +146,7 @@ public static class Funding
                     if (allocationIsAllowed[b, t])
                     {
                         var maximumAllocation = Math.Min(budgetAmounts[b], treatmentCosts[t]);
-                        var allocationVariable = solver.MakeNumVar(0, (double)maximumAllocation, $"a[{b},{t}]");
+                        var allocationVariable = solver.MakeNumVar(0, (double)maximumAllocation, $"allocation[{b},{t}]");
 
                         allocationVariables[b, t] = allocationVariable;
                         allocationVariablesPerBudget[b].Add(allocationVariable);

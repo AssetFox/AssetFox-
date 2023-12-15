@@ -1,5 +1,4 @@
-﻿using System;
-using AppliedResearchAssociates.iAM.Analysis.Engine;
+﻿using AppliedResearchAssociates.iAM.Analysis.Engine;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Testing;
@@ -187,7 +186,37 @@ public class FundingSolutionTests
     }
 
     [Fact]
-    public void SingleBudget_MultipleTreatments()
+    public void SingleBudget_MultipleTreatments_MissingAllocation()
+    {
+        bool[,] allocationIsAllowed =
+        {
+            { true, false, true, },
+        };
+
+        decimal[] budgetAmounts =
+        {
+            10,
+        };
+
+        decimal[] treatmentCosts =
+        {
+            1,
+            2,
+            3,
+        };
+
+        var solved = Funding.TrySolve(
+            allocationIsAllowed,
+            budgetAmounts,
+            treatmentCosts,
+            true,
+            out var solution);
+
+        Assert.False(solved);
+    }
+
+    [Fact]
+    public void SingleBudget_MultipleTreatments_Solved()
     {
         bool[,] allocationIsAllowed =
         {
@@ -221,17 +250,14 @@ public class FundingSolutionTests
         };
 
         Assert.Equivalent(expected, solution, true);
-        Assert.Equal(1, solution[0, 0]);
-        Assert.Equal(2, solution[0, 1]);
-        Assert.Equal(3, solution[0, 2]);
     }
 
     [Fact]
-    public void SingleBudget_MultipleTreatments_MissingAllocation()
+    public void SingleBudget_MultipleTreatments_Unsolved()
     {
         bool[,] allocationIsAllowed =
         {
-            { true, false, true, },
+            { true, true, true, },
         };
 
         decimal[] budgetAmounts =
@@ -241,7 +267,7 @@ public class FundingSolutionTests
 
         decimal[] treatmentCosts =
         {
-            1,
+            10,
             2,
             3,
         };
@@ -257,7 +283,7 @@ public class FundingSolutionTests
     }
 
     [Fact]
-    public void SingleBudget_SingleTreatment()
+    public void SingleBudget_SingleTreatment_Solved()
     {
         bool[,] allocationIsAllowed =
         {
@@ -289,6 +315,34 @@ public class FundingSolutionTests
         };
 
         Assert.Equivalent(expected, solution, true);
+    }
+
+    [Fact]
+    public void SingleBudget_SingleTreatment_Unsolved()
+    {
+        bool[,] allocationIsAllowed =
+        {
+            { true, },
+        };
+
+        decimal[] budgetAmounts =
+        {
+            10,
+        };
+
+        decimal[] treatmentCosts =
+        {
+            100,
+        };
+
+        var solved = Funding.TrySolve(
+            allocationIsAllowed,
+            budgetAmounts,
+            treatmentCosts,
+            true,
+            out var solution);
+
+        Assert.False(solved);
     }
 
     #endregion
@@ -332,6 +386,37 @@ public class FundingSolutionTests
         };
 
         Assert.Equivalent(expected, solution, true);
+    }
+
+    [Fact]
+    public void MultipleBudgets_MultipleTreatments_MultiFunding_Minimal_Unsolved()
+    {
+        bool[,] allocationIsAllowed =
+        {
+            { true, true, },
+            { true, false, },
+        };
+
+        decimal[] budgetAmounts =
+        {
+            6,
+            10,
+        };
+
+        decimal[] treatmentCosts =
+        {
+            8,
+            8,
+        };
+
+        var solved = Funding.TrySolve(
+            allocationIsAllowed,
+            budgetAmounts,
+            treatmentCosts,
+            true,
+            out var solution);
+
+        Assert.False(solved);
     }
 
     // to-do: allocation column false

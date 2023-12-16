@@ -79,11 +79,6 @@ public sealed class Simulation : WeakEntity, IValidator
     {
         var results = new ValidationResultBag();
 
-        if (ShouldBundleFeasibleTreatments && AnalysisMethod.AllowFundingFromMultipleBudgets)
-        {
-            results.Add(ValidationStatus.Error, "Treatments cannot be bundled when each treatment is allowed to be funded from multiple budgets.", this, nameof(ShouldBundleFeasibleTreatments));
-        }
-
         var treatmentsWithEmptyFeasibility = Treatments.Where(treatment => treatment.FeasibilityCriteria.All(criterion => criterion.ExpressionIsBlank)).ToList();
         if (treatmentsWithEmptyFeasibility.Count != 1)
         {

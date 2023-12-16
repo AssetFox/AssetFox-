@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Google.OrTools.LinearSolver;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine;
@@ -62,6 +63,13 @@ public static class Funding
             }
         }
 
+        if (budgetAmounts.Sum() < treatmentCosts.Sum())
+        {
+            // Trivially unsolvable.
+            solution = null;
+            return false;
+        }
+
         // Optimization
 
         solution = new decimal?[budgetAmounts.Length, treatmentCosts.Length];
@@ -121,8 +129,9 @@ public static class Funding
             using var solver = Solver.CreateSolver("GLOP") ??
                 throw new Exception("Solver could not be created.");
 
-            var allocationVariables = new Variable[budgetAmounts.Length, treatmentCosts.Length];
+            var allocationVariablesMatrix = new Variable[budgetAmounts.Length, treatmentCosts.Length];
             var allocationVariablesPerBudget = new List<Variable>[budgetAmounts.Length];
+            var allocationVariablesVector = new MPVariableVector(allocationVariablesMatrix.Length);
 
             var spendingConstraints = new Constraint[budgetAmounts.Length];
             var fundingConstraints = new Constraint[treatmentCosts.Length];
@@ -148,8 +157,9 @@ public static class Funding
                         var maximumAllocation = Math.Min(budgetAmounts[b], treatmentCosts[t]);
                         var allocationVariable = solver.MakeNumVar(0, (double)maximumAllocation, $"allocation[{b},{t}]");
 
-                        allocationVariables[b, t] = allocationVariable;
+                        allocationVariablesMatrix[b, t] = allocationVariable;
                         allocationVariablesPerBudget[b].Add(allocationVariable);
+                        allocationVariablesVector.Add(allocationVariable);
 
                         spendingConstraints[b].SetCoefficient(allocationVariable, 1);
                         fundingConstraints[t].SetCoefficient(allocationVariable, 1);
@@ -157,7 +167,9 @@ public static class Funding
                 }
             }
 
-            // Use the solver. Maximize then fix each budget's total spending, in budget order.
+            // Use the solver. In budget order, maximize each budget's total spending.
+
+            var allocationValues = new double[allocationVariablesVector.Count];
 
             using var objective = solver.Objective();
 
@@ -165,8 +177,24 @@ public static class Funding
             {
                 if (b > 0)
                 {
+                    // Copy all variable values from the previous iteration's solution.
+                    for (var i = 0; i < allocationValues.Length; ++i)
+                    {
+                        allocationValues[i] = allocationVariablesVector[i].SolutionValue();
+                    }
+
+                    // This is what was maximized on the previous iteration, for the budget before
+                    // the current one. We want to maintain this maximized value, so we will update
+                    // the previous budget's spending constraint.
                     var maximizedSpending = objective.Value();
+
+                    // This constraint update also resets all variable values. (Probably a
+                    // deliberate side-effect, because changing a constraint bound can potentially
+                    // change the feasibility of any solution.)
                     spendingConstraints[b - 1].SetLb(maximizedSpending);
+
+                    // Un-reset all variable values to continue from the previous solution.
+                    solver.SetHint(allocationVariablesVector, allocationValues);
                 }
 
                 objective.Clear();
@@ -189,7 +217,7 @@ public static class Funding
             {
                 for (var t = 0; t < treatmentCosts.Length; ++t)
                 {
-                    if (allocationVariables[b, t] is Variable allocationVariable)
+                    if (allocationVariablesMatrix[b, t] is Variable allocationVariable)
                     {
                         solution[b, t] = Math.Round((decimal)allocationVariable.SolutionValue(), 2);
                     }
@@ -198,7 +226,7 @@ public static class Funding
 
             // Manually dispose collections of disposables.
 
-            foreach (var v in allocationVariables)
+            foreach (var v in allocationVariablesMatrix)
             {
                 v?.Dispose();
             }

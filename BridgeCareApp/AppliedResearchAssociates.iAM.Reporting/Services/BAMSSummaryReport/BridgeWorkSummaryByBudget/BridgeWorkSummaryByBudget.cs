@@ -265,7 +265,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     var perYearTotalSpent = totalSpent.Find(_ => _.year == startYear + yearTracker);
                     var cellFortotalBudget = yearTracker;
                     var column = currentCell.Column + cellFortotalBudget + 2;
-                    var perYrTotalSpent = (double)worksheet.Cells[TotalSpentRow, column].Value;                    
+                    var perYrTotalSpent = Convert.ToDouble(worksheet.Cells[TotalSpentRow, column].Value ?? 0.0);
                     worksheet.Cells[currentCell.Row, column].Value = budgetData.Value - (decimal)perYrTotalSpent;
 
                     worksheet.Cells[currentCell.Row + 1, column].Value =

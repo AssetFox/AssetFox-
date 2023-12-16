@@ -8,6 +8,37 @@ public class FundingSolutionTests
     #region Degenerate inputs
 
     [Fact]
+    public void MultipleBudgets_MultipleTreatments_AmountSumLessThanCostSum()
+    {
+        bool[,] allocationIsAllowed =
+        {
+            { true, true, },
+            { true, false, },
+        };
+
+        decimal[] budgetAmounts =
+        {
+            10,
+            5,
+        };
+
+        decimal[] treatmentCosts =
+        {
+            8,
+            8,
+        };
+
+        var solved = Funding.TrySolve(
+            allocationIsAllowed,
+            budgetAmounts,
+            treatmentCosts,
+            true,
+            out var solution);
+
+        Assert.False(solved);
+    }
+
+    [Fact]
     public void MultipleBudgets_SingleTreatment_MultiFunding_Solved()
     {
         bool[,] allocationIsAllowed =
@@ -350,6 +381,49 @@ public class FundingSolutionTests
     #region Multiple budgets, multiple treatments, multi-funding (LP)
 
     [Fact]
+    public void MultipleBudgets_MultipleTreatments_MultiFunding_3x3_Solved()
+    {
+        bool[,] allocationIsAllowed =
+        {
+            { true, true, false, },
+            { true, false, true, },
+            { true, false, true, },
+        };
+
+        decimal[] budgetAmounts =
+        {
+            10,
+            20,
+            5,
+        };
+
+        decimal[] treatmentCosts =
+        {
+            10,
+            10,
+            10,
+        };
+
+        var solved = Funding.TrySolve(
+            allocationIsAllowed,
+            budgetAmounts,
+            treatmentCosts,
+            true,
+            out var solution);
+
+        Assert.True(solved);
+
+        decimal?[,] expected =
+        {
+            { 0, 10, null, },
+            { 10, null, 10, },
+            { 0, null, 0, },
+        };
+
+        Assert.Equivalent(expected, solution, true);
+    }
+
+    [Fact]
     public void MultipleBudgets_MultipleTreatments_MultiFunding_Minimal_Solved()
     {
         bool[,] allocationIsAllowed =
@@ -382,7 +456,7 @@ public class FundingSolutionTests
         decimal?[,] expected =
         {
             { 2, 8, },
-            { 6, default, },
+            { 6, null, },
         };
 
         Assert.Equivalent(expected, solution, true);

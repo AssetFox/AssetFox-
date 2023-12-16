@@ -191,7 +191,6 @@ function createCriteriaObject(
     let currentCloseParentheses: string[] = [];
     let loopPasses: number = 0;
     let quotesClosed: boolean = true; // This check is to allow values with spaces in it to pass through the while loop
-
     while (currentCharIndex < expression.length) {
         loopPasses++;
         if (loopPasses > expression.length) {
@@ -397,5 +396,5 @@ export const convertCriteriaExpressionToCriteriaObject = (
         return null;
     }
 
-    return { ...emptyCriteria };
+    return { ...clone(emptyCriteria) };
 };

@@ -1,35 +1,5 @@
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
-
-
-export interface VueQuery{
-
-}
-
-export interface LevelOperator{
-    name: string;
-    identifier: string;
-    level: number;
-}
-
-export interface QueryRule{
-    index: number;
-    value: string;
-    level: number;
-    identifier: string;
-    uuid: string;
-    ruleType: QueryRuleType;
-    isGroup: boolean;
-    children: QueryRule[];
-}
-
-export interface QueryRuleType{
-    name: string;
-    identifier: string;
-    type: string;
-    icon: string;
-    initialValue: string;
-    placeholder: string;
-}
+import { SelectItem } from '../vue/select-item';
 
 export interface Criteria {
     logicalOperator: string;
@@ -37,6 +7,7 @@ export interface Criteria {
 }
 
 export interface CriteriaType {
+    id?: string;
     type: string;
     query: Criteria | CriteriaRule;
 }
@@ -62,6 +33,14 @@ export interface CriteriaEditorData {
     mergedCriteriaExpression: string | null;
     isLibraryContext: boolean;
     networkId: string;
+}
+
+export interface CriteriaConfigRule {
+    type: string;
+    label: string;
+    id: string;
+    operators: string[];
+    choices: SelectItem[];
 }
 
 export interface CriteriaEditorResult {

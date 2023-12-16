@@ -150,21 +150,11 @@
                            </v-tabs>
                             <v-window v-model="tab">
                                 <v-window-item value="tree">
-                                    <!-- <vue-query-builder
-                                        id="CriteriaEditor-criteria-vuequerybuilder"
-                                        :labels="queryBuilderLabels"
-                                        :maxDepth="25"
-                                        :rules="queryBuilderRules"
-                                        
-                                        v-if="queryBuilderRules.length > 0"
-                                        v-model="selectedSubCriteriaClause"
-                                    >
-                                    </vue-query-builder> -->
-                                    <advanced-query-builder id="CriteriaEditor-criteria-vuequerybuilder"         
-                                        :config="queryBuilderConfig"
-                                        v-model="currentQuery">
-
-                                    </advanced-query-builder>
+                                    <QueryEditor v-model:criteria="selectedSubCriteriaClause" 
+                                        :maxDepth="3" 
+                                        :queryRules="queryBuilderRules" 
+                                        :depth="0"
+                                        v-if="queryBuilderRules.length > 0"></QueryEditor>
                                 </v-window-item>
                                 <v-window-item value="raw">
                                     <v-textarea
@@ -233,6 +223,7 @@
 <script lang="ts" setup>
 import {
     Criteria,
+    CriteriaConfigRule,
     CriteriaEditorData,
     CriteriaRule,
     CriteriaType,
@@ -274,8 +265,9 @@ import { ref, onMounted, computed, toRefs, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { getUrl } from "../utils/get-url";
-import { Rule, RuleOperator, QueryBuilderConfig } from '../utils/query-builder';
 import { reactive } from 'vue';
+import QueryBuilder from "query-builder-vue";
+import QueryEditor from "../components/queryEditor/QueryEditorGroup.vue"
 
 let store = useStore();
 const $router = useRouter();
@@ -293,7 +285,7 @@ async function getAttributesAction(payload?: any): Promise<any> {await store.dis
 async function getAttributeSelectValuesAction(payload?: any): Promise<any> {await store.dispatch('getAttributeSelectValues',payload);}
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification',payload);}
 const tab = ref<any>(null);
-    const queryBuilderRules = ref<any[]>([]);
+    const queryBuilderRules = ref<CriteriaConfigRule[]>([]);
     let queryBuilderLabels: object = {
         matchType: '',
         matchTypes: [
@@ -307,25 +299,6 @@ const tab = ref<any>(null);
         textInputPlaceholder: 'value',
     };
     
-    
-    let currentQuery = ref({
-        rules: [],
-        levelOperators: []
-    }) ;
-    const queryBuilderConfig: QueryBuilderConfig = {
-        levelOperators: [
-            {
-                name: 'and',
-                identifier: 'AND'
-            },
-            {
-                name: 'or',
-                identifier:'OR'
-            },
-        ],
-        ruleOperators: [],
-        rules: []
-    };
     const cannotSubmit = ref<boolean>(true);
     const validCriteriaMessage = ref<string | null>(null);
     const invalidCriteriaMessage = ref<string | null>(null);
@@ -338,7 +311,7 @@ const tab = ref<any>(null);
     const selectedConjunction = ref<string>('OR');
     const subCriteriaClauses= ref<string[]>([]);
     const selectedSubCriteriaClauseIndex = ref<number>(-1);
-    const selectedSubCriteriaClause= ref<Criteria |null>(emptyCriteria);
+    const selectedSubCriteriaClause= ref<Criteria |null>(null);
     const selectedRawSubCriteriaClause = ref<string>('');
     let activeTab = 'tree-view';
     const checkOutput = ref<boolean>(false);
@@ -355,8 +328,10 @@ const tab = ref<any>(null);
         setSubCriteriaClauses(mainCriteria);
 
         if (hasValue(stateAttributes)) {
+            
+            onStateAttributesChanged();
+            onStateAttributesSelectValues();
             // setQueryBuilderRules();
-            createAdvanceQueryBuilderConfig();
         }
     });
 
@@ -405,11 +380,12 @@ const tab = ref<any>(null);
         }
     });
 
-    watch(stateAttributes,()=> {
+    watch(stateAttributes, onStateAttributesChanged);
+    function onStateAttributesChanged(){
         if (hasValue(stateAttributes.value)) {
             setQueryBuilderRules();
         }
-    });
+    }
 
     watch(subCriteriaClauses,()=> {
         resetCriteriaValidationProperties();
@@ -446,7 +422,8 @@ const tab = ref<any>(null);
         resetSubCriteriaValidationProperties();
     });
 
-    watch(stateAttributesSelectValues,()=> {
+    watch(stateAttributesSelectValues, onStateAttributesSelectValues)
+    function onStateAttributesSelectValues(){
         if (
             hasValue(queryBuilderRules.value) &&
             hasValue(stateAttributesSelectValues.value)
@@ -468,7 +445,7 @@ const tab = ref<any>(null);
                                 label: asv.attribute,
                                 operators: ['=', '<>', '<', '<=', '>', '>='],
                                 choices: asv.values.map((value: string) => ({
-                                    label: value,
+                                    text: value,
                                     value: value,
                                 })),
                             },
@@ -478,7 +455,7 @@ const tab = ref<any>(null);
                 );
             }
         }
-    })
+    }
 
     function isAndConjunction() {
         return selectedConjunction.value === 'AND';
@@ -505,27 +482,14 @@ const tab = ref<any>(null);
     function setQueryBuilderRules() {
         queryBuilderRules.value = stateAttributes.value.map(
             (attribute: Attribute) => ({
-                type: 'text',
+                type: attribute.type,
                 label: attribute.name,
                 id: attribute.name,
                 operators: ['=', '<>', '<', '<=', '>', '>='],
+                choices: []
             }),
         );
     }
-
-    function createAdvanceQueryBuilderConfig() {
-        queryBuilderConfig.rules = setAdvancedQueryBuilderRules();
-        queryBuilderConfig.ruleOperators = setAdvancedQueryBuilderRuleOperators();
-    }
-
-    function setAdvancedQueryBuilderRules(): Rule[] {
-        return stateAttributes.value.map((attr: Attribute) => ({
-            name: attr.name,
-            identifier: attr.id,
-            type: attr.type,
-            operators: ['=', '<>', '<', '<=', '>', '>=']
-        }));
-    } 
 
     const queryBuilderRuleOperatorTypes = [
         { name: '=', identifier: '=' },
@@ -535,12 +499,6 @@ const tab = ref<any>(null);
         {name: '>', identifier: '>'},
         {name: '>=', identifier: '>='},
     ]
-    function setAdvancedQueryBuilderRuleOperators(): RuleOperator[] {
-        return queryBuilderRuleOperatorTypes.map(op => ({
-            name: op.name,
-            identifier: op.identifier
-        }));
-    }
 
     function setSubCriteriaClauses(mainCriteria: Criteria) {
         subCriteriaClauses.value = [];
@@ -676,7 +634,7 @@ const tab = ref<any>(null);
             selectedRawSubCriteriaClause.value,
             addErrorNotificationAction,
         );
-        if (parsedRawSubCriteria) {
+        if (parsedRawSubCriteria && selectedRawSubCriteriaClause.value != '') {
             selectedSubCriteriaClause.value = parsedRawSubCriteria;
             if (!hasValue(selectedSubCriteriaClause.value.logicalOperator)) {
                 selectedSubCriteriaClause.value.logicalOperator = 'OR';
@@ -828,6 +786,7 @@ const tab = ref<any>(null);
     }
 
     function onCheckSubCriteria() {
+
         const criteria = getSubCriteriaValueToCheck();
 
         if (isNil(criteria)) {

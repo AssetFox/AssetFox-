@@ -82,7 +82,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AdminSettings
         }
 
         [Fact]
-        public void ChangeNetworks_Does()
+        public void ChangeMainNetwork_Does()
         {
             var networkEntity1 = NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var keyAttributeName = RandomStrings.WithPrefix("keyAttribute");

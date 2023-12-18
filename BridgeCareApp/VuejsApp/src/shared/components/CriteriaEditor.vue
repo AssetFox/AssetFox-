@@ -151,16 +151,11 @@
                            </v-tabs>
                             <v-window v-model="tab">
                                 <v-window-item value="tree">
-                                    <!-- <vue-query-builder
-                                        id="CriteriaEditor-criteria-vuequerybuilder"
-                                        :labels="queryBuilderLabels"
-                                        :maxDepth="25"
-                                        :rules="queryBuilderRules"
-                                        
-                                        v-if="queryBuilderRules.length > 0"
-                                        v-model="selectedSubCriteriaClause"
-                                    >
-                                    </vue-query-builder> -->
+                                    <QueryEditor v-model:criteria="selectedSubCriteriaClause" 
+                                        :maxDepth="3" 
+                                        :queryRules="queryBuilderRules" 
+                                        :depth="0"
+                                        v-if="queryBuilderRules.length > 0"></QueryEditor>
                                 </v-window-item>
                                 <v-window-item value="raw">
                                     <v-textarea
@@ -174,7 +169,6 @@
                                     ></v-textarea>
                                 </v-window-item>
                             </v-window>
-
                         </v-card-text>
                         <v-card-actions :class="{ 'validation-actions':criteriaEditorData.isLibraryContext, }">
                             <v-row>
@@ -228,9 +222,9 @@
 </template>
 
 <script lang="ts" setup>
-import VueQueryBuilder from "vue-query-builder/src/VueQueryBuilder.vue";
 import {
     Criteria,
+    CriteriaConfigRule,
     CriteriaEditorData,
     CriteriaRule,
     CriteriaType,
@@ -272,6 +266,9 @@ import { ref, onMounted, computed, toRefs, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { getUrl } from "../utils/get-url";
+import { reactive } from 'vue';
+import QueryBuilder from "query-builder-vue";
+import QueryEditor from "../components/queryEditor/QueryEditorGroup.vue"
 
 let store = useStore();
 const $router = useRouter();
@@ -289,19 +286,8 @@ async function getAttributesAction(payload?: any): Promise<any> {await store.dis
 async function getAttributeSelectValuesAction(payload?: any): Promise<any> {await store.dispatch('getAttributeSelectValues',payload);}
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification',payload);}
 const tab = ref<any>(null);
-    const queryBuilderRules = ref<any[]>([]);
-    let queryBuilderLabels: object = {
-        matchType: '',
-        matchTypes: [
-            { id: 'AND', label: 'AND' },
-            { id: 'OR', label: 'OR' },
-        ],
-        addRule: 'Add Rule',
-        removeRule: `<img class='img-general' src="${getUrl("assets/icons/trash-ghd-blue.svg")}" style="margin-top:4px;margin-left:4px;"/>`,
-        addGroup: 'Add Group',
-        removeGroup: `<img class='img-general' src="${getUrl("assets/icons/trash-ghd-blue.svg")}"/>`,
-        textInputPlaceholder: 'value',
-    };
+    const queryBuilderRules = ref<CriteriaConfigRule[]>([]);
+    
     const cannotSubmit = ref<boolean>(true);
     const validCriteriaMessage = ref<string | null>(null);
     const invalidCriteriaMessage = ref<string | null>(null);
@@ -314,12 +300,12 @@ const tab = ref<any>(null);
     const selectedConjunction = ref<string>('OR');
     const subCriteriaClauses= ref<string[]>([]);
     const selectedSubCriteriaClauseIndex = ref<number>(-1);
-    const selectedSubCriteriaClause= ref<Criteria |null>(emptyCriteria);
+    const selectedSubCriteriaClause= ref<Criteria |null>(null);
     const selectedRawSubCriteriaClause = ref<string>('');
     let activeTab = 'tree-view';
     const checkOutput = ref<boolean>(false);
 
-    onMounted(()=> {
+    onMounted(()=> {     
         const mainCriteria: Criteria = convertCriteriaExpressionToCriteriaObject(
             criteriaEditorData.value.mergedCriteriaExpression != null
                 ? criteriaEditorData.value.mergedCriteriaExpression
@@ -331,7 +317,10 @@ const tab = ref<any>(null);
         setSubCriteriaClauses(mainCriteria);
 
         if (hasValue(stateAttributes)) {
-            setQueryBuilderRules();
+            
+            onStateAttributesChanged();
+            onStateAttributesSelectValues();
+            // setQueryBuilderRules();
         }
     });
 
@@ -380,11 +369,12 @@ const tab = ref<any>(null);
         }
     });
 
-    watch(stateAttributes,()=> {
+    watch(stateAttributes, onStateAttributesChanged);
+    function onStateAttributesChanged(){
         if (hasValue(stateAttributes.value)) {
             setQueryBuilderRules();
         }
-    });
+    }
 
     watch(subCriteriaClauses,()=> {
         resetCriteriaValidationProperties();
@@ -421,7 +411,8 @@ const tab = ref<any>(null);
         resetSubCriteriaValidationProperties();
     });
 
-    watch(stateAttributesSelectValues,()=> {
+    watch(stateAttributesSelectValues, onStateAttributesSelectValues)
+    function onStateAttributesSelectValues(){
         if (
             hasValue(queryBuilderRules.value) &&
             hasValue(stateAttributesSelectValues.value)
@@ -443,7 +434,7 @@ const tab = ref<any>(null);
                                 label: asv.attribute,
                                 operators: ['=', '<>', '<', '<=', '>', '>='],
                                 choices: asv.values.map((value: string) => ({
-                                    label: value,
+                                    text: value,
                                     value: value,
                                 })),
                             },
@@ -453,7 +444,7 @@ const tab = ref<any>(null);
                 );
             }
         }
-    })
+    }
 
     function isAndConjunction() {
         return selectedConjunction.value === 'AND';
@@ -480,10 +471,11 @@ const tab = ref<any>(null);
     function setQueryBuilderRules() {
         queryBuilderRules.value = stateAttributes.value.map(
             (attribute: Attribute) => ({
-                type: 'text',
+                type: attribute.type,
                 label: attribute.name,
                 id: attribute.name,
                 operators: ['=', '<>', '<', '<=', '>', '>='],
+                choices: []
             }),
         );
     }
@@ -625,7 +617,7 @@ const tab = ref<any>(null);
             selectedRawSubCriteriaClause.value,
             addErrorNotificationAction,
         );
-        if (parsedRawSubCriteria) {
+        if (parsedRawSubCriteria && selectedRawSubCriteriaClause.value != '') {
             selectedSubCriteriaClause.value = parsedRawSubCriteria;
             if (!hasValue(selectedSubCriteriaClause.value.logicalOperator)) {
                 selectedSubCriteriaClause.value.logicalOperator = 'OR';
@@ -777,6 +769,7 @@ const tab = ref<any>(null);
     }
 
     function onCheckSubCriteria() {
+
         const criteria = getSubCriteriaValueToCheck();
 
         if (isNil(criteria)) {
@@ -965,7 +958,10 @@ const tab = ref<any>(null);
 
 </script>
 
-<style>
+<style lang="scss">
+
+@import 'vue3-advanced-query-builder/dist/styles.css';
+
 .invalid-message {
     color: red;
 }

@@ -357,7 +357,6 @@ internal sealed class AssetContext : CalculateEvaluateScope
             }
         }
 
-
         Detail.AppliedTreatment = treatment.Name;
         Detail.TreatmentStatus = TreatmentStatus.Applied;
     }

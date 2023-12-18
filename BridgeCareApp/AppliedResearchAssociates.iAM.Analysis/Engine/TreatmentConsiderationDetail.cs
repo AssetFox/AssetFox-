@@ -26,7 +26,11 @@ public sealed class TreatmentConsiderationDetail
         CashFlowConsiderations.AddRange(original.CashFlowConsiderations.Select(_ => new CashFlowConsiderationDetail(_)));
 
         FundingCalculationInput = new(original.FundingCalculationInput);
-        FundingCalculationOutput = new(original.FundingCalculationOutput);
+
+        if (original.FundingCalculationOutput != null)
+        {
+            FundingCalculationOutput = new(original.FundingCalculationOutput);
+        }
     }
 
     /// <summary>
@@ -39,9 +43,9 @@ public sealed class TreatmentConsiderationDetail
     /// </summary>
     public List<CashFlowConsiderationDetail> CashFlowConsiderations { get; } = new List<CashFlowConsiderationDetail>();
 
-    public FundingCalculationInput FundingCalculationInput { get; } = new();
+    public FundingCalculationInput FundingCalculationInput { get; set; }
 
-    public FundingCalculationOutput FundingCalculationOutput { get; } = new();
+    public FundingCalculationOutput FundingCalculationOutput { get; set; }
 
     /// <summary>
     ///     The treatment being considered.

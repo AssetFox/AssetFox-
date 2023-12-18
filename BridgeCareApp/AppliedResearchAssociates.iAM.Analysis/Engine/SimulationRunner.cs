@@ -837,28 +837,88 @@ public sealed class SimulationRunner
 
     private CostCoverage TryToPayForTreatment(AssetContext assetContext, Treatment treatment, int year, Func<BudgetContext, decimal> getAvailableAmount)
     {
-        var treatmentCost = assetContext.GetCostOfTreatment(treatment);
+        //var treatmentCost = assetContext.GetCostOfTreatment(treatment);
+        //var inflationFactor = GetInflationFactor(year);
 
         // This variable is updated as payment for the treatment is arranged.
-        var remainingCost = (decimal)(treatmentCost * GetInflationFactor(year));
+        //var remainingCost = (decimal)(treatmentCost * inflationFactor);
 
-        var treatmentConsideration = new TreatmentConsiderationDetail(treatment.Name);
-
-        treatmentConsideration.BudgetsAtDecisionTime.AddRange(
-            BudgetContexts.Select(context => new BudgetDetail(context.Budget, getAvailableAmount(context))));
-
-        treatmentConsideration.BudgetUsages.AddRange(BudgetContexts.Select(budgetContext => new BudgetUsageDetail(budgetContext.Budget.Name)
+        var treatmentConsideration = new TreatmentConsiderationDetail(treatment.Name)
         {
-            Status = treatment.CanUseBudget(budgetContext.Budget) ? BudgetUsageStatus.NotNeeded : BudgetUsageStatus.NotUsable
-        }));
+            FundingCalculationInput = new()
+            {
+                MultiBudgetFundingIsAllowed = Simulation.AnalysisMethod.AllowFundingFromMultipleBudgets
+            }
+        };
 
-        if (treatment is CommittedProject)
+        var basicCost = assetContext.GetCostOfTreatment(treatment);
+        var committedProject = treatment as CommittedProject;
+
+        foreach (var budgetContext in BudgetContexts)
         {
+            var budgetAmount = getAvailableAmount(budgetContext);
+
+            if (committedProject?.Budget == budgetContext.Budget)
+            {
+                // To offset for a CP's prepayment, which is made before the simulation begins.
+                budgetAmount += (decimal)basicCost;
+            }
+
+            treatmentConsideration.FundingCalculationInput.Budgets.Add(new(
+                budgetContext.Budget.Name,
+                budgetAmount));
+        }
+
+        if (committedProject is not null)
+        {
+            // CP cost is assumed to already include all appropriate adjustments for inflation.
+            var treatmentCost = (decimal)basicCost;
+            treatmentConsideration.FundingCalculationInput.Treatments.Add(new(treatment.Name, treatmentCost));
+
+            foreach (var budgetContext in BudgetContexts)
+            {
+                var budget = budgetContext.Budget;
+                if (!treatment.CanUseBudget(budget))
+                {
+                    treatmentConsideration.FundingCalculationInput.ExclusionMatrix.Add(new(
+                        budget.Name,
+                        treatment.Name,
+                        FundingCalculationInput.ExclusionReason.TreatmentSettings));
+                }
+            }
+
+            treatmentConsideration.FundingCalculationOutput = new()
+            {
+                SpendingMatrix =
+                {
+                    new(committedProject.Budget.Name, treatment.Name, treatmentCost)
+                }
+            };
+
             assetContext.Detail.TreatmentConsiderations.Add(treatmentConsideration);
-            var budgetUsageDetail = treatmentConsideration.BudgetUsages.Single(budgetUsage => budgetUsage.Status != BudgetUsageStatus.NotUsable);
-            budgetUsageDetail.Status = BudgetUsageStatus.CostCovered;
-            budgetUsageDetail.CoveredCost = (decimal)treatmentCost; // Cost is assumed to already include all appropriate adjustments, e.g. for inflation.
             return CostCoverage.Full;
+        }
+        else if (treatment is TreatmentBundle bundle)
+        {
+            // todo
+        }
+        else
+        {
+            var inflationFactor = GetInflationFactor(year);
+            var treatmentCost = (decimal)(basicCost * inflationFactor);
+            treatmentConsideration.FundingCalculationInput.Treatments.Add(new(treatment.Name, treatmentCost));
+
+            // fill exclusions
+
+            // convert to solver input
+
+            // solver
+
+            // if solved, convert from solver output & fill output, then return 'full'
+
+            // otherwise, return 'none'
+
+            // [todo] cash flow (which must be attempted before regular payment)
         }
 
         // At this point, we know we are not dealing with a committed project.

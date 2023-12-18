@@ -19,38 +19,32 @@ public sealed class TreatmentConsiderationDetail
         TreatmentName = treatmentName;
     }
 
+    internal TreatmentConsiderationDetail(TreatmentConsiderationDetail original)
+    {
+        TreatmentName = original.TreatmentName;
+        BudgetPriorityLevel = original.BudgetPriorityLevel;
+        CashFlowConsiderations.AddRange(original.CashFlowConsiderations.Select(_ => new CashFlowConsiderationDetail(_)));
+
+        FundingCalculationInput = new(original.FundingCalculationInput);
+        FundingCalculationOutput = new(original.FundingCalculationOutput);
+    }
+
     /// <summary>
     ///     The priority level of the budget(s) that would be used to apply the treatment.
     /// </summary>
     public int? BudgetPriorityLevel { get; set; }
 
     /// <summary>
-    ///     The amounts in each budget prior to the analysis of this consideration.
-    /// </summary>
-    public List<BudgetDetail> BudgetsAtDecisionTime { get; } = new List<BudgetDetail>();
-
-    /// <summary>
-    ///     How each budget was or was not used to fund the treatment.
-    /// </summary>
-    public List<BudgetUsageDetail> BudgetUsages { get; } = new List<BudgetUsageDetail>();
-
-    /// <summary>
     ///     How each cash-flow rule was processed to determine if the treatment would be cash-flowed.
     /// </summary>
     public List<CashFlowConsiderationDetail> CashFlowConsiderations { get; } = new List<CashFlowConsiderationDetail>();
+
+    public FundingCalculationInput FundingCalculationInput { get; } = new();
+
+    public FundingCalculationOutput FundingCalculationOutput { get; } = new();
 
     /// <summary>
     ///     The treatment being considered.
     /// </summary>
     public string TreatmentName { get; }
-
-    internal TreatmentConsiderationDetail(TreatmentConsiderationDetail original)
-    {
-        TreatmentName = original.TreatmentName;
-        BudgetUsages.AddRange(original.BudgetUsages.Select(_ => new BudgetUsageDetail(_)));
-        CashFlowConsiderations.AddRange(original.CashFlowConsiderations.Select(_ => new CashFlowConsiderationDetail(_)));
-        BudgetsAtDecisionTime.AddRange(original.BudgetsAtDecisionTime.Select(_ => new BudgetDetail(_)));
-
-        BudgetPriorityLevel = original.BudgetPriorityLevel;
-    }
 }

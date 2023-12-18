@@ -10,7 +10,7 @@
         </v-row>
       </v-card-title>
       <v-card-text>
-        <v-data-table-server id="ShareBudgetPriorityLibraryDialog-table-vdatatable"
+        <v-data-table id="ShareBudgetPriorityLibraryDialog-table-vdatatable"
                       :headers="budgetPriorityLibraryUserGridHeaders"
                       :items="budgetPriorityLibraryUserGridRows"
                       :items-length="budgetPriorityLibraryUserGridRows.length"
@@ -50,7 +50,7 @@
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
           </v-alert> -->
-        </v-data-table-server>
+        </v-data-table>
       </v-card-text>
       <v-card-actions>
         <v-row justify="center">

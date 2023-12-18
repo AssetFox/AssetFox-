@@ -63,7 +63,7 @@ public static class Funding
             }
         }
 
-        if (budgetAmounts.Sum() < treatmentCosts.Sum())
+        if (Math.Round(budgetAmounts.Sum(), 2) < Math.Round(treatmentCosts.Sum(), 2))
         {
             // Trivially unsolvable.
             solution = null;
@@ -204,8 +204,8 @@ public static class Funding
                     objective.SetCoefficient(allocationVariable, 1);
                 }
 
-                var status = solver.Solve();
-                if (status != Solver.ResultStatus.OPTIMAL && status != Solver.ResultStatus.FEASIBLE)
+                var resultStatus = solver.Solve();
+                if (resultStatus is not Solver.ResultStatus.OPTIMAL or Solver.ResultStatus.FEASIBLE)
                 {
                     return false;
                 }
@@ -291,7 +291,7 @@ public static class Funding
                 total += solution[b, t] ?? 0;
             }
 
-            return total.Value;
+            return Math.Round(total.Value, 2);
         }
 
         static decimal totalTreatmentFunding(decimal?[,] solution, int t)
@@ -303,7 +303,7 @@ public static class Funding
                 total += solution[b, t] ?? 0;
             }
 
-            return total.Value;
+            return Math.Round(total.Value, 2);
         }
     }
 }

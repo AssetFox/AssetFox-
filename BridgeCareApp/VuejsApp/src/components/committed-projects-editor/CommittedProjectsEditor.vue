@@ -89,7 +89,7 @@
         <v-col>
                 <p-card style="padding: 10px; width: auto;">
                     <v-row>
-                        <v-data-table-server
+                        <v-data-table
                         id="CommittedProjectsEditor-committedProjects-vdatatable"
                         :headers="cpGridHeaders"
                         :items-length="totalItems"
@@ -252,7 +252,7 @@
                                 </td>
                             </tr>
                             </template>
-                        </v-data-table-server>    
+                        </v-data-table>    
                     </v-row>
             </p-card>
         </v-col>

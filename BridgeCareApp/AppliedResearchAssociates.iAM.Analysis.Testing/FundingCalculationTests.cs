@@ -3,7 +3,7 @@ using Xunit;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Testing;
 
-public class FundingOptimizationTests
+public class FundingCalculationTests
 {
     #region Degenerate inputs
 

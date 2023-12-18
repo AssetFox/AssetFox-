@@ -74,6 +74,8 @@ export enum WorkType {
     ImportScenarioInvestment,
     ImportScenarioPerformanceCurve,
     ImportScenarioTreatment,
+    ImportScenarioTreatmentSupersedeRule,
+    ImportLibraryTreatmentSupersedeRule,
     ImportCommittedProject,
 }
 

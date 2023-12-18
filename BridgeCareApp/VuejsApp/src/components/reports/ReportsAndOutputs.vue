@@ -13,7 +13,9 @@
                         <v-data-table
                             id="ReportsAndOutputs-datatable"
                             :headers="reportsGridHeaders"
-                            :items="currentPage"                       
+                            :items="currentPage"      
+                            sort-asc-icon="custom:GhdTableSortAscSvg"
+                            sort-desc-icon="custom:GhdTableSortDescSvg"                 
                             :rows-per-page-items=[5,10,25]
                             class="fixed-header ghd-table v-table__overflow"
                             item-key="id"

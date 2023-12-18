@@ -18,5 +18,5 @@ public sealed class InvestmentPlan
 
     public int NumberOfYearsInAnalysisPeriod { get; set; }
 
-    public bool ShouldAccumulateUnusedBudgetAmounts { get; set; }
+    public bool AllowFundingCarryover { get; set; }
 }

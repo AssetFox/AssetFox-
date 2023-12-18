@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Drawing;
 using OfficeOpenXml;
-
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary;
 using AppliedResearchAssociates.iAM.Reporting.Models;
-using NLog.Internal;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget
 {
@@ -190,6 +189,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
             ExcelHelper.SetTextColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.White);
             currentCell.Row++; 
+        }
+
+        internal void AddCostOfWorkOutsideScope(WorkTypeTotal workTypeTotal, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
+        {
+            foreach(var committedProjectForWorkOutsideScope in committedProjectsForWorkOutsideScope)
+            {
+                var yearsData = new YearsData { TreatmentCategory = TreatmentCategory.WorkOutsideScope, Year = committedProjectForWorkOutsideScope.Year, Amount = committedProjectForWorkOutsideScope.Cost };
+                WorkTypeTotalHelper.FillWorkTypeTotals(yearsData, workTypeTotal);
+            }
         }
     }
 }

@@ -83,8 +83,8 @@ namespace BridgeCareCore.Services
         }
         public bool CheckCompatibleNetworkAttributes(CloneSimulationDTO dto)
         {
-            var scenarioAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.NetworkId);
-            var destinationScenarioAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintableAssetsAttributeByNetworkId(dto.DestinationNetworkId);
+            var scenarioAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetAttributeIdsByNetworkId(dto.NetworkId);
+            var destinationScenarioAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetAttributeIdsByNetworkId(dto.DestinationNetworkId);
 
             if (destinationScenarioAttributes.Any(c => !scenarioAttributes.Contains(c)) && destinationScenarioAttributes.Count > 0 || destinationScenarioAttributes.Count() == 0)
             {

@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.SampleData;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Models;
@@ -49,13 +50,7 @@ namespace BridgeCareCoreTests.Tests
             dataSourceRepo.Setup(d => d.GetDataSource(dataSourceDto.Id)).Returns(dataSourceDto);
             excelWorksheetRepo.Setup(e => e.AddExcelRawData(It.IsAny<ExcelRawDataDTO>())).Returns((ExcelRawDataDTO d) => d.Id);
             var excelRawDataId = Guid.NewGuid();
-            var excelRawDataDto = new ExcelRawDataDTO
-            {
-                Id = excelRawDataId,
-                SerializedWorksheetContent = @"[[""BRKEY"", 1, 10, 100, 10001],
-                [""DISTRICT"", 11, 20, 110, 10011],
-                [""Inspection_Date"", ""2022-01-01T00:00:00"", ""2022-02-01T00:00:00"", ""2022-03-01T00:00:00"", ""2022-04-01T00:00:00""]]"
-            };
+            var excelRawDataDto = ExcelRawDataDtos.Dto(excelRawDataId);
             excelWorksheetRepo.Setup(e => e.GetExcelRawDataByDataSourceId(dataSourceDto.Id)).Returns(excelRawDataDto);
             var districtAttribute = AttributeDtos.District(dataSourceDto);
             var districtAttributeDomain = AttributeDtoDomainMapper.ToDomain(districtAttribute, unitOfWork.EncryptionKey);

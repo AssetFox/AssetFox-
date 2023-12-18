@@ -5,7 +5,7 @@
             <v-select
                 id="TreatmentEditor-treatmentLibrary-select"
                 :items='librarySelectItems'
-                append-icon=ghd-down
+                menu-icon=custom:GhdDownSvg
                 class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                 label='Select a Treatment Library'
                 variant="outlined"
@@ -21,7 +21,7 @@
             <v-select
             id="TreatmentEditor-treatment-select"
                 :items='treatmentSelectItems'
-                append-icon=ghd-down
+                menu-icon=custom:GhdDownSvg
                 class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                 label='Select a Treatment'
                 variant="outlined"
@@ -369,7 +369,7 @@
 </template>
 
 <script setup lang='ts'>
-import { ShallowRef, computed, shallowRef, watch } from 'vue';
+import { ShallowRef, computed, inject, shallowRef, watch } from 'vue';
 import { ref, onMounted, onBeforeUnmount, Ref} from 'vue';
 import { useStore } from 'vuex';
 import CreateTreatmentLibraryDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentLibraryDialog.vue';
@@ -456,13 +456,13 @@ import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 import { ImportNewTreatmentDialogResult } from '@/shared/models/modals/import-new-treatment-dialog-result';
 import { useRouter } from 'vue-router';
-import mitt from 'mitt';
+import mitt, { Emitter, EventType } from 'mitt';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
 
     const emit = defineEmits(['submit'])    
-    const $emitter = mitt()
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
     const $router = useRouter();
     const confirm = useConfirm();
     let store = useStore();
@@ -588,6 +588,7 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
    store.dispatch('setAlertMessage', payload);
 }
 
+
 async function addedOrUpdatedTreatmentLibraryMutator(payload?: any): Promise<any> {
   await store.commit('addedOrUpdatedTreatmentLibraryMutator', payload);
 }
@@ -652,7 +653,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     const shareTreatmentLibraryDialogData = ref<ShareTreatmentLibraryDialogData>(clone(emptyShareTreatmentLibraryDialogData));
     let loadedScenarioId: string = '';
     let parentLibraryId: string  = uuidNIL;
-    let parentLibraryName: string = 'None';
+    let parentLibraryName = ref('None');
     let scenarioParentLIbrary: string | null = null;
     let scenarioLibraryIsModified: boolean = false;
     let loadedParentName: string = "";
@@ -662,9 +663,9 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
 
     
     beforeRouteEnter();
-    function beforeRouteEnter() {
+    async function beforeRouteEnter() {
         librarySelectItemValue.value = "";
-        getTreatmentLibrariesAction();
+        await getTreatmentLibrariesAction();
         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Treatment) !== -1) {
             selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
             loadedScenarioId = selectedScenarioId;
@@ -675,23 +676,21 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
                 $router.push('/Scenarios/');
             }
             hasScenario.value = true;
-            getSimpleScenarioSelectableTreatmentsAction(selectedScenarioId);
-            getTreatmentLibraryBySimulationIdAction(selectedScenarioId);
-            getScenarioPerformanceCurvesAction(selectedScenarioId);
+            await getSimpleScenarioSelectableTreatmentsAction(selectedScenarioId);
+            await getTreatmentLibraryBySimulationIdAction(selectedScenarioId);
+            await getScenarioPerformanceCurvesAction(selectedScenarioId);
             
             treatmentTabs = [...treatmentTabs, 'Budgets', 'Performance Factor'];
-            getScenarioSimpleBudgetDetailsAction({ scenarioId: selectedScenarioId, }).then(()=> {
-                getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-                    selectScenarioAction({ scenarioId: selectedScenarioId });   
-                });
-            });
-            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioTreatment}).then(response => {
+            await getScenarioSimpleBudgetDetailsAction({ scenarioId: selectedScenarioId, })
+            await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})
+            selectScenarioAction({ scenarioId: selectedScenarioId });   
+              
+            await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioTreatment}).then(response => {
                 if(response.data){
                     setAlertMessageAction("A treatment curve has been added to the work queue")
                 }
             })
         }
-
     }
 
     onMounted(() => mounted());
@@ -734,10 +733,11 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
     
     watch(stateScenarioTreatmentLibrary, () => onStateScenarioTreatmentLibraryChanged())
     function onStateScenarioTreatmentLibraryChanged() {
+
         setParentLibraryName(stateScenarioTreatmentLibrary.value ? stateScenarioTreatmentLibrary.value.id : "None");
         scenarioLibraryIsModified = stateScenarioTreatmentLibrary.value ? stateScenarioTreatmentLibrary.value.isModified : false;
         loadedParentId = stateScenarioTreatmentLibrary.value ? stateScenarioTreatmentLibrary.value.id : uuidNIL;
-        loadedParentName = parentLibraryName;
+        loadedParentName = parentLibraryName.value;
     }
 
     watch(librarySelectItemValue, () => onLibrarySelectItemValueChangedCheckUnsaved())
@@ -1064,7 +1064,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
 
     function setParentLibraryName(libraryId: string) {
         if (libraryId === "None" || libraryId === uuidNIL) {
-            parentLibraryName = "None";
+            parentLibraryName.value = "None";
             return;
         }
         let foundLibrary: TreatmentLibrary = emptyTreatmentLibrary;
@@ -1074,7 +1074,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
             }
         });
         parentLibraryId = foundLibrary.id;
-        parentLibraryName = foundLibrary.name;
+        parentLibraryName.value = foundLibrary.name;
     }
 
     function onUpsertScenarioTreatments() {
@@ -1296,7 +1296,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
                 simpleTreatments.value = clone(stateSimpleScenarioSelectableTreatments.value);
             }
         });
-        parentLibraryName = loadedParentName;
+        parentLibraryName.value = loadedParentName;
         parentLibraryId = loadedParentId;
     }
 

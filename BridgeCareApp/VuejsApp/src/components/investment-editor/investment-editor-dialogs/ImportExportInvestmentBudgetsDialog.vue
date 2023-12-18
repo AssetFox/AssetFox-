@@ -62,7 +62,6 @@ const props = defineProps<{
 const { showDialog } = toRefs(props);
 
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports');}
-async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports');}
 function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImportMutator');}
 let isSuccessfulImport = computed<boolean>(() => store.state.investmentModule.isSuccessfulImport);
 

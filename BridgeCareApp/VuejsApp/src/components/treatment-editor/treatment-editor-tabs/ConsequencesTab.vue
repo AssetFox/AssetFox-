@@ -5,7 +5,8 @@
                 <v-data-table :headers='consequencesGridHeaders' :items='consequencesGridData'
                               id="ConsequencesTab-Consequences-vDataTable"
                               class='elevation-1 fixed-header v-table__overflow'
-                              sort-icon=ghd-table-sort
+                              sort-asc-icon="custom:GhdTableSortAscSvg"
+                              sort-desc-icon="custom:GhdTableSortDescSvg"
                               hide-actions>
                     <template slot='items' slot-scope='props' v-slot:item="props">
                         <tr>
@@ -25,7 +26,7 @@
                                     <v-select v-if="header.key === 'attribute'" :items='attributeSelectItems'
                                         item-title="text"
                                         item-value="value"   
-                                        append-icon=ghd-down
+                                        menu-icon=custom:GhdDownSvg
                                         variant="underlined"
                                         label='Edit'
                                         v-model='props.item.attribute'

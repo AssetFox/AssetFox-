@@ -281,7 +281,7 @@ import {
 } from '@/shared/utils/http-utils';
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
-import { bind, clone } from 'ramda';
+import { bind, clone, isNil } from 'ramda';
 import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { newsAccessDateComparison, getDateOnly, getCurrentDateOnly } from '@/shared/utils/date-utils';
@@ -303,7 +303,7 @@ import NewsDialog from '@/components/NewsDialog.vue'
 import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcement';
 import { useStore } from 'vuex';
 import router from './router';
-import mitt from 'mitt'
+import mitt, { Emitter, EventType } from 'mitt'
 import vuetify from '@/plugins/vuetify';
 import config from '../public/config.json';
 import { getUrl } from './shared/utils/get-url';
@@ -329,7 +329,6 @@ import { getUrl } from './shared/utils/get-url';
     const stateAlertMessage = computed<string>(() => store.state.alertModule.alertMessage);
     const stateAlert = ref<boolean>(store.state.alertModule.alert);
     async function logOutAction(payload?: any): Promise<any> {await store.dispatch('logOut', payload);}
-    async function setIsBusyAction(payload?: any): Promise<any> { await store.dispatch('setIsBusy', payload);}
     async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks', payload);}
     async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes', payload);}
     async function getAnnouncementsAction(payload?: any): Promise<any> { await store.dispatch('getAnnouncements', payload);}
@@ -353,6 +352,9 @@ import { getUrl } from './shared/utils/get-url';
     async function getProductLogoAction(payload?: any): Promise<any> { await store.dispatch('getProductLogo', payload);} 
     async function getInventoryReportsAction(payload?: any): Promise<any> { await store.dispatch('getInventoryReports', payload);} 
     async function setAlertMessageAction(payload?: any): Promise<any> { await store.dispatch('setAlertMessage', payload);} 
+    function incrementProcessCounterAction(payload?: any): void {  store.dispatch('incrementProcessCounter', payload);}
+    function decrementProcessCounterAction(payload?: any): void {  store.dispatch('decrementProcessCounter', payload);}
+    function setProcessCounterAction(payload?: any): void {  store.dispatch('setProcessCounter', payload);}
 
     let drawer: boolean = false;
     let latestNewsDate: string = '0001-01-01';
@@ -385,7 +387,7 @@ import { getUrl } from './shared/utils/get-url';
     let inventoryReportName: string = '';
     let alert: Ref<boolean> = ref(false);
 
-    const $emitter = mitt()
+        const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
     
     created();
 
@@ -487,11 +489,8 @@ import { getUrl } from './shared/utils/get-url';
             }
 
             request.headers = setAuthHeader(request.headers);
-            setIsBusyAction({
-                isBusy: ignoredAPIs.every(
-                    (ignored: string) => request.url!.indexOf(ignored) === -1,
-                ),
-            });
+            if(ignoredAPIs.every((ignored: string) => request.url!.indexOf(ignored) === -1,))
+                incrementProcessCounterAction();
             return request;
         }
 
@@ -510,10 +509,14 @@ import { getUrl } from './shared/utils/get-url';
         // create a success & error handler
         const successHandler = (response: AxiosResponse) => {
             response.headers = setContentTypeCharset(response.headers);
-            setIsBusyAction({ isBusy: false });
+            if(!isNil(response.config.url)){
+                if(ignoredAPIs.every((ignored: string) => response.config.url!.indexOf(ignored) === -1,))
+                    new Promise(_ => setTimeout(_, 10)).then(() => decrementProcessCounterAction()) 
+            }         
             return response;
         };
         const errorHandler = (error: AxiosError) => {
+            
             if (error.request) {
                 error.request.headers = setContentTypeCharset(
                     error.request.headers,
@@ -523,8 +526,8 @@ import { getUrl } from './shared/utils/get-url';
                 error.response.headers = setContentTypeCharset(
                     error.response.headers,
                 );
-            }
-            setIsBusyAction({ isBusy: false });            
+            }    
+            setProcessCounterAction(0);
             unauthorizedError = hasValue(unauthorizedError) ? error.response!.data : "User is not authorized!";
             if (error.response!.status === 500) return;
             

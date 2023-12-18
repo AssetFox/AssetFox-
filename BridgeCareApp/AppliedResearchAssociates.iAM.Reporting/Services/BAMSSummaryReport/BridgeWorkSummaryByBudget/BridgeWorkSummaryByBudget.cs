@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using System;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget
 {
@@ -23,6 +24,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private CommittedProjectCost _committedProjectCost;
         private ReportHelper _reportHelper;
         private readonly IUnitOfWork _unitOfWork;
+        private int TotalSpentRow = 0;
 
         public BridgeWorkSummaryByBudget(IUnitOfWork unitOfWork)
         {
@@ -34,9 +36,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
-            List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount
-            , IReadOnlyCollection<SelectableTreatment> selectableTreatments)
+        public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount
+            , IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
         {
             var startYear = simulationYears[0];
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
@@ -80,9 +81,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                         {
                             var category = TreatmentCategory.Other;
-                            if (map.ContainsKey(section.AppliedTreatment))
+                            var categoryKey = treatmentCategoryLookup[section.AppliedTreatment];
+                            if (map.ContainsKey(categoryKey))
                             {
-                                category = map[section.AppliedTreatment];
+                                category = map[categoryKey];
                             }
                             summaryData.YearlyData.Add(new YearsData
                             {
@@ -159,16 +161,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 var workTypeTotal = new WorkTypeTotal();
                 var amount = totalSpent.Sum(_ => _.amount);
                 if (amount > 0)
-                {
+                {                    
                     _committedProjectCost.FillCostOfCommittedWork(worksheet, currentCell, simulationYears, costForCommittedBudgets.ToList(),
                         committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal);
                     _committedProjectCost.FillCostOfSAPWork(worksheet, currentCell, simulationYears, costForCommittedBudgets.ToList(),
                         committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal);
                     _committedProjectCost.FillCostOfProjectBuilderWork(worksheet, currentCell, simulationYears, costForCommittedBudgets.ToList(),
                         committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal);
+                    _committedProjectCost.AddCostOfWorkOutsideScope(workTypeTotal, committedProjectsForWorkOutsideScope);
 
                     _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget.ToList(), totalBudgetPerYearForCulvert, simulationYears, workTypeTotal);
-
                     _bridgeWorkCost.FillCostOfBridgeWork(worksheet, currentCell, simulationYears, costForBridgeBudgets.ToList(), totalBudgetPerYearForBridgeWork, workTypeTotal);
                 }
 
@@ -196,9 +198,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 InsertWorkTypeTotals(startYear, firstContentRow, worksheet, workTypeTotal);
                 insertTotalAndPercentagePerCategory(worksheet, currentCell, numberOfYears, firstContentRow);
 
-                ExcelHelper.SetCustomFormat(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 6, simulationYears.Count + 3], ExcelHelperCellFormat.NegativeCurrency);
-                ExcelHelper.ApplyColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 6, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
-                ExcelHelper.SetTextColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 6, simulationYears.Count + 2], Color.White);
+                ExcelHelper.SetCustomFormat(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 7, simulationYears.Count + 3], ExcelHelperCellFormat.NegativeCurrency);
+                ExcelHelper.ApplyColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 7, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
+                ExcelHelper.SetTextColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 7, simulationYears.Count + 2], Color.White);
 
                 currentCell.Row += 2;
                 currentCell.Column = 1;
@@ -262,13 +264,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 {
                     var perYearTotalSpent = totalSpent.Find(_ => _.year == startYear + yearTracker);
                     var cellFortotalBudget = yearTracker;
-                    worksheet.Cells[currentCell.Row, currentCell.Column + cellFortotalBudget + 2].Value = budgetData.Value - (decimal)perYearTotalSpent.amount;
+                    var column = currentCell.Column + cellFortotalBudget + 2;
+                    var perYrTotalSpent = Convert.ToDouble(worksheet.Cells[TotalSpentRow, column].Value ?? 0.0);
+                    worksheet.Cells[currentCell.Row, column].Value = budgetData.Value - (decimal)perYrTotalSpent;
 
-                    worksheet.Cells[currentCell.Row + 1, currentCell.Column + cellFortotalBudget + 2].Value =
-                        totalBudgetPerYearForMPMS[perYearTotalSpent.year] / perYearTotalSpent.amount;
+                    worksheet.Cells[currentCell.Row + 1, column].Value =
+                        totalBudgetPerYearForMPMS[perYearTotalSpent.year] / perYrTotalSpent;
 
-                    worksheet.Cells[currentCell.Row + 2, currentCell.Column + cellFortotalBudget + 2].Value = 1 -
-                        totalBudgetPerYearForMPMS[perYearTotalSpent.year] / perYearTotalSpent.amount;
+                    worksheet.Cells[currentCell.Row + 2, column].Value = 1 -
+                        totalBudgetPerYearForMPMS[perYearTotalSpent.year] / perYrTotalSpent;
                     yearTracker++;
                 }
 
@@ -306,7 +310,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     // Text
                     worksheet.Cells[row, startColumnIndex + numberOfYears + 2].Value = $"Percentage Spent on " + worksheet.Cells[row, 1].Value.ToString().ToUpper();
                 }
-                var excelRange = worksheet.Cells[firstContentRow, numberOfYears + 3, firstContentRow + 6, numberOfYears + 3];
+                var excelRange = worksheet.Cells[firstContentRow, numberOfYears + 3, firstContentRow + 7, numberOfYears + 3];
                 ExcelHelper.ApplyColor(excelRange, Color.FromArgb(217, 217, 217));
                 ExcelHelper.ApplyBorder(excelRange);
                 ExcelHelper.SetCustomFormat(worksheet.Cells[firstContentRow, numberOfYears + 4, firstContentRow + 6, numberOfYears + 4], ExcelHelperCellFormat.Percentage);
@@ -409,8 +413,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
             firstContentRow++;
+            foreach (var item in workTypeTotal.WorkOutsideScopeCostPerYear)
+            {
+                FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
+            }
+            firstContentRow++;
             // Add data for BAMS Work Type Totals "Total Spent"
             worksheet.Cells[firstContentRow, 1].Value = BAMSConstants.TotalSpent;
+            TotalSpentRow = firstContentRow;
             foreach (var item in workTypeTotal.TotalCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);

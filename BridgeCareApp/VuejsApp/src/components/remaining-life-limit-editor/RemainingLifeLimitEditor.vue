@@ -12,7 +12,7 @@
                             :items="selectListItems"
                             item-title="text"
                             item-value="value"
-                            append-icon=ghd-down
+                            menu-icon=custom:GhdDownSvg
                             v-model="librarySelectItemValue"
                             variant="outlined"
                             density="compact"
@@ -60,7 +60,8 @@
             :headers="gridHeaders"
             :pagination.sync="pagination"
             :must-sort='true'
-            sort-icon=ghd-table-sort
+            sort-asc-icon="custom:GhdTableSortAscSvg"
+            sort-desc-icon="custom:GhdTableSortDescSvg"
             class="elevation-1 fixed-header v-table__overflow"
             v-model="selectedGridRows"
 
@@ -117,7 +118,7 @@
                                         :items="numericAttributeSelectItems"
                                         item-title="text"
                                         item-value="value"
-                                        append-icon=ghd-down
+                                        menu-icon=custom:GhdDownSvg
                                         label="Select an Attribute"
                                         variant="outlined"
                                         v-model="props.item.attribute"
@@ -415,26 +416,24 @@ import { getUrl } from '@/shared/utils/get-url';
     let loadedParentId: string = "";
     let newLibrarySelection = ref<boolean>(false);
 
-    onMounted(() => {
-            librarySelectItemValue.value = null;
-            getRemainingLifeLimitLibrariesAction().then(() => {
-                if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.RemainingLifeLimit) !== -1) {
-                    selectedScenarioId = $router.currentRoute.value.query.scenarioId;
-                    if (selectedScenarioId === uuidNIL) {
-                        addErrorNotificationAction({
-                            message: 'Found no selected scenario for edit',
-                        });
-                        $router.push('/Scenarios/');
-                    }
-                    hasScenario.value = true;
-                    getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-                        selectScenarioAction({ scenarioId: selectedScenarioId });        
-                        initializePages();  
-                    });                                      
-                }
-            });
-            setAttributesSelectListItems();
-            
+    onMounted(async () => {
+        librarySelectItemValue.value = null;
+        await getRemainingLifeLimitLibrariesAction()
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.RemainingLifeLimit) !== -1) {
+            selectedScenarioId = $router.currentRoute.value.query.scenarioId;
+            if (selectedScenarioId === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Found no selected scenario for edit',
+                });
+                $router.push('/Scenarios/');
+            }
+            hasScenario.value = true;
+            await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})
+            selectScenarioAction({ scenarioId: selectedScenarioId });        
+            await initializePages();                            
+        }
+
+        setAttributesSelectListItems();
     });
 
     onBeforeUnmount(() => {
@@ -940,7 +939,7 @@ import { getUrl } from '@/shared/utils/get-url';
         parentLibraryName = foundLibrary.name;
     }
 
-    function initializePages(){
+    async function initializePages(){
         const request: PagingRequest<RemainingLifeLimit>= {
             page: 1,
             rowsPerPage: 5,
@@ -956,7 +955,7 @@ import { getUrl } from '@/shared/utils/get-url';
             search: ''
         };
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL)
-            RemainingLifeLimitService.getScenarioRemainingLifeLimitPage(selectedScenarioId, request).then(response => {
+            await RemainingLifeLimitService.getScenarioRemainingLifeLimitPage(selectedScenarioId, request).then(response => {
                 initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<RemainingLifeLimit>;

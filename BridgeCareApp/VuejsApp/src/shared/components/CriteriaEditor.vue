@@ -14,6 +14,7 @@
                             <v-col cols = "4">
                                 <v-row style="padding: 20px;">
                                 <v-select
+                                    menu-icon=custom:GhdDownSvg
                                     :items="conjunctionSelectListItems"
                                     class="ghd-control-border ghd-control-text ghd-select"
                                     v-model="selectedConjunction"
@@ -611,12 +612,15 @@ const tab = ref<any>(null);
         resetCriteriaValidationProperties();
 
         if (criteriaEditorData.value.isLibraryContext) {
-            if (!hasValue(subCriteriaClauses)) {
+            //if (!hasValue(subCriteriaClauses)) {
+            if(subCriteriaClauses.value.length === 0) {
                 emit('submitCriteriaEditorResult', {
                     validated: true,
                     criteria: '',
                 });
-            } else if (hasValue(subCriteriaClause)) {
+            }
+             //else if (hasValue(subCriteriaClause)) {
+            else if (subCriteriaClauses.value.length != 0) {
                 emit('submitCriteriaEditorResult', {
                     validated: false,
                     criteria: null,

@@ -19,7 +19,7 @@
                 <v-select id="TreatmentDetailsTab-category-vselect"
                 class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
                     :items="Array.from(treatmentCategoryMap.keys())"
-                    append-icon=ghd-down   
+                    menu-icon=custom:GhdDownSvg  
                     label="Category"
                     variant="outlined"
                     density="compact"
@@ -143,6 +143,7 @@
                 </v-card>
             </v-menu>
             <v-switch
+                color="#2A578D"
                 v-model="TreatmentIsUnSelectable"
                 label="Mark treatment as unselectable by scenario engine"
                 style="margin-left: 0px; margin-top: 10px;"

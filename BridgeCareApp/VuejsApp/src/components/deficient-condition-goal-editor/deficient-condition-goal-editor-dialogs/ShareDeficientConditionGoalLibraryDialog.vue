@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
+  <v-dialog max-width="600px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
         <v-row  justify="space-between" align="center" style="padding: 10px;">
@@ -13,18 +13,33 @@
         <v-data-table id="ShareDeficientConditionGoalLibraryDialog-table-vdatatable" 
                       :headers="deficientConditionGoalLibraryUserGridHeaders"
                       :items="deficientConditionGoalLibraryUserGridRows"
-                      :search="searchTerm">
+                      sort-asc-icon="custom:GhdTableSortAscSvg"
+                      sort-desc-icon="custom:GhdTableSortDescSvg"
+                      :search="searchTerm"
+                      :items-per-page="5"
+                      :items-per-page-options="[
+                        {value: 5, title: '5'},
+                        {value: 10, title: '10'},
+                        {value: 25, title: '25'},
+                    ]">
+          <template v-slot:headers="props">
+            <tr>
+              <th style="font-weight: bold;" v-for="header in deficientConditionGoalLibraryUserGridHeaders" :key="header.title">
+                  {{header.title}}
+              </th>
+            </tr>
+          </template>
           <template slot="items" slot-scope="props" v-slot:item="{item}">
             <tr>
             <td>
               {{ item.username }}
             </td>
             <td>
-              <v-checkbox id="ShareDeficientConditionGoalLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.isShared"
+              <v-checkbox id="ShareDeficientConditionGoalLibraryDialog-isShared-vcheckbox" v-model="item.isShared"
                           @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox id="ShareDeficientConditionGoalLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" label="Can Modify" v-model="item.canModify"/>
+              <v-checkbox id="ShareDeficientConditionGoalLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" v-model="item.canModify"/>
             </td>
           </tr>
           </template>

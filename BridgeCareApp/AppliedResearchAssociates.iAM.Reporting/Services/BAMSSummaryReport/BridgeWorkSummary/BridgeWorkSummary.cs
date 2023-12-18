@@ -8,6 +8,9 @@ using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using static HotChocolate.ErrorCodes;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -39,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
             List<int> simulationYears, WorkSummaryModel workSummaryModel, Dictionary<string, Budget> yearlyBudgetAmount,
-            IReadOnlyCollection<SelectableTreatment> selectableTreatments)
+            IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
         {
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
@@ -60,17 +63,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             // and non-culvert bridges
             var costPerBPNPerYear = new Dictionary<int, Dictionary<string, decimal>>();
             var costAndCountPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
-            var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource)>>();
+            var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>>();
             var countForCompletedProject = new Dictionary<int, Dictionary<string, int>>();
             var countForCompletedCommittedProject = new Dictionary<int, Dictionary<string, int>>();
-
             FillDataToUseInExcel(reportOutputData, costPerBPNPerYear, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj,
-                countForCompletedProject, countForCompletedCommittedProject);
+                countForCompletedProject, countForCompletedCommittedProject, treatmentCategoryLookup, committedProjectsForWorkOutsideScope);
 
             #endregion Initial work to set some data, which will be used throughout the Work summary TAB
 
             _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj,
-                simulationYears, yearlyBudgetAmount, costPerBPNPerYear, simulationTreatments);
+                simulationYears, yearlyBudgetAmount, costPerBPNPerYear, simulationTreatments, committedProjectsForWorkOutsideScope);
 
             _bridgesCulvertsWorkSummary.FillBridgesCulvertsWorkSummarySections(worksheet, currentCell, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj, simulationYears, simulationTreatments);
             _projectsCompletedCount.FillProjectCompletedCountSection(worksheet, currentCell, countForCompletedProject, countForCompletedCommittedProject, simulationYears, simulationTreatments);
@@ -100,15 +102,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private void FillDataToUseInExcel(
      SimulationOutput reportOutputData, Dictionary<int, Dictionary<string, decimal>> costPerBPNPerYear,
      Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costAndCountPerTreatmentPerYear,
-     Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource)>> yearlyCostCommittedProj,
+     Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
      Dictionary<int, Dictionary<string, int>> countForCompletedProject,
-     Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject)
+     Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject,
+     Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
         {
             var isInitialYear = true;
             foreach (var yearData in reportOutputData.Years)
             {
                 costAndCountPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int bridgeCount)>());
-                yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource)>();
+                yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>();
                 costPerBPNPerYear.Add(yearData.Year, new Dictionary<string, decimal>());
                 countForCompletedProject.Add(yearData.Year, new Dictionary<string, int>());
                 countForCompletedCommittedProject.Add(yearData.Year, new Dictionary<string, int>());
@@ -122,34 +125,42 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         costPerBPNPerYear[yearData.Year].Add(busPlanNetwork, 0);
                     }
 
+                    var appliedTreatment = section.AppliedTreatment;
+                    var treatmentCategory = treatmentCategoryLookup[appliedTreatment];
                     if (section.TreatmentCause == TreatmentCause.CommittedProject &&
-                        section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment)
+                        appliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                     {
                         var commitedCost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
-
-                        if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(section.AppliedTreatment))
+                        if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
                         {
-                            yearlyCostCommittedProj[yearData.Year].Add(section.AppliedTreatment, (commitedCost, 1, section.ProjectSource));
+                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (commitedCost, 1, section.ProjectSource, treatmentCategory));
                         }
                         else
                         {
-                            var currentRecord = yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment];
+                            var currentRecord = yearlyCostCommittedProj[yearData.Year][appliedTreatment];
                             var treatmentCost = currentRecord.treatmentCost + commitedCost;  
                             var bridgeCount = currentRecord.bridgeCount + 1;  
                             var projectSource = currentRecord.projectSource;
-                            yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment] = (treatmentCost, bridgeCount, projectSource);
+                            yearlyCostCommittedProj[yearData.Year][appliedTreatment] = (treatmentCost, bridgeCount, projectSource, treatmentCategory);
                         }
                  
                         costPerBPNPerYear[yearData.Year][busPlanNetwork] += commitedCost;
 
                         // Adding count for completed committed project
-                        if (!countForCompletedCommittedProject[yearData.Year].ContainsKey(section.AppliedTreatment))
+                        if (!countForCompletedCommittedProject[yearData.Year].ContainsKey(appliedTreatment))
                         {
-                            countForCompletedCommittedProject[yearData.Year].Add(section.AppliedTreatment, 1);
+                            countForCompletedCommittedProject[yearData.Year].Add(appliedTreatment, 1);
                         }
                         else
                         {
-                            countForCompletedCommittedProject[yearData.Year][section.AppliedTreatment] += 1;
+                            countForCompletedCommittedProject[yearData.Year][appliedTreatment] += 1;
+                        }
+
+                        // Remove from committedProjectsForWorkOutsideScope
+                        var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Treatment == appliedTreatment && _.Year == yearData.Year && _.ProjectSource.ToString() == section.ProjectSource && _.Category.ToString() == treatmentCategory);
+                        if (toRemove != null)
+                        {
+                            committedProjectsForWorkOutsideScope.Remove(toRemove);
                         }
 
                         continue;

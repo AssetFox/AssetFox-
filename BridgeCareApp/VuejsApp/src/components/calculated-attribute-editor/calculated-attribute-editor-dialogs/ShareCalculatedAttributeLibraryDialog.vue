@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
+  <v-dialog max-width="600px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
         <v-row justify="space-between" align="center" style="margin-top: 10px;">
@@ -13,19 +13,33 @@
         <v-data-table id="ShareCalculatedAttributeLibraryDialog-table-vdatatable"
                       :headers="shareCalculatedAttributeLibraryUserGridHeaders"
                       :items="shareCalculatedAttributeLibraryUserGridRows"
-                      sort-icon=ghd-table-sort
-                      :search="searchTerm">
+                      sort-asc-icon="custom:GhdTableSortAscSvg"
+                      sort-desc-icon="custom:GhdTableSortDescSvg"
+                      :search="searchTerm"
+                      :items-per-page="5"
+                      :items-per-page-options="[
+                        {value: 5, title: '5'},
+                        {value: 10, title: '10'},
+                        {value: 25, title: '25'},
+                    ]">
+          <template v-slot:headers="props">
+            <tr>
+              <th style="font-weight: bold;" v-for="header in shareCalculatedAttributeLibraryUserGridHeaders" :key="header.title">
+                  {{header.title}}
+              </th>
+            </tr>
+          </template>
           <template slot="items" slot-scope="props" v-slot:item="{item}">
             <tr>
             <td>
               {{ item.username }}
             </td>
             <td>
-              <v-checkbox label="Is Shared" v-model="item.isShared" id="ShareCalculatedAttributeLibraryDialog-isShared-vcheckbox"
+              <v-checkbox v-model="item.isShared" id="ShareCalculatedAttributeLibraryDialog-isShared-vcheckbox"
                           @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!dialogData.showDialog" label="Can Modify" v-model="item.canModify" id="ShareCalculatedAttributeLibraryDialog-canModify-vcheckbox"/>
+              <v-checkbox :disabled="!dialogData.showDialog" v-model="item.canModify" id="ShareCalculatedAttributeLibraryDialog-canModify-vcheckbox"/>
             </td>
           </tr>
           </template>

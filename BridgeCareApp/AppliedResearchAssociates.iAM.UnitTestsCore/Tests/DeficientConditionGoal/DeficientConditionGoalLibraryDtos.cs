@@ -15,6 +15,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DeficientConditionGo
             var dto = new DeficientConditionGoalLibraryDTO
             {
                 Id = resolveId,
+                Name = "Deficient condition goal library",
             };
             return dto;
         }

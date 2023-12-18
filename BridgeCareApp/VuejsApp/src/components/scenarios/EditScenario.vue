@@ -55,6 +55,16 @@
         </v-row>
         <Alert :dialogData="alertData" @submit="onSubmitAlertResult" />
 
+        <AlertPreChecks
+            :dialogDataPreChecks="confirmAnalysisPreCheckAlertData"
+            @submit="onConfirmAnalysisPreCheckAlertSubmit"
+        />
+
+        <AlertWithButtons
+            :dialogDataWithButtons="confirmAnalysisRunAlertData"
+            @submit="onConfirmAnalysisRunAlertSubmit"
+        />
+
         <Alert
             :dialogData="alertDataForDeletingCommittedProjects"
             @submit="onDeleteCommittedProjectsSubmit"
@@ -79,7 +89,9 @@ import { Network } from '@/shared/models/iAM/network';
 import FileDownload from 'js-file-download';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
-import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
+import { AlertData, AlertDataWithButtons, AlertPreChecksData, emptyAlertData, emptyAlertDataWithButtons, emptyAlertPreChecksData } from '@/shared/models/modals/alert-data';
+import AlertPreChecks from '@/shared/modals/AlertPreChecks.vue';
+import AlertWithButtons from '@/shared/modals/AlertWithButtons.vue';
 import Alert from '@/shared/modals/Alert.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
@@ -100,6 +112,7 @@ import CommittedProjectSvg from '@/shared/icons/CommittedProjectSvg.vue';
 import ReportsSvg from '@/shared/icons/ReportsSvg.vue';
 import { useStore } from 'vuex'; 
 import { useRouter } from 'vue-router'; 
+import ScenarioService from '@/services/scenario.service';
 
     let store = useStore(); 
     const router = useRouter(); 
@@ -128,6 +141,12 @@ import { useRouter } from 'vue-router';
     let simulationName: string;
     let networkName: string = '';
     let selectedScenario: Scenario = clone(emptyScenario);
+    let runAnalysisScenario: Scenario = clone(emptyScenario);
+    let preCheckMessages: any;
+    let preCheckHeading: string;
+    let preCheckStatus: any;
+    let confirmAnalysisRunAlertData= ref(clone(emptyAlertDataWithButtons));
+    let confirmAnalysisPreCheckAlertData= ref(clone(emptyAlertPreChecksData));
     let navigationTabs: NavigationTab[] = [
         {
             tabName: 'Analysis Method',
@@ -404,15 +423,115 @@ import { useRouter } from 'vue-router';
      * Shows the Alert
      */
     function onShowRunSimulationAlert() {
-        alertData.value = {
+        confirmAnalysisRunAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
             message:
                 'Only one simulation can be run at a time. The model run you are about to queue will be ' +
                 'executed in the order in which it was received.',
+            buttons: []
         };
     }
+
+    async function onConfirmAnalysisRunAlertSubmit(submit: string) {
+        confirmAnalysisRunAlertData.value.showDialog = false;
+        confirmAnalysisPreCheckAlertData.value = clone(emptyAlertPreChecksData);
+        runAnalysisScenario = selectedScenario;
+
+        if (submit == "pre-checks") {
+            preCheckMessages = [];
+                if (submit && selectedScenarioId !== getBlankGuid()) 
+                {
+                    await ScenarioService.upsertValidateSimulation(networkId, selectedScenarioId).then((response: AxiosResponse) => {
+                        if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                            addSuccessNotificationAction({message: "Simulation pre-checks completed",});
+                            if(response.data.length > 0)
+                            {
+                                preCheckStatus = response.data[0].status;
+                                for(const item of response.data)
+                                {
+                                    if (item.message != '') {
+                                    preCheckMessages += item.message;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                preCheckStatus = 3;
+                            }
+                        }
+                    });
+
+                }
+                secondRunAnalysisModal();
+        }
+        else if(submit == "continue") {
+            if (submit && selectedScenarioId !== getBlankGuid()) {
+                runSimulationAction({
+                    networkId: networkId,
+                    scenarioId: selectedScenarioId,
+                }).then(() => (selectedScenario = clone(emptyScenario)));
+            }
+        }
+
+    }
+
+    function secondRunAnalysisModal() {
+        confirmAnalysisPreCheckAlertData.value = clone(emptyAlertPreChecksData);
+
+            if(preCheckStatus == 0)
+            {
+                preCheckHeading = 'Error';
+            }
+            else if(preCheckStatus == 1)
+            {
+                preCheckHeading = 'Warning';
+            }
+            else if(preCheckStatus == 2)
+            {
+                preCheckHeading = 'Information';
+            }
+            else if(preCheckStatus == 3)
+            {
+                preCheckHeading = 'Success';
+                preCheckMessages += 'No warnings have been returned.' + 'No errors have been returned';
+            }
+
+            if(preCheckStatus == 0)
+            {
+                (selectedScenario = clone(emptyScenario));
+                confirmAnalysisPreCheckAlertData.value = {
+                showDialog: true,
+                heading: (preCheckHeading),
+                choice: false,
+                message:(preCheckMessages),
+                }
+            }
+            else{
+                (selectedScenario = clone(emptyScenario));
+                confirmAnalysisPreCheckAlertData.value = {
+                showDialog: true,
+                heading: (preCheckHeading),
+                choice: true,
+                message:(preCheckMessages),
+                }
+            }
+    }
+
+    function onConfirmAnalysisPreCheckAlertSubmit(submit: boolean) {
+        confirmAnalysisPreCheckAlertData.value = clone(emptyAlertPreChecksData);
+
+        selectedScenario = runAnalysisScenario;
+
+        if (submit && selectedScenarioId !== getBlankGuid()) {
+            runSimulationAction({
+                networkId: networkId,
+                scenarioId: selectedScenarioId,
+            }).then(() => (selectedScenario = clone(emptyScenario)));
+        }
+    }
+
 
     /**
      * Takes in a boolean parameter from the AppPopupModal to determine if a scenario's simulation should be executed

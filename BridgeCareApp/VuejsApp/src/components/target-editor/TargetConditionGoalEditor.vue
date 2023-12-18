@@ -11,6 +11,7 @@
                         id="TargetConditionGoalEditor-SelectLibrary-select"
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items="librarySelectItems"
+                        menu-icon=custom:GhdDownSvg
                         item-title="text"
                         item-value="value"
                         v-model="librarySelectItemValue"
@@ -78,7 +79,8 @@
                     v-model:items-per-page="pagination.rowsPerPage"
                     @update:options="onPaginationChanged"
                     class='v-table__overflow ghd-table'
-                    sort-icon=ghd-table-sort
+                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                    sort-desc-icon="custom:GhdTableSortDescSvg"
                     item-key="id"
                     show-select
                     return-object
@@ -95,7 +97,7 @@
                             </td>
                             <td v-for="header in targetConditionGoalGridHeaders">
                                 <editDialog v-if="header.key !== 'criterionLibrary' && header.key !== 'actions'"
-                                    :return-value.sync="item.item[header.key]"
+                                    v-model:return-value.sync="item.item[header.key]"
                                     @save="onEditTargetConditionGoalProperty(item.item,header.key,item.item[header.key])"
                                     size="large"
                                     lazy>
@@ -117,7 +119,7 @@
                                         <v-select v-if="header.key === 'attribute'"
                                             id="TargetConditionGoalEditor-editTargetConditionGoalAttribute-vselect"
                                             :items="numericAttributeNames"
-                                            append-icon=ghd-down
+                                            menu-icon=custom:GhdDownSvg
                                             label="Select an Attribute"
                                             variant="outlined"
                                             v-model="item.item[header.key]"
@@ -182,6 +184,8 @@
         <v-col cols="12">
             <v-btn flat
                 v-show="hasSelectedLibrary || hasScenario"
+                :disabled="selectedTargetConditionGoalIds.length === 0"
+                variant="text"
                 id="TargetConditionGoalEditor-deleteSelected-vbtn"
                 class='ghd-blue ghd-button'
                 @click="onRemoveTargetConditionGoals"> 
@@ -495,10 +499,9 @@ import { getUrl } from '@/shared/utils/get-url';
             }
 
             hasScenario.value = true;
-            getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-                selectScenarioAction({ scenarioId: selectedScenarioId });     
-                initializePages();
-            });                                        
+            await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})
+            selectScenarioAction({ scenarioId: selectedScenarioId });     
+            await initializePages();                                   
         }
     });            
     onBeforeUnmount(()=> beforeDestroy());
@@ -961,7 +964,7 @@ import { getUrl } from '@/shared/utils/get-url';
         parentLibraryName.value = foundLibrary.name;
     }
 
-    function initializePages(){
+    async function initializePages(){
         const request: PagingRequest<TargetConditionGoal>= {
             page: 1,
             rowsPerPage: 5,
@@ -977,7 +980,7 @@ import { getUrl } from '@/shared/utils/get-url';
             search: ''
         };
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL)
-            TargetConditionGoalService.getScenarioTargetConditionGoalPage(selectedScenarioId, request).then(response => {
+            await TargetConditionGoalService.getScenarioTargetConditionGoalPage(selectedScenarioId, request).then(response => {
                 initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<TargetConditionGoal>;

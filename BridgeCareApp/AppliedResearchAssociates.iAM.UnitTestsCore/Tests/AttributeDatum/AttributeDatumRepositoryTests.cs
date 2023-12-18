@@ -29,13 +29,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AttributeDatum
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, assets, networkId, keyAttributeId);
             var assetIds = new List<Guid> { assetId };
             var attributeIds = new List<Guid> { keyAttributeId };
-            var attributeDtos = new List<AttributeDTO> { attributeDto };
-            var datumId = Guid.NewGuid();
-            var location = Locations.Section("location");
-            var domainAttribute = AttributeDtoDomainMapper.ToDomain(attributeDto, "");
-            var datum = new AttributeDatum<string>(datumId, domainAttribute, "where", location, DateTime.Now);
-            asset.AssignedData.Add(datum);
-            TestHelper.UnitOfWork.AttributeDatumRepo.AddAssignedData(assets, attributeDtos);
+            var datumId = AttributeDatumTestSetup.AssignStringAttributeDatum(attributeDto, asset);
 
             var attributeData = TestHelper.UnitOfWork.AttributeDatumRepo.GetAllInNetwork(
                 assetIds, attributeIds);
@@ -50,5 +44,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.AttributeDatum
             };
             ObjectAssertions.Equivalent(expectedAttributeDatum, attributeDatum);
         }
+
+
     }
 }

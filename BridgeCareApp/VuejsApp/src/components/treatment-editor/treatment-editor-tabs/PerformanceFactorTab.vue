@@ -4,7 +4,8 @@
             <div class='factor-data-table'>
                 <v-data-table :headers='factorGridHeaders' :items='factorGridData'
                               class='elevation-1 fixed-header v-table__overflow'
-                              sort-icon=ghd-table-sort
+                              sort-asc-icon="custom:GhdTableSortAscSvg"
+                              sort-desc-icon="custom:GhdTableSortDescSvg"
                               hide-actions>
                     <template slot='items' slot-scope='props' v-slot:item="props">
                         <tr>
@@ -22,7 +23,7 @@
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                                     <template v-slot:input>
                                         <v-select v-if="header.key === 'attribute'" variant="underlined" :items='attributeSelectItems'
-                                                append-icon=ghd-down
+                                                menu-icon=custom:GhdDownSvg
                                                 label='Edit'
                                                 item-title="text"
                                                 item-value="value" 

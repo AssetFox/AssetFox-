@@ -10,6 +10,7 @@
                                   :items="librarySelectItems"
                                   append-icon="ghd-down"
                                   variant="outlined"
+                                  menu-icon=custom:GhdDownSvg
                                   v-model="librarySelectItemValue"
                                   item-title="text" 
                                     item-value="value" 
@@ -23,7 +24,7 @@
                     <v-row align-end>
                         <v-text-field
                                     id="CalculatedAttribute-search-textField"
-                                    prepend-inner-icon=ghd-search                                                                  
+                                    prepend-inner-icon=custom:GhdSearchSvg                                                           
                                     placeholder="Search Calculated Attribute"
                                     single-line
                                     v-model="gridSearchTerm"
@@ -69,6 +70,7 @@
                 <v-row column style="float:left; width: 100%; margin-left: 10px">
                     <v-select
                         id="CalculatedAttribute-Attribute-select"   
+                        menu-icon=custom:GhdDownSvg
                         :items="attributeSelectItems"
                         append-icon=ghd-down
                         label="Attribute"
@@ -86,6 +88,7 @@
                 <v-col cols = "6">
                 <v-row column style="float:right; width: 100%">
                     <v-select
+                        menu-icon=custom:GhdDownSvg
                         id="CalculatedAttribute-Timing-select"
                         :items="attributeTimingSelectItems"
                         label="Timing"
@@ -140,7 +143,8 @@
                 :items="selectedGridItem"
                 :pagination.sync="pagination"
                 class="v-table__overflow ghd-table"
-                sort-icon=ghd-table-sort
+                sort-asc-icon="custom:GhdTableSortAscSvg"
+                sort-desc-icon="custom:GhdTableSortDescSvg"
                 item-key="calculatedAttributeLibraryEquationId"                            
                 :items-length="totalItems"
                 :items-per-page-options="[
@@ -377,7 +381,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
-import mitt from 'mitt';
+import mitt, { Emitter, EventType } from 'mitt';
 import { computed } from 'vue';
 import { getUrl } from '@/shared/utils/get-url';
 import { TimelineEmits } from 'primevue/timeline';
@@ -518,34 +522,31 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     ];
     
     const $router = useRouter();
-    const $emitter = mitt();
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
     
-    onMounted(()=> {
+    onMounted(async ()=> {
         librarySelectItemValue.value = '';
-            attributeSelectItemValue.value = '';
-
-            getCalculatedAttributesAction().then( () => {
-                getCalculatedAttributeLibrariesAction().then(() => {
-                    setAttributeSelectItems()
-                    setAttributeTimingSelectItems();
-                    if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CalculatedAttribute) !== -1) {
-                        
-                            selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
-                        if (selectedScenarioId === uuidNIL) {
-                            addErrorNotificationAction({
-                                message: 'Unable to identify selected scenario.',
-                            });
-                            $router.push('/Scenarios/');
-                        }
-                        hasScenario.value = true;
-                        getScenarioCalculatedAttributeAction(selectedScenarioId).then(()=> {
-                            getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-                                selectScenarioAction({ scenarioId: selectedScenarioId });        
-                            });
-                        });
-                    }
-                });                
-            });
+        attributeSelectItemValue.value = '';
+        await getCalculatedAttributesAction()
+        await getCalculatedAttributeLibrariesAction()
+        setAttributeSelectItems()
+        setAttributeTimingSelectItems();
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CalculatedAttribute) !== -1) {
+            
+                selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
+            if (selectedScenarioId === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Unable to identify selected scenario.',
+                });
+                $router.push('/Scenarios/');
+            }
+            hasScenario.value = true;
+            await getScenarioCalculatedAttributeAction(selectedScenarioId)
+            await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})   
+            selectScenarioAction({ scenarioId: selectedScenarioId });        
+            
+        
+        }           
     });
 
     onBeforeUnmount(()=>beforeDestroy())

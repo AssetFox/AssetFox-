@@ -14,7 +14,6 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Attributes
             var config = TestConfiguration.Get();
             var connectionString = TestConnectionStrings.BridgeCare(config);
             var unitOfWork = UnitOfWorkSetup.New(config);
-            DatabaseResetter.EnsureDatabaseExists(unitOfWork);
             var dataSource = DataSourceTestSetup.DtoForSqlDataSourceInDb(unitOfWork, connectionString);
             var attribute = AttributeConnectionAttributes.String(connectionString, dataSource.Id);
             unitOfWork.AttributeRepo.UpsertAttributes(attribute);

@@ -12,7 +12,8 @@
             <v-data-table
                 :headers="cashFlowRuleDistributionGridHeaders"
                 :items="cashFlowDistributionRuleGridData"
-                sort-icon=ghd-table-sort
+                sort-asc-icon="custom:GhdTableSortAscSvg"
+                sort-desc-icon="custom:GhdTableSortDescSvg"
                 hide-actions
                 class="ghd-table v-table__overflow">
                 <template v-slot:item ="item" slot="items" slot-scope="props">
@@ -282,6 +283,7 @@ function onEditSelectedLibraryListData(data: any, property: string) {
         const newCashFlowDistributionRule: CashFlowDistributionRule = modifyNewCashFlowDistributionRuleDefaultValues();
         processedGridData.value.push(clone(newCashFlowDistributionRule))
         cashFlowDistributionRuleGridData.value.push(newCashFlowDistributionRule);
+        hasUnsavedChanges.value = true;
     }
 
     function modifyNewCashFlowDistributionRuleDefaultValues() {

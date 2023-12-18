@@ -1,16 +1,28 @@
 const state = {
-    isBusy: false
+    processCounter: 0
 };
 
 const mutations = {
-    isBusyMutator(state: any, isBusy: boolean) {
-        state.isBusy = isBusy;
+    incrementProcessCounterMutator(state: any){
+        state.processCounter++
+    },
+    decrementProcessCounterMutator(state: any){
+        state.processCounter--
+    },
+    setProcessCounterMutator(state: any, count: number){
+        state.processCounter = count;
     }
 };
 
 const actions = {
-    setIsBusy({commit}: any, payload: any) {
-        commit('isBusyMutator', payload.isBusy);
+    incrementProcessCounter({commit}: any){
+        commit('incrementProcessCounterMutator');
+    },
+    decrementProcessCounter({commit}: any){
+        commit('decrementProcessCounterMutator');
+    },
+    setProcessCounter({commit}: any, count: number){
+        commit('setProcessCounterMutator', count)
     }
 };
 

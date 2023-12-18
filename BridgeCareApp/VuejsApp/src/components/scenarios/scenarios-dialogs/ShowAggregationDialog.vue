@@ -25,7 +25,8 @@
                     <div class="network-min-width">
                         <v-data-table
                             :headers="networkGridHeaders"
-                            sort-icon=$vuetify.icons.ghd-table-sort
+                            sort-asc-icon="custom:GhdTableSortAscSvg"
+                            sort-desc-icon="custom:GhdTableSortDescSvg"
                             :items="networks"
                             :items-per-page="5"
                             class="elevation-1"
@@ -159,10 +160,10 @@ import { any, clone, find, findIndex, isNil, propEq, update } from 'ramda';
 import { Hub } from '@/connectionHub';
 import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, inject, computed } from 'vue'; 
 import { useStore } from 'vuex'; 
-import mitt from 'mitt';
+import mitt, { Emitter, EventType } from 'mitt';
 
     let store = useStore();     
-    const $emitter = mitt()
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
 
     const props = defineProps<{dialogData: any}>();
     let showDialogComputed = computed(() => props.dialogData.showDialog);

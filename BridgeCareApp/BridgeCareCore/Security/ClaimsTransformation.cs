@@ -51,24 +51,21 @@ namespace BridgeCareCore.Security
 
             if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.B2C)
             {
-                // Read user name
-                var userNameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname";
-                var userName = principal.Claims.FirstOrDefault(t => t.Type == userNameClaimType);
-                var userNameValue = userName?.Value;
+                var nameidentifierClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
+                var nameidentifier = principal.Claims.FirstOrDefault(t => t.Type == nameidentifierClaimType);
+                var cacheKey = nameidentifier?.Value;
                 lock (cache)
                 {
                     try
                     {
-                        if (userNameValue != null && !cache.ContainsKey(userNameValue) || cache[userNameValue].LastRefreshTime < DateTime.Now.AddDays(-1))
+                        if (cacheKey != null && !cache.ContainsKey(cacheKey) || cache[cacheKey].LastRefreshTime < DateTime.Now.AddDays(-1))
                         {
                             // Read group name(s) set in Azure B2C(that will be IP role name(s)
                             var groupNames = new List<string>();
                             var groupClaimType = "group";
                             if (!principal.HasClaim(claim => claim.Type == groupClaimType))
-                            {
-                                var nameidentifierClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
-                                var nameidentifier = principal.Claims.FirstOrDefault(t => t.Type == nameidentifierClaimType);
-                                groupNames = _graphApiClientService.GetGraphApiUserMemberGroup(nameidentifier.Value)?.Result;
+                            {                                
+                                groupNames = _graphApiClientService.GetGraphApiUserMemberGroup(cacheKey)?.Result;
                             }
                             if (groupNames.Count == 0)
                             {
@@ -79,16 +76,16 @@ namespace BridgeCareCore.Security
                             var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRolesFromMapper);
                             var identity = _roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper);
 
-                            if (!cache.ContainsKey(userNameValue))
+                            if (!cache.ContainsKey(cacheKey))
                             {
-                                cache.Add(userNameValue, new UserCache { Identity = identity, LastRefreshTime = DateTime.Now });
+                                cache.Add(cacheKey, new UserCache { Identity = identity, LastRefreshTime = DateTime.Now });
                             }
                             else
                             {
-                                if (cache[userNameValue].LastRefreshTime < DateTime.Now.AddDays(-1))
+                                if (cache[cacheKey].LastRefreshTime < DateTime.Now.AddDays(-1))
                                 {
-                                    cache[userNameValue].Identity = identity;
-                                    cache[userNameValue].LastRefreshTime = DateTime.Now;
+                                    cache[cacheKey].Identity = identity;
+                                    cache[cacheKey].LastRefreshTime = DateTime.Now;
                                 }
                             }
                         }
@@ -99,9 +96,9 @@ namespace BridgeCareCore.Security
                         _log.Error("ClaimsTransformation Error: " + e.StackTrace);
                     }
                 }
-                if (userNameValue != null)
+                if (cacheKey != null)
                 {
-                    principal.AddIdentity(cache[userNameValue].Identity);
+                    principal.AddIdentity(cache[cacheKey].Identity);
                 }
             }
             return principal;

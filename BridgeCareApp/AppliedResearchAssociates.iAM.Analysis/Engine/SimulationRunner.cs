@@ -80,7 +80,8 @@ public sealed class SimulationRunner
     {
 #if dump_analysis_input
         var inputDumpPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "Downloads",
             "iAM analysis dumps",
             $"{DateTime.Now:yyyy-MM-dd-HHmmssfff} iAM analysis input dump.json");
 
@@ -267,7 +268,8 @@ public sealed class SimulationRunner
 
 #if dump_analysis_output
         var outputDumpPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "Downloads",
             "iAM analysis dumps",
             $"{DateTime.Now:yyyy-MM-dd-HHmmssfff} iAM analysis output dump.json");
 
@@ -522,7 +524,7 @@ public sealed class SimulationRunner
                             workingContext,
                             option.CandidateTreatment,
                             year,
-                            context => context.CurrentPrioritizedAmount ?? context.CurrentAmount);
+                            context => context.CurrentPriorityAmount ?? context.CurrentAmount);
 
                         var considerationDetail = workingContext.Detail.TreatmentConsiderations.Last();
                         considerationDetail.BudgetPriorityLevel = priority.PriorityLevel;
@@ -639,10 +641,10 @@ public sealed class SimulationRunner
             static double getBenefitImprovement(AssetContext context, Treatment treatment)
             {
                 var copyOfContext = new AssetContext(context);
-                var benefitBeforeTreatment = copyOfContext.GetBenefit(false);
+                var beforeTreatment = copyOfContext.GetBenefitData();
                 copyOfContext.ApplyTreatmentConsequences(treatment);
-                var benefitAfterTreatment = copyOfContext.GetBenefit(false);
-                return benefitAfterTreatment - benefitBeforeTreatment;
+                var afterTreatment = copyOfContext.GetBenefitData();
+                return afterTreatment.lruBenefit - beforeTreatment.lruBenefit;
             }
 
             if (feasibleTreatments.Count > 0)
@@ -799,7 +801,7 @@ public sealed class SimulationRunner
         var treatmentConsideration = new TreatmentConsiderationDetail(treatment.Name);
 
         treatmentConsideration.BudgetsAtDecisionTime.AddRange(
-            BudgetContexts.Select(context => new BudgetDetail(context.Budget, context.CurrentAmount)));
+            BudgetContexts.Select(context => new BudgetDetail(context.Budget, getAvailableAmount(context))));
 
         treatmentConsideration.BudgetUsages.AddRange(BudgetContexts.Select(budgetContext => new BudgetUsageDetail(budgetContext.Budget.Name)
         {
@@ -900,17 +902,13 @@ public sealed class SimulationRunner
 
                     Dictionary<BudgetContext, decimal> firstYearFractionPerBudget = null;
 
-                    foreach (var (futureYearConsideration, futureYearCost, futureYear) in Zip.Short(considerationPerYear, costPerYear, Static.Count(year)))
+                    foreach (var (cashFlowYearConsideration, cashFlowYearCost, cashFlowYear)
+                        in Zip.Short(considerationPerYear, costPerYear, Static.Count(year)))
                     {
-                        foreach (var budgetContext in workingBudgetContexts)
-                        {
-                            budgetContext.SetYear(futureYear);
-                        }
-
-                        var workingBudgetDetails = futureYearConsideration.BudgetUsages.Where(detail => applicableBudgetNames.Contains(detail.BudgetName));
+                        var workingBudgetDetails = cashFlowYearConsideration.BudgetUsages.Where(detail => applicableBudgetNames.Contains(detail.BudgetName));
                         var workingBudgets = workingBudgetContexts.Zip(workingBudgetDetails, BudgetInfo.Create).ToList();
 
-                        var remainingYearCost = futureYearCost;
+                        var remainingYearCost = cashFlowYearCost;
 
                         void addFutureCostAllocator(decimal cost, BudgetContext workingBudgetContext)
                         {
@@ -918,7 +916,7 @@ public sealed class SimulationRunner
                             workingBudgetContext.AllocateCost(cost);
 
                             var originalBudgetContext = originalBudgetContextPerWorkingBudgetContext[workingBudgetContext];
-                            futureCostAllocators.Add(() => originalBudgetContext.AllocateCost(cost, futureYear));
+                            futureCostAllocators.Add(() => originalBudgetContext.AllocateCost(cost, cashFlowYear));
                         }
 
                         tryToAllocateCost(
@@ -938,11 +936,19 @@ public sealed class SimulationRunner
                             return ReasonAgainstCashFlow.FundingIsNotAvailable;
                         }
 
-                        if (futureYear == year && Simulation.AnalysisMethod.ShouldRestrictCashFlowToFirstYearBudgets)
+                        if (cashFlowYear == year && Simulation.AnalysisMethod.ShouldRestrictCashFlowToFirstYearBudgets)
                         {
                             firstYearFractionPerBudget = workingBudgets
                                 .Where(info => info.UsageDetail.Status == BudgetUsageStatus.CostCovered)
-                                .ToDictionary(info => info.Context, info => info.UsageDetail.CoveredCost / futureYearCost);
+                                .ToDictionary(info => info.Context, info => info.UsageDetail.CoveredCost / cashFlowYearCost);
+                        }
+
+                        if (cashFlowYear < lastYearOfCashFlow)
+                        {
+                            foreach (var budgetContext in workingBudgetContexts)
+                            {
+                                budgetContext.MoveToNextYear();
+                            }
                         }
                     }
 

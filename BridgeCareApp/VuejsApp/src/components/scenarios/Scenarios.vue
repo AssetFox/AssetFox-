@@ -32,7 +32,7 @@
                                                 hide-details
                                                 single-line
                                                 v-model="searchMine"
-                                                prepend-inner-icon=ghd-search 
+                                                prepend-inner-icon=custom:GhdSearchSvg
                                                 variant="outlined"
                                                 density="compact"
                                                 clearable
@@ -99,6 +99,8 @@
                                     v-model:sort-by="userScenariosPagination.sort"
                                     v-model:page="userScenariosPagination.page"
                                     v-model:items-per-page="userScenariosPagination.rowsPerPage"
+                                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                                    sort-desc-icon="custom:GhdTableSortDescSvg"
                                     item-value="name"
                                     :hover="true"
                                     @update:options="onUserScenariosPagination"
@@ -248,6 +250,7 @@
                                                 variant="outlined"
                                                 hide-details
                                                 single-line
+                                                prepend-inner-icon=custom:GhdSearchSvg
                                                 v-model="searchShared"
                                                 clearable
                                                 @click:clear="onSharedClearClick()"
@@ -302,6 +305,8 @@
                                     :hover="true"
                                     v-model:sort-by="sharedScenariosPagination.sort"
                                     v-model:page="sharedScenariosPagination.page"
+                                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                                    sort-desc-icon="custom:GhdTableSortDescSvg"
                                     v-model:items-per-page="sharedScenariosPagination.rowsPerPage"
                                     item-value="name"
                                     @update:options="onSharedScenariosPagination"
@@ -434,7 +439,9 @@
                                     :headers="workQueueGridHeaders"
                                     :totalItems="totalQueuedSimulations"
                                     :pagination.sync="workQueuePagination"
-                                    :items="currentWorkQueuePage"                      
+                                    :items="currentWorkQueuePage"              
+                                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                                    sort-desc-icon="custom:GhdTableSortDescSvg"        
                                     :items-length="totalQueuedSimulations"
                                     :items-per-page-options="[
                                         {value: 5, title: '5'},
@@ -517,6 +524,8 @@
                                     :totalItems="totalFastQueuedItems"
                                     :pagination.sync="fastWorkQueuePagination"                  
                                     :items-length="totalFastQueuedItems"
+                                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                                    sort-desc-icon="custom:GhdTableSortDescSvg"
                                     :items-per-page-options="[
                                         {value: 5, title: '5'},
                                         {value: 10, title: '10'},
@@ -668,7 +677,7 @@
 
 <script lang="ts" setup>
 import { getUrl } from '@/shared/utils/get-url';
-import { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, onMounted, inject, readonly, computed, reactive } from 'vue'; 
+import { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, computed, reactive, inject } from 'vue'; 
 import moment from 'moment';
 import {
     emptyScenario,
@@ -731,14 +740,15 @@ import { PagingRequest } from '@/shared/models/iAM/paging';
 import ScenarioService from '@/services/scenario.service';
 import { useStore } from 'vuex'; 
 import { useRouter } from 'vue-router'; 
-import mitt from 'mitt';
+import mitt, { Emitter, EventType } from 'mitt';
 import $vuetify from '@/plugins/vuetify';
 import { onBeforeMount } from 'vue';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
+import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
 
     let store = useStore(); 
     const $router = useRouter();     
-    const $emitter = mitt()
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
     
     const stateNetworks = computed<Network[]>(() => store.state.networkModule.networks) ;
     const stateScenarios = computed<Scenario[]>(() => store.state.scenarioModule.scenarios); 
@@ -1415,7 +1425,7 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
         );
     });
 
-    function initializeScenarioPages(){
+    async function initializeScenarioPages(){
         const { sort, descending, page, rowsPerPage } = sharedScenariosPagination;
 
         const request: PagingRequest<Scenario> = {
@@ -1446,22 +1456,21 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
             isDescending: false,
             search: ''
         };        
-        getSharedScenariosPageAction(request).then(() =>
-        getUserScenariosPageAction(request).then(() =>
-        getWorkQueuePageAction(workQueueRequest).then(() => 
-        getFastWorkQueuePageAction(workQueueRequest).then(() => {
-            initializing = false;
-            initializingWorkQueue = false;
-            initializingFastWorkQueue = false;
-            totalUserScenarios.value = stateTotalUserScenarios.value;
-            totalSharedScenarios.value = stateTotalSharedScenarios.value;
-            totalQueuedSimulations.value = stateTotalQueuedSimulations.value;
-            totalFastQueuedItems.value = stateTotalFastQueuedItems.value;
-            currentUserScenariosPage.value = clone(stateUserScenariosPage.value);
-            currentSharedScenariosPage.value = clone(stateSharedScenariosPage.value);
-            currentWorkQueuePage.value = clone(stateWorkQueuePage.value);
-            currentFastWorkQueuePage.value = clone(stateFastWorkQueuePage.value);
-        })))); 
+        await getSharedScenariosPageAction(request)
+        await getUserScenariosPageAction(request)
+        await getWorkQueuePageAction(workQueueRequest)
+        await getFastWorkQueuePageAction(workQueueRequest)
+        initializing = false;
+        initializingWorkQueue = false;
+        initializingFastWorkQueue = false;
+        totalUserScenarios.value = stateTotalUserScenarios.value;
+        totalSharedScenarios.value = stateTotalSharedScenarios.value;
+        totalQueuedSimulations.value = stateTotalQueuedSimulations.value;
+        totalFastQueuedItems.value = stateTotalFastQueuedItems.value;
+        currentUserScenariosPage.value = clone(stateUserScenariosPage.value);
+        currentSharedScenariosPage.value = clone(stateSharedScenariosPage.value);
+        currentWorkQueuePage.value = clone(stateWorkQueuePage.value);
+        currentFastWorkQueuePage.value = clone(stateFastWorkQueuePage.value);
     }
 
     function formatDate(dateToFormat: Date) {

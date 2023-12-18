@@ -19,6 +19,7 @@
           <v-row align-start row>
             <v-select style="padding:0px !important"
                 :items='reports'
+                menu-icon=custom:GhdDownSvg
                 v-model='selectedReport'>
             </v-select>
             <v-chip
@@ -67,7 +68,6 @@ import { useStore } from 'vuex';
 
     const props = defineProps<{dialogData: ReportsDownloaderDialogData}>();
     let showDialogComputed = computed(() => props.dialogData.showModal);
-    let isBusy = ref<boolean>(store.state.busyModule.isBusy);
 
     let stateSimulationReportNames: string[] = (store.state.adminDataModule.simulationReportNames)
 

@@ -1,5 +1,5 @@
 <template>
-  <v-dialog  max-width="500px" persistent v-model ="dialogData.showDialog">
+  <v-dialog  max-width="600px" persistent v-model ="dialogData.showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-padding-top-title">
         <v-row justify="space-between">
@@ -10,23 +10,37 @@
         </v-row>
       </v-card-title>
       <v-card-text>
-        <v-data-table-server id="ShareBudgetPriorityLibraryDialog-table-vdatatable"
+        <v-data-table id="ShareBudgetPriorityLibraryDialog-table-vdatatable"
                       :headers="budgetPriorityLibraryUserGridHeaders"
                       :items="budgetPriorityLibraryUserGridRows"
                       :items-length="budgetPriorityLibraryUserGridRows.length"
-                      sort-icon=$vuetify.icons.ghd-table-sort
-                      :search="searchTerm">
+                      sort-asc-icon="custom:GhdTableSortAscSvg"
+                      sort-desc-icon="custom:GhdTableSortDescSvg"
+                      :search="searchTerm"
+                      :items-per-page="5"
+                      :items-per-page-options="[
+                        {value: 5, title: '5'},
+                        {value: 10, title: '10'},
+                        {value: 25, title: '25'},
+                    ]">
+          <template v-slot:headers="props">
+            <tr>
+              <th style="font-weight: bold;" v-for="header in budgetPriorityLibraryUserGridHeaders" :key="header.title">
+                  {{header.title}}
+              </th>
+            </tr>
+          </template>
           <template v-slot:item="{item}" slot="items" slot-scope="props">
             <tr>
             <td>
               {{ item.username }}
             </td>
             <td>
-              <v-checkbox id="ShareBudgetPriorityLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.isShared"
+              <v-checkbox id="ShareBudgetPriorityLibraryDialog-isShared-vcheckbox" v-model="item.isShared"
                           @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox id="ShareBudgetPriorityLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" label="Can Modify" v-model="item.canModify"/>
+              <v-checkbox id="ShareBudgetPriorityLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" v-model="item.canModify"/>
             </td>
           </tr>
           </template>
@@ -36,7 +50,7 @@
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
           </v-alert> -->
-        </v-data-table-server>
+        </v-data-table>
       </v-card-text>
       <v-card-actions>
         <v-row justify="center">

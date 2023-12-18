@@ -61,7 +61,6 @@
     
     async function getInventoryAction(payload?: any): Promise<any> {await store.dispatch('getInventory',payload);}
     async function getStaticInventoryHTMLAction(payload?: any): Promise<any> {await store.dispatch('getStaticInventoryHTML',payload);}
-    async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('setIsBusy',payload);}
     async function getInventoryReportsAction(payload?: any): Promise<any> {await store.dispatch('getInventoryReports',payload);}
     async function getKeyFieldsAction(payload?: any): Promise<any> {await store.dispatch('getKeyFields', payload);}
     async function getConstraintTypeAction(payload?: any): Promise<any> {await store.dispatch('getConstraintType',payload);}

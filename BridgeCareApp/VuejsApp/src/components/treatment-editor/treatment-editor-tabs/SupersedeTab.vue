@@ -5,7 +5,8 @@
                 <v-data-table :headers='supersedeRulesGridHeaders' :items='supersedeRulesGridData'
                               id="SupersedeRulesTab-vDataTable"
                               class='elevation-1 fixed-header v-table__overflow'
-                              sort-icon=ghd-table-sort
+                              sort-asc-icon="custom:GhdTableSortAscSvg"
+                              sort-desc-icon="custom:GhdTableSortDescSvg"
                               hide-actions>
                     <template slot='items' slot-scope='props' v-slot:item="props">
                         <tr>
@@ -13,7 +14,7 @@
                                 <v-select style="margin-top: 15px;"
                                     id="TreatmentSupersedeRulesTab-treatment-select"
                                     :items='treatmentSelectItems'
-                                    append-icon=ghd-down
+                                    menu-icon=custom:GhdDownSvg
                                     class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                                     label='Select a Treatment'
                                     variant="outlined"

@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
+  <v-dialog max-width="600px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
         <v-row justify="space-between" style="margin-top: 10px;">
@@ -12,19 +12,34 @@
       <v-card-text>
         <v-data-table id="ShareBudgetLibraryDialog-table-vdatatable" :headers="budgetLibraryUserGridHeaders"
                       :items="budgetLibraryUserGridRows"
-                      sort-icon=ghd-table-sort
-                      :search="searchTerm">
+                      sort-asc-icon="custom:GhdTableSortAscSvg"
+                      sort-desc-icon="custom:GhdTableSortDescSvg"
+                      :search="searchTerm" 
+                      :items-per-page="5"        
+                      :items-per-page-options="[
+                        {value: 5, title: '5'},
+                        {value: 10, title: '10'},
+                        {value: 25, title: '25'},
+                    ]">
+          <template v-slot:headers="props">
+            <tr>
+              <th style="font-weight: bold;" v-for="header in budgetLibraryUserGridHeaders" :key="header.title">
+                  {{header.title}}
+              </th>
+            </tr>
+          </template>
+
           <template slot="items" slot-scope="props" v-slot:item="{item}">
             <tr>
             <td>
               {{ item.username }}
             </td>
             <td>
-              <v-checkbox id="ShareBudgetLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="item.isShared"
-                          @change="removeUserModifyAccess(item.id, item.isShared)"/>
+              <v-checkbox id="ShareBudgetLibraryDialog-isShared-vcheckbox" v-model="item.isShared"
+                          @change="removeUserModifyAccess(item.id, item.isShared)"></v-checkbox>
             </td>
             <td>
-              <v-checkbox id="ShareBudgetLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" label="Can Modify" v-model="item.canModify"/>
+              <v-checkbox id="ShareBudgetLibraryDialog-canModify-vcheckbox" :disabled="!item.isShared" v-model="item.canModify"/>
             </td>
           </tr>
           </template>
@@ -217,5 +232,8 @@ const stateUsers = computed<User[]>(() => store.state.userModule.users);
 .sharing-button {
   flex: 0.55;
   margin: 1.3em 1.5em auto auto;
+}
+.header {
+  font-weight: bold;
 }
 </style>

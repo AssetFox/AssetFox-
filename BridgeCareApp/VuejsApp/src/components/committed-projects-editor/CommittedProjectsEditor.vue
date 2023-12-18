@@ -33,6 +33,7 @@
                     label='Select a Template'
                     style="width: 20% !important;"
                     v-model="templateItemSelected"
+                    menu-icon=custom:GhdDownSvg
                     variant="outlined"
                     density="compact">
                     </v-select>
@@ -67,6 +68,7 @@
                         placeholder="Search"
                         single-line
                         v-model="gridSearchTerm"
+                        prepend-inner-icon=custom:GhdSearchSvg
                         variant="outlined"
                         density="compact"
                         clearable
@@ -93,6 +95,8 @@
                         :items-length="totalItems"
                         :items="currentPage"
                         item-key='id'
+                        sort-asc-icon="custom:GhdTableSortAscSvg"
+                        sort-desc-icon="custom:GhdTableSortDescSvg"
                         :pagination.sync="projectPagination"
                         :total-items="totalItems"
                         :items-per-page-options="[
@@ -114,6 +118,7 @@
                                     <div>
                                         <v-select v-if="header.key === 'treatment'"
                                             :items="treatmentSelectItems"
+                                            menu-icon=custom:GhdDownSvg
                                             class="ghd-down-small"
                                             density="compact"
                                             variant="underlined"
@@ -124,6 +129,7 @@
                                         <v-select
                                             v-else-if="header.key === 'projectSource'"
                                             :items="projectSourceOptions"
+                                            menu-icon=custom:GhdDownSvg
                                             class="ghd-down-small"
                                             density="compact"
                                             variant="underlined"
@@ -198,6 +204,7 @@
 
                                                 <v-select v-if="header.key === 'budget'"
                                                     :items="budgetSelectItems"
+                                                    menu-icon=custom:GhdDownSvg
                                                     label="Select a Budget"
                                                     variant="outlined"
                                                     item-title="text"  
@@ -207,6 +214,7 @@
 
                                                 <v-select v-if="header.key === 'category'"
                                                     :items="categorySelectItems"
+                                                    menu-icon=custom:GhdDownSvg
                                                     label="Select a Category"
                                                     variant="outlined"
                                                     item-title="text"  
@@ -296,11 +304,11 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import editDialog from '@/shared/modals/Edit-Dialog.vue'
-import { watch, ref, onMounted, onBeforeUnmount, shallowRef, computed } from 'vue'
+import { watch, ref, shallowReactive, onMounted, onBeforeUnmount, shallowRef, computed, inject } from 'vue'
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { CommittedProjectFillTreatmentReturnValues, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
 import { getBlankGuid, getNewGuid } from '../../shared/utils/uuid-utils';
-import { emptyTreatmentLibrary, Treatment, treatmentCategoryMap, treatmentCategoryReverseMap, TreatmentLibrary } from '@/shared/models/iAM/treatment';
+import { emptyTreatmentLibrary, SimpleTreatment, Treatment, treatmentCategoryMap, treatmentCategoryReverseMap, TreatmentLibrary } from '@/shared/models/iAM/treatment';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import CommittedProjectsService from '@/services/committed-projects.service';
 import { Attribute } from '@/shared/models/iAM/attribute';
@@ -332,7 +340,7 @@ import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 import { storeKey, useStore } from 'vuex';
 import { createDecipheriv } from 'crypto';
-import mitt from 'mitt';
+import mitt, { Emitter, EventType } from 'mitt';
 import Dialog from 'primevue/dialog';
 import Column from 'primevue/column';
 import TreatmentService from '@/services/treatment.service';
@@ -342,7 +350,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     let store = useStore();
     const $router = useRouter();    
-    const $emitter = mitt()
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
     created();
 
     let searchItems = '';
@@ -386,10 +394,10 @@ import ConfirmDialog from 'primevue/confirmdialog';
     const currentPage = ref<SectionCommittedProjectTableData[]>([]);
     let isRunning: boolean = true;
 
-    const selectedLibraryTreatments = ref<Treatment[]>([]);
+    const selectedLibraryTreatments = ref<SimpleTreatment[]>([]);
     let isKeyAttributeValidMap: Map<string, boolean> = new Map<string, boolean>();
 
-    let projectPagination = shallowRef<Pagination>(clone(emptyPagination));
+    let projectPagination = shallowReactive<Pagination>(clone(emptyPagination));
 
     const currentUserCriteriaFilter = computed<UserCriteriaFilter>(() => store.state.userModule.currentUserCriteriaFilter);
     const stateSectionCommittedProjects = computed<SectionCommittedProject[]>(() => store.state.committedProjectsModule.sectionCommittedProjects);
@@ -515,14 +523,12 @@ import ConfirmDialog from 'primevue/confirmdialog';
     ]);
 
     function created() {
-
         $emitter.on(
             Hub.BroadcastEventType.BroadcastImportCompletionEvent,
             importCompleted,
         );
     }
-    onMounted(() => {
-
+    onMounted(async() => {
         scenarioId = $router.currentRoute.value.query.scenarioId as string;
         networkId = $router.currentRoute.value.query.networkId as string;
         
@@ -537,48 +543,45 @@ import ConfirmDialog from 'primevue/confirmdialog';
             categorySelectItems.value.push({text: cat, value: i})     
             i++   
         });
-        fetchTreatmentLibrary(scenarioId);
-
-        (async () => { 
-            hasScenario = true;
-            await getNetworksAction();
-            await InvestmentService.getScenarioBudgetYears(scenarioId).then(response => {  
-                if(response.data) {
-                    if (response.data.length === 0) {
-                        investmentYears.value = [];
-                    } else {
-                        investmentYears.value = response.data;
-                    }
+        await fetchTreatmentLibrary(scenarioId);
+        hasScenario = true;
+        await getNetworksAction();
+        await InvestmentService.getScenarioBudgetYears(scenarioId).then(response => {  
+            if(response.data) {
+                if (response.data.length === 0) {
+                    investmentYears.value = [];
+                } else {
+                    investmentYears.value = response.data;
                 }
-            });
-            await ScenarioService.getNoTreatmentBeforeCommitted(scenarioId).then(response => {
-                    if(!isNil(response.data)){
-                        isNoTreatmentBeforeCache.value = response.data;
-                        isNoTreatmentBefore.value = response.data;
-                    }
-            });
-            await getScenarioSimpleBudgetDetailsAction({scenarioId: scenarioId});
-            await getAttributesAction();
-            await getTreatmentLibrariesAction();
-            await getCurrentUserOrSharedScenarioAction({simulationId: scenarioId});
-            await selectScenarioAction({ scenarioId: scenarioId });
-            await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: scenarioId, workType: WorkType.ImportCommittedProject}).then(response => {
-                if(response.data){
-                    setAlertMessageAction("Committed project import has been added to the work queue")
-                }
-            });
-            await initializePages();
-            if (scenarioId !== undefined) {  
-                            await fetchTreatmentLibrary(scenarioId);
-                            await fetchProjectSources();
-                        }
+            }
+        });
+        await ScenarioService.getNoTreatmentBeforeCommitted(scenarioId).then(response => {
+            if(!isNil(response.data)){
+                isNoTreatmentBeforeCache.value = response.data;
+                isNoTreatmentBefore.value = response.data;
+            }
+        });
+        await getScenarioSimpleBudgetDetailsAction({scenarioId: scenarioId});
+        await getAttributesAction();
+        await getTreatmentLibrariesAction();
+        await getCurrentUserOrSharedScenarioAction({simulationId: scenarioId});
+        await selectScenarioAction({ scenarioId: scenarioId });
+        await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: scenarioId, workType: WorkType.ImportCommittedProject}).then(response => {
+            if(response.data){
+                setAlertMessageAction("Committed project import has been added to the work queue")
+            }
+        });
+        await initializePages();
+        if (scenarioId !== undefined) {  
+            await fetchTreatmentLibrary(scenarioId);
+            await fetchProjectSources();
+        }
 
-                await CommittedProjectsService.getUploadedCommittedProjectTemplates().then(response => {
-                    if(!isNil(response.data)){
-                            templateSelectItems.value = response.data;
-                        }
-           });            
-        })();                    
+        await CommittedProjectsService.getUploadedCommittedProjectTemplates().then(response => {
+            if(!isNil(response.data)){
+                    templateSelectItems.value = response.data;
+            }
+        });            
     });
     onBeforeUnmount(() => beforeDestroy())
     function beforeDestroy() {
@@ -628,7 +631,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     watch(selectedLibraryTreatments, onSelectedLibraryTreatmentsChanged)
     function onSelectedLibraryTreatmentsChanged() {
         treatmentSelectItems.value = selectedLibraryTreatments.value.map(
-            (treatment: Treatment) => (treatment.name)
+            (treatment: SimpleTreatment) => (treatment.name)
         );
     };
     watch(selectedStateTreatmentLibrary, () => {
@@ -667,7 +670,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             return;
         isRunning = true
         checkHasUnsavedChanges();
-        const { sort, descending, page, rowsPerPage } = projectPagination.value;
+        const { sort, descending, page, rowsPerPage } = projectPagination;
 
         const request: PagingRequest<SectionCommittedProject>= {
             page: page,
@@ -1232,7 +1235,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }
 
     function resetPage(){
-        projectPagination.value.page = 1;
+        projectPagination.page = 1;
         onPaginationChanged();
     }
 
@@ -1250,7 +1253,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     function importCompleted(data: any){
         var importComp = data.importComp as importCompletion
         if(importComp.id === scenarioId && importComp.workType == WorkType.ImportCommittedProject){
-            projectPagination.value.page = 1
+            projectPagination.page = 1
             clearChanges();
             onPaginationChanged().then(() => {
                 setAlertMessageAction('');
@@ -1276,15 +1279,20 @@ import ConfirmDialog from 'primevue/confirmdialog';
         }
     }
 
-    function handleLibrarySelectChange(libraryId: string) {
+    async function handleLibrarySelectChange(libraryId: string) {
         selectTreatmentLibraryAction(libraryId);
         hasSelectedLibrary = true;
         const library = stateTreatmentLibraries.value.find((o) => o.id === libraryId);
         librarySelectItemValue.value = libraryId;
 
         if (!isNil(library)) {
-          selectedLibraryTreatments.value = library.treatments;
-          onSelectedLibraryTreatmentsChanged();
+            await TreatmentService.getSimpleTreatmentsByLibraryId(libraryId).then(response => {
+                if (hasValue(response, 'data')) {
+                    let treatments = response.data as SimpleTreatment[]
+                    selectedLibraryTreatments.value = clone(treatments);
+                    onSelectedLibraryTreatmentsChanged();
+                }
+            })         
         } 
     }   
 

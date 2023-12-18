@@ -12,6 +12,7 @@
                         id="CashFlowEditor-SelectLibrary-vselect"
                         variant="outlined"
                         v-model="librarySelectItemValue"
+                        menu-icon=custom:GhdDownSvg
                         item-title="text"
                         item-value="value"
                         class="ghd-select ghd-text-field ghd-text-field-border" density="compact">
@@ -68,7 +69,8 @@
                     :items="currentPage"  
                     :pagination.sync="pagination"
                     :must-sort='true'
-                    sort-icon=ghd-table-sort
+                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                    sort-desc-icon="custom:GhdTableSortDescSvg"
                     v-model='selectedCashRuleGridRows'
                     class="ghd-table v-table__overflow"
                     item-key="id"
@@ -92,7 +94,7 @@
                         </td>
                         <td>
                             <editDialog
-                                :return-value="item.item.name"
+                                v-model:return-value="item.item.name"
                                 size="large"
                                 lazy
                                 @save="onEditSelectedLibraryListData(item.item,'description')"
@@ -484,29 +486,25 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
     let libraryImported: boolean = false;
 
     created();
-    function created() {
+    async function created() {
         librarySelectItemValue.value = "";
-        
-        getCashFlowRuleLibrariesAction().then(() => {
-            getHasPermittedAccessAction().then(() => {
-                if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CashFlow) !== -1) {
-                    selectedScenarioId = $router.currentRoute.value.query.scenarioId;
-                    if (selectedScenarioId === uuidNIL) {
-                        addErrorNotificationAction({
-                            message: 'Unable to identify selected scenario.',
-                        });
-                        $router.push('/Scenarios/');
-                        return;
-                    }
+        await getCashFlowRuleLibrariesAction()
+        await getHasPermittedAccessAction()
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CashFlow) !== -1) {
+            selectedScenarioId = $router.currentRoute.value.query.scenarioId;
+            if (selectedScenarioId === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Unable to identify selected scenario.',
+                });
+                $router.push('/Scenarios/');
+                return;
+            }
 
-                    hasScenario.value = true;
-                    getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-                        selectScenarioAction({ scenarioId: selectedScenarioId });        
-                        initializePages();
-                    });                                                
-                }
-            });
-        });
+            hasScenario.value = true;
+            await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})     
+            selectScenarioAction({ scenarioId: selectedScenarioId });        
+            await initializePages();                                   
+        }
     }
 
 
@@ -1103,7 +1101,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
         } 
     }
 
-    function initializePages(){
+    async function initializePages(){
         
         const request: PagingRequest<CashFlowRule>= {
             page: 1,
@@ -1120,7 +1118,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
             search: ''
         };
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL) {
-            CashFlowService.getScenarioCashFlowRulePage(selectedScenarioId, request).then(response => {
+            await CashFlowService.getScenarioCashFlowRulePage(selectedScenarioId, request).then(response => {
                 initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<CashFlowRule>;

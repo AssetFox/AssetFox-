@@ -9,6 +9,7 @@
     <v-row justify="start">     
         <v-col cols="10">
             <v-switch
+                color="#2A578D"
                 v-show="useTreatment"
                 label="No Treatment"
                 class="ghd-control-label ghd-md-gray Montserrat-font-family my-2"
@@ -24,6 +25,8 @@
         <v-data-table-virtual :headers="tableHeaders"
                              :items="files"
                              :items-length="files.length"
+                             sort-asc-icon="custom:GhdTableSortAscSvg"
+                             sort-desc-icon="custom:GhdTableSortDescSvg"
                              class="fixed-header v-table__overflow Montserrat-font-family"
                              >
             <template slot="items" slot-scope="props" v-slot:item="props">
@@ -63,7 +66,6 @@ const props = defineProps<{
 const { useTreatment, closed } = toRefs(props);
 
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
-async function setIsBusyAction(payload?: any): Promise<any> {await store.dispatch('setIsBusy', payload);}
 
     const applyNoTreatment = ref<boolean>(true);
     const fileSelect = ref<HTMLInputElement>({} as HTMLInputElement);

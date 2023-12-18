@@ -12,6 +12,7 @@
                         :items="librarySelectItems"
                         variant="outlined"
                         v-model="librarySelectItemValue"
+                        menu-icon=custom:GhdDownSvg
                         item-title="text"
                         item-value="value" 
                         density="compact"
@@ -85,7 +86,8 @@
                     :items="currentPage"  
                     :pagination.sync="pagination"
                     :must-sort='true'
-                    sort-icon=ghd-table-sort
+                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                    sort-desc-icon="custom:GhdTableSortDescSvg"
                     class="ghd-table v-table__overflow"
                     item-key="id"
                     show-select
@@ -151,7 +153,7 @@
                                         <v-select v-if="header.key === 'attribute'"
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalAttribute-vselect"
                                             :items="numericAttributeNames"
-                                            append-icon=ghd-down
+                                            menu-icon=custom:GhdDownSvg
                                             label="Select an Attribute"
                                             variant="outlined"
                                             v-model="item.item[header.key]"
@@ -476,7 +478,7 @@ import { getUrl } from '@/shared/utils/get-url';
     const showCreateDeficientConditionGoalDialog = ref<boolean>(false);
     const criterionEditorDialogData = ref< GeneralCriterionEditorDialogData >(clone(emptyGeneralCriterionEditorDialogData));
     const createDeficientConditionGoalLibraryDialogData = ref<CreateDeficientConditionGoalLibraryDialogData>(clone(emptyCreateDeficientConditionGoalLibraryDialogData));
-    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    const confirmDeleteAlertData = ref<AlertData>(clone(emptyAlertData));
     let rules: InputValidationRules = validationRules;
     let uuidNIL: string = getBlankGuid();
     let hasScenario = ref(false);
@@ -517,29 +519,27 @@ import { getUrl } from '@/shared/utils/get-url';
     created();
     function created() {
     }
-    onMounted(() => {
+    onMounted(async () => {
         librarySelectItemValue.value = null;
-        getDeficientConditionGoalLibrariesAction().then(() => {
-            numericAttributeNames = getPropertyValues('name', getNumericAttributesGetter);
-            getHasPermittedAccessAction().then(() => {
-                if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.DeficientConditionGoal) !== -1) {
-                    selectedScenarioId.value = $router.currentRoute.value.query.scenarioId as string;
+        await getDeficientConditionGoalLibrariesAction()
+        numericAttributeNames = getPropertyValues('name', getNumericAttributesGetter);
+        await getHasPermittedAccessAction()
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.DeficientConditionGoal) !== -1) {
+            selectedScenarioId.value = $router.currentRoute.value.query.scenarioId as string;
 
-                    if (selectedScenarioId.value === uuidNIL) {
-                        addErrorNotificationAction({
-                            message: 'Found no selected scenario for edit',
-                        });
-                        $router.push('/Scenarios/');
-                    }
+            if (selectedScenarioId.value === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Found no selected scenario for edit',
+                });
+                $router.push('/Scenarios/');
+            }
 
-                    hasScenario.value = true;
-                    getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId.value}).then(() => {         
-                        selectScenarioAction({ scenarioId: selectedScenarioId.value });        
-                        initializePages();
-                    });                                               
-                }
-            });     
-        });       
+            hasScenario.value = true;
+            await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId.value})       
+            selectScenarioAction({ scenarioId: selectedScenarioId.value });        
+            await initializePages();                                      
+        }
+                
     });
     onBeforeUnmount(() => beforeDestroy); 
     function beforeDestroy() {
@@ -900,7 +900,7 @@ import { getUrl } from '@/shared/utils/get-url';
     }
 
     function onShowConfirmDeleteAlert() {
-        confirmDeleteAlertData = {
+        confirmDeleteAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -909,7 +909,7 @@ import { getUrl } from '@/shared/utils/get-url';
     }
 
     function onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        confirmDeleteAlertData = clone(emptyAlertData);
+        confirmDeleteAlertData.value = clone(emptyAlertData);
 
         if (submit) {
             librarySelectItemValue.value = null;
@@ -1069,7 +1069,7 @@ import { getUrl } from '@/shared/utils/get-url';
         parentLibraryId = foundLibrary.id;
         parentLibraryName = foundLibrary.name;
     }
-    function initializePages(){
+    async function initializePages(){
         const request: PagingRequest<DeficientConditionGoal>= {
             page: 1,
             rowsPerPage: 5,
@@ -1085,7 +1085,7 @@ import { getUrl } from '@/shared/utils/get-url';
             search: ''
         };
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId.value !== uuidNIL)
-            DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(selectedScenarioId.value, request).then(response => {
+            await DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(selectedScenarioId.value, request).then(response => {
                 initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<DeficientConditionGoal>;

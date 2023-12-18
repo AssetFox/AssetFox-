@@ -12,6 +12,7 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
 import GhdDownSvg from '@/shared/icons/GhdDownSvg.vue';
 import GhdTableSortSvg from '@/shared/icons/GhdTableSortSvg.vue';
 import { mdi } from 'vuetify/iconsets/mdi';
+import { customSVGs } from './customSvgs'; 
 
 const ghdSearchIconSet: IconSet = {
     component: (props: IconProps) => {
@@ -44,7 +45,7 @@ const vuetify = createVuetify({
     icons: { 
       defaultSet: 'fa', 
       aliases,
-      sets: { fa, mdi, ghdSearchIconSet, ghdTableSortIconSet, ghdDownIconSet },  
+      sets: { fa, mdi, custom:customSVGs }, 
     },
     directives,
     

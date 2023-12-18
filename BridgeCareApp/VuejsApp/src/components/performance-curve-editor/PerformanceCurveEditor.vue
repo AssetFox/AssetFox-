@@ -9,7 +9,7 @@
                     id="PerformanceCurveEditor-library-select"
                     class="ghd-control-border ghd-control-text ghd-select "
                     :items="librarySelectItems"
-                    append-icon=ghd-down
+                    menu-icon=custom:GhdDownSvg
                     variant="outlined"
                     v-model="librarySelectItemValue"
                     item-title="text" 
@@ -31,7 +31,7 @@
                     id="PerformanceCurveEditor-searchDeteriorationEquations-textField"
                     class="ghd-text-field-border ghd-text-field search-icon-general"
                     style="margin-top:0px;"
-                    prepend-inner-icon=ghd-search
+                    prepend-inner-icon=custom:GhdSearchSvg
                     hide-details
                     placeholder="Search Deterioration Equations"
                     single-line
@@ -115,11 +115,11 @@
                         show-select
                         class='v-table__overflow ghd-table'
                         item-key="id"
-
                         :headers="performanceCurveGridHeaders"
                         :pagination.sync="performancePagination"
                         :must-sort='true'
-                        sort-icon=ghd-table-sort
+                        sort-asc-icon="custom:GhdTableSortAscSvg"
+                        sort-desc-icon="custom:GhdTableSortDescSvg"
                         v-model="selectedPerformanceEquations"
                         return-object
                         :items="currentPage"                      
@@ -211,7 +211,7 @@
                                     <template v-slot:input>
                                         <v-select
                                             :items="attributeSelectItems"
-                                            append-icon=ghd-down
+                                            menu-icon=custom:GhdDownSvg
                                             label="Edit"
                                             variant="outlined"
                                             v-model="item.item.attribute"
@@ -533,7 +533,7 @@ import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref, shallowRef, ShallowRef} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import mitt from 'mitt';
+import mitt, { Emitter, EventType } from 'mitt';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { computed } from 'vue';
@@ -641,7 +641,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let selectedPerformanceCurve: PerformanceCurve = clone(emptyPerformanceCurve);
     let hasSelectedPerformanceCurve: boolean = false;
     const $router = useRouter();    
-    const $emitter = mitt()
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
     let unsavedDialogAllowed: boolean = true;
     let trueLibrarySelectItemValue: string | null = ''
     let librarySelectItemValueAllowedChanged: boolean = true;
@@ -680,39 +680,31 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let modifiedStatus : string = "";
 
     created();
-    function created() {
+    async function created() {
         librarySelectItemValue.value= null;           
-            getPerformanceCurveLibrariesAction().then(() => {
-                getHasPermittedAccessAction().then(() => {
-                    if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.PerformanceCurve) !== -1) {
-                        selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
+        await getPerformanceCurveLibrariesAction()
+        await getHasPermittedAccessAction()
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.PerformanceCurve) !== -1) {
+            selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
 
-                        if (selectedScenarioId === uuidNIL) {
-                            addErrorNotificationAction({
-                                message: 'Unable to identify selected scenario.',
-                            });
-                            $router.push('/Scenarios/');
-                        }
-
-                        hasScenario.value = true;
-                        ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioPerformanceCurve}).then(response => {
-                            if(response.data){
-                                setAlertMessageAction("A performance curve import has been added to the work queue")
-                            }
-                            initializePages().then(() =>{
-                                hasScenario.value = true;
-                                getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId}).then(() => {         
-                                    selectScenarioAction({ scenarioId: selectedScenarioId });        
-                            });
-                        });
-                            
-                        })
-
-                    }
-
-                    
+            if (selectedScenarioId === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Unable to identify selected scenario.',
                 });
-            });
+                $router.push('/Scenarios/');
+            }
+            hasScenario.value = true;
+            await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioPerformanceCurve}).then(async response => {
+                if(response.data){
+                    setAlertMessageAction("A performance curve import has been added to the work queue")
+                }
+                await initializePages()
+                hasScenario.value = true;
+                await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})   
+                selectScenarioAction({ scenarioId: selectedScenarioId });        
+            })
+
+        }
     }
     onMounted(()=>mounted())
     function mounted() {

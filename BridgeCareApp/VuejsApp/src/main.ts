@@ -41,7 +41,6 @@ import "primevue/resources/themes/bootstrap4-light-blue/theme.css"
 import 'primevue/resources/primevue.min.css'
 import 'primeicons/primeicons.css';
 import "primeflex/primeflex.css";
-import AdvancedQueryBuilder from 'vue3-advanced-query-builder';
 const app = createApp(App);
 
 
@@ -51,7 +50,6 @@ app.use(vuetify);
 app.use(PrimeVue);
 //app.use(VueWorker);
 app.use(KendoChartInstaller);
-app.use(AdvancedQueryBuilder);
 
 //app.use(VueCurrencyInput);
 //authenticationModule.state.securityType = config.securityType as string;

@@ -287,18 +287,6 @@ async function getAttributeSelectValuesAction(payload?: any): Promise<any> {awai
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification',payload);}
 const tab = ref<any>(null);
     const queryBuilderRules = ref<CriteriaConfigRule[]>([]);
-    let queryBuilderLabels: object = {
-        matchType: '',
-        matchTypes: [
-            { id: 'AND', label: 'AND' },
-            { id: 'OR', label: 'OR' },
-        ],
-        addRule: 'Add Rule',
-        removeRule: `<img class='img-general' src="${getUrl("assets/icons/trash-ghd-blue.svg")}" style="margin-top:4px;margin-left:4px;"/>`,
-        addGroup: 'Add Group',
-        removeGroup: `<img class='img-general' src="${getUrl("assets/icons/trash-ghd-blue.svg")}"/>`,
-        textInputPlaceholder: 'value',
-    };
     
     const cannotSubmit = ref<boolean>(true);
     const validCriteriaMessage = ref<string | null>(null);
@@ -491,15 +479,6 @@ const tab = ref<any>(null);
             }),
         );
     }
-
-    const queryBuilderRuleOperatorTypes = [
-        { name: '=', identifier: '=' },
-        { name: '<>', identifier: '<>'},
-        {name: '<', identifier: '<'},
-        {name: '<=', identifier: '<=>'},
-        {name: '>', identifier: '>'},
-        {name: '>=', identifier: '>='},
-    ]
 
     function setSubCriteriaClauses(mainCriteria: Criteria) {
         subCriteriaClauses.value = [];

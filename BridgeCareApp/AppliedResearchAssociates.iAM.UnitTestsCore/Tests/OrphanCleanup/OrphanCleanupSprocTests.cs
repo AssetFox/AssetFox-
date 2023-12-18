@@ -16,7 +16,10 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.BudgetPriority;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DeficientConditionGoal;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Microsoft.Data.SqlClient;
@@ -140,6 +143,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             BudgetPriorityTestSetup.SetupSingleBudgetPriorityWithCriterionLibraryForSimulationInDb(simulationId);
             var cashFlowLibrary = CashFlowRuleLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             CashFlowRuleLibraryUserTestSetup.SetUsersOfCashFlowRuleLibrary(TestHelper.UnitOfWork, cashFlowLibrary.Id, LibraryAccessLevel.Modify, userId);
+            CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
+            var deficientConditionGoalLibrary = DeficientConditionGoalLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            DeficientConditionGoalLibraryUserTestSetup.SetUsersOfDeficientConditionGoalLibrary(TestHelper.UnitOfWork, deficientConditionGoalLibrary.Id, LibraryAccessLevel.Modify, userId);
+            var investmentPlan = InvestmentPlanTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
+            var remainingLifeLimitLibrary = RemainingLifeLimitLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            RemainingLifeLimitLibraryUserTestSetup.SetUsersOfRemainingLifeLimitLibrary(TestHelper.UnitOfWork, remainingLifeLimitLibrary.Id, LibraryAccessLevel.Modify, userId);
+            SimulationAnalysisDetailTestSetup.CreateAnalysisDetail(TestHelper.UnitOfWork, simulationId);
+            var targetConditionGoalLibrary = TargetConditionGoalLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            TargetConditionGoalLibraryUserTestSetup.SetUsersOfTargetConditionGoalLibrary(TestHelper.UnitOfWork, targetConditionGoalLibrary.Id, LibraryAccessLevel.Modify, user.Id);
+
+
             var rowCounts1 = TableRowCounter.CountRows();
             
             RunOrphanCleanupSproc();

@@ -150,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var remainingLifeLimitLibrary = RemainingLifeLimitLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             RemainingLifeLimitLibraryUserTestSetup.SetUsersOfRemainingLifeLimitLibrary(TestHelper.UnitOfWork, remainingLifeLimitLibrary.Id, LibraryAccessLevel.Modify, userId);
             SimulationAnalysisDetailTestSetup.CreateAnalysisDetail(TestHelper.UnitOfWork, simulationId);
-            var targetConditionGoalLibrary = TargetConditionGoalLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var targetConditionGoalLibrary = TargetConditionGoalLibraryTestSetup.ModelForEntityInDbWithSingleGoal(TestHelper.UnitOfWork);
             TargetConditionGoalLibraryUserTestSetup.SetUsersOfTargetConditionGoalLibrary(TestHelper.UnitOfWork, targetConditionGoalLibrary.Id, LibraryAccessLevel.Modify, user.Id);
 
 

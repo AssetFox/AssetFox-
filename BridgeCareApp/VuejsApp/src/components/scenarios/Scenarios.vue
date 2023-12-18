@@ -23,9 +23,10 @@
                          <v-col cols = "12">
                             <v-card elevation="5">
                                 <v-card-title>
-                                    <v-col cols = "6">
                                         <v-row style = "margin-right: -100px;">
-                                            <v-text-field
+                                            <v-col>
+                                                <v-row style="margin: 0;">
+                                                    <v-text-field
                                                 id="Scenarios-searchScenarios-textField"
                                                 type="text"
                                                 placeholder="Search in scenarios"
@@ -71,11 +72,13 @@
                                                 </v-chip>
                                                 </div>
                                             </span>
-                                        </v-row>
-                                    </v-col>
-                                    <v-col cols = "4"></v-col>
-                                    <v-row class="flex-end xs2" style="justify-content: end; padding-right: 70px">
-                                        <v-btn
+                                                </v-row>
+                                                
+                                            </v-col>
+                                            
+                                            <v-spacer></v-spacer>
+                                            <v-col>
+                                                <v-btn
                                            id="Scenarios-createScenario-btn"
                                             @click="
                                                 showCreateScenarioDialog = true
@@ -84,6 +87,12 @@
                                         >
                                             Create new scenario
                                         </v-btn>
+                                            </v-col>
+                                            
+                                        </v-row>
+
+                                    <v-row class="flex-end xs2" style="justify-content: end; padding-right: 70px">
+                                        
                                     </v-row>
                                 </v-card-title>
                                 <v-data-table-server

@@ -2,14 +2,14 @@
     <v-container fluid grid-list-xl>
         <v-row>
             <v-col cols = "12">
-                <v-row justify-center>
+                <v-row justify="center">
                     <v-card class="logged-out-card">
                         <div class="bridgecare-logo-img-div">
                             <v-img :src="getUrl('assets/images/logos/Banner-logo.jpg')"
                                    class="bridgecare-logo-img">
                             </v-img>
                         </div>
-                        <v-card-title style="justify-content: center">
+                        <v-card-title style="justify-content: center; text-align: center">
                             <h3>Logged Out</h3>
                         </v-card-title>
                         <v-card-text style="justify-content: center; text-align: center">

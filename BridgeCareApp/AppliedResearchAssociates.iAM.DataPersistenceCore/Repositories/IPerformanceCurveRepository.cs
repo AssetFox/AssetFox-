@@ -7,8 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IPerformanceCurveRepository
     {
-        void CreateScenarioPerformanceCurves(List<PerformanceCurve> performanceCurves, Guid simulationId);
-
         void GetScenarioPerformanceCurves(Simulation simulation, Dictionary<Guid, string> attributeNameLookupDictionary);
 
         List<PerformanceCurveLibraryDTO> GetPerformanceCurveLibraries();

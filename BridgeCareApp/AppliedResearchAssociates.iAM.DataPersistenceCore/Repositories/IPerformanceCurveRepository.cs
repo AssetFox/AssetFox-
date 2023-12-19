@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         public List<PerformanceCurveDTO> GetPerformanceCurvesForLibraryOrderedById(Guid performanceCurveLibraryId);
 
-        public List<PerformanceCurveLibraryDTO> GetPerformanceCurveLibrariesNoChildrenAccessibleToUser(Guid guid);
+        public List<PerformanceCurveLibraryDTO> GetPerformanceCurveLibrariesNoChildrenAccessibleToUser(Guid userId);
 
         DateTime GetLibraryModifiedDate(Guid performanceLibraryId);
 

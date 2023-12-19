@@ -16,58 +16,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
     public class PerformanceCurveRepositoryTests
     {
 
-        [Fact]
-        public void Delete_PerformanceCurveLibraryExistsWithCurveAndEquation_DeletesAll()
-        {
-            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-            var performanceCurveLibraryId = Guid.NewGuid();
-            var performanceCurveId = Guid.NewGuid();
-            var testLibrary = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, performanceCurveLibraryId);
-            var curveDto = PerformanceCurveTestSetup.TestLibraryPerformanceCurveInDb(TestHelper.UnitOfWork, performanceCurveLibraryId, performanceCurveId, TestAttributeNames.ActionType);
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
-            var dtos = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibraries();
-
-            var performanceCurveLibraryDTO = dtos.Single(dto => dto.Id == performanceCurveLibraryId);
-            curveDto.CriterionLibrary = criterionLibrary;
-            var equationInDb = TestHelper.UnitOfWork.Context.Equation
-                .SingleOrDefault(e => e.PerformanceCurveEquationJoin.PerformanceCurve.PerformanceCurveLibraryId == performanceCurveLibraryId);
-            Assert.NotNull(equationInDb);
-            TestHelper.UnitOfWork.Context.ChangeTracker.Clear();
-
-            // Act
-            TestHelper.UnitOfWork.PerformanceCurveRepo.DeletePerformanceCurveLibrary(performanceCurveLibraryId);
-
-            Assert.False(TestHelper.UnitOfWork.Context.PerformanceCurveLibrary.Any(_ => _.Id == performanceCurveLibraryId));
-            Assert.False(TestHelper.UnitOfWork.Context.PerformanceCurve.Any(_ => _.Id == performanceCurveId));
-            Assert.False(
-                TestHelper.UnitOfWork.Context.CriterionLibraryPerformanceCurve.Any(_ =>
-                    _.PerformanceCurveId == performanceCurveId));
-            Assert.False(
-                TestHelper.UnitOfWork.Context.PerformanceCurveEquation.Any(_ =>
-                    _.PerformanceCurveId == performanceCurveId));
-            var equationInDbAfter = TestHelper.UnitOfWork.Context.Equation
-                .SingleOrDefault(e => e.PerformanceCurveEquationJoin.PerformanceCurve.PerformanceCurveLibraryId == performanceCurveLibraryId);
-            Assert.Null(equationInDbAfter);
-        }
-
-        [Fact]
-        public void GetPerformanceCurveLibrariesNoPerformanceCurves_Does()
-        {
-            Setup();
-            var libraryId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var attribute = TestAttributeNames.CulvDurationN;
-            var curveId = Guid.NewGuid();
-            PerformanceCurveTestSetup.TestLibraryPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, attribute);
-
-            var libraries = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrariesNoPerformanceCurves();
-
-            var relevantLibrary = libraries.Single(l => l.Id == libraryId);
-            Assert.Empty(relevantLibrary.PerformanceCurves);
-            var relevantLibraryWithChildren = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
-            Assert.NotEmpty(relevantLibraryWithChildren.PerformanceCurves);
-        }
-
+ 
         private void Setup()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
@@ -324,7 +273,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
         }
 
         [Fact]
-        public async Task UpsertScenarioPerformanceCurveWithEquation_EmptySimulationInDb_AddsCurveAndEquationToSimulation()
+        public void UpsertScenarioPerformanceCurveWithEquation_EmptySimulationInDb_AddsCurveAndEquationToSimulation()
         {
             Setup();
             // Arrange

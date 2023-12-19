@@ -566,6 +566,11 @@ import ConfirmDialog from 'primevue/confirmdialog';
         await getTreatmentLibrariesAction();
         await getCurrentUserOrSharedScenarioAction({simulationId: scenarioId});
         await selectScenarioAction({ scenarioId: scenarioId });
+        await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: scenarioId, workType: WorkType.ImportCommittedProject}).then(response => {
+            if(response.data){
+                setAlertMessageAction("Committed project import has been added to the work queue");
+            }
+        });
         await initializePages();
         if (scenarioId !== undefined) {  
             await fetchTreatmentLibrary(scenarioId);

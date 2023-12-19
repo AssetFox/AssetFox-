@@ -11,6 +11,15 @@ public static class Funding
 
     private static readonly decimal?[,] EmptyAllocationMatrix = { };
 
+    private delegate void UpdateBudgetAmount(ref decimal amount, decimal update);
+
+    /// <summary>
+    ///     Try to fund one or more treatments via multi-year cash-flow.
+    /// </summary>
+    /// <returns>
+    ///     null if funding was successful; otherwise, the cash-flow year (as a zero-based index) in
+    ///     which funding failed
+    /// </returns>
     public static int? TryCashFlow(
         decimal[] cashFlowPercentagePerYear,
         bool[,] allocationIsAllowedPerBudgetAndTreatment,
@@ -19,7 +28,118 @@ public static class Funding
         Settings settings,
         out decimal?[][,] allocationPerBudgetAndTreatmentPerYear)
     {
-        allocationPerBudgetAndTreatmentPerYear = Array.Empty<decimal?[,]>();
+        if (cashFlowPercentagePerYear is null)
+        {
+            throw new ArgumentNullException(nameof(cashFlowPercentagePerYear));
+        }
+
+        if (allocationIsAllowedPerBudgetAndTreatment is null)
+        {
+            throw new ArgumentNullException(nameof(allocationIsAllowedPerBudgetAndTreatment));
+        }
+
+        if (amountPerBudgetPerYear is null)
+        {
+            throw new ArgumentNullException(nameof(amountPerBudgetPerYear));
+        }
+
+        if (costPerTreatment is null)
+        {
+            throw new ArgumentNullException(nameof(costPerTreatment));
+        }
+
+        if (settings is null)
+        {
+            throw new ArgumentNullException(nameof(settings));
+        }
+
+        if (cashFlowPercentagePerYear.Length != amountPerBudgetPerYear.Length)
+        {
+            throw new ArgumentException("Inconsistent input sizes.");
+        }
+
+        if (cashFlowPercentagePerYear.Length < 2)
+        {
+            throw new ArgumentException("Less than two years of cash flow.");
+        }
+
+        if (cashFlowPercentagePerYear.Any(IsNegative) || cashFlowPercentagePerYear.Sum() != 100)
+        {
+            throw new ArgumentException("Invalid cash flow percentages.", nameof(cashFlowPercentagePerYear));
+        }
+
+        if (amountPerBudgetPerYear.Any(IsNull))
+        {
+            throw new ArgumentException("Incomplete input.", nameof(amountPerBudgetPerYear));
+        }
+
+        if (amountPerBudgetPerYear.Select(ArrayLength).Distinct().Count() != 1)
+        {
+            throw new ArgumentException("Inconsistent input sizes.", nameof(amountPerBudgetPerYear));
+        }
+
+        Allocate(out allocationPerBudgetAndTreatmentPerYear, cashFlowPercentagePerYear.Length);
+
+        Allocate(out decimal[] workingAmountPerBudget, amountPerBudgetPerYear[0].Length);
+        Allocate(out decimal[] workingCostPerTreatment, costPerTreatment.Length);
+
+        UpdateBudgetAmount updateBudgetAmount = settings.BudgetCarryoverIsAllowed ? Increment : Assign;
+
+        for (var year = 0; year < cashFlowPercentagePerYear.Length; ++year)
+        {
+            var amountPerBudget = amountPerBudgetPerYear[year];
+
+            for (var b = 0; b < workingAmountPerBudget.Length; ++b)
+            {
+                updateBudgetAmount(ref workingAmountPerBudget[b], amountPerBudget[b]);
+            }
+
+            var cashFlowFraction = cashFlowPercentagePerYear[year] / 100;
+
+            for (var t = 0; t < workingCostPerTreatment.Length; ++t)
+            {
+                workingCostPerTreatment[t] = costPerTreatment[t] * cashFlowFraction;
+            }
+
+            ref var allocationPerBudgetAndTreatment = ref allocationPerBudgetAndTreatmentPerYear[year];
+
+            var solved = TrySolve(
+                allocationIsAllowedPerBudgetAndTreatment,
+                workingAmountPerBudget,
+                workingCostPerTreatment,
+                settings,
+                out allocationPerBudgetAndTreatment);
+
+            if (!solved)
+            {
+                return year;
+            }
+
+            for (var b = 0; b < workingAmountPerBudget.Length; ++b)
+            {
+                var totalSpending = TotalSpendingPerBudget(allocationPerBudgetAndTreatment, b);
+                workingAmountPerBudget[b] -= totalSpending;
+            }
+
+            if (settings.CashFlowEnforcesFirstYearFundingFractions)
+            {
+                // to-do: deal with first-year fractions
+
+                break;
+            }
+        }
+
+        for (var t = 0; t < costPerTreatment.Length; ++t)
+        {
+            var funding = TotalFundingPerTreatment(allocationPerBudgetAndTreatmentPerYear, t).RoundToCent();
+            var cost = costPerTreatment[t].RoundToCent();
+
+            if (funding != cost)
+            {
+                throw new Exception($"Treatment funding [{funding}] does not match cost [{cost}].");
+            }
+        }
+
         return null;
     }
 
@@ -47,39 +167,46 @@ public static class Funding
             throw new ArgumentNullException(nameof(costPerTreatment));
         }
 
+        if (settings is null)
+        {
+            throw new ArgumentNullException(nameof(settings));
+        }
+
         if (amountPerBudget.Length == 0)
         {
-            throw new ArgumentException("No budget amounts are given.", nameof(amountPerBudget));
+            throw new ArgumentException("No budget amounts.", nameof(amountPerBudget));
         }
 
         if (costPerTreatment.Length == 0)
         {
-            throw new ArgumentException("No treatment costs are given.", nameof(costPerTreatment));
+            throw new ArgumentException("No treatment costs.", nameof(costPerTreatment));
         }
 
         if (allocationIsAllowedPerBudgetAndTreatment.GetLength(0) != amountPerBudget.Length ||
             allocationIsAllowedPerBudgetAndTreatment.GetLength(1) != costPerTreatment.Length)
         {
-            throw new Exception("Inconsistent input sizes.");
+            throw new ArgumentException("Inconsistent input sizes.");
         }
 
         for (var b = 0; b < amountPerBudget.Length; ++b)
         {
-            if (amountPerBudget[b] <= 0)
+            var amount = amountPerBudget[b];
+            if (amount <= 0)
             {
-                throw new ArgumentException($"Budget amount [{b}] is non-positive: [{amountPerBudget[b]}]");
+                throw new ArgumentException($"Budget [{b}] amount [{amount}] is non-positive.");
             }
         }
 
         for (var t = 0; t < costPerTreatment.Length; ++t)
         {
-            if (costPerTreatment[t] <= 0)
+            var cost = costPerTreatment[t];
+            if (cost <= 0)
             {
-                throw new ArgumentException($"Treatment cost [{t}] is non-positive: [{costPerTreatment[t]}]");
+                throw new ArgumentException($"Treatment [{t}] cost [{cost}] is non-positive.");
             }
         }
 
-        if (Math.Round(amountPerBudget.Sum(), 2) < Math.Round(costPerTreatment.Sum(), 2))
+        if (amountPerBudget.Sum().RoundToCent() < costPerTreatment.Sum().RoundToCent())
         {
             // Trivially unsolvable.
             allocationPerBudgetAndTreatment = EmptyAllocationMatrix;
@@ -107,7 +234,7 @@ public static class Funding
 
                 amountRemaining -= cost;
 
-                allocationPerBudgetAndTreatment[0, t] = Math.Round(cost, 2);
+                allocationPerBudgetAndTreatment[0, t] = cost.RoundToCent();
             }
         }
         else if (costPerTreatment.Length == 1)
@@ -123,12 +250,12 @@ public static class Funding
                     var amountAvailable = amountPerBudget[b];
                     if (costRemaining <= amountAvailable)
                     {
-                        allocationPerBudgetAndTreatment[b, 0] = Math.Round(costRemaining, 2);
+                        allocationPerBudgetAndTreatment[b, 0] = costRemaining.RoundToCent();
                         costRemaining = 0;
                     }
                     else if (settings.MultipleBudgetsCanFundEachTreatment)
                     {
-                        allocationPerBudgetAndTreatment[b, 0] = Math.Round(amountAvailable, 2);
+                        allocationPerBudgetAndTreatment[b, 0] = amountAvailable.RoundToCent();
                         costRemaining -= amountAvailable;
                     }
                 }
@@ -236,7 +363,8 @@ public static class Funding
                 {
                     if (allocationVariablesMatrix[b, t] is Variable allocationVariable)
                     {
-                        allocationPerBudgetAndTreatment[b, t] = Math.Round((decimal)allocationVariable.SolutionValue(), 2);
+                        var allocation = (decimal)allocationVariable.SolutionValue();
+                        allocationPerBudgetAndTreatment[b, t] = allocation.RoundToCent();
                     }
                 }
             }
@@ -271,56 +399,76 @@ public static class Funding
 
         for (var b = 0; b < amountPerBudget.Length; ++b)
         {
-            var spending = totalBudgetSpending(allocationPerBudgetAndTreatment, b);
-            var amount = Math.Round(amountPerBudget[b], 2);
+            var spending = TotalSpendingPerBudget(allocationPerBudgetAndTreatment, b).RoundToCent();
+            var amount = amountPerBudget[b].RoundToCent();
 
             if (spending > amount)
             {
-                throw new Exception($"Budget spending exceeds amount by [{spending - amount}].");
+                throw new Exception($"Budget spending [{spending}] exceeds amount [{amount}].");
             }
         }
 
         for (var t = 0; t < costPerTreatment.Length; ++t)
         {
-            var funding = totalTreatmentFunding(allocationPerBudgetAndTreatment, t);
-            var cost = Math.Round(costPerTreatment[t], 2);
+            var funding = TotalFundingPerTreatment(allocationPerBudgetAndTreatment, t).RoundToCent();
+            var cost = costPerTreatment[t].RoundToCent();
 
-            if (funding < cost)
+            if (funding != cost)
             {
-                throw new Exception($"Treatment cost exceeds funding by [{cost - funding}].");
-            }
-            else if (funding > cost)
-            {
-                throw new Exception($"Treatment funding exceeds cost by [{funding - cost}].");
+                throw new Exception($"Treatment funding [{funding}] does not match cost [{cost}].");
             }
         }
 
         return true;
+    }
 
-        // Local functions
+    private static void Allocate<T>(out T[] array, int length) => array = new T[length];
 
-        static decimal totalBudgetSpending(decimal?[,] solution, int b)
+    private static int ArrayLength<T>(T[] array) => array.Length;
+
+    private static void Assign(ref decimal variable, decimal value) => variable = value;
+
+    private static void Increment(ref decimal variable, decimal value) => variable += value;
+
+    private static bool IsNegative(decimal value) => value < 0;
+
+    private static bool IsNull<T>(T value) => value is null;
+
+    private static decimal RoundToCent(this decimal value) => Math.Round(value, 2);
+
+    private static decimal TotalFundingPerTreatment(decimal?[,] allocationPerBudgetAndTreatment, int t)
+    {
+        decimal? totalFunding = 0;
+
+        for (var b = 0; b < allocationPerBudgetAndTreatment.GetLength(0); ++b)
         {
-            decimal? total = 0;
-
-            for (var t = 0; t < solution.GetLength(1); ++t)
-            {
-                total += solution[b, t] ?? 0;
-            }
-
-            return Math.Round(total.Value, 2);
+            totalFunding += allocationPerBudgetAndTreatment[b, t] ?? 0;
         }
 
-        static decimal totalTreatmentFunding(decimal?[,] solution, int t)
+        return totalFunding.Value;
+    }
+
+    private static decimal TotalFundingPerTreatment(decimal?[][,] allocationPerBudgetAndTreatmentPerYear, int t)
+    {
+        decimal? totalFunding = 0;
+
+        foreach (var allocationPerBudgetAndTreatment in allocationPerBudgetAndTreatmentPerYear)
         {
-            decimal? total = 0;
-
-            for (var b = 0; b < solution.GetLength(0); ++b)
-            {
-                total += solution[b, t] ?? 0;
-            }
-
-            return Math.Round(total.Value, 2);
+            totalFunding += TotalFundingPerTreatment(allocationPerBudgetAndTreatment, t);
         }
+
+        return totalFunding.Value;
+    }
+
+    private static decimal TotalSpendingPerBudget(decimal?[,] allocationPerBudgetAndTreatment, int b)
+    {
+        decimal? totalSpending = 0;
+
+        for (var t = 0; t < allocationPerBudgetAndTreatment.GetLength(1); ++t)
+        {
+            totalSpending += allocationPerBudgetAndTreatment[b, t] ?? 0;
+        }
+
+        return totalSpending.Value;
     }
 }

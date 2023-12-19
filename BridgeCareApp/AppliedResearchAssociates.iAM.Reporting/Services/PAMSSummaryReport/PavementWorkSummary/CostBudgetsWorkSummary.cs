@@ -11,7 +11,6 @@ using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.StaticC
 using WorkTypeMap = AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary.WorkTypeMap;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
 {
@@ -875,7 +874,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             column = currentCell.Column;
             worksheet.Cells[currentCell.Row, column].Value = PAMSConstants.CommittedTotal;
             column++;
-            int firstTotalYear = TotalCommittedSpent.Keys.Min();
+            int firstTotalYear = TotalCommittedSpent.Count > 0 ? TotalCommittedSpent.Keys.Min() : startYear;
             var offsetForTotal = firstTotalYear - startYear;
             var fromColumn = column + offsetForTotal + 1;
 
@@ -979,7 +978,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells[currentCell.Row, column].Value = "SAP Total";
             column++;
 
-            int firstTotalYear = TotalSAPSpent.Keys.Min();
+            int firstTotalYear = TotalSAPSpent.Count > 0 ? TotalSAPSpent.Keys.Min() : startYear;
             var offsetForTotal = firstTotalYear - startYear;
 
             var fromColumn = column + 1 + offsetForTotal;
@@ -1087,7 +1086,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells[currentCell.Row, column].Value = "Project Builder Total";
             column++;
 
-            int firstTotalYear = TotalProjectBuilderSpent.Keys.Min();
+            int firstTotalYear = TotalProjectBuilderSpent.Count > 0 ? TotalProjectBuilderSpent.Keys.Min() : startYear;
             var offsetForTotal = firstTotalYear - startYear;
 
             var fromColumn = column + 1 + offsetForTotal;

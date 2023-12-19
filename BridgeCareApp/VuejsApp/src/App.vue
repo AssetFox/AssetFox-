@@ -454,13 +454,13 @@ import { getUrl } from './shared/utils/get-url';
         productLogo.value = productLogoBase64.value;
     })
 
-    watch(stateInventoryReportNames, () => onStateInventoryReportNamesChanged)
+    watch(stateInventoryReportNames, onStateInventoryReportNamesChanged)
     function onStateInventoryReportNamesChanged(){
         if(stateInventoryReportNames.value.length > 0)
             inventoryReportName = stateInventoryReportNames.value[0]
     }
 
-    watch(stateAlertMessage, () => onStateAlertMessageChanged)
+    watch(stateAlertMessage, onStateAlertMessageChanged)
     function onStateAlertMessageChanged(){
         if(stateAlertMessage.value.trim() !== ''){
             alert.value = true;
@@ -469,9 +469,9 @@ import { getUrl } from './shared/utils/get-url';
             alert.value = false;
     }
 
-    watch(alert, () => onAlertChanged)
+    watch(alert, onAlertChanged)
     function onAlertChanged(){
-        if(!alert){
+        if(!alert.value){
             setAlertMessageAction('');
         }
     }

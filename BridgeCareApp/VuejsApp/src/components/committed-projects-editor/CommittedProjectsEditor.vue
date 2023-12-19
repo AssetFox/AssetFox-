@@ -89,7 +89,7 @@
         <v-col>
                 <p-card style="padding: 10px; width: auto;">
                     <v-row>
-                        <v-data-table-server
+                        <v-data-table
                         id="CommittedProjectsEditor-committedProjects-vdatatable"
                         :headers="cpGridHeaders"
                         :items-length="totalItems"
@@ -252,7 +252,7 @@
                                 </td>
                             </tr>
                             </template>
-                        </v-data-table-server>    
+                        </v-data-table>    
                     </v-row>
             </p-card>
         </v-col>
@@ -568,7 +568,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
         await selectScenarioAction({ scenarioId: scenarioId });
         await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: scenarioId, workType: WorkType.ImportCommittedProject}).then(response => {
             if(response.data){
-                setAlertMessageAction("Committed project import has been added to the work queue")
+                setAlertMessageAction("Committed project import has been added to the work queue");
             }
         });
         await initializePages();
@@ -905,9 +905,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
                     result.file,
                     result.applyNoTreatment,
                     scenarioId,
-                ).then((response: any) =>{
-                    setAlertMessageAction("Committed project import has been added to the work queue")
-                })
+                    ).then((response: any) =>{
+                        setAlertMessageAction("Committed project import has been added to the work queue");                        
+                    })
             } else {
                 addErrorNotificationAction({
                     message: 'No file selected.',

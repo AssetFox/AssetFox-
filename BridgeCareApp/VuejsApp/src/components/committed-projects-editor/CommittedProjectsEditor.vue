@@ -566,11 +566,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
         await getTreatmentLibrariesAction();
         await getCurrentUserOrSharedScenarioAction({simulationId: scenarioId});
         await selectScenarioAction({ scenarioId: scenarioId });
-        await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: scenarioId, workType: WorkType.ImportCommittedProject}).then(response => {
-            if(response.data){
-                setAlertMessageAction("Committed project import has been added to the work queue")
-            }
-        });
         await initializePages();
         if (scenarioId !== undefined) {  
             await fetchTreatmentLibrary(scenarioId);
@@ -905,9 +900,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
                     result.file,
                     result.applyNoTreatment,
                     scenarioId,
-                ).then((response: any) =>{
-                    setAlertMessageAction("Committed project import has been added to the work queue")
-                })
+                    ).then((response: any) =>{ 
+                        addSuccessNotificationAction({message:"Committed project import has been added to the work queue"});
+                    })
             } else {
                 addErrorNotificationAction({
                     message: 'No file selected.',

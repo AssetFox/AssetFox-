@@ -123,7 +123,12 @@ public static class Funding
 
             if (settings.CashFlowEnforcesFirstYearFundingFractions)
             {
-                // to-do: deal with first-year fractions
+                // prepare first-year fractions
+
+                while (++year < cashFlowPercentagePerYear.Length)
+                {
+                    // use first-year fractions (and fail if can't be used)
+                }
 
                 break;
             }

@@ -2,7 +2,7 @@
     <v-container fluid grid-list-xl>
         <v-row>
             <v-col cols="12">
-                <v-row justify-center>
+                <v-row justify="center">
                     <v-card>
                         <v-card-title>
                             <h3>Beginning Authentication</h3>

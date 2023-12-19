@@ -900,8 +900,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
                     result.file,
                     result.applyNoTreatment,
                     scenarioId,
-                    ).then((response: any) =>{ 
-                        addSuccessNotificationAction({message:"Committed project import has been added to the work queue"});
+                    ).then((response: any) =>{
+                        setAlertMessageAction("Committed project import has been added to the work queue");                        
                     })
             } else {
                 addErrorNotificationAction({

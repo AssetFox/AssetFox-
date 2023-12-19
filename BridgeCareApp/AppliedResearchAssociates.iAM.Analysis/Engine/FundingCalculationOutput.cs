@@ -10,10 +10,10 @@ public sealed class FundingCalculationOutput
 
     public FundingCalculationOutput(FundingCalculationOutput original)
     {
-        SpendingMatrix.AddRange(original.SpendingMatrix);
+        AllocationMatrix.AddRange(original.AllocationMatrix);
     }
 
-    public List<Spending> SpendingMatrix { get; } = new();
+    public List<Allocation> AllocationMatrix { get; } = new();
 
-    public sealed record Spending(string BudgetName, string TreatmentName, decimal Spent);
+    public sealed record Allocation(string BudgetName, string TreatmentName, decimal Allocated);
 }

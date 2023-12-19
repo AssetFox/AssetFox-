@@ -1,118 +1,135 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Google.OrTools.LinearSolver;
+﻿using Google.OrTools.LinearSolver;
 
-namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+namespace AppliedResearchAssociates.iAM.Analysis.Logic;
 
 public static class Funding
 {
+    public sealed record Settings(
+        bool BudgetCarryoverIsAllowed = false,
+        bool CashFlowEnforcesFirstYearFundingFractions = false,
+        bool MultipleBudgetsCanFundEachTreatment = false);
+
+    private static readonly decimal?[,] EmptyAllocationMatrix = { };
+
+    public static int? TryCashFlow(
+        decimal[] cashFlowPercentagePerYear,
+        bool[,] allocationIsAllowedPerBudgetAndTreatment,
+        decimal[][] amountPerBudgetPerYear,
+        decimal[] costPerTreatment,
+        Settings settings,
+        out decimal?[][,] allocationPerBudgetAndTreatmentPerYear)
+    {
+        allocationPerBudgetAndTreatmentPerYear = Array.Empty<decimal?[,]>();
+        return null;
+    }
+
     public static bool TrySolve(
-        bool[,] allocationIsAllowed,
-        decimal[] budgetAmounts,
-        decimal[] treatmentCosts,
-        bool multipleBudgetsCanFundEachTreatment,
-        out decimal?[,] solution)
+        bool[,] allocationIsAllowedPerBudgetAndTreatment,
+        decimal[] amountPerBudget,
+        decimal[] costPerTreatment,
+        Settings settings,
+        out decimal?[,] allocationPerBudgetAndTreatment)
     {
         // Pre-validation
 
-        if (allocationIsAllowed is null)
+        if (allocationIsAllowedPerBudgetAndTreatment is null)
         {
-            throw new ArgumentNullException(nameof(allocationIsAllowed));
+            throw new ArgumentNullException(nameof(allocationIsAllowedPerBudgetAndTreatment));
         }
 
-        if (budgetAmounts is null)
+        if (amountPerBudget is null)
         {
-            throw new ArgumentNullException(nameof(budgetAmounts));
+            throw new ArgumentNullException(nameof(amountPerBudget));
         }
 
-        if (treatmentCosts is null)
+        if (costPerTreatment is null)
         {
-            throw new ArgumentNullException(nameof(treatmentCosts));
+            throw new ArgumentNullException(nameof(costPerTreatment));
         }
 
-        if (budgetAmounts.Length == 0)
+        if (amountPerBudget.Length == 0)
         {
-            throw new ArgumentException("No budget amounts are given.", nameof(budgetAmounts));
+            throw new ArgumentException("No budget amounts are given.", nameof(amountPerBudget));
         }
 
-        if (treatmentCosts.Length == 0)
+        if (costPerTreatment.Length == 0)
         {
-            throw new ArgumentException("No treatment costs are given.", nameof(treatmentCosts));
+            throw new ArgumentException("No treatment costs are given.", nameof(costPerTreatment));
         }
 
-        if (allocationIsAllowed.GetLength(0) != budgetAmounts.Length ||
-            allocationIsAllowed.GetLength(1) != treatmentCosts.Length)
+        if (allocationIsAllowedPerBudgetAndTreatment.GetLength(0) != amountPerBudget.Length ||
+            allocationIsAllowedPerBudgetAndTreatment.GetLength(1) != costPerTreatment.Length)
         {
             throw new Exception("Inconsistent input sizes.");
         }
 
-        for (var b = 0; b < budgetAmounts.Length; ++b)
+        for (var b = 0; b < amountPerBudget.Length; ++b)
         {
-            if (budgetAmounts[b] <= 0)
+            if (amountPerBudget[b] <= 0)
             {
-                throw new ArgumentException($"Budget amount [{b}] is non-positive: [{budgetAmounts[b]}]");
+                throw new ArgumentException($"Budget amount [{b}] is non-positive: [{amountPerBudget[b]}]");
             }
         }
 
-        for (var t = 0; t < treatmentCosts.Length; ++t)
+        for (var t = 0; t < costPerTreatment.Length; ++t)
         {
-            if (treatmentCosts[t] <= 0)
+            if (costPerTreatment[t] <= 0)
             {
-                throw new ArgumentException($"Treatment cost [{t}] is non-positive: [{treatmentCosts[t]}]");
+                throw new ArgumentException($"Treatment cost [{t}] is non-positive: [{costPerTreatment[t]}]");
             }
         }
 
-        if (Math.Round(budgetAmounts.Sum(), 2) < Math.Round(treatmentCosts.Sum(), 2))
+        if (Math.Round(amountPerBudget.Sum(), 2) < Math.Round(costPerTreatment.Sum(), 2))
         {
             // Trivially unsolvable.
-            solution = null;
+            allocationPerBudgetAndTreatment = EmptyAllocationMatrix;
             return false;
         }
 
         // Optimization
 
-        solution = new decimal?[budgetAmounts.Length, treatmentCosts.Length];
+        allocationPerBudgetAndTreatment = new decimal?[amountPerBudget.Length, costPerTreatment.Length];
 
-        if (budgetAmounts.Length == 1)
+        if (amountPerBudget.Length == 1)
         {
             // Degenerate case.
 
-            var amountRemaining = budgetAmounts[0];
+            var amountRemaining = amountPerBudget[0];
 
-            for (var t = 0; t < treatmentCosts.Length; ++t)
+            for (var t = 0; t < costPerTreatment.Length; ++t)
             {
-                var cost = treatmentCosts[t];
+                var cost = costPerTreatment[t];
 
-                if (!allocationIsAllowed[0, t] || cost > amountRemaining)
+                if (!allocationIsAllowedPerBudgetAndTreatment[0, t] || cost > amountRemaining)
                 {
                     return false;
                 }
 
                 amountRemaining -= cost;
 
-                solution[0, t] = Math.Round(cost, 2);
+                allocationPerBudgetAndTreatment[0, t] = Math.Round(cost, 2);
             }
         }
-        else if (treatmentCosts.Length == 1)
+        else if (costPerTreatment.Length == 1)
         {
             // Less degenerate case.
 
-            var costRemaining = treatmentCosts[0];
+            var costRemaining = costPerTreatment[0];
 
-            for (var b = 0; b < budgetAmounts.Length; ++b)
+            for (var b = 0; b < amountPerBudget.Length; ++b)
             {
-                if (allocationIsAllowed[b, 0])
+                if (allocationIsAllowedPerBudgetAndTreatment[b, 0])
                 {
-                    if (costRemaining <= budgetAmounts[b])
+                    var amountAvailable = amountPerBudget[b];
+                    if (costRemaining <= amountAvailable)
                     {
-                        solution[b, 0] = Math.Round(costRemaining, 2);
+                        allocationPerBudgetAndTreatment[b, 0] = Math.Round(costRemaining, 2);
                         costRemaining = 0;
                     }
-                    else if (multipleBudgetsCanFundEachTreatment)
+                    else if (settings.MultipleBudgetsCanFundEachTreatment)
                     {
-                        solution[b, 0] = Math.Round(budgetAmounts[b], 2);
-                        costRemaining -= budgetAmounts[b];
+                        allocationPerBudgetAndTreatment[b, 0] = Math.Round(amountAvailable, 2);
+                        costRemaining -= amountAvailable;
                     }
                 }
             }
@@ -122,39 +139,39 @@ public static class Funding
                 return false;
             }
         }
-        else if (multipleBudgetsCanFundEachTreatment)
+        else if (settings.MultipleBudgetsCanFundEachTreatment)
         {
             // Use LP with GLOP. Build the LP.
 
             using var solver = Solver.CreateSolver("GLOP") ??
                 throw new Exception("Solver could not be created.");
 
-            var allocationVariablesMatrix = new Variable[budgetAmounts.Length, treatmentCosts.Length];
-            var allocationVariablesPerBudget = new List<Variable>[budgetAmounts.Length];
+            var allocationVariablesMatrix = new Variable[amountPerBudget.Length, costPerTreatment.Length];
+            var allocationVariablesPerBudget = new List<Variable>[amountPerBudget.Length];
             var allocationVariablesVector = new MPVariableVector(allocationVariablesMatrix.Length);
 
-            var spendingConstraints = new Constraint[budgetAmounts.Length];
-            var fundingConstraints = new Constraint[treatmentCosts.Length];
+            var spendingConstraints = new Constraint[amountPerBudget.Length];
+            var fundingConstraints = new Constraint[costPerTreatment.Length];
 
-            for (var t = 0; t < treatmentCosts.Length; ++t)
+            for (var t = 0; t < costPerTreatment.Length; ++t)
             {
                 const decimal fundingTolerance = 0.001m; // 1/10th of 1 cent
                 fundingConstraints[t] = solver.MakeConstraint(
-                    (double)(treatmentCosts[t] - fundingTolerance),
-                    (double)(treatmentCosts[t] + fundingTolerance),
+                    (double)(costPerTreatment[t] - fundingTolerance),
+                    (double)(costPerTreatment[t] + fundingTolerance),
                     $"funding[{t}]");
             }
 
-            for (var b = 0; b < budgetAmounts.Length; ++b)
+            for (var b = 0; b < amountPerBudget.Length; ++b)
             {
-                spendingConstraints[b] = solver.MakeConstraint(0, (double)budgetAmounts[b], $"spending[{b}]");
-                allocationVariablesPerBudget[b] = new(treatmentCosts.Length);
+                spendingConstraints[b] = solver.MakeConstraint(0, (double)amountPerBudget[b], $"spending[{b}]");
+                allocationVariablesPerBudget[b] = new(costPerTreatment.Length);
 
-                for (var t = 0; t < treatmentCosts.Length; ++t)
+                for (var t = 0; t < costPerTreatment.Length; ++t)
                 {
-                    if (allocationIsAllowed[b, t])
+                    if (allocationIsAllowedPerBudgetAndTreatment[b, t])
                     {
-                        var maximumAllocation = Math.Min(budgetAmounts[b], treatmentCosts[t]);
+                        var maximumAllocation = Math.Min(amountPerBudget[b], costPerTreatment[t]);
                         var allocationVariable = solver.MakeNumVar(0, (double)maximumAllocation, $"allocation[{b},{t}]");
 
                         allocationVariablesMatrix[b, t] = allocationVariable;
@@ -173,7 +190,7 @@ public static class Funding
 
             using var objective = solver.Objective();
 
-            for (var b = 0; b < budgetAmounts.Length - 1; ++b)
+            for (var b = 0; b < amountPerBudget.Length - 1; ++b)
             {
                 if (b > 0)
                 {
@@ -190,7 +207,7 @@ public static class Funding
 
                     // This constraint update also resets all variable values. (Probably a
                     // deliberate side-effect, because changing a constraint bound can potentially
-                    // change the feasibility of any solution.)
+                    // change the space of feasible solutions.)
                     spendingConstraints[b - 1].SetLb(maximizedSpending);
 
                     // Un-reset all variable values to continue from the previous solution.
@@ -213,22 +230,22 @@ public static class Funding
 
             // Prepare the solution.
 
-            for (var b = 0; b < budgetAmounts.Length; ++b)
+            for (var b = 0; b < amountPerBudget.Length; ++b)
             {
-                for (var t = 0; t < treatmentCosts.Length; ++t)
+                for (var t = 0; t < costPerTreatment.Length; ++t)
                 {
                     if (allocationVariablesMatrix[b, t] is Variable allocationVariable)
                     {
-                        solution[b, t] = Math.Round((decimal)allocationVariable.SolutionValue(), 2);
+                        allocationPerBudgetAndTreatment[b, t] = Math.Round((decimal)allocationVariable.SolutionValue(), 2);
                     }
                 }
             }
 
             // Manually dispose collections of disposables.
 
-            foreach (var v in allocationVariablesMatrix)
+            foreach (var v in allocationVariablesVector)
             {
-                v?.Dispose();
+                v.Dispose();
             }
 
             foreach (var c in spendingConstraints)
@@ -252,10 +269,10 @@ public static class Funding
 
         // Post-validation
 
-        for (var b = 0; b < budgetAmounts.Length; ++b)
+        for (var b = 0; b < amountPerBudget.Length; ++b)
         {
-            var spending = totalBudgetSpending(solution, b);
-            var amount = Math.Round(budgetAmounts[b], 2);
+            var spending = totalBudgetSpending(allocationPerBudgetAndTreatment, b);
+            var amount = Math.Round(amountPerBudget[b], 2);
 
             if (spending > amount)
             {
@@ -263,10 +280,10 @@ public static class Funding
             }
         }
 
-        for (var t = 0;  t < treatmentCosts.Length; ++t)
+        for (var t = 0; t < costPerTreatment.Length; ++t)
         {
-            var funding = totalTreatmentFunding(solution, t);
-            var cost = Math.Round(treatmentCosts[t], 2);
+            var funding = totalTreatmentFunding(allocationPerBudgetAndTreatment, t);
+            var cost = Math.Round(costPerTreatment[t], 2);
 
             if (funding < cost)
             {

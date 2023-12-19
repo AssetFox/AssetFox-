@@ -1,7 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.Analysis.Engine;
-using Xunit;
-
-namespace AppliedResearchAssociates.iAM.Analysis.Testing;
+﻿namespace AppliedResearchAssociates.iAM.Analysis.Logic.Testing;
 
 public class FundingCalculationTests
 {
@@ -32,7 +29,7 @@ public class FundingCalculationTests
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            true,
+            new(MultipleBudgetsCanFundEachTreatment: true),
             out var solution);
 
         Assert.False(solved);
@@ -64,7 +61,7 @@ public class FundingCalculationTests
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            true,
+            new(MultipleBudgetsCanFundEachTreatment: true),
             out var solution);
 
         Assert.True(solved);
@@ -105,7 +102,7 @@ public class FundingCalculationTests
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            true,
+            new(MultipleBudgetsCanFundEachTreatment: true),
             out var solution);
 
         Assert.False(solved);
@@ -137,7 +134,7 @@ public class FundingCalculationTests
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            true,
+            new(MultipleBudgetsCanFundEachTreatment: true),
             out var solution);
 
         Assert.False(solved);
@@ -169,7 +166,7 @@ public class FundingCalculationTests
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            false,
+            new(MultipleBudgetsCanFundEachTreatment: false),
             out var solution);
 
         Assert.True(solved);
@@ -210,7 +207,7 @@ public class FundingCalculationTests
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            false,
+            new(MultipleBudgetsCanFundEachTreatment: false),
             out var solution);
 
         Assert.False(solved);
@@ -240,7 +237,7 @@ public class FundingCalculationTests
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            true,
+            new(MultipleBudgetsCanFundEachTreatment: true),
             out var solution);
 
         Assert.False(solved);
@@ -270,7 +267,7 @@ public class FundingCalculationTests
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            true,
+            new(MultipleBudgetsCanFundEachTreatment: true),
             out var solution);
 
         Assert.True(solved);
@@ -307,7 +304,7 @@ public class FundingCalculationTests
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            true,
+            new(MultipleBudgetsCanFundEachTreatment: true),
             out var solution);
 
         Assert.False(solved);
@@ -335,7 +332,7 @@ public class FundingCalculationTests
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            true,
+            new(MultipleBudgetsCanFundEachTreatment: true),
             out var solution);
 
         Assert.True(solved);
@@ -370,7 +367,7 @@ public class FundingCalculationTests
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            true,
+            new(MultipleBudgetsCanFundEachTreatment: true),
             out var solution);
 
         Assert.False(solved);
@@ -408,7 +405,7 @@ public class FundingCalculationTests
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            true,
+            new(MultipleBudgetsCanFundEachTreatment: true),
             out var solution);
 
         Assert.True(solved);
@@ -448,7 +445,7 @@ public class FundingCalculationTests
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            true,
+            new(MultipleBudgetsCanFundEachTreatment: true),
             out var solution);
 
         Assert.True(solved);
@@ -487,7 +484,7 @@ public class FundingCalculationTests
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            true,
+            new(MultipleBudgetsCanFundEachTreatment: true),
             out var solution);
 
         Assert.False(solved);

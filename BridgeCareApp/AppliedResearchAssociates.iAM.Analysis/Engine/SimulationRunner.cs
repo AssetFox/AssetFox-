@@ -889,7 +889,7 @@ public sealed class SimulationRunner
 
             treatmentConsideration.FundingCalculationOutput = new()
             {
-                SpendingMatrix =
+                AllocationMatrix =
                 {
                     new(committedProject.Budget.Name, treatment.Name, treatmentCost)
                 }
@@ -919,6 +919,8 @@ public sealed class SimulationRunner
             // otherwise, return 'none'
 
             // [todo] cash flow (which must be attempted before regular payment)
+
+            // turn cash flow funding into an independent calculation, a la the LP/MIP optimization method.
         }
 
         // At this point, we know we are not dealing with a committed project.

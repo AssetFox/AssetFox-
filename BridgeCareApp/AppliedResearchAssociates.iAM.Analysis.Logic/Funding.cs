@@ -207,7 +207,7 @@ public static class Funding
 
                     // This constraint update also resets all variable values. (Probably a
                     // deliberate side-effect, because changing a constraint bound can potentially
-                    // change the space of feasible solutions.)
+                    // change the solution space.)
                     spendingConstraints[b - 1].SetLb(maximizedSpending);
 
                     // Un-reset all variable values to continue from the previous solution.

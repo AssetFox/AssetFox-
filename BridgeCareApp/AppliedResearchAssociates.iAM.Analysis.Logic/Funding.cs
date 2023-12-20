@@ -103,7 +103,10 @@ public static class Funding
 
             ref var allocationPerBudgetAndTreatment = ref allocationPerBudgetAndTreatmentPerYear[year];
 
-            if (year > 0 && settings.CashFlowEnforcesFirstYearFundingFractions)
+            var fundingFractionsEnforcementIsActive =
+                year > 0 && settings.CashFlowEnforcesFirstYearFundingFractions;
+
+            if (fundingFractionsEnforcementIsActive)
             {
                 allocationPerBudgetAndTreatment = new decimal?[
                     workingAmountPerBudget.Length,
@@ -142,10 +145,9 @@ public static class Funding
 
                 if (workingAmountPerBudget[b] < 0)
                 {
-                    // This should occur only when first-year funding fractions aren't supported by
-                    // a subsequent year's budget amounts.
-                    var conditionIsValid = year > 0 && settings.CashFlowEnforcesFirstYearFundingFractions;
-                    return conditionIsValid ? year : throw new Exception("Overspending condition is invalid.");
+                    return fundingFractionsEnforcementIsActive
+                        ? year
+                        : throw new Exception($"Budget [{b}] overspent, but funding fractions weren't enforced.");
                 }
             }
 

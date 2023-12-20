@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
@@ -32,7 +28,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int pavementCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
             IReadOnlyCollection<SelectableTreatment> selectableTreatments,
             ICollection<CommittedProject> committedProjects,
-            Dictionary<string, string> treatmentCategoryLookup)
+            Dictionary<string, string> treatmentCategoryLookup,
+            List<DTOs.Abstract.BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
         {
             var workSummaryByBudgetModels = CreateWorkSummaryByBudgetModels(reportOutputData);
             var committedTreatments = new HashSet<string>();
@@ -46,9 +43,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             }
             simulationTreatments.Sort((a, b) => a.Name.CompareTo(b.Name));
 
-            var currentCell = new CurrentCell { Row = 1, Column = 1 };
-            var committedProjectsForWorkOutsideScope = new List<CommittedProject>();
-            committedProjectsForWorkOutsideScope.AddRange(committedProjects);
+            var currentCell = new CurrentCell { Row = 1, Column = 1 };            
             foreach (var budgetSummaryModel in workSummaryByBudgetModels)
             {
                 var noData = !budgetSummaryModel.YearlyData.Any(datum => datum.Amount != 0);
@@ -57,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     continue;
                 }
                 
-                PopulateYearlyCostCommittedProj(reportOutputData, budgetSummaryModel, yearlyCostCommittedProj, treatmentCategoryLookup, committedProjectsForWorkOutsideScope);
+                PopulateYearlyCostCommittedProj(reportOutputData, budgetSummaryModel, yearlyCostCommittedProj, treatmentCategoryLookup);
 
                 // Inside iteration since each section has its own budget analysis section.
                 var costBudgetsWorkSummary = new CostBudgetsWorkSummary();
@@ -121,7 +116,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     workTypeTotals,
                     committedProjects,
                     budgetSummaryModel,
-                    reportOutputData);
+                    reportOutputData,
+                    committedProjectsForWorkOutsideScope);
 
                 // Finally, advance for next budget label
                 currentCell.Row++;
@@ -191,8 +187,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                     Dictionary<int, Dictionary<string,
                                     (decimal treatmentCost, int pavementCount,
                                     string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
-                                    Dictionary<string, string> treatmentCategoryLookup,
-                                    List<CommittedProject> committedProjectsForWorkOutsideScope)
+                                    Dictionary<string, string> treatmentCategoryLookup)
         {
             yearlyCostCommittedProj.Clear();
 
@@ -227,13 +222,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                 var pavementCount = currentRecord.pavementCount + 1;
                                 var projectSource = currentRecord.projectSource;
                                 yearlyCostCommittedProj[yearData.Year][appliedTreatment] = (treatmentCost, pavementCount, projectSource, treatmentCategory);
-                            }
-
-                            // Remove from committedProjectsForWorkOutsideScope
-                            var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Name == appliedTreatment && _.Year == yearData.Year && _.ProjectSource.ToString() == section.ProjectSource && _.treatmentCategory.ToString() == treatmentCategory);
-                            if (toRemove != null)
-                            {
-                                committedProjectsForWorkOutsideScope.Remove(toRemove);
                             }
                         }
                     }

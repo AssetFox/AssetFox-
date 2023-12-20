@@ -82,7 +82,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         }
 
 
-        internal void FillDataToUseInExcel(SimulationOutput reportOutputData, Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj, Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndLengthPerTreatmentPerYear, Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear, Dictionary<string, string> treatmentCategoryLookup, List<CommittedProject> committedProjectsForWorkOutsideScope)
+        internal void FillDataToUseInExcel(SimulationOutput reportOutputData, Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj, Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndLengthPerTreatmentPerYear, Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
         {
             foreach (var yearData in reportOutputData.Years)
             {
@@ -115,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         }
 
                         // Remove from committedProjectsForWorkOutsideScope
-                        var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Name == appliedTreatment && _.Year == yearData.Year && _.ProjectSource.ToString() == section.ProjectSource && _.treatmentCategory.ToString() == treatmentCategory);
+                        var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Treatment == appliedTreatment && _.Year == yearData.Year);
                         if (toRemove != null)
                         {
                             committedProjectsForWorkOutsideScope.Remove(toRemove);
@@ -127,8 +127,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             }
         }
 
-        internal void FillDataToUseInExcel(
-            WorkSummaryByBudgetModel budgetSummaryModel,
+        internal void FillDataToUseInExcel(WorkSummaryByBudgetModel budgetSummaryModel,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
             Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear
             )

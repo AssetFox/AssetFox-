@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.StaticC
 using WorkTypeMap = AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary.WorkTypeMap;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
 {
@@ -41,8 +42,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             List<(string TreatmentName, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments,
             Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals,
             ICollection<CommittedProject> committedProjects,
-            List<CommittedProject> committedProjectsForWorkOutsideScope)
-        {            
+            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
+        {
             FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfSAPWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfProjectBuilderWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
@@ -52,13 +53,27 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             FillTreatmentGroupTotalsSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentGroupPerYear);
             var workTypeTotalsWorkOutsideScope = AddCostOfWorkOutsideScope(committedProjectsForWorkOutsideScope);
             FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, workTypeTotals, workTypeTotalsWorkOutsideScope, yearlyBudgetAmount, out var totalSpendingRow);
-            var committedProjectsList = committedProjects.ToList();
-            committedProjectsList.RemoveAll(committedProjectsForWorkOutsideScope.Contains);
+            var committedProjectsList = TrimCommittedProjects(committedProjects, committedProjectsForWorkOutsideScope);
             FillBudgetTotalSection(worksheet, currentCell, simulationYears, committedProjectsList, totalSpendingRow);
             FillBudgetAnalysisSection(worksheet, currentCell, simulationYears, yearlyBudgetAmount, committedProjectsList, totalSpendingRow);
-            
+
             var chartRowsModel = new ChartRowsModel();
             return chartRowsModel;
+        }
+
+        private static List<CommittedProject> TrimCommittedProjects(ICollection<CommittedProject> committedProjects, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
+        {
+            var committedProjectsList = committedProjects.ToList();
+            foreach (var project in committedProjectsForWorkOutsideScope)
+            {
+                var toRemove = committedProjectsList.FirstOrDefault(cp => cp.Year == project.Year && cp.Name == project.Treatment && cp.Cost == project.Cost);
+                if (toRemove != null)
+                {
+                    committedProjectsList.Remove(toRemove);
+                }
+            }
+
+            return committedProjectsList;
         }
 
         public ChartRowsModel FillCostBudgetWorkSummarySectionsbyBudget(
@@ -71,10 +86,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals
              , ICollection<CommittedProject> committedProjects,
             WorkSummaryByBudgetModel workSummaryByBudgetModel,
-            SimulationOutput reportOutputData)
-        {
-            var committedProjectsForWorkOutsideScope = new List<CommittedProject>();
-            committedProjectsForWorkOutsideScope.AddRange(committedProjects);
+            SimulationOutput reportOutputData,
+            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
+        {            
             FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfSAPWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfProjectBuilderWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
@@ -1369,8 +1383,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 }
 
                 decimal pamsBudgetTotal = Convert.ToDecimal(worksheet.Cells[totalSpendingRow, column].Value) - mpmsBudgetTotal - sapBudgetTotal - projectBuilderBudgetTotal;
-                decimal yearlyBudget = Convert.ToDecimal(yearlyBudgetAmount[workSummaryByBudgetModel.BudgetName].YearlyAmounts[yearIndex].Value);
-                // TODO check if correct
+                decimal yearlyBudget = Convert.ToDecimal(yearlyBudgetAmount[workSummaryByBudgetModel.BudgetName].YearlyAmounts[yearIndex].Value);                
                 decimal remainingBudget = yearlyBudget - (pamsBudgetTotal + mpmsBudgetTotal + sapBudgetTotal + projectBuilderBudgetTotal);
                 worksheet.Cells[row, column].Value = Convert.ToDouble(remainingBudget);
                 worksheet.Cells[row, column].Style.Numberformat.Format = "$#,##0.00";
@@ -1403,7 +1416,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             }
         }
 
-        private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> AddCostOfWorkOutsideScope(List<CommittedProject> committedProjectsForWorkOutsideScope)
+        private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> AddCostOfWorkOutsideScope(List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
         {
             var workTypeTotalWorkOutsideScope = new Dictionary<TreatmentCategory, SortedDictionary<int, decimal>>();
             var category = TreatmentCategory.WorkOutsideScope;

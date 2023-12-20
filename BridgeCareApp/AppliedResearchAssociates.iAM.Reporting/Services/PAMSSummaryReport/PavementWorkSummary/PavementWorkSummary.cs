@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
 {
@@ -33,7 +34,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             Dictionary<string, Budget> yearlyBudgetAmount,
             IReadOnlyCollection<SelectableTreatment> selectableTreatments,
             ICollection<CommittedProject> committedProjects,
-            Dictionary<string, string> treatmentCategoryLookup)
+            Dictionary<string, string> treatmentCategoryLookup,
+            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
         {
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
             var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>>();
@@ -50,8 +52,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             var costAndLengthPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>(); // Year, treatmentName, cost, length
             var costAndLengthPerTreatmentGroupPerYear = new Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>>();
-            var committedProjectsForWorkOutsideScope = new List<CommittedProject>();
-            committedProjectsForWorkOutsideScope.AddRange(committedProjects);
             _pavementWorkSummaryComputationHelper.FillDataToUseInExcel(reportOutputData, yearlyCostCommittedProj, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, treatmentCategoryLookup, committedProjectsForWorkOutsideScope);
             var workTypeTotals = _pavementWorkSummaryComputationHelper.CalculateWorkTypeTotals(costAndLengthPerTreatmentPerYear, simulationTreatments);
 

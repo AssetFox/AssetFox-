@@ -8,8 +8,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ISelectableTreatmentRepository
     {
-        void CreateScenarioSelectableTreatments(List<SelectableTreatment> selectableTreatments, Guid simulationId);
-
         void GetScenarioSelectableTreatments(Simulation simulation);
 
         DateTime GetLibraryModifiedDate(Guid treatmentLibraryId);

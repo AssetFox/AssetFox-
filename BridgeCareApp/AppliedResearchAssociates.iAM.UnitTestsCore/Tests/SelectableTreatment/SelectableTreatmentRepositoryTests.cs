@@ -18,6 +18,7 @@ using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
+using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
 {
@@ -32,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         private ScenarioConditionalTreatmentConsequenceEntity _testScenarioTreatmentConsequence;
 
 
-        private void Setup()
+        private void SetupAttributesAndNetwork()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
@@ -187,7 +188,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void GetSimpleTreatmentsByLibraryId_EntitiesInDatabase_Gets()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             CreateLibraryTestData();
 
             // Act
@@ -203,7 +204,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void GetSimpleTreatmentsBySimulationId_EntitiesInDb_Gets()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var budget = CreateScenarioTestData(simulation.Id);
 
@@ -218,7 +219,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         [Fact]
         public void GetAllTreatmentLibrariesNoChildren_AtLeastOneLibraryInDb_Gets()
         {
-            Setup();
+            SetupAttributesAndNetwork();
             // Act
             var result = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibrariesNoChildren();
 
@@ -228,7 +229,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         [Fact]
         public void GetScenarioSelectableTreatments_SimulationInDb_DoesNotThrow()
         {
-            Setup();
+            SetupAttributesAndNetwork();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             // Act
             var result = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation.Id);
@@ -238,7 +239,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void GetTreatmentLibraryWithSingleTreatmentByTreatmentId_TreatmentInDb_Expected()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             CreateLibraryTestData();
 
             // Act
@@ -259,7 +260,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         [Fact]
         public void GetScenarioSelectableTreatmentById_TreatmentInDb_Expected()
         {
-            Setup();
+            SetupAttributesAndNetwork();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var budget = CreateScenarioTestData(simulation.Id);
 
@@ -283,7 +284,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void UpsertOrDeleteLibrary_ThenTreatments_DoesNotThrow()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             var dto = new TreatmentLibraryDTO
             {
                 Id = Guid.NewGuid(),
@@ -302,7 +303,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void UpsertOrDeleteScenarioTreatments_DoesNotThrow()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             var dtos = new List<TreatmentDTO>();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
 
@@ -322,7 +323,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void GetAllTreatmentLibrariesNoChildren_EntitiesInDatabase_Deletes()
         {
             //Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             CreateLibraryTestData();
 
             // Act
@@ -335,7 +336,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void GetScenarioSelectableTreatments_EntitiesInDatabase_Gets()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var budget = CreateScenarioTestData(simulation.Id);
 
@@ -358,7 +359,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void UpsertOrDeleteTreatmentLibraryTreatmentsAndPossiblyUsers_LibraryAndTreatmentsInDb_Updates()
         {
             // WJWJWJ could be a good test to modify for the new repo method?
-            Setup();
+            SetupAttributesAndNetwork();
             CreateLibraryTestData();
 
             var dto = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibrariesNoChildren();
@@ -402,7 +403,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void UpsertOrDeleteScenarioSelectableTreatment_ValidInput_Succeeds()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
@@ -462,7 +463,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void UpsertOrDeleteSelectableTreatments_TwoConsequencesCollide_DbUnchanged()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
@@ -533,7 +534,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void DeleteTreatmentLibrary_EntitiesInDb_Deletes()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             CreateLibraryTestData();
 
             // Act
@@ -580,6 +581,51 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
             var result = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatmentByLibraryIdAndName(treatmentLibraryId, "wrongName");
 
             Assert.Null(result);
+        }
+
+        [Fact]
+        public void GetLibraryModifiedDate_Does()
+        {
+            var libraryId = Guid.NewGuid();
+            var before = DateTime.Now;
+
+            var library = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryId);
+
+            var after = DateTime.Now;
+            var modifiedDate = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetLibraryModifiedDate(libraryId);
+            DateTimeAssertions.Between(before, after, modifiedDate, TimeSpan.FromSeconds(1));
+        }
+
+        [Fact]
+        public void AddLibraryTreatments_Does()
+        {
+            var treatmentLibraryId = Guid.NewGuid();
+            var library = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists();
+            var treatments = new List<TreatmentDTO> { treatment };
+
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.AddLibraryTreatments(
+                treatments, treatmentLibraryId);
+
+            var treatmentsAfter = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(treatmentLibraryId);
+            var treatmentAfter = treatmentsAfter.Single();
+            ObjectAssertions.EquivalentExcluding(treatment, treatmentAfter, t => t.CriterionLibrary);
+        }
+
+        [Fact]
+        public void AddScenarioSelectableTreatment_Does()
+        {
+            SetupAttributesAndNetwork();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, NetworkTestSetup.NetworkId);
+
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists();
+            var treatments = new List<TreatmentDTO> { treatment };
+
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.AddScenarioSelectableTreatment(treatments, simulation.Id);
+
+            var treatmentsAfter = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation.Id);
+            var treatmentAfter = treatmentsAfter.Single();
+            ObjectAssertions.EquivalentExcluding(treatment, treatmentAfter, t => t.CriterionLibrary, t => t.Budgets);
         }
     }
 }

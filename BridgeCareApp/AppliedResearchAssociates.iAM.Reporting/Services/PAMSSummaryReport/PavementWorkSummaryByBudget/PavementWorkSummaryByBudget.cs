@@ -47,7 +47,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             simulationTreatments.Sort((a, b) => a.Name.CompareTo(b.Name));
 
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
-
+            var committedProjectsForWorkOutsideScope = new List<CommittedProject>();
+            committedProjectsForWorkOutsideScope.AddRange(committedProjects);
             foreach (var budgetSummaryModel in workSummaryByBudgetModels)
             {
                 var noData = !budgetSummaryModel.YearlyData.Any(datum => datum.Amount != 0);
@@ -55,7 +56,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 {
                     continue;
                 }
-                PopulateYearlyCostCommittedProj(reportOutputData, budgetSummaryModel, yearlyCostCommittedProj, treatmentCategoryLookup);
+                
+                PopulateYearlyCostCommittedProj(reportOutputData, budgetSummaryModel, yearlyCostCommittedProj, treatmentCategoryLookup, committedProjectsForWorkOutsideScope);
 
                 // Inside iteration since each section has its own budget analysis section.
                 var costBudgetsWorkSummary = new CostBudgetsWorkSummary();
@@ -189,7 +191,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                     Dictionary<int, Dictionary<string,
                                     (decimal treatmentCost, int pavementCount,
                                     string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
-                                    Dictionary<string, string> treatmentCategoryLookup)
+                                    Dictionary<string, string> treatmentCategoryLookup,
+                                    List<CommittedProject> committedProjectsForWorkOutsideScope)
         {
             yearlyCostCommittedProj.Clear();
 
@@ -224,6 +227,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                 var pavementCount = currentRecord.pavementCount + 1;
                                 var projectSource = currentRecord.projectSource;
                                 yearlyCostCommittedProj[yearData.Year][appliedTreatment] = (treatmentCost, pavementCount, projectSource, treatmentCategory);
+                            }
+
+                            // Remove from committedProjectsForWorkOutsideScope
+                            var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Name == appliedTreatment && _.Year == yearData.Year && _.ProjectSource.ToString() == section.ProjectSource && _.treatmentCategory.ToString() == treatmentCategory);
+                            if (toRemove != null)
+                            {
+                                committedProjectsForWorkOutsideScope.Remove(toRemove);
                             }
                         }
                     }

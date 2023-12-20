@@ -52,8 +52,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             FillTreatmentGroupTotalsSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentGroupPerYear);
             var workTypeTotalsWorkOutsideScope = AddCostOfWorkOutsideScope(committedProjectsForWorkOutsideScope);
             FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, workTypeTotals, workTypeTotalsWorkOutsideScope, yearlyBudgetAmount, out var totalSpendingRow);
-            FillBudgetTotalSection(worksheet, currentCell, simulationYears, committedProjects, totalSpendingRow);
-            FillBudgetAnalysisSection(worksheet, currentCell, simulationYears, yearlyBudgetAmount, committedProjects, totalSpendingRow);
+            var committedProjectsList = committedProjects.ToList();
+            committedProjectsList.RemoveAll(committedProjectsForWorkOutsideScope.Contains);
+            FillBudgetTotalSection(worksheet, currentCell, simulationYears, committedProjectsList, totalSpendingRow);
+            FillBudgetAnalysisSection(worksheet, currentCell, simulationYears, yearlyBudgetAmount, committedProjectsList, totalSpendingRow);
             
             var chartRowsModel = new ChartRowsModel();
             return chartRowsModel;
@@ -517,6 +519,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells[startRow + 3, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 3, column + 2].Value = "Percentage spent on REPLACEMENT";
 
+            worksheet.Cells[startRow + 4, column + 1].Style.Numberformat.Format = "#0.00%";
+            worksheet.Cells[startRow + 4, column + 2].Value = "Percentage spent on WORK OUTSIDE SCOPE/JURISDICTION";
+
             row += 2;
             worksheet.Cells[row, 1].Value = "Total PAMS Budget";
             column = fromColumn;
@@ -645,6 +650,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             worksheet.Cells[startRow + 3, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 3, column + 2].Value = "Percentage spent on REPLACEMENT";
+
+            worksheet.Cells[startRow + 4, column + 1].Style.Numberformat.Format = "#0.00%";
+            worksheet.Cells[startRow + 4, column + 2].Value = "Percentage spent on WORK OUTSIDE SCOPE/JURISDICTION";
 
             row += 2;
             worksheet.Cells[row, 1].Value = "Total PAMS Budget";  

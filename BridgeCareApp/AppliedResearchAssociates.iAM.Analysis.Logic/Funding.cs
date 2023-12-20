@@ -9,7 +9,7 @@ public static class Funding
         bool CashFlowEnforcesFirstYearFundingFractions = false,
         bool MultipleBudgetsCanFundEachTreatment = false);
 
-    private static readonly decimal?[,] EmptyAllocationMatrix = { };
+    private static readonly decimal?[,] EmptyMatrix = { };
 
     private delegate void UpdateBudgetAmount(ref decimal amount, decimal update);
 
@@ -85,17 +85,17 @@ public static class Funding
 
         UpdateBudgetAmount updateBudgetAmount = settings.BudgetCarryoverIsAllowed ? Increment : Assign;
 
+        decimal?[,] fundingFractionPerBudgetAndTreatment = EmptyMatrix;
+
         for (var year = 0; year < cashFlowPercentagePerYear.Length; ++year)
         {
             var amountPerBudget = amountPerBudgetPerYear[year];
-
             for (var b = 0; b < workingAmountPerBudget.Length; ++b)
             {
                 updateBudgetAmount(ref workingAmountPerBudget[b], amountPerBudget[b]);
             }
 
             var cashFlowFraction = cashFlowPercentagePerYear[year] / 100;
-
             for (var t = 0; t < workingCostPerTreatment.Length; ++t)
             {
                 workingCostPerTreatment[t] = costPerTreatment[t] * cashFlowFraction;
@@ -103,34 +103,67 @@ public static class Funding
 
             ref var allocationPerBudgetAndTreatment = ref allocationPerBudgetAndTreatmentPerYear[year];
 
-            var solved = TrySolve(
-                allocationIsAllowedPerBudgetAndTreatment,
-                workingAmountPerBudget,
-                workingCostPerTreatment,
-                settings,
-                out allocationPerBudgetAndTreatment);
-
-            if (!solved)
+            if (year > 0 && settings.CashFlowEnforcesFirstYearFundingFractions)
             {
-                return year;
+                allocationPerBudgetAndTreatment = new decimal?[
+                    workingAmountPerBudget.Length,
+                    workingCostPerTreatment.Length];
+
+                for (var t = 0; t < workingCostPerTreatment.Length; ++t)
+                {
+                    var cost = workingCostPerTreatment[t];
+                    for (var b = 0; b < workingAmountPerBudget.Length; ++b)
+                    {
+                        var fundingFraction = fundingFractionPerBudgetAndTreatment[b, t];
+                        var allocation = cost * fundingFraction;
+                        allocationPerBudgetAndTreatment[b, t] = allocation;
+                    }
+                }
+            }
+            else
+            {
+                var solved = TrySolve(
+                    allocationIsAllowedPerBudgetAndTreatment,
+                    workingAmountPerBudget,
+                    workingCostPerTreatment,
+                    settings,
+                    out allocationPerBudgetAndTreatment);
+
+                if (!solved)
+                {
+                    return year;
+                }
             }
 
             for (var b = 0; b < workingAmountPerBudget.Length; ++b)
             {
                 var totalSpending = TotalSpendingPerBudget(allocationPerBudgetAndTreatment, b);
                 workingAmountPerBudget[b] -= totalSpending;
+
+                if (workingAmountPerBudget[b] < 0)
+                {
+                    // This should occur only when first-year funding fractions aren't supported by
+                    // a subsequent year's budget amounts.
+                    var conditionIsValid = year > 0 && settings.CashFlowEnforcesFirstYearFundingFractions;
+                    return conditionIsValid ? year : throw new Exception("Overspending condition is invalid.");
+                }
             }
 
-            if (settings.CashFlowEnforcesFirstYearFundingFractions)
+            if (year == 0 && settings.CashFlowEnforcesFirstYearFundingFractions)
             {
-                // prepare first-year fractions
+                fundingFractionPerBudgetAndTreatment = new decimal?[
+                    workingAmountPerBudget.Length,
+                    workingCostPerTreatment.Length];
 
-                while (++year < cashFlowPercentagePerYear.Length)
+                for (var t = 0; t < workingCostPerTreatment.Length; ++t)
                 {
-                    // use first-year fractions (and fail if can't be used)
+                    var totalFunding = TotalFundingPerTreatment(allocationPerBudgetAndTreatment, t);
+                    for (var b = 0; b < workingAmountPerBudget.Length; ++b)
+                    {
+                        var fundingFraction = allocationPerBudgetAndTreatment[b, t] / totalFunding;
+                        fundingFractionPerBudgetAndTreatment[b, t] = fundingFraction;
+                    }
                 }
-
-                break;
             }
         }
 
@@ -214,7 +247,7 @@ public static class Funding
         if (amountPerBudget.Sum().RoundToCent() < costPerTreatment.Sum().RoundToCent())
         {
             // Trivially unsolvable.
-            allocationPerBudgetAndTreatment = EmptyAllocationMatrix;
+            allocationPerBudgetAndTreatment = EmptyMatrix;
             return false;
         }
 
@@ -443,37 +476,37 @@ public static class Funding
 
     private static decimal TotalFundingPerTreatment(decimal?[,] allocationPerBudgetAndTreatment, int t)
     {
-        decimal? totalFunding = 0;
+        decimal totalFunding = 0;
 
         for (var b = 0; b < allocationPerBudgetAndTreatment.GetLength(0); ++b)
         {
             totalFunding += allocationPerBudgetAndTreatment[b, t] ?? 0;
         }
 
-        return totalFunding.Value;
+        return totalFunding;
     }
 
     private static decimal TotalFundingPerTreatment(decimal?[][,] allocationPerBudgetAndTreatmentPerYear, int t)
     {
-        decimal? totalFunding = 0;
+        decimal totalFunding = 0;
 
         foreach (var allocationPerBudgetAndTreatment in allocationPerBudgetAndTreatmentPerYear)
         {
             totalFunding += TotalFundingPerTreatment(allocationPerBudgetAndTreatment, t);
         }
 
-        return totalFunding.Value;
+        return totalFunding;
     }
 
     private static decimal TotalSpendingPerBudget(decimal?[,] allocationPerBudgetAndTreatment, int b)
     {
-        decimal? totalSpending = 0;
+        decimal totalSpending = 0;
 
         for (var t = 0; t < allocationPerBudgetAndTreatment.GetLength(1); ++t)
         {
             totalSpending += allocationPerBudgetAndTreatment[b, t] ?? 0;
         }
 
-        return totalSpending.Value;
+        return totalSpending;
     }
 }

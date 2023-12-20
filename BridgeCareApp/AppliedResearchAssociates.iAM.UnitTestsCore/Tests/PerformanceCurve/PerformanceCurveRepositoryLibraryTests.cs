@@ -113,6 +113,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var libraryId = Guid.NewGuid();
             var testLibrary = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
             PerformanceCurveLibraryUserTestSetup.SetUsersOfPerformanceCurveLibrary(TestHelper.UnitOfWork, libraryId, LibraryAccessLevel.Modify, user.Id);
+
             var libraryAccess = TestHelper.UnitOfWork.PerformanceCurveRepo.GetLibraryAccess(libraryId, user.Id);
 
             var expected = new LibraryUserAccessModel

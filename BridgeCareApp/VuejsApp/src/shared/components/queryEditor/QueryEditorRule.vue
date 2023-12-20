@@ -57,7 +57,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
     async function getAttributeSelectValuesAction(payload?: any): Promise<any> {await store.dispatch('getAttributeSelectValues',payload);}
     const stateAttributesSelectValues = computed<AttributeSelectValues[]>(() => store.state.attributeModule.attributesSelectValues);
     const emit = defineEmits(['update:criteriaRule', 'delete'])
-    let selectedOperator = ref<string | null>(null);
+    let selectedOperator = ref<string | null>('=');
     let selectedValue = ref<string | null>(null);
     let queryRule = ref<any>({})
     const props = defineProps<{
@@ -86,6 +86,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
             await getAttributeSelectValuesAction({attributeNames: [props.criteriaRule.selectedOperand]});
         }
         queryRule.value = props.queryRules.find(_ => _.label === props.criteriaRule.selectedOperand)!
+        criteriaValue.value.selectedOperator = '='
     })
 
     watch(selectedOperator, (newVal, oldVal) =>{

@@ -50,7 +50,7 @@
                             style="padding-left:0px;"
                             variant="outlined"
                             :value="getValueForTextarea(-1)"
-                            @click="onClickSubCriteriaClauseTextarea(subCriteriaClauses.join(' AND '), -1)"
+                            @click="onClickSubCriteriaClauseTextarea(subCriteriaAndClause, -1)"
                             class="ghd-control-text"
                             full-width
                             no-resize
@@ -234,6 +234,7 @@ import {
     convertCriteriaObjectToCriteriaExpression,
     convertCriteriaTypeObjectToCriteriaExpression,
     convertCriteriaExpressionToCriteriaObject,
+queryBuilderTypes,
 } from '../utils/criteria-editor-parsers';
 import { hasValue } from '../utils/has-value-util';
 import {
@@ -261,7 +262,7 @@ import {
     ValidationParameter,
 } from '@/shared/models/iAM/expression-validation';
 import { UserCriteriaFilter } from '../models/iAM/user-criteria-filter';
-import { getBlankGuid } from '../utils/uuid-utils';
+import { getBlankGuid, getNewGuid } from '../utils/uuid-utils';
 import { ref, onMounted, computed, toRefs, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -299,6 +300,9 @@ const tab = ref<any>(null);
     ]);
     const selectedConjunction = ref<string>('OR');
     const subCriteriaClauses= ref<string[]>([]);
+    const subCriteriaAndClause = ref<string>('')
+    let subCriterias:CriteriaType[] = []
+
     const selectedSubCriteriaClauseIndex = ref<number>(-1);
     const selectedSubCriteriaClause= ref<Criteria |null>(null);
     const selectedRawSubCriteriaClause = ref<string>('');
@@ -465,7 +469,7 @@ const tab = ref<any>(null);
     }
 
     function getValueForTextarea(index: number) {
-        return isAndConjunction() ? subCriteriaClauses.value.join(' AND ') : subCriteriaClauses.value[index];
+        return isAndConjunction() ? subCriteriaAndClause.value : subCriteriaClauses.value[index];
     }
 
     function setQueryBuilderRules() {
@@ -482,15 +486,18 @@ const tab = ref<any>(null);
 
     function setSubCriteriaClauses(mainCriteria: Criteria) {
         subCriteriaClauses.value = [];
-        if (hasValue(mainCriteria) && hasValue(mainCriteria.children)) {
+        subCriterias = [];
+        if (hasValue(mainCriteria) && hasValue(mainCriteria.children)) {          
             mainCriteria.children!.forEach((criteriaType: CriteriaType) => {
                 const clause: string = convertCriteriaTypeObjectToCriteriaExpression(
                     criteriaType,
                 );
                 if (hasValue(clause)) {
                     subCriteriaClauses.value.push(clause);
+                    subCriterias.push(clone(criteriaType))
                 }
             });
+            subCriteriaAndClause.value = getAndExpresion()
         }
     }
 
@@ -522,6 +529,11 @@ const tab = ref<any>(null);
                 subCriteriaClauses.value.length,
             );
             subCriteriaClauses.value.push('');
+            subCriterias.push({
+                id: getNewGuid(),
+                type: 'query-builder-group',
+                query: clone(emptyCriteria)
+            });
             selectedSubCriteriaClauseIndex.value =
                 subCriteriaClauses.value.length - 1;
             selectedSubCriteriaClause.value = clone(emptyCriteria);
@@ -567,6 +579,12 @@ const tab = ref<any>(null);
             subCriteriaClauses.value,
         );
 
+        subCriterias = remove(
+            subCriteriaClauseIndex,
+            1,
+            subCriterias,
+        );
+
         if (selectedSubCriteriaClauseIndex.value === subCriteriaClauseIndex) {
             resetSubCriteriaSelectedProperties();
         } else {
@@ -606,6 +624,8 @@ const tab = ref<any>(null);
                 });
             }
         }
+
+        subCriteriaAndClause.value = getAndExpresion()
     }
 
     function onParseRawSubCriteria() {
@@ -786,6 +806,8 @@ const tab = ref<any>(null);
         if (isAndConjunction()) {
             subCriteriaClauses.value = [];
             subCriteriaClauses.value.push(criteria);
+            subCriterias = [];
+            subCriterias.push({id:getNewGuid(), type: 'query-builder-group', query: clone(selectedSubCriteriaClause.value!)})
         }
         else {
             subCriteriaClauses.value= update(
@@ -793,7 +815,15 @@ const tab = ref<any>(null);
                 criteria as any,
                 subCriteriaClauses.value,
             );
-        }
+
+            subCriterias= update(
+                selectedSubCriteriaClauseIndex.value,
+                clone({type: getSelectectedSubCriteriaType(), query: getSubCriteriasUpdateObject()}) as any,
+                subCriterias,
+            );
+        }     
+
+        subCriteriaAndClause.value = getAndExpresion()
 
         resetCriteriaValidationProperties();
         checkOutput.value = true;
@@ -804,6 +834,27 @@ const tab = ref<any>(null);
                 validated: false,
                 criteria: null,
             });
+        }
+    }
+
+    function getSelectectedSubCriteriaType(): string{
+        const children = selectedSubCriteriaClause.value!.children;
+        if(!isNil(children)){
+            if(children.length > 1)
+                return "query-builder-group"
+            else if(children.length === 1 && children[0].type == "query-builder-rule")
+                return queryBuilderTypes.QueryBuilderRule
+        }
+
+        return queryBuilderTypes.QueryBuilderGroup
+    }
+
+    function getSubCriteriasUpdateObject(){
+        if(getSelectectedSubCriteriaType() === queryBuilderTypes.QueryBuilderRule){
+            return clone(selectedSubCriteriaClause.value!.children![0].query)
+        }
+        else{
+            return clone(selectedSubCriteriaClause.value)
         }
     }
 
@@ -818,6 +869,15 @@ const tab = ref<any>(null);
             return null;
         }
         return selectedRawSubCriteriaClause.value;
+    }
+
+    function getAndExpresion(){
+        let andCriteria: Criteria = {logicalOperator: 'AND', children: clone(subCriterias)}
+        const parsedCriteriaJson  = convertCriteriaObjectToCriteriaExpression(andCriteria)
+        if (parsedCriteriaJson) {
+            return parsedCriteriaJson.join('');
+        }
+        return ''
     }
 
     function onSubmitCriteriaEditorResult(submit: boolean) {
@@ -915,6 +975,7 @@ const tab = ref<any>(null);
                             return parsedSubCriteriaClause.children![0];
                         }
                         return {
+                            id: getNewGuid(),
                             type: 'query-builder-group',
                             query: {
                                 logicalOperator:

@@ -7,7 +7,7 @@ export interface Criteria {
 }
 
 export interface CriteriaType {
-    id?: string;
+    id: string;
     type: string;
     query: Criteria | CriteriaRule;
 }

@@ -6,12 +6,13 @@ import {
     emptyCriteria,
 } from '@/shared/models/iAM/criteria';
 import { hasValue } from '@/shared/utils/has-value-util';
+import { getNewGuid } from './uuid-utils';
 
 const operators: string[] = ['<=', '>=', '<>', '=', '<', '>'];
 
 const invalidCharRegex: RegExp = /\s|\(|\)/g;
 
-const queryBuilderTypes: any = {
+export const queryBuilderTypes: any = {
     QueryBuilderRule: 'query-builder-rule',
     QueryBuilderGroup: 'query-builder-group',
 };
@@ -351,6 +352,7 @@ function createCriteriaTypeObject(
     query: CriteriaRule | Criteria,
 ): CriteriaType {
     return {
+        id: getNewGuid(),
         type: type,
         query: query,
     } as CriteriaType;

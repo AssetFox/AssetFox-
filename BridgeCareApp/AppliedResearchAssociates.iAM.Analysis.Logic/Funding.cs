@@ -85,7 +85,7 @@ public static class Funding
 
         UpdateBudgetAmount updateBudgetAmount = settings.BudgetCarryoverIsAllowed ? Increment : Assign;
 
-        decimal?[,] fundingFractionPerBudgetAndTreatment = EmptyMatrix;
+        decimal?[,]? fundingFractionPerBudgetAndTreatment = null;
 
         for (var year = 0; year < cashFlowPercentagePerYear.Length; ++year)
         {
@@ -103,27 +103,7 @@ public static class Funding
 
             ref var allocationPerBudgetAndTreatment = ref allocationPerBudgetAndTreatmentPerYear[year];
 
-            var fundingFractionsEnforcementIsActive =
-                year > 0 && settings.CashFlowEnforcesFirstYearFundingFractions;
-
-            if (fundingFractionsEnforcementIsActive)
-            {
-                allocationPerBudgetAndTreatment = new decimal?[
-                    workingAmountPerBudget.Length,
-                    workingCostPerTreatment.Length];
-
-                for (var t = 0; t < workingCostPerTreatment.Length; ++t)
-                {
-                    var cost = workingCostPerTreatment[t];
-                    for (var b = 0; b < workingAmountPerBudget.Length; ++b)
-                    {
-                        var fundingFraction = fundingFractionPerBudgetAndTreatment[b, t];
-                        var allocation = cost * fundingFraction;
-                        allocationPerBudgetAndTreatment[b, t] = allocation;
-                    }
-                }
-            }
-            else
+            if (fundingFractionPerBudgetAndTreatment is null)
             {
                 var solved = TrySolve(
                     allocationIsAllowedPerBudgetAndTreatment,
@@ -137,6 +117,23 @@ public static class Funding
                     return year;
                 }
             }
+            else
+            {
+                allocationPerBudgetAndTreatment = new decimal?[
+                    workingAmountPerBudget.Length,
+                    workingCostPerTreatment.Length];
+
+                for (var t = 0; t < workingCostPerTreatment.Length; ++t)
+                {
+                    var cost = workingCostPerTreatment[t];
+                    for (var b = 0; b < workingAmountPerBudget.Length; ++b)
+                    {
+                        var fundingFraction = fundingFractionPerBudgetAndTreatment[b, t];
+                        var allocation = cost * fundingFraction;
+                        allocationPerBudgetAndTreatment[b, t] = allocation?.RoundToCent();
+                    }
+                }
+            }
 
             for (var b = 0; b < workingAmountPerBudget.Length; ++b)
             {
@@ -145,9 +142,9 @@ public static class Funding
 
                 if (workingAmountPerBudget[b] < 0)
                 {
-                    return fundingFractionsEnforcementIsActive
-                        ? year
-                        : throw new Exception($"Budget [{b}] overspent, but funding fractions weren't enforced.");
+                    return fundingFractionPerBudgetAndTreatment is null
+                        ? throw new Exception($"Budget [{b}] overspent, but funding fractions weren't enforced.")
+                        : year;
                 }
             }
 

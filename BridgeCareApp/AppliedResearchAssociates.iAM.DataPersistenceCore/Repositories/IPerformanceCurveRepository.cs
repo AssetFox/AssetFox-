@@ -45,9 +45,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<LibraryUserDTO> GetLibraryUsers(Guid performanceCurveLibraryId);
 
         List<LibraryUserDTO> GetAccessForUser(Guid performanceCurveLibraryId, Guid userId);
-
-        void AddLibraryIdToScenarioPerformanceCurve(List<PerformanceCurveDTO> performanceCurveDTOs, Guid? libraryId);
-
-        void AddModifiedToScenarioPerformanceCurve(List<PerformanceCurveDTO> performanceCurveDTOs, bool IsModified);
     }
 }

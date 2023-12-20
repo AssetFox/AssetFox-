@@ -374,7 +374,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             var curve = PerformanceCurveDtos.Dto();
             var curves = new List<PerformanceCurveDTO> { curve };
             Assert.False(curve.IsModified);
-            TestHelper.UnitOfWork.PerformanceCurveRepo.AddModifiedToScenarioPerformanceCurve(curves, true);
+            PerformanceCurveDtoListHelper.AddModifiedToScenarioPerformanceCurve(curves, true);
             Assert.True(curve.IsModified);
         }
 
@@ -385,7 +385,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             var curves = new List<PerformanceCurveDTO> { curve };
             var libraryId = Guid.NewGuid();
 
-            TestHelper.UnitOfWork.PerformanceCurveRepo.AddLibraryIdToScenarioPerformanceCurve(curves, libraryId);
+            PerformanceCurveDtoListHelper.AddLibraryIdToScenarioPerformanceCurves(curves, libraryId);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }
@@ -398,7 +398,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             var libraryId = Guid.NewGuid();
             curve.LibraryId = libraryId;
 
-            TestHelper.UnitOfWork.PerformanceCurveRepo.AddLibraryIdToScenarioPerformanceCurve(curves, null);
+            PerformanceCurveDtoListHelper.AddLibraryIdToScenarioPerformanceCurves(curves, null);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }

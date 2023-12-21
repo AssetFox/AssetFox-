@@ -383,12 +383,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void ReplaceTreatmentLibrary(Guid libraryId, List<TreatmentDTO> treatments)
         {
-
             _unitOfWork.Context.DeleteAll<SelectableTreatmentEntity>(_ =>
                 _.TreatmentLibraryId == libraryId);
 
             UpsertOrDeleteTreatments(treatments, libraryId);
-
         }
 
         public void DeleteTreatmentLibrary(Guid libraryId)
@@ -726,8 +724,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("The specified treatment library was not found.");
             }
 
-            var selectableTreatmentEntity = treatment.ToLibraryEntity(libraryId);
-            var entityId = selectableTreatmentEntity.Id;
+            var entityId = treatment.Id;
             _unitOfWork.AsTransaction(() =>
             {
 

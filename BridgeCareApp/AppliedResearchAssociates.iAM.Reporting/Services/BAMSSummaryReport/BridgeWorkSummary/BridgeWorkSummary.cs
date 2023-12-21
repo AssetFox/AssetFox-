@@ -157,7 +157,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         }
 
                         // Remove from committedProjectsForWorkOutsideScope
-                        var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Treatment == appliedTreatment && _.Year == yearData.Year && _.ProjectSource.ToString() == section.ProjectSource && _.Category.ToString() == treatmentCategory);
+                        var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Treatment == appliedTreatment && _.Year == yearData.Year);
                         if (toRemove != null)
                         {
                             committedProjectsForWorkOutsideScope.Remove(toRemove);

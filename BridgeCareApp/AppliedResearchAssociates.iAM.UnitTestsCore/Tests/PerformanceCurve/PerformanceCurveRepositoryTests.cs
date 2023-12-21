@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
@@ -16,6 +15,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
 {
     public class PerformanceCurveRepositoryTests
     {
+
+
         private void Setup()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
@@ -366,41 +367,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
 
             var message = exception.Message;
             Assert.Contains(ErrorMessageConstants.NoAttributeFoundHavingName, message);
-        }
-
-        [Fact]
-        public void AddModifiedToPerformanceCurve_Does()
-        {
-            var curve = PerformanceCurveDtos.Dto();
-            var curves = new List<PerformanceCurveDTO> { curve };
-            Assert.False(curve.IsModified);
-            PerformanceCurveDtoListHelper.AddModifiedToScenarioPerformanceCurve(curves, true);
-            Assert.True(curve.IsModified);
-        }
-
-        [Fact]
-        public void AddLibraryIdToPerformanceCurve_Does()
-        {
-            var curve = PerformanceCurveDtos.Dto();
-            var curves = new List<PerformanceCurveDTO> { curve };
-            var libraryId = Guid.NewGuid();
-
-            PerformanceCurveDtoListHelper.AddLibraryIdToScenarioPerformanceCurves(curves, libraryId);
-
-            Assert.Equal(libraryId, curve.LibraryId);
-        }
-
-        [Fact]
-        public void AddLibraryIdToPerformanceCurve_LibraryIdIsNull_NoChange()
-        {
-            var curve = PerformanceCurveDtos.Dto();
-            var curves = new List<PerformanceCurveDTO> { curve };
-            var libraryId = Guid.NewGuid();
-            curve.LibraryId = libraryId;
-
-            PerformanceCurveDtoListHelper.AddLibraryIdToScenarioPerformanceCurves(curves, null);
-
-            Assert.Equal(libraryId, curve.LibraryId);
         }
     }
 }

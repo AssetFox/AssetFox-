@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Services;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.ListHelpers
+namespace BridgeCareCoreTests
 {
     public class PerformanceCurveDtoListHelperTests
     {

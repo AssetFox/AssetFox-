@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using AppliedResearchAssociates.iAM.DTOs;
 
-namespace AppliedResearchAssociates.iAM.DTOs
+namespace BridgeCareCore.Services
 {
     public static class PerformanceCurveDtoListHelper
     {

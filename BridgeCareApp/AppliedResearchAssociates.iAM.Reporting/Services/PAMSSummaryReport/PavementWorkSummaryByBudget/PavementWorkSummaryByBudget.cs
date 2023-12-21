@@ -113,8 +113,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     yearlyCostCommittedProj,
                     costAndLengthPerTreatmentGroupPerYear, // We only care about cost here
                     simulationTreatments, // This should be filtered by budget/year; do we already have this by this point?
-                    workTypeTotals,
-                    committedProjects,
+                    workTypeTotals,                    
                     budgetSummaryModel,
                     reportOutputData,
                     committedProjectsForWorkOutsideScope);

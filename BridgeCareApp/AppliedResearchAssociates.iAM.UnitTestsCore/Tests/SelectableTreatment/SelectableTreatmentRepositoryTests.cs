@@ -19,6 +19,9 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Treatment;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
 {
@@ -645,6 +648,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         }
 
         [Fact]
+        public void GetSingleTreatmentLibaryNoChildren_LibraryInDb_Gets()
+        {
+            var treatmentLibraryId = Guid.NewGuid();
+            var library = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists();
+            var treatments = new List<TreatmentDTO> { treatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.AddLibraryTreatments(
+                treatments, treatmentLibraryId);
+
+            var libraryWithChildren = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
+            var libraryWithoutChildren = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibaryNoChildren(treatmentLibraryId);
+
+            Assert.Empty(libraryWithoutChildren.Treatments);
+            Assert.NotEmpty(libraryWithChildren.Treatments);
+            ObjectAssertions.EquivalentExcluding(libraryWithChildren, libraryWithoutChildren, l => l.Treatments);
+        }
+
+        [Fact]
         public void ReplaceTreatmentLibrary_LibraryInDbWithTreatment_DeletesTreatment()
         {
             var treatmentLibraryId = Guid.NewGuid();
@@ -695,6 +716,31 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
             var simulationTreatmentsAfter = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
             Assert.Single(simulationTreatmentsBefore);
             Assert.Empty(simulationTreatmentsAfter);
+        }
+
+        [Fact]
+        public async Task GetTreatmentLibrariesNoChildrenAccessibleToUser_LibraryInDbNotAccessibleToUser_IsNotInList()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var treatmentLibraryId = Guid.NewGuid();
+            var library = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+
+            var userLibraries = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibrariesNoChildrenAccessibleToUser(user.Id);
+
+            Assert.DoesNotContain(userLibraries, l => l.Id == treatmentLibraryId);
+        }
+
+        [Fact]
+        public async Task GetTreatmentLibrariesNoChildrenAccessibleToUser_LibraryInDbAccessibleToUser_IsInList()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var treatmentLibraryId = Guid.NewGuid();
+            var library = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            TreatmentLibraryUserTestSetup.SetUsersOfTreatmentLibrary(TestHelper.UnitOfWork, treatmentLibraryId, LibraryAccessLevel.Modify, user.Id);
+
+            var userLibraries = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibrariesNoChildrenAccessibleToUser(user.Id);
+
+            Assert.Contains(userLibraries, l => l.Id == treatmentLibraryId);
         }
     }
 }

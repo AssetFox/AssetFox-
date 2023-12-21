@@ -394,10 +394,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, section.ProjectSource); //Project Pick
                     }
 
-                    var treatmentConsideration = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == section.AppliedTreatment);
+                    var treatmentConsiderations = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == section.AppliedTreatment);
                     BudgetUsageDetail budgetUsage = null;
 
-                    foreach (var item in treatmentConsideration)
+                    foreach (var item in treatmentConsiderations)
                     {
                         budgetUsage = item.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCovered);
                     }
@@ -408,7 +408,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     worksheet.Cells[row, ++column].Value = section.AppliedTreatment; // Project
                     var columnForAppliedTreatment = column;
 
-                    var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                    var cost = treatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks

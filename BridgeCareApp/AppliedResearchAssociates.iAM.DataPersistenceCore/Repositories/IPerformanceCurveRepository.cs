@@ -7,8 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IPerformanceCurveRepository
     {
-        void CreateScenarioPerformanceCurves(List<PerformanceCurve> performanceCurves, Guid simulationId);
-
         void GetScenarioPerformanceCurves(Simulation simulation, Dictionary<Guid, string> attributeNameLookupDictionary);
 
         List<PerformanceCurveLibraryDTO> GetPerformanceCurveLibraries();
@@ -36,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         public List<PerformanceCurveDTO> GetPerformanceCurvesForLibraryOrderedById(Guid performanceCurveLibraryId);
 
-        public List<PerformanceCurveLibraryDTO> GetPerformanceCurveLibrariesNoChildrenAccessibleToUser(Guid guid);
+        public List<PerformanceCurveLibraryDTO> GetPerformanceCurveLibrariesNoChildrenAccessibleToUser(Guid userId);
 
         DateTime GetLibraryModifiedDate(Guid performanceLibraryId);
 

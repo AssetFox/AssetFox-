@@ -11,9 +11,15 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.BudgetPriority;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CashFlowRule;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DeficientConditionGoal;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Microsoft.Data.SqlClient;
@@ -96,15 +102,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             AdminSettingsTestSetup.SetupBamsAdminSettings(TestHelper.UnitOfWork, NetworkTestSetup.TestNetwork().Name, keyAttribute.Name, keyAttribute.Name);
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var userId = user.Id;
+            var userIds = new List<Guid> { userId };
             var networkId = Guid.NewGuid();
             var assetId = Guid.NewGuid();
             var asset = MaintainableAssets.InNetwork(networkId, keyAttribute.Name, assetId);
             var assets = new List<MaintainableAsset> { asset };
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, assets, networkId, keyAttribute.Id);
-            var attribute = AttributeDtos.DeckDurationN;
-            var numericAttribute = AttributeTestSetup.Numeric(attribute.Id, attribute.Name, dataSource.Id);
+            var numericAttributeDto = AttributeDtos.DeckDurationN;
+            var numericAttribute = AttributeTestSetup.Numeric(numericAttributeDto.Id, numericAttributeDto.Name, dataSource.Id);
             var numericAttributeList = new List<IamAttribute> { numericAttribute };
-            AggregatedResultTestSetup.AddNumericAggregatedResultsToDb(TestHelper.UnitOfWork, assets, numericAttributeList);
+            var textAttributeDto = AttributeDtos.Interstate;
             var simulationId = Guid.NewGuid();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
             var simulationTreatment = TreatmentTestSetup.ModelForSingleTreatmentOfSimulationInDb(TestHelper.UnitOfWork, simulationId);
@@ -126,8 +133,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var scenarioPerformanceId = Guid.NewGuid();
             var scenarioPerformanceCurveCriterionLibrary = CriterionLibraryDtos.Dto();
             var simulationPerformanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, scenarioPerformanceId, scenarioPerformanceCurveCriterionLibrary, "pretendEquation");
-            
             ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, scenarioBudgets, simulationId);
+            AggregatedResultTestSetup.AddNumericAggregatedResultsToDb(TestHelper.UnitOfWork, assets, numericAttributeList);
+            AttributeDatumTestSetup.AssignStringAttributeDatum(textAttributeDto, asset);
+            AttributeDatumTestSetup.AssignDoubleAttributeDatum(numericAttributeDto, asset, 100);
+            BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, budgetLibraryId, LibraryAccessLevel.Owner, userId);
+            var budgetPriorityLibrary = BudgetPriorityLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            BudgetPriorityLibraryUserTestSetup.SetUsersOfBudgetPriorityLibrary(TestHelper.UnitOfWork, budgetPriorityLibrary.Id, LibraryAccessLevel.Modify, userId);
+            BudgetPriorityTestSetup.SetupSingleBudgetPriorityWithCriterionLibraryForSimulationInDb(simulationId);
+            var cashFlowLibrary = CashFlowRuleLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            CashFlowRuleLibraryUserTestSetup.SetUsersOfCashFlowRuleLibrary(TestHelper.UnitOfWork, cashFlowLibrary.Id, LibraryAccessLevel.Modify, userId);
+            CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
+            var deficientConditionGoalLibrary = DeficientConditionGoalLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            DeficientConditionGoalLibraryUserTestSetup.SetUsersOfDeficientConditionGoalLibrary(TestHelper.UnitOfWork, deficientConditionGoalLibrary.Id, LibraryAccessLevel.Modify, userId);
+            var investmentPlan = InvestmentPlanTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
+            var remainingLifeLimitLibrary = RemainingLifeLimitLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            RemainingLifeLimitLibraryUserTestSetup.SetUsersOfRemainingLifeLimitLibrary(TestHelper.UnitOfWork, remainingLifeLimitLibrary.Id, LibraryAccessLevel.Modify, userId);
+            SimulationAnalysisDetailTestSetup.CreateAnalysisDetail(TestHelper.UnitOfWork, simulationId);
+            var targetConditionGoalLibrary = TargetConditionGoalLibraryTestSetup.ModelForEntityInDbWithSingleGoal(TestHelper.UnitOfWork);
+            TargetConditionGoalLibraryUserTestSetup.SetUsersOfTargetConditionGoalLibrary(TestHelper.UnitOfWork, targetConditionGoalLibrary.Id, LibraryAccessLevel.Modify, user.Id);
+
 
             var rowCounts1 = TableRowCounter.CountRows();
             

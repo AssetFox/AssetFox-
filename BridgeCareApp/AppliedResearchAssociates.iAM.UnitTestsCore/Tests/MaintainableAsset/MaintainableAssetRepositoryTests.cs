@@ -97,12 +97,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void GetMaintainableAssetByTextKeyAttribute_AssetExists_Gets()
         {
-            var dataSource = AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var keyAttributeName = RandomStrings.WithPrefix("keyAttribute");
             var keyAttributeId = Guid.NewGuid();
             var keyAttributeDto = AttributeTestSetup.CreateSingleTextAttribute(
                 TestHelper.UnitOfWork, keyAttributeId, keyAttributeName, ConnectionType.EXCEL, keyAttributeName);
-            
             var assetId = Guid.NewGuid();
             var networkId = Guid.NewGuid();
             var locationIdentifier = RandomStrings.WithPrefix("Location");

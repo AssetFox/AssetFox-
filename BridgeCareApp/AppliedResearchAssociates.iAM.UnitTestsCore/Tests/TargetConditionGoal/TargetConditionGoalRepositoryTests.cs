@@ -9,10 +9,12 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using Microsoft.Extensions.DependencyModel;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
@@ -22,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
         private static readonly Guid TargetConditionGoalId = Guid.Parse("42b3bbfc-d590-4d3d-aea9-fc8221210c57");
 
-        private void Setup()
+        private void SetupAttributesAndNetwork()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
@@ -35,14 +37,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return dto;
         }
 
-        public TargetConditionGoalDTO SetupTargetConditionGoal(Guid targetConditionGoalLibraryId)
-        {
-            var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
-            var targetConditionGoal = TargetConditionGoalDtos.Dto(attribute.Name);
-            var targetConditionGoals = new List<TargetConditionGoalDTO> { targetConditionGoal };
-            TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(targetConditionGoals, targetConditionGoalLibraryId);
-            return targetConditionGoal;
-        }
 
         private CriterionLibraryDTO SetupCriterionLibraryForUpsertOrDelete()
         {
@@ -81,7 +75,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void UpsertTargetConditionGoalLibary_DoesNotThrow()
         {
-            Setup();
+            SetupAttributesAndNetwork();
             var library = SetupLibraryForGet();
             // Act
             TestHelper.UnitOfWork.TargetConditionGoalRepo
@@ -91,7 +85,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void DeleteTargetConditionGoalLibrary_LibraryDoesNotExist_DoesNotThrow()
         {
-            Setup();
+            SetupAttributesAndNetwork();
             // Act
             TestHelper.UnitOfWork.TargetConditionGoalRepo.DeleteTargetConditionGoalLibrary(Guid.NewGuid()); ;
         }
@@ -99,10 +93,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void GetTargetConditionGoalLibrariesNoChildren_LibraryInDb_Gets()
         {
-            Setup();
+            SetupAttributesAndNetwork();
             // Arrange
             var library = SetupLibraryForGet();
-            var goal = SetupTargetConditionGoal(library.Id);
+            var attribute = AttributeDtos.CulvDurationN;
+            var goal = TargetConditionGoalTestSetup.ModelForLibraryGoalInDb(library.Id, attribute.Name);
 
             // Act
             var dtos = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalLibrariesNoChildren();
@@ -112,12 +107,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void UpsertOrDeleteTargetConditionGoals_GoalInDbWithLibrary_ModifiesGoal()
         {
-            Setup();
+            SetupAttributesAndNetwork();
             // Arrange
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
             var libraryDto = SetupLibraryForGet();
-            var goalDto = SetupTargetConditionGoal(libraryDto.Id);
+            var attribute = AttributeDtos.CulvDurationN;
+            var goalDto = TargetConditionGoalTestSetup.ModelForLibraryGoalInDb(libraryDto.Id, attribute.Name);
             goalDto.Name = "Updated Name";
             goalDto.CriterionLibrary = criterionLibrary;
             var updateRows = new List<TargetConditionGoalDTO> { goalDto };
@@ -137,7 +133,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void UpsertTargetConditionGoalLibrary_LibraryInDb_Modifies()
         {
-            Setup();
+            SetupAttributesAndNetwork();
             // Arrange
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
@@ -157,7 +153,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public async Task UpsertTargetConditionGoalLibraryAndGoals_LibraryNotInDb_Adds()
         {
-            Setup();
+            SetupAttributesAndNetwork();
             var libraryId = Guid.NewGuid();
             var libraryName = RandomStrings.WithPrefix("Library");
             var library = TargetConditionGoalLibraryDtos.Dto(libraryId);
@@ -178,7 +174,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void UpsertTargetConditionGoalLibraryAndGoals_LibraryInDb_Updates()
         {
-            Setup();
+            SetupAttributesAndNetwork();
             var libraryId = Guid.NewGuid();
             var libraryName = RandomStrings.WithPrefix("Library");
             var library = TargetConditionGoalLibraryDtos.Dto(libraryId);
@@ -199,12 +195,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void DeleteTargetConditionGoalLibrary_DeletesGoalsAndData()
         {
-            Setup();
+            SetupAttributesAndNetwork();
             // Arrange
             var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
             var targetConditionGoalLibraryEntity = SetupLibraryForGet();
             var libraryId = targetConditionGoalLibraryEntity.Id;
-            var targetConditionGoalEntity = SetupTargetConditionGoal(libraryId);
+            var attribute = TestAttributeNames.CulvDurationN;
+            var targetConditionGoalEntity = TargetConditionGoalTestSetup.ModelForLibraryGoalInDb(libraryId, attribute);
             var goalId = targetConditionGoalEntity.Id;
 
             JoinCriterionToLibraryConditionGoal(goalId, criterionLibrary.Id);
@@ -222,7 +219,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void GetScenarioTargetConditionGoals_ScenarioInDbWithGoal_Gets()
         {
-            Setup();
+            SetupAttributesAndNetwork();
             // Arrange
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var goal = SetupForScenarioTargetGet(simulation.Id);
@@ -238,10 +235,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void ShouldGetLibraryTargetConditionGoalPageData()
         {
-            Setup();
+            SetupAttributesAndNetwork();
             // Arrange
             var library = SetupLibraryForGet();
-            var goal = SetupTargetConditionGoal(library.Id);
+            var goal = TargetConditionGoalTestSetup.ModelForLibraryGoalInDb(library.Id, TestAttributeNames.CulvDurationN);
 
             // Act
             var dtos = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalsByLibraryId(library.Id);
@@ -254,7 +251,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void UpsertOrDeleteScenarioTargetConditionGoals_ScenarioInDbWithGoals_UpdatesOneDeletesAnother()
         {
-            Setup();
+            SetupAttributesAndNetwork();
             // Arrange
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var criterionLibrary = SetupForScenarioTargetUpsertOrDelete(simulation.Id);
@@ -315,7 +312,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public async Task UpdateTargetConditionGoalLibraryWithUserAccessChange_Does()
         {
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-            var library = TargetConditionGoalLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = TargetConditionGoalLibraryTestSetup.ModelForEntityInDbWithSingleGoal(TestHelper.UnitOfWork);
             TargetConditionGoalLibraryUserTestSetup.SetUsersOfTargetConditionGoalLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
             var libraryUsersBefore = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetLibraryUsers(library.Id);
             var libraryUserBefore = libraryUsersBefore.Single();
@@ -332,7 +329,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public async Task UpdateTargetConditionGoalLibraryUsers_RequestAccessRemoval_Does()
         {
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-            var library = TargetConditionGoalLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = TargetConditionGoalLibraryTestSetup.ModelForEntityInDbWithSingleGoal(TestHelper.UnitOfWork);
             TargetConditionGoalLibraryUserTestSetup.SetUsersOfTargetConditionGoalLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
             var libraryUsersBefore = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetLibraryUsers(library.Id);
             var libraryUserBefore = libraryUsersBefore.Single();
@@ -349,7 +346,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var user1 = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var user2 = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-            var library = TargetConditionGoalLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = TargetConditionGoalLibraryTestSetup.ModelForEntityInDbWithSingleGoal(TestHelper.UnitOfWork);
             TargetConditionGoalLibraryUserTestSetup.SetUsersOfTargetConditionGoalLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user1.Id);
             var usersBefore = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetLibraryUsers(library.Id);
             var newUser = new LibraryUserDTO

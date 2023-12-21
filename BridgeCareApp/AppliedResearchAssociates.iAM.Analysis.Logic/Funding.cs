@@ -6,7 +6,6 @@ public static class Funding
 {
     public sealed record Settings(
         bool BudgetCarryoverIsAllowed = false,
-        bool CashFlowEnforcesFirstYearFundingFractions = false,
         bool MultipleBudgetsCanFundEachTreatment = false);
 
     private static readonly decimal?[,] EmptyMatrix = { };
@@ -79,13 +78,12 @@ public static class Funding
         }
 
         Allocate(out allocationPerBudgetAndTreatmentPerYear, cashFlowPercentagePerYear.Length);
+        Array.Fill(allocationPerBudgetAndTreatmentPerYear, EmptyMatrix);
 
-        Allocate(out decimal[] workingAmountPerBudget, amountPerBudgetPerYear[0].Length);
-        Allocate(out decimal[] workingCostPerTreatment, costPerTreatment.Length);
+        var workingAmountPerBudget = new decimal[amountPerBudgetPerYear[0].Length];
+        var workingCostPerTreatment = new decimal[costPerTreatment.Length];
 
         UpdateBudgetAmount updateBudgetAmount = settings.BudgetCarryoverIsAllowed ? Increment : Assign;
-
-        decimal?[,]? fundingFractionPerBudgetAndTreatment = null;
 
         for (var year = 0; year < cashFlowPercentagePerYear.Length; ++year)
         {
@@ -103,66 +101,22 @@ public static class Funding
 
             ref var allocationPerBudgetAndTreatment = ref allocationPerBudgetAndTreatmentPerYear[year];
 
-            if (fundingFractionPerBudgetAndTreatment is null)
-            {
-                var solved = TrySolve(
-                    allocationIsAllowedPerBudgetAndTreatment,
-                    workingAmountPerBudget,
-                    workingCostPerTreatment,
-                    settings,
-                    out allocationPerBudgetAndTreatment);
+            var solved = TrySolve(
+                allocationIsAllowedPerBudgetAndTreatment,
+                workingAmountPerBudget,
+                workingCostPerTreatment,
+                settings,
+                out allocationPerBudgetAndTreatment);
 
-                if (!solved)
-                {
-                    return year;
-                }
-            }
-            else
+            if (!solved)
             {
-                allocationPerBudgetAndTreatment = new decimal?[
-                    workingAmountPerBudget.Length,
-                    workingCostPerTreatment.Length];
-
-                for (var t = 0; t < workingCostPerTreatment.Length; ++t)
-                {
-                    var cost = workingCostPerTreatment[t];
-                    for (var b = 0; b < workingAmountPerBudget.Length; ++b)
-                    {
-                        var fundingFraction = fundingFractionPerBudgetAndTreatment[b, t];
-                        var allocation = cost * fundingFraction;
-                        allocationPerBudgetAndTreatment[b, t] = allocation?.RoundToCent();
-                    }
-                }
+                return year;
             }
 
             for (var b = 0; b < workingAmountPerBudget.Length; ++b)
             {
                 var totalSpending = TotalSpendingPerBudget(allocationPerBudgetAndTreatment, b);
                 workingAmountPerBudget[b] -= totalSpending;
-
-                if (workingAmountPerBudget[b] < 0)
-                {
-                    return fundingFractionPerBudgetAndTreatment is null
-                        ? throw new Exception($"Budget [{b}] overspent, but funding fractions weren't enforced.")
-                        : year;
-                }
-            }
-
-            if (year == 0 && settings.CashFlowEnforcesFirstYearFundingFractions)
-            {
-                fundingFractionPerBudgetAndTreatment = new decimal?[
-                    workingAmountPerBudget.Length,
-                    workingCostPerTreatment.Length];
-
-                for (var t = 0; t < workingCostPerTreatment.Length; ++t)
-                {
-                    var totalFunding = TotalFundingPerTreatment(allocationPerBudgetAndTreatment, t);
-                    for (var b = 0; b < workingAmountPerBudget.Length; ++b)
-                    {
-                        var fundingFraction = allocationPerBudgetAndTreatment[b, t] / totalFunding;
-                        fundingFractionPerBudgetAndTreatment[b, t] = fundingFraction;
-                    }
-                }
             }
         }
 
@@ -180,6 +134,8 @@ public static class Funding
         return null;
     }
 
+    private static readonly decimal[] SingleYearCostPercentage = { 100m };
+
     public static bool TrySolve(
         bool[,] allocationIsAllowedPerBudgetAndTreatment,
         decimal[] amountPerBudget,
@@ -187,16 +143,39 @@ public static class Funding
         Settings settings,
         out decimal?[,] allocationPerBudgetAndTreatment)
     {
-        // Pre-validation
+        var solved = TrySolve(
+            allocationIsAllowedPerBudgetAndTreatment,
+            new[] { amountPerBudget },
+            costPerTreatment,
+            SingleYearCostPercentage,
+            settings,
+            out var allocationPerBudgetAndTreatmentPerYear);
+
+        allocationPerBudgetAndTreatment = solved
+            ? allocationPerBudgetAndTreatmentPerYear[0]
+            : EmptyMatrix;
+
+        return solved;
+    }
+
+    public static bool TrySolve(
+        bool[,] allocationIsAllowedPerBudgetAndTreatment,
+        decimal[][] amountPerBudgetPerYear,
+        decimal[] costPerTreatment,
+        decimal[] splitCostPercentagePerYear,
+        Settings settings,
+        out decimal?[][,] allocationPerBudgetAndTreatmentPerYear)
+    {
+        // Input validation
 
         if (allocationIsAllowedPerBudgetAndTreatment is null)
         {
             throw new ArgumentNullException(nameof(allocationIsAllowedPerBudgetAndTreatment));
         }
 
-        if (amountPerBudget is null)
+        if (amountPerBudgetPerYear is null)
         {
-            throw new ArgumentNullException(nameof(amountPerBudget));
+            throw new ArgumentNullException(nameof(amountPerBudgetPerYear));
         }
 
         if (costPerTreatment is null)
@@ -204,57 +183,131 @@ public static class Funding
             throw new ArgumentNullException(nameof(costPerTreatment));
         }
 
+        if (splitCostPercentagePerYear is null)
+        {
+            throw new ArgumentNullException(nameof(splitCostPercentagePerYear));
+        }
+
         if (settings is null)
         {
             throw new ArgumentNullException(nameof(settings));
         }
 
-        if (amountPerBudget.Length == 0)
+        if (amountPerBudgetPerYear.Length != splitCostPercentagePerYear.Length)
         {
-            throw new ArgumentException("No budget amounts.", nameof(amountPerBudget));
+            throw new ArgumentException("Inconsistent input sizes (number of years).");
         }
 
-        if (costPerTreatment.Length == 0)
+        var numberOfYears = amountPerBudgetPerYear.Length;
+
+        if (numberOfYears == 0)
         {
-            throw new ArgumentException("No treatment costs.", nameof(costPerTreatment));
+            throw new ArgumentException("Zero years of input.");
         }
 
-        if (allocationIsAllowedPerBudgetAndTreatment.GetLength(0) != amountPerBudget.Length ||
-            allocationIsAllowedPerBudgetAndTreatment.GetLength(1) != costPerTreatment.Length)
+        if (amountPerBudgetPerYear.Any(IsNull))
         {
-            throw new ArgumentException("Inconsistent input sizes.");
+            throw new ArgumentException(
+                "Incomplete input (budgets per year).",
+                nameof(amountPerBudgetPerYear));
         }
 
-        for (var b = 0; b < amountPerBudget.Length; ++b)
+        if (amountPerBudgetPerYear.Select(ArrayLength).Distinct().Count() != 1)
         {
-            var amount = amountPerBudget[b];
-            if (amount <= 0)
+            throw new ArgumentException(
+                "Inconsistent input sizes (number of budgets per year).",
+                nameof(amountPerBudgetPerYear));
+        }
+
+        var numberOfBudgets = amountPerBudgetPerYear[0].Length;
+
+        if (numberOfBudgets == 0)
+        {
+            throw new ArgumentException(
+                "No budget amounts.",
+                nameof(amountPerBudgetPerYear));
+        }
+
+        var numberOfTreatments = costPerTreatment.Length;
+
+        if (numberOfTreatments == 0)
+        {
+            throw new ArgumentException(
+                "No treatment costs.",
+                nameof(costPerTreatment));
+        }
+
+        if (allocationIsAllowedPerBudgetAndTreatment.GetLength(0) != numberOfBudgets ||
+            allocationIsAllowedPerBudgetAndTreatment.GetLength(1) != numberOfTreatments)
+        {
+            throw new ArgumentException(
+                "Inconsistent input sizes (budget-to-treatment allocation permissions matrix).",
+                nameof(allocationIsAllowedPerBudgetAndTreatment));
+        }
+
+        for (var year = 0; year < amountPerBudgetPerYear.Length; ++year)
+        {
+            var amountPerBudget = amountPerBudgetPerYear[year];
+            for (var b = 0; b < amountPerBudget.Length; ++b)
             {
-                throw new ArgumentException($"Budget [{b}] amount [{amount}] is non-positive.");
+                var amount = amountPerBudget[b];
+                if (amount < 0)
+                {
+                    throw new ArgumentException(
+                        $"Year [{year}] budget [{b}] amount [{amount}] is negative.",
+                        nameof(amountPerBudgetPerYear));
+                }
             }
         }
 
         for (var t = 0; t < costPerTreatment.Length; ++t)
         {
             var cost = costPerTreatment[t];
-            if (cost <= 0)
+            if (cost < 0)
             {
-                throw new ArgumentException($"Treatment [{t}] cost [{cost}] is non-positive.");
+                throw new ArgumentException(
+                    $"Treatment [{t}] cost [{cost}] is negative.",
+                    nameof(costPerTreatment));
             }
         }
 
-        if (amountPerBudget.Sum().RoundToCent() < costPerTreatment.Sum().RoundToCent())
+        var splitCostPercentagesSum = 0m;
+        for (var year = 0; year < splitCostPercentagePerYear.Length; ++year)
+        {
+            var splitCostPercentage = splitCostPercentagePerYear[year];
+            if (splitCostPercentage < 0)
+            {
+                throw new ArgumentException(
+                    $"Year [{year}] split cost percentage [{splitCostPercentage}] is negative.",
+                    nameof(splitCostPercentagePerYear));
+            }
+
+            splitCostPercentagesSum += splitCostPercentage;
+        }
+
+        if (splitCostPercentagesSum != 100)
+        {
+            throw new ArgumentException(
+                $"Split cost percentages sum [{splitCostPercentagesSum}] does not equal 100.",
+                nameof(splitCostPercentagePerYear));
+        }
+
+        if (amountPerBudgetPerYear.Select(Enumerable.Sum).Sum() < costPerTreatment.Sum())
         {
             // Trivially unsolvable.
-            allocationPerBudgetAndTreatment = EmptyMatrix;
+            AssignEmptyArray(out allocationPerBudgetAndTreatmentPerYear);
             return false;
         }
 
         // Optimization
 
-        allocationPerBudgetAndTreatment = new decimal?[amountPerBudget.Length, costPerTreatment.Length];
+        Allocate(out allocationPerBudgetAndTreatmentPerYear, numberOfYears);
+        for (var year = 0; year < allocationPerBudgetAndTreatmentPerYear.Length; ++year)
+        {
+            Allocate(out allocationPerBudgetAndTreatmentPerYear[year], numberOfBudgets, numberOfTreatments);
+        }
 
-        if (amountPerBudget.Length == 1)
+        if (numberOfBudgets == 1)
         {
             // Degenerate case.
 
@@ -274,7 +327,7 @@ public static class Funding
                 allocationPerBudgetAndTreatment[0, t] = cost.RoundToCent();
             }
         }
-        else if (costPerTreatment.Length == 1)
+        else if (numberOfTreatments == 1)
         {
             // Less degenerate case.
 
@@ -369,8 +422,8 @@ public static class Funding
                     // the previous budget's spending constraint.
                     var maximizedSpending = objective.Value();
 
-                    // This constraint update also resets all variable values. (Probably a
-                    // deliberate side-effect, because changing a constraint bound can potentially
+                    // This constraint update also resets all variable values. (Probably an
+                    // intended side-effect, because changing a constraint bound can potentially
                     // change the solution space.)
                     spendingConstraints[b - 1].SetLb(maximizedSpending);
 
@@ -427,12 +480,12 @@ public static class Funding
         {
             // Use MIP with CP-SAT. Build the MIP.
 
-            // update allowedSpending by disallowing where amount_b < cost_t. (don't un-disallow anything!)
+            // update allocationIsAllowed by disallowing where amount_b < cost_t. (don't un-disallow anything!)
 
-            throw new NotImplementedException();
+            throw new NotImplementedException("MIP for single-budget funding is still WIP.");
         }
 
-        // Post-validation
+        // Output validation
 
         for (var b = 0; b < amountPerBudget.Length; ++b)
         {
@@ -459,7 +512,11 @@ public static class Funding
         return true;
     }
 
+    private static void AssignEmptyArray<T>(out T[] array) => array = Array.Empty<T>();
+
     private static void Allocate<T>(out T[] array, int length) => array = new T[length];
+
+    private static void Allocate<T>(out T[,] array, int length0, int length1) => array = new T[length0, length1];
 
     private static int ArrayLength<T>(T[] array) => array.Length;
 

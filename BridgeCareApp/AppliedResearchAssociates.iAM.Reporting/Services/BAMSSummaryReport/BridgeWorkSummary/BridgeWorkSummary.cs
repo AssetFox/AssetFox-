@@ -167,7 +167,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
                     //[TODO] - ask Jake regarding cash flow project. It won't have anything in the TreartmentOptions barring 1st year
 
-                    var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                    var cost = section.TreatmentConsiderations.
+                                Where(_ => _.TreatmentName?.ToLower() != BAMSConstants.NoTreatment && _.TreatmentName == appliedTreatment)
+                                .Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
                     PopulateWorkedOnCostAndCount(yearData.Year, section, costAndCountPerTreatmentPerYear, cost);
 
                     PopulateCompletedProjectCount(yearData.Year, section, countForCompletedProject);

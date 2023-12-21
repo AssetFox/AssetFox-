@@ -600,12 +600,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, section.ProjectSource);
                     }
 
-                    var recommendedTreatment = section.AppliedTreatment; // Recommended Treatment
-                    var cost = Math.Round(section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost)), 0); // Rounded cost to whole number based on comments from Jeff Davis
+                    var recommendedTreatment = section.AppliedTreatment ?? ""; // Recommended Treatment
+                    var treatmentConsiderations = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == recommendedTreatment);
+                    var cost = Math.Round(treatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost)), 0); // Rounded cost to whole number based on comments from Jeff Davis
 
-                    //get budget usages
-                    var appliedTreatment = section.AppliedTreatment ?? "";
-                    var treatmentConsiderations = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == appliedTreatment);
+                    //get budget usages                                       
                     var budgetUsages = new List<BudgetUsageDetail>();
                     foreach (var item in treatmentConsiderations)
                     {
@@ -670,9 +669,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column], ExcelFormatStrings.CurrencyWithoutCents);
 
-                    if (!string.IsNullOrEmpty(appliedTreatment) && !string.IsNullOrWhiteSpace(appliedTreatment) && treatmentCategoryLookup.ContainsKey(appliedTreatment))
+                    if (!string.IsNullOrEmpty(recommendedTreatment) && !string.IsNullOrWhiteSpace(recommendedTreatment) && treatmentCategoryLookup.ContainsKey(recommendedTreatment))
                     {
-                        worksheet.Cells[row, ++column].Value = treatmentCategoryLookup[appliedTreatment]?.ToString(); // FHWA Work Type
+                        worksheet.Cells[row, ++column].Value = treatmentCategoryLookup[recommendedTreatment]?.ToString(); // FHWA Work Type
                     }
                     else
                     {

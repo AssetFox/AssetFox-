@@ -46,6 +46,5 @@ namespace BridgeCareCoreTests
 
             Assert.Equal(libraryId, curve.LibraryId);
         }
-
     }
 }

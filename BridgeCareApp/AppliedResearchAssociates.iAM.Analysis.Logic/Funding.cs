@@ -121,6 +121,26 @@ public static class Funding
                 nameof(allocationIsAllowedPerBudgetAndTreatment));
         }
 
+        for (var t = 0; t < numberOfTreatments; ++t)
+        {
+            var fundingIsPossible = false;
+            for (var b = 0; b < numberOfBudgets; ++b)
+            {
+                if (allocationIsAllowedPerBudgetAndTreatment[b, t])
+                {
+                    fundingIsPossible = true;
+                    break;
+                }
+            }
+
+            if (!fundingIsPossible)
+            {
+                throw new ArgumentException(
+                    $"Treatment [{t}] funding is not permitted.",
+                    nameof(allocationIsAllowedPerBudgetAndTreatment));
+            }
+        }
+
         for (var y = 0; y < amountPerBudgetPerYear.Length; ++y)
         {
             var amountPerBudget = amountPerBudgetPerYear[y];
@@ -139,10 +159,10 @@ public static class Funding
         for (var t = 0; t < costPerTreatment.Length; ++t)
         {
             var cost = costPerTreatment[t];
-            if (cost < 0)
+            if (cost <= 0)
             {
                 throw new ArgumentException(
-                    $"Treatment [{t}] cost [{cost}] is negative.",
+                    $"Treatment [{t}] cost [{cost}] is non-positive.",
                     nameof(costPerTreatment));
             }
         }
@@ -187,23 +207,26 @@ public static class Funding
         {
             // Degenerate case.
 
-            var amountRemaining = amountPerBudget[0];
-
-            for (var t = 0; t < costPerTreatment.Length; ++t)
+            for (var y = 0; y < numberOfYears; ++y)
             {
-                var cost = costPerTreatment[t];
+                var amountRemaining = amountPerBudget[0];
 
-                if (!allocationIsAllowedPerBudgetAndTreatment[0, t] || cost > amountRemaining)
+                for (var t = 0; t < costPerTreatment.Length; ++t)
                 {
-                    return false;
+                    var cost = costPerTreatment[t];
+
+                    if (!allocationIsAllowedPerBudgetAndTreatment[0, t] || cost > amountRemaining)
+                    {
+                        return false;
+                    }
+
+                    amountRemaining -= cost;
+
+                    allocationPerBudgetAndTreatment[0, t] = cost.RoundToCent();
                 }
-
-                amountRemaining -= cost;
-
-                allocationPerBudgetAndTreatment[0, t] = cost.RoundToCent();
             }
         }
-        else if (numberOfTreatments == 1)
+        else if (numberOfTreatments == 1 && !settings.BudgetCarryoverIsAllowed)
         {
             // Less degenerate case.
 

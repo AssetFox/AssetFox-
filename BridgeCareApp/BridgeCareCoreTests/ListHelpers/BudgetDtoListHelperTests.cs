@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+﻿using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Services;
 using Xunit;
 
 namespace BridgeCareCoreTests.ListHelpers
@@ -17,7 +12,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curve = new BudgetDTO();
             var curves = new List<BudgetDTO> { curve };
             Assert.False(curve.IsModified);
-            TestHelper.UnitOfWork.BudgetRepo.AddModifiedToScenarioBudget(curves, true);
+            BudgetDtoListHelper.AddModifiedToScenarioBudget(curves, true);
             Assert.True(curve.IsModified);
         }
 
@@ -29,7 +24,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curves = new List<BudgetDTO> { curve };
             var libraryId = Guid.NewGuid();
 
-            TestHelper.UnitOfWork.BudgetRepo.AddLibraryIdToScenarioBudget(curves, libraryId);
+            BudgetDtoListHelper.AddLibraryIdToScenarioBudget(curves, libraryId);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }
@@ -42,7 +37,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var libraryId = Guid.NewGuid();
             curve.LibraryId = libraryId;
 
-            TestHelper.UnitOfWork.BudgetRepo.AddLibraryIdToScenarioBudget(curves, null);
+            BudgetDtoListHelper.AddLibraryIdToScenarioBudget(curves, null);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }

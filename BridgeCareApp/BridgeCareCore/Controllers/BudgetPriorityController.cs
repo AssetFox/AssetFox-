@@ -18,6 +18,7 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Interfaces;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
+using BridgeCareCore.Services.DtoHelpers;
 
 namespace BridgeCareCore.Controllers
 {
@@ -245,8 +246,8 @@ namespace BridgeCareCore.Controllers
                 {
                     var dtos = _budgetPriortyService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    UnitOfWork.BudgetPriorityRepo.AddLibraryIdToScenarioBudgetPriority(dtos, pagingSync.LibraryId);
-                    UnitOfWork.BudgetPriorityRepo.AddModifiedToScenarioBudgetPriority(dtos, pagingSync.IsModified);
+                    BudgetPriorityDtoListHelper.AddLibraryIdToScenarioBudgetPriority(dtos, pagingSync.LibraryId);
+                    BudgetPriorityDtoListHelper.AddModifiedToScenarioBudgetPriority(dtos, pagingSync.IsModified);
                     UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(dtos, simulationId);
                 });
 

@@ -268,21 +268,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var user = users.FirstOrDefault();
             return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
-        public void AddLibraryIdToScenarioBudget(List<BudgetDTO> budgetDTOs, Guid? libraryId)
-        {
-            if (libraryId == null) return;
-            foreach (var dto in budgetDTOs)
-            {
-                dto.LibraryId = (Guid)libraryId;
-            }
-        }
-        public void AddModifiedToScenarioBudget(List<BudgetDTO> budgetDTOs, bool IsModified)
-        {
-            foreach (var dto in budgetDTOs)
-            {
-                dto.IsModified = IsModified;
-            }
-        }
         public BudgetLibraryDTO GetBudgetLibrary(Guid libraryId)
         {
             if (!_unitOfWork.Context.BudgetLibrary.Any(_ => _.Id == libraryId))

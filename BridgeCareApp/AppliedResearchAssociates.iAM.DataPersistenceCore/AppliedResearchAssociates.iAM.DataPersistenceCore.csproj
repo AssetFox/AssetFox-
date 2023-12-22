@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Repositories\MSSQL\DTOs\**" />
+    <EmbeddedResource Remove="Repositories\MSSQL\DTOs\**" />
+    <None Remove="Repositories\MSSQL\DTOs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Repositories\MSSQL\migrationConnection.json" />
   </ItemGroup>
 
@@ -50,7 +56,6 @@
 
   <ItemGroup>
     <Folder Include="Repositories\MSSQLLegacy\Mappings\" />
-    <Folder Include="Repositories\MSSQL\DTOs\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,5 +1,6 @@
 ﻿using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using BridgeCareCore.Services.DtoHelpers;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Xunit;
 
@@ -13,7 +14,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curve = new BudgetPriorityDTO();
             var curves = new List<BudgetPriorityDTO> { curve };
             Assert.False(curve.IsModified);
-            TestHelper.UnitOfWork.BudgetPriorityRepo.AddModifiedToScenarioBudgetPriority(curves, true);
+            BudgetPriorityDtoListHelper.AddModifiedToScenarioBudgetPriority(curves, true);
             Assert.True(curve.IsModified);
         }
 
@@ -25,7 +26,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curves = new List<BudgetPriorityDTO> { curve };
             var libraryId = Guid.NewGuid();
 
-            TestHelper.UnitOfWork.BudgetPriorityRepo.AddLibraryIdToScenarioBudgetPriority(curves, libraryId);
+            BudgetPriorityDtoListHelper.AddLibraryIdToScenarioBudgetPriority(curves, libraryId);
 
             Assert.Equal(libraryId, curve.libraryId);
         }
@@ -38,7 +39,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var libraryId = Guid.NewGuid();
             curve.libraryId = libraryId;
 
-            TestHelper.UnitOfWork.BudgetPriorityRepo.AddLibraryIdToScenarioBudgetPriority(curves, null);
+            BudgetPriorityDtoListHelper.AddLibraryIdToScenarioBudgetPriority(curves, null);
 
             Assert.Equal(libraryId, curve.libraryId);
         }

@@ -1,6 +1,6 @@
 ﻿using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
-using BridgeCareCore.Services.DtoHelpers;
+using BridgeCareCore.Services;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Xunit;
 

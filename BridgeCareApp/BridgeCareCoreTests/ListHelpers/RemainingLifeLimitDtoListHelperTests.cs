@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DTOs;
+﻿using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Services;
 using Xunit;
@@ -18,7 +13,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curve = new RemainingLifeLimitDTO();
             var curves = new List<RemainingLifeLimitDTO> { curve };
             Assert.False(curve.IsModified);
-            TestHelper.UnitOfWork.RemainingLifeLimitRepo.AddModifiedToScenarioRemainingLifeLimit(curves, true);
+            RemainingLifeLimitDtoListHelper.AddModifiedToScenarioRemainingLifeLimit(curves, true);
             Assert.True(curve.IsModified);
         }
 
@@ -30,7 +25,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curves = new List<RemainingLifeLimitDTO> { curve };
             var libraryId = Guid.NewGuid();
 
-            TestHelper.UnitOfWork.RemainingLifeLimitRepo.AddLibraryIdToScenarioRemainingLifeLimit(curves, libraryId);
+            RemainingLifeLimitDtoListHelper.AddLibraryIdToScenarioRemainingLifeLimit(curves, libraryId);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }
@@ -43,7 +38,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var libraryId = Guid.NewGuid();
             curve.LibraryId = libraryId;
 
-            TestHelper.UnitOfWork.RemainingLifeLimitRepo.AddLibraryIdToScenarioRemainingLifeLimit(curves, null);
+            RemainingLifeLimitDtoListHelper.AddLibraryIdToScenarioRemainingLifeLimit(curves, null);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using BridgeCareCore.Services;
 using Xunit;
 
 namespace BridgeCareCoreTests.ListHelpers
@@ -17,7 +18,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curve = new TreatmentDTO();
             var curves = new List<TreatmentDTO> { curve };
             Assert.False(curve.IsModified);
-            TestHelper.UnitOfWork.SelectableTreatmentRepo.AddModifiedToScenarioSelectableTreatments(curves, true);
+            TreatmentDtoListHelper.AddModifiedToScenarioSelectableTreatments(curves, true);
             Assert.True(curve.IsModified);
         }
 
@@ -29,7 +30,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curves = new List<TreatmentDTO> { curve };
             var libraryId = Guid.NewGuid();
 
-            TestHelper.UnitOfWork.SelectableTreatmentRepo.AddLibraryIdToScenarioSelectableTreatments(curves, libraryId);
+            TreatmentDtoListHelper.AddLibraryIdToScenarioSelectableTreatments(curves, libraryId);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }
@@ -42,7 +43,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var libraryId = Guid.NewGuid();
             curve.LibraryId = libraryId;
 
-            TestHelper.UnitOfWork.SelectableTreatmentRepo.AddLibraryIdToScenarioSelectableTreatments(curves, null);
+            TreatmentDtoListHelper.AddLibraryIdToScenarioSelectableTreatments(curves, null);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }

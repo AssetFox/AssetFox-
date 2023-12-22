@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using BridgeCareCore.Services;
 using Xunit;
 
 namespace BridgeCareCoreTests.ListHelpers
@@ -18,7 +19,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curves = new List<TargetConditionGoalDTO> { curve };
             Assert.False(curve.IsModified);
 
-            TestHelper.UnitOfWork.TargetConditionGoalRepo.AddModifiedToScenarioTargetConditionGoal(curves, true);
+            TargetConditionGoalDtoListHelper.AddModifiedToScenarioTargetConditionGoal(curves, true);
 
             Assert.True(curve.IsModified);
         }
@@ -30,7 +31,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curves = new List<TargetConditionGoalDTO> { curve };
             var libraryId = Guid.NewGuid();
 
-            TestHelper.UnitOfWork.TargetConditionGoalRepo.AddLibraryIdToScenarioTargetConditionGoal(curves, libraryId);
+            TargetConditionGoalDtoListHelper.AddLibraryIdToScenarioTargetConditionGoal(curves, libraryId);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }
@@ -43,7 +44,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var libraryId = Guid.NewGuid();
             curve.LibraryId = libraryId;
 
-            TestHelper.UnitOfWork.TargetConditionGoalRepo.AddLibraryIdToScenarioTargetConditionGoal(curves, null);
+            TargetConditionGoalDtoListHelper.AddLibraryIdToScenarioTargetConditionGoal(curves, null);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }

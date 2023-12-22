@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System;
 
-namespace BridgeCareCore.Services.DtoHelpers
+namespace BridgeCareCore.Services
 {
     public static class BudgetPriorityDtoListHelper
     {

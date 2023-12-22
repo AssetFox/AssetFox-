@@ -2,19 +2,17 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -406,23 +404,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var user = users.FirstOrDefault();
             return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
-        public void AddLibraryIdToScenarioTargetConditionGoal(List<TargetConditionGoalDTO> targetConditionGoalDTOs, Guid? libraryId)
-        {
-            if (libraryId == null) return;
-            foreach (var dto in targetConditionGoalDTOs)
-            {
-                dto.LibraryId = (Guid)libraryId;
-            }
-        }
-
-        public void AddModifiedToScenarioTargetConditionGoal(List<TargetConditionGoalDTO> targetConditionGoalDTOs, bool IsModified)
-        {
-            foreach (var dto in targetConditionGoalDTOs)
-            {
-                dto.IsModified = IsModified;
-            }
-        }
-
 
         public void UpsertTargetConditionGoalLibraryGoalsAndPossiblyUser(TargetConditionGoalLibraryDTO dto, bool isNewLibrary, Guid ownerIdForNewLibrary)
         {

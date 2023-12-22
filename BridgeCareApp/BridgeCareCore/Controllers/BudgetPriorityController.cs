@@ -18,7 +18,7 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Interfaces;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
-using BridgeCareCore.Services.DtoHelpers;
+using BridgeCareCore.Services;
 
 namespace BridgeCareCore.Controllers
 {

@@ -121,26 +121,6 @@ public static class Funding
                 nameof(allocationIsAllowedPerBudgetAndTreatment));
         }
 
-        for (var t = 0; t < numberOfTreatments; ++t)
-        {
-            var fundingIsPossible = false;
-            for (var b = 0; b < numberOfBudgets; ++b)
-            {
-                if (allocationIsAllowedPerBudgetAndTreatment[b, t])
-                {
-                    fundingIsPossible = true;
-                    break;
-                }
-            }
-
-            if (!fundingIsPossible)
-            {
-                throw new ArgumentException(
-                    $"Treatment [{t}] funding is not permitted.",
-                    nameof(allocationIsAllowedPerBudgetAndTreatment));
-            }
-        }
-
         for (var y = 0; y < amountPerBudgetPerYear.Length; ++y)
         {
             var amountPerBudget = amountPerBudgetPerYear[y];
@@ -207,13 +187,26 @@ public static class Funding
         {
             // Degenerate case.
 
+            var amountRemaining = 0m;
+
             for (var y = 0; y < numberOfYears; ++y)
             {
-                var amountRemaining = amountPerBudget[0];
+                var amountPerBudget = amountPerBudgetPerYear[y];
+                var allocationPerBudgetAndTreatment = allocationPerBudgetAndTreatmentPerYear[y];
+                var costFraction = costPercentagePerYear[y] / 100;
+
+                if (settings.BudgetCarryoverIsAllowed)
+                {
+                    amountRemaining += amountPerBudget[0];
+                }
+                else
+                {
+                    amountRemaining = amountPerBudget[0];
+                }
 
                 for (var t = 0; t < costPerTreatment.Length; ++t)
                 {
-                    var cost = costPerTreatment[t];
+                    var cost = costPerTreatment[t] * costFraction;
 
                     if (!allocationIsAllowedPerBudgetAndTreatment[0, t] || cost > amountRemaining)
                     {
@@ -230,29 +223,36 @@ public static class Funding
         {
             // Less degenerate case.
 
-            var costRemaining = costPerTreatment[0];
-
-            for (var b = 0; b < amountPerBudget.Length; ++b)
+            for (var y = 0; y < numberOfYears; ++y)
             {
-                if (allocationIsAllowedPerBudgetAndTreatment[b, 0])
+                var amountPerBudget = amountPerBudgetPerYear[y];
+                var allocationPerBudgetAndTreatment = allocationPerBudgetAndTreatmentPerYear[y];
+                var costFraction = costPercentagePerYear[y] / 100;
+
+                var costRemaining = costPerTreatment[0] * costFraction;
+
+                for (var b = 0; b < amountPerBudget.Length; ++b)
                 {
-                    var amountAvailable = amountPerBudget[b];
-                    if (costRemaining <= amountAvailable)
+                    if (allocationIsAllowedPerBudgetAndTreatment[b, 0])
                     {
-                        allocationPerBudgetAndTreatment[b, 0] = costRemaining.RoundToCent();
-                        costRemaining = 0;
-                    }
-                    else if (settings.MultipleBudgetsCanFundEachTreatment)
-                    {
-                        allocationPerBudgetAndTreatment[b, 0] = amountAvailable.RoundToCent();
-                        costRemaining -= amountAvailable;
+                        var amountAvailable = amountPerBudget[b];
+                        if (costRemaining <= amountAvailable)
+                        {
+                            allocationPerBudgetAndTreatment[b, 0] = costRemaining.RoundToCent();
+                            costRemaining = 0;
+                        }
+                        else if (settings.MultipleBudgetsCanFundEachTreatment)
+                        {
+                            allocationPerBudgetAndTreatment[b, 0] = amountAvailable.RoundToCent();
+                            costRemaining -= amountAvailable;
+                        }
                     }
                 }
-            }
 
-            if (costRemaining != 0)
-            {
-                return false;
+                if (costRemaining != 0)
+                {
+                    return false;
+                }
             }
         }
         else if (settings.MultipleBudgetsCanFundEachTreatment)
@@ -327,10 +327,9 @@ public static class Funding
                     fundingConstraintPerYearAndTreatment[y, t] = fundingConstraint;
 
                     var cost = costPerTreatment[t] * costFraction;
-                    const decimal fundingTolerance = 0.001m; // 1/10th of 1 cent
 
-                    fundingConstraint.SetLb((double)(cost - fundingTolerance));
-                    fundingConstraint.SetUb((double)(cost + fundingTolerance));
+                    fundingConstraint.SetLb((double)cost);
+                    fundingConstraint.SetUb((double)cost);
                 }
 
                 // Create allocation variables.
@@ -552,7 +551,7 @@ public static class Funding
 
         foreach (var allocationPerBudgetAndTreatment in allocationPerBudgetAndTreatmentPerYear)
         {
-            totalSpending += TotalFundingPerTreatment(allocationPerBudgetAndTreatment, b);
+            totalSpending += TotalSpendingPerBudget(allocationPerBudgetAndTreatment, b);
         }
 
         return totalSpending;

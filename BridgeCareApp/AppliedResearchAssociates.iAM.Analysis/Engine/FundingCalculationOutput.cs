@@ -15,5 +15,5 @@ public sealed class FundingCalculationOutput
 
     public List<Allocation> AllocationMatrix { get; } = new();
 
-    public sealed record Allocation(string BudgetName, string TreatmentName, decimal Allocated);
+    public sealed record Allocation(int Year, string BudgetName, string TreatmentName, decimal AllocatedAmount);
 }

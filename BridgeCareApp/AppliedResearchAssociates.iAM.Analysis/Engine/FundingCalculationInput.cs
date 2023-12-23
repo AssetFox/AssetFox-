@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.Analysis.Logic;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
@@ -10,10 +11,12 @@ public sealed class FundingCalculationInput
 
     public FundingCalculationInput(FundingCalculationInput original)
     {
-        Budgets.AddRange(original.Budgets);
-        Treatments.AddRange(original.Treatments);
+        BudgetsToSpend.AddRange(original.BudgetsToSpend);
+        CashFlowDistribution.AddRange(original.CashFlowDistribution);
         ExclusionMatrix.AddRange(original.ExclusionMatrix);
-        MultiBudgetFundingIsAllowed = original.MultiBudgetFundingIsAllowed;
+        TreatmentsToFund.AddRange(original.TreatmentsToFund);
+
+        Settings = original.Settings;
     }
 
     public enum ExclusionReason
@@ -24,17 +27,21 @@ public sealed class FundingCalculationInput
         BudgetConditions,
     }
 
-    public List<Budget> Budgets { get; } = new();
+    public List<Budget> BudgetsToSpend { get; } = new();
+
+    public List<CashFlowPoint> CashFlowDistribution { get; } = new();
 
     public List<Exclusion> ExclusionMatrix { get; } = new();
 
-    public bool MultiBudgetFundingIsAllowed { get; set; }
+    public Funding.Settings Settings { get; set; } = new();
 
-    public List<Treatment> Treatments { get; } = new();
+    public List<Treatment> TreatmentsToFund { get; } = new();
 
-    public sealed record Budget(string Name, decimal Amount);
+    public sealed record Budget(string Name, decimal Amount, int Year);
 
-    public sealed record Treatment(string Name, decimal Cost);
+    public sealed record CashFlowPoint(int Year, decimal Percentage);
 
     public sealed record Exclusion(string BudgetName, string TreatmentName, ExclusionReason Reason);
+
+    public sealed record Treatment(string Name, decimal Cost);
 }

@@ -1,4 +1,6 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+﻿using System;
+
+namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
 /// <summary>
 ///     Represents the reason that cash flow was not used to fund a specific treatment.
@@ -49,11 +51,4 @@ public enum ReasonAgainstCashFlow
     ///     Indicates a selected cash flow rule.
     /// </summary>
     None,
-
-    /// <summary>
-    ///     Indicates that (a) <see cref="AnalysisMethod.ShouldRestrictCashFlowToFirstYearBudgets"/>
-    ///     is enabled and (b) the first cash-flow year's funding pattern (i.e. allocated cost per
-    ///     budget) could not be applied to at least one future year of the cash-flow.
-    /// </summary>
-    FirstYearFundingPatternFailedInFutureYear,
 }

@@ -61,7 +61,6 @@ public sealed class Scenario
         RemainingLifeLimits = source.RemainingLifeLimits.Select(Convert).ToList(),
         ShouldApplyMultipleFeasibleCosts = source.ShouldApplyMultipleFeasibleCosts,
         ShouldDeteriorateDuringCashFlow = source.ShouldDeteriorateDuringCashFlow,
-        ShouldRestrictCashFlowToFirstYearBudgets = source.ShouldRestrictCashFlowToFirstYearBudgets,
         SpendingStrategy = source.SpendingStrategy,
         TargetConditionGoals = source.TargetConditionGoals.Select(Convert).ToList(),
     };
@@ -589,7 +588,6 @@ public sealed class Scenario
             target.OptimizationStrategy = source.OptimizationStrategy;
             target.ShouldApplyMultipleFeasibleCosts = source.ShouldApplyMultipleFeasibleCosts;
             target.ShouldDeteriorateDuringCashFlow = source.ShouldDeteriorateDuringCashFlow;
-            target.ShouldRestrictCashFlowToFirstYearBudgets = source.ShouldRestrictCashFlowToFirstYearBudgets;
             target.SpendingStrategy = source.SpendingStrategy;
 
             if (source.BenefitWeightAttributeName != null)

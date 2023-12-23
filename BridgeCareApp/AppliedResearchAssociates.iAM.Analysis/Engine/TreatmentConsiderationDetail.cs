@@ -25,7 +25,10 @@ public sealed class TreatmentConsiderationDetail
         BudgetPriorityLevel = original.BudgetPriorityLevel;
         CashFlowConsiderations.AddRange(original.CashFlowConsiderations.Select(_ => new CashFlowConsiderationDetail(_)));
 
-        FundingCalculationInput = new(original.FundingCalculationInput);
+        if (original.FundingCalculationInput != null)
+        {
+            FundingCalculationInput = new(original.FundingCalculationInput);
+        }
 
         if (original.FundingCalculationOutput != null)
         {

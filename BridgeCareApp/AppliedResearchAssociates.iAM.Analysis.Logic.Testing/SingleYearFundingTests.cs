@@ -1,6 +1,6 @@
 ﻿namespace AppliedResearchAssociates.iAM.Analysis.Logic.Testing;
 
-public class FundingCalculationTests
+public class SingleYearFundingTests
 {
     #region Degenerate inputs
 
@@ -30,7 +30,7 @@ public class FundingCalculationTests
             budgetAmounts,
             treatmentCosts,
             new(MultipleBudgetsCanFundEachTreatment: true),
-            out var solution);
+            out var actualSolution);
 
         Assert.False(solved);
     }
@@ -62,18 +62,18 @@ public class FundingCalculationTests
             budgetAmounts,
             treatmentCosts,
             new(MultipleBudgetsCanFundEachTreatment: true),
-            out var solution);
+            out var actualSolution);
 
         Assert.True(solved);
 
-        decimal?[,] expected =
+        decimal?[,] expectedSolution =
         {
             { 10, },
             { 5, },
             { 0, },
         };
 
-        Assert.Equivalent(expected, solution, true);
+        Assert.Equivalent(expectedSolution, actualSolution, true);
     }
 
     [Fact]
@@ -103,7 +103,7 @@ public class FundingCalculationTests
             budgetAmounts,
             treatmentCosts,
             new(MultipleBudgetsCanFundEachTreatment: true),
-            out var solution);
+            out var actualSolution);
 
         Assert.False(solved);
     }
@@ -135,7 +135,7 @@ public class FundingCalculationTests
             budgetAmounts,
             treatmentCosts,
             new(MultipleBudgetsCanFundEachTreatment: true),
-            out var solution);
+            out var actualSolution);
 
         Assert.False(solved);
     }
@@ -167,18 +167,18 @@ public class FundingCalculationTests
             budgetAmounts,
             treatmentCosts,
             new(MultipleBudgetsCanFundEachTreatment: false),
-            out var solution);
+            out var actualSolution);
 
         Assert.True(solved);
 
-        decimal?[,] expected =
+        decimal?[,] expectedSolution =
         {
             { null, },
             { 5, },
             { 0, },
         };
 
-        Assert.Equivalent(expected, solution, true);
+        Assert.Equivalent(expectedSolution, actualSolution, true);
     }
 
     [Fact]
@@ -208,7 +208,7 @@ public class FundingCalculationTests
             budgetAmounts,
             treatmentCosts,
             new(MultipleBudgetsCanFundEachTreatment: false),
-            out var solution);
+            out var actualSolution);
 
         Assert.False(solved);
     }
@@ -238,7 +238,7 @@ public class FundingCalculationTests
             budgetAmounts,
             treatmentCosts,
             new(MultipleBudgetsCanFundEachTreatment: true),
-            out var solution);
+            out var actualSolution);
 
         Assert.False(solved);
     }
@@ -268,16 +268,16 @@ public class FundingCalculationTests
             budgetAmounts,
             treatmentCosts,
             new(MultipleBudgetsCanFundEachTreatment: true),
-            out var solution);
+            out var actualSolution);
 
         Assert.True(solved);
 
-        decimal?[,] expected =
+        decimal?[,] expectedSolution =
         {
             { 1, 2, 3, },
         };
 
-        Assert.Equivalent(expected, solution, true);
+        Assert.Equivalent(expectedSolution, actualSolution, true);
     }
 
     [Fact]
@@ -305,7 +305,7 @@ public class FundingCalculationTests
             budgetAmounts,
             treatmentCosts,
             new(MultipleBudgetsCanFundEachTreatment: true),
-            out var solution);
+            out var actualSolution);
 
         Assert.False(solved);
     }
@@ -333,16 +333,16 @@ public class FundingCalculationTests
             budgetAmounts,
             treatmentCosts,
             new(MultipleBudgetsCanFundEachTreatment: true),
-            out var solution);
+            out var actualSolution);
 
         Assert.True(solved);
 
-        decimal?[,] expected =
+        decimal?[,] expectedSolution =
         {
             { 1, },
         };
 
-        Assert.Equivalent(expected, solution, true);
+        Assert.Equivalent(expectedSolution, actualSolution, true);
     }
 
     [Fact]
@@ -368,7 +368,7 @@ public class FundingCalculationTests
             budgetAmounts,
             treatmentCosts,
             new(MultipleBudgetsCanFundEachTreatment: true),
-            out var solution);
+            out var actualSolution);
 
         Assert.False(solved);
     }
@@ -406,18 +406,18 @@ public class FundingCalculationTests
             budgetAmounts,
             treatmentCosts,
             new(MultipleBudgetsCanFundEachTreatment: true),
-            out var solution);
+            out var actualSolution);
 
         Assert.True(solved);
 
-        decimal?[,] expected =
+        decimal?[,] expectedSolution =
         {
             { 0, 10, null, },
             { 10, null, 10, },
             { 0, null, 0, },
         };
 
-        Assert.Equivalent(expected, solution, true);
+        Assert.Equivalent(expectedSolution, actualSolution, true);
     }
 
     [Fact]
@@ -446,17 +446,17 @@ public class FundingCalculationTests
             budgetAmounts,
             treatmentCosts,
             new(MultipleBudgetsCanFundEachTreatment: true),
-            out var solution);
+            out var actualSolution);
 
         Assert.True(solved);
 
-        decimal?[,] expected =
+        decimal?[,] expectedSolution =
         {
             { 2, 8, },
             { 6, null, },
         };
 
-        Assert.Equivalent(expected, solution, true);
+        Assert.Equivalent(expectedSolution, actualSolution, true);
     }
 
     [Fact]
@@ -485,7 +485,7 @@ public class FundingCalculationTests
             budgetAmounts,
             treatmentCosts,
             new(MultipleBudgetsCanFundEachTreatment: true),
-            out var solution);
+            out var actualSolution);
 
         Assert.False(solved);
     }

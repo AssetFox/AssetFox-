@@ -139,10 +139,10 @@ public static class Funding
         for (var t = 0; t < costPerTreatment.Length; ++t)
         {
             var cost = costPerTreatment[t];
-            if (cost <= 0)
+            if (cost < 0)
             {
                 throw new ArgumentException(
-                    $"Treatment [{t}] cost [{cost}] is non-positive.",
+                    $"Treatment [{t}] cost [{cost}] is negative.",
                     nameof(costPerTreatment));
             }
         }

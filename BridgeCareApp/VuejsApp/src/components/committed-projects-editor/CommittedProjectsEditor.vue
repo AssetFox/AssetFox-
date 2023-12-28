@@ -573,7 +573,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
         });
         await initializePages();
         if (scenarioId !== undefined) {  
-            await fetchTreatmentLibrary(scenarioId);
+            // await fetchTreatmentLibrary(scenarioId); Uncomment if it is really needed.
             await fetchProjectSources();
         }
 

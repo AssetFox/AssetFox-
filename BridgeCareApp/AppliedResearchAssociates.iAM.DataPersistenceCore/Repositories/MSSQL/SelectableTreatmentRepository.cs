@@ -1045,7 +1045,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             try
             {
-                var scenarioSelectableTreatments = GetScenarioSelectableTreatments(simulationId);
+                var scenarioSelectableTreatments = GetScenarioSelectableTreatmentsWithCriterionLibrary(simulationId);
                 var defaultTreatment = scenarioSelectableTreatments
                     .Where(_ => _.IsUnselectable == false)  // trying to be explicit
                     .SingleOrDefault(_ => _.CriterionLibrary == null || string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression));
@@ -1136,6 +1136,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
             return dtos;
+        }
+
+        private List<TreatmentDTO> GetScenarioSelectableTreatmentsWithCriterionLibrary(Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException("No simulation was found for the given scenario");
+            }
+
+            return _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
+                .Where(_ => _.SimulationId == simulationId)
+                .Include(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Select(_ => _.ToDto(null))
+                .ToList();
         }
     }
 }

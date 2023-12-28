@@ -219,7 +219,7 @@ public static class Funding
                 }
             }
         }
-        else if (numberOfTreatments == 1 && !settings.BudgetCarryoverIsAllowed)
+        else if (numberOfTreatments == 1 && (numberOfYears == 1 || !settings.BudgetCarryoverIsAllowed))
         {
             // Less degenerate case.
 

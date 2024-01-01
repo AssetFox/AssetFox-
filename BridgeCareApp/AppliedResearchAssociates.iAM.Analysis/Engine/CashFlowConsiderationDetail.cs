@@ -22,6 +22,8 @@ public sealed class CashFlowConsiderationDetail
     {
         CashFlowRuleName = original.CashFlowRuleName;
         ReasonAgainstCashFlow = original.ReasonAgainstCashFlow;
+
+        FundingCalculationInputSupplement = new(original.FundingCalculationInputSupplement);
     }
 
     /// <summary>
@@ -29,7 +31,7 @@ public sealed class CashFlowConsiderationDetail
     /// </summary>
     public string CashFlowRuleName { get; }
 
-    public FundingCalculationInput FundingCalculationInput { get; set; }
+    public FundingCalculationInput.CashFlowSupplement FundingCalculationInputSupplement { get; set; }
 
     /// <summary>
     ///     Result of the decision regarding this specific treatment and cash flow rule.

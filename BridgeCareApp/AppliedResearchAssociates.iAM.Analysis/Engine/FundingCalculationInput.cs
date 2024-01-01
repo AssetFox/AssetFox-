@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.Analysis.Logic;
+using System.Linq;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
@@ -11,12 +11,9 @@ public sealed class FundingCalculationInput
 
     public FundingCalculationInput(FundingCalculationInput original)
     {
-        BudgetsToSpend.AddRange(original.BudgetsToSpend);
-        CashFlowDistribution.AddRange(original.CashFlowDistribution);
-        ExclusionMatrix.AddRange(original.ExclusionMatrix);
-        TreatmentsToFund.AddRange(original.TreatmentsToFund);
-
-        Settings = original.Settings;
+        CurrentBudgetsToSpend = original.CurrentBudgetsToSpend.ToList();
+        ExclusionsMatrix = original.ExclusionsMatrix.ToList();
+        TreatmentsToFund = original.TreatmentsToFund.ToList();
     }
 
     public enum ExclusionReason
@@ -27,13 +24,9 @@ public sealed class FundingCalculationInput
         BudgetConditions,
     }
 
-    public List<Budget> BudgetsToSpend { get; } = new();
+    public List<Budget> CurrentBudgetsToSpend { get; } = new();
 
-    public List<CashFlowPoint> CashFlowDistribution { get; } = new();
-
-    public List<Exclusion> ExclusionMatrix { get; } = new();
-
-    public Funding.Settings Settings { get; set; } = new();
+    public List<Exclusion> ExclusionsMatrix { get; } = new();
 
     public List<Treatment> TreatmentsToFund { get; } = new();
 
@@ -44,4 +37,21 @@ public sealed class FundingCalculationInput
     public sealed record Exclusion(string BudgetName, string TreatmentName, ExclusionReason Reason);
 
     public sealed record Treatment(string Name, decimal Cost);
+
+    public sealed class CashFlowSupplement
+    {
+        public CashFlowSupplement()
+        {
+        }
+
+        public CashFlowSupplement(CashFlowSupplement original)
+        {
+            CashFlowDistribution = original.CashFlowDistribution.ToList();
+            FutureBudgetsToSpend = original.FutureBudgetsToSpend.ToList();
+        }
+
+        public List<CashFlowPoint> CashFlowDistribution { get; } = new();
+
+        public List<Budget> FutureBudgetsToSpend { get; } = new();
+    }
 }

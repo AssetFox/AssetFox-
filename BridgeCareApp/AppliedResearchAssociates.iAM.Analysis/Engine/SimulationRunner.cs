@@ -408,8 +408,6 @@ public sealed class SimulationRunner
                     context.ApplyPerformanceCurves();
                 }
 
-                context.Detail.TreatmentConsiderations.Add(progress.TreatmentConsideration);
-
                 if (progress.IsComplete)
                 {
                     context.ApplyTreatment(progress.Treatment, year);
@@ -836,6 +834,14 @@ public sealed class SimulationRunner
         Simulation.ResultsOnDisk.AddYearDetail(yearDetail);
     }
 
+    private void UpdateConditionActuals(int year)
+    {
+        TargetConditionActuals = GetTargetConditionActuals(year);
+        DeficientConditionActuals = GetDeficientConditionActuals();
+    }
+
+    #region Treatment funding logic
+
     private CostCoverage TryToPayForTreatment(
         AssetContext assetContext,
         Treatment treatment,
@@ -867,11 +873,10 @@ public sealed class SimulationRunner
 
         // Begin filling in the funding calculation input.
 
-        treatmentConsideration.FundingCalculationInput = new()
+        var fundingSettings = new Funding.Settings
         {
-            Settings = new(
-                Simulation.InvestmentPlan.AllowFundingCarryover,
-                Simulation.AnalysisMethod.AllowFundingFromMultipleBudgets)
+            BudgetCarryoverIsAllowed = Simulation.InvestmentPlan.AllowFundingCarryover,
+            MultipleBudgetsCanFundEachTreatment = Simulation.AnalysisMethod.AllowFundingFromMultipleBudgets,
         };
 
         var treatmentsToFund = new List<Treatment>();
@@ -883,6 +888,8 @@ public sealed class SimulationRunner
         {
             treatmentsToFund.Add(treatment);
         }
+
+        treatmentConsideration.FundingCalculationInput = new();
 
         foreach (var treatmentToFund in treatmentsToFund)
         {
@@ -896,6 +903,8 @@ public sealed class SimulationRunner
             .Select(t => t.Cost)
             .ToArray();
 
+        var amountPerBudgetOfCurrentYear = new decimal[BudgetContexts.Count];
+
         var allocationIsAllowedPerBudgetAndTreatment = new bool[BudgetContexts.Count, treatmentsToFund.Count];
 
         for (var b = 0; b < BudgetContexts.Count; ++b)
@@ -904,7 +913,9 @@ public sealed class SimulationRunner
 
             var amount = getAvailableAmount(budgetContext);
 
-            treatmentConsideration.FundingCalculationInput.BudgetsToSpend.Add(
+            amountPerBudgetOfCurrentYear[b] = amount;
+
+            treatmentConsideration.FundingCalculationInput.CurrentBudgetsToSpend.Add(
                 new(budgetContext.Budget.Name, amount, year));
 
             var budgetConditions = ConditionsPerBudget[budgetContext.Budget];
@@ -918,14 +929,14 @@ public sealed class SimulationRunner
 
                 if (!treatmentToFund.CanUseBudget(budgetContext.Budget))
                 {
-                    treatmentConsideration.FundingCalculationInput.ExclusionMatrix.Add(new(
+                    treatmentConsideration.FundingCalculationInput.ExclusionsMatrix.Add(new(
                         budgetContext.Budget.Name,
                         treatmentToFund.Name,
                         FundingCalculationInput.ExclusionReason.TreatmentSettings));
                 }
                 else if (!budgetConditionIsMet)
                 {
-                    treatmentConsideration.FundingCalculationInput.ExclusionMatrix.Add(new(
+                    treatmentConsideration.FundingCalculationInput.ExclusionsMatrix.Add(new(
                         budgetContext.Budget.Name,
                         treatmentToFund.Name,
                         FundingCalculationInput.ExclusionReason.BudgetConditions));
@@ -939,7 +950,6 @@ public sealed class SimulationRunner
 
         // First, attempt any applicable cash flows.
 
-        var cashFlowConsiderations = new List<CashFlowConsiderationDetail>();
         Action scheduleCashFlowEvents = null;
 
         var applicableCashFlowRules =
@@ -948,7 +958,7 @@ public sealed class SimulationRunner
 
         foreach (var cashFlowRule in applicableCashFlowRules)
         {
-            var cashFlowConsideration = cashFlowConsiderations.GetAdd(new(cashFlowRule.Name));
+            var cashFlowConsideration = treatmentConsideration.CashFlowConsiderations.GetAdd(new(cashFlowRule.Name));
 
             cashFlowConsideration.ReasonAgainstCashFlow = scheduleCashFlowEvents is null
                 ? handleCashFlowRule()
@@ -984,24 +994,37 @@ public sealed class SimulationRunner
                     return ReasonAgainstCashFlow.FutureEventScheduleIsBlocked;
                 }
 
-                // set up the solver. set up the extra budget years and the cash flow percentages,
-                // but only add them to the input record if a solution is found. but do put them on
-                // the cashflowconsideration.
+                cashFlowConsideration.FundingCalculationInputSupplement = new();
 
-                var costPercentagePerYear = distributionRule.YearlyPercentages.ToArray();
+                var costPercentagePerYear = new decimal[distributionRule.YearlyPercentages.Count];
+                for (var y = 0; y < costPercentagePerYear.Length; ++y)
+                {
+                    var costPercentage = distributionRule.YearlyPercentages[y];
+                    costPercentagePerYear[y] = costPercentage;
 
-                var amountPerBudgetPerYear = new decimal[costPercentagePerYear.Length][];
-                for (var y = 0; y < amountPerBudgetPerYear.Length; ++y)
+                    cashFlowConsideration.FundingCalculationInputSupplement.CashFlowDistribution
+                        .Add(new(year + y, costPercentage));
+                }
+
+                var amountPerBudgetPerYear = new List<decimal[]>(costPercentagePerYear.Length)
+                {
+                    amountPerBudgetOfCurrentYear
+                };
+
+                for (var y = 1; y < costPercentagePerYear.Length; ++y)
                 {
                     var amountPerBudget = new decimal[BudgetContexts.Count];
-                    amountPerBudgetPerYear[y] = amountPerBudget;
                     for (var b = 0; b < BudgetContexts.Count; ++b)
                     {
                         var budgetContext = BudgetContexts[b];
-                        amountPerBudget[b] = y == 0
-                            ? getAvailableAmount(budgetContext)
-                            : budgetContext.GetAmount(year + y);
+                        var amount = budgetContext.GetAmount(year + y);
+                        amountPerBudget[b] = amount;
+
+                        cashFlowConsideration.FundingCalculationInputSupplement.FutureBudgetsToSpend
+                            .Add(new(budgetContext.Budget.Name, amount, year + y));
                     }
+
+                    amountPerBudgetPerYear.Add(amountPerBudget);
                 }
 
                 var fundable = Funding.TrySolve(
@@ -1009,7 +1032,7 @@ public sealed class SimulationRunner
                     amountPerBudgetPerYear,
                     costPerTreatment,
                     costPercentagePerYear,
-                    treatmentConsideration.FundingCalculationInput.Settings,
+                    fundingSettings,
                     out var allocationPerBudgetAndTreatmentPerYear);
 
                 if (!fundable)
@@ -1017,63 +1040,21 @@ public sealed class SimulationRunner
                     return ReasonAgainstCashFlow.FundingIsNotAvailable;
                 }
 
+                treatmentConsideration.FundingCalculationOutput = new();
                 var futureCostAllocators = new List<Action>();
-                var considerationPerYear = costPerYear.Select(_ => new TreatmentConsiderationDetail(treatmentConsideration)).ToList();
 
-                var workingBudgetContexts = applicableBudgets.Select(_ => new BudgetContext(_.Context)).ToArray();
-                var applicableBudgetNames = applicableBudgets.Select(_ => _.UsageDetail.BudgetName).ToHashSet();
-
-                var originalBudgetContextPerWorkingBudgetContext = new Dictionary<BudgetContext, BudgetContext>();
-                foreach (var ((original, _), working) in Zip.Strict(applicableBudgets, workingBudgetContexts))
+                for (var y = 0; y < allocationPerBudgetAndTreatmentPerYear.Count; ++y)
                 {
-                    originalBudgetContextPerWorkingBudgetContext[working] = original;
+                    PrepareFundingCalculationOutput(
+                        treatmentsToFund,
+                        allocationPerBudgetAndTreatmentPerYear[y],
+                        year + y,
+                        treatmentConsideration.FundingCalculationOutput,
+                        futureCostAllocators);
                 }
 
-                Dictionary<BudgetContext, decimal> firstYearFractionPerBudget = null;
-
-                foreach (var (cashFlowYearConsideration, cashFlowYearCost, cashFlowYear)
-                    in Zip.Short(considerationPerYear, costPerYear, Static.Count(year)))
-                {
-                    var workingBudgetDetails = cashFlowYearConsideration.BudgetUsages.Where(detail => applicableBudgetNames.Contains(detail.BudgetName));
-                    var workingBudgets = workingBudgetContexts.Zip(workingBudgetDetails, BudgetInfo.Create).ToList();
-
-                    var remainingYearCost = cashFlowYearCost;
-
-                    void addFutureCostAllocator(decimal cost, BudgetContext workingBudgetContext)
-                    {
-                        remainingYearCost -= cost;
-                        workingBudgetContext.AllocateCost(cost);
-
-                        var originalBudgetContext = originalBudgetContextPerWorkingBudgetContext[workingBudgetContext];
-                        futureCostAllocators.Add(() => originalBudgetContext.AllocateCost(cost, cashFlowYear));
-                    }
-
-                    tryToAllocateCost(
-                        workingBudgets,
-                        ref remainingYearCost,
-                        addFutureCostAllocator,
-                        firstYearFractionPerBudget,
-                        out var costCoverageFractionsWereSatisfied);
-
-                    if (remainingYearCost > 0)
-                    {
-                        return ReasonAgainstCashFlow.FundingIsNotAvailable;
-                    }
-
-                    if (cashFlowYear < lastYearOfCashFlow)
-                    {
-                        foreach (var budgetContext in workingBudgetContexts)
-                        {
-                            budgetContext.MoveToNextYear();
-                        }
-                    }
-                }
-
-                considerationPerYear[0].CashFlowConsiderations.AddRange(cashFlowConsiderations);
-                assetContext.Detail.TreatmentConsiderations.Add(considerationPerYear[0]);
-
-                var progression = costPerYear.Zip(considerationPerYear, (cost, consideration) => new TreatmentProgress(treatment, consideration)).ToArray();
-                progression.Last().IsComplete = true;
+                var progression = costPercentagePerYear.Select(_ => new TreatmentProgress(treatment)).ToArray();
+                progression[^1].IsComplete = true;
 
                 scheduleCashFlowEvents = () =>
                 {
@@ -1100,27 +1081,27 @@ public sealed class SimulationRunner
 
         // At this point, no cash flow could be used. So try to pay the normal way.
 
-        treatmentConsideration.CashFlowConsiderations.AddRange(cashFlowConsiderations);
-        assetContext.Detail.TreatmentConsiderations.Add(treatmentConsideration);
+        var fundable = Funding.TrySolve(
+            allocationIsAllowedPerBudgetAndTreatment,
+            amountPerBudgetOfCurrentYear,
+            costPerTreatment,
+            fundingSettings,
+            out var allocationPerBudgetAndTreatment);
 
-        var costAllocators = new List<Action>();
-        void addCostAllocator(decimal cost, BudgetContext budgetContext)
-        {
-            remainingCost -= cost;
-            costAllocators.Add(() => budgetContext.AllocateCost(cost));
-        }
-
-        tryToAllocateCost(
-            applicableBudgets,
-            ref remainingCost,
-            addCostAllocator,
-            null,
-            out _);
-
-        if (remainingCost > 0)
+        if (!fundable)
         {
             return CostCoverage.None;
         }
+
+        treatmentConsideration.FundingCalculationOutput = new();
+        var costAllocators = new List<Action>();
+
+        PrepareFundingCalculationOutput(
+            treatmentsToFund,
+            allocationPerBudgetAndTreatment,
+            year,
+            treatmentConsideration.FundingCalculationOutput,
+            costAllocators);
 
         foreach (var costAllocator in costAllocators)
         {
@@ -1128,89 +1109,37 @@ public sealed class SimulationRunner
         }
 
         return CostCoverage.Full;
+    }
 
-        void tryToAllocateCost(
-            IEnumerable<BudgetInfo> applicableBudgets,
-            ref decimal remainingCost,
-            Action<decimal, BudgetContext> costAllocationAction,
-            IReadOnlyDictionary<BudgetContext, decimal> costCoverageFractionPerBudget,
-            out bool costCoverageFractionsWereSatisfied)
+    private void PrepareFundingCalculationOutput(
+        IReadOnlyList<Treatment> treatments,
+        decimal?[,] allocationPerBudgetAndTreatment,
+        int year,
+        FundingCalculationOutput output,
+        List<Action> costAllocators)
+    {
+        for (var b = 0; b < BudgetContexts.Count; ++b)
         {
-            // Assumed (or irrelevant, if no fractions are provided)
-            costCoverageFractionsWereSatisfied = true;
+            var budgetContext = BudgetContexts[b];
 
-            // "cost" is a variable that is being *indirectly* updated by "costAllocationAction".
-            var originalCost = remainingCost;
-
-            foreach (var (budgetContext, budgetUsageDetail) in applicableBudgets)
+            var budgetTotalSpending = 0m;
+            for (var t = 0; t < treatments.Count; ++t)
             {
-                if (remainingCost <= 0)
+                if (allocationPerBudgetAndTreatment[b, t] is decimal allocation)
                 {
-                    break;
-                }
+                    budgetTotalSpending += allocation;
 
-                var availableAmount = getAvailableAmount(budgetContext);
-
-                if (costCoverageFractionPerBudget is null)
-                {
-                    if (SpendingLimit == SpendingLimit.NoLimit || remainingCost <= availableAmount)
-                    {
-                        coverCost(remainingCost);
-                        break;
-                    }
-
-                    if (Simulation.AnalysisMethod.AllowFundingFromMultipleBudgets && availableAmount > 0)
-                    {
-                        coverCost(availableAmount);
-                        continue;
-                    }
-                }
-                else if (costCoverageFractionPerBudget.TryGetValue(budgetContext, out var coverageFraction))
-                {
-                    var fractionedCost = originalCost * coverageFraction;
-
-                    if (fractionedCost <= availableAmount)
-                    {
-                        coverCost(fractionedCost);
-                        continue;
-                    }
-                    else
-                    {
-                        // Any unsatisfied coverage fraction means the whole cost allocation has failed.
-                        costCoverageFractionsWereSatisfied = false;
-                        return;
-                    }
-                }
-
-                budgetUsageDetail.Status = BudgetUsageStatus.CostNotCovered;
-
-                void coverCost(decimal costToCover)
-                {
-                    budgetUsageDetail.Status = BudgetUsageStatus.CostCovered;
-                    budgetUsageDetail.CoveredCost = costToCover;
-                    costAllocationAction(costToCover, budgetContext);
+                    output.AllocationMatrix.Add(
+                        new(year, budgetContext.Budget.Name, treatments[t].Name, allocation));
                 }
             }
 
-            // Some floating-point error may accumulate that could unintentionally trigger this
-            // error condition, but rounding (to the nearest tenth of a cent) should take care of
-            // it. If rounding doesn't take care of it, then there's probably more to it than just
-            // floating-point error.
-            if (Math.Round(remainingCost, 3) < 0)
+            if (budgetTotalSpending > 0)
             {
-                throw new InvalidOperationException(MessageStrings.RemainingCostIsNegative);
+                costAllocators.Add(() => budgetContext.AllocateCost(budgetTotalSpending, year));
             }
         }
     }
 
-    private void UpdateConditionActuals(int year)
-    {
-        TargetConditionActuals = GetTargetConditionActuals(year);
-        DeficientConditionActuals = GetDeficientConditionActuals();
-    }
-
-    private sealed record BudgetInfo(BudgetContext Context, BudgetUsageDetail UsageDetail)
-    {
-        public static BudgetInfo Create(BudgetContext context, BudgetUsageDetail usageDetail) => new(context, usageDetail);
-    }
+    #endregion
 }

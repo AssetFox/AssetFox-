@@ -10,7 +10,7 @@ public sealed class CashFlowDistributionRule : CompilableExpression
 {
     public decimal? CostCeiling { get; set; }
 
-    public IReadOnlyCollection<decimal> YearlyPercentages
+    public IReadOnlyList<decimal> YearlyPercentages
     {
         get
         {
@@ -68,9 +68,11 @@ public sealed class CashFlowDistributionRule : CompilableExpression
         _YearlyPercentages.AddRange(match.Groups[2].Captures.Cast<Capture>().Select(ParsePercentage));
     }
 
-    private static readonly Regex YearlyPercentagesPattern = new Regex($@"(?>\A\s*({PatternStrings.Number})(?:\s*/\s*({PatternStrings.Number}))*\s*\z)", RegexOptions.Compiled);
+    private static readonly Regex YearlyPercentagesPattern = new(
+        $@"(?>\A\s*({PatternStrings.Number})(?:\s*/\s*({PatternStrings.Number}))*\s*\z)",
+        RegexOptions.Compiled);
 
-    private readonly List<decimal> _YearlyPercentages = new List<decimal>();
+    private readonly List<decimal> _YearlyPercentages = new();
 
     private static decimal ParsePercentage(Capture capture)
     {

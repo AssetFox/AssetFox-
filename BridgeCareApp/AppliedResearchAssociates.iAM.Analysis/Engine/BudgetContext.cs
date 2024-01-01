@@ -56,6 +56,7 @@ internal sealed class BudgetContext
         if (Budget.InvestmentPlan.AllowFundingCarryover)
         {
             AmountPerYear[CurrentYearIndex] += AmountPerYear[CurrentYearIndex - 1];
+            AmountPerYear[CurrentYearIndex - 1] = 0;
         }
     }
 

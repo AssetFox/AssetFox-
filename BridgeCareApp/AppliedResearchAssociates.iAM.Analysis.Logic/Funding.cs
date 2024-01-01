@@ -21,7 +21,7 @@ public static class Funding
     {
         var solved = TrySolve(
             allocationIsAllowedPerBudgetAndTreatment,
-            new[] { amountPerBudget },
+            new List<decimal[]> { amountPerBudget },
             costPerTreatment,
             SingleYearCostPercentage,
             settings,
@@ -36,11 +36,11 @@ public static class Funding
 
     public static bool TrySolve(
         bool[,] allocationIsAllowedPerBudgetAndTreatment,
-        decimal[][] amountPerBudgetPerYear,
+        IReadOnlyList<decimal[]> amountPerBudgetPerYear,
         decimal[] costPerTreatment,
         decimal[] costPercentagePerYear,
         Settings settings,
-        out decimal?[][,] allocationPerBudgetAndTreatmentPerYear)
+        out List<decimal?[,]> allocationPerBudgetAndTreatmentPerYear)
     {
         // Input validation
 
@@ -69,12 +69,12 @@ public static class Funding
             throw new ArgumentNullException(nameof(settings));
         }
 
-        if (amountPerBudgetPerYear.Length != costPercentagePerYear.Length)
+        if (amountPerBudgetPerYear.Count != costPercentagePerYear.Length)
         {
             throw new ArgumentException("Inconsistent input sizes (number of years).");
         }
 
-        var numberOfYears = amountPerBudgetPerYear.Length;
+        var numberOfYears = amountPerBudgetPerYear.Count;
 
         if (numberOfYears == 0)
         {
@@ -121,7 +121,7 @@ public static class Funding
                 nameof(allocationIsAllowedPerBudgetAndTreatment));
         }
 
-        for (var y = 0; y < amountPerBudgetPerYear.Length; ++y)
+        for (var y = 0; y < amountPerBudgetPerYear.Count; ++y)
         {
             var amountPerBudget = amountPerBudgetPerYear[y];
             for (var b = 0; b < amountPerBudget.Length; ++b)
@@ -171,16 +171,16 @@ public static class Funding
         if (amountPerBudgetPerYear.Select(Enumerable.Sum).Sum() < costPerTreatment.Sum())
         {
             // Trivially unsolvable.
-            AssignEmptyArray(out allocationPerBudgetAndTreatmentPerYear);
+            allocationPerBudgetAndTreatmentPerYear = new();
             return false;
         }
 
         // Optimization
 
-        Allocate(out allocationPerBudgetAndTreatmentPerYear, numberOfYears);
-        for (var y = 0; y < allocationPerBudgetAndTreatmentPerYear.Length; ++y)
+        allocationPerBudgetAndTreatmentPerYear = new(numberOfYears);
+        for (var y = 0; y < numberOfYears; ++y)
         {
-            Allocate(out allocationPerBudgetAndTreatmentPerYear[y], numberOfBudgets, numberOfTreatments);
+            allocationPerBudgetAndTreatmentPerYear.Add(new decimal?[numberOfBudgets, numberOfTreatments]);
         }
 
         if (numberOfBudgets == 1)
@@ -460,6 +460,23 @@ public static class Funding
 
         // Output validation
 
+        for (var y = 0; y < numberOfYears; ++y)
+        {
+            var allocationPerBudgetAndTreatment = allocationPerBudgetAndTreatmentPerYear[y];
+
+            for (var b = 0; b < numberOfBudgets; ++b)
+            {
+                for (var t = 0; t < numberOfTreatments; ++t)
+                {
+                    var allocation = allocationPerBudgetAndTreatment[b, t];
+                    if (allocation < 0)
+                    {
+                        throw new Exception($"Year [{y}] allocation [{allocation}] from budget [{b}] to treatment [{t}] is negative.");
+                    }
+                }
+            }
+        }
+
         for (var b = 0; b < numberOfBudgets; ++b)
         {
             var spending = TotalSpendingPerBudget(allocationPerBudgetAndTreatmentPerYear, b).RoundToCent();
@@ -485,25 +502,19 @@ public static class Funding
         return true;
     }
 
-    private static void Allocate<T>(out T[] array, int length) => array = new T[length];
-
-    private static void Allocate<T>(out T[,] array, int length0, int length1) => array = new T[length0, length1];
-
     private static int ArrayLength<T>(T[] array) => array.Length;
-
-    private static void AssignEmptyArray<T>(out T[] array) => array = Array.Empty<T>();
 
     private static bool IsNull<T>(T value) => value is null;
 
     private static decimal RoundToCent(this decimal value) => Math.Round(value, 2);
 
-    private static decimal TotalAmountPerBudget(decimal[][] amountPerBudgetPerYear, int b)
+    private static decimal TotalAmountPerBudget(IEnumerable<decimal[]> amountPerBudgetPerYear, int b)
     {
         var totalAmount = 0m;
 
-        for (var y = 0; y < amountPerBudgetPerYear.Length; ++y)
+        foreach (var amountPerBudget in amountPerBudgetPerYear)
         {
-            totalAmount += amountPerBudgetPerYear[y][b];
+            totalAmount += amountPerBudget[b];
         }
 
         return totalAmount;
@@ -521,7 +532,7 @@ public static class Funding
         return totalFunding;
     }
 
-    private static decimal TotalFundingPerTreatment(decimal?[][,] allocationPerBudgetAndTreatmentPerYear, int t)
+    private static decimal TotalFundingPerTreatment(IEnumerable<decimal?[,]> allocationPerBudgetAndTreatmentPerYear, int t)
     {
         var totalFunding = 0m;
 
@@ -545,7 +556,7 @@ public static class Funding
         return totalSpending;
     }
 
-    private static decimal TotalSpendingPerBudget(decimal?[][,] allocationPerBudgetAndTreatmentPerYear, int b)
+    private static decimal TotalSpendingPerBudget(IEnumerable<decimal?[,]> allocationPerBudgetAndTreatmentPerYear, int b)
     {
         var totalSpending = 0m;
 

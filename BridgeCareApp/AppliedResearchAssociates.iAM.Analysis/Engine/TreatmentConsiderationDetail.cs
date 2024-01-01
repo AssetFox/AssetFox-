@@ -44,7 +44,7 @@ public sealed class TreatmentConsiderationDetail
     /// <summary>
     ///     How each cash-flow rule was processed to determine if the treatment would be cash-flowed.
     /// </summary>
-    public List<CashFlowConsiderationDetail> CashFlowConsiderations { get; } = new List<CashFlowConsiderationDetail>();
+    public List<CashFlowConsiderationDetail> CashFlowConsiderations { get; } = new();
 
     public FundingCalculationInput FundingCalculationInput { get; set; }
 

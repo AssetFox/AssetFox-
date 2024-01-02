@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,9 +9,12 @@ namespace AppliedResearchAssociates
     {
         public static T? AsNullable<T>(this T value) where T : struct => value;
 
-        public static IEnumerable<T?> AsNullables<T>(this IEnumerable<T> values) where T : struct => values.Select(AsNullable);
+        public static IEnumerable<T?> AsNullables<T>(this IEnumerable<T> values) where T : struct
+            => values.Select(AsNullable);
 
-        public static void CopyFrom<TKey, TValue>(this IDictionary<TKey, TValue> target, IEnumerable<KeyValuePair<TKey, TValue>> source)
+        public static void CopyFrom<TKey, TValue>(
+            this IDictionary<TKey, TValue> target,
+            IEnumerable<KeyValuePair<TKey, TValue>> source)
         {
             foreach (var (key, value) in source)
             {
@@ -65,7 +69,7 @@ namespace AppliedResearchAssociates
                 return true;
             }
 
-            comparer = comparer ?? Comparer<T>.Default;
+            comparer ??= Comparer<T>.Default;
 
             var e0 = list[0];
             var e1 = list[1];
@@ -97,31 +101,33 @@ namespace AppliedResearchAssociates
 
         public static IEnumerable<T> Once<T>(this T value) => Enumerable.Repeat(value, 1);
 
-        public static IEnumerable<int> RangeFromBounds(int start, int end, int stride = 1)
+        public static IEnumerable<int> RangeFromBounds(int start, int end, int stride = 1) => Math.Sign(stride) switch
         {
-            switch (Math.Sign(stride))
+            1 => TowardPositiveInfinity(start, end, stride),
+            -1 => TowardNegativeInfinity(start, end, stride),
+            _ => throw new ArgumentException("Stride must be non-zero.", nameof(stride)),
+        };
+
+        public static HashCode ReduceToHashCode<T>(this IEnumerable<T> values)
+        {
+            var hash = new HashCode();
+
+            foreach (var value in values)
             {
-            case 1:
-                return TowardPositiveInfinity(start, end, stride);
+                hash.Add(value);
+            }
 
-            case -1:
-                return TowardNegativeInfinity(start, end, stride);
-
-            default:
-                throw new ArgumentException("Stride must be non-zero.", nameof(stride));
-            };
+            return hash;
         }
 
         public static void Swap<T>(this IList<T> list, int index1, int index2)
-        {
-            var item1 = list[index1];
-            list[index1] = list[index2];
-            list[index2] = item1;
-        }
+            => (list[index2], list[index1]) = (list[index1], list[index2]);
 
-        public static SortedDictionary<TKey, TValue> ToSortedDictionary<TKey, TValue>(this IEnumerable<TValue> source, Func<TValue, TKey> keySelector, IComparer<TKey> comparer = null) => new SortedDictionary<TKey, TValue>(source.ToDictionary(keySelector), comparer);
+        public static SortedDictionary<TKey, TValue> ToSortedDictionary<TKey, TValue>(this IEnumerable<TValue> source, Func<TValue, TKey> keySelector, IComparer<TKey> comparer = null)
+            => new SortedDictionary<TKey, TValue>(source.ToDictionary(keySelector), comparer);
 
-        public static SortedSet<T> ToSortedSet<T>(this IEnumerable<T> source, IComparer<T> comparer = null) => new SortedSet<T>(source, comparer);
+        public static SortedSet<T> ToSortedSet<T>(this IEnumerable<T> source, IComparer<T> comparer = null)
+            => new SortedSet<T>(source, comparer);
 
         private static IEnumerable<int> TowardNegativeInfinity(int start, int end, int stride)
         {

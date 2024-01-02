@@ -21,13 +21,14 @@
                     menu-icon=custom:GhdDownSvg
                     return-object
                     @update:modelValue="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
-                    density="default"
+                    density="compact"
                     variant="outlined"
                 ></v-select>
                 <v-text-field
                     id="CloneScenarioDialog-scenarioName-textField"
                     label="Scenario name"
-                    outline
+                    variant="outlined"
+                    density="compact"
                     v-model="dialogData.scenario.name"
                 ></v-text-field>
                 <v-checkbox v-model="shared" label="Share with all?" />

@@ -25,29 +25,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = unitOfWork ??
                           throw new ArgumentNullException(nameof(unitOfWork));
             
-        private void JoinTreatmentsWithBudgets(Dictionary<Guid, List<Guid>> budgetIdsPerTreatmentId)
-        {
-            var treatmentBudgetJoins = new List<ScenarioSelectableTreatmentScenarioBudgetEntity>();
-
-            budgetIdsPerTreatmentId.Keys.ForEach(treatmentId =>
-            {
-                var budgetIds = budgetIdsPerTreatmentId[treatmentId];
-                if (!_unitOfWork.Context.ScenarioBudget.Any(_ => budgetIds.Contains(_.Id)))
-                {
-                    throw new RowNotInTableException("No budgets for the specified treatments were found.");
-                }
-
-                treatmentBudgetJoins.AddRange(budgetIds.Select(budgetId =>
-                    new ScenarioSelectableTreatmentScenarioBudgetEntity
-                    {
-                        ScenarioSelectableTreatmentId = treatmentId,
-                        ScenarioBudgetId = budgetId
-                    }));
-            });
-
-            _unitOfWork.Context.AddAll(treatmentBudgetJoins);
-        }
-
         public void GetScenarioSelectableTreatments(Simulation simulation)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))

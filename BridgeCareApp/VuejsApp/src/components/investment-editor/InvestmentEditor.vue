@@ -746,7 +746,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     setAlertMessageAction("");
             })
         }
-
         clearChanges()
        onPaginationChanged()
     });
@@ -998,7 +997,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
     if (!isNil(budgetLibrary)) {
         hasCreatedLibrary = true;
-        librarySelectItemValue.value = budgetLibrary.id;
+        
         const libraryUpsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
             library: budgetLibrary,
             isNewLibrary: true,
@@ -1027,11 +1026,11 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 if(budgetLibrary.budgets.length === 0){
                     clearChanges();
                 }
-
+                    pagination.page = 1;
                     budgetLibraryMutator(budgetLibrary); // mutation actions
-                    selectedBudgetLibraryMutator(budgetLibrary.id);
+                    librarySelectItemValue.value = budgetLibrary.id;
+                    // selectedBudgetLibraryMutator(budgetLibrary.id);
                     addSuccessNotificationAction({ message: 'Added budget library' })
-                    resetPage();
                 }
             })
         }

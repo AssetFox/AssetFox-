@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment;
+using AppliedResearchAssociates.iAM.TestHelpers;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Treatment
 {
@@ -105,5 +106,36 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Treatment
             Assert.Equal(simulationId, defaultTreatment.SimulationId);
             Assert.Equal(treatment.AssetType.ToString(), defaultTreatment.AssetType.ToString());
         }
+
+
+        [Fact]
+        public void GetDefaultNoTreatment_NoneIsDefined_ReturnsNull()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var simulationId = Guid.NewGuid();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+
+            var defaultNoTreatment = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetDefaultNoTreatment(simulationId);
+
+            Assert.Null(defaultNoTreatment);
+        }
+
+        [Fact]
+        public void GetDefaultNoTreatment_OneIsDefined_ReturnsIt()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var simulationId = Guid.NewGuid();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists();
+            treatment.Budgets = new List<TreatmentBudgetDTO>();
+            var treatments = new List<TreatmentDTO> { treatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(treatments, simulationId);
+
+            var defaultNoTreatment = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetDefaultNoTreatment(simulationId);
+
+            ObjectAssertions.EquivalentExcluding(defaultNoTreatment, treatment, t => t.CriterionLibrary);
+        }   
     }
 }

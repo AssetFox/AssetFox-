@@ -136,6 +136,31 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Treatment
             var defaultNoTreatment = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetDefaultNoTreatment(simulationId);
 
             ObjectAssertions.EquivalentExcluding(defaultNoTreatment, treatment, t => t.CriterionLibrary);
-        }   
+        }
+
+        [Fact]
+        public void AddDefaultPerformanceFactors_PerformanceFactorInDb_Adds()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var simulationId = Guid.NewGuid();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var curveId = Guid.NewGuid();
+            var performanceCurveDto = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(
+                TestHelper.UnitOfWork, simulationId, curveId, attribute: TestAttributeNames.SupDurationN);
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists();
+            var treatments = new List<TreatmentDTO> { treatment };
+
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.AddDefaultPerformanceFactors(simulationId, treatments);
+
+            var performanceFactorsAfter = treatment.PerformanceFactors;
+            var performanceFactorAfter = performanceFactorsAfter.Single();
+            var expectedPerformanceFactorAfter = new TreatmentPerformanceFactorDTO
+            {
+                Attribute = TestAttributeNames.SupDurationN,
+                PerformanceFactor = 1,
+            };
+            ObjectAssertions.EquivalentExcluding(performanceFactorAfter, expectedPerformanceFactorAfter, pf => pf.Id);
+        }
     }
 }

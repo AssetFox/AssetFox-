@@ -962,118 +962,8 @@ public sealed class SimulationRunner
             var cashFlowConsideration = treatmentConsideration.CashFlowConsiderations.GetAdd(new(cashFlowRule.Name));
 
             cashFlowConsideration.ReasonAgainstCashFlow = scheduleCashFlowEvents is null
-                ? handleCashFlowRule()
+                ? handleCashFlowRule(cashFlowRule, cashFlowConsideration)
                 : ReasonAgainstCashFlow.NotNeeded;
-
-            ReasonAgainstCashFlow handleCashFlowRule()
-            {
-                var distributionRule =
-                    SortedDistributionRulesPerCashFlowRule[cashFlowRule]
-                    .FirstOrDefault(kv => totalTreatmentCost <= kv.Key)
-                    .Value;
-
-                if (distributionRule is null)
-                {
-                    return ReasonAgainstCashFlow.NoApplicableDistributionRule;
-                }
-
-                if (distributionRule.YearlyPercentages.Count == 1)
-                {
-                    return ReasonAgainstCashFlow.ApplicableDistributionRuleIsForOnlyOneYear;
-                }
-
-                var lastYearOfCashFlow = year + distributionRule.YearlyPercentages.Count - 1;
-                if (lastYearOfCashFlow > Simulation.InvestmentPlan.LastYearOfAnalysisPeriod)
-                {
-                    return ReasonAgainstCashFlow.LastYearOfCashFlowIsOutsideOfAnalysisPeriod;
-                }
-
-                var futureYearsOfCashFlow = Static.RangeFromBounds(year + 1, lastYearOfCashFlow);
-                var scheduleIsBlocked = futureYearsOfCashFlow.Any(assetContext.EventSchedule.ContainsKey);
-                if (scheduleIsBlocked)
-                {
-                    return ReasonAgainstCashFlow.FutureEventScheduleIsBlocked;
-                }
-
-                cashFlowConsideration.FundingCalculationInputSupplement = new();
-
-                var costPercentagePerYear = new decimal[distributionRule.YearlyPercentages.Count];
-                for (var y = 0; y < costPercentagePerYear.Length; ++y)
-                {
-                    var costPercentage = distributionRule.YearlyPercentages[y];
-                    costPercentagePerYear[y] = costPercentage;
-
-                    cashFlowConsideration.FundingCalculationInputSupplement.CashFlowDistribution
-                        .Add(new(year + y, costPercentage));
-                }
-
-                var amountPerBudgetPerYear = new List<decimal[]>(costPercentagePerYear.Length)
-                {
-                    amountPerBudgetOfCurrentYear
-                };
-
-                for (var y = 1; y < costPercentagePerYear.Length; ++y)
-                {
-                    var amountPerBudget = new decimal[BudgetContexts.Count];
-                    var futureYear = year + y;
-
-                    for (var b = 0; b < BudgetContexts.Count; ++b)
-                    {
-                        var budgetContext = BudgetContexts[b];
-                        var amount = budgetContext.GetAmount(futureYear);
-                        amountPerBudget[b] = amount;
-
-                        cashFlowConsideration.FundingCalculationInputSupplement.FutureBudgetsToSpend
-                            .Add(new(budgetContext.Budget.Name, amount, futureYear));
-                    }
-
-                    amountPerBudgetPerYear.Add(amountPerBudget);
-                }
-
-                var fundable = Funding.TrySolve(
-                    allocationIsAllowedPerBudgetAndTreatment,
-                    amountPerBudgetPerYear,
-                    costPerTreatment,
-                    costPercentagePerYear,
-                    fundingSettings,
-                    out var allocationPerBudgetAndTreatmentPerYear);
-
-                if (!fundable)
-                {
-                    return ReasonAgainstCashFlow.FundingIsNotAvailable;
-                }
-
-                treatmentConsideration.FundingCalculationOutput = new();
-                var futureCostAllocators = new List<Action>();
-
-                for (var y = 0; y < allocationPerBudgetAndTreatmentPerYear.Count; ++y)
-                {
-                    PrepareFundingCalculationOutput(
-                        treatmentsToFund,
-                        allocationPerBudgetAndTreatmentPerYear[y],
-                        year + y,
-                        treatmentConsideration.FundingCalculationOutput,
-                        futureCostAllocators);
-                }
-
-                var progression = costPercentagePerYear.Select(_ => new TreatmentProgress(treatment)).ToArray();
-                progression[^1].IsComplete = true;
-
-                scheduleCashFlowEvents = () =>
-                {
-                    foreach (var futureCostAllocator in futureCostAllocators)
-                    {
-                        futureCostAllocator();
-                    }
-
-                    foreach (var (yearProgress, yearOffset) in Zip.Short(progression, Static.Count()))
-                    {
-                        assetContext.EventSchedule.Add(year + yearOffset, yearProgress);
-                    }
-                };
-
-                return ReasonAgainstCashFlow.None;
-            }
         }
 
         if (scheduleCashFlowEvents is not null)
@@ -1112,6 +1002,124 @@ public sealed class SimulationRunner
         }
 
         return CostCoverage.Full;
+
+        // --- local functions ---
+
+        ReasonAgainstCashFlow handleCashFlowRule(CashFlowRule cashFlowRule, CashFlowConsiderationDetail cashFlowConsideration)
+        {
+            var distributionRule =
+                SortedDistributionRulesPerCashFlowRule[cashFlowRule]
+                .FirstOrDefault(kv => totalTreatmentCost <= kv.Key)
+                .Value;
+
+            // Do some basic validation.
+
+            if (distributionRule is null)
+            {
+                return ReasonAgainstCashFlow.NoApplicableDistributionRule;
+            }
+
+            if (distributionRule.YearlyPercentages.Count == 1)
+            {
+                return ReasonAgainstCashFlow.ApplicableDistributionRuleIsForOnlyOneYear;
+            }
+
+            var lastYearOfCashFlow = year + distributionRule.YearlyPercentages.Count - 1;
+            if (lastYearOfCashFlow > Simulation.InvestmentPlan.LastYearOfAnalysisPeriod)
+            {
+                return ReasonAgainstCashFlow.LastYearOfCashFlowIsOutsideOfAnalysisPeriod;
+            }
+
+            var futureYearsOfCashFlow = Static.RangeFromBounds(year + 1, lastYearOfCashFlow);
+            var scheduleIsBlocked = futureYearsOfCashFlow.Any(assetContext.EventSchedule.ContainsKey);
+            if (scheduleIsBlocked)
+            {
+                return ReasonAgainstCashFlow.FutureEventScheduleIsBlocked;
+            }
+
+            // Attempt a funding solution.
+
+            cashFlowConsideration.FundingCalculationInputSupplement = new();
+
+            var costPercentagePerYear = new decimal[distributionRule.YearlyPercentages.Count];
+            for (var y = 0; y < costPercentagePerYear.Length; ++y)
+            {
+                var costPercentage = distributionRule.YearlyPercentages[y];
+                costPercentagePerYear[y] = costPercentage;
+
+                cashFlowConsideration.FundingCalculationInputSupplement.CashFlowDistribution
+                    .Add(new(year + y, costPercentage));
+            }
+
+            var amountPerBudgetPerYear = new List<decimal[]>(costPercentagePerYear.Length)
+                {
+                    amountPerBudgetOfCurrentYear
+                };
+
+            for (var y = 1; y < costPercentagePerYear.Length; ++y)
+            {
+                var amountPerBudget = new decimal[BudgetContexts.Count];
+                var futureYear = year + y;
+
+                for (var b = 0; b < BudgetContexts.Count; ++b)
+                {
+                    var budgetContext = BudgetContexts[b];
+                    var amount = budgetContext.GetAmount(futureYear);
+                    amountPerBudget[b] = amount;
+
+                    cashFlowConsideration.FundingCalculationInputSupplement.FutureBudgetsToSpend
+                        .Add(new(budgetContext.Budget.Name, amount, futureYear));
+                }
+
+                amountPerBudgetPerYear.Add(amountPerBudget);
+            }
+
+            var fundable = Funding.TrySolve(
+                allocationIsAllowedPerBudgetAndTreatment,
+                amountPerBudgetPerYear,
+                costPerTreatment,
+                costPercentagePerYear,
+                fundingSettings,
+                out var allocationPerBudgetAndTreatmentPerYear);
+
+            if (!fundable)
+            {
+                return ReasonAgainstCashFlow.FundingIsNotAvailable;
+            }
+
+            // Successfully funded. Prepare the output.
+
+            treatmentConsideration.FundingCalculationOutput = new();
+            var futureCostAllocators = new List<Action>();
+
+            for (var y = 0; y < allocationPerBudgetAndTreatmentPerYear.Count; ++y)
+            {
+                PrepareFundingCalculationOutput(
+                    treatmentsToFund,
+                    allocationPerBudgetAndTreatmentPerYear[y],
+                    year + y,
+                    treatmentConsideration.FundingCalculationOutput,
+                    futureCostAllocators);
+            }
+
+            var progression = costPercentagePerYear.Select(_ => new TreatmentProgress(treatment)).ToArray();
+            progression[^1].IsComplete = true;
+
+            scheduleCashFlowEvents = () =>
+            {
+                foreach (var futureCostAllocator in futureCostAllocators)
+                {
+                    futureCostAllocator();
+                }
+
+                foreach (var (yearProgress, yearOffset) in Zip.Short(progression, Static.Count()))
+                {
+                    assetContext.EventSchedule.Add(year + yearOffset, yearProgress);
+                }
+            };
+
+            return ReasonAgainstCashFlow.None;
+        }
     }
 
     private void PrepareFundingCalculationOutput(

@@ -1036,7 +1036,6 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
     }
 
     function onLibrarySelectItemValueChanged() {
-        console.log('HERES THE VALUE ' + librarySelectItemValue.value);
         trueLibrarySelectItemValue = librarySelectItemValue.value;
         if(!hasScenario.value || !isNil(librarySelectItemValue.value))
         {    

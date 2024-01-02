@@ -144,7 +144,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 
                 decisionsTreatment.BudgetsUsed = string.Join(", ", budgetsUsed); // currently this will be single value
 
-                // [REVIEW] Simulation output no longer provides "status" values.
+                // [REVIEW] Simulation output no longer provides "budget usage status" values.
                 decisionsTreatment.BudgetUsageStatuses = string.Join(", ", budgetsUsed);
 
                 decisionsTreatment.BudgetPriorityLevel = budgetPriorityLevel;

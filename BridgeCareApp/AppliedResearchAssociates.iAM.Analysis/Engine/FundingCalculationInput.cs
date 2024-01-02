@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
-public sealed class FundingCalculationInput
+public sealed class FundingCalculationInput : IEquatable<FundingCalculationInput>
 {
     public FundingCalculationInput()
     {
@@ -30,15 +31,22 @@ public sealed class FundingCalculationInput
 
     public List<Treatment> TreatmentsToFund { get; } = new();
 
-    public sealed record Budget(string Name, decimal Amount, int Year);
+    public bool Equals(FundingCalculationInput other) =>
+        other is not null && (ReferenceEquals(this, other) ||
+        Enumerable.SequenceEqual(CurrentBudgetsToSpend, other.CurrentBudgetsToSpend) &&
+        Enumerable.SequenceEqual(ExclusionsMatrix, other.ExclusionsMatrix) &&
+        Enumerable.SequenceEqual(TreatmentsToFund, other.TreatmentsToFund));
 
-    public sealed record CashFlowPoint(int Year, decimal Percentage);
+    public override bool Equals(object obj) => Equals(obj as FundingCalculationInput);
 
-    public sealed record Exclusion(string BudgetName, string TreatmentName, ExclusionReason Reason);
+    public override int GetHashCode() =>
+        CurrentBudgetsToSpend
+        .Concat<object>(ExclusionsMatrix)
+        .Concat(TreatmentsToFund)
+        .ReduceToHashCode()
+        .ToHashCode();
 
-    public sealed record Treatment(string Name, decimal Cost);
-
-    public sealed class CashFlowSupplement
+    public sealed class CashFlowSupplement : IEquatable<CashFlowSupplement>
     {
         public CashFlowSupplement()
         {
@@ -53,5 +61,26 @@ public sealed class FundingCalculationInput
         public List<CashFlowPoint> CashFlowDistribution { get; } = new();
 
         public List<Budget> FutureBudgetsToSpend { get; } = new();
+
+        public bool Equals(CashFlowSupplement other) =>
+            other is not null && (ReferenceEquals(this, other) ||
+            Enumerable.SequenceEqual(CashFlowDistribution, other.CashFlowDistribution) &&
+            Enumerable.SequenceEqual(FutureBudgetsToSpend, other.FutureBudgetsToSpend));
+
+        public override bool Equals(object obj) => Equals(obj as CashFlowSupplement);
+
+        public override int GetHashCode() =>
+            CashFlowDistribution
+            .Concat<object>(FutureBudgetsToSpend)
+            .ReduceToHashCode()
+            .ToHashCode();
     }
+
+    public sealed record Budget(string Name, decimal Amount, int Year);
+
+    public sealed record CashFlowPoint(int Year, decimal Percentage);
+
+    public sealed record Exclusion(string BudgetName, string TreatmentName, ExclusionReason Reason);
+
+    public sealed record Treatment(string Name, decimal Cost);
 }

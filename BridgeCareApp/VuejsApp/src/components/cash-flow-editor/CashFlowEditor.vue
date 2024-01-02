@@ -815,7 +815,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 parentLibraryId = librarySelectItemValue.value;
                 clearChanges();
-                librarySelectItemValue.value = "";
+                // librarySelectItemValue.value = "";
                 resetPage();
                 addSuccessNotificationAction({message: "Modified scenario's cash flow rules"});
                 importLibraryDisabled = true;
@@ -1036,6 +1036,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
     }
 
     function onLibrarySelectItemValueChanged() {
+        console.log('HERES THE VALUE ' + librarySelectItemValue.value);
         trueLibrarySelectItemValue = librarySelectItemValue.value;
         if(!hasScenario.value || !isNil(librarySelectItemValue.value))
         {    

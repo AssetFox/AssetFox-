@@ -1015,14 +1015,16 @@ public sealed class SimulationRunner
                 for (var y = 1; y < costPercentagePerYear.Length; ++y)
                 {
                     var amountPerBudget = new decimal[BudgetContexts.Count];
+                    var futureYear = year + y;
+
                     for (var b = 0; b < BudgetContexts.Count; ++b)
                     {
                         var budgetContext = BudgetContexts[b];
-                        var amount = budgetContext.GetAmount(year + y);
+                        var amount = budgetContext.GetAmount(futureYear);
                         amountPerBudget[b] = amount;
 
                         cashFlowConsideration.FundingCalculationInputSupplement.FutureBudgetsToSpend
-                            .Add(new(budgetContext.Budget.Name, amount, year + y));
+                            .Add(new(budgetContext.Budget.Name, amount, futureYear));
                     }
 
                     amountPerBudgetPerYear.Add(amountPerBudget);

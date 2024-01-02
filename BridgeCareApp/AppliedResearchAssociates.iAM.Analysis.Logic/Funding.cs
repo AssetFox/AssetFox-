@@ -6,7 +6,8 @@ public static class Funding
 {
     public sealed record Settings(
         bool BudgetCarryoverIsAllowed = false,
-        bool MultipleBudgetsCanFundEachTreatment = false);
+        bool MultipleBudgetsCanFundEachTreatment = false,
+        bool UnlimitedSpending = false);
 
     private static readonly decimal?[,] EmptyMatrix = { };
 
@@ -121,17 +122,20 @@ public static class Funding
                 nameof(allocationIsAllowedPerBudgetAndTreatment));
         }
 
-        for (var y = 0; y < amountPerBudgetPerYear.Count; ++y)
+        if (!settings.UnlimitedSpending)
         {
-            var amountPerBudget = amountPerBudgetPerYear[y];
-            for (var b = 0; b < amountPerBudget.Length; ++b)
+            for (var y = 0; y < amountPerBudgetPerYear.Count; ++y)
             {
-                var amount = amountPerBudget[b];
-                if (amount < 0)
+                var amountPerBudget = amountPerBudgetPerYear[y];
+                for (var b = 0; b < amountPerBudget.Length; ++b)
                 {
-                    throw new ArgumentException(
-                        $"Year [{y}] budget [{b}] amount [{amount}] is negative.",
-                        nameof(amountPerBudgetPerYear));
+                    var amount = amountPerBudget[b];
+                    if (amount < 0)
+                    {
+                        throw new ArgumentException(
+                            $"Year [{y}] budget [{b}] amount [{amount}] is negative.",
+                            nameof(amountPerBudgetPerYear));
+                    }
                 }
             }
         }
@@ -168,7 +172,7 @@ public static class Funding
                 nameof(costPercentagePerYear));
         }
 
-        if (amountPerBudgetPerYear.Select(Enumerable.Sum).Sum() < costPerTreatment.Sum())
+        if (!settings.UnlimitedSpending && amountPerBudgetPerYear.Select(Enumerable.Sum).Sum() < costPerTreatment.Sum())
         {
             // Trivially unsolvable.
             allocationPerBudgetAndTreatmentPerYear = new();
@@ -208,7 +212,8 @@ public static class Funding
                 {
                     var cost = costPerTreatment[t] * costFraction;
 
-                    if (!allocationIsAllowedPerBudgetAndTreatment[0, t] || cost > amountRemaining)
+                    if (!allocationIsAllowedPerBudgetAndTreatment[0, t] ||
+                        cost > amountRemaining && !settings.UnlimitedSpending)
                     {
                         return false;
                     }
@@ -236,7 +241,7 @@ public static class Funding
                     if (allocationIsAllowedPerBudgetAndTreatment[b, 0])
                     {
                         var amountAvailable = amountPerBudget[b];
-                        if (costRemaining <= amountAvailable)
+                        if (costRemaining <= amountAvailable || settings.UnlimitedSpending)
                         {
                             allocationPerBudgetAndTreatment[b, 0] = costRemaining.RoundToCent();
                             costRemaining = 0;
@@ -276,13 +281,20 @@ public static class Funding
             {
                 allocationVariablesPerBudget[b] = new(numberOfYears * numberOfTreatments);
 
-                var totalAmount = TotalAmountPerBudget(amountPerBudgetPerYear, b);
-
                 var totalSpendingConstraint = solver.MakeConstraint($"totalSpending[{b}]");
                 totalSpendingConstraintPerBudget[b] = totalSpendingConstraint;
 
                 totalSpendingConstraint.SetLb(0);
-                totalSpendingConstraint.SetUb((double)totalAmount);
+
+                if (settings.UnlimitedSpending)
+                {
+                    totalSpendingConstraint.SetUb(double.PositiveInfinity);
+                }
+                else
+                {
+                    var totalAmount = TotalAmountPerBudget(amountPerBudgetPerYear, b);
+                    totalSpendingConstraint.SetUb((double)totalAmount);
+                }
             }
 
             // Create yearly constraints and variables.
@@ -297,27 +309,35 @@ public static class Funding
                     var spendingConstraint = solver.MakeConstraint($"spending[{y},{b}]");
                     spendingConstraintPerYearAndBudget[y, b] = spendingConstraint;
 
-                    var amount = amountPerBudget[b];
+                    spendingConstraint.SetLb(0);
 
-                    if (settings.BudgetCarryoverIsAllowed)
+                    if (settings.UnlimitedSpending)
                     {
-                        // Incorporate each previous year's budget amount and allocation variables.
-                        for (var y0 = 0; y0 < y; ++y0)
-                        {
-                            amount += amountPerBudgetPerYear[y0][b];
+                        spendingConstraint.SetUb(double.PositiveInfinity);
+                    }
+                    else
+                    {
+                        var amount = amountPerBudget[b];
 
-                            for (var t = 0; t < numberOfTreatments; ++t)
+                        if (settings.BudgetCarryoverIsAllowed)
+                        {
+                            // Incorporate each previous year's budget amount and allocation variables.
+                            for (var y0 = 0; y0 < y; ++y0)
                             {
-                                if (allocationVariablesMatrix[y0, b, t] is Variable allocationVariable)
+                                amount += amountPerBudgetPerYear[y0][b];
+
+                                for (var t = 0; t < numberOfTreatments; ++t)
                                 {
-                                    spendingConstraint.SetCoefficient(allocationVariable, 1);
+                                    if (allocationVariablesMatrix[y0, b, t] is Variable allocationVariable)
+                                    {
+                                        spendingConstraint.SetCoefficient(allocationVariable, 1);
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    spendingConstraint.SetLb(0);
-                    spendingConstraint.SetUb((double)amount);
+                        spendingConstraint.SetUb((double)amount);
+                    }
                 }
 
                 // Create treatment funding constraints.
@@ -477,14 +497,17 @@ public static class Funding
             }
         }
 
-        for (var b = 0; b < numberOfBudgets; ++b)
+        if (!settings.UnlimitedSpending)
         {
-            var spending = TotalSpendingPerBudget(allocationPerBudgetAndTreatmentPerYear, b).RoundToCent();
-            var amount = TotalAmountPerBudget(amountPerBudgetPerYear, b).RoundToCent();
-
-            if (spending > amount)
+            for (var b = 0; b < numberOfBudgets; ++b)
             {
-                throw new Exception($"Budget [{b}] total spending [{spending}] exceeds total amount [{amount}].");
+                var spending = TotalSpendingPerBudget(allocationPerBudgetAndTreatmentPerYear, b).RoundToCent();
+                var amount = TotalAmountPerBudget(amountPerBudgetPerYear, b).RoundToCent();
+
+                if (spending > amount)
+                {
+                    throw new Exception($"Budget [{b}] total spending [{spending}] exceeds total amount [{amount}].");
+                }
             }
         }
 

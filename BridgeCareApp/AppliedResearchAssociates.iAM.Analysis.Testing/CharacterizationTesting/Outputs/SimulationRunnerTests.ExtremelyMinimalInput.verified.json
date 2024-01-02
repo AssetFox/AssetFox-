@@ -1,4 +1,4 @@
-{
+﻿{
   "InitialAssetSummaries": [
     {
       "AssetId": "00000000-0000-0000-0000-000000000000",
@@ -24,20 +24,33 @@
           "TreatmentConsiderations": [
             {
               "BudgetPriorityLevel": 0,
-              "BudgetsAtDecisionTime": [
-                {
-                  "AvailableFunding": 1000000.0,
-                  "BudgetName": "Bag of money"
-                }
-              ],
-              "BudgetUsages": [
-                {
-                  "BudgetName": "Bag of money",
-                  "CoveredCost": 160000.0,
-                  "Status": "CostCovered"
-                }
-              ],
               "CashFlowConsiderations": [],
+              "FundingCalculationInput": {
+                "CurrentBudgetsToSpend": [
+                  {
+                    "Name": "Bag of money",
+                    "Amount": 1000000.0,
+                    "Year": 2020
+                  }
+                ],
+                "ExclusionsMatrix": [],
+                "TreatmentsToFund": [
+                  {
+                    "Name": "Eldritch wizardry",
+                    "Cost": 160000.0
+                  }
+                ]
+              },
+              "FundingCalculationOutput": {
+                "AllocationMatrix": [
+                  {
+                    "Year": 2020,
+                    "BudgetName": "Bag of money",
+                    "TreatmentName": "Eldritch wizardry",
+                    "AllocatedAmount": 160000.0
+                  }
+                ]
+              },
               "TreatmentName": "Eldritch wizardry"
             }
           ],

@@ -877,6 +877,7 @@ public sealed class SimulationRunner
         {
             BudgetCarryoverIsAllowed = Simulation.InvestmentPlan.AllowFundingCarryover,
             MultipleBudgetsCanFundEachTreatment = Simulation.AnalysisMethod.AllowFundingFromMultipleBudgets,
+            UnlimitedSpending = SpendingLimit == SpendingLimit.NoLimit,
         };
 
         var treatmentsToFund = new List<Treatment>();
@@ -1125,7 +1126,7 @@ public sealed class SimulationRunner
             var budgetTotalSpending = 0m;
             for (var t = 0; t < treatments.Count; ++t)
             {
-                if (allocationPerBudgetAndTreatment[b, t] is decimal allocation)
+                if (allocationPerBudgetAndTreatment[b, t] is decimal allocation && allocation > 0)
                 {
                     budgetTotalSpending += allocation;
 

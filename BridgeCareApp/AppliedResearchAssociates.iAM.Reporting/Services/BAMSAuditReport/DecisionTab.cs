@@ -125,10 +125,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
                 var budgetPriorityLevel = treatmentConsideration != null && treatmentConsideration.BudgetPriorityLevel != null ? treatmentConsideration.BudgetPriorityLevel.Value.ToString() : string.Empty;
 
+                // [REVIEW] As written, this query includes cash flow funding of future years.
+                // It may need a 'Where' filter.
                 decisionsTreatment.AmountSpent =
                     treatmentConsideration
                     ?.FundingCalculationOutput
-                    ?.AllocationMatrix // [REVIEW] This includes cash flow funding of future years.
+                    ?.AllocationMatrix
                     .Sum(_ => _.AllocatedAmount)
                     ?? 0;
 

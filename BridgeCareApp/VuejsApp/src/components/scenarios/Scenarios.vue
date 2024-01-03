@@ -83,7 +83,8 @@
                                             @click="
                                                 showCreateScenarioDialog = true
                                             "
-                                            color="blue darken-2 text-white"
+                                            class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                                            variant="outlined"
                                         >
                                             Create new scenario
                                         </v-btn>

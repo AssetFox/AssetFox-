@@ -1,14 +1,16 @@
 <template>
     <v-dialog max-width="450px" persistent v-model="showDialogComputed">
         <v-card elevation="5"  class="modal-pop-up-padding">
+            
             <v-card-title>
+                <v-row justify="space-between">
                 <h3 class="dialog-header">
                     Filter For Scenarios
                 </h3>
-                <v-spacer></v-spacer>
-                <v-btn @click="onSubmit(false)" icon>
+                <v-btn @click="onSubmit(false)" flat>
                     <i class="fas fa-times fa-2x"></i>
                 </v-btn>
+            </v-row>
             </v-card-title>
 
             <v-card-text>
@@ -21,29 +23,31 @@
                     return-object
                     menu-icon=custom:GhdDownSvg
                     @update:modelValue="selectedFilter(`${FilterCategory}`, `${FilterValue}`)"
-                    density="default"
-                    variant = "outlined"
+                    variant="outlined"
+                    density="compact"
                 ></v-select>
                 <v-text-field
                     id="FilterScenarioList-scenarioName-textField"
                     label="Filter Value"
-                    outline
+                    variant="outlined"
+                    density="compact"
                     v-model="FilterValue"
                 ></v-text-field>
             </v-card-text>
             <v-card-actions>
-                <v-row justify-space-between row>
+                <v-row justify="center">
                     <v-btn
                         id="FilterScenarioList-save-btn"
                         @click="onSubmit(true)"
-                        class="ara-blue-bg text-white"
+                        class="ghd-button ghd-blue"
                     >
                         Filter
                     </v-btn>
                     <v-btn
                         id="FilterScenarioList-cancel-btn"
                         @click="onSubmit(false)"
-                        class="ara-orange-bg text-white"
+                        class="ghd-button ghd-blue"
+                        variant="outlined"
                         >Cancel</v-btn
                     >
                 </v-row>

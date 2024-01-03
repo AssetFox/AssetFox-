@@ -461,15 +461,17 @@ namespace BridgeCareCoreTests.Tests
                 RowsPerPage = 0,
                 SyncModel = request,
             };
+            var yearBefore = DateTime.Now.Year;
 
             var result = pagingService.GetScenarioPage(simulationId, pageRequest);
 
+            var yearAfter = DateTime.Now.Year;
             var expectedBudget = BudgetDtos.New(budgetId);
             var expectedAmounts = new List<BudgetAmountDTO> { thisYearAmount };
             expectedBudget.BudgetAmounts.AddRange(expectedAmounts);
             var expectedInvestmentPlan = new InvestmentPlanDTO
             {
-                FirstYearOfAnalysisPeriod = 2023,
+                FirstYearOfAnalysisPeriod = DateTime.Now.Year,
                 NumberOfYearsInAnalysisPeriod = 1,
                 InflationRatePercentage = 3,
                 MinimumProjectCostLimit = 100000,
@@ -484,7 +486,8 @@ namespace BridgeCareCoreTests.Tests
                 TotalItems = 0,
                 Items = expectedBudgets,
             };
-            ObjectAssertions.EquivalentExcluding(expected, result, x => x.InvestmentPlan.Id);
+            ObjectAssertions.EquivalentExcluding(expected, result, x => x.InvestmentPlan.Id, x => x.InvestmentPlan.FirstYearOfAnalysisPeriod);
+            DoubleAssertions.Between(yearBefore, yearAfter, result.InvestmentPlan.FirstYearOfAnalysisPeriod);
         }
 
         [Fact]

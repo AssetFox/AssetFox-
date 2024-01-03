@@ -19,6 +19,7 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using BridgeCareCore.Services.General_Work_Queue.WorkItems;
+using BridgeCareCore.Services;
 
 namespace BridgeCareCore.Controllers
 {
@@ -422,8 +423,8 @@ namespace BridgeCareCore.Controllers
                 {
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     var dtos = _treatmentPagingService.GetSyncedScenarioDataSet(simulationId, pagingSync);
-                    UnitOfWork.SelectableTreatmentRepo.AddLibraryIdToScenarioSelectableTreatments(dtos, pagingSync.LibraryId);
-                    UnitOfWork.SelectableTreatmentRepo.AddModifiedToScenarioSelectableTreatments(dtos, pagingSync.IsModified);
+                    TreatmentDtoListHelper.AddLibraryIdToScenarioSelectableTreatments(dtos, pagingSync.LibraryId);
+                    TreatmentDtoListHelper.AddModifiedToScenarioSelectableTreatments(dtos, pagingSync.IsModified);
                     UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
                 });
 

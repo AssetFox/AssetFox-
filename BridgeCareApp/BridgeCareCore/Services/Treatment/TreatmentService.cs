@@ -14,11 +14,11 @@ namespace BridgeCareCore.Services
 {
     public class TreatmentService : ITreatmentService
     {
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ExcelTreatmentLoader _treatmentLoader;
 
         public TreatmentService(
-            UnitOfDataPersistenceWork unitOfWork,
+            IUnitOfWork unitOfWork,
             ExcelTreatmentLoader treatmentLoader
             )
         {

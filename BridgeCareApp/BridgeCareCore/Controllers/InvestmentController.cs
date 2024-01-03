@@ -16,6 +16,7 @@ using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services;
 using BridgeCareCore.Services.General_Work_Queue.WorkItems;
 using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -137,8 +138,8 @@ namespace BridgeCareCore.Controllers
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
 
                     var dtos = _investmentPagingService.GetSyncedScenarioDataSet(simulationId, pagingSync);
-                    UnitOfWork.BudgetRepo.AddModifiedToScenarioBudget(dtos, pagingSync.IsModified);
-                    UnitOfWork.BudgetRepo.AddLibraryIdToScenarioBudget(dtos, pagingSync.LibraryId);
+                    BudgetDtoListHelper.AddModifiedToScenarioBudget(dtos, pagingSync.IsModified);
+                    BudgetDtoListHelper.AddLibraryIdToScenarioBudget(dtos, pagingSync.LibraryId);
 
                     InvestmentDTO investment = new InvestmentDTO();
                     var investmentPlan = pagingSync.Investment;

@@ -101,7 +101,6 @@ namespace BridgeCareCoreTests.Tests
             var treatementLibraryUserRepo = TreatmentLibraryUserMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();
-            var treatmentService = TreatmentServiceMocks.EmptyMock;
             var pagingService = TreatmentPagingServiceMocks.EmptyMock;
             var dto = new TreatmentLibraryDTO
             {
@@ -119,7 +118,7 @@ namespace BridgeCareCoreTests.Tests
             };
             treatementLibraryUserRepo.SetupGetLibraryAccess(libraryRequest.Library.Id, libraryExists);
             pagingService.Setup(ts => ts.GetSyncedLibraryDataset(It.IsAny<LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>>())).Returns(new List<TreatmentDTO>()); // correct? Merge build error here.
-            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork, pagingService);
             // Act
             var result = await controller.UpsertTreatmentLibrary(libraryRequest);
 
@@ -135,7 +134,6 @@ namespace BridgeCareCoreTests.Tests
             var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();
-            var treatmentService = TreatmentServiceMocks.EmptyMock;
             var pagingService = TreatmentPagingServiceMocks.EmptyMock;
             var dto = new TreatmentLibraryDTO
             {
@@ -149,7 +147,7 @@ namespace BridgeCareCoreTests.Tests
                 IsNewLibrary = true,
                 Library = dto,
             };
-            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService);
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork, pagingService);
             var dtos = new List<TreatmentDTO>();
             var simulation = new SimulationDTO { Id = simulationId };
 
@@ -238,7 +236,6 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.New();
             var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);            
             var treatmentLibraryRepo = TreatmentLibraryUserMocks.New(unitOfWork);
-            var treatmentService = TreatmentServiceMocks.EmptyMock;
             var pagingService = TreatmentPagingServiceMocks.EmptyMock;            
             var libraryId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();
@@ -281,7 +278,7 @@ namespace BridgeCareCoreTests.Tests
             var libraryUser = LibraryUserDtos.Modify(user.Id);
             var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
             treatmentLibraryRepo.SetupGetLibraryAccess(libraryId, libraryExists);
-            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork, pagingService);
 
             // Act
             var result = await controller.UpsertTreatmentLibrary(libraryRequest);
@@ -299,9 +296,8 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.New();
             var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);
             var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
-            var treatmentService = TreatmentServiceMocks.EmptyMock;
             var pagingService = TreatmentPagingServiceMocks.EmptyMock;
-            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork, pagingService);
             var libraryId = Guid.NewGuid();
             var simulationId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();

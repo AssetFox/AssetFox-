@@ -16,6 +16,7 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Models;
 using BridgeCareCore.Interfaces;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using BridgeCareCore.Services;
 
 namespace BridgeCareCore.Controllers
 {
@@ -232,8 +233,8 @@ namespace BridgeCareCore.Controllers
                 {
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     var dtos = _deficientConditionGoalService.GetSyncedScenarioDataSet(simulationId, pagingSync);
-                    UnitOfWork.DeficientConditionGoalRepo.AddLibraryIdToScenarioDeficientConditionGoal(dtos, pagingSync.LibraryId);
-                    UnitOfWork.DeficientConditionGoalRepo.AddModifiedToScenarioDeficientConditionGoal(dtos, pagingSync.IsModified);
+                    DeficientConditionGoalDtoListHelper.AddLibraryIdToScenarioDeficientConditionGoal(dtos, pagingSync.LibraryId);
+                    DeficientConditionGoalDtoListHelper.AddModifiedToScenarioDeficientConditionGoal(dtos, pagingSync.IsModified);
                     UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteScenarioDeficientConditionGoals(dtos, simulationId);
                 });
 

@@ -902,23 +902,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return dto;
         }
 
-        public void AddLibraryIdToScenarioSelectableTreatments(List<TreatmentDTO> treatmentDTOs, Guid? libraryId)
-        {
-            if (libraryId == null) return;
-            foreach (var dto in treatmentDTOs)
-            {
-                dto.LibraryId = (Guid)libraryId;
-            }
-        }
-
-        public void AddModifiedToScenarioSelectableTreatments(List<TreatmentDTO> treatmentDTOs, bool IsModified)
-        {
-            foreach (var dto in treatmentDTOs)
-            {
-                dto.IsModified = IsModified;
-            }
-        }
-
         public void AddDefaultPerformanceFactors(Guid scenarioId, List<TreatmentDTO> treatments)
         {
             var distinctPerformanceCurves = _unitOfWork.Context.ScenarioPerformanceCurve.Include(_ => _.Attribute).Where(_ => _.SimulationId == scenarioId).ToList().GroupBy(_ => _.Attribute.Name).Select(_ => _.First().Attribute.Name).ToList();

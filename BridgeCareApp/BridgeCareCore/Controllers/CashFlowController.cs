@@ -16,6 +16,7 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Models;
 using BridgeCareCore.Interfaces;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using BridgeCareCore.Services;
 
 namespace BridgeCareCore.Controllers
 {
@@ -224,8 +225,8 @@ namespace BridgeCareCore.Controllers
                 {
                     var dtos = _cashFlowService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    UnitOfWork.CashFlowRuleRepo.AddLibraryIdToScenarioCashFlowRule(dtos, pagingSync.LibraryId);
-                    UnitOfWork.CashFlowRuleRepo.AddModifiedToScenarioCashFlowRule(dtos, pagingSync.IsModified);
+                    CashFlowRuleDtoListHelper.AddLibraryIdToScenarioCashFlowRule(dtos, pagingSync.LibraryId);
+                    CashFlowRuleDtoListHelper.AddModifiedToScenarioCashFlowRule(dtos, pagingSync.IsModified);
                     UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteScenarioCashFlowRules(dtos, simulationId);
                 });
 

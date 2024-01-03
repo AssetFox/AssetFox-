@@ -508,27 +508,5 @@ namespace BridgeCareCoreTests.Tests
             ObjectAssertions.EquivalentExcluding(libraryDto, accessibleLibraryAfter, lib => lib.Owner, lib => lib.DeficientConditionGoals);
             Assert.Empty(accessibleLibraryAfter.DeficientConditionGoals);
         }
-
-        [Fact]
-        public void AddLibraryIdToDeficientConditionGoal_Does()
-        {
-            var dto = DeficientConditionGoalDtos.DtoWithCriterionLibrary();
-            var dtos = new List<DeficientConditionGoalDTO> { dto };
-            var libraryId = Guid.NewGuid();
-            TestHelper.UnitOfWork.DeficientConditionGoalRepo.AddLibraryIdToScenarioDeficientConditionGoal(dtos, libraryId);
-            Assert.Equal(libraryId, dto.LibraryId);
-        }
-
-        [Fact]
-        public void AddModifiedToDeficientConditionGoal_Does()
-        {
-            var dto = DeficientConditionGoalDtos.DtoWithCriterionLibrary();
-            var dtos = new List<DeficientConditionGoalDTO> { dto };
-           
-            TestHelper.UnitOfWork.DeficientConditionGoalRepo.AddModifiedToScenarioDeficientConditionGoal(dtos, true);
-            Assert.True(dto.IsModified);
-            TestHelper.UnitOfWork.DeficientConditionGoalRepo.AddModifiedToScenarioDeficientConditionGoal(dtos, false);
-            Assert.False(dto.IsModified);
-        }
     }
 }

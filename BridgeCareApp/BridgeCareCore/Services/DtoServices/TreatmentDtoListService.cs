@@ -4,7 +4,7 @@ using System;
 
 namespace BridgeCareCore.Services
 {
-    public static class TreatmentDtoListHelper
+    public static class TreatmentDtoListService
     {
         public static void AddLibraryIdToScenarioSelectableTreatments(List<TreatmentDTO> treatmentDTOs, Guid? libraryId)
         {

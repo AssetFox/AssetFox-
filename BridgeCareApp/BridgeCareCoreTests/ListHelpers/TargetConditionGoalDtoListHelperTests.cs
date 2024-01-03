@@ -19,7 +19,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curves = new List<TargetConditionGoalDTO> { curve };
             Assert.False(curve.IsModified);
 
-            TargetConditionGoalDtoListHelper.AddModifiedToScenarioTargetConditionGoal(curves, true);
+            TargetConditionGoalDtoListService.AddModifiedToScenarioTargetConditionGoal(curves, true);
 
             Assert.True(curve.IsModified);
         }
@@ -31,7 +31,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curves = new List<TargetConditionGoalDTO> { curve };
             var libraryId = Guid.NewGuid();
 
-            TargetConditionGoalDtoListHelper.AddLibraryIdToScenarioTargetConditionGoal(curves, libraryId);
+            TargetConditionGoalDtoListService.AddLibraryIdToScenarioTargetConditionGoal(curves, libraryId);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }
@@ -44,7 +44,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var libraryId = Guid.NewGuid();
             curve.LibraryId = libraryId;
 
-            TargetConditionGoalDtoListHelper.AddLibraryIdToScenarioTargetConditionGoal(curves, null);
+            TargetConditionGoalDtoListService.AddLibraryIdToScenarioTargetConditionGoal(curves, null);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }

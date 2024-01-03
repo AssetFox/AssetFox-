@@ -4,7 +4,7 @@ using System;
 
 namespace BridgeCareCore.Services
 {
-    public static class RemainingLifeLimitDtoListHelper
+    public static class RemainingLifeLimitDtoListService
     {
         public static void AddLibraryIdToScenarioRemainingLifeLimit(List<RemainingLifeLimitDTO> remainingLifeLimitDTOs, Guid? libraryId)
         {

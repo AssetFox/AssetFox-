@@ -18,7 +18,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curve = new CalculatedAttributeDTO();
             var curves = new List<CalculatedAttributeDTO> { curve };
             Assert.False(curve.IsModified);
-            CalculatedAttributeDtoListHelper.AddModifiedToScenarioCalculatedAttributes(curves, true);
+            CalculatedAttributeDtoListService.AddModifiedToScenarioCalculatedAttributes(curves, true);
             Assert.True(curve.IsModified);
         }
 
@@ -30,7 +30,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curves = new List<CalculatedAttributeDTO> { curve };
             var libraryId = Guid.NewGuid();
 
-            CalculatedAttributeDtoListHelper.AddLibraryIdToScenarioCalculatedAttributes(curves, libraryId);
+            CalculatedAttributeDtoListService.AddLibraryIdToScenarioCalculatedAttributes(curves, libraryId);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }
@@ -43,7 +43,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var libraryId = Guid.NewGuid();
             curve.LibraryId = libraryId;
 
-            CalculatedAttributeDtoListHelper.AddLibraryIdToScenarioCalculatedAttributes(curves, null);
+            CalculatedAttributeDtoListService.AddLibraryIdToScenarioCalculatedAttributes(curves, null);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }

@@ -18,7 +18,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curve = new CashFlowRuleDTO();
             var curves = new List<CashFlowRuleDTO> { curve };
             Assert.False(curve.IsModified);
-            CashFlowRuleDtoListHelper.AddModifiedToScenarioCashFlowRule(curves, true);
+            CashFlowRuleDtoListService.AddModifiedToScenarioCashFlowRule(curves, true);
             Assert.True(curve.IsModified);
         }
 
@@ -30,7 +30,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curves = new List<CashFlowRuleDTO> { curve };
             var libraryId = Guid.NewGuid();
 
-            CashFlowRuleDtoListHelper.AddLibraryIdToScenarioCashFlowRule(curves, libraryId);
+            CashFlowRuleDtoListService.AddLibraryIdToScenarioCashFlowRule(curves, libraryId);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }
@@ -43,7 +43,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var libraryId = Guid.NewGuid();
             curve.LibraryId = libraryId;
 
-            CashFlowRuleDtoListHelper.AddLibraryIdToScenarioCashFlowRule(curves, null);
+            CashFlowRuleDtoListService.AddLibraryIdToScenarioCashFlowRule(curves, null);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }

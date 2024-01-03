@@ -5,7 +5,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace BridgeCareCore.Services
 {
-    public static class PerformanceCurveDtoListHelper
+    public static class PerformanceCurveDtoListService
     {
         public static void AddLibraryIdToScenarioPerformanceCurves(List<PerformanceCurveDTO> performanceCurveDTOs, Guid? libraryId)
         {

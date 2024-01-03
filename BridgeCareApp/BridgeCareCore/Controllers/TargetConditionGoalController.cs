@@ -226,8 +226,8 @@ namespace BridgeCareCore.Controllers
                 {
                     var dtos = _targetConditionGoalService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    TargetConditionGoalDtoListHelper.AddLibraryIdToScenarioTargetConditionGoal(dtos, pagingSync.LibraryId);
-                    TargetConditionGoalDtoListHelper.AddModifiedToScenarioTargetConditionGoal(dtos, pagingSync.IsModified);
+                    TargetConditionGoalDtoListService.AddLibraryIdToScenarioTargetConditionGoal(dtos, pagingSync.LibraryId);
+                    TargetConditionGoalDtoListService.AddModifiedToScenarioTargetConditionGoal(dtos, pagingSync.IsModified);
                     UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteScenarioTargetConditionGoals(dtos, simulationId);
                 });
 

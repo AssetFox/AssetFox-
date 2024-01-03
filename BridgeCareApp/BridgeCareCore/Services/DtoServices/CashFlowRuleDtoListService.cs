@@ -4,7 +4,7 @@ using System;
 
 namespace BridgeCareCore.Services
 {
-    public static class CashFlowRuleDtoListHelper
+    public static class CashFlowRuleDtoListService
     {
         public static void AddLibraryIdToScenarioCashFlowRule(List<CashFlowRuleDTO> cashFlowRuleDTOs, Guid? libraryId)
         {

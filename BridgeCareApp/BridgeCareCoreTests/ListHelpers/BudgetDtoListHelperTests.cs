@@ -12,7 +12,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curve = new BudgetDTO();
             var curves = new List<BudgetDTO> { curve };
             Assert.False(curve.IsModified);
-            BudgetDtoListHelper.AddModifiedToScenarioBudget(curves, true);
+            BudgetDtoListService.AddModifiedToScenarioBudget(curves, true);
             Assert.True(curve.IsModified);
         }
 
@@ -24,7 +24,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curves = new List<BudgetDTO> { curve };
             var libraryId = Guid.NewGuid();
 
-            BudgetDtoListHelper.AddLibraryIdToScenarioBudget(curves, libraryId);
+            BudgetDtoListService.AddLibraryIdToScenarioBudget(curves, libraryId);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }
@@ -37,7 +37,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var libraryId = Guid.NewGuid();
             curve.LibraryId = libraryId;
 
-            BudgetDtoListHelper.AddLibraryIdToScenarioBudget(curves, null);
+            BudgetDtoListService.AddLibraryIdToScenarioBudget(curves, null);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }

@@ -4,7 +4,7 @@ using System;
 
 namespace BridgeCareCore.Services
 {
-    public static class DeficientConditionGoalDtoListHelper
+    public static class DeficientConditionGoalDtoListService
     {
         public static void AddLibraryIdToScenarioDeficientConditionGoal(List<DeficientConditionGoalDTO> deficientConditionGoalDTOs, Guid? libraryId)
         {

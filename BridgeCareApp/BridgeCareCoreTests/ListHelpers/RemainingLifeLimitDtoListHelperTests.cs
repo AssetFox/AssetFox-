@@ -13,7 +13,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curve = new RemainingLifeLimitDTO();
             var curves = new List<RemainingLifeLimitDTO> { curve };
             Assert.False(curve.IsModified);
-            RemainingLifeLimitDtoListHelper.AddModifiedToScenarioRemainingLifeLimit(curves, true);
+            RemainingLifeLimitDtoListService.AddModifiedToScenarioRemainingLifeLimit(curves, true);
             Assert.True(curve.IsModified);
         }
 
@@ -25,7 +25,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var curves = new List<RemainingLifeLimitDTO> { curve };
             var libraryId = Guid.NewGuid();
 
-            RemainingLifeLimitDtoListHelper.AddLibraryIdToScenarioRemainingLifeLimit(curves, libraryId);
+            RemainingLifeLimitDtoListService.AddLibraryIdToScenarioRemainingLifeLimit(curves, libraryId);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }
@@ -38,7 +38,7 @@ namespace BridgeCareCoreTests.ListHelpers
             var libraryId = Guid.NewGuid();
             curve.LibraryId = libraryId;
 
-            RemainingLifeLimitDtoListHelper.AddLibraryIdToScenarioRemainingLifeLimit(curves, null);
+            RemainingLifeLimitDtoListService.AddLibraryIdToScenarioRemainingLifeLimit(curves, null);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }

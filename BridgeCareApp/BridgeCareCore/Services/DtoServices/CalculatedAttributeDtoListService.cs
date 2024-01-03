@@ -4,7 +4,7 @@ using System;
 
 namespace BridgeCareCore.Services
 {
-    public static class CalculatedAttributeDtoListHelper
+    public static class CalculatedAttributeDtoListService
     {
 
         public static void AddLibraryIdToScenarioCalculatedAttributes(List<CalculatedAttributeDTO> calculatedAttributesDTOs, Guid? libraryId)

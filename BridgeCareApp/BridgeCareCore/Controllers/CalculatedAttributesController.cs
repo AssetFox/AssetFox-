@@ -245,8 +245,8 @@ namespace BridgeCareCore.Controllers
                 {
                     var dto = _calulatedAttributeService.GetSyncedScenarioDataSet(simulationId, syncModel);
 
-                    CalculatedAttributeDtoListHelper.AddLibraryIdToScenarioCalculatedAttributes(dto, syncModel.LibraryId);
-                    CalculatedAttributeDtoListHelper.AddModifiedToScenarioCalculatedAttributes(dto, syncModel.IsModified);
+                    CalculatedAttributeDtoListService.AddLibraryIdToScenarioCalculatedAttributes(dto, syncModel.LibraryId);
+                    CalculatedAttributeDtoListService.AddModifiedToScenarioCalculatedAttributes(dto, syncModel.IsModified);
                     
                     calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(dto, simulationId);
                 });

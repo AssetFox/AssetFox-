@@ -138,8 +138,8 @@ namespace BridgeCareCore.Controllers
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
 
                     var dtos = _investmentPagingService.GetSyncedScenarioDataSet(simulationId, pagingSync);
-                    BudgetDtoListHelper.AddModifiedToScenarioBudget(dtos, pagingSync.IsModified);
-                    BudgetDtoListHelper.AddLibraryIdToScenarioBudget(dtos, pagingSync.LibraryId);
+                    BudgetDtoListService.AddModifiedToScenarioBudget(dtos, pagingSync.IsModified);
+                    BudgetDtoListService.AddLibraryIdToScenarioBudget(dtos, pagingSync.LibraryId);
 
                     InvestmentDTO investment = new InvestmentDTO();
                     var investmentPlan = pagingSync.Investment;

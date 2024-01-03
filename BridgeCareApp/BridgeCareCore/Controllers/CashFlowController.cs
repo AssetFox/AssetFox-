@@ -225,8 +225,8 @@ namespace BridgeCareCore.Controllers
                 {
                     var dtos = _cashFlowService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    CashFlowRuleDtoListHelper.AddLibraryIdToScenarioCashFlowRule(dtos, pagingSync.LibraryId);
-                    CashFlowRuleDtoListHelper.AddModifiedToScenarioCashFlowRule(dtos, pagingSync.IsModified);
+                    CashFlowRuleDtoListService.AddLibraryIdToScenarioCashFlowRule(dtos, pagingSync.LibraryId);
+                    CashFlowRuleDtoListService.AddModifiedToScenarioCashFlowRule(dtos, pagingSync.IsModified);
                     UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteScenarioCashFlowRules(dtos, simulationId);
                 });
 

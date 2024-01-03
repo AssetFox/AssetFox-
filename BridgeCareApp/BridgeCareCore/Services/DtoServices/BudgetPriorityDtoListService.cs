@@ -4,7 +4,7 @@ using System;
 
 namespace BridgeCareCore.Services
 {
-    public static class BudgetPriorityDtoListHelper
+    public static class BudgetPriorityDtoListService
     {
         public static void AddLibraryIdToScenarioBudgetPriority(List<BudgetPriorityDTO> budgetPriorityDTOs, Guid? libraryId)
         {

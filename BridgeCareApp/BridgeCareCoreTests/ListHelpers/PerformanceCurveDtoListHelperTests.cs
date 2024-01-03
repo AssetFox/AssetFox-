@@ -17,7 +17,7 @@ namespace BridgeCareCoreTests
             var curve = new PerformanceCurveDTO();
             var curves = new List<PerformanceCurveDTO> { curve };
             Assert.False(curve.IsModified);
-            PerformanceCurveDtoListHelper.AddModifiedToScenarioPerformanceCurve(curves, true);
+            PerformanceCurveDtoListService.AddModifiedToScenarioPerformanceCurve(curves, true);
             Assert.True(curve.IsModified);
         }
 
@@ -29,7 +29,7 @@ namespace BridgeCareCoreTests
             var curves = new List<PerformanceCurveDTO> { curve };
             var libraryId = Guid.NewGuid();
 
-            PerformanceCurveDtoListHelper.AddLibraryIdToScenarioPerformanceCurves(curves, libraryId);
+            PerformanceCurveDtoListService.AddLibraryIdToScenarioPerformanceCurves(curves, libraryId);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }
@@ -42,7 +42,7 @@ namespace BridgeCareCoreTests
             var libraryId = Guid.NewGuid();
             curve.LibraryId = libraryId;
 
-            PerformanceCurveDtoListHelper.AddLibraryIdToScenarioPerformanceCurves(curves, null);
+            PerformanceCurveDtoListService.AddLibraryIdToScenarioPerformanceCurves(curves, null);
 
             Assert.Equal(libraryId, curve.LibraryId);
         }

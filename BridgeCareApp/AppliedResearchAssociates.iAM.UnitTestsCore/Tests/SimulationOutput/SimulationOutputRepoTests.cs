@@ -96,9 +96,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
-            var startDate = DateTime.Now;
             TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutputViaRelational(context.SimulationId, simulationOutput);
-            var endDate = DateTime.Now;
             var oldSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(context.SimulationId);
             oldSimulation.Name = RandomStrings.WithPrefix("Modified simulation");
             var updateStartDate = DateTime.Now;
@@ -107,6 +105,40 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutputViaRelation(context.SimulationId);
             var lastModifiedDate = loadedOutput.LastModifiedDate;
             DateTimeAssertions.Between(updateStartDate, updateEndDate, lastModifiedDate, TimeSpan.FromMilliseconds(1));
+        }
+
+        [Fact]
+        public void CreateSimulationOutputViaJson_Does()
+        {
+            var numberOfYears = 1;
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
+            var simulationOutput = SimulationOutputModels.SimulationOutput(context);
+            var before = DateTime.Now;
+
+            TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutputViaJson(context.SimulationId, simulationOutput);
+
+            var after = DateTime.Now;
+            var simulationOutputAfter = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(context.SimulationId);
+            ObjectAssertions.EquivalentExcluding(simulationOutput, simulationOutputAfter, so => so.LastModifiedDate);
+            DateTimeAssertions.Between(before, after, simulationOutputAfter.LastModifiedDate, TimeSpan.FromSeconds(1));
+        }
+
+
+        [Fact]
+        public void ConvertOutputFromJsonToRelational_JsonOutputInDb_Converts()
+        {
+            var numberOfYears = 1;
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
+            var simulationOutput = SimulationOutputModels.SimulationOutput(context);
+            TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutputViaJson(context.SimulationId, simulationOutput);
+
+            TestHelper.UnitOfWork.SimulationOutputRepo.ConvertSimulationOutpuFromJsonTorelational(context.SimulationId);
+
+
         }
     }
 }

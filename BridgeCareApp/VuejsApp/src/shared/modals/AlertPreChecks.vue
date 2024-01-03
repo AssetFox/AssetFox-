@@ -69,9 +69,13 @@
 
     if (props.dialogDataPreChecks.message) {
         // Split the message by periods and filter out empty strings
-        const sentences = message.split('. ');
+        const sentences = message.split('.');
+        
+        var filtered = sentences.filter(function (el) {
+            return el != null && el != '';
+        });
 
-        return sentences;
+        return filtered;
     }
     return [];
 });        /**

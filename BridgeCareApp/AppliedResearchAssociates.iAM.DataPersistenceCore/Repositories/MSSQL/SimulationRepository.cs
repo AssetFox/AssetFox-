@@ -172,8 +172,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var simulationAnalysisDetail = _unitOfWork.Context.SimulationAnalysisDetail.AsNoTracking()
                 .SingleOrDefault(_ => _.SimulationId == simulationId);
 
-            simulationEntity.CreateSimulation(network, simulationAnalysisDetail.LastRun,
-                simulationAnalysisDetail.LastModifiedDate);
+            var defaultDate = new DateTime(1900, 1, 1);
+            var lastRun = simulationAnalysisDetail?.LastRun ?? defaultDate;
+            var lastModifiedDate = simulationAnalysisDetail?.LastModifiedDate ?? defaultDate;
+            simulationEntity.CreateSimulation(network, lastRun, lastModifiedDate);
         }
 
         public void CreateSimulation(Guid networkId, SimulationDTO dto)

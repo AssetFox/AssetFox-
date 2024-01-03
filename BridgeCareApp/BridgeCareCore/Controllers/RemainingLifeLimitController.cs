@@ -16,6 +16,7 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Models;
 using BridgeCareCore.Interfaces;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using BridgeCareCore.Services;
 
 namespace BridgeCareCore.Controllers
 {
@@ -228,8 +229,8 @@ namespace BridgeCareCore.Controllers
                 {
                     var dtos = _remainingLifeLimitService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    UnitOfWork.RemainingLifeLimitRepo.AddLibraryIdToScenarioRemainingLifeLimit(dtos, pagingSync.LibraryId);
-                    UnitOfWork.RemainingLifeLimitRepo.AddModifiedToScenarioRemainingLifeLimit(dtos, pagingSync.IsModified);
+                    RemainingLifeLimitDtoListService.AddLibraryIdToScenarioRemainingLifeLimit(dtos, pagingSync.LibraryId);
+                    RemainingLifeLimitDtoListService.AddModifiedToScenarioRemainingLifeLimit(dtos, pagingSync.IsModified);
                     UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteScenarioRemainingLifeLimits(dtos, simulationId);
                 });
 

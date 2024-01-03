@@ -20,6 +20,7 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using Microsoft.SqlServer.Dac.Model;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCore.Utils;
+using BridgeCareCore.Services;
 
 namespace BridgeCareCore.Controllers
 {
@@ -244,8 +245,8 @@ namespace BridgeCareCore.Controllers
                 {
                     var dto = _calulatedAttributeService.GetSyncedScenarioDataSet(simulationId, syncModel);
 
-                    calculatedAttributesRepo.AddLibraryIdToScenarioCalculatedAttributes(dto, syncModel.LibraryId);
-                    calculatedAttributesRepo.AddModifiedToScenarioCalculatedAttributes(dto, syncModel.IsModified);
+                    CalculatedAttributeDtoListService.AddLibraryIdToScenarioCalculatedAttributes(dto, syncModel.LibraryId);
+                    CalculatedAttributeDtoListService.AddModifiedToScenarioCalculatedAttributes(dto, syncModel.IsModified);
                     
                     calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(dto, simulationId);
                 });

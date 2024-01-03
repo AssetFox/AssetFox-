@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
     public class PerformanceCurveRepositoryTests
     {
 
- 
+
         private void Setup()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);

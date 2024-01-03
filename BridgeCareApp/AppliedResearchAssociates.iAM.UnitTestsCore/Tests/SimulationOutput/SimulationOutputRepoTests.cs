@@ -138,7 +138,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             TestHelper.UnitOfWork.SimulationOutputRepo.ConvertSimulationOutpuFromJsonTorelational(context.SimulationId);
 
-
+            var simulationOutputAfter = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(context.SimulationId);
+            ObjectAssertions.EquivalentExcluding(simulationOutput, simulationOutputAfter, so => so.LastModifiedDate);
         }
     }
 }

@@ -26,6 +26,7 @@ using MoreLinq;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using AppliedResearchAssociates.Validation;
 using System.Collections.Generic;
+using BridgeCareCore.Models.Validation;
 
 namespace BridgeCareCore.Controllers
 {
@@ -604,15 +605,18 @@ namespace BridgeCareCore.Controllers
             {
                 _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                 ValidationResultBag validationResultBag = null;
-                var validationResults = new List<ValidationResult>();
+                var validationResults = new List<PreChecksValidationResult>();
 
                 await Task.Factory.StartNew(() =>
                 {
                     var simulation = AnalysisInputLoading.GetSimulationWithoutAssets(UnitOfWork, networkId, simulationId);
                     validationResultBag = simulation.GetAllValidationResults(Enumerable.Empty<string>());
-                    validationResults = validationResultBag.AsEnumerable().ToList();
+                    var validationResultList = validationResultBag.AsEnumerable().ToList();
+                    validationResults.AddRange(from validationResult in validationResultList
+                                               let toAdd = new PreChecksValidationResult(validationResult.Status, validationResult.Message)
+                                               select toAdd);
                 });
-
+                
                 return Ok(validationResults);
             }
             catch (UnauthorizedAccessException)

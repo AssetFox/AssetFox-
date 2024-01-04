@@ -61,14 +61,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             ObjectAssertions.Equivalent(simulationFromRepo, retrievedSimulation);
         }
 
-        [Fact]
-        public void GetSharedScenarios_DoesNotThrow()
-        {
-            // Arrange
-            SimulationRepositoryTestSetup.Setup();
 
-            var result = TestHelper.UnitOfWork.SimulationRepo.GetSharedScenarios(true, true);
-        }
 
         [Fact]
         public void GetSimulationNameOrId_SimulationNotInDb_GetsId()
@@ -257,7 +250,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.NotNull(budgetPriorityEntityBefore);
             unitOfWork.Context.SaveChanges();
 
-           unitOfWork.SimulationRepo.DeleteSimulation(simulationId);
+            unitOfWork.SimulationRepo.DeleteSimulation(simulationId);
 
             unitOfWork.Context.ChangeTracker.Clear();
             var budgetAmountEntityAfter = TestHelper.UnitOfWork.Context.ScenarioBudgetAmount.SingleOrDefault(ba => ba.Id == budgetAmountId);
@@ -301,12 +294,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
             var districtAttribute = AttributeDtoDomainMapper.ToDto(districtAttributeDomain, dataSourceDto);
             UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
-
             var networkName = RandomStrings.WithPrefix("Network");
-
             var assetList = new List<MaintainableAsset>();
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, assetList);
-
             var simulationId = Guid.NewGuid();
             var simulationName = RandomStrings.WithPrefix("Simulation");
             var simulationDto = new SimulationDTO

@@ -110,7 +110,7 @@
                     <td>
                         <editDialog
                             v-model:return-value="item.item.yearlyPercentages"
-                            @save="onEditSelectedLibraryListData(item,'yearlyPercentages')"
+                            @save="onEditSelectedLibraryListData(item.item,'yearlyPercentages')"
                             full-width
                             size="large"
                             lazy

@@ -16,6 +16,7 @@ namespace BridgeCareCoreTests.Tests.Integration
 {
     public class SimulationRunTests
     {
+        //[Fact]
         [Fact (Skip ="Fails as we apparently need a CalculatedAttribute library. Setup is likely nowhere near rich enough.")]
         public void RunSimulation()
         {

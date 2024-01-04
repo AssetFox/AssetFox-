@@ -17,8 +17,6 @@ namespace BridgeCareCore.StartupExtension
         {
             services.AddScoped<IAttributeMetaDataRepository, AttributeMetaDataRepository>();
 
-            services.AddScoped<ISimulationOutputFileRepository, SimulationOutputFileRepository>();
-
             services.AddSingleton<SequentialWorkQueue<WorkQueueMetadata>>();
             services.AddSingleton<FastSequentialworkQueue<WorkQueueMetadata>>();
             services.AddHostedService<SequentialWorkBackgroundService>();

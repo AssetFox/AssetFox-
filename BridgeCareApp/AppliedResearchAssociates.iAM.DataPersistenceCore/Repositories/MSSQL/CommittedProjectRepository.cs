@@ -315,8 +315,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 allExistingCommittedProjectIds.AddRange(simulationProjects);
             }
             _unitOfWork.AsTransaction(() =>
-            {
+            {                
                 _unitOfWork.Context.UpsertAll(committedProjectEntities);
+                var committedProjectLocations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
+                _unitOfWork.Context.UpsertAll(committedProjectLocations);
             });
         }
 

@@ -15,6 +15,7 @@ namespace BridgeCareCore.Services
             };
             CopyAbstractFields(dto, clone, helper);
             clone.Id = Guid.NewGuid();
+            clone.LocationKeys["ID"] = Guid.NewGuid().ToString();
             return clone;
         }
 

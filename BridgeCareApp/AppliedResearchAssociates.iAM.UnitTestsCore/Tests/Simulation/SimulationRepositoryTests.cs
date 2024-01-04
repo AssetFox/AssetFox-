@@ -18,6 +18,8 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Xunit;
+using System.Net.WebSockets;
+using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -335,6 +337,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
+        public void DeleteSimulationsByNetworkId_NetworkInDbWithSimulations_Deletes()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var simulationId = Guid.NewGuid();
+            var simulationIds = new List<Guid> { simulationId };
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, networkId: networkId);
+            var simulationsBefore = TestHelper.UnitOfWork.SimulationRepo.GetScenariosWithIds(simulationIds);
+            Assert.NotEmpty(simulationsBefore);
+
+            TestHelper.UnitOfWork.SimulationRepo.DeleteSimulationsByNetworkId(networkId);
+
+            var simulationsAfter = TestHelper.UnitOfWork.SimulationRepo.GetScenariosWithIds(simulationIds);
+            Assert.Empty(simulationsAfter);
+        }
+
+        [Fact]
         public void GetScenariosWithIds_SimulationDoesNotExist_Empty()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
@@ -346,6 +366,35 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulations = TestHelper.UnitOfWork.SimulationRepo.GetScenariosWithIds(simulationIds);
 
             Assert.Empty(simulations);
+        }
+
+        [Fact]
+        public void UpdateLastModifiedDate_SimulationInDb_Updates()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var simulationId = Guid.NewGuid();
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, networkId: networkId);
+
+            var simulationEntity = TestHelper.UnitOfWork.Context.Simulation.Single(
+                s => s.Id == simulationId );
+            simulationEntity.LastModifiedDate = new DateTime(2024, 1, 4);
+            TestHelper.UnitOfWork.Context.Update(simulationEntity);
+            TestHelper.UnitOfWork.Context.SaveChanges();
+            var entityBefore = TestHelper.UnitOfWork.Context.Simulation.Single(
+                s => s.Id == simulationId);
+            var dateBefore = entityBefore.LastModifiedDate;
+            Assert.Equal(new DateTime(2024, 1, 4), dateBefore);
+            var dateLowerBound = DateTime.Now;
+
+            TestHelper.UnitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+
+            var dateUpperBound = DateTime.Now;
+            var entityAfter = TestHelper.UnitOfWork.Context.Simulation.Single(
+               s => s.Id == simulationId);
+            var dateAfter = entityAfter.LastModifiedDate;
+            DateTimeAssertions.Between(dateLowerBound, dateUpperBound, dateAfter, TimeSpan.FromSeconds(1));
         }
     }
 }

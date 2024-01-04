@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class SimulationRepositoryTests
     {
-                       
+
         private async Task<UserDTO> AddTestUser()
         {
             var randomName = RandomStrings.Length11();
@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return returnValue;
         }
 
-        [Fact] 
+        [Fact]
         public void DeleteSimulation_Does()
         {
             SimulationRepositoryTestSetup.Setup();
@@ -71,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Contains(simulationId.ToString(), nameOrId);
         }
 
-        
+
         [Fact]
         public async Task CreateSimulation_Does()
         {
@@ -196,7 +196,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             ObjectAssertions.Equivalent(dtoBefore, dtoAfter);
             Assert.NotEqual(updateDto.Name, dtoAfter.Name);
         }
-      
+
 
         [Fact]
         public void SimulationInDbWithBudgetAndAmount_Delete_DeletesAll()
@@ -261,7 +261,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Null(investmentPlanEntityAfter);
         }
 
-        [Fact (Skip ="Fails. Keeping around until related discussion is complete.")]
+        [Fact(Skip = "Fails. Keeping around until related discussion is complete.")]
         public async Task FailureInASingleTest()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
@@ -280,7 +280,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             // Act
             //  TestHelper.UnitOfWork.SimulationRepo.DeleteSimulation(simulation.Id);
             TestHelper.UnitOfWork.SimulationRepo.DeleteSimulation(simulation2.Id);
-
         }
 
         [Fact]
@@ -320,6 +319,33 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Equal(simulationId, simulationAfter.Id);
         }
 
+        [Fact]
+        public void GetScenariosWithIds_SimulationExists_Gets()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var simulationId = Guid.NewGuid();
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, networkId: networkId);
+            var simulationIds = new List<Guid> { simulationId };
 
+            var simulations = TestHelper.UnitOfWork.SimulationRepo.GetScenariosWithIds(simulationIds);
+
+            Assert.Single(simulations);
+        }
+
+        [Fact]
+        public void GetScenariosWithIds_SimulationDoesNotExist_Empty()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var nonexistentSimulationId = Guid.NewGuid();
+            var simulationIds = new List<Guid> { nonexistentSimulationId };
+
+            var simulations = TestHelper.UnitOfWork.SimulationRepo.GetScenariosWithIds(simulationIds);
+
+            Assert.Empty(simulations);
+        }
     }
 }

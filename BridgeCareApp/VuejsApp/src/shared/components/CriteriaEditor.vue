@@ -3,16 +3,11 @@
         <v-col>
             <h3 class="ghd-dialog">Output</h3>
             <v-card class="elevation-0" style="border: 1px solid;" width="600px">
-                        <div class="conjunction-and-messages-container" >
-                            <v-row
-                                :class="{
-                                    'justify-space-between': !criteriaEditorData.isLibraryContext,
-                                    'justify-start':
-                                        criteriaEditorData.isLibraryContext,
-                                }"
-                            >
-                            <v-col cols = "4">
-                                <v-row style="padding: 20px;">
+                <div class="conjunction-and-messages-container" >
+                    <v-row :class="{'justify-space-between': !criteriaEditorData.isLibraryContext,
+                        'justify-start':criteriaEditorData.isLibraryContext}">
+                        <v-col cols = "4">
+                            <v-row style="padding: 20px;">
                                 <v-select
                                     menu-icon=custom:GhdDownSvg
                                     :items="conjunctionSelectListItems"
@@ -24,100 +19,68 @@
                                     variant="outlined"
                                 >
                                 </v-select>
-                                </v-row>
-                            </v-col>
-                            <div style="padding:20px">
-                                <v-btn
-                                    id="CriteriaEditor-addSubCriteria-btn"
-                                    @click="onAddSubCriteria"
-                                    class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                                    variant = "flat"
-                                    >Add Subcriteria
-                                </v-btn>
-                            </div>
                             </v-row>
+                        </v-col>
+                        <div style="padding:20px">
+                            <v-btn
+                                id="CriteriaEditor-addSubCriteria-btn"
+                                @click="onAddSubCriteria"
+                                class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
+                                variant = "flat"
+                                >Add Subcriteria
+                            </v-btn>
                         </div>
-                        <v-card-text
-                            :class="{
-                                'clauses-card-dialog':
-                                    !criteriaEditorData.isLibraryContext,
-                                'clauses-card-library':
-                                    criteriaEditorData.isLibraryContext,
-                            }"
-                        >
-                        <v-textarea
-                            v-if="isAndConjunction()"
-                            style="padding-left:0px;"
+                    </v-row>
+                </div>
+                <v-card-text :class="{'clauses-card-dialog':!criteriaEditorData.isLibraryContext,
+                    'clauses-card-library':criteriaEditorData.isLibraryContext}">  
+                    <div v-for="(clause, index) in subCriteriaClauses" :key="index">
+                        <v-textarea style="padding-left:0px;"
+                            :value="getValueForTextarea(index)"
                             variant="outlined"
-                            :value="getValueForTextarea(-1)"
-                            @click="onClickSubCriteriaClauseTextarea(subCriteriaAndClause, -1)"
+                            @click="onClickSubCriteriaClauseTextarea(clause, index)"
                             class="ghd-control-text"
                             full-width
                             no-resize
                             readonly
-                            rows="3"
-                        >
+                            rows="3">
                             <template v-slot:append>
-                                <v-btn
-                                    @click="onRemoveSubCriteria(selectedSubCriteriaClauseIndex)"
+                                <v-btn id="CriteriaEditor-removeSubCriteria-btn"
+                                    @click.stop="onRemoveSubCriteria(index)"
                                     class="ghd-blue"
-                                    flat
-                                >
+                                    flat>
                                     <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                             </template>
                         </v-textarea>
-                        <div v-else>
-                            <div v-for="(clause, index) in subCriteriaClauses" :key="index">
-                                <v-textarea style="padding-left:0px;"
-                                    :value="getValueForTextarea(index)"
-                                    variant="outlined"
-                                    @click="onClickSubCriteriaClauseTextarea(clause, index)"
-                                    class="ghd-control-text"
-                                    full-width
-                                    no-resize
-                                    readonly
-                                    rows="3"
-                                >
-                                    <template v-slot:append>
-                                        <v-btn id="CriteriaEditor-removeSubCriteria-btn"
-                                            @click="onRemoveSubCriteria(index)"
-                                            class="ghd-blue"
-                                            flat
-                                        >
-                                            <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
-                                        </v-btn>
-                                    </template>
-                                </v-textarea>
-                            </div>
+                    </div>
+                </v-card-text>
+                <v-card-actions :class="{'validation-actions':criteriaEditorData.isLibraryContext,}">
+                    <v-row>
+                        <div class="validation-check-btn-container">
+                            <v-btn
+                                id="CriteriaEditor-checkOutput-btn"
+                                :disabled="onDisableCheckOutputButton()"
+                                @click="onCheckCriteria"
+                                class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
+                                variant = "flat"
+                            >
+                                Check Output
+                            </v-btn>
                         </div>
-                    </v-card-text>
-                    <v-card-actions :class="{'validation-actions':criteriaEditorData.isLibraryContext,}">
-                        <v-row>
-                            <div class="validation-check-btn-container">
-                                <v-btn
-                                    id="CriteriaEditor-checkOutput-btn"
-                                    :disabled="onDisableCheckOutputButton()"
-                                    @click="onCheckCriteria"
-                                    class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                                    variant = "flat"
-                                >
-                                    Check Output
-                                </v-btn>
-                            </div>
-                            <div style="padding: 10px;">
-                                <p class="invalid-message" v-if="invalidCriteriaMessage !== null">
-                                    <strong>{{ invalidCriteriaMessage }}</strong>
-                                </p>
-                                <p id="CriteriaEditor-validOutput-p" class="valid-message" v-if="validCriteriaMessage !== null">
-                                    <strong>{{ validCriteriaMessage }}</strong>
-                                </p>
-                                <p v-if="checkOutput">
-                                    Please click here to check entire rule
-                                </p>
-                            </div>
-                        </v-row>
-                    </v-card-actions>
+                        <div style="padding: 10px;">
+                            <p class="invalid-message" v-if="invalidCriteriaMessage !== null">
+                                <strong>{{ invalidCriteriaMessage }}</strong>
+                            </p>
+                            <p id="CriteriaEditor-validOutput-p" class="valid-message" v-if="validCriteriaMessage !== null">
+                                <strong>{{ validCriteriaMessage }}</strong>
+                            </p>
+                            <p v-if="checkOutput">
+                                Please click here to check entire rule
+                            </p>
+                        </div>
+                    </v-row>
+                </v-card-actions>
             </v-card>
         </v-col>
         <v-col>
@@ -155,7 +118,7 @@
                                         :maxDepth="3" 
                                         :queryRules="queryBuilderRules" 
                                         :depth="0"
-                                        v-if="queryBuilderRules.length > 0"></QueryEditor>
+                                        v-if="queryBuilderRules.length > 0 "></QueryEditor>
                                 </v-window-item>
                                 <v-window-item value="raw">
                                     <v-textarea
@@ -268,7 +231,6 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { getUrl } from "../utils/get-url";
 import { reactive } from 'vue';
-import QueryBuilder from "query-builder-vue";
 import QueryEditor from "../components/queryEditor/QueryEditorGroup.vue"
 
 let store = useStore();
@@ -300,7 +262,6 @@ const tab = ref<any>(null);
     ]);
     const selectedConjunction = ref<string>('OR');
     const subCriteriaClauses= ref<string[]>([]);
-    const subCriteriaAndClause = ref<string>('')
     let subCriterias:CriteriaType[] = []
 
     const selectedSubCriteriaClauseIndex = ref<number>(-1);
@@ -450,10 +411,6 @@ const tab = ref<any>(null);
         }
     }
 
-    function isAndConjunction() {
-        return selectedConjunction.value === 'AND';
-    }
-
     function getClassForTextarea(index: number) {
         if (isAndConjunction()) {
             return {
@@ -469,7 +426,7 @@ const tab = ref<any>(null);
     }
 
     function getValueForTextarea(index: number) {
-        return isAndConjunction() ? subCriteriaAndClause.value : subCriteriaClauses.value[index];
+        return subCriteriaClauses.value[index];
     }
 
     function setQueryBuilderRules() {
@@ -497,7 +454,6 @@ const tab = ref<any>(null);
                     subCriterias.push(clone(criteriaType))
                 }
             });
-            subCriteriaAndClause.value = getAndExpresion()
         }
     }
 
@@ -524,6 +480,7 @@ const tab = ref<any>(null);
     function onAddSubCriteria() {
         resetSubCriteriaSelectedProperties();
         setTimeout(() => {
+            subCriteriaClauses.value = subCriteriaClauses.value.filter(_ => _.trim() !== '');
             onClickSubCriteriaClauseTextarea(
                 '',
                 subCriteriaClauses.value.length,
@@ -624,8 +581,6 @@ const tab = ref<any>(null);
                 });
             }
         }
-
-        subCriteriaAndClause.value = getAndExpresion()
     }
 
     function onParseRawSubCriteria() {
@@ -803,27 +758,18 @@ const tab = ref<any>(null);
 
         // fix until treeview is implemented
         // added the if clause for AND, to copy expression from raw criteria tab to the SubCriteria textarea on left
-        if (isAndConjunction()) {
-            subCriteriaClauses.value = [];
-            subCriteriaClauses.value.push(criteria);
-            subCriterias = [];
-            subCriterias.push({id:getNewGuid(), type: 'query-builder-group', query: clone(selectedSubCriteriaClause.value!)})
-        }
-        else {
-            subCriteriaClauses.value= update(
-                selectedSubCriteriaClauseIndex.value,
-                criteria as any,
-                subCriteriaClauses.value,
-            );
 
-            subCriterias= update(
-                selectedSubCriteriaClauseIndex.value,
-                clone({type: getSelectectedSubCriteriaType(), query: getSubCriteriasUpdateObject()}) as any,
-                subCriterias,
-            );
-        }     
+        subCriteriaClauses.value= update(
+            selectedSubCriteriaClauseIndex.value,
+            criteria as any,
+            subCriteriaClauses.value,
+        );
 
-        subCriteriaAndClause.value = getAndExpresion()
+        subCriterias= update(
+            selectedSubCriteriaClauseIndex.value,
+            clone({type: getSelectectedSubCriteriaType(), query: getSubCriteriasUpdateObject()}) as any,
+            subCriterias,
+        );
 
         resetCriteriaValidationProperties();
         checkOutput.value = true;
@@ -869,15 +815,6 @@ const tab = ref<any>(null);
             return null;
         }
         return selectedRawSubCriteriaClause.value;
-    }
-
-    function getAndExpresion(){
-        let andCriteria: Criteria = {logicalOperator: 'AND', children: clone(subCriterias)}
-        const parsedCriteriaJson  = convertCriteriaObjectToCriteriaExpression(andCriteria)
-        if (parsedCriteriaJson) {
-            return parsedCriteriaJson.join('');
-        }
-        return ''
     }
 
     function onSubmitCriteriaEditorResult(submit: boolean) {

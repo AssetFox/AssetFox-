@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TargetConditionGoal;
@@ -363,6 +364,29 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var user2After = libraryUsersAfter.Single(u => u.UserId == user2.Id);
             Assert.Equal(LibraryAccessLevel.Modify, user1After.AccessLevel);
             Assert.Equal(LibraryAccessLevel.Read, user2After.AccessLevel);
+        }
+
+        [Fact]
+        public void GetLibraryModifiedDate_Does()
+        {
+            var before = DateTime.Now;
+            var library = TargetConditionGoalLibraryTestSetup.ModelForEntityInDbWithSingleGoal(TestHelper.UnitOfWork);
+            var after = DateTime.Now;
+
+            var actual = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetLibraryModifiedDate(library.Id);
+
+            DateTimeAssertions.Between(before, after, actual, TimeSpan.FromSeconds(1));
+        }
+
+        [Fact]
+        public async Task GetTargetConditionGoalLibrariesNoChildrenAccessibleToUser_InaccessibleLibraryInDb_DoesNotGet()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = TargetConditionGoalLibraryTestSetup.ModelForEntityInDbWithSingleGoal(TestHelper.UnitOfWork);
+
+            var libraries = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalLibrariesNoChildrenAccessibleToUser(user.Id);
+
+            Assert.DoesNotContain(libraries, l => l.Id == library.Id);
         }
     }
 }

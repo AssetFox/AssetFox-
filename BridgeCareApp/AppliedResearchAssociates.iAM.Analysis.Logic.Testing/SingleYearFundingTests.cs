@@ -13,23 +13,14 @@ public class SingleYearFundingTests
             { true, false, },
         };
 
-        decimal[] budgetAmounts =
-        {
-            10,
-            5,
-        };
-
-        decimal[] treatmentCosts =
-        {
-            8,
-            8,
-        };
+        decimal[] budgetAmounts = [10, 5];
+        decimal[] treatmentCosts = [8, 8];
 
         var solved = Funding.TrySolve(
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            new(MultipleBudgetsCanFundEachTreatment: true),
+            new(),
             out var actualSolution);
 
         Assert.False(solved);
@@ -45,23 +36,17 @@ public class SingleYearFundingTests
             { true, },
         };
 
-        decimal[] budgetAmounts =
-        {
-            10,
-            10,
-            10,
-        };
-
-        decimal[] treatmentCosts =
-        {
-            15,
-        };
+        decimal[] budgetAmounts = [10, 10, 10];
+        decimal[] treatmentCosts = [15];
 
         var solved = Funding.TrySolve(
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            new(MultipleBudgetsCanFundEachTreatment: true),
+            new()
+            {
+                MultipleBudgetsCanFundEachTreatment = true,
+            },
             out var actualSolution);
 
         Assert.True(solved);
@@ -86,23 +71,17 @@ public class SingleYearFundingTests
             { true, },
         };
 
-        decimal[] budgetAmounts =
-        {
-            10,
-            10,
-            10,
-        };
-
-        decimal[] treatmentCosts =
-        {
-            35,
-        };
+        decimal[] budgetAmounts = [10, 10, 10];
+        decimal[] treatmentCosts = [35];
 
         var solved = Funding.TrySolve(
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            new(MultipleBudgetsCanFundEachTreatment: true),
+            new()
+            {
+                MultipleBudgetsCanFundEachTreatment = true,
+            },
             out var actualSolution);
 
         Assert.False(solved);
@@ -118,23 +97,14 @@ public class SingleYearFundingTests
             { false, },
         };
 
-        decimal[] budgetAmounts =
-        {
-            10,
-            10,
-            10,
-        };
-
-        decimal[] treatmentCosts =
-        {
-            1,
-        };
+        decimal[] budgetAmounts = [10, 10, 10];
+        decimal[] treatmentCosts = [1];
 
         var solved = Funding.TrySolve(
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            new(MultipleBudgetsCanFundEachTreatment: true),
+            new(),
             out var actualSolution);
 
         Assert.False(solved);
@@ -150,23 +120,17 @@ public class SingleYearFundingTests
             { true, },
         };
 
-        decimal[] budgetAmounts =
-        {
-            10,
-            10,
-            10,
-        };
-
-        decimal[] treatmentCosts =
-        {
-            5,
-        };
+        decimal[] budgetAmounts = [10, 10, 10];
+        decimal[] treatmentCosts = [5];
 
         var solved = Funding.TrySolve(
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            new(MultipleBudgetsCanFundEachTreatment: false),
+            new()
+            {
+                MultipleBudgetsCanFundEachTreatment = false,
+            },
             out var actualSolution);
 
         Assert.True(solved);
@@ -191,23 +155,17 @@ public class SingleYearFundingTests
             { true, },
         };
 
-        decimal[] budgetAmounts =
-        {
-            10,
-            10,
-            10,
-        };
-
-        decimal[] treatmentCosts =
-        {
-            15,
-        };
+        decimal[] budgetAmounts = [10, 10, 10];
+        decimal[] treatmentCosts = [15];
 
         var solved = Funding.TrySolve(
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            new(MultipleBudgetsCanFundEachTreatment: false),
+            new()
+            {
+                MultipleBudgetsCanFundEachTreatment = false,
+            },
             out var actualSolution);
 
         Assert.False(solved);
@@ -221,23 +179,14 @@ public class SingleYearFundingTests
             { true, false, true, },
         };
 
-        decimal[] budgetAmounts =
-        {
-            10,
-        };
-
-        decimal[] treatmentCosts =
-        {
-            1,
-            2,
-            3,
-        };
+        decimal[] budgetAmounts = [10];
+        decimal[] treatmentCosts = [1, 2, 3];
 
         var solved = Funding.TrySolve(
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            new(MultipleBudgetsCanFundEachTreatment: true),
+            new(),
             out var actualSolution);
 
         Assert.False(solved);
@@ -251,23 +200,14 @@ public class SingleYearFundingTests
             { true, true, true, },
         };
 
-        decimal[] budgetAmounts =
-        {
-            10,
-        };
-
-        decimal[] treatmentCosts =
-        {
-            1,
-            2,
-            3,
-        };
+        decimal[] budgetAmounts = [10];
+        decimal[] treatmentCosts = [1, 2, 3];
 
         var solved = Funding.TrySolve(
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            new(MultipleBudgetsCanFundEachTreatment: true),
+            new(),
             out var actualSolution);
 
         Assert.True(solved);
@@ -288,23 +228,14 @@ public class SingleYearFundingTests
             { true, true, true, },
         };
 
-        decimal[] budgetAmounts =
-        {
-            10,
-        };
-
-        decimal[] treatmentCosts =
-        {
-            10,
-            2,
-            3,
-        };
+        decimal[] budgetAmounts = [10];
+        decimal[] treatmentCosts = [10, 2, 3];
 
         var solved = Funding.TrySolve(
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            new(MultipleBudgetsCanFundEachTreatment: true),
+            new(),
             out var actualSolution);
 
         Assert.False(solved);
@@ -318,21 +249,14 @@ public class SingleYearFundingTests
             { true, },
         };
 
-        decimal[] budgetAmounts =
-        {
-            10,
-        };
-
-        decimal[] treatmentCosts =
-        {
-            1,
-        };
+        decimal[] budgetAmounts = [10];
+        decimal[] treatmentCosts = [1];
 
         var solved = Funding.TrySolve(
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            new(MultipleBudgetsCanFundEachTreatment: true),
+            new(),
             out var actualSolution);
 
         Assert.True(solved);
@@ -353,21 +277,17 @@ public class SingleYearFundingTests
             { true, },
         };
 
-        decimal[] budgetAmounts =
-        {
-            10,
-        };
-
-        decimal[] treatmentCosts =
-        {
-            100,
-        };
+        decimal[] budgetAmounts = [10];
+        decimal[] treatmentCosts = [100];
 
         var solved = Funding.TrySolve(
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            new(MultipleBudgetsCanFundEachTreatment: true),
+            new()
+            {
+                MultipleBudgetsCanFundEachTreatment = true,
+            },
             out var actualSolution);
 
         Assert.False(solved);
@@ -375,10 +295,10 @@ public class SingleYearFundingTests
 
     #endregion
 
-    #region Multiple budgets, multiple treatments, multi-funding (LP)
+    #region Non-degenerate inputs
 
     [Fact]
-    public void MultipleBudgets_MultipleTreatments_MultiFunding_3x3_Solved()
+    public void MultipleBudgets_MultipleTreatments_3x3_RequiresMultiFunding()
     {
         bool[,] allocationIsAllowed =
         {
@@ -387,33 +307,37 @@ public class SingleYearFundingTests
             { true, false, true, },
         };
 
-        decimal[] budgetAmounts =
-        {
-            10,
-            20,
-            5,
-        };
-
-        decimal[] treatmentCosts =
-        {
-            10,
-            10,
-            10,
-        };
+        decimal[] budgetAmounts = [12, 18, 5];
+        decimal[] treatmentCosts = [10, 10, 10];
 
         var solved = Funding.TrySolve(
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            new(MultipleBudgetsCanFundEachTreatment: true),
+            new()
+            {
+                MultipleBudgetsCanFundEachTreatment = false,
+            },
             out var actualSolution);
+
+        Assert.False(solved);
+
+        solved = Funding.TrySolve(
+            allocationIsAllowed,
+            budgetAmounts,
+            treatmentCosts,
+            new()
+            {
+                MultipleBudgetsCanFundEachTreatment = true,
+            },
+            out actualSolution);
 
         Assert.True(solved);
 
         decimal?[,] expectedSolution =
         {
-            { 0, 10, null, },
-            { 10, null, 10, },
+            { 2, 10, null, },
+            { 8, null, 10, },
             { 0, null, 0, },
         };
 
@@ -429,23 +353,17 @@ public class SingleYearFundingTests
             { true, false, },
         };
 
-        decimal[] budgetAmounts =
-        {
-            10,
-            6,
-        };
-
-        decimal[] treatmentCosts =
-        {
-            8,
-            8,
-        };
+        decimal[] budgetAmounts = [10, 6];
+        decimal[] treatmentCosts = [8, 8];
 
         var solved = Funding.TrySolve(
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            new(MultipleBudgetsCanFundEachTreatment: true),
+            new()
+            {
+                MultipleBudgetsCanFundEachTreatment = true,
+            },
             out var actualSolution);
 
         Assert.True(solved);
@@ -468,35 +386,114 @@ public class SingleYearFundingTests
             { true, false, },
         };
 
-        decimal[] budgetAmounts =
-        {
-            6,
-            10,
-        };
-
-        decimal[] treatmentCosts =
-        {
-            8,
-            8,
-        };
+        decimal[] budgetAmounts = [6, 10];
+        decimal[] treatmentCosts = [8, 8];
 
         var solved = Funding.TrySolve(
             allocationIsAllowed,
             budgetAmounts,
             treatmentCosts,
-            new(MultipleBudgetsCanFundEachTreatment: true),
+            new()
+            {
+                MultipleBudgetsCanFundEachTreatment = true,
+            },
             out var actualSolution);
 
         Assert.False(solved);
     }
 
-    // to-do: allocation column false
+    [Fact]
+    public void MultipleBudgets_MultipleTreatments_SingleFunding_3x3_Solved()
+    {
+        bool[,] allocationIsAllowed =
+        {
+            { true, true, false, },
+            { true, false, true, },
+            { true, false, true, },
+        };
 
-    // to-do: allocation row false
+        decimal[] budgetAmounts = [10, 20, 5];
+        decimal[] treatmentCosts = [10, 10, 10];
 
-    #endregion
+        var solved = Funding.TrySolve(
+            allocationIsAllowed,
+            budgetAmounts,
+            treatmentCosts,
+            new()
+            {
+                MultipleBudgetsCanFundEachTreatment = false,
+            },
+            out var actualSolution);
 
-    #region Multiple budgets, multiple treatments, single-funding (MIP)
+        Assert.True(solved);
+
+        decimal?[,] expectedSolution =
+        {
+            { 0, 10, null, },
+            { 10, null, 10, },
+            { 0, null, 0, },
+        };
+
+        Assert.Equivalent(expectedSolution, actualSolution, true);
+    }
+
+    [Fact]
+    public void MultipleBudgets_MultipleTreatments_SingleFunding_Minimal_Solved()
+    {
+        bool[,] allocationIsAllowed =
+        {
+            { true, true, },
+            { true, false, },
+        };
+
+        decimal[] budgetAmounts = [10, 10];
+        decimal[] treatmentCosts = [8, 8];
+
+        var solved = Funding.TrySolve(
+            allocationIsAllowed,
+            budgetAmounts,
+            treatmentCosts,
+            new()
+            {
+                MultipleBudgetsCanFundEachTreatment = false,
+            },
+            out var actualSolution);
+
+        Assert.True(solved);
+
+        decimal?[,] expectedSolution =
+        {
+            { 0, 8, },
+            { 8, null, },
+        };
+
+        Assert.Equivalent(expectedSolution, actualSolution, true);
+    }
+
+    [Fact]
+    public void MultipleBudgets_MultipleTreatments_SingleFunding_Minimal_Unsolved()
+    {
+        bool[,] allocationIsAllowed =
+        {
+            { true, true, },
+            { true, false, },
+        };
+
+        decimal[] budgetAmounts = [6, 10];
+        decimal[] treatmentCosts = [8, 8];
+
+        var solved = Funding.TrySolve(
+            allocationIsAllowed,
+            budgetAmounts,
+            treatmentCosts,
+            new()
+            {
+                MultipleBudgetsCanFundEachTreatment = false,
+            },
+            out var actualSolution);
+
+        Assert.False(solved);
+    }
 
     #endregion
 }

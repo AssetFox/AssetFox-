@@ -2,7 +2,7 @@
 
 internal sealed partial record FundingSolver(
     bool[,] AllocationIsAllowedPerBudgetAndTreatment,
-    List<decimal[]> AmountPerBudgetPerYear,
+    decimal[][] AmountPerBudgetPerYear,
     decimal[] CostPerTreatment,
     decimal[] CostPercentagePerYear,
     Funding.Settings Settings,
@@ -37,28 +37,6 @@ internal sealed partial record FundingSolver(
 
     private bool UnlimitedSpending()
     {
-        var firstBudgetPerTreatment = new int[NumberOfTreatments];
-        for (var t = 0; t < NumberOfTreatments; ++t)
-        {
-            var firstBudgetWasFound = false;
-
-            for (var b = 0; b < NumberOfBudgets; ++b)
-            {
-                if (AllocationIsAllowedPerBudgetAndTreatment[b, t])
-                {
-                    firstBudgetPerTreatment[t] = b;
-
-                    firstBudgetWasFound = true;
-                    break;
-                }
-            }
-
-            if (!firstBudgetWasFound)
-            {
-                return false;
-            }
-        }
-
         for (var y = 0; y < NumberOfYears; ++y)
         {
             var allocationPerBudgetAndTreatment = AllocationPerBudgetAndTreatmentPerYear[y];
@@ -66,10 +44,25 @@ internal sealed partial record FundingSolver(
 
             for (var t = 0; t < NumberOfTreatments; ++t)
             {
-                var b = firstBudgetPerTreatment[t];
-                var cost = CostPerTreatment[t] * costFraction;
+                var allocationHasHappened = false;
 
-                allocationPerBudgetAndTreatment[b, t] = cost.RoundToCent();
+                for (var b = 0; b < NumberOfBudgets; ++b)
+                {
+                    if (AllocationIsAllowedPerBudgetAndTreatment[b, t])
+                    {
+                        if (allocationHasHappened)
+                        {
+                            allocationPerBudgetAndTreatment[b, t] = 0;
+                        }
+                        else
+                        {
+                            var cost = CostPerTreatment[t] * costFraction;
+                            allocationPerBudgetAndTreatment[b, t] = cost.RoundToCent();
+
+                            allocationHasHappened = true;
+                        }
+                    }
+                }
             }
         }
 

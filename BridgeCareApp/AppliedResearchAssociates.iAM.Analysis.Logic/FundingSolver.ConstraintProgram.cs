@@ -8,8 +8,10 @@ partial record FundingSolver
     private bool ConstraintProgram()
     {
         // Unlike the API used in the linear program implementation, the API used here doesn't allow
-        // updating the model as you go along. Because of that, we have to recreate the entire model
-        // for each budget whose spending we're maximizing.
+        // editing or removing constraints of the model as you go along. Because of that, we have to
+        // recreate the entire model for each budget whose spending we're maximizing.
+
+        // ---
 
         // In budget order, maximize each budget's total spending.
 
@@ -119,7 +121,7 @@ partial record FundingSolver
 
             // Configure the model with previous solution data, if any.
 
-            for (var b = 0; b < maximizedTotalSpendingPerBudget.Count; ++b)
+            for (var b = 0; b < budgetToMaximize; ++b)
             {
                 var maximizedExpression = createTotalSpendingExpression(b);
                 var maximizedValue = maximizedTotalSpendingPerBudget[b];
@@ -171,10 +173,6 @@ partial record FundingSolver
                             var value = solver.Value(variable);
                             currentAllocationPerYearAndBudgetAndTreatment[y, b, t] = value;
                         }
-                        else
-                        {
-                            currentAllocationPerYearAndBudgetAndTreatment[y, b, t] = null;
-                        }
                     }
                 }
             }
@@ -208,15 +206,22 @@ partial record FundingSolver
         for (var y = 0; y < NumberOfYears; ++y)
         {
             var allocationPerBudgetAndTreatment = AllocationPerBudgetAndTreatmentPerYear[y];
+            var costFraction = CostPercentagePerYear[y] / 100;
 
-            for (var b = 0; b < NumberOfBudgets; ++b)
+            for (var t = 0; t < NumberOfTreatments; ++t)
             {
-                for (var t = 0; t < NumberOfTreatments; ++t)
+                for (var b = 0; b < NumberOfBudgets; ++b)
                 {
-                    if (currentAllocationPerYearAndBudgetAndTreatment[y, b, t] is long value)
+                    var allocation = currentAllocationPerYearAndBudgetAndTreatment[y, b, t];
+
+                    if (allocation == 1)
                     {
-                        var allocation = (decimal)allocationVariable.SolutionValue();
-                        allocationPerBudgetAndTreatment[b, t] = allocation.RoundToCent();
+                        var cost = CostPerTreatment[t] * costFraction;
+                        allocationPerBudgetAndTreatment[b, t] = cost.RoundToCent();
+                    }
+                    else if (allocation == 0)
+                    {
+                        allocationPerBudgetAndTreatment[b, t] = 0;
                     }
                 }
             }

@@ -22,7 +22,7 @@ public static partial class Funding
     {
         var solved = TrySolve(
             allocationIsAllowedPerBudgetAndTreatment,
-            new() { amountPerBudget },
+            new[] { amountPerBudget },
             costPerTreatment,
             SingleYearCostPercentage,
             settings,
@@ -37,7 +37,7 @@ public static partial class Funding
 
     public static bool TrySolve(
         bool[,] allocationIsAllowedPerBudgetAndTreatment,
-        List<decimal[]> amountPerBudgetPerYear,
+        decimal[][] amountPerBudgetPerYear,
         decimal[] costPerTreatment,
         decimal[] costPercentagePerYear,
         Settings settings,
@@ -70,12 +70,12 @@ public static partial class Funding
             throw new ArgumentNullException(nameof(settings));
         }
 
-        if (amountPerBudgetPerYear.Count != costPercentagePerYear.Length)
+        if (amountPerBudgetPerYear.Length != costPercentagePerYear.Length)
         {
             throw new ArgumentException("Inconsistent input sizes (number of years).");
         }
 
-        var numberOfYears = amountPerBudgetPerYear.Count;
+        var numberOfYears = amountPerBudgetPerYear.Length;
 
         if (numberOfYears == 0)
         {
@@ -124,7 +124,7 @@ public static partial class Funding
 
         if (!settings.UnlimitedSpending)
         {
-            for (var y = 0; y < amountPerBudgetPerYear.Count; ++y)
+            for (var y = 0; y < amountPerBudgetPerYear.Length; ++y)
             {
                 var amountPerBudget = amountPerBudgetPerYear[y];
                 for (var b = 0; b < amountPerBudget.Length; ++b)

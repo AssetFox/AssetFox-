@@ -1051,10 +1051,8 @@ public sealed class SimulationRunner
                     .Add(new(year + y, costPercentage));
             }
 
-            var amountPerBudgetPerYear = new List<decimal[]>(costPercentagePerYear.Length)
-                {
-                    amountPerBudgetOfCurrentYear
-                };
+            var amountPerBudgetPerYear = new decimal[costPercentagePerYear.Length][];
+            amountPerBudgetPerYear[0] = amountPerBudgetOfCurrentYear;
 
             for (var y = 1; y < costPercentagePerYear.Length; ++y)
             {
@@ -1071,7 +1069,7 @@ public sealed class SimulationRunner
                         .Add(new(budgetContext.Budget.Name, amount, futureYear));
                 }
 
-                amountPerBudgetPerYear.Add(amountPerBudget);
+                amountPerBudgetPerYear[y] = amountPerBudget;
             }
 
             var fundable = Funding.TrySolve(
@@ -1092,7 +1090,7 @@ public sealed class SimulationRunner
             treatmentConsideration.FundingCalculationOutput = new();
             var futureCostAllocators = new List<Action>();
 
-            for (var y = 0; y < allocationPerBudgetAndTreatmentPerYear.Count; ++y)
+            for (var y = 0; y < allocationPerBudgetAndTreatmentPerYear.Length; ++y)
             {
                 PrepareFundingCalculationOutput(
                     treatmentsToFund,

@@ -4,7 +4,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Logic;
 
 partial record FundingSolver
 {
-    private bool LP()
+    private bool LinearProgram()
     {
         // Build the LP model.
 
@@ -31,15 +31,8 @@ partial record FundingSolver
 
             totalSpendingConstraint.SetLb(0);
 
-            if (Settings.UnlimitedSpending)
-            {
-                totalSpendingConstraint.SetUb(double.PositiveInfinity);
-            }
-            else
-            {
-                var totalAmount = TotalAmountPerBudget(AmountPerBudgetPerYear, b);
-                totalSpendingConstraint.SetUb((double)totalAmount);
-            }
+            var totalAmount = TotalAmountPerBudget(AmountPerBudgetPerYear, b);
+            totalSpendingConstraint.SetUb((double)totalAmount);
         }
 
         // Create yearly constraints and variables.
@@ -56,33 +49,26 @@ partial record FundingSolver
 
                 spendingConstraint.SetLb(0);
 
-                if (Settings.UnlimitedSpending)
-                {
-                    spendingConstraint.SetUb(double.PositiveInfinity);
-                }
-                else
-                {
-                    var amount = amountPerBudget[b];
+                var amount = amountPerBudget[b];
 
-                    if (Settings.BudgetCarryoverIsAllowed)
+                if (Settings.BudgetCarryoverIsAllowed)
+                {
+                    // Incorporate each previous year's budget amount and allocation variables.
+                    for (var y0 = 0; y0 < y; ++y0)
                     {
-                        // Incorporate each previous year's budget amount and allocation variables.
-                        for (var y0 = 0; y0 < y; ++y0)
-                        {
-                            amount += AmountPerBudgetPerYear[y0][b];
+                        amount += AmountPerBudgetPerYear[y0][b];
 
-                            for (var t = 0; t < NumberOfTreatments; ++t)
+                        for (var t = 0; t < NumberOfTreatments; ++t)
+                        {
+                            if (allocationVariablesMatrix[y0, b, t] is Variable allocationVariable)
                             {
-                                if (allocationVariablesMatrix[y0, b, t] is Variable allocationVariable)
-                                {
-                                    spendingConstraint.SetCoefficient(allocationVariable, 1);
-                                }
+                                spendingConstraint.SetCoefficient(allocationVariable, 1);
                             }
                         }
                     }
-
-                    spendingConstraint.SetUb((double)amount);
                 }
+
+                spendingConstraint.SetUb((double)amount);
             }
 
             // Create treatment funding constraints.
@@ -167,7 +153,7 @@ partial record FundingSolver
             }
 
             var resultStatus = solver.Solve();
-            if (resultStatus is not Solver.ResultStatus.OPTIMAL or Solver.ResultStatus.FEASIBLE)
+            if (resultStatus is not (Solver.ResultStatus.OPTIMAL or Solver.ResultStatus.FEASIBLE))
             {
                 return false;
             }

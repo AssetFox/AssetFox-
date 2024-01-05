@@ -6,18 +6,20 @@ internal sealed partial record FundingSolver(
     decimal[] CostPerTreatment,
     decimal[] CostPercentagePerYear,
     Funding.Settings Settings,
-    List<decimal?[,]> AllocationPerBudgetAndTreatmentPerYear,
+    decimal?[][,] AllocationPerBudgetAndTreatmentPerYear,
     int NumberOfYears,
     int NumberOfBudgets,
     int NumberOfTreatments)
 {
     public bool TrySolve() =>
+        Settings.UnlimitedSpending
+        ? UnlimitedSpending() :
         NumberOfBudgets == 1
-        ? SingleBudget() :
+        ? OneBudget() :
         NumberOfTreatments == 1 && (NumberOfYears == 1 || !Settings.BudgetCarryoverIsAllowed)
-        ? SingleTreatmentWithoutCarryover() :
+        ? OneTreatmentAndNoCarryover() :
         Settings.MultipleBudgetsCanFundEachTreatment
-        ? LP() : CP();
+        ? LinearProgram() : ConstraintProgram();
 
     private static decimal TotalAmountPerBudget(IEnumerable<decimal[]> amountPerBudgetPerYear, int b)
     {
@@ -31,10 +33,51 @@ internal sealed partial record FundingSolver(
         return totalAmount;
     }
 
-    private bool SingleBudget()
-    {
-        // Degenerate case.
+    #region Degenerate cases
 
+    private bool UnlimitedSpending()
+    {
+        var firstBudgetPerTreatment = new int[NumberOfTreatments];
+        for (var t = 0; t < NumberOfTreatments; ++t)
+        {
+            var firstBudgetWasFound = false;
+
+            for (var b = 0; b < NumberOfBudgets; ++b)
+            {
+                if (AllocationIsAllowedPerBudgetAndTreatment[b, t])
+                {
+                    firstBudgetPerTreatment[t] = b;
+
+                    firstBudgetWasFound = true;
+                    break;
+                }
+            }
+
+            if (!firstBudgetWasFound)
+            {
+                return false;
+            }
+        }
+
+        for (var y = 0; y < NumberOfYears; ++y)
+        {
+            var allocationPerBudgetAndTreatment = AllocationPerBudgetAndTreatmentPerYear[y];
+            var costFraction = CostPercentagePerYear[y] / 100;
+
+            for (var t = 0; t < NumberOfTreatments; ++t)
+            {
+                var b = firstBudgetPerTreatment[t];
+                var cost = CostPerTreatment[t] * costFraction;
+
+                allocationPerBudgetAndTreatment[b, t] = cost.RoundToCent();
+            }
+        }
+
+        return true;
+    }
+
+    private bool OneBudget()
+    {
         var amountRemaining = 0m;
 
         for (var y = 0; y < NumberOfYears; ++y)
@@ -56,8 +99,7 @@ internal sealed partial record FundingSolver(
             {
                 var cost = CostPerTreatment[t] * costFraction;
 
-                if (!AllocationIsAllowedPerBudgetAndTreatment[0, t] ||
-                    cost > amountRemaining && !Settings.UnlimitedSpending)
+                if (!AllocationIsAllowedPerBudgetAndTreatment[0, t] || cost > amountRemaining)
                 {
                     return false;
                 }
@@ -71,10 +113,8 @@ internal sealed partial record FundingSolver(
         return true;
     }
 
-    private bool SingleTreatmentWithoutCarryover()
+    private bool OneTreatmentAndNoCarryover()
     {
-        // Less degenerate case.
-
         for (var y = 0; y < NumberOfYears; ++y)
         {
             var amountPerBudget = AmountPerBudgetPerYear[y];
@@ -88,7 +128,7 @@ internal sealed partial record FundingSolver(
                 if (AllocationIsAllowedPerBudgetAndTreatment[b, 0])
                 {
                     var amountAvailable = amountPerBudget[b];
-                    if (costRemaining <= amountAvailable || Settings.UnlimitedSpending)
+                    if (costRemaining <= amountAvailable)
                     {
                         allocationPerBudgetAndTreatment[b, 0] = costRemaining.RoundToCent();
                         costRemaining = 0;
@@ -109,4 +149,6 @@ internal sealed partial record FundingSolver(
 
         return true;
     }
+
+    #endregion
 }

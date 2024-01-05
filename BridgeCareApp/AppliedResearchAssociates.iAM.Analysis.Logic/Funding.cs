@@ -41,7 +41,7 @@ public static partial class Funding
         decimal[] costPerTreatment,
         decimal[] costPercentagePerYear,
         Settings settings,
-        out List<decimal?[,]> allocationPerBudgetAndTreatmentPerYear)
+        out decimal?[][,] allocationPerBudgetAndTreatmentPerYear)
     {
         // Input validation
 
@@ -175,16 +175,16 @@ public static partial class Funding
         if (!settings.UnlimitedSpending && amountPerBudgetPerYear.Select(Enumerable.Sum).Sum() < costPerTreatment.Sum())
         {
             // Trivially unsolvable.
-            allocationPerBudgetAndTreatmentPerYear = new();
+            allocationPerBudgetAndTreatmentPerYear = Array.Empty<decimal?[,]>();
             return false;
         }
 
         // Optimization
 
-        allocationPerBudgetAndTreatmentPerYear = new(numberOfYears);
+        allocationPerBudgetAndTreatmentPerYear = new decimal?[numberOfYears][,];
         for (var y = 0; y < numberOfYears; ++y)
         {
-            allocationPerBudgetAndTreatmentPerYear.Add(new decimal?[numberOfBudgets, numberOfTreatments]);
+            allocationPerBudgetAndTreatmentPerYear[y] = new decimal?[numberOfBudgets, numberOfTreatments];
         }
 
         var solver = new FundingSolver(

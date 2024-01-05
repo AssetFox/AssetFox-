@@ -108,8 +108,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         dto.LocationKeys[networkKeyAttribute]
                         )
                     {
-                        CommittedProjectId = result.Id,
-                        Id = Guid.NewGuid()
+                        CommittedProjectId = result.Id
                     };
                 }
                 else

@@ -1163,7 +1163,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
     function fillAmounts() {
         const isLastPage = pagination.page == Math.ceil(totalItems.value/pagination.rowsPerPage)
-        let budgets = currentPage.value.filter(_ => _.budgetAmounts.length < pagination.rowsPerPage);
+        let budgets = currentPage.value.filter(_ => _.budgetAmounts.length > pagination.rowsPerPage);
         let modelbudget = currentPage.value.find(_ => _.budgetAmounts.length === pagination.rowsPerPage ||
         (isLastPage && _.budgetAmounts.length == totalItems.value % pagination.rowsPerPage))
         if(!isNil(budgets) && !isNil(modelbudget)){

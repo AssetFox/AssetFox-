@@ -1019,9 +1019,7 @@ const tab = ref<any>(null);
 
 </script>
 
-<style lang="scss">
-
-@import 'vue3-advanced-query-builder/dist/styles.css';
+<style>
 
 .invalid-message {
     color: red;

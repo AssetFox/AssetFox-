@@ -95,6 +95,7 @@
                             <v-row style="padding-left: 15px; padding-top: 11px">
                               <v-textarea :rows="5" @blur="setCursorPosition" @focus="setTextareaCursorPosition"
                                           id="equation_textarea"
+                                          ref="textareaInput"
                                           no-resize outline
                                           spellcheck="false"
                                           variant="outlined"
@@ -406,7 +407,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
   const formulasList = ref<string[]>(formulas);
   let expression = shallowRef<string>('');
   const isPiecewise = ref<boolean>(false);
-  let textareaInput: HTMLTextAreaElement = {} as HTMLTextAreaElement;
+  const textareaInput: any = ref(null);
   let cursorPosition: number = 0;
   const cannotSubmit = ref<boolean>(true);
   const invalidExpressionMessage = ref('');
@@ -443,8 +444,8 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    */
   onMounted(()=>mounted())
    function mounted() {
-    textareaInput = document.getElementById('equation_textarea') as HTMLTextAreaElement;
-    // cursorPosition = textareaInput.selectionStart; broken need to fix later
+    //  cursorPosition = textareaInput.selectionStart; 
+    console.log(textareaInput.value) 
     if (hasValue(stateNumericAttributes.value)) {
       setAttributesList();
     }
@@ -557,7 +558,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    * Setter: cursorPosition
    */
    function setCursorPosition() {
-    cursorPosition = textareaInput.selectionStart;
+    cursorPosition = textareaInput.value.selectionStart;
   }
 
   /**
@@ -594,7 +595,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
         cursorPosition = output.length;
       }
     }
-    textareaInput.focus();
+    textareaInput.value.focus();
   }
 
   /**
@@ -614,7 +615,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
       expression.value = `${output}${expression.value.substr(cursorPosition)}`;
       cursorPosition = output.length;
     }
-    textareaInput.focus();
+    textareaInput.value.focus();
   }
 
   /**
@@ -622,7 +623,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    */
    function setTextareaCursorPosition() {
     setTimeout(() =>
-        textareaInput.setSelectionRange(cursorPosition, cursorPosition)
+        textareaInput.value.setSelectionRange(cursorPosition, cursorPosition)
     );
   }
 

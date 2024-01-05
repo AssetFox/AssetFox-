@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data.Mappers;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DataUnitTests;
+using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
@@ -18,8 +19,6 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Xunit;
-using System.Net.WebSockets;
-using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -263,6 +262,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Null(investmentPlanEntityAfter);
         }
 
+        // [Fact]
         [Fact(Skip = "Fails. Keeping around until related discussion is complete.")]
         public async Task FailureInASingleTest()
         {
@@ -273,7 +273,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var maintainableAssets = new List<MaintainableAsset>();
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId, TestAttributeIds.CulvDurationNId);
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"), "Test Simulation", Guid.NewGuid(), networkId);
+            // Issue here is that the code lets us create a simulation owned by a nonexistent user.
+            var nonexistentUserId = Guid.NewGuid();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"), "Test Simulation", nonexistentUserId, networkId);
             // changing the owner Id to user.Id above causes this to pass.
 
             // Arrange
@@ -376,7 +378,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var networkId = NetworkTestSetup.NetworkId;
             var simulationId = Guid.NewGuid();
             SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, networkId: networkId);
-
             var simulationEntity = TestHelper.UnitOfWork.Context.Simulation.Single(
                 s => s.Id == simulationId );
             simulationEntity.LastModifiedDate = new DateTime(2024, 1, 4);
@@ -396,5 +397,36 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var dateAfter = entityAfter.LastModifiedDate;
             DateTimeAssertions.Between(dateLowerBound, dateUpperBound, dateAfter, TimeSpan.FromSeconds(1));
         }
+
+        [Fact]
+        public void GetSimulationName_SimulationInDb_GetsName()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var simulationId = Guid.NewGuid();
+            var simulationName = RandomStrings.WithPrefix("Simulation");
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName);
+
+            var actual = TestHelper.UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
+
+            Assert.Equal(simulationName, actual);
+        }
+
+        [Fact]
+        public void SetNoTreatmentBeforeCommitted_ThenGet_True_ThenRemove_GetAgain_False()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var simulationId = Guid.NewGuid();
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+
+            TestHelper.UnitOfWork.SimulationRepo.SetNoTreatmentBeforeCommitted(simulationId);
+            var afterSet = TestHelper.UnitOfWork.SimulationRepo.GetNoTreatmentBeforeCommitted(simulationId);
+            Assert.True(afterSet);
+            TestHelper.UnitOfWork.SimulationRepo.RemoveNoTreatmentBeforeCommitted(simulationId);
+            var afterRemove = TestHelper.UnitOfWork.SimulationRepo.GetNoTreatmentBeforeCommitted(simulationId);
+            Assert.False(afterRemove);
+        }
+
     }
 }

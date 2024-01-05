@@ -11,10 +11,10 @@ using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    public class SimulationRepositoryGetSharedScenariosTests
+    public class SimulationRepositoryGetCurrentUserOrSharedScenarioTests
     {
         [Fact]
-        public async Task GetSharedScenarios_NoAdminOrSimulationAccess_SimulationInDbOwnedByDifferentUser_DoesNotGet()
+        public async Task GetCurrentUserOrSharedScenario_NoAdminOrSimulationAccess_SimulationInDbOwnedByDifferentUser_DoesNotGet()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
@@ -27,12 +27,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var networkId = NetworkTestSetup.NetworkId;
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
 
-            var sharedSimulations = TestHelper.UnitOfWork.SimulationRepo.GetSharedScenarios(false, false);
-            Assert.Empty(sharedSimulations.Where(s => s.Id == simulationId));
+            var actual = TestHelper.UnitOfWork.SimulationRepo.GetCurrentUserOrSharedScenario(simulationId, false, false);
+
+            Assert.Null(actual);
         }
 
         [Fact]
-        public async Task GetSharedScenarios_SimulationAccess_SimulationInDbOwnedByDifferentUser_Gets()
+        public async Task GetCurrentUserOrSharedScenario_SimulationAccess_SimulationInDbOwnedByDifferentUser_Gets()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
@@ -44,15 +45,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var networkId = NetworkTestSetup.NetworkId;
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
 
-            var sharedSimulations = TestHelper.UnitOfWork.SimulationRepo.GetSharedScenarios(false, true);
+            var actual = TestHelper.UnitOfWork.SimulationRepo.GetCurrentUserOrSharedScenario(simulationId, false, true);
 
-            var sharedSimulation = sharedSimulations.SingleOrDefault(s => s.Id == simulationId);
             var simulationAnotherWay = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
-            ObjectAssertions.Equivalent(simulationAnotherWay, sharedSimulation);
+            ObjectAssertions.Equivalent(simulationAnotherWay, actual);
         }
 
         [Fact]
-        public async Task GetSharedScenarios_AdminAccess_SimulationInDbOwnedByDifferentUser_Gets()
+        public async Task GetCurrentUserOrSharedScenario_AdminAccess_SimulationInDbOwnedByDifferentUser_Gets()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
@@ -64,15 +64,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var networkId = NetworkTestSetup.NetworkId;
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
 
-            var sharedSimulations = TestHelper.UnitOfWork.SimulationRepo.GetSharedScenarios(true, false);
+            var actual = TestHelper.UnitOfWork.SimulationRepo.GetCurrentUserOrSharedScenario(simulationId, true, false);
 
-            var sharedSimulation = sharedSimulations.SingleOrDefault(s => s.Id == simulationId);
             var simulationAnotherWay = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
-            ObjectAssertions.Equivalent(simulationAnotherWay, sharedSimulation);
+            ObjectAssertions.Equivalent(simulationAnotherWay, actual);
         }
 
         [Fact]
-        public async Task GetSharedScenarios_UserIsOwner_DoesNotGet()
+        public async Task GetCurrentUserOrSharedScenario_UserIsOwner_Gets()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
@@ -83,10 +82,32 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var networkId = NetworkTestSetup.NetworkId;
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user.Id, networkId);
 
-            var sharedSimulations = TestHelper.UnitOfWork.SimulationRepo.GetSharedScenarios(false, false);
+            var actual = TestHelper.UnitOfWork.SimulationRepo.GetCurrentUserOrSharedScenario(simulationId, false, false);
 
-            var sharedSimulation = sharedSimulations.SingleOrDefault(s => s.Id == simulationId);
-            Assert.Null(sharedSimulation);
+            var simulationAnotherWay = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            ObjectAssertions.Equivalent(simulationAnotherWay, actual);
+        }
+
+        [Fact]
+        public async Task GetCurrentUserOrSharedScenario_UserIsUserOfSimulation_Gets()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var user1 = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var user2 = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            TestHelper.UnitOfWork.SetUser(user2.Username);
+            var simulationId = Guid.NewGuid();
+            var simulationName = RandomStrings.WithPrefix("Simulation");
+            var networkId = NetworkTestSetup.NetworkId;
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
+            var simulationUser = SimulationUserDtos.Dto(user2.Id, user2.Username);
+            simulation.Users.Add(simulationUser);
+            TestHelper.UnitOfWork.SimulationRepo.UpdateSimulationAndPossiblyUsers(simulation);
+
+            var actual = TestHelper.UnitOfWork.SimulationRepo.GetCurrentUserOrSharedScenario(simulationId, false, false);
+
+            var simulationAnotherWay = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            ObjectAssertions.Equivalent(simulationAnotherWay, actual);
         }
     }
 }

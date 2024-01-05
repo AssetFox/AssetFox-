@@ -31,16 +31,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                           throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public void CreateSimulation(Simulation simulation)
-        {
-            if (!_unitOfWork.Context.Network.Any(_ => _.Id == simulation.Network.Id))
-            {
-                throw new RowNotInTableException("The specified network was not found.");
-            }
-
-            _unitOfWork.Context.AddEntity(simulation.ToEntity(), _unitOfWork.UserEntity?.Id);
-        }
-
         public SimulationCloningResultDTO CreateSimulation(CompleteSimulationDTO completeSimulationDTO, string keyAttribute, SimulationCloningCommittedProjectErrors simulationCloningCommittedProjectErrors, BaseEntityProperties baseEntityProperties)
         {
             var attributes = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
@@ -60,20 +50,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 WarningMessage = warningMessage,
             };
             return cloningResult;
-        }
-
-        public void GetAllInNetwork(Network network)
-        {
-            if (!_unitOfWork.Context.Network.Any(_ => _.Id == network.Id))
-            {
-                throw new RowNotInTableException("The specified network was not found.");
-            }
-
-            var entities = _unitOfWork.Context.Simulation.Where(_ => _.NetworkId == network.Id).ToList();
-
-            // "GetAllInNetwork" is only getting used in testing. Therefore, passing DateTime.Now,
-            // instead of actual date
-            entities.ForEach(_ => _.CreateSimulation(network, DateTime.Now, DateTime.Now));
         }
 
         public List<SimulationDTO> GetAllScenario()

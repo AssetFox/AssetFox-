@@ -2,11 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Data.Mappers;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataUnitTests;
+using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
@@ -19,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class SimulationRepositoryTests
     {
-                       
+
         private async Task<UserDTO> AddTestUser()
         {
             var randomName = RandomStrings.Length11();
@@ -28,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return returnValue;
         }
 
-        [Fact] 
+        [Fact]
         public void DeleteSimulation_Does()
         {
             SimulationRepositoryTestSetup.Setup();
@@ -57,14 +62,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             ObjectAssertions.Equivalent(simulationFromRepo, retrievedSimulation);
         }
 
-        [Fact]
-        public void GetSharedScenarios_DoesNotThrow()
-        {
-            // Arrange
-            SimulationRepositoryTestSetup.Setup();
 
-            var result = TestHelper.UnitOfWork.SimulationRepo.GetSharedScenarios(true, true);
-        }
 
         [Fact]
         public void GetSimulationNameOrId_SimulationNotInDb_GetsId()
@@ -74,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Contains(simulationId.ToString(), nameOrId);
         }
 
-        
+
         [Fact]
         public async Task CreateSimulation_Does()
         {
@@ -199,7 +197,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             ObjectAssertions.Equivalent(dtoBefore, dtoAfter);
             Assert.NotEqual(updateDto.Name, dtoAfter.Name);
         }
-      
+
 
         [Fact]
         public void SimulationInDbWithBudgetAndAmount_Delete_DeletesAll()
@@ -253,7 +251,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.NotNull(budgetPriorityEntityBefore);
             unitOfWork.Context.SaveChanges();
 
-           unitOfWork.SimulationRepo.DeleteSimulation(simulationId);
+            unitOfWork.SimulationRepo.DeleteSimulation(simulationId);
 
             unitOfWork.Context.ChangeTracker.Clear();
             var budgetAmountEntityAfter = TestHelper.UnitOfWork.Context.ScenarioBudgetAmount.SingleOrDefault(ba => ba.Id == budgetAmountId);
@@ -264,7 +262,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Null(investmentPlanEntityAfter);
         }
 
-        [Fact (Skip ="Fails. Keeping around until related discussion is complete.")]
+        // [Fact]
+        [Fact(Skip = "Fails. Keeping around until related discussion is complete.")]
         public async Task FailureInASingleTest()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
@@ -274,7 +273,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var maintainableAssets = new List<MaintainableAsset>();
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId, TestAttributeIds.CulvDurationNId);
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"), "Test Simulation", Guid.NewGuid(), networkId);
+            // Issue here is that the code lets us create a simulation owned by a nonexistent user.
+            var nonexistentUserId = Guid.NewGuid();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"), "Test Simulation", nonexistentUserId, networkId);
             // changing the owner Id to user.Id above causes this to pass.
 
             // Arrange
@@ -283,7 +284,149 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             // Act
             //  TestHelper.UnitOfWork.SimulationRepo.DeleteSimulation(simulation.Id);
             TestHelper.UnitOfWork.SimulationRepo.DeleteSimulation(simulation2.Id);
-
         }
+
+        [Fact]
+        public void GetSimulationInNetwork_Does()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            CalculatedAttributeTestSetup.CreateDefaultCalculatedAttributeLibrary(TestHelper.UnitOfWork);
+            var config = TestConfiguration.Get();
+            var connectionString = TestConnectionStrings.BridgeCare(config);
+            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(TestHelper.UnitOfWork, connectionString);
+            var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
+            var districtAttribute = AttributeDtoDomainMapper.ToDto(districtAttributeDomain, dataSourceDto);
+            UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
+            var networkName = RandomStrings.WithPrefix("Network");
+            var assetList = new List<MaintainableAsset>();
+            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, assetList);
+            var simulationId = Guid.NewGuid();
+            var simulationName = RandomStrings.WithPrefix("Simulation");
+            var simulationDto = new SimulationDTO
+            {
+                Id = simulationId,
+                NetworkId = network.Id,
+                Name = simulationName,
+            };
+            TestHelper.UnitOfWork.SimulationRepo.CreateSimulation(network.Id, simulationDto);
+            SimulationAnalysisDetailTestSetup.CreateAnalysisDetail(TestHelper.UnitOfWork, simulationId);
+            var explorer = TestHelper.UnitOfWork.AttributeRepo.GetExplorer();
+            var analysisNetwork = TestHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(
+                network.Id, explorer);
+            var simulationsBefore = analysisNetwork.Simulations.ToList();
+            Assert.Empty(simulationsBefore);
+
+            TestHelper.UnitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, analysisNetwork);
+
+            var simulationsAfter = analysisNetwork.Simulations.ToList();
+            var simulationAfter = simulationsAfter.Single();
+            Assert.Equal(simulationId, simulationAfter.Id);
+        }
+
+        [Fact]
+        public void GetScenariosWithIds_SimulationExists_Gets()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var simulationId = Guid.NewGuid();
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, networkId: networkId);
+            var simulationIds = new List<Guid> { simulationId };
+
+            var simulations = TestHelper.UnitOfWork.SimulationRepo.GetScenariosWithIds(simulationIds);
+
+            Assert.Single(simulations);
+        }
+
+        [Fact]
+        public void DeleteSimulationsByNetworkId_NetworkInDbWithSimulations_Deletes()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var simulationId = Guid.NewGuid();
+            var simulationIds = new List<Guid> { simulationId };
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, networkId: networkId);
+            var simulationsBefore = TestHelper.UnitOfWork.SimulationRepo.GetScenariosWithIds(simulationIds);
+            Assert.NotEmpty(simulationsBefore);
+
+            TestHelper.UnitOfWork.SimulationRepo.DeleteSimulationsByNetworkId(networkId);
+
+            var simulationsAfter = TestHelper.UnitOfWork.SimulationRepo.GetScenariosWithIds(simulationIds);
+            Assert.Empty(simulationsAfter);
+        }
+
+        [Fact]
+        public void GetScenariosWithIds_SimulationDoesNotExist_Empty()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var nonexistentSimulationId = Guid.NewGuid();
+            var simulationIds = new List<Guid> { nonexistentSimulationId };
+
+            var simulations = TestHelper.UnitOfWork.SimulationRepo.GetScenariosWithIds(simulationIds);
+
+            Assert.Empty(simulations);
+        }
+
+        [Fact]
+        public void UpdateLastModifiedDate_SimulationInDb_Updates()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var networkId = NetworkTestSetup.NetworkId;
+            var simulationId = Guid.NewGuid();
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, networkId: networkId);
+            var simulationEntity = TestHelper.UnitOfWork.Context.Simulation.Single(
+                s => s.Id == simulationId );
+            simulationEntity.LastModifiedDate = new DateTime(2024, 1, 4);
+            TestHelper.UnitOfWork.Context.Update(simulationEntity);
+            TestHelper.UnitOfWork.Context.SaveChanges();
+            var entityBefore = TestHelper.UnitOfWork.Context.Simulation.Single(
+                s => s.Id == simulationId);
+            var dateBefore = entityBefore.LastModifiedDate;
+            Assert.Equal(new DateTime(2024, 1, 4), dateBefore);
+            var dateLowerBound = DateTime.Now;
+
+            TestHelper.UnitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+
+            var dateUpperBound = DateTime.Now;
+            var entityAfter = TestHelper.UnitOfWork.Context.Simulation.Single(
+               s => s.Id == simulationId);
+            var dateAfter = entityAfter.LastModifiedDate;
+            DateTimeAssertions.Between(dateLowerBound, dateUpperBound, dateAfter, TimeSpan.FromSeconds(1));
+        }
+
+        [Fact]
+        public void GetSimulationName_SimulationInDb_GetsName()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var simulationId = Guid.NewGuid();
+            var simulationName = RandomStrings.WithPrefix("Simulation");
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName);
+
+            var actual = TestHelper.UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
+
+            Assert.Equal(simulationName, actual);
+        }
+
+        [Fact]
+        public void SetNoTreatmentBeforeCommitted_ThenGet_True_ThenRemove_GetAgain_False()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var simulationId = Guid.NewGuid();
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+
+            TestHelper.UnitOfWork.SimulationRepo.SetNoTreatmentBeforeCommitted(simulationId);
+            var afterSet = TestHelper.UnitOfWork.SimulationRepo.GetNoTreatmentBeforeCommitted(simulationId);
+            Assert.True(afterSet);
+            TestHelper.UnitOfWork.SimulationRepo.RemoveNoTreatmentBeforeCommitted(simulationId);
+            var afterRemove = TestHelper.UnitOfWork.SimulationRepo.GetNoTreatmentBeforeCommitted(simulationId);
+            Assert.False(afterRemove);
+        }
+
     }
 }

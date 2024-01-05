@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing.Text;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.TestHelpers;
-using Microsoft.Extensions.DependencyModel;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes
 {
@@ -37,21 +32,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.Calculate
                 }
             }
         }
-        public static CalculatedAttributeLibraryDTO TestCalculatedAttributeLibraryDto(Guid libraryId)
-        {
-            var randomName = RandomStrings.WithPrefix("CalcAttr");
-            var calcAttr = new CalculatedAttributeLibraryDTO
-            {
-                Id = libraryId,
-                Name = randomName,
-                Description = "test library"
-            };
-            return calcAttr;
-        }
 
         public static CalculatedAttributeLibraryDTO TestCalculatedAttributeLibraryInDb(IUnitOfWork unitOfWork, Guid libraryId)
         {
-            var calcAttrLibrary = TestCalculatedAttributeLibraryDto(libraryId);
+            var calcAttrLibrary = CalculatedAttributeLibraryDtos.Dto(libraryId);
             unitOfWork.CalculatedAttributeRepo.UpsertCalculatedAttributeLibrary(calcAttrLibrary);
             var calcAttrsFromDb = unitOfWork.CalculatedAttributeRepo.GetCalculatedAttributeLibraryByID(libraryId);
             return calcAttrsFromDb;
@@ -67,20 +51,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.Calculate
                     Id = Guid.NewGuid(),
                     Expression = $"[{attributeName}]"
                 }
-            }; 
+            };
             var calcAttr = new CalculatedAttributeDTO
             {
                 Id = calcAttrId,
                 Attribute = attributeName,
                 CalculationTiming = 0,
-                Equations = new List<CalculatedAttributeEquationCriteriaPairDTO>() {pair}
+                Equations = new List<CalculatedAttributeEquationCriteriaPairDTO>() { pair }
             };
             return calcAttr;
         }
 
         public static CalculatedAttributeDTO TestCalculatedAttributeDtoWithEquationCriterionLibrary(Guid calcAttrId, string attributeName, string mergeCriterionExpression = "mergeCriteriaExpression")
         {
-            var criterionLibrary = CriterionLibraryDtos.Dto(null,mergeCriterionExpression);
+            var criterionLibrary = CriterionLibraryDtos.Dto(null, mergeCriterionExpression);
             var pair = new CalculatedAttributeEquationCriteriaPairDTO()
             {
                 Id = Guid.NewGuid(),

@@ -27,7 +27,7 @@ namespace BridgeCareCore.Security
 
                 string responseText;
                 // Set status code to forbidden
-                if (path.Value != null && path.Value.Contains("GetHasPermittedAccess"))
+                if (path.Value != null && (path.Value.Contains("GetHasPermittedAccess") || path.Value.Contains("GetHasAdminAccess")))
                 {
                     context.Response.StatusCode = StatusCodes.Status200OK;
                     responseText = "false";

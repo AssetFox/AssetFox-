@@ -89,7 +89,8 @@
                                             variant="underlined"
                                             class='sm-txt'
                                             :model-value="item.item[header.key]"
-                                            :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                            :rules="[rules['generalRules'].valueIsNotEmpty]" 
+                                            />
                                         <v-text-field style="width: 75px;"
                                             v-else readonly single-line class='sm-txt'
                                             variant="underlined"
@@ -99,7 +100,7 @@
                                             <v-text-field v-if="header.key === 'priorityLevel'" label='Edit' single-line
                                                         v-model.number='item.item[header.key]'
                                                         :mask="'##########'"
-                                                        :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotUnique(item.item[header.key], currentPriorityList)]" />
+                                                        :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                             <v-text-field v-else label='Edit' single-line :mask="'####'"
                                                         v-model.number='item.item[header.key]' />
                                         </template>

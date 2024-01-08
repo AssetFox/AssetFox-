@@ -249,7 +249,7 @@
             <v-footer app color ="#00204B"  fixed>
                 <v-spacer></v-spacer>
                     <div class="dev-and-ver-div" style="display: flex; align-items: center">
-                    <div>iAM</div> &nbsp;
+                    <div>AssetFox</div> &nbsp;
                     <div>{{implementationName}}</div> &nbsp;
                     <div>{{packageVersionEnv}}</div>
                     </div>

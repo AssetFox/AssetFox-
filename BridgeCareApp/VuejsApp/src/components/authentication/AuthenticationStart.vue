@@ -83,7 +83,7 @@ import config from '@/../public/config.json';
         // The 'state' query parameter that is sent to ESEC will be sent back to
         // the /Authentication page of the iam-deploy app.
         if (import.meta.env.VITE_APP_IS_PRODUCTION !== 'true') {
-            href += '&state=localhost' + import.meta.env.PORT;
+            href += '&state=localhost' + "8080";
         }
 
         window.location.href = href;

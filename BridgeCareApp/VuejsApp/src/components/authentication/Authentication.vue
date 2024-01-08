@@ -16,29 +16,29 @@
 
 <script setup lang="ts">
     import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
-    import Vue, { onMounted, ref } from 'vue';
+    import Vue, { computed, onMounted, ref } from 'vue';
     import { SecurityTypes } from '@/shared/utils/security-types';
     import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
     let store = useStore();
-    let authenticated : boolean = store.state.authenticationModule.authenticated;  
-    let hasRole: boolean = store.state.authenticationModule.hasRole;
-    let hasAdminAccess: boolean = store.state.authenticationModule.hasAdminAccess;
-    let currentUserCriteriaFilter: UserCriteriaFilter = store.state.userModule.currentUserCriteriaFilter;
+    let authenticated = computed<boolean>(() => store.state.authenticationModule.authenticated);  
+    let hasRole= computed<boolean>(() => store.state.authenticationModule.hasRole);
+    let hasAdminAccess= computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
+    let currentUserCriteriaFilter= computed<UserCriteriaFilter>(() => store.state.userModule.currentUserCriteriaFilter);
     let securityType: string = store.state.authenticationModule.securityType;
 
     async function setSuccessMessageAction(payload?: any): Promise<any> {await store.dispatch('setSuccessMessage');}
     async function setErrorMessageAction(payload?: any): Promise<any> {await store.dispatch('setErrorMessage');}
-    async function getUserTokensAction(payload?: any): Promise<any> {await store.dispatch('getUserTokens');}
+    async function getUserTokensAction(payload?: any): Promise<any> {await store.dispatch('getUserTokens', payload);}
     async function getUserInfoAction(payload?: any): Promise<any> {await store.dispatch('getUserInfo');}
     async function getAzureAccountDetailsAction(payload?: any): Promise<any> {await store.dispatch('getAzureAccountDetails');}
     async function getUserCriteriaFilterAction(payload?: any): Promise<any> {await store.dispatch('getUserCriteriaFilter');}
-    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
+    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
 
     const $router = useRouter();
 
-    onMounted(() => mounted);
+    onMounted(() => mounted());
     function mounted() {
         const code: string = $router.currentRoute.value.query.code as string;
         const state: string = $router.currentRoute.value.query.state as string;
@@ -47,18 +47,18 @@ import { useRouter } from 'vue-router';
             // The ESEC login will always redirect the browser to the iam-deploy site.
             // If the state is set, we know the authentication was started by a local client,
             // and so we should send the browser back to that client.
-            if (state === 'localhost' + import.meta.env.PORT) {
-                window.location.href = `http://localhost:${import.meta.env.PORT}/Authentication/?code=${code}`;
+            if (state === 'localhost8080') {
+                window.location.href = `http://localhost:8080/Authentication/?code=${code}`;
                 return;
             }
 
-            getUserTokensAction(code).then(() => {
-                if (!authenticated) {
+            getUserTokensAction({ code: code }).then(() => {
+                if (!authenticated.value) {
                     onAuthenticationFailure();
                 } else {
                     getUserInfoAction().then(() => {
                         getUserCriteriaFilterAction().then(() => {
-                            if (!hasRole || (!currentUserCriteriaFilter.hasAccess && !hasAdminAccess)) {
+                            if (!hasRole.value || (!currentUserCriteriaFilter.value.hasAccess && !hasAdminAccess.value)) {
                                 onRoleFailure();
                             } else {
                                 onAuthenticationSuccess();
@@ -69,9 +69,10 @@ import { useRouter } from 'vue-router';
             });
         }
 
+        //Is this deprecated???
         if (securityType === SecurityTypes.b2c) {
             getAzureAccountDetailsAction();
-            if (!authenticated) {
+            if (!authenticated.value) {
                 onAuthenticationFailure();
             } else {
                 onAuthenticationSuccess();

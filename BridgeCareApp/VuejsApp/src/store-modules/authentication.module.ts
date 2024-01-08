@@ -50,8 +50,8 @@ const mutations = {
 };
 
 const actions = {
-    async getUserTokens({ commit }: any, code: string) {
-        await AuthenticationService.getUserTokens(code).then(
+    async getUserTokens({ commit }: any, payload: any) {
+        await AuthenticationService.getUserTokens(payload.code).then(
             (response: AxiosResponse) => {
                 const expirationInMilliseconds = moment().add(30, 'minutes');
                 if (

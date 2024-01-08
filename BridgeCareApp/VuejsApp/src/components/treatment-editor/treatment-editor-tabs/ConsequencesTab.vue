@@ -39,8 +39,6 @@
 
                             <v-menu
                                 location="left"
-                                min-height="500px"
-                                min-width="500px"
                                 v-if="header.key === 'equation'"
                             >
                                 <template v-slot:activator="{ props }">
@@ -60,6 +58,7 @@
                                             outline
                                             readonly
                                             rows="3"
+                                            style = "min-width: 500px;min-height: 205px;"
                                         />
                                     </v-card-text>
                                 </v-card>
@@ -71,8 +70,6 @@
 
                             <v-menu
                                 location="left"
-                                min-height="500px"
-                                min-width="500px"
                                 v-if="header.key === 'criterionLibrary'"
                             >
                                 <template v-slot:activator="{ props }">
@@ -93,6 +90,7 @@
                                             outline
                                             readonly
                                             rows="3"
+                                            style = "min-width: 500px;min-height: 205px;"
                                         />
                                     </v-card-text>
                                 </v-card>

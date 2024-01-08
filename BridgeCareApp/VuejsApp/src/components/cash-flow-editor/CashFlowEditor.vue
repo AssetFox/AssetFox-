@@ -123,9 +123,7 @@
                         <td>
                             <v-row align-center style='flex-wrap:nowrap'>
                                 <v-menu
-                                location="bottom"
-                                min-height="500px"
-                                min-width="500px">
+                                location="bottom">
                                 <template v-slot:activator>
                                     <v-text-field
                                     variant="underlined"
@@ -144,7 +142,8 @@
                                             no-resize
                                             outline
                                             readonly
-                                            rows="5"/>
+                                            rows="5"
+                                            style = "min-width: 500px;min-height: 205px;"/>
                                     </v-card-text>
                                 </v-card>
                             </v-menu>

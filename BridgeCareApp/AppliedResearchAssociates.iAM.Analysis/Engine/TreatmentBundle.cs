@@ -8,7 +8,7 @@ internal sealed class TreatmentBundle : Treatment
 {
     private readonly IReadOnlyList<ITreatmentScheduling> TreatmentSchedulings;
 
-    public TreatmentBundle(IEnumerable<SelectableTreatment> bundledTreatments)
+    public TreatmentBundle(IEnumerable<Treatment> bundledTreatments)
     {
         BundledTreatments = bundledTreatments?.OrderBy(t => t.Name).ToList()
             ?? throw new ArgumentNullException(nameof(bundledTreatments));
@@ -28,13 +28,13 @@ internal sealed class TreatmentBundle : Treatment
         ShadowForAnyTreatment = BundledTreatments.Max(t => t.ShadowForAnyTreatment);
 
         TreatmentSchedulings = BundledTreatments
-            .SelectMany(t => t.Schedulings)
+            .SelectMany(t => t.GetSchedulings())
             .GroupBy(s => s.OffsetToFutureYear)
             .Select(BundleScheduling.Create)
             .ToList();
     }
 
-    public IReadOnlyList<SelectableTreatment> BundledTreatments { get; }
+    public IReadOnlyList<Treatment> BundledTreatments { get; }
 
     public override IReadOnlyDictionary<NumberAttribute, double> PerformanceCurveAdjustmentFactors { get; }
 
@@ -65,7 +65,7 @@ internal sealed class TreatmentBundle : Treatment
                 {
                     scope.SimulationRunner.Send(new()
                     {
-                        Message = "Multiple treatments in a bundle are applying consequences to a single number attribute.",
+                        Message = $"Multiple treatments in a bundle are applying consequences to a single number attribute ({g.Key.Name}).",
                         SimulationId = scope.SimulationRunner.Simulation.Id,
                         Status = DTOs.Enums.SimulationLogStatus.Warning,
                         Subject = DTOs.Enums.SimulationLogSubject.Calculation,
@@ -81,7 +81,7 @@ internal sealed class TreatmentBundle : Treatment
                 {
                     scope.SimulationRunner.Send(new()
                     {
-                        Message = "Multiple treatments in a bundle are applying consequences to a single non-number attribute.",
+                        Message = $"Multiple treatments in a bundle are applying consequences to a single non-number attribute ({g.Key.Name}).",
                         SimulationId = scope.SimulationRunner.Simulation.Id,
                         Status = DTOs.Enums.SimulationLogStatus.Fatal,
                         Subject = DTOs.Enums.SimulationLogSubject.Calculation,
@@ -100,7 +100,7 @@ internal sealed class TreatmentBundle : Treatment
 
     private sealed record BundleScheduling(int OffsetToFutureYear, Treatment TreatmentToSchedule) : ITreatmentScheduling
     {
-        public static BundleScheduling Create(IGrouping<int, TreatmentScheduling> g)
+        public static BundleScheduling Create(IGrouping<int, ITreatmentScheduling> g)
             => new(g.Key, new TreatmentBundle(g.Select(s => s.TreatmentToSchedule)));
     }
 }

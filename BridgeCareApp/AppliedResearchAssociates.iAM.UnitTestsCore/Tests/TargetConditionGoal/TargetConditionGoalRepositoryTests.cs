@@ -4,6 +4,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Common;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -387,6 +388,43 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var libraries = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalLibrariesNoChildrenAccessibleToUser(user.Id);
 
             Assert.DoesNotContain(libraries, l => l.Id == library.Id);
+        }
+
+        [Fact]
+        public async Task GetLibraryAccess_UserHasLibraryAccess_Gets()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = TargetConditionGoalLibraryTestSetup.ModelForEntityInDbWithSingleGoal(TestHelper.UnitOfWork);
+            TargetConditionGoalLibraryUserTestSetup.SetUsersOfTargetConditionGoalLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
+
+            var access = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetLibraryAccess(library.Id, user.Id);
+
+            var returnedAccess = access.Access;
+            var expected = new LibraryUserDTO
+            {
+                AccessLevel = LibraryAccessLevel.Modify,
+                UserId = user.Id,
+                UserName = user.Username,
+            };
+            ObjectAssertions.Equivalent(expected, returnedAccess);
+        }
+
+
+        [Fact]
+        public async Task GetLibraryAccess_UserDoesNotHaveAccess_Gets()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = TargetConditionGoalLibraryTestSetup.ModelForEntityInDbWithSingleGoal(TestHelper.UnitOfWork);
+
+            var access = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetLibraryAccess(library.Id, user.Id);
+
+            var expected = new LibraryUserAccessModel
+            {
+                Access = null,
+                UserId = user.Id,
+                LibraryExists = true,
+            };
+            ObjectAssertions.Equivalent(expected, access);
         }
     }
 }

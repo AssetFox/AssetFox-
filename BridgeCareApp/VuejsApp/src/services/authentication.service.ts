@@ -21,4 +21,8 @@ export default class AuthenticationService {
     static revokeIdToken(): AxiosPromise {
         return coreAxiosInstance.post(`${API.Authentication}/RevokeToken/Id`, null);
     }
+
+    static getHasAdminAccess(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Authentication}/GetHasAdminAccess`);
+    }
 }

@@ -1,5 +1,4 @@
-﻿using Google.OrTools.ConstraintSolver;
-using Google.OrTools.Sat;
+﻿using Google.OrTools.Sat;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Logic;
 

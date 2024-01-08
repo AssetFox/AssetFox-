@@ -22,13 +22,14 @@
                                                 :model-value='parseFloat(props.item.performanceFactor).toFixed(2)'
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                                     <template v-slot:input>
-                                        <v-select v-if="header.key === 'attribute'" variant="underlined" :items='attributeSelectItems'
+                                        <v-text-field v-if="header.key === 'attribute'" variant="underlined" :items='attributeSelectItems'
                                                 menu-icon=custom:GhdDownSvg
                                                 label='Edit'
                                                 item-title="text"
                                                 item-value="value" 
                                                 v-model='props.item.attribute'
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                                :rules="[rules['generalRules'].valueIsNotEmpty]"
+                                                readonly />
                                         <v-text-field v-if="header.key === 'performanceFactor'" variant="underlined" label='Edit' single-line maxLength="5"
                                                     v-model='props.item.performanceFactor'
                                                     :rules="[rules['generalRules'].valueIsNotEmpty]" />

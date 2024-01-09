@@ -107,7 +107,7 @@
         </v-col>
         <!-- Default Equation -->
         <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
-            <v-subheader style="margin-left: 400px" class="ghd-md-gray ghd-control-label">Default Equation</v-subheader>
+            <v-subheader style="margin-left: 450px" class="ghd-md-gray ghd-control-label">Default Equation</v-subheader>
             <v-row justify-center>
                 <v-col cols = "8">
                     <v-row column>

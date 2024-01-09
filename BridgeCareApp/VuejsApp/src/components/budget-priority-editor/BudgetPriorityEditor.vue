@@ -1071,6 +1071,7 @@ import { faL } from '@fortawesome/free-solid-svg-icons';
     color: red;
     text-align: center;
     margin-bottom: 10px;
+    margin-top: -15px;
 }
 
 .priorities-data-table .v-menu--inline, .priority-criteria-output {

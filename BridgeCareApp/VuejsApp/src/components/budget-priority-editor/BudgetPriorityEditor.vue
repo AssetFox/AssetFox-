@@ -896,7 +896,7 @@ import { faL } from '@fortawesome/free-solid-svg-icons';
         if (hasSelectedLibrary.value) {
             return !(rules['generalRules'].valueIsNotEmpty(selectedBudgetPriorityLibrary.value.name) === true && allDataIsValid);
         }
-        disableCrudButtonsResult = !allDataIsValid && hasUniquePriorityLevels();
+        disableCrudButtonsResult = !allDataIsValid && !hasUniquePriorityLevels();
         return !allDataIsValid;
     }
 

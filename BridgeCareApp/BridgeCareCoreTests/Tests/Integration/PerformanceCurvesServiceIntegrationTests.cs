@@ -28,7 +28,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
             var simulationName = RandomStrings.WithPrefix("Simulation");
-            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName);
+            SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName);
             var service = CreatePerformanceCurvesService();
 
             var fileInfo = service.ExportScenarioPerformanceCurvesFile(simulationId);
@@ -44,7 +44,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
             var simulationName = RandomStrings.WithPrefix("Simulation");
-            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName);
+            SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName);
             var curveId = Guid.NewGuid();
             var curve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork,
                 simulationId, curveId, equation: "[AGE]");

@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
-            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var dto = SimulationReportDetailDtos.Dto(simulationId);
 
             TestHelper.UnitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);

@@ -85,7 +85,7 @@ namespace BridgeCareCoreTests.Tests
         {
             var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
             var goal = TestScenarioDeficientConditionGoal(goalId);
-            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             goal.AttributeId = attribute.Id;
             goal.SimulationId = simulationId;
             goal.Attribute = attribute;

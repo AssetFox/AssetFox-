@@ -91,7 +91,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
         {
             // Arrange
             Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var dtos = new List<CashFlowRuleDTO>();
             // Act
             TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteScenarioCashFlowRules(dtos, simulation.Id);
@@ -130,7 +130,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
         {
             // Arrange
             Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var scenarioRule = CreateScenarioTestData(simulation.Id);
 
             // Act
@@ -191,7 +191,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
         {
             // Arrange
             Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var scenarioRule = CreateScenarioTestData(simulation.Id);
             var scenarioDto = scenarioRule.ToDto();
             scenarioDto.Name = "Updated Name";
@@ -217,7 +217,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
         {
             // Arrange
             Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var scenarioRule = CreateScenarioTestData(simulation.Id);
             var scenarioDto = scenarioRule.ToDto();
             scenarioDto.Name = "Updated Name";

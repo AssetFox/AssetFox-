@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             var simulationName = RandomStrings.WithPrefix("Simulation");
             var networkId = NetworkTestSetup.NetworkId;
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
 
             var actual = TestHelper.UnitOfWork.SimulationRepo.GetCurrentUserOrSharedScenario(simulationId, false, false);
 
@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulationId = Guid.NewGuid();
             var simulationName = RandomStrings.WithPrefix("Simulation");
             var networkId = NetworkTestSetup.NetworkId;
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
 
             var actual = TestHelper.UnitOfWork.SimulationRepo.GetCurrentUserOrSharedScenario(simulationId, false, true);
 
@@ -62,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulationId = Guid.NewGuid();
             var simulationName = RandomStrings.WithPrefix("Simulation");
             var networkId = NetworkTestSetup.NetworkId;
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
 
             var actual = TestHelper.UnitOfWork.SimulationRepo.GetCurrentUserOrSharedScenario(simulationId, true, false);
 
@@ -80,7 +80,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulationId = Guid.NewGuid();
             var simulationName = RandomStrings.WithPrefix("Simulation");
             var networkId = NetworkTestSetup.NetworkId;
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user.Id, networkId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName, user.Id, networkId);
 
             var actual = TestHelper.UnitOfWork.SimulationRepo.GetCurrentUserOrSharedScenario(simulationId, false, false);
 
@@ -99,7 +99,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulationId = Guid.NewGuid();
             var simulationName = RandomStrings.WithPrefix("Simulation");
             var networkId = NetworkTestSetup.NetworkId;
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
             var simulationUser = SimulationUserDtos.Dto(user2.Id, user2.Username);
             simulation.Users.Add(simulationUser);
             TestHelper.UnitOfWork.SimulationRepo.UpdateSimulationAndPossiblyUsers(simulation);

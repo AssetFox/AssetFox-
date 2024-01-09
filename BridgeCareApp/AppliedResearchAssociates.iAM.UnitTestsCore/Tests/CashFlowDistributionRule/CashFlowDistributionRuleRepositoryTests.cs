@@ -45,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var ruleId = Guid.NewGuid();
             var scenarioRule = CashFlowRuleDtos.Rule(ruleId);
             var scenarioRules = new List<CashFlowRuleDTO> { scenarioRule };

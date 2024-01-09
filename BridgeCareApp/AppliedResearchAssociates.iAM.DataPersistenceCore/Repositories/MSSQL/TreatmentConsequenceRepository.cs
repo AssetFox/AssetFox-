@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public List<TreatmentConsequenceDTO> GetScenarioTreatmentConsequencesByTreatmentId(Guid treatmentId)
         {
-            if (!_unitOfWork.Context.ScenarioConditionalTreatmentConsequences.Any(_ => _.Id == treatmentId))
+            if (!_unitOfWork.Context.ScenarioSelectableTreatment.Any(_ => _.Id == treatmentId))
             {
                 throw new RowNotInTableException("The specified scenario treamtment was not found");
             }
@@ -40,12 +40,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public List<TreatmentConsequenceDTO> GetTreatmentConsequencesByTreatmentId(Guid treatmentId)
         {
-            if (!_unitOfWork.Context.TreatmentConsequence.Any(_ => _.Id == treatmentId))
+            if (!_unitOfWork.Context.SelectableTreatment.Any(_ => _.Id == treatmentId))
             {
                 throw new RowNotInTableException("The specified treamtment was not found");
             }
 
             return _unitOfWork.Context.TreatmentConsequence
+                .Where(tc => tc.SelectableTreatmentId == treatmentId)
                 .Include(_ => _.Attribute)
                 .Include(_ => _.ConditionalTreatmentConsequenceEquationJoin)
                 .ThenInclude(_ => _.Equation)

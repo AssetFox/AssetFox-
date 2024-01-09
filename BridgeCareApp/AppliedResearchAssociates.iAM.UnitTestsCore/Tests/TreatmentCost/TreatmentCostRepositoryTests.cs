@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
 
@@ -71,7 +72,28 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentCost
 
             var costsAfter = TestHelper.UnitOfWork.TreatmentCostRepo.GetTreatmentCostByTreatmentId(treatmentId);
             var costAfter = costsAfter.Single();
-            ObjectAssertions.EquivalentExcluding(treatmentCost, costAfter, tc => tc.CriterionLibrary.Name, tc => tc.CriterionLibrary.Id, tc => tc.Equation.Id);
+            ObjectAssertions.EquivalentExcluding(treatmentCost, costAfter, tc => tc.CriterionLibrary.Name, tc => tc.CriterionLibrary.Id, tc => tc.CriterionLibrary.Owner, tc => tc.Equation.Id);
+        }
+
+        [Fact]
+        public void GetTreatmentCostByScenarioTreatmentId_ScenarioTreatmentInDbWithCosts_Gets()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var simulationId = Guid.NewGuid();
+            SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, networkId: NetworkTestSetup.NetworkId);
+            var treatmentId = Guid.NewGuid();
+            TreatmentTestSetup.ModelForSingleTreatmentOfSimulationInDb(TestHelper.UnitOfWork, simulationId, treatmentId);
+            var treatmentCost = ScenarioTreatmentCostTestSetup.CostForTreatmentInDb(TestHelper.UnitOfWork, treatmentId, simulationId);
+
+            var treatmentCosts = TestHelper.UnitOfWork.TreatmentCostRepo.GetTreatmentCostByScenarioTreatmentId(treatmentId);
+
+            var actual = treatmentCosts.Single();
+            ObjectAssertions.EquivalentExcluding(treatmentCost, actual,
+                tc => tc.CriterionLibrary.Id,
+                tc => tc.CriterionLibrary.Name,
+                tc => tc.CriterionLibrary.Owner,
+                tc => tc.Equation.Id);
         }
     }
 }

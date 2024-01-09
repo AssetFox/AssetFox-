@@ -13,9 +13,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpsertOrDeleteScenarioTreatmentCosts(Dictionary<Guid, List<TreatmentCostDTO>> scenarioTreatmentCostPerTreatmentId,
             Guid SimulationId);
 
-        List<TreatmentCostDTO> GetTreatmentCostByScenariotreatmentId(Guid treatmentId);
+        List<TreatmentCostDTO> GetTreatmentCostByScenarioTreatmentId(Guid treatmentId); // unused except for tests 1/9/24
 
-        List<TreatmentCostDTO> GetTreatmentCostByTreatmentId(Guid treatmentId);
+        List<TreatmentCostDTO> GetTreatmentCostByTreatmentId(Guid treatmentId);  // unused except for tests 1/9/24
         List<TreatmentCostDTO> GetTreatmentCostsWithEquationJoinsByLibraryIdAndTreatmentName(Guid treatmentLibraryId, string treatmentName);
     }
 }

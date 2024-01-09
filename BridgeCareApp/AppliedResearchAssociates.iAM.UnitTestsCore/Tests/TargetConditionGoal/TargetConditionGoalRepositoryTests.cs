@@ -111,7 +111,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             SetupAttributesAndNetwork();
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
             var libraryDto = SetupLibraryForGet();
             var attribute = AttributeDtos.CulvDurationN;
@@ -137,7 +137,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             SetupAttributesAndNetwork();
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
             var library = SetupLibraryForGet();
             library.Description = "Updated Description";
@@ -223,7 +223,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             SetupAttributesAndNetwork();
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var goal = SetupForScenarioTargetGet(simulation.Id);
 
             // Act
@@ -255,7 +255,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             SetupAttributesAndNetwork();
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var criterionLibrary = SetupForScenarioTargetUpsertOrDelete(simulation.Id);
             var dtos = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulation.Id);
             var attribute = TestHelper.UnitOfWork.Context.Attribute.First();

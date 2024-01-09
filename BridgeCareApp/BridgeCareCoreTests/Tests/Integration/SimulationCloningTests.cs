@@ -96,7 +96,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             Assert.Empty(clonedTreatment.BudgetIds);
             ObjectAssertions.EquivalentExcluding(treatment, clonedTreatment, t => t.Id, t => t.CriterionLibrary, t => t.Costs, t => t.Budgets, t => t.BudgetIds, t => t.SupersedeRules);
             Assert.NotEqual(treatment.Id, clonedTreatment.Id);
-            AssertValidLibraryClone(scenarioTreatmentCost.CriterionLibrary, clonedTreatment.Costs[0].CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
+            SimulationCloningCriterionLibraryDtoAssertions.AssertValidLibraryClone(scenarioTreatmentCost.CriterionLibrary, clonedTreatment.Costs[0].CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
         }
 
         [Fact]
@@ -169,7 +169,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             Assert.Empty(clonedTreatment.Budgets);
             Assert.Empty(clonedTreatment.BudgetIds);
             Assert.NotEqual(treatmentBefore.Id, clonedTreatment.Id);
-            AssertValidLibraryClone(treatmentBefore.CriterionLibrary, clonedTreatment.CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
+            SimulationCloningCriterionLibraryDtoAssertions.AssertValidLibraryClone(treatmentBefore.CriterionLibrary, clonedTreatment.CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
         }
 
         [Fact]
@@ -212,10 +212,10 @@ namespace BridgeCareCoreTests.Tests.Integration
             Assert.Empty(clonedTreatment.Budgets);
             Assert.Empty(clonedTreatment.BudgetIds);
             ObjectAssertions.EquivalentExcluding(treatment, clonedTreatment, t => t.Id, t => t.Consequences, t => t.CriterionLibrary, t => t.BudgetIds, t => t.Budgets, t => t.SupersedeRules);
-            AssertValidLibraryClone(treatment.CriterionLibrary, clonedTreatment.CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
+            SimulationCloningCriterionLibraryDtoAssertions.AssertValidLibraryClone(treatment.CriterionLibrary, clonedTreatment.CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
             var clonedConsequence = clonedTreatment.Consequences.Single();
             ObjectAssertions.EquivalentExcluding(treatmentConsequence, clonedConsequence, c => c.Id, c => c.CriterionLibrary, c => c.Equation.Id);
-            AssertValidLibraryClone(treatmentConsequence.CriterionLibrary, clonedConsequence.CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
+            SimulationCloningCriterionLibraryDtoAssertions.AssertValidLibraryClone(treatmentConsequence.CriterionLibrary, clonedConsequence.CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
             Assert.NotEqual(treatmentConsequence.Id, clonedConsequence.Id);
         }
 
@@ -278,7 +278,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             ObjectAssertions.EquivalentExcluding(treatment, clonedTreatment1, t => t.Id, t => t.Consequences, t => t.CriterionLibrary, t => t.BudgetIds, t => t.Budgets, t => t.SupersedeRules);            
             var clonedSupersedeRule = clonedTreatment1.SupersedeRules.Single();
             ObjectAssertions.EquivalentExcluding(treatmentSuperdedeRule, clonedSupersedeRule, _ => _.Id, _ => _.CriterionLibrary, _ => _.treatment.CriterionLibrary, _ => _.treatment.BudgetIds, t => t.treatment.Budgets, t => t.treatment.SupersedeRules, t => t.treatment.Id);
-            AssertValidLibraryClone(treatmentSuperdedeRule.CriterionLibrary, clonedSupersedeRule.CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
+            SimulationCloningCriterionLibraryDtoAssertions.AssertValidLibraryClone(treatmentSuperdedeRule.CriterionLibrary, clonedSupersedeRule.CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
             Assert.NotEqual(treatmentSuperdedeRule.Id, clonedSupersedeRule.Id);
         }
 
@@ -820,7 +820,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var clonedBudget = clonedBudgets.Single();
             var originalLibrary = budget.CriterionLibrary;
             var clonedLibrary = clonedBudget.CriterionLibrary;
-            AssertValidLibraryClone(originalLibrary, clonedLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
+            SimulationCloningCriterionLibraryDtoAssertions.AssertValidLibraryClone(originalLibrary, clonedLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
             ObjectAssertions.EquivalentExcluding(budget, clonedBudget, b => b.Id, b => b.CriterionLibrary, b => b.BudgetAmounts[0].Id);
         }
 
@@ -892,17 +892,9 @@ namespace BridgeCareCoreTests.Tests.Integration
             ObjectAssertions.EquivalentExcluding(distributionRule, clonedDistributionRule, x => x.Id);
             var originalLibrary = cashFlowRule.CriterionLibrary;
             var clonedLibrary = clonedCashFlowRule.CriterionLibrary;
-            AssertValidLibraryClone(originalLibrary, clonedLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
+            SimulationCloningCriterionLibraryDtoAssertions.AssertValidLibraryClone(originalLibrary, clonedLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
         }
 
-        private static void AssertValidLibraryClone(CriterionLibraryDTO originalLibrary, CriterionLibraryDTO clonedLibrary, Guid? expectedOwnerId)
-        {
-            var resolveOwnerId = expectedOwnerId ?? Guid.Empty;
-            ObjectAssertions.EquivalentExcluding(originalLibrary, clonedLibrary, x => x.Id, x => x.IsSingleUse, x => x.Name, x => x.Owner);
-            Assert.NotEqual(originalLibrary.Id, clonedLibrary.Id);
-            Assert.True(clonedLibrary.IsSingleUse);
-            Assert.Equal(resolveOwnerId, clonedLibrary.Owner);
-        }
 
         [Fact]
         public void SimulationInDbWithInvestmentPlan_Clone_Clones()

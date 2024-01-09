@@ -180,7 +180,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public List<TreatmentCostDTO> GetTreatmentCostByScenariotreatmentId(Guid treatmentId)
+        public List<TreatmentCostDTO> GetTreatmentCostByScenarioTreatmentId(Guid treatmentId)
         {
             if (!_unitOfWork.Context.ScenarioSelectableTreatment.Any(_ => _.Id == treatmentId))
             {
@@ -188,6 +188,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return _unitOfWork.Context.ScenarioTreatmentCost.AsNoTracking()
+                .Where(_ => _.ScenarioSelectableTreatmentId == treatmentId)
                 .Include(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.ScenarioTreatmentCostEquationJoin)

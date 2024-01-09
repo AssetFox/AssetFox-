@@ -81,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Treatment
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
 
             var defaultTreatment = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetDefaultTreatment(simulationId);
 
@@ -94,7 +94,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Treatment
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists();
             var treatments = new List<TreatmentDTO> { treatment };
             TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(treatments, simulationId);
@@ -114,7 +114,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Treatment
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
 
             var defaultNoTreatment = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetDefaultNoTreatment(simulationId);
 
@@ -127,7 +127,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Treatment
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists();
             treatment.Budgets = new List<TreatmentBudgetDTO>();
             var treatments = new List<TreatmentDTO> { treatment };
@@ -144,7 +144,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Treatment
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var curveId = Guid.NewGuid();
             var performanceCurveDto = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(
                 TestHelper.UnitOfWork, simulationId, curveId, attribute: TestAttributeNames.SupDurationN);

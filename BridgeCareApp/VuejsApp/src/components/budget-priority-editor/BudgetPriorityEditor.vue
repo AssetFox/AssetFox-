@@ -175,7 +175,7 @@
             </v-textarea>
         </v-col>
         <v-col cols = "12">   
-            <div v-if="!isPriorityLevelUnique" class="priorities-error">
+            <div v-if="!hasUniquePriorityLevels()" class="priorities-error">
                 Each item must have a unique priority level.
             </div>        
             <v-row style="padding-bottom: 40px;" justify="center" v-show='hasSelectedLibrary || hasScenario'>
@@ -189,7 +189,7 @@
                 </v-btn>
                 <v-btn @click='onUpsertScenarioBudgetPriorities'
                        class='ghd-blue-bg text-white ghd-button-text ghd-button' style="margin: 5px;"
-                       v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges || !hasUniquePriorityLevels()'>
+                       v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
                 </v-btn>
                 <v-btn id="BudgetPriorityEditor-deleteLibrary-vbtn"  @click='onShowConfirmDeleteAlert' variant = "outlined" style="margin: 5px;"
@@ -362,7 +362,6 @@ import { faL } from '@fortawesome/free-solid-svg-icons';
     let loadedParentName: string = "";
     let loadedParentId: string = "";
     let newLibrarySelection: boolean = false;
-    let isPriorityLevelUnique = ref(true);
     
     created();
     async function created() {
@@ -897,7 +896,7 @@ import { faL } from '@fortawesome/free-solid-svg-icons';
         if (hasSelectedLibrary.value) {
             return !(rules['generalRules'].valueIsNotEmpty(selectedBudgetPriorityLibrary.value.name) === true && allDataIsValid);
         }
-        disableCrudButtonsResult = !allDataIsValid;
+        disableCrudButtonsResult = !allDataIsValid && hasUniquePriorityLevels();
         return !allDataIsValid;
     }
 

@@ -31,6 +31,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return  _unitOfWork.Context.ScenarioConditionalTreatmentConsequences
+                .Where(_ => _.ScenarioSelectableTreatmentId == treatmentId )
                 .Include(_ => _.Attribute)
                 .Include(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
                 .ThenInclude(_ => _.Equation)

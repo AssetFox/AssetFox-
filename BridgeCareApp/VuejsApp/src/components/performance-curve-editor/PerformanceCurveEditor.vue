@@ -228,8 +228,6 @@
                             <td class="text-xs-left">
                                 <v-menu
                                     location="left"
-                                    min-height="500px"
-                                    min-width="500px"
                                     v-show="item.item.equation.expression !== ''"
                                 >
                                     <template v-slot:activator="{ props }">
@@ -251,6 +249,7 @@
                                                 outline
                                                 readonly
                                                 rows="5"
+                                                style = "min-width: 500px;min-height: 205px;"
                                             />
                                         </v-card-text>
                                     </v-card>
@@ -265,14 +264,12 @@
                                 </v-btn>
                             </td>
                             <td class="text-xs-left">
-                                <v-menu
-                                    min-height="500px"
-                                    min-width="500px"
+                                <v-menu                                    
                                     location="right"
                                     v-show="
                                         item.item.criterionLibrary
                                             .mergedCriteriaExpression !== ''
-                                    "
+                                    "                                    
                                 >
                                     <template v-slot:activator="{ props }">
                                         <v-btn v-bind="props" id="PerformanceCurveEditor-checkCriteriaEye-vbtn" class="ghd-blue" variant = "flat" icon>
@@ -294,6 +291,7 @@
                                                 outline
                                                 readonly
                                                 rows="5"
+                                                style = "min-width: 500px;min-height: 205px;"
                                             />
                                         </v-card-text>
                                     </v-card>

@@ -189,7 +189,7 @@
                 </v-btn>
                 <v-btn @click='onUpsertScenarioBudgetPriorities'
                        class='ghd-blue-bg text-white ghd-button-text ghd-button' style="margin: 5px;"
-                       v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
+                       v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges || !hasUniquePriorityLevels()'>
                     Save
                 </v-btn>
                 <v-btn id="BudgetPriorityEditor-deleteLibrary-vbtn"  @click='onShowConfirmDeleteAlert' variant = "outlined" style="margin: 5px;"
@@ -763,7 +763,7 @@ import { faL } from '@fortawesome/free-solid-svg-icons';
         selectedBudgetPriorityForCriteriaEdit = clone(emptyBudgetPriority);
     }
 
-    function validateUniquePriorityLevels() {
+    function hasUniquePriorityLevels() {
         const levels = new Set();
         for (let item of budgetPriorityGridRows.value) {
             if (levels.has(item.priorityLevel)) {
@@ -775,12 +775,6 @@ import { faL } from '@fortawesome/free-solid-svg-icons';
     }
 
     async function onUpsertScenarioBudgetPriorities() {
-        isPriorityLevelUnique.value = validateUniquePriorityLevels();
-        if (!isPriorityLevelUnique.value) {
-            return;
-        }
-
-
         if (selectedBudgetPriorityLibrary.value.id === uuidNIL || hasUnsavedChanges.value && newLibrarySelection ===false) {scenarioLibraryIsModified.value = true;}
         else { scenarioLibraryIsModified.value = false; }
 

@@ -175,6 +175,7 @@
                         @click="onUpsertAnalysisMethod"
                         variant = "flat"
                         class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
+                        style="margin-left: 5px;"
                         >Save</v-btn
                     >
                 </v-row>

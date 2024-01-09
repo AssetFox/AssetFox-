@@ -95,11 +95,9 @@ const actions = {
                         ? 'Updated network'
                         : 'Added network';
 
-                    //commit('networksMutator', payload.network);
                     dispatch('getNetworks').then(() => {
                         commit('selectedNetworkMutator', response.data);
                     });
-                    //commit('selectedNetworkMutator', response.data);
                     dispatch('addSuccessNotification', { message: message });
                 }
             },
@@ -113,7 +111,7 @@ const actions = {
                     http2XX.test(response.status.toString())
                 )  {
                     dispatch('addSuccessNotification', {
-                        message: 'Deleted network',
+                        message: 'Network deletion started',
                     });
                     const networks: Network[] = reject(
                         propEq('id', networkId),

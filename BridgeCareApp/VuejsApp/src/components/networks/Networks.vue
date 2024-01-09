@@ -143,7 +143,8 @@
                                 sort-asc-icon="custom:GhdTableSortAscSvg"
                                 sort-desc-icon="custom:GhdTableSortDescSvg"
                                 :must-sort='true'
-                                hide-actions
+                                return-object
+                                show-select
                                 :pagination.sync="pagination">
                                 <template slot='items' slot-scope='props' v-slot:item="{item}">
                                     <tr>
@@ -157,6 +158,7 @@
                                                 item.name 
                                             }}
                                         </td> 
+                                        <td>{{ item.dataSource.name}}</td> 
                                         <td>{{ item.dataSource.type}}</td> 
                                     </tr>
                                 </template>
@@ -225,6 +227,7 @@ import { useStore } from 'vuex';
 import mitt, { Emitter, EventType } from 'mitt';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { NIL } from 'uuid';
+import { text } from 'stream/consumers';
 
     let store = useStore();
     let stateNetworks = computed<Network[]>(()=>store.state.networkModule.networks);
@@ -250,6 +253,7 @@ import { NIL } from 'uuid';
     let dataSourceGridHeaders: any[] = [
         { title: 'Name', key: 'name', align: 'left', sortable: true, class: '', width: '' },
         { title: 'Data Source', key: 'data source', align: 'left', sortable: true, class: '', width: '' },
+        { title: 'Data Source Type', key: 'data source', align: 'left', sortable: true, class: '', width: '' },
     ];
 
     const addNetworkDialogData = reactive<AddNetworkDialogData>(emptyAddNetworkDialogData);
@@ -308,9 +312,7 @@ import { NIL } from 'uuid';
     }
     
     watch(stateNetworks, () =>  {
-        stateNetworks.value.forEach(_ => {
-        selectNetworkItems.value.push({text:_.name,value:_.id})
-        });
+        selectNetworkItems.value = stateNetworks.value.map(_ => ({text: _.name, value: _.id}))
     })
 
     watch(stateAttributes, () => { 
@@ -328,10 +330,13 @@ import { NIL } from 'uuid';
 
     watch(selectNetworkItemValue, () =>  {
         selectNetworkAction(selectNetworkItemValue.value);
-        if(selectNetworkItemValue.value != getBlankGuid() || isNewNetwork.value)
+        if(selectNetworkItemValue.value !== '' && selectNetworkItemValue.value != getBlankGuid() || isNewNetwork.value)
             hasSelectedNetwork.value = true;
         else
             hasSelectedNetwork.value = false;
+
+        if(selectNetworkItemValue.value == getBlankGuid() && isNewNetwork.value)
+            isNewNetwork.value = false;
     })
 
     watch(selectedAttributeRows, () => 
@@ -345,7 +350,7 @@ import { NIL } from 'uuid';
     })
     
     watch(stateSelectedNetwork, () => {
-        if (isNewNetwork) {
+        if (!isNewNetwork.value) {           
             selectedNetwork.value = clone(stateSelectedNetwork.value);
         }
     })
@@ -353,10 +358,10 @@ import { NIL } from 'uuid';
     watch(selectedNetwork, () => { 
         selectedAttributeRows.value = [];
         hasStartedAggregation.value  = false;
-        selectNetworkItemValue.value = selectedNetwork.value.id;
+        if(selectedNetwork.value.id !== getBlankGuid())
+            selectNetworkItemValue.value = selectedNetwork.value.id;
         if(selectedNetwork.value.keyAttribute != NIL)
         selectedKeyAttributeItem.value = selectedNetwork.value.keyAttribute;
-
         spatialWeightingEquationValue.value.expression = selectedNetwork.value.defaultSpatialWeighting;
         const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', selectedNetwork.value, stateSelectedNetwork.value);
         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
@@ -378,14 +383,15 @@ import { NIL } from 'uuid';
             text: network.name,
             value: network.id
         });
-        
+     
         isNewNetwork.value  = true;
         selectNetworkItemValue.value = network.id;
         selectedNetwork.value = clone(network);
         hasSelectedNetwork.value = true;
     }
     function onDiscardChanges() {
-        selectedNetwork.value = clone(stateSelectedNetwork.value);
+        isNewNetwork.value = false;
+        selectNetworkItemValue.value = ''
     }
     function onSubmitEquationEditorDialogResult(equation: Equation) {
         equationEditorDialogData.value = clone(emptyEquationEditorDialogData);
@@ -401,7 +407,7 @@ import { NIL } from 'uuid';
         };      
     }
     function selectAllFromSource(){
-        selectedAttributeRows.value = clone(stateAttributes.value);
+        selectedAttributeRows.value = clone(attributeRows.value.filter(_ => _.dataSource.id == selectDataSourceId.value));
     }
     function onAddAll(){
         selectedAttributeRows.value = clone(attributeRows.value)
@@ -426,11 +432,9 @@ import { NIL } from 'uuid';
         })       
     }
     function disableCrudButtonsCreate() {
-
         let allValid = rules.value['generalRules'].valueIsNotEmpty(selectedNetwork.value.name) === true
             && rules.value['generalRules'].valueIsNotEmpty(spatialWeightingEquationValue.value.expression) === true
             && rules.value['generalRules'].valueIsNotEmpty(selectedKeyAttributeItem.value) === true;
-
 
         return !allValid;
     }
@@ -441,14 +445,13 @@ import { NIL } from 'uuid';
             && isKeyPropertySelectedAttribute === true
             && hasStartedAggregation.value === false;
 
-
         return !allValid;
     }
     function createNetwork(){
         isNewNetwork.value = false;
 
         createNetworkAction({
-            network: selectedNetwork.value.id,
+            network: selectedNetwork.value,
             parameters: {
                 defaultEquation: spatialWeightingEquationValue.value.expression,
                 networkDefinitionAttribute: selectedKeyAttribute.value

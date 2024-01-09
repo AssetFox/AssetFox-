@@ -77,8 +77,11 @@ $$
 
 $$
 \begin{align*}
+    a(b,t,y) &= \text{money allocated from budget $b$ to treatment $t$ in year $y$} \\
+    &= x(b,t,y) \times K(t,y) \\
+    \\
     T(b) &= \text{total spending from budget $b$ over all treatments and years} \\
-    &= \sum_{t,y} \Big[ x(b,t,y) \times K(t,y) \Big]
+    &= \sum_{t,y} a(b,t,y) \\
 \end{align*}
 $$
 
@@ -90,8 +93,8 @@ $$
     \\
     \forall\ b,y &:
     \begin{cases}
-        \sum_t & \sum_{y'\,\le\,y} & x(b,t,y') & \le & \sum_{y'\,\le\,y} & A(b,y') & \text{if $S_\text{carryover}$} \\
-        \sum_t & & x(b,t,y) & \le & & A(b,y) & \text{otherwise} \\
+        \sum_t & \sum_{y'\,\le\,y} & a(b,t,y') & \le & \sum_{y'\,\le\,y} & A(b,y') & \text{if $S_\text{carryover}$} \\
+        \sum_t & & a(b,t,y) & \le & & A(b,y) & \text{otherwise} \\
     \end{cases} \\
     \\
     \forall\ b \in B_\text{max} &: T(b) \ge M(b)

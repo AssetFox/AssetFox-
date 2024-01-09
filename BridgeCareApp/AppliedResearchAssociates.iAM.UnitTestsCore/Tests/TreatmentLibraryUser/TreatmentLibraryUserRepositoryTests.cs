@@ -93,6 +93,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentLibraryUser
             TestHelper.UnitOfWork.TreatmentLibraryUserRepo.UpsertOrDeleteUsers(library.Id, usersBefore);
 
             var access = TestHelper.UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(library.Id, user2.Id);
+
             var expected = new LibraryUserAccessModel
             {
                 UserId = user2.Id,

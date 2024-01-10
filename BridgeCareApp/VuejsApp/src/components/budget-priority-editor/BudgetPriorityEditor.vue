@@ -89,7 +89,8 @@
                                             variant="underlined"
                                             class='sm-txt'
                                             :model-value="item.item[header.key]"
-                                            :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                            :rules="[rules['generalRules'].valueIsNotEmpty]" 
+                                            />
                                         <v-text-field style="width: 75px;"
                                             v-else readonly single-line class='sm-txt'
                                             variant="underlined"
@@ -99,7 +100,7 @@
                                             <v-text-field v-if="header.key === 'priorityLevel'" label='Edit' single-line
                                                         v-model.number='item.item[header.key]'
                                                         :mask="'##########'"
-                                                        :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotUnique(item.item[header.key], currentPriorityList)]" />
+                                                        :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                                             <v-text-field v-else label='Edit' single-line :mask="'####'"
                                                         v-model.number='item.item[header.key]' />
                                         </template>
@@ -173,7 +174,10 @@
                         @update:model-value="checkHasUnsavedChanges()">
             </v-textarea>
         </v-col>
-        <v-col cols = "12">           
+        <v-col cols = "12">   
+            <div v-if="!hasUniquePriorityLevels()" class="priorities-error">
+                Each item must have a unique priority level.
+            </div>        
             <v-row style="padding-bottom: 40px;" justify="center" v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn  variant = "flat" @click='onDiscardChanges'
                        v-show='hasScenario' :disabled='!hasUnsavedChanges' style="margin: 5px;" class='ghd-blue ghd-button-text ghd-button'>
@@ -758,6 +762,17 @@ import { faL } from '@fortawesome/free-solid-svg-icons';
         selectedBudgetPriorityForCriteriaEdit = clone(emptyBudgetPriority);
     }
 
+    function hasUniquePriorityLevels() {
+        const levels = new Set();
+        for (let item of budgetPriorityGridRows.value) {
+            if (levels.has(item.priorityLevel)) {
+                return false;
+            }
+            levels.add(item.priorityLevel);
+        }
+        return true;
+    }
+
     async function onUpsertScenarioBudgetPriorities() {
         if (selectedBudgetPriorityLibrary.value.id === uuidNIL || hasUnsavedChanges.value && newLibrarySelection ===false) {scenarioLibraryIsModified.value = true;}
         else { scenarioLibraryIsModified.value = false; }
@@ -881,8 +896,9 @@ import { faL } from '@fortawesome/free-solid-svg-icons';
         if (hasSelectedLibrary.value) {
             return !(rules['generalRules'].valueIsNotEmpty(selectedBudgetPriorityLibrary.value.name) === true && allDataIsValid);
         }
-        disableCrudButtonsResult = !allDataIsValid;
-        return !allDataIsValid;
+
+        disableCrudButtonsResult = !allDataIsValid && !hasUniquePriorityLevels();
+        return disableCrudButtonsResult;
     }
 
     function onUpdateRow(rowId: string, updatedRow: BudgetPriority){
@@ -1050,6 +1066,13 @@ import { faL } from '@fortawesome/free-solid-svg-icons';
     height: 425px;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+.priorities-error {
+    color: red;
+    text-align: center;
+    margin-bottom: 10px;
+    margin-top: -15px;
 }
 
 .priorities-data-table .v-menu--inline, .priority-criteria-output {

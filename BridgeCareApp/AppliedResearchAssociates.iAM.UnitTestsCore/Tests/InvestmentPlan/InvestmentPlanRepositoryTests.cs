@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.InvestmentPlan
         public void UpsertInvestmentPlan_SimulationInDb_Inserts()
         {
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var investmentPlan = new InvestmentPlanDTO
             {
                 Id = Guid.NewGuid(),

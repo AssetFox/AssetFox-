@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var unitOfWork = TestHelper.UnitOfWork;
             AttributeTestSetup.CreateAttributes(unitOfWork);
             NetworkTestSetup.CreateNetwork(unitOfWork);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var entity = AnalysisMethodEntities.TestAnalysis(simulation.Id);
             TestHelper.UnitOfWork.Context.AnalysisMethod.Add(entity);
             TestHelper.UnitOfWork.Context.SaveChanges();
@@ -44,7 +44,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var unitOfWork = TestHelper.UnitOfWork;
             AttributeTestSetup.CreateAttributes(unitOfWork);
             NetworkTestSetup.CreateNetwork(unitOfWork);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var repo = unitOfWork.AnalysisMethodRepo;
             var analysisMethodDto = repo.GetAnalysisMethod(simulation.Id);
             analysisMethodDto.Benefit = BenefitDtos.Dto(TestAttributeNames.Age);
@@ -64,7 +64,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var unitOfWork = TestHelper.UnitOfWork;
             AttributeTestSetup.CreateAttributes(unitOfWork);
             NetworkTestSetup.CreateNetwork(unitOfWork);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
             var repo = unitOfWork.AnalysisMethodRepo;
 

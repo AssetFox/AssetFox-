@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return entity;
         }
 
-        public static SimulationDTO CreateSimulation(UnitOfDataPersistenceWork unitOfWork, Guid? id = null, string name = null, Guid? owner = null, Guid? networkId = null)
+        public static SimulationDTO ModelForEntityInDb(UnitOfDataPersistenceWork unitOfWork, Guid? id = null, string name = null, Guid? owner = null, Guid? networkId = null)
         {
             var resolveNetworkId = networkId ?? NetworkTestSetup.NetworkId;
             CalculatedAttributeTestSetup.CreateDefaultCalculatedAttributeLibrary(unitOfWork);

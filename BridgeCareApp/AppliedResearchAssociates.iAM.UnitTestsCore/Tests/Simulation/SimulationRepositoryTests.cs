@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             SimulationRepositoryTestSetup.Setup();
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
 
             // Act
             TestHelper.UnitOfWork.SimulationRepo.DeleteSimulation(simulation.Id);
@@ -53,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             SimulationRepositoryTestSetup.Setup();
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             TestHelper.UnitOfWork.SetUser(user.Username);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, owner: user.Id);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, owner: user.Id);
 
             // Act
             var result = TestHelper.UnitOfWork.SimulationRepo.GetUserScenarios();
@@ -120,7 +120,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             TestHelper.UnitOfWork.Context.SaveChanges();
             var simulationId = Guid.NewGuid();
             var ownerId = testUser1.Id;
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, owner: ownerId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, owner: ownerId);
             var updatedSimulation = SimulationDtos.Dto(simulationId, owner: testUser2.Id);
 
             updatedSimulation.Name = "Updated Name";
@@ -163,7 +163,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             TestHelper.UnitOfWork.Context.SaveChanges();
             var simulationId = Guid.NewGuid();
             var ownerId = testUser1.Id;
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, owner: ownerId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, owner: ownerId);
             var updateDto = SimulationDtos.Dto(simulationId, owner: testUser2.Id);
 
             updateDto.Name = "Updated Name";
@@ -275,11 +275,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             // Issue here is that the code lets us create a simulation owned by a nonexistent user.
             var nonexistentUserId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"), "Test Simulation", nonexistentUserId, networkId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"), "Test Simulation", nonexistentUserId, networkId);
             // changing the owner Id to user.Id above causes this to pass.
 
             // Arrange
-            var simulation2 = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation2 = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
 
             // Act
             //  TestHelper.UnitOfWork.SimulationRepo.DeleteSimulation(simulation.Id);
@@ -330,7 +330,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var networkId = NetworkTestSetup.NetworkId;
             var simulationId = Guid.NewGuid();
-            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, networkId: networkId);
+            SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, networkId: networkId);
             var simulationIds = new List<Guid> { simulationId };
 
             var simulations = TestHelper.UnitOfWork.SimulationRepo.GetScenariosWithIds(simulationIds);
@@ -346,7 +346,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var networkId = NetworkTestSetup.NetworkId;
             var simulationId = Guid.NewGuid();
             var simulationIds = new List<Guid> { simulationId };
-            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, networkId: networkId);
+            SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, networkId: networkId);
             var simulationsBefore = TestHelper.UnitOfWork.SimulationRepo.GetScenariosWithIds(simulationIds);
             Assert.NotEmpty(simulationsBefore);
 
@@ -377,7 +377,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var networkId = NetworkTestSetup.NetworkId;
             var simulationId = Guid.NewGuid();
-            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, networkId: networkId);
+            SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, networkId: networkId);
             var simulationEntity = TestHelper.UnitOfWork.Context.Simulation.Single(
                 s => s.Id == simulationId );
             simulationEntity.LastModifiedDate = new DateTime(2024, 1, 4);
@@ -405,7 +405,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
             var simulationName = RandomStrings.WithPrefix("Simulation");
-            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName);
+            SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName);
 
             var actual = TestHelper.UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
 
@@ -418,7 +418,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
-            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
 
             TestHelper.UnitOfWork.SimulationRepo.SetNoTreatmentBeforeCommitted(simulationId);
             var afterSet = TestHelper.UnitOfWork.SimulationRepo.GetNoTreatmentBeforeCommitted(simulationId);

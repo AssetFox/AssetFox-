@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             var simulationName = RandomStrings.WithPrefix("Simulation");
             var networkId = NetworkTestSetup.NetworkId;
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
 
             var sharedSimulations = TestHelper.UnitOfWork.SimulationRepo.GetSharedScenarios(false, false);
             Assert.Empty(sharedSimulations.Where(s => s.Id == simulationId));
@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulationId = Guid.NewGuid();
             var simulationName = RandomStrings.WithPrefix("Simulation");
             var networkId = NetworkTestSetup.NetworkId;
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
 
             var sharedSimulations = TestHelper.UnitOfWork.SimulationRepo.GetSharedScenarios(false, true);
 
@@ -62,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulationId = Guid.NewGuid();
             var simulationName = RandomStrings.WithPrefix("Simulation");
             var networkId = NetworkTestSetup.NetworkId;
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName, user1.Id, networkId);
 
             var sharedSimulations = TestHelper.UnitOfWork.SimulationRepo.GetSharedScenarios(true, false);
 
@@ -81,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulationId = Guid.NewGuid();
             var simulationName = RandomStrings.WithPrefix("Simulation");
             var networkId = NetworkTestSetup.NetworkId;
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user.Id, networkId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName, user.Id, networkId);
 
             var sharedSimulations = TestHelper.UnitOfWork.SimulationRepo.GetSharedScenarios(false, false);
 

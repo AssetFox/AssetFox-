@@ -243,7 +243,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Arrange
             Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var lifeLimitLibrary = SetupForGet();
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             var dtos = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits();
@@ -268,7 +268,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Arrange
             Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var limitEntity = SetupForScenarioGet(simulation.Id);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             var dto = limitEntity.ToDto();
@@ -290,7 +290,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Arrange
             Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var limitEntity = SetupForScenarioGet(simulation.Id);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             var updateDto = limitEntity.ToDto();
@@ -318,7 +318,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             Setup();
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var limit = SetupForScenarioGet(simulation.Id).ToDto();
 
             // Act

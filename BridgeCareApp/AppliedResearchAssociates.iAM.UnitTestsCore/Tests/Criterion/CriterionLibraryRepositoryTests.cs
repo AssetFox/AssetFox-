@@ -66,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Criterion
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var budgetId = Guid.NewGuid();
             var budgetName = RandomStrings.WithPrefix("budget ");
             var budget = BudgetDtos.New(budgetId, budgetName);
@@ -148,7 +148,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Criterion
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(
+            var simulation = SimulationTestSetup.ModelForEntityInDb(
                 TestHelper.UnitOfWork, simulationId);
             var budgetId = Guid.NewGuid();
             var library = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);

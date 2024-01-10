@@ -113,7 +113,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var numericAttributeList = new List<IamAttribute> { numericAttribute };
             var textAttributeDto = AttributeDtos.Interstate;
             var simulationId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var simulationTreatment = TreatmentTestSetup.ModelForSingleTreatmentOfSimulationInDb(TestHelper.UnitOfWork, simulationId);
             var treatmentLibraryId = Guid.NewGuid();
             var treatmentLibrary = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);

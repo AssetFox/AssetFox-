@@ -4,11 +4,13 @@ using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Common;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TargetConditionGoal;
@@ -109,7 +111,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             SetupAttributesAndNetwork();
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
             var libraryDto = SetupLibraryForGet();
             var attribute = AttributeDtos.CulvDurationN;
@@ -135,7 +137,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             SetupAttributesAndNetwork();
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
             var library = SetupLibraryForGet();
             library.Description = "Updated Description";
@@ -221,7 +223,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             SetupAttributesAndNetwork();
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var goal = SetupForScenarioTargetGet(simulation.Id);
 
             // Act
@@ -253,7 +255,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             SetupAttributesAndNetwork();
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var criterionLibrary = SetupForScenarioTargetUpsertOrDelete(simulation.Id);
             var dtos = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulation.Id);
             var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
@@ -363,6 +365,66 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var user2After = libraryUsersAfter.Single(u => u.UserId == user2.Id);
             Assert.Equal(LibraryAccessLevel.Modify, user1After.AccessLevel);
             Assert.Equal(LibraryAccessLevel.Read, user2After.AccessLevel);
+        }
+
+        [Fact]
+        public void GetLibraryModifiedDate_Does()
+        {
+            var before = DateTime.Now;
+            var library = TargetConditionGoalLibraryTestSetup.ModelForEntityInDbWithSingleGoal(TestHelper.UnitOfWork);
+            var after = DateTime.Now;
+
+            var actual = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetLibraryModifiedDate(library.Id);
+
+            DateTimeAssertions.Between(before, after, actual, TimeSpan.FromSeconds(1));
+        }
+
+        [Fact]
+        public async Task GetTargetConditionGoalLibrariesNoChildrenAccessibleToUser_InaccessibleLibraryInDb_DoesNotGet()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = TargetConditionGoalLibraryTestSetup.ModelForEntityInDbWithSingleGoal(TestHelper.UnitOfWork);
+
+            var libraries = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalLibrariesNoChildrenAccessibleToUser(user.Id);
+
+            Assert.DoesNotContain(libraries, l => l.Id == library.Id);
+        }
+
+        [Fact]
+        public async Task GetLibraryAccess_UserHasLibraryAccess_Gets()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = TargetConditionGoalLibraryTestSetup.ModelForEntityInDbWithSingleGoal(TestHelper.UnitOfWork);
+            TargetConditionGoalLibraryUserTestSetup.SetUsersOfTargetConditionGoalLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
+
+            var access = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetLibraryAccess(library.Id, user.Id);
+
+            var returnedAccess = access.Access;
+            var expected = new LibraryUserDTO
+            {
+                AccessLevel = LibraryAccessLevel.Modify,
+                UserId = user.Id,
+                UserName = user.Username,
+            };
+            ObjectAssertions.Equivalent(expected, returnedAccess);
+        }
+
+
+        [Fact]
+        public async Task GetLibraryAccess_UserDoesNotHaveAccess_Gets()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = TargetConditionGoalLibraryTestSetup.ModelForEntityInDbWithSingleGoal(TestHelper.UnitOfWork);
+
+            var access = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetLibraryAccess(library.Id, user.Id);
+
+            var expected = new LibraryUserAccessModel
+            {
+                Access = null,
+                UserId = user.Id,
+                LibraryExists = true,
+            };
+            ObjectAssertions.Equivalent(expected, access);
         }
     }
 }

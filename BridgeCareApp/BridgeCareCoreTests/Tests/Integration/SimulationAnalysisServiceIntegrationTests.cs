@@ -40,7 +40,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             TestHelper.UnitOfWork.SetUser(user.Username);
             var userId = user.Id;
-            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, userId);
+            SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName, userId);
             var service = CreateService();
 
             var userInfo = new UserInfo

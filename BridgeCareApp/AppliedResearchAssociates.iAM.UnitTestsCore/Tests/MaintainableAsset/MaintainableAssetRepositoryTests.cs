@@ -196,7 +196,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
             var maintainableAssets = new List<MaintainableAsset> { maintainableAsset };
             var network = NetworkTestSetup.ModelForEntityInDbWithExistingKeyAttribute(TestHelper.UnitOfWork, maintainableAssets, keyAttributeDto.Id, networkId);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user.Id, networkId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName, user.Id, networkId);
             var committedProjectId = Guid.NewGuid();
             var sectionCommittedProjectDto = SectionCommittedProjectDtos.Dto1(committedProjectId, simulation.Id);
             var sectionCommittedProjectDtos = new List<SectionCommittedProjectDTO> { sectionCommittedProjectDto };

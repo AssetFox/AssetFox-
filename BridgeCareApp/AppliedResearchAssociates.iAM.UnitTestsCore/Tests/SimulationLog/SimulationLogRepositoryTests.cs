@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
-            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var log = SimulationLogDtos.Dto(simulationId);
             var before = DateTime.Now;
 
@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
-            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var log = SimulationLogDtos.Dto(simulationId);
             TestHelper.UnitOfWork.SimulationLogRepo.CreateLog(log);
             var logsBefore = await TestHelper.UnitOfWork.SimulationLogRepo.GetLog(simulationId);

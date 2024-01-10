@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId);
             var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDto = scenarioCurves[0];
@@ -54,7 +54,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId, equation: "2");
             var updateRows = new List<PerformanceCurveDTO> { performanceCurve };
 
@@ -75,7 +75,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId, equation: "2");
             var equationId = performanceCurve.Equation.Id;
             var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -102,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId, criterionLibrary);
             var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -125,7 +125,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId, criterionLibrary);
             var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -155,7 +155,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId);
             var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -181,7 +181,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId, equation: "2");
             var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDto = scenarioCurves[0];
@@ -205,7 +205,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             Setup();
             // Arrange
             var curveId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var simulationId = simulation.Id;
             var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId, equation: "2");
             var updateRows = new List<PerformanceCurveDTO>();
@@ -224,7 +224,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             Setup();
             // Arrange
             var simulationId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var performanceCurveDto = new PerformanceCurveDTO
             {
@@ -246,7 +246,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             Setup();
             // Arrange
             var curveId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var equation = new EquationDTO
             {
@@ -278,7 +278,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             Setup();
             // Arrange
             var curveId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var simulationId = simulation.Id;
             var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var equation = new EquationDTO
@@ -311,7 +311,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             Setup();
             // Arrange
             var curveId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var criterionLibrary = new CriterionLibraryDTO
             {
@@ -345,7 +345,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
             var libraryId = Guid.NewGuid();
             var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var criterionLibrary = new CriterionLibraryDTO
             {
                 Id = Guid.NewGuid(),

@@ -73,7 +73,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
             var goal1 = TargetConditionGoalDtos.Dto(attribute.Name);
             var goals1 = new List<TargetConditionGoalDTO> { goal1 };
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             TestHelper.UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteScenarioTargetConditionGoals(goals1, simulation.Id);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             var dtos = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulation.Id);

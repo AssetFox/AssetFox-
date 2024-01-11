@@ -157,7 +157,7 @@
                                     <v-text-field
                                         label="Edit"
                                         single-line
-                                        :mask="'##########'"
+                                        v-maska:[mask]
                                         variant="underlined"
                                         v-model.number="props.item.value"
                                         :rules="[
@@ -415,6 +415,7 @@ import { getUrl } from '@/shared/utils/get-url';
     let loadedParentName: string = "";
     let loadedParentId: string = "";
     let newLibrarySelection = ref<boolean>(false);
+    const mask = { mask: '##########' };
 
     onMounted(async () => {
         librarySelectItemValue.value = null;

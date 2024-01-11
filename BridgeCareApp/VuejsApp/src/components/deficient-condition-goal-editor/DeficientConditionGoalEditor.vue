@@ -167,7 +167,8 @@
                                             single-line
                                             variant="underlined"
                                             v-model="item.item[header.key]"
-                                            :mask="'##########'"
+                                            type="number"
+                                            v-maska:[limitMask]
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                         <v-text-field v-if="header.key === 'allowedDeficientPercentage'"
@@ -176,7 +177,7 @@
                                             single-line
                                             variant="underlined"
                                             v-model.number="item.item[header.key]"
-                                            :mask="'###'"
+                                            v-maska:[percentMask]
                                             :rules="[
                                                 rules['generalRules'].valueIsNotEmpty,
                                                 rules['generalRules'].valueIsWithinRange(
@@ -515,6 +516,9 @@ import { getUrl } from '@/shared/utils/get-url';
     let loadedParentName: string = "";
     let loadedParentId: string = "";
     let libraryImported: boolean = false;
+
+    const percentMask = { mask: '###' };
+    const limitMask = { mask: '##########' };
 
     created();
     function created() {

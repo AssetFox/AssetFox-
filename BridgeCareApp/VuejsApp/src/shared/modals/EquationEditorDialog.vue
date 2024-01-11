@@ -444,8 +444,6 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
    */
   onMounted(()=>mounted())
    function mounted() {
-    //  cursorPosition = textareaInput.selectionStart; 
-    console.log(textareaInput.value) 
     if (hasValue(stateNumericAttributes.value)) {
       setAttributesList();
     }

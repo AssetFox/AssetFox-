@@ -99,9 +99,9 @@
                                         <template v-slot:input>
                                             <v-text-field v-if="header.key === 'priorityLevel'" label='Edit' single-line
                                                         v-model.number='item.item[header.key]'
-                                                        :mask="'##########'"
+                                                        v-maska:[priorityMask]
                                                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-                                            <v-text-field v-else label='Edit' single-line :mask="'####'"
+                                            <v-text-field v-else label='Edit' single-line v-maska:[generalMask]
                                                         v-model.number='item.item[header.key]' />
                                         </template>
                                     </editDialog>
@@ -137,7 +137,7 @@
                                         <v-text-field readonly single-line class='sm-txt' :model-value="item.item[header.key]" variant="underlined"
                                                     :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.item[header.key], [0, 100])]" />
                                         <template v-slot:input>
-                                            <v-text-field :mask="'###'" label='Edit' single-line
+                                            <v-text-field v-maska:[percentMask] label='Edit' single-line
                                                         v-model="item.item[header.key]"
                                                         :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.item[header.key], [0, 100])]" />
                                         </template>
@@ -275,6 +275,7 @@
     import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
 import { faL } from '@fortawesome/free-solid-svg-icons';
+import { vMaska } from "maska"
 
     let store = useStore();
     const confirm = useConfirm();
@@ -362,7 +363,9 @@ import { faL } from '@fortawesome/free-solid-svg-icons';
     let loadedParentName: string = "";
     let loadedParentId: string = "";
     let newLibrarySelection: boolean = false;
-    
+    const priorityMask = { mask: '##########' };
+    const generalMask = { mask: '####' };
+    const percentMask = {mask: '###'};
     created();
     async function created() {
         librarySelectItemValue.value = null;

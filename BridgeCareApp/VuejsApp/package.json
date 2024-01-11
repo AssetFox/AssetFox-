@@ -61,7 +61,8 @@
         "vue3-advanced-query-builder": "^3.1.2",
         "vuejs-dialog": "^1.4.2",
         "vuetify": "^3.4.0",
-        "vuex": "^4.1.0"
+        "vuex": "^4.1.0",
+        "maska": "^2.1.11"
     },
     "devDependencies": {
         "@fimbul/valtyr": "0.19.0",

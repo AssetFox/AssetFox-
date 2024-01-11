@@ -78,21 +78,21 @@
                     </v-col>
                     <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Minimum Value</v-subheader>
-                        <v-text-field id="Attributes-attributeMinimumValue-vtextfield" variant="outlined" class="ghd-text-field-border ghd-text-field"                            
-                            v-model.number='selectedAttribute.minimum'
+                        <v-text-field id="Attributes-attributeMinimumValue-vtextfield" type="number" variant="outlined" class="ghd-text-field-border ghd-text-field"                            
+                            v-model='selectedAttribute.minimum'
                             density="compact"/>
                     </v-col>
                     <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Maximum Value</v-subheader>
-                        <v-text-field id="Attributes-attributeMaximumValue-vtextfield" variant="outlined" class="ghd-text-field-border ghd-text-field"
-                            v-model.number='selectedAttribute.maximum'
+                        <v-text-field id="Attributes-attributeMaximumValue-vtextfield" variant="outlined" type="number" class="ghd-text-field-border ghd-text-field"
+                            v-model='selectedAttribute.maximum'
                             density="compact"/>
                     </v-col>
                     <v-col cols="4" style="padding-top:40px;">
                         <v-row>
-                        <v-switch id="Attributes-attributeCalculated-vswitch" class='sharing header-text-content'  label='Calculated' 
+                        <v-switch id="Attributes-attributeCalculated-vswitch" class='sharing header-text-content' color="#2A578D"  label='Calculated' 
                             v-model='selectedAttribute.isCalculated'/>
-                        <v-switch id="Attributes-attributeAscending-vswitch" class='sharing header-text-content'  label='Ascending' 
+                        <v-switch id="Attributes-attributeAscending-vswitch" class='sharing header-text-content' color="#2A578D" label='Ascending' 
                             v-model='selectedAttribute.isAscending'/>
                         </v-row>
                     </v-col>
@@ -167,14 +167,14 @@
                 <v-btn id="Attributes-cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Cancel
                 </v-btn>  
-                <p>&nbsp;&nbsp;&nbsp;</p>
-                <v-btn
+                <p v-if="selectedAttribute.dataSource.type == 'SQL'">&nbsp;&nbsp;&nbsp;</p>
+                <v-btn v-if="selectedAttribute.dataSource.type == 'SQL'"
                 variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'
                     @click="CheckSqlCommand">
                     Test
                 </v-btn>
                 <p>&nbsp;&nbsp;&nbsp;</p>
-                <v-btn id="Attributes-save-vbtn" @click='saveAttribute'  variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
+                <v-btn id="Attributes-save-vbtn" @click='saveAttribute' :disabled='disableCrudButtons()'  variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Save
                 </v-btn>               
             </v-row>
@@ -335,12 +335,15 @@ import ConfirmDialog from 'primevue/confirmdialog';
        // }));
     })
 
-    watch(stateSelectedAttribute, () =>  {
+    watch(stateSelectedAttribute, () =>  {       
         selectedAttribute.value = clone(stateSelectedAttribute.value);
         if(isNil(selectedAttribute.value.dataSource)) {
             selectedAttribute.value.dataSource = clone(emptyDatasource);
         }
-        selectDatasourceItemValue.value = selectedAttribute.value.dataSource.id;
+        if(selectedAttribute.value.id === getBlankGuid())
+            selectDatasourceItemValue.value = ''
+        else
+            selectDatasourceItemValue.value = selectedAttribute.value.dataSource.id;
     })
 
     watch(selectedAttribute, () => {
@@ -350,7 +353,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     function addAttribute()
     {
-        selectAttributeItemValue.value = getBlankGuid()
+        selectAttributeItemValue.value = ''
     }
 
     function onDiscardChanges() {

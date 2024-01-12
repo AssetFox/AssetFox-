@@ -536,6 +536,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { computed } from 'vue';
 import { getUrl } from '@/shared/utils/get-url';
+import { nextTick } from 'process';
 
 const emit = defineEmits(['submit'])
 let store = useStore();
@@ -669,7 +670,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
 
     let sharePerformanceCurveLibraryDialogData = ref(clone(emptySharePerformanceCurveLibraryDialogData));
 
-    let parentLibraryName: string = "None";
+    let parentLibraryName = ref('None');
     let parentLibraryId: string = "";
     let scenarioLibraryIsModified: boolean = false;
     let loadedParentName: string = "";
@@ -701,7 +702,6 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})   
                 selectScenarioAction({ scenarioId: selectedScenarioId });        
             })
-
         }
     }
     onMounted(()=>mounted())
@@ -885,10 +885,10 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         // Get parent name from library id
         librarySelectItems.value.forEach(library => {
             if (library.value === parentLibraryId) {
-                parentLibraryName = library.text;
+                parentLibraryName.value = library.text;
             }
-            if(parentLibraryName == ""){
-                parentLibraryName = "None";
+            if(parentLibraryName.value == ""){
+                parentLibraryName.value = "None";
             }
         });
     }
@@ -1141,7 +1141,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 resetPage();
             }
         });
-        parentLibraryName = loadedParentName;
+        parentLibraryName.value = loadedParentName;
         parentLibraryId = loadedParentId;
     }
 
@@ -1350,8 +1350,8 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     };
 
     function setParentLibraryName(libraryId: string) {
-         if (libraryId === "None") {
-            parentLibraryName = "None";
+         if (libraryId === "None" || libraryId === uuidNIL) {
+            parentLibraryName.value = "None";
             return;
         }
         let foundLibrary: PerformanceCurveLibrary = emptyPerformanceCurveLibrary;
@@ -1361,7 +1361,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
             }
         });
         parentLibraryId = foundLibrary.id;
-        parentLibraryName = foundLibrary.name;
+        parentLibraryName.value = foundLibrary.name;
     }
 
     function importCompleted(data: any){
@@ -1391,21 +1391,22 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
             isDescending: false,
             search: ''
         };
-        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL)
-            await PerformanceCurveService.getPerformanceCurvePage(selectedScenarioId, request).then(response => {
-                isRunning = false
-                if(response.data){
-                    let data = response.data as PagingPage<PerformanceCurve>;
-                    currentPage.value = data.items;
-                    rowCache = clone(currentPage.value)
-                    totalItems.value = data.totalItems;
-                    setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
-                    loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
-                    loadedParentName = parentLibraryName; //store original
-                    scenarioLibraryIsModified = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
-
-                }
-            });
+        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL){
+            let response = await PerformanceCurveService.getPerformanceCurvePage(selectedScenarioId, request);
+            isRunning = false
+            if(response.data) {
+                let data = response.data as PagingPage<PerformanceCurve>;
+                currentPage.value = data.items;
+                rowCache = clone(currentPage.value)
+                totalItems.value = data.totalItems;
+                let currentPageLength = currentPage.value.length;
+                setParentLibraryName(currentPageLength > 0 ? currentPage.value[0].libraryId : "None");
+                loadedParentId = currentPageLength > 0 ? currentPage.value[0].libraryId : "";
+                loadedParentName = parentLibraryName.value; //store original
+                scenarioLibraryIsModified = currentPageLength > 0 ? currentPage.value[0].isModified : false;
+            
+            }
+        }
     }
 </script>
 

@@ -479,7 +479,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
     let scenarioHasCreatedNew: boolean = false;
     let loadedParentName: string = "";
     let loadedParentId: string = "";
-    let parentLibraryName: string = "None";
+    let parentLibraryName = ref('None');
     let parentLibraryId: string = "";
     let scenarioLibraryIsModified: boolean = false;
     let libraryImported: boolean = false;
@@ -595,7 +595,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
         // Get parent name from library id
         librarySelectItems.value.forEach(library => {
             if (library.value === parentLibraryId) {
-                parentLibraryName = "Library Used: " + library.text;
+                parentLibraryName.value = "Library Used: " + library.text;
             }
         });
     }
@@ -853,7 +853,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
 
     function onDiscardChanges() {
         librarySelectItemValue.value = '';
-        parentLibraryName = loadedParentName;
+        parentLibraryName.value = loadedParentName;
         parentLibraryId = loadedParentId;
 
         setTimeout(() => {
@@ -1020,8 +1020,8 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
     };
 
     function setParentLibraryName(libraryId: string) {
-        if (libraryId === "") {
-            parentLibraryName = "None";
+        if (libraryId === "" || libraryId === uuidNIL) {
+            parentLibraryName.value = "None";
             return;
         }
         let foundLibrary: CashFlowRuleLibrary = emptyCashFlowRuleLibrary;
@@ -1031,7 +1031,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
             }
         });
         parentLibraryId = foundLibrary.id;
-        parentLibraryName = foundLibrary.name;
+        parentLibraryName.value = foundLibrary.name;
     }
 
     function onLibrarySelectItemValueChanged() {
@@ -1071,7 +1071,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
         librarySelectItemValueAllowedChanged = true;
         librarySelectItems.value.forEach(library => {
             if (library.value === librarySelectItemValue.value) {
-                parentLibraryName = "Library Used: " + library.text;
+                parentLibraryName.value = "Library Used: " + library.text;
             }
         });
     }
@@ -1126,7 +1126,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
                     totalItems.value = data.totalItems;
                     setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
                     loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
-                    loadedParentName = parentLibraryName; //store original
+                    loadedParentName = parentLibraryName.value; //store original
                     scenarioLibraryIsModified = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
                 }
             });

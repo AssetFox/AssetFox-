@@ -70,8 +70,11 @@
                                 :rules="[rules['generalRules'].valueIsNotEmpty]"
                                 :disabled="!hasAdminAccess"
                             >
-                            <v-messages v-show="benefit.attribute === null" :messages="[ 'Attribute is required' ]">'Attribute is required'</v-messages>
                             </v-select>
+                            <div class="ghd-md-gray"
+                                :disabled="benefit.attribute == null">
+                                A Benefit Attribute is required before saving
+                        </div>
                         </v-col>
                         <v-col cols = "4">
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Limit</v-subheader>
@@ -173,18 +176,13 @@
                     >
                     <v-btn
                         id="EditAnalysisMethod-save-btn"
-                        :disabled="(criteriaIsInvalid() || !valid) || !hasUnsavedChanges"
+                        :disabled="(criteriaIsInvalid() || !valid) || !hasUnsavedChanges || benefit.attribute == null"
                         @click="onUpsertAnalysisMethod"
                         variant = "flat"
                         class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
                         style="margin-left: 5px;"
                         >Save</v-btn
                     >
-                </v-row>
-                <v-row justify="center">
-                    <p style="padding-top: 12px" class="ghd-md-gray" v-if="benefitAttributeCheck == true">
-                        A Benefit Attribute is required before saving
-                    </p>
                 </v-row>
     </v-card>
             <GeneralCriterionEditorDialog

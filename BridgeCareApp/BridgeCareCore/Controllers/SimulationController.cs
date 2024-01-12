@@ -609,12 +609,18 @@ namespace BridgeCareCore.Controllers
 
                 await Task.Factory.StartNew(() =>
                 {
-                    var simulation = AnalysisInputLoading.GetSimulationWithoutAssets(UnitOfWork, networkId, simulationId);
-                    validationResultBag = simulation.GetAllValidationResults(Enumerable.Empty<string>());
-                    var validationResultList = validationResultBag.AsEnumerable().ToList();
-                    validationResults.AddRange(from validationResult in validationResultList
-                                               let toAdd = new PreChecksValidationResult(validationResult.Status, validationResult.Message)
-                                               select toAdd);
+                    var simulation = AnalysisInputLoading.GetSimulationWithoutAssets(UnitOfWork, networkId, simulationId, validationResultBag);
+                    var validationResultList = validationResultBag?.AsEnumerable()?.ToList();
+                    if (validationResultList != null && validationResultList.Count > 0)
+                    {
+                        GetValidationResults(validationResults, validationResultList);
+                    }
+                    else
+                    {
+                        validationResultBag = simulation.GetAllValidationResults(Enumerable.Empty<string>());
+                        validationResultList.AddRange(validationResultBag.AsEnumerable().ToList());
+                        GetValidationResults(validationResults, validationResultList);
+                    }
                 });
                 
                 return Ok(validationResults);
@@ -640,5 +646,10 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        private static void GetValidationResults(List<PreChecksValidationResult> validationResults, List<AppliedResearchAssociates.Validation.ValidationResult> validationResultList) =>
+            validationResults.AddRange(from validationResult in validationResultList
+                                       let toAdd = new PreChecksValidationResult(validationResult.Status, validationResult.Message)
+                                       select toAdd);
     }
 }

@@ -3,6 +3,8 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.Validation;
+using HotChocolate.Language.Visitors;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore;
 
@@ -38,8 +40,8 @@ public static class AnalysisInputLoading
     public static Simulation GetSimulationWithoutAssets(
         IUnitOfWork unitOfWork,
         Guid networkId,
-        Guid simulationId
-        )
+        Guid simulationId,
+        ValidationResultBag validationResultBag) // TODO fill up validationResultBag if any errors // add try catch to each call within GetSimulation and build results if allowLoadingOfAssets is false?
         => GetSimulation(
             false,
             unitOfWork,
@@ -52,7 +54,8 @@ public static class AnalysisInputLoading
             AlwaysTrue,
             AlwaysTrue,
             AlwaysTrue,
-            AlwaysTrue);
+            AlwaysTrue,
+            validationResultBag);
 
     private static bool AlwaysTrue() => true;
 
@@ -68,11 +71,27 @@ public static class AnalysisInputLoading
         Func<bool> afterAnalysisMethod,
         Func<bool> afterPerformanceCurves,
         Func<bool> afterSelectableTreatments,
-        Func<bool> afterCommittedProjects)
+        Func<bool> afterCommittedProjects,
+        ValidationResultBag validationResultBag = null)
     {
-        // load
-        var explorer = unitOfWork.AttributeRepo.GetExplorer();
+        Explorer explorer = null;
+        Network network = null;
+        Simulation simulation = null;
 
+        // load
+        try
+        {
+            explorer = unitOfWork.AttributeRepo.GetExplorer();
+        }
+        catch (Exception ex)
+        {
+            if (allowLoadingOfAssets)
+            {
+                throw;
+            }
+            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));            
+            // return null;
+        }
         // intermediate update/check
         if (!afterExplorer())
         {
@@ -80,14 +99,25 @@ public static class AnalysisInputLoading
         }
 
         // load
-        var network = unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, allowLoadingOfAssets, simulationId);
-        if (!allowLoadingOfAssets && !network.Assets.Any())
+        try
         {
-            var fakeAsset = network.AddAsset();
-            fakeAsset.AssetName = "Fake asset";
-            fakeAsset.SpatialWeighting.Expression = "0";
+            network = unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, allowLoadingOfAssets, simulationId);
+            if (!allowLoadingOfAssets && !network.Assets.Any())
+            {
+                var fakeAsset = network.AddAsset();
+                fakeAsset.AssetName = "Fake asset";
+                fakeAsset.SpatialWeighting.Expression = "0";
+            }
         }
-
+        catch (Exception ex)
+        {
+            if (allowLoadingOfAssets)
+            {
+                throw;
+            }
+            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
+            // return null;
+        }
         // intermediate update/check
         if (!afterNetwork())
         {
@@ -95,8 +125,19 @@ public static class AnalysisInputLoading
         }
 
         // load
-        unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
-
+        try
+        {
+            unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
+        }
+        catch (Exception ex)
+        {
+            if (allowLoadingOfAssets)
+            {
+                throw;
+            }
+            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
+            // return null;
+        }
         // intermediate update/check
         if (!afterSimulation())
         {
@@ -104,9 +145,20 @@ public static class AnalysisInputLoading
         }
 
         // load
-        var simulation = network.Simulations.Single(_ => _.Id == simulationId);
-        unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-
+        try
+        {
+            simulation = network.Simulations.Single(_ => _.Id == simulationId);
+            unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+        }
+        catch (Exception ex)
+        {
+            if (allowLoadingOfAssets)
+            {
+                throw;
+            }
+            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
+            // return null;
+        }
         // intermediate update/check
         if (!afterInvestmentPlan())
         {
@@ -114,9 +166,20 @@ public static class AnalysisInputLoading
         }
 
         // load
-        var userCriteria = unitOfWork.UserCriteriaRepo.GetUserCriteria(unitOfWork.CurrentUser.Id);
-        unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, userCriteria);
-
+        try
+        {
+            var userCriteria = unitOfWork.UserCriteriaRepo.GetUserCriteria(unitOfWork.CurrentUser.Id);
+            unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, userCriteria);
+        }
+        catch (Exception ex)
+        {
+            if (allowLoadingOfAssets)
+            {
+                throw;
+            }
+            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
+            // return null;
+        }
         // intermediate update/check
         if (!afterAnalysisMethod())
         {
@@ -124,9 +187,20 @@ public static class AnalysisInputLoading
         }
 
         // load
-        var attributeNameLookup = unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
-        unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
-
+        try
+        {
+            var attributeNameLookup = unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
+            unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
+        }
+        catch (Exception ex)
+        {
+            if (allowLoadingOfAssets)
+            {
+                throw;
+            }
+            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
+            // return null;
+        }
         // intermediate update/check
         if (!afterPerformanceCurves())
         {
@@ -134,8 +208,19 @@ public static class AnalysisInputLoading
         }
 
         // load
-        unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
-
+        try
+        {
+            unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
+        }
+        catch (Exception ex)
+        {
+            if (allowLoadingOfAssets)
+            {
+                throw;
+            }
+            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
+            // return null;
+        }
         // intermediate update/check
         if (!afterSelectableTreatments())
         {
@@ -143,8 +228,19 @@ public static class AnalysisInputLoading
         }
 
         // load
-        unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
-
+        try
+        {
+            unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
+        }
+        catch (Exception ex)
+        {
+            if (allowLoadingOfAssets)
+            {
+                throw;
+            }
+            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
+            // return null;
+        }
         // intermediate update/check
         if (!afterCommittedProjects())
         {
@@ -152,7 +248,19 @@ public static class AnalysisInputLoading
         }
 
         // load
-        unitOfWork.CalculatedAttributeRepo.PopulateScenarioCalculatedFields(simulation);
+        try
+        {
+            unitOfWork.CalculatedAttributeRepo.PopulateScenarioCalculatedFields(simulation);
+        }
+        catch (Exception ex)
+        {
+            if (allowLoadingOfAssets)
+            {
+                throw;
+            }
+            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
+            // return null;
+        }
 
         return simulation;
     }

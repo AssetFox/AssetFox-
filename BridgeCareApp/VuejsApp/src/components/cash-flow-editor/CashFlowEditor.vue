@@ -800,7 +800,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
         });
     }
 
-    function onUpsertScenarioCashFlowRules() {
+    async function onUpsertScenarioCashFlowRules() {
         if (selectedCashFlowRuleLibrary.value.id === uuidNIL || hasUnsavedChanges.value && libraryImported === false) {scenarioLibraryIsModified = true;}
         else { scenarioLibraryIsModified = false; }
 
@@ -814,7 +814,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 parentLibraryId = librarySelectItemValue.value;
                 clearChanges();
-                // librarySelectItemValue.value = "";
+                librarySelectItemValue.value = "";
                 resetPage();
                 addSuccessNotificationAction({message: "Modified scenario's cash flow rules"});
                 importLibraryDisabled = true;

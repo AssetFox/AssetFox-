@@ -67,9 +67,14 @@
                                 v-model="benefit.attribute"
                                 menu-icon=custom:GhdDownSvg
                                 @update:model-value="onSetBenefitProperty('attribute', $event)"
+                                :rules="[rules['generalRules'].valueIsNotEmpty]"
                                 :disabled="!hasAdminAccess"
                             >
                             </v-select>
+                            <div class="ghd-md-gray"
+                                :disabled="benefit.attribute == null">
+                                A Benefit Attribute is required before saving
+                        </div>
                         </v-col>
                         <v-col cols = "4">
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Limit</v-subheader>
@@ -171,7 +176,7 @@
                     >
                     <v-btn
                         id="EditAnalysisMethod-save-btn"
-                        :disabled="(criteriaIsInvalid() || !valid) || !hasUnsavedChanges"
+                        :disabled="(criteriaIsInvalid() || !valid) || !hasUnsavedChanges || benefit.attribute == null"
                         @click="onUpsertAnalysisMethod"
                         variant = "flat"
                         class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
@@ -276,7 +281,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
     const rules = ref<InputValidationRules>(validationRules);
     const valid = ref<boolean>(true);
     const criteriaIsIntentionallyEmpty = ref<boolean>(false);
-    let hasUnsavedChanges = ref<boolean>(false)
+    let hasUnsavedChanges = ref<boolean>(false);
+    let benefitAttributeCheck = ref<boolean>(false);
 
     //beforeRouteEnter(to: any, from: any, next: any) {
        //next((vm: any) => {
@@ -334,17 +340,17 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 hasUnsavedChanges.value
         });
 
-        setBenefitAttributeIfEmpty();        
+        //setBenefitAttributeIfEmpty();        
     }
 
     watch(stateNumericAttributes, () => {
         if (hasValue(stateNumericAttributes.value)) {
             setBenefitAndWeightingAttributes();
-            setBenefitAttributeIfEmpty();
+            //setBenefitAttributeIfEmpty();
         }
     });
 
-    function setBenefitAttributeIfEmpty() {
+/*     function setBenefitAttributeIfEmpty() {
         if (
             !hasValue(analysisMethod.value.benefit.attribute) &&
             hasValue(benefitAttributes.value)
@@ -352,7 +358,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             analysisMethod.value.benefit.attribute = benefitAttributes.value[0].value.toString();
         }
     }
-
+ */
     function onSetAnalysisMethodProperty(property: string, value: any) {
         analysisMethod.value = setItemPropertyValue(
             property,
@@ -425,10 +431,17 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     async function onUpsertAnalysisMethod() {
 
-        upsertAnalysisMethodAction({
+        if(benefit.value.attribute != null)
+        {
+            benefitAttributeCheck.value = false;
+            upsertAnalysisMethodAction({
                 analysisMethod: analysisMethod.value,
                 scenarioId: selectedScenarioId.value,
             });
+        }
+        else{
+            benefitAttributeCheck.value = true;
+        }
 
         // const form: any = $refs.form;
 

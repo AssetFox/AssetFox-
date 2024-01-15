@@ -30,14 +30,14 @@
               <v-subheader class="ghd-md-gray ghd-control-label">Deficient Limit</v-subheader>
               <v-text-field id="CreateDeficientConditionGoalDialog-limit-vtextfield"
                             variant="outlined"
-                            v-model.number="newDeficientConditionGoal.deficientLimit" :mask="'##########'"
+                            v-model.number="newDeficientConditionGoal.deficientLimit" v-maska:[limitMask]
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                             class="ghd-text-field-border ghd-text-field"></v-text-field>
               <v-subheader class="ghd-md-gray ghd-control-label">Allowed Deficient Percentage</v-subheader>
               <v-text-field id="CreateDeficientConditionGoalDialog-percentage-vtextfield"
                             variant="outlined"
                             v-model.number="newDeficientConditionGoal.allowedDeficientPercentage"
-                            :mask="'###'"
+                            v-maska:[percentMask]
                             :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(newDeficientConditionGoal.allowedDeficientPercentage, [0, 100])]"
                             class="ghd-text-field-border ghd-text-field">
               </v-text-field>
@@ -91,6 +91,9 @@ import { useStore } from 'vuex';
   const newDeficientConditionGoal = ref<DeficientConditionGoal>(clone({...emptyDeficientConditionGoal, id: getNewGuid()}));
   const numericAttributeNames = ref<string[]>([]);
   let rules: InputValidationRules = validationRules;
+
+  const limitMask = { mask: '##########' };
+  const percentMask = { mask: '###' };
 
   onMounted(() => {
     setNumericAttributeNames();

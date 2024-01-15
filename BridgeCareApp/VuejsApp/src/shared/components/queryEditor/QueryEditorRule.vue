@@ -20,7 +20,7 @@
                                     style="margin-bottom: -15px;"></v-text-field>
                                 <v-text-field v-if="queryRule!.type === 'NUMBER'" density="compact" bg-color="white" 
                                      variant="outlined" style="margin-bottom: -15px;"
-                                     type="number" :mask="'##########'"
+                                     type="number" v-maska:[mask]
                                      v-model="selectedValue"></v-text-field>
                                 <v-select v-if="queryRule!.type === 'select'" density="compact" variant="outlined" style="margin-bottom: -15px; "
                                     :items='queryRule!.choices'
@@ -75,6 +75,8 @@ import { hasValue } from '@/shared/utils/has-value-util';
         emit('update:criteriaRule', value)
       }
     })
+
+    const mask = { mask: '##########' };
 
     onBeforeMount(async () => {
         if(!isNil(props.criteriaRule.selectedOperator))

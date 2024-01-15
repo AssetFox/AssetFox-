@@ -15,15 +15,15 @@
           <v-col>
             <v-subheader class="ghd-md-gray ghd-control-label">Priority Level</v-subheader>       
             <v-text-field id="CreateBudgetPriorityDialog-priorityLevel-vtextfield"
-                          v-model.number="newBudgetPriority.priorityLevel" 
-                          :mask="'##########'" :rules="[rules['generalRules'].valueIsNotEmpty]"
+                          v-model="newBudgetPriority.priorityLevel" 
+                          v-maska:[priorityMask] :rules="[rules['generalRules'].valueIsNotEmpty]"
                           class="ghd-text-field-border ghd-text-field" variant="outlined" density="compact"/>
           
             <v-subheader class="ghd-md-gray ghd-control-label">Year</v-subheader>
           
             <v-text-field id="CreateBudgetPriorityDialog-year-vtextfield" 
-                          v-model.number="newBudgetPriority.year"
-                          :mask="'####'"
+                          v-model="newBudgetPriority.year"
+                          v-maska:[yearMask]
                           class="ghd-text-field-border ghd-text-field" variant="outlined" density="compact"/>
           </v-col>
         </v-row>
@@ -61,6 +61,9 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
   const { showDialog } = toRefs(props);
 
   const emit = defineEmits(['submit'])
+
+  const priorityMask = { mask: '##########' };
+  const yearMask = { mask: '####' };
 
   let newBudgetPriority = ref<BudgetPriority>({...emptyBudgetPriority, id: getNewGuid()});
   let rules: InputValidationRules = validationRules;

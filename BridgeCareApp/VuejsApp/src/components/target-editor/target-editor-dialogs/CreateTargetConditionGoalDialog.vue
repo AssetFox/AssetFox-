@@ -31,7 +31,7 @@
           <v-subheader class="ghd-control-label ghd-md-gray">Year</v-subheader>
           <v-text-field 
             id="CreateTargetConditionGoalDialog-year-vtextfield" 
-            :mask="'####'" 
+            v-maska:[yearMask]
             class="ghd-control-text ghd-control-border" 
             variant="outlined"
             density="compact" 
@@ -41,7 +41,7 @@
             id="CreateTargetConditionGoalDialog-target-vtextfield" 
             variant="outlined"
             density="compact"
-            :mask="'##########'" 
+            v-maska:[mask]
             v-model.number="newTargetConditionGoal.target"
             class="ghd-control-text ghd-control-border"
             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
@@ -99,6 +99,9 @@ import { useStore } from 'vuex';
   let newTargetConditionGoal = ref<TargetConditionGoal>({...emptyTargetConditionGoal, id: getNewGuid()});
   const numericAttributeNames = ref<string[]>([]);
   const rules = ref<InputValidationRules>(validationRules);
+
+  const mask = { mask: '##########' };
+  const yearMask = { mask: '##########' };
 
   onMounted(() => {
     setNumericAttributeNames();

@@ -7,7 +7,7 @@
         </v-row>
       </v-card-title>
       <v-card-text>
-        <v-text-field type="number" :mask="'##########'" label="Edit" single-line
+        <v-text-field type="number" v-maska:[mask] label="Edit" single-line
           v-model.number="range"
           :min="1"
           :max="maxRange"
@@ -38,6 +38,8 @@ const props = defineProps<{
 let showDialogComputed = computed(() => props.showDialog);
 let range : number =1;
 let rules: InputValidationRules = validationRules;
+const mask = { mask: '##########' };
+
 function rangeLabel() {
     return 'Year Range: ' + (range <= 1 ? props.endYear : (props.endYear - range + 1) + '-' + props.endYear);
   }

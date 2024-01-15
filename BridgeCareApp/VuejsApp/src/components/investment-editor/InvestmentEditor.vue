@@ -55,7 +55,7 @@
                                   variant="outlined"
                                   @update:model-value ='onEditInvestmentPlan("firstYearOfAnalysisPeriod", $event)'
                                   :rules="[rules['generalRules'].valueIsNotEmpty]"
-                                  :mask="'####'"
+                                  v-maska:[yearMask]
                                   v-model='investmentPlan.firstYearOfAnalysisPeriod' 
                                   class="ghd-text-field-border ghd-text-field"/>
                 </v-col>
@@ -84,7 +84,7 @@
                                   variant="outlined"
                                   v-model='investmentPlan.inflationRatePercentage'
                                   @update:model-value='onEditInvestmentPlan("inflationRatePercentage", $event)'
-                                  :mask="'###'"
+                                  v-maska:[percentMask]
                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(investmentPlan.inflationRatePercentage, [0,100])]"
                                   :disabled="!hasAdminAccess"
                                   class="ghd-text-field-border ghd-text-field" />
@@ -114,7 +114,7 @@
                         </v-col>
                         <v-col cols="2">
                         <v-text-field id="InvestmentEditor-numberYearsToAdd-textField"
-                                      :disabled='currentPage.length === 0' type="number" min=1 :mask="'##########'"
+                                      :disabled='currentPage.length === 0' type="number" min=1 v-maska:[mask]
                                       class="ghd-text-field-border ghd-text-field"
                                       v-bind:class="{ 'ghd-blue-text-field': currentPage.length !== 0}"
                                       variant="outlined" density="compact" v-model.number="range" />
@@ -499,6 +499,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let unsavedDialogAllowed = ref<boolean>(true);
     let trueLibrarySelectItemValue : string | null = '';
     let librarySelectItemValueAllowedChanged: boolean = true;
+
+    const percentMask = { mask: '###' };
+    const yearMask = { mask: '####' };
+    const mask = { mask: '##########' };
 
     function addYearLabel() {
         return 'Add Year (' + getNextYear() + ')';

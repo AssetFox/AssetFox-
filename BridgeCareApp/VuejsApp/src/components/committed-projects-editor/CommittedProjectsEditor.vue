@@ -182,7 +182,7 @@
 
                                             <v-text-field v-if="header.key === 'year'"
                                                 :model-value="item.item[header.key]"
-                                                :mask="'##########'"
+                                                v-maska:[yearMask]
                                                 density="compact"
                                                 variant="underlined"
                                                 :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), inputRules['generalRules'].valueIsNotEmpty, inputRules['generalRules'].valueIsWithinRange(item.item[header.key], [firstYear, lastYear])]"
@@ -227,7 +227,7 @@
                                                     single-line
                                                     variant = "underlined"
                                                     v-model="item.item[header.key]"
-                                                    :mask="'##########'"
+                                                    v-maska:[yearMask]
                                                     :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.item[header.key], [firstYear, lastYear])]"/>
 
                                                 <currencyTextbox v-if="header.key === 'cost'"
@@ -454,6 +454,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
     let investmentYears = ref<number[]>([]);
     let isNoTreatmentBefore = ref<boolean>(true);
     let isNoTreatmentBeforeCache = ref<boolean>(true);
+
+    const yearMask = { mask: '####' };
     
     const cpGridHeaders = ref<any[]>([
         {

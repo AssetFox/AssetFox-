@@ -44,7 +44,7 @@
             <v-col >
                 <v-text-field id="TreatmentDetailsTab-yearsBeforeAny-vtext"
                     class='ghd-control-border ghd-control-text ghd-control-width-sm'
-                    :mask="'####'"
+                    v-maska:[mask]
                     @update:model-value="onEditTreatmentDetails('shadowForAnyTreatment', $event)"
                     label="Years Before Any"
                     variant="outlined"
@@ -58,7 +58,7 @@
             <v-col >
                 <v-text-field id="TreatmentDetailsTab-yearsBeforeSame-vtext"
                     class='ghd-control-border ghd-control-text ghd-control-width-sm'
-                    :mask="'####'"
+                    v-maska:[mask]
                     rows="4"
                     @update:model-value="onEditTreatmentDetails('shadowForSameTreatment', $event)"
                     label="Years Before Same"
@@ -199,6 +199,8 @@ import { getUrl } from '@/shared/utils/get-url';
     let categories = Array.from(treatmentCategoryMap.keys());
     let assetTypeMapValue: Map<string, AssetType> = clone(assetTypeMap);
     let assetTypeBinding = ref('');
+
+    const mask = { mask: '##########' };
 
     watch(assetTypeBinding, () => {
         onEditAssetType('assetType', assetTypeBinding.value)

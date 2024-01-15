@@ -31,7 +31,7 @@
             <v-text-field id="CreateRemainingLifeLimitDialog-limit-textField"
                           variant="outlined"
                           density="compact"
-                          :mask="'##########'"
+                          v-maska:[mask]
                           v-model.number="newRemainingLifeLimit.value"
                           :rules="[rules['generalRules'].valueIsNotEmpty]"
                           class="ghd-control-text ghd-control-border"/>
@@ -70,6 +70,7 @@ import {clone} from 'ramda';
 
   let newRemainingLifeLimit = ref<RemainingLifeLimit>({...emptyRemainingLifeLimit, id: getNewGuid()});
   let rules: InputValidationRules = clone(validationRules);
+  const mask = { mask: '##########' };
   
   watch(dialogData,()=> {
     newRemainingLifeLimit.value.attribute = hasValue(dialogData.value.numericAttributeSelectItems)

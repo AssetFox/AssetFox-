@@ -501,9 +501,18 @@ internal sealed class AssetContext : CalculateEvaluateScope
         SetInitialValues(SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
         SetInitialValues(SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
-        foreach (var committedProject in SimulationRunner.CommittedProjectsPerAsset[Asset])
+        foreach (var committedProjects in SimulationRunner.CommittedProjectsPerAsset[Asset].GroupBy(cp => cp.Year))
         {
-            EventSchedule.Add(committedProject.Year, committedProject);
+            var year = committedProjects.Key;
+            var numberOfProjects = committedProjects.Count();
+            if (numberOfProjects > 1)
+            {
+                EventSchedule.Add(year, new TreatmentBundle(committedProjects));
+            }
+            else if (numberOfProjects == 1)
+            {
+                EventSchedule.Add(year, committedProjects.Single());
+            }
         }
 
         InitializeCalculatedFields();

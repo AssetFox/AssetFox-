@@ -117,22 +117,6 @@ public sealed class Simulation : WeakEntity, IValidator
             results.Add(ValidationStatus.Error, "Multiple selectable treatments have the same name.", this, nameof(Treatments));
         }
 
-        if (CommittedProjects.Select(project => (project.Asset, project.Year)).Distinct().Count() < CommittedProjects.Count)
-        {
-            results.Add(ValidationStatus.Error, "Multiple projects are committed to the same asset in the same year.", this, nameof(CommittedProjects));
-        }
-        else if (InvestmentPlan.GetAllValidationResults(new List<string>()).All(result => result.Status != ValidationStatus.Error))
-        {
-            try
-            {
-                _ = GetBudgetContextsWithCostAllocationsForCommittedProjects();
-            }
-            catch (SimulationException e)
-            {
-                results.Add(ValidationStatus.Error, "At least one committed project cannot be funded: " + e.Message, this, nameof(CommittedProjects));
-            }
-        }
-
         return results;
     }
 

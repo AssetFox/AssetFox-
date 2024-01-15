@@ -89,8 +89,7 @@ public static class AnalysisInputLoading
             {
                 throw;
             }
-            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));            
-            // return null;
+            AddError(validationResultBag, ex.Message);
         }
         // intermediate update/check
         if (!afterExplorer())
@@ -115,8 +114,7 @@ public static class AnalysisInputLoading
             {
                 throw;
             }
-            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
-            // return null;
+            AddError(validationResultBag, ex.Message);
         }
         // intermediate update/check
         if (!afterNetwork())
@@ -135,8 +133,7 @@ public static class AnalysisInputLoading
             {
                 throw;
             }
-            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
-            // return null;
+            AddError(validationResultBag, ex.Message);
         }
         // intermediate update/check
         if (!afterSimulation())
@@ -156,8 +153,7 @@ public static class AnalysisInputLoading
             {
                 throw;
             }
-            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
-            // return null;
+            AddError(validationResultBag, ex.Message);
         }
         // intermediate update/check
         if (!afterInvestmentPlan())
@@ -177,8 +173,7 @@ public static class AnalysisInputLoading
             {
                 throw;
             }
-            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
-            // return null;
+            AddError(validationResultBag, ex.Message);
         }
         // intermediate update/check
         if (!afterAnalysisMethod())
@@ -198,8 +193,7 @@ public static class AnalysisInputLoading
             {
                 throw;
             }
-            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
-            // return null;
+            AddError(validationResultBag, ex.Message);
         }
         // intermediate update/check
         if (!afterPerformanceCurves())
@@ -218,8 +212,7 @@ public static class AnalysisInputLoading
             {
                 throw;
             }
-            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
-            // return null;
+            AddError(validationResultBag, ex.Message);
         }
         // intermediate update/check
         if (!afterSelectableTreatments())
@@ -238,8 +231,7 @@ public static class AnalysisInputLoading
             {
                 throw;
             }
-            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
-            // return null;
+            AddError(validationResultBag, ex.Message);
         }
         // intermediate update/check
         if (!afterCommittedProjects())
@@ -258,10 +250,11 @@ public static class AnalysisInputLoading
             {
                 throw;
             }
-            validationResultBag.Add(ValidationStatus.Error, ex.Message, typeof(AnalysisInputLoading));
-            // return null;
+            AddError(validationResultBag, ex.Message);
         }
 
         return simulation;
     }
+
+    private static void AddError(ValidationResultBag validationResultBag, string errorMessage) => validationResultBag.Add(ValidationStatus.Error, errorMessage, typeof(AnalysisInputLoading));
 }

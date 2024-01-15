@@ -604,14 +604,14 @@ namespace BridgeCareCore.Controllers
             try
             {
                 _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                ValidationResultBag validationResultBag = null;
+                var validationResultBag = new ValidationResultBag();
                 var validationResults = new List<PreChecksValidationResult>();
 
                 await Task.Factory.StartNew(() =>
                 {
                     var simulation = AnalysisInputLoading.GetSimulationWithoutAssets(UnitOfWork, networkId, simulationId, validationResultBag);
-                    var validationResultList = validationResultBag?.AsEnumerable()?.ToList();
-                    if (validationResultList != null && validationResultList.Count > 0)
+                    var validationResultList = validationResultBag.AsEnumerable().ToList();
+                    if (validationResultList?.Count > 0)
                     {
                         GetValidationResults(validationResults, validationResultList);
                     }

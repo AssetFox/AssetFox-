@@ -4,7 +4,6 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.Validation;
-using HotChocolate.Language.Visitors;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore;
 
@@ -41,7 +40,7 @@ public static class AnalysisInputLoading
         IUnitOfWork unitOfWork,
         Guid networkId,
         Guid simulationId,
-        ValidationResultBag validationResultBag) // TODO fill up validationResultBag if any errors // add try catch to each call within GetSimulation and build results if allowLoadingOfAssets is false?
+        ValidationResultBag validationResultBag)
         => GetSimulation(
             false,
             unitOfWork,

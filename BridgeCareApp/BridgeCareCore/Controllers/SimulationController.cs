@@ -27,6 +27,7 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using AppliedResearchAssociates.Validation;
 using System.Collections.Generic;
 using BridgeCareCore.Models.Validation;
+using ValidationResult = AppliedResearchAssociates.Validation.ValidationResult;
 
 namespace BridgeCareCore.Controllers
 {
@@ -605,25 +606,26 @@ namespace BridgeCareCore.Controllers
             {
                 _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                 var validationResultBag = new ValidationResultBag();
-                var validationResults = new List<PreChecksValidationResult>();
+                var validationResultList = new List<ValidationResult>();
+                var preChecksValidationResults = new List<PreChecksValidationResult>();
 
                 await Task.Factory.StartNew(() =>
                 {
                     var simulation = AnalysisInputLoading.GetSimulationWithoutAssets(UnitOfWork, networkId, simulationId, validationResultBag);
-                    var validationResultList = validationResultBag.AsEnumerable().ToList();
-                    if (validationResultList?.Count > 0)
+                    if (validationResultBag.Count > 0)
                     {
-                        GetValidationResults(validationResults, validationResultList);
+                        validationResultList = validationResultBag.AsEnumerable().ToList();
+                        GetPreChecksValidationResults(preChecksValidationResults, validationResultList);
                     }
                     else
                     {
                         validationResultBag = simulation.GetAllValidationResults(Enumerable.Empty<string>());
                         validationResultList.AddRange(validationResultBag.AsEnumerable().ToList());
-                        GetValidationResults(validationResults, validationResultList);
+                        GetPreChecksValidationResults(preChecksValidationResults, validationResultList);
                     }
                 });
                 
-                return Ok(validationResults);
+                return Ok(preChecksValidationResults);
             }
             catch (UnauthorizedAccessException)
             {
@@ -647,7 +649,7 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        private static void GetValidationResults(List<PreChecksValidationResult> validationResults, List<AppliedResearchAssociates.Validation.ValidationResult> validationResultList) =>
+        private static void GetPreChecksValidationResults(List<PreChecksValidationResult> validationResults, List<ValidationResult> validationResultList) =>
             validationResults.AddRange(from validationResult in validationResultList
                                        let toAdd = new PreChecksValidationResult(validationResult.Status, validationResult.Message)
                                        select toAdd);

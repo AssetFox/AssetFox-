@@ -250,6 +250,12 @@
             selectedInventoryIndex.value = [];
             selectedKeys[0] = "";
             keyAttributeValues.value = await setupSelectLists();
+
+            clearForm();
+        }
+
+        function clearForm() {
+            store.state.inventoryModule.staticHTMLForInventory = null;
         }
 
         function onSelectInventoryItem(index: number){

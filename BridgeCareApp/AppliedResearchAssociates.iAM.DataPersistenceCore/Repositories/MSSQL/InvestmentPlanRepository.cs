@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if(!_unitOfWork.Context.InvestmentPlan.Any(_ => _.Simulation.Id == simulation.Id))
             {
-                throw new RowNotInTableException("No budget(s) was found for the given scenario.");
+                throw new RowNotInTableException("No budgets were found for the given scenario.");
             }
 
             _unitOfWork.Context.InvestmentPlan.AsNoTracking()

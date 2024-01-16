@@ -164,7 +164,7 @@ import { useStore } from 'vuex';
             newScenario.networkName = selectedNetworkName;      
             newScenario.name = props.dialogData.scenario.name;
             cloneScenarioWithDestinationNetworkAction(newScenario);
-            emit('submit', newScenario);
+            emit('submit');
         } else {
             emit('submit', null);
         }

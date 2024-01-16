@@ -390,7 +390,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     const rowCache = ref<SectionCommittedProject[]>([]);
     const gridSearchTerm = ref('');
     const currentSearch = ref('');
-    let totalItems = 0;
+    let totalItems = ref(0);
     const currentPage = ref<SectionCommittedProjectTableData[]>([]);
     let isRunning: boolean = true;
 
@@ -695,7 +695,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
                     let data = response.data as PagingPage<SectionCommittedProject>;
                     sectionCommittedProjects.value = data.items;
                     rowCache.value = clone(sectionCommittedProjects.value)
-                    totalItems = data.totalItems;
+                    totalItems.value = data.totalItems;
                     const row = data.items.find(scp => scp.id == selectedCommittedProject.value);
 
                     if(isNil(row)) {
@@ -1319,7 +1319,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 let data = response.data as PagingPage<SectionCommittedProject>;
                 sectionCommittedProjects.value = data.items;
                 rowCache.value = clone(sectionCommittedProjects.value)
-                totalItems = data.totalItems;
+                totalItems.value = data.totalItems;
             }
         }); 
     }

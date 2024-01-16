@@ -29,7 +29,7 @@
                 item-title="text"
                 item-value="value"
                 v-model='treatmentSelectItemValue'
-                v-show='hasSelectedLibrary'
+                v-show='hasSelectedLibrary || hasScenario'
             >
             </v-select>
         </v-col>

@@ -149,7 +149,6 @@ public sealed class Scenario
         NameOfUsableBudget = source.Budget.Name,
         NameOfTemplateTreatment = source.TemplateTreatment.Name,
         Year = source.Year,
-        ProjectSource = source.ProjectSource.ToString()
     };
 
     private static ConditionalTreatmentConsequence Convert(Analysis.ConditionalTreatmentConsequence source) => new()
@@ -338,7 +337,6 @@ public sealed class Scenario
         {
             var result = target.AddTreatment();
 
-            result.Category = source.Category;
             result.Name = source.Name;
             result.SetShadowForAnyTreatment(source.ShadowForAnyTreatment);
             result.SetShadowForSameTreatment(source.ShadowForSameTreatment);
@@ -569,11 +567,7 @@ public sealed class Scenario
                 Budget = BudgetByName[source.NameOfUsableBudget],
                 Cost = source.Cost,
                 Name = source.Name,
-                treatmentCategory = source.Category,
                 TemplateTreatment = TreatmentByName[source.NameOfTemplateTreatment],
-                ProjectSource = Enum.TryParse<ProjectSourceDTO>(source.ProjectSource, out var projectSourceEnum)
-                            ? projectSourceEnum
-                            : ProjectSourceDTO.None
             };
 
             return result;

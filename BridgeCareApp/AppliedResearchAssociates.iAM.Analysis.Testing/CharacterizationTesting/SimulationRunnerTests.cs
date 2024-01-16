@@ -27,7 +27,6 @@ public class SimulationRunnerTests
             Cost = 100,
             Name = "Lovecraftian Horror",
             NameOfTemplateTreatment = scenario.SelectableTreatments.First(t => t.ForCommittedProjectsOnly).Name,
-            ProjectSource = ProjectSourceDTO.Maintenance.ToString(),
         });
 
         return RunTest(scenario);
@@ -46,7 +45,6 @@ public class SimulationRunnerTests
             Cost = 100,
             Name = "Lovecraftian Horror #1",
             NameOfTemplateTreatment = scenario.SelectableTreatments.First(t => t.ForCommittedProjectsOnly).Name,
-            ProjectSource = ProjectSourceDTO.Maintenance.ToString(),
         });
 
         scenario.CommittedProjects.Add(new()
@@ -58,7 +56,6 @@ public class SimulationRunnerTests
             Name = "Lovecraftian Horror #2",
             NameOfTemplateTreatment = scenario.SelectableTreatments
                 .First(t => !t.ForCommittedProjectsOnly && t.Name != scenario.NameOfPassiveTreatment).Name,
-            ProjectSource = ProjectSourceDTO.Maintenance.ToString(),
         });
 
         return RunTest(scenario);

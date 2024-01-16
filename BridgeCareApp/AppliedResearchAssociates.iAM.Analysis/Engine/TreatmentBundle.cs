@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
-internal sealed class TreatmentBundle : Treatment
+internal class TreatmentBundle : Treatment
 {
     private readonly IReadOnlyList<ITreatmentScheduling> TreatmentSchedulings;
 
@@ -103,4 +103,13 @@ internal sealed class TreatmentBundle : Treatment
         public static BundleScheduling Create(IGrouping<int, ITreatmentScheduling> g)
             => new(g.Key, new TreatmentBundle(g.Select(s => s.TreatmentToSchedule)));
     }
+}
+
+internal sealed class CommittedProjectBundle : TreatmentBundle
+{
+    public CommittedProjectBundle(IEnumerable<CommittedProject> bundledTreatments) : base(bundledTreatments)
+    {
+    }
+
+    public IEnumerable<CommittedProject> BundledProjects => BundledTreatments.Cast<CommittedProject>();
 }

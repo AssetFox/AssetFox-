@@ -479,11 +479,15 @@ internal sealed class AssetContext : CalculateEvaluateScope
         PrepareForTreatment();
 
         if (EventSchedule.TryGetValue(year, out var scheduledEvent) &&
-            scheduledEvent.IsT1(out var treatment) &&
-            treatment is CommittedProject project)
+            scheduledEvent.IsT1(out var treatment))
         {
-            ApplyTreatment(project, year);
-            rollForwardEvents.Add(new(year, Asset.Id, Asset.AssetName, project.Name));
+            if (treatment is not (CommittedProject or CommittedProjectBundle))
+            {
+                throw new InvalidOperationException("Simulation engine scheduled invalid roll-forward event.");
+            }
+
+            ApplyTreatment(treatment, year);
+            rollForwardEvents.Add(new(year, Asset.Id, Asset.AssetName, treatment.Name));
         }
         else if (!SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
         {
@@ -507,7 +511,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
             var numberOfProjects = committedProjects.Count();
             if (numberOfProjects > 1)
             {
-                EventSchedule.Add(year, new TreatmentBundle(committedProjects));
+                EventSchedule.Add(year, new CommittedProjectBundle(committedProjects));
             }
             else if (numberOfProjects == 1)
             {

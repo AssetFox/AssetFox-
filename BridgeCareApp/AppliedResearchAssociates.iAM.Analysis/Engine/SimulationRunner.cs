@@ -464,7 +464,7 @@ public sealed class SimulationRunner
                         context.Detail.ProjectSource = committedProject.ProjectSource.ToString();
                     }
 
-                    context.Detail.TreatmentCause = treatment is CommittedProject
+                    context.Detail.TreatmentCause = treatment is CommittedProject or CommittedProjectBundle
                         ? TreatmentCause.CommittedProject
                         : TreatmentCause.ScheduledTreatment;
                 }
@@ -850,24 +850,38 @@ public sealed class SimulationRunner
     {
         var treatmentConsideration = assetContext.Detail.TreatmentConsiderations.GetAdd(new(treatment.Name));
 
-        var totalBasicCost = (decimal)assetContext.GetCostOfTreatment(treatment);
+        // First, check for committed projects.
 
-        if (treatment is CommittedProject committedProject)
+        if (treatment is CommittedProject cp)
         {
             treatmentConsideration.FundingCalculationOutput = new()
             {
                 AllocationMatrix =
                 {
                     // CP cost is assumed to already include all appropriate adjustments for inflation.
-                    new(year, committedProject.Budget.Name, treatment.Name, totalBasicCost)
+                    new(year, cp.Budget.Name, cp.Name, (decimal)cp.Cost)
                 }
             };
 
             return CostCoverage.Full;
         }
 
-        // At this point, we know we are not dealing with a committed project.
+        if (treatment is CommittedProjectBundle cpBundle)
+        {
+            treatmentConsideration.FundingCalculationOutput = new();
 
+            foreach (var bp in cpBundle.BundledProjects)
+            {
+                treatmentConsideration.FundingCalculationOutput.AllocationMatrix.Add(
+                    new(year, bp.Budget.Name, bp.Name, (decimal)bp.Cost));
+            }
+
+            return CostCoverage.Full;
+        }
+
+        // At this point, we know we are not dealing with committed projects.
+
+        var totalBasicCost = (decimal)assetContext.GetCostOfTreatment(treatment);
         var inflationFactor = (decimal)GetInflationFactor(year);
         var totalTreatmentCost = totalBasicCost * inflationFactor;
 

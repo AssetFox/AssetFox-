@@ -8,21 +8,24 @@
                         <v-btn @click="onSubmit(false)" flat>
                         <i class="fas fa-times fa-2x"></i>
                         </v-btn>
-                    </v-row>
-                        <div style="margin: 50px;">
+
+                        <div style="margin: 40px;">
                         <CommittedProjectsFileSelector :closed='closed' useTreatment='true' @treatment='onTreatmentChanged' @submit='onSubmitFileSelectorFile' />
-                        </div>
-                        <span class="div-warning-border" style="margin: 10px;">
-                            <v-row align="start" style="padding:5px;">
+                        </div>                    
+                    </v-row>
+                    <v-row justify="center" style="margin: 5px;width: 100%;">
+                        <span class="div-warning-border" style="margin: 5px;">
+                            <v-row align="start" style="padding:8px;">
                                 <v-icon class="px-2 icon-color">fas fa-exclamation-triangle</v-icon>
                                 <h3 class="h3-color">Warning</h3>
                             </v-row>
                             <p class="Montserrat-font-family">
                                 Uploading new committed projects will override ALL previous commitments.
-                                Committed projects may take a few minutes to process. You will receive an email when this process is complete.
+                                Committed projects may take a few minutes to process.
                             </p>
                         </span>
-                    <v-row justify="center" style="margin: 10px;">
+                    </v-row>
+                    <v-row justify="center" style="margin: 5px;">
                         <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue Montserrat-font-family' variant = "flat">Cancel</v-btn>
                         <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>
                     </v-row>

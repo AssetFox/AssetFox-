@@ -388,10 +388,10 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 }               
             }
             //when the parameter and ui sync an empty string is assigned to the parameter instead of null if the text box is empty
-            if(!isNil(selectedAttribute.value.maximum))  
-                selectedAttribute.value.maximum = null;
-            if(!isNil(selectedAttribute.value.minimum))  
-                selectedAttribute.value.minimum = null;
+            if(isNil(selectedAttribute.value.maximum))  
+                 selectedAttribute.value.maximum = null;
+            if(isNil(selectedAttribute.value.minimum))  
+                 selectedAttribute.value.minimum = null;
 
             if(selectedAttribute.value.dataSource.type === 'SQL'){
                 allValid = allValid &&

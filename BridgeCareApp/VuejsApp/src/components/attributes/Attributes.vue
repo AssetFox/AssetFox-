@@ -78,13 +78,13 @@
                     </v-col>
                     <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Minimum Value</v-subheader>
-                        <v-text-field id="Attributes-attributeMinimumValue-vtextfield" type="number" variant="outlined" class="ghd-text-field-border ghd-text-field"                            
+                        <v-text-field id="Attributes-attributeMinimumValue-vtextfield" variant="outlined" class="ghd-text-field-border ghd-text-field"                            
                             v-model='selectedAttribute.minimum'
                             density="compact"/>
                     </v-col>
                     <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Maximum Value</v-subheader>
-                        <v-text-field id="Attributes-attributeMaximumValue-vtextfield" variant="outlined" type="number" class="ghd-text-field-border ghd-text-field"
+                        <v-text-field id="Attributes-attributeMaximumValue-vtextfield" variant="outlined" class="ghd-text-field-border ghd-text-field"
                             v-model='selectedAttribute.maximum'
                             density="compact"/>
                     </v-col>

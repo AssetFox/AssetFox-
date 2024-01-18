@@ -1,6 +1,6 @@
 <template>
-    <v-layout column>
-        <v-layout>
+    <v-row column>
+        <v-row>
             <v-card
                 class="mx-auto ghd-sidebar-raw-data"
                 height="100%"
@@ -10,40 +10,37 @@
                     Administration
                 </div>
                 <v-list class="ghd-navigation-list">
-                    <v-list-item-group
+                    <v-list-item
                         class="settings-list ghd-control-text"
                         :key="navigationTab.tabName"
                         v-for="navigationTab in visibleNavigationTabs()"
                     >
-                        <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
-                            <v-list-tile-action>
-                                <v-list-tile-icon class="sidebar-icon">
-                                    <AttributesSvg id="EditAdmin-security-btn" style="height: 38px; width: 34px"  class="raw-data-icon" v-if="navigationTab.tabName === 'Security'"/>    
+                    <v-list-item id="EditScenario-tabs-vListTile" :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
+                            <template v-slot:prepend>
+                                <AttributesSvg id="EditAdmin-security-btn" style="height: 38px; width: 34px"  class="raw-data-icon" v-if="navigationTab.tabName === 'Security'"/>    
                                     <DataSourceSvg id="EditAdmin-site-btn" style="height: 30px; width: 36px" class="raw-data-icon" v-if="navigationTab.tabName === 'Site'"/>
-                                    <NetworksSvg  id="EditAdmin-data-btn" style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'Data'"/>                            
-                                    <NetworksSvg  style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'RawData'"/>                            
-                                </v-list-tile-icon>
-                            </v-list-tile-action>
-                            <v-list-tile-content>
-                                <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>
-                            </v-list-tile-content>
-                        </v-list-tile>
-                    </v-list-item-group>
+                                    <NetworksSvg id="EditAdmin-data-btn" style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'Data'"/>                            
+                            </template>
+                            <v-list-item-title style="width: auto; padding-left: 5px;" v-text="navigationTab.tabName"></v-list-item-title>
+                        </v-list-item>
+                        
+                    </v-list-item>
                 </v-list>
             </v-card>
-            <v-flex xs12 class="ghd-content">
+            <v-col cols ="12" class="ghd-content">
                 <v-container fluid grid-list-xs style="padding-left:20px;padding-right:20px;">
                     <router-view></router-view>
                 </v-container>
-            </v-flex>
-        </v-layout>
-    </v-layout>
+            </v-col>
+        </v-row>
+    </v-row>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Action, State } from 'vuex-class';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import router from '@/router';
 import { any, clone, isNil, propEq } from 'ramda';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
@@ -51,16 +48,14 @@ import AttributesSvg from '@/shared/icons/AttributesSvg.vue';
 import DataSourceSvg from '@/shared/icons/DataSourceSvg.vue';
 import NetworksSvg from '@/shared/icons/NetworksSvg.vue';
 
-@Component({
-    components: { AttributesSvg, DataSourceSvg, NetworksSvg}
-})
-export default class EditAdmin extends Vue {
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.authenticationModule.userId) userId: string;
+import { createDecipheriv } from 'crypto';
 
-    networkId: string = getBlankGuid();
-    networkName: string = '';
-    navigationTabs: NavigationTab[] = [
+    let store = useStore();
+    let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess);
+    let userID = ref<string>(store.state.authenticationModule.userID);
+    let networkId: string = getBlankGuid();
+    let networkName: string = '';
+    let navigationTabs: NavigationTab[] = [
         {
             tabName: 'Security',
             tabIcon: "",
@@ -83,10 +78,10 @@ export default class EditAdmin extends Vue {
             },
         },
     ];
-    
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-                vm.navigationTabs = vm.navigationTabs.map(
+    created();
+    function created(){
+        (() => {
+                navigationTabs = navigationTabs.map(
                     (navTab: NavigationTab) => {
                         const navigationTab = {
                             ...navTab,
@@ -100,7 +95,7 @@ export default class EditAdmin extends Vue {
                         if (navigationTab.tabName === 'DataSource' 
                             || navigationTab.tabName === 'Networks' 
                             || navigationTab.tabName === 'Attributes') {
-                            navigationTab['visible'] = vm.hasAdminAccess;
+                            navigationTab['visible'] =hasAdminAccess.value;
                         }
 
                         return navigationTab;
@@ -113,19 +108,21 @@ export default class EditAdmin extends Vue {
                 const hasChildPath = any(
                     (navigationTab: NavigationTab) =>
                         href.indexOf(navigationTab.navigation.path) !== -1,
-                    vm.navigationTabs,
+                    navigationTabs,
                 );
         });
     }
-
-
-    visibleNavigationTabs() {
-        return this.navigationTabs.filter(
+     function visibleNavigationTabs() {
+        return navigationTabs.filter(
             navigationTab =>
                 navigationTab.visible === undefined || navigationTab.visible,
         );
     }
-}
+    function onNavigate(route: any) {
+        if (router.currentRoute.value.path !== route.path) {
+            router.push(route).catch(() => {});
+        }
+    }
 </script>
 
 <style>
@@ -161,7 +158,7 @@ export default class EditAdmin extends Vue {
     padding-left: 20px !important;
 }
 
-.primary--text .selected-sidebar-icon .v-icon{
+.text-primary .selected-sidebar-icon .v-icon{
     visibility: visible !important;
 }
 
@@ -169,7 +166,7 @@ export default class EditAdmin extends Vue {
     visibility: hidden !important;
 }
 
-.primary--text .raw-data-icon{
+.text-primary .raw-data-icon{
     stroke: #FFFFFF !important;
 }
 
@@ -181,7 +178,7 @@ export default class EditAdmin extends Vue {
     fill: #FFFFFF;
 }
 
-.primary--text .raw-data-svg-fill {
+.text-primary .raw-data-svg-fill {
     fill: #2A578D;
 }
 </style>

@@ -1,102 +1,106 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="showDialog">
+  <v-dialog max-width="450px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
-        <v-layout justify-space-between align-center>
+        <v-row justify-space-between align-center>
           <div class="ghd-control-dialog-header">Add Consequence</div>
           <v-btn 
               id="CreateCommittedProjectConsequenceDialog-close-vbtn"
-              @click="onSubmit(false)" flat class="ghd-close-button">
+              @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
           </v-btn>
-        </v-layout>
+        </v-row>
       </v-card-title>
       <v-card-text class="ghd-dialog-box-padding-center"
         id="CreateCommittedProjectConsequenceDialog-content-vCardText"
       >
-        <v-layout column
+        <v-row column
           id="CreateCommittedProjectConsequenceDialog-content-vLayout"
           >
-          <v-flex
+          <v-col
             id="CreateCommittedProjectConsequenceDialog-attribute-vFlex">
             <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
             <v-select :items="attributeNames"
-              append-icon=$vuetify.icons.ghd-down
-              outline
+              menu-icon=custom:GhdDownSvg
+              variant="outlined"
               v-model="newConsequence.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
               class="ghd-select ghd-text-field ghd-text-field-border">
             </v-select>
-          </v-flex>
-          <v-flex
+          </v-col>
+          <v-col
             id="CreateCommittedProjectConsequenceDialog-changeValue-vFlex">
             <v-subheader class="ghd-md-gray ghd-control-label">Change Value</v-subheader>
             <v-text-field outline v-model="newConsequence.changeValue"
               :rules="[rules['generalRules'].valueIsNotEmpty]"
               class="ghd-text-field-border ghd-text-field"></v-text-field>
-          </v-flex>         
-        </v-layout>
+          </v-col>         
+        </v-row>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
-        <v-layout justify-center row>
-          <v-btn @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
+        <v-row justify-center row>
+          <v-btn @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
             Cancel
           </v-btn >
-          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Save
           </v-btn>         
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop} from 'vue-property-decorator';
+<script lang="ts" setup>
+import {watch, ref, onMounted, reactive, computed} from 'vue';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { CommittedProjectConsequence, emptyCommittedProjectConsequence } from '@/shared/models/iAM/committed-projects';
-import { State } from 'vuex-class';
 import { Attribute } from '@/shared/models/iAM/attribute';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
+import { createDecipheriv } from 'crypto';
+import { useStore } from 'vuex';
 
-@Component
-export default class CreateConsequenceDialog extends Vue {
-  @Prop() showDialog: boolean;
+  let store = useStore();
+  const emit = defineEmits(['submit']);
+  const props = defineProps({showDialog: Boolean});
+  let showDialogComputed = computed(() => props.showDialog);
+  let showDialog = ref<boolean>(props.showDialog);
 
-  mounted() {
-    this.setAttributes();
+  onMounted(() => mounted())
+  function mounted() {
+    setAttributes();
   }
 
-  newConsequence: CommittedProjectConsequence = {...emptyCommittedProjectConsequence, id: getNewGuid()};
-  rules: InputValidationRules = rules;
-  attributeNames: string[] = [];
+  let newConsequence: CommittedProjectConsequence = {...emptyCommittedProjectConsequence, id: getNewGuid()};
+  let inputRules: InputValidationRules = rules;
+  let attributeNames: string[] = [];
 
-  @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
+  // @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
+  // async function stateAttributes(payload?: any): Promise<any>{ await store.dispatch('');}
+  const stateAttributes = reactive<Attribute[]>(store.state.attributeModule.attributes);
 
-  disableSubmitButton() {
-    return !(this.rules['generalRules'].valueIsNotEmpty(this.newConsequence.changeValue) === true);
+  function disableSubmitButton() {
+    return !(inputRules['generalRules'].valueIsNotEmpty(newConsequence.changeValue) === true);
   }
 
-  setAttributes() {
-    if (hasValue(this.stateAttributes)) {
-      this.attributeNames = getPropertyValues('name', this.stateAttributes);
+  function setAttributes() {
+    if (hasValue(stateAttributes)) {
+      attributeNames = getPropertyValues('name', stateAttributes);
 
-      if (this.showDialog) {
-        this.setNewDeficientConditionGoalDefaultValues();
-      }
+      // if (showDialog) {
+      //   setNewDeficientConditionGoalDefaultValues();
+      // }
     }
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newConsequence);
+      emit('submit', newConsequence);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newConsequence = {...emptyCommittedProjectConsequence, id: getNewGuid()};
+    newConsequence = {...emptyCommittedProjectConsequence, id: getNewGuid()};
   }
-}
 </script>

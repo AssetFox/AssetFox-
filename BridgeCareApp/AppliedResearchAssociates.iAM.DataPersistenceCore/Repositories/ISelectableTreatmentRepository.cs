@@ -53,5 +53,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         TreatmentDTO GetSelectableTreatmentByLibraryIdAndName(Guid treatmentLibraryId, string treatmentName);
         void UpsertOrDeleteTreatmentLibraryTreatmentsAndPossiblyUsers(TreatmentLibraryDTO dto, bool isNewLibrary, Guid userId);
         void AddDefaultPerformanceFactors(Guid scenarioId, List<TreatmentDTO> treatments);
+
+        LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId);
     }
 }

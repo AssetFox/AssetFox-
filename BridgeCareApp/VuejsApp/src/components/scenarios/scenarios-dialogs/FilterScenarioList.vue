@@ -1,14 +1,16 @@
 <template>
-    <v-dialog max-width="450px" persistent v-model="showDialog">
-        <v-card elevation="5" outlined class="modal-pop-up-padding">
+    <v-dialog max-width="450px" persistent v-model="showDialogComputed">
+        <v-card elevation="5"  class="modal-pop-up-padding">
+            
             <v-card-title>
+                <v-row justify="space-between">
                 <h3 class="dialog-header">
                     Filter For Scenarios
                 </h3>
-                <v-spacer></v-spacer>
-                <v-btn @click="onSubmit(false)" icon>
+                <v-btn @click="onSubmit(false)" flat>
                     <i class="fas fa-times fa-2x"></i>
                 </v-btn>
+            </v-row>
             </v-card-title>
 
             <v-card-text>
@@ -16,45 +18,46 @@
                     id="FilterScenarioList-selectAFilter-select"
                     :items="filters"
                     label="Select a filter"
-                    item-text="name"
+                    item-title="name"
                     v-model="FilterCategory"
                     return-object
-                    v-on:change="selectedFilter(`${FilterCategory}`, `${FilterValue}`)"
-                    dense
-                    outline
+                    menu-icon=custom:GhdDownSvg
+                    @update:modelValue="selectedFilter(`${FilterCategory}`, `${FilterValue}`)"
+                    variant="outlined"
+                    density="compact"
                 ></v-select>
                 <v-text-field
                     id="FilterScenarioList-scenarioName-textField"
                     label="Filter Value"
-                    outline
+                    variant="outlined"
+                    density="compact"
                     v-model="FilterValue"
                 ></v-text-field>
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-space-between row>
+                <v-row justify="center">
                     <v-btn
                         id="FilterScenarioList-save-btn"
                         @click="onSubmit(true)"
-                        class="ara-blue-bg white--text"
+                        class="ghd-button ghd-blue"
                     >
                         Filter
                     </v-btn>
                     <v-btn
                         id="FilterScenarioList-cancel-btn"
                         @click="onSubmit(false)"
-                        class="ara-orange-bg white--text"
+                        class="ghd-button ghd-blue"
+                        variant="outlined"
                         >Cancel</v-btn
                     >
-                </v-layout>
+                </v-row>
             </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { State } from 'vuex-class';
+<script lang="ts" setup>
+import Vue, { computed, ref, watch } from 'vue'; 
 import { getUserName } from '@/shared/utils/get-user-info';
 import { User } from '@/shared/models/iAM/user';
 import {
@@ -65,51 +68,56 @@ import {
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { find, isNil, propEq } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
+import { useStore } from 'vuex'; 
 
-@Component
-export default class FilterScenarioList extends Vue {
-    @Prop() showDialog: boolean;
+  let store = useStore(); 
 
-    @State(state => state.userModule.users) stateUsers: User[];
-    filters: string[] = [
+  const props = defineProps<{showDialog: boolean}>();
+  const emit = defineEmits(['submit'])
+  let showDialogComputed = computed(() => props.showDialog);
+    let stateUsers = ref<User[]>(store.state.userModule.users);
+    let shared = ref<boolean>(false);
+
+    let filters: string[] = [
         "Scenario",
         "Owner",
         "Creator",
         "Network"
     ]
-    FilterCategory = '';
-    FilterValue = '';
+    let FilterCategory = ref('');
+    let FilterValue = ref('');
+    let isNetworkSelected: boolean = false;
 
-    @Watch('showDialog')
-    onShowDialogChanged() {
-        this.FilterCategory = '';
-        this.FilterValue = '';
+    watch(()=> props.showDialog,()=> onShowDialogChanged)
+    function onShowDialogChanged() {
+         FilterCategory.value = '';
+        FilterValue.value = '';
     }
 
-    @Watch('shared')
-    onSetPublic() {
-        this.onModifyScenarioUserAccess();
+    watch(shared, ()=> onSetPublic)
+    function onSetPublic() {
+        // ToDo - commented the below line as the function is missing
+        //onModifyScenarioUserAccess();
     }
 
-    selectedFilter(FilterCategory: string, FilterValue: string){
-      this.FilterCategory = FilterCategory;
-      this.FilterValue = FilterValue;
-      if(FilterCategory != '' && !isNil(FilterCategory)){
-        this.isNetworkSelected = true;
+    function selectedFilter(localFilterCategory: string, localFilterValue: string){
+       FilterCategory.value = localFilterCategory;
+       FilterValue.value =  FilterValue.value;
+      if( FilterCategory.value != '' && !isNil( FilterCategory.value)){
+        isNetworkSelected = true;
       }
       else{
-        this.isNetworkSelected = false;
+        isNetworkSelected = false;
       }
     }
 
-
-    onSubmit(submit: boolean) {
+    function onSubmit(submit: boolean) {
         if (submit) {
-            this.$emit('submit', this.FilterCategory,this.FilterValue);
+            emit('submit',  FilterCategory.value, FilterValue.value);
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
 
     }
-}
+
 </script>

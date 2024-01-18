@@ -1,97 +1,113 @@
 <template>
-    <v-layout column class="Montserrat-font-family">
-        <v-flex xs12>
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-layout column>
-                        <v-subheader id="Networks-headerText-vsubheader" class="ghd-md-gray ghd-control-label">Network</v-subheader>
-                        <v-select :items='selectNetworkItems'
-                            id="Networks-selectNetwork-vselect"
-                            outline  
-                            v-model='selectNetworkItemValue'                         
-                            class="ghd-select ghd-text-field ghd-text-field-border">
-                        </v-select>                           
-                    </v-layout>
-                    <v-btn style="margin-top: 20px !important; margin-left: 20px !important" 
+    <v-row column class="Montserrat-font-family">
+        <v-col cols = "12">
+            <v-row>
+                    <v-subheader class="ghd-md-gray ghd-control-label" style="margin-bottom:1%; margin-left:1%;">Network</v-subheader>
+            </v-row>
+            <v-col cols = "8" >
+                <v-row>
+                    <v-select :items="selectNetworkItems"
+                        id="Networks-selectNetwork-vselect"
+                        variant="outlined"
+                        item-title = "text"
+                        item-value = "value"
+                        menu-icon=custom:GhdDownSvg
+                        v-model="selectNetworkItemValue"          
+                        class="ghd-select ghd-text-field ghd-text-field-border"
+                        density="compact">
+                    </v-select>                           
+                    <v-btn style="margin-top: 2px !important; margin-left: 20px !important" 
                         id="Networks-addNetwork-vbtn"
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="onAddNetworkDialog">
                         Add Network
                     </v-btn>
-                </v-layout>
-            </v-flex>
-        </v-flex>
+                </v-row>
+            </v-col>
+        </v-col>
         <v-divider />
-        <v-flex xs12 class="ghd-constant-header" v-show="hasSelectedNetwork">
-            <v-layout justify-space-between>
-                <v-flex xs6>
-                    <v-layout column>
-                        <v-subheader class="ghd-md-gray ghd-control-label">
-                            Key Attribute
-                        </v-subheader>
+        <v-col cols = "12" class="ghd-constant-header" v-show="hasSelectedNetwork">
+            <v-row>
+                    <v-subheader class="ghd-md-gray ghd-control-label" >Key Attribute</v-subheader>
+            </v-row>
+            <v-row justify-space-between>
+                <v-col cols = "6" sm="5">
+                    <v-row column>
                         <v-select
+                            item-title="text"
+                            menu-icon=custom:GhdDownSvg
+                            item-value="value"
                             id="Networks-KeyAttribute-vselect"
-                            outline                           
+                            variant="outlined"
                             class="ghd-select ghd-text-field ghd-text-field-border"
                             :disabled="!isNewNetwork"
+                            append-icon="@/assets/icons/down.svg"
                             v-model="selectedKeyAttributeItem"
-                            :items='selectKeyAttributeItems'>
+                            :items='selectKeyAttributeItems'
+                            density="compact">
                         </v-select>  
-                    </v-layout>                         
-                </v-flex>
-                <v-flex xs5>
-                <v-layout v-show="!isNewNetwork">
+                    </v-row>                         
+                </v-col>
+                <v-col cols = "5" style="align-items: right;" v-show="!isNewNetwork">
+                    <v-row>
+                    <v-subheader class="ghd-md-gray ghd-control-label" >Data Source</v-subheader>
+                    </v-row>
+                <v-row>
                     <v-select
                         id="Networks-DataSource-vselect"
-                        outline 
-                        :items="selectDataSourceItems"  
-                        style="margin-top: 18px !important;"                  
+                        variant="outlined"
+                        item-title="text"
+                        item-value="value"
+                        menu-icon=custom:GhdDownSvg
+                        :items="selectDataSourceItems"                       
                         class="ghd-select ghd-text-field ghd-text-field-border shifted-label"
-                        label="Data Source"
-                        v-model="selectDataSourceId">
+                        v-model="selectDataSourceId"
+                        density="compact">
                     </v-select>  
-                    <v-btn style="margin-top: 20px !important;" 
+                    <v-btn style="margin-top: 2px !important; margin-left: 20px;"  
                         id="Networks-SelectAllFromSource-vbtn"
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         @click="selectAllFromSource">
                         Select All From Source
                     </v-btn>                            
-                </v-layout>  
-                </v-flex>       
-            </v-layout>
-        </v-flex>
+                </v-row>  
+                </v-col>       
+            </v-row>
+        </v-col>
         <!-- Data source combobox -->
-        <v-flex xs12 v-show="hasSelectedNetwork">
-            <v-layout justify-space-between>
-                <v-flex xs5 >
-                    <v-layout column>
-                        <v-layout style="height=12px;padding-bottom:0px;">
-                                <v-flex xs12 class="ghd-constant-header" style="height=12px;padding-bottom:0px">
-                                    <v-subheader class="ghd-control-label ghd-md-gray" style="padding-top: 14px !important">                             
+        <v-col cols = "12" v-show="hasSelectedNetwork">
+            <v-row justify-space-between>
+                <v-col cols = "5" >
+                    <v-row column>
+                        <v-row style="height=12px;padding-bottom:0px;">
+                                <v-col cols = "12" class="ghd-constant-header" style="height=12px;padding-bottom:0px">
+                                    <v-subheader class="ghd-control-label ghd-md-gray" style="padding-top: 14px !important;">                             
                                         Spatial Weighting Equation</v-subheader>
-                                </v-flex>
-                                <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
-                                    <v-btn
-                                        id="Networks-EditSpatialWeightingEquation-vbtn"
-                                        style="padding-right:20px !important;"
-                                        class="edit-icon ghd-control-label"
-                                        icon
+                                </v-col>
+                                <v-row style="width: 70% !important; margin-bottom: 5px; margin-left: 1px;; padding-top: 10px" >
+                                    <v-text-field style="margin-left: 10px; margin-right: 10px" 
+                                    :disabled="!isNewNetwork" density="compact" 
+                                    id="Networks-EditSpatialWeightingEquation-vtextfield"
+                                    variant="outlined" 
+                                    class="ghd-text-field-border ghd-text-field" 
+                                    v-model="spatialWeightingEquationValue.expression"/>
+
+                                    <btn id="Networks-EditSpatialWeightingEquation-vbtn"
+                                        style="margin-top: 10px; margin-right: 32px; cursor: pointer;"
+                                        class="edit-icon ghd-control-label" 
                                         :disabled="!isNewNetwork"
+                                        append-icon="ghd-blue"
                                         @click="onShowEquationEditorDialog">
-                                        <v-icon class="ghd-blue">fas fa-edit</v-icon>
-                                    </v-btn>
-                                </v-flex>
-                            </v-layout>
-                        <v-text-field id="Networks-EditSpatialWeightingEquation-vtextfield" outline class="ghd-text-field-border ghd-text-field" 
-                           :disabled="!isNewNetwork" v-model="spatialWeightingEquationValue.expression"/>                         
-                    </v-layout>
-                    <v-layout v-show="hasStartedAggregation">
-                        <v-flex>
+                                        <v-icon v-if="isNewNetwork" class="ghd-blue" variant = "outlined">fas fa-edit</v-icon>
+                                    </btn>
+                                </v-row>
+                            </v-row>
+                    </v-row>
+                    <v-row v-show="hasStartedAggregation">
+                        <v-col>
                             <v-subheader class="ghd-control-label ara-black" v-text="networkDataAssignmentStatus" ></v-subheader>
                             <v-progress-linear
-                                            v-model="
-                                                networkDataAssignmentPercentage
-                                            "
+                                            v-model="networkDataAssignmentPercentage"
                                             height="25"
                                             striped
                                         >
@@ -103,69 +119,77 @@
                                                 }}%</strong
                                             >
                                         </v-progress-linear>
-                        </v-flex>
-                    </v-layout>
-                </v-flex>
-                <v-flex xs5>
-                    <v-layout column>
+                        </v-col>
+                    </v-row>
+                </v-col>
+                <v-col cols = "5">
+                    <v-row column>
                         <div class='priorities-data-table' v-show="!isNewNetwork">
-                            <v-layout justify-center>
-                                <v-btn id="Networks-AddAll-vbtn" flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                            <v-row justify-center>
+                                <v-btn style="margin-left: 130px" id="Networks-AddAll-vbtn" variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                                     @click="onAddAll">
                                     Add All
                                 </v-btn>
                                 <v-divider class="investment-divider" inset vertical>
                                 </v-divider>
-                                <v-btn id="Networks-RemoveAll-vbtn" flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                                <v-btn id="Networks-RemoveAll-vbtn" variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                                     @click="onRemoveAll">
                                     Remove All
                                 </v-btn>
-                            </v-layout>
+                            </v-row>
                             <v-data-table id="Networks-Attributes-vdatatable" :headers='dataSourceGridHeaders' :items='attributeRows'
-                                class='v-table__overflow ghd-table' item-key='id' select-all
+                                class='v-table__overflow ghd-table' item-key='id'
                                 v-model="selectedAttributeRows"
+                                sort-asc-icon="custom:GhdTableSortAscSvg"
+                                sort-desc-icon="custom:GhdTableSortDescSvg"
                                 :must-sort='true'
-                                hide-actions
+                                return-object
+                                show-select
                                 :pagination.sync="pagination">
-                                <template slot='items' slot-scope='props'>
-                                    <td>
-                                        <v-checkbox id="Networks-SelectAttribute-vcheckbox" hide-details primary v-model='props.selected'></v-checkbox>
-                                    </td>
-                                    <td>{{ props.item.name }}</td> 
-                                    <td>{{ props.item.dataSource.type }}</td> 
+                                <template slot='items' slot-scope='props' v-slot:item="{item}">
+                                    <tr>
+                                        <td>
+                                            <v-checkbox v-model="selectedAttributeRows"
+                                            :value="item" 
+                                            id="Networks-SelectAttribute-vcheckbox" hide-details primary></v-checkbox>
+                                        </td>
+                                        <td>
+                                            {{
+                                                item.name 
+                                            }}
+                                        </td> 
+                                        <td>{{ item.dataSource.name}}</td> 
+                                        <td>{{ item.dataSource.type}}</td> 
+                                    </tr>
                                 </template>
                             </v-data-table>    
-                            <div class="text-xs-center pt-2">
-                                <v-pagination id="Networks-ChangeTablePage-vpagination" class="ghd-pagination ghd-button-text" 
-                                    v-model="pagination.page" 
-                                    :length="pages()"
-                                    ></v-pagination>
-                            </div>
                         </div>               
-                    </v-layout>
-                </v-flex>
-            </v-layout>
-        </v-flex>
+                    </v-row>
+                </v-col>
+            </v-row>
+        </v-col>
         <!-- The Buttons  -->
-        <v-flex xs12 v-show="hasSelectedNetwork">        
-            <v-layout justify-center style="padding-top: 30px !important">
+        <v-col cols = "12"  v-show="hasSelectedNetwork">        
+            <v-row justify="center" style="padding-top: 30px !important">
                 <v-btn id="Networks-Cancel-vbtn" :disabled='!hasUnsavedChanges' @click='onDiscardChanges'
-                    flat class='ghd-blue ghd-button-text ghd-button'>
+                variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Cancel
                 </v-btn>  
-                <v-btn id="Networks-Aggregate-vbtn" @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <p>&nbsp;&nbsp;&nbsp;</p>
+                <v-btn v-show="!isNewNetwork" id="Networks-Aggregate-vbtn" @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate()'  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Aggregate
                 </v-btn>
-                <v-btn id="Networks-Delete-vbtn" @click='onDeleteClick' :disabled='isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <p>&nbsp;&nbsp;&nbsp;</p>
+                <v-btn v-show="!isNewNetwork" id="Networks-Delete-vbtn" @click='onDeleteClick' :disabled='isNewNetwork'  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Delete
                 </v-btn>
-                <v-btn id="Networks-Create-vbtn" @click='createNetwork' :disabled='disableCrudButtonsCreate() || !isNewNetwork'
-                    v-show="isNewNetwork"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <p>&nbsp;&nbsp;&nbsp;</p>
+                <v-btn v-show="isNewNetwork" id="Networks-Create-vbtn" @click='createNetwork'  :disabled='disableCrudButtonsCreate()'
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Create
                 </v-btn>            
-            </v-layout>
-        </v-flex>
+            </v-row>
+        </v-col>
         <EquationEditorDialog
             :dialogData="equationEditorDialogData"
             :isFromPerformanceCurveEditor=false
@@ -173,18 +197,16 @@
         />
         <AddNetworkDialog :dialogData='addNetworkDialogData'
                                 @submit='addNetwork' />
-    </v-layout>
+        <ConfirmDialog></ConfirmDialog>
+    </v-row>
 </template>
 
-<script lang='ts'>
+<script setup lang='ts'>
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { SelectItem } from '@/shared/models/vue/select-item';
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Watch } from 'vue-property-decorator';
-import { Action, Getter, State } from 'vuex-class';
+import Vue, { computed, DeepReadonly, inject, onBeforeUnmount, onMounted, reactive, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
 import {
     emptyEquationEditorDialogData,
@@ -195,270 +217,264 @@ import { Datasource } from '@/shared/models/iAM/data-source';
 import { clone, isNil, propEq, any } from 'ramda';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
-import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
+import { InputValidationRules, rules as validationRules } from '@/shared/utils/input-validation-rules';
 import  AddNetworkDialog from '@/components/networks/networks-dialogs/AddNetworkDialog.vue';
 import { AddNetworkDialogData, emptyAddNetworkDialogData } from '@/shared/models/modals/add-network-dialog-data';
 import { Hub } from '@/connectionHub';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
+import { useStore } from 'vuex';
+import mitt, { Emitter, EventType } from 'mitt';
+import ConfirmDialog from 'primevue/confirmdialog';
+import { NIL } from 'uuid';
+import { text } from 'stream/consumers';
 
-@Component({
-    components: {
-        EquationEditorDialog,
-        AddNetworkDialog
-    },
-})
-export default class Networks extends Vue {
-    @State(state => state.networkModule.networks) stateNetworks: Network[];
-    @State(state => state.networkModule.selectedNetwork) stateSelectedNetwork: Network;
-    @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
-    @State(state => state.datasourceModule.dataSources) stateDataSources: Datasource[];
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    let store = useStore();
+    let stateNetworks = computed<Network[]>(()=>store.state.networkModule.networks);
+    let stateSelectedNetwork = computed<Network>(()=>store.state.networkModule.selectedNetwork) ;
+    let stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
+    let stateDataSources = computed<Datasource[]>(() => store.state.datasourceModule.dataSources) ;
+    let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+    let isAdmin: boolean = (store.state.authenticationModule.isAdmin) ;
     
-    @Action('getNetworks') getNetworks: any;
-    @Action('getDataSources') getDataSources: any;
-    @Action('getAttributes') getAttributes: any;
-    @Action('selectNetwork') selectNetworkAction: any;
-    @Action('createNetwork') createNetworkAction: any;
-    @Action('deleteNetwork') deleteNetworkAction: any;
-    @Action('aggregateNetworkData') aggregateNetworkAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Getter('getUserNameById') getUserNameByIdGetter: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
+    async function getNetworks(payload?: any): Promise<any> {await store.dispatch('getNetworks', payload);}
+    async function getDataSources(payload?: any): Promise<any> {await store.dispatch('getDataSources', payload);}
+    async function getAttributes(payload?: any): Promise<any> {await store.dispatch('getAttributes', payload);}
+    async function selectNetworkAction(payload?: any): Promise<any> {await store.dispatch('selectNetwork', payload);}
+    async function createNetworkAction(payload?: any): Promise<any> {await store.dispatch('createNetwork', payload);}
+    async function deleteNetworkAction(payload?: any): Promise<any> {await store.dispatch('deleteNetwork', payload);}
+    async function aggregateNetworkAction(payload?: any): Promise<any> {await store.dispatch('aggregateNetworkData', payload);}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+    async function getUserNameByIdGetter(payload?: any): Promise<any> {await store.dispatch('getUserNameById', payload);}
+    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
 
-    rules: InputValidationRules = rules;
+    let rules = ref<InputValidationRules>(validationRules);
 
-    dataSourceGridHeaders: DataTableHeader[] = [
-        { text: 'Name', value: 'name', align: 'left', sortable: true, class: '', width: '' },
-        { text: 'Data Source', value: 'data source', align: 'left', sortable: true, class: '', width: '' },
+    let dataSourceGridHeaders: any[] = [
+        { title: 'Name', key: 'name', align: 'left', sortable: true, class: '', width: '' },
+        { title: 'Data Source', key: 'data source', align: 'left', sortable: true, class: '', width: '' },
+        { title: 'Data Source Type', key: 'data source', align: 'left', sortable: true, class: '', width: '' },
     ];
 
-    addNetworkDialogData: AddNetworkDialogData = clone(emptyAddNetworkDialogData);
-    pagination: Pagination = emptyPagination;
-    selectNetworkItems: SelectItem[] = [];
-    selectKeyAttributeItems: SelectItem[] = [];
-    selectDataSourceItems: SelectItem[] = [];
-    attributeRows: Attribute[] =[];
-    cleanAttributes: Attribute[] = [];
-    attributes: Attribute[] = [];
-    selectedAttributeRows: Attribute[] = [];
-    dataSourceSelectValues: SelectItem[] = [
+    const addNetworkDialogData = reactive<AddNetworkDialogData>(emptyAddNetworkDialogData);
+    let pagination: Pagination = emptyPagination;
+    const selectNetworkItems = ref<SelectItem[]>([]);
+    let selectKeyAttributeItems = ref<SelectItem[]>([]);
+    let selectDataSourceItems = ref<SelectItem[]>([]);
+    let attributeRows = ref<Attribute[]>([]);
+    let cleanAttributes: Attribute[] = [];
+    let attributes: Attribute[] = [];
+    let selectedAttributeRows = ref<Attribute[]>([]);
+    let dataSourceSelectValues: SelectItem[] = [
         {text: 'SQL', value: 'SQL'},
         {text: 'Excel', value: 'Excel'},
         {text: 'None', value: 'None'}
     ]; 
 
-    networkDataAssignmentPercentage = 0;
-    networkDataAssignmentStatus: string = 'Waiting on server.';
+    let networkDataAssignmentPercentage = ref<number>(0);
+    let networkDataAssignmentStatus = ref<string>('Waiting on server.');
 
-    selectedKeyAttributeItem: string = '';
-    selectedKeyAttribute: Attribute = clone(emptyAttribute);
-    selectedNetwork: Network = clone(emptyNetwork);
-    selectNetworkItemValue: string = '';
-    selectDataSourceId: string = '';
-    hasSelectedNetwork: boolean = false;
-    isNewNetwork: boolean = false;
-    hasStartedAggregation: boolean = false;
-    isKeyPropertySelectedAttribute: boolean = false;
-    spatialWeightingEquationValue: Equation = clone(emptyEquation); //placeholder until network dto and api changes
-    equationEditorDialogData: EquationEditorDialogData = clone(
+    const selectedKeyAttributeItem = ref<string>('');
+    const selectedKeyAttribute = ref<Attribute>(clone(emptyAttribute));
+    const selectedNetwork = ref<Network>(clone(emptyNetwork));
+    const selectNetworkItemValue = ref<string>('');
+    const selectDataSourceId = ref<string>('');
+    const hasSelectedNetwork = ref<boolean>(false);
+    const isNewNetwork = ref<boolean>(false);
+    const hasStartedAggregation = ref<boolean>(false);
+    const isKeyPropertySelectedAttribute = ref<boolean>(false);
+    const spatialWeightingEquationValue = ref<Equation>(clone(emptyEquation)); //placeholder until network dto and api changes
+    const equationEditorDialogData = ref(clone(
         emptyEquationEditorDialogData,
-    );
+    ));
+    
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
 
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            vm.getAttributes();
-            vm.getNetworks();
-            vm.getDataSources();
-        });
+    created();
+    function created() {
+        getAttributes();
+        getNetworks();
+        getDataSources();
     }
-
-    mounted() {
-        this.$statusHub.$on(
+    onMounted(() => mounted); 
+    function mounted() {
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
-            this.getDataAggregationStatus,
+            getDataAggregationStatus,
+        );
+    }
+    onBeforeUnmount(() => beforeDestroy)
+    function beforeDestroy() {
+        $emitter.off(
+            Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
+            getDataAggregationStatus,
         );
     }
     
-    @Watch('stateNetworks')
-    onStateNetworksChanged() {
-        this.selectNetworkItems = this.stateNetworks.map((network: Network) => ({
-            text: network.name,
-            value: network.id,
-        }));
-    }
-    @Watch('stateAttributes')
-    onStateAttributesChanged() {
-        this.attributeRows = clone(this.stateAttributes);
-        this.selectKeyAttributeItems = this.stateAttributes.map((attribute: Attribute) => ({
-            text: attribute.name,
-            value: attribute.id,
-        }));
-    }
-    @Watch('stateDataSources')
-    onStateDataSourcesChanges() {
-        this.selectDataSourceItems = this.stateDataSources.map((dataSource: Datasource) => ({
-            text: dataSource.name,
-            value: dataSource.id,
-        }));
-    }
-    @Watch('selectNetworkItemValue')
-    onSelectNetworkItemValueChanged() {
-        this.selectNetworkAction(this.selectNetworkItemValue);
-        if(this.selectNetworkItemValue != getBlankGuid() || this.isNewNetwork)
-            this.hasSelectedNetwork = true;
+    watch(stateNetworks, () =>  {
+        selectNetworkItems.value = stateNetworks.value.map(_ => ({text: _.name, value: _.id}))
+    })
+
+    watch(stateAttributes, () => { 
+        attributeRows.value = clone(stateAttributes.value);
+        stateAttributes.value.forEach(_ => {
+        selectKeyAttributeItems.value.push({text:_.name,value:_.id})
+        })
+        });
+
+    watch(stateDataSources, () => {  
+        stateDataSources.value.forEach(_ => {
+            selectDataSourceItems.value.push({text:_.name,value:_.id})
+        })
+    })
+
+    watch(selectNetworkItemValue, () =>  {
+        selectNetworkAction(selectNetworkItemValue.value);
+        if(selectNetworkItemValue.value !== '' && selectNetworkItemValue.value != getBlankGuid() || isNewNetwork.value)
+            hasSelectedNetwork.value = true;
         else
-            this.hasSelectedNetwork = false;
-    }
-    @Watch('selectedAttributeRows')
-    onSelectedAttributeRowsChanged()
+            hasSelectedNetwork.value = false;
+
+        if(selectNetworkItemValue.value == getBlankGuid() && isNewNetwork.value)
+            isNewNetwork.value = false;
+    })
+
+    watch(selectedAttributeRows, () => 
     {
-        if(any(propEq('id', this.selectedNetwork.keyAttribute), this.selectedAttributeRows)) {
-            this.isKeyPropertySelectedAttribute = true;
+        if(any(propEq('id', selectedNetwork.value.keyAttribute), selectedAttributeRows.value)) {
+            isKeyPropertySelectedAttribute.value = true;
         }
         else {
-            this.isKeyPropertySelectedAttribute = false;
+            isKeyPropertySelectedAttribute.value  = false;
         }
-    }
+    })
     
-    @Watch('stateSelectedNetwork')
-    onStateSelectedNetworkChanged() {
-        if (!this.isNewNetwork) {
-            this.selectedNetwork = clone(this.stateSelectedNetwork);
+    watch(stateSelectedNetwork, () => {
+        if (!isNewNetwork.value) {           
+            selectedNetwork.value = clone(stateSelectedNetwork.value);
         }
-    }
-    @Watch('selectedNetwork', {deep: true})
-    onSelectedNetworkChanged() {
-        this.selectedAttributeRows = [];
-        this.hasStartedAggregation = false;
-        this.selectNetworkItemValue = this.selectedNetwork.id;
-        this.selectedKeyAttributeItem = this.selectedNetwork.keyAttribute;
-        this.spatialWeightingEquationValue.expression = this.selectedNetwork.defaultSpatialWeighting;
+    })
 
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.selectedNetwork, this.stateSelectedNetwork);
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
-    }
-    @Watch('selectedKeyAttributeItem')
-    onSelectedKeyAttributeItemChanged()
+    watch(selectedNetwork, () => { 
+        selectedAttributeRows.value = [];
+        hasStartedAggregation.value  = false;
+        if(selectedNetwork.value.id !== getBlankGuid())
+            selectNetworkItemValue.value = selectedNetwork.value.id;
+        if(selectedNetwork.value.keyAttribute != NIL)
+        selectedKeyAttributeItem.value = selectedNetwork.value.keyAttribute;
+        spatialWeightingEquationValue.value.expression = selectedNetwork.value.defaultSpatialWeighting;
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', selectedNetwork.value, stateSelectedNetwork.value);
+        setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    })
+
+    watch(selectedKeyAttributeItem, () => 
     {
-        this.selectedKeyAttribute = this.attributeRows.find((attr: Attribute) => attr.id === this.selectedKeyAttributeItem) || clone(emptyAttribute);
-    }
-    onAddNetworkDialog() {
-        this.addNetworkDialogData = {
-            showDialog: true,
-        }
+        selectedKeyAttribute.value = attributeRows.value.find((attr: Attribute) => attr.id === selectedKeyAttributeItem.value) || clone(emptyAttribute);
+    })
+
+    function onAddNetworkDialog() {
+        addNetworkDialogData.showDialog = true;
     }
 
-    addNetwork(network: Network)
+    function addNetwork(network: Network)
     {
-        this.selectNetworkItems.push({
+        addNetworkDialogData.showDialog = false;
+        selectNetworkItems.value.push({
             text: network.name,
             value: network.id
         });
-        
-        this.isNewNetwork = true;
-        this.selectNetworkItemValue = network.id;
-        this.selectedNetwork = clone(network);
-        this.hasSelectedNetwork = true;
+     
+        isNewNetwork.value  = true;
+        selectNetworkItemValue.value = network.id;
+        selectedNetwork.value = clone(network);
+        hasSelectedNetwork.value = true;
     }
-    onDiscardChanges() {
-        this.selectedNetwork = clone(this.stateSelectedNetwork);
+    function onDiscardChanges() {
+        isNewNetwork.value = false;
+        selectNetworkItemValue.value = ''
     }
-    onSubmitEquationEditorDialogResult(equation: Equation) {
-        this.equationEditorDialogData = clone(emptyEquationEditorDialogData);
+    function onSubmitEquationEditorDialogResult(equation: Equation) {
+        equationEditorDialogData.value = clone(emptyEquationEditorDialogData);
 
         if (!isNil(equation)) {
-            this.spatialWeightingEquationValue = clone(equation)
+            spatialWeightingEquationValue.value.expression  = clone(equation.expression);
         }
     }
-    onShowEquationEditorDialog() {
-        this.equationEditorDialogData = {
+    function onShowEquationEditorDialog() {
+        equationEditorDialogData.value = {
             showDialog: true,
-            equation: this.spatialWeightingEquationValue,
+            equation: spatialWeightingEquationValue.value,
         };      
     }
-    selectAllFromSource(){
-        this.selectedAttributeRows = clone(this.stateAttributes.filter((attr: Attribute) => attr.dataSource.id == this.selectDataSourceId));
+    function selectAllFromSource(){
+        selectedAttributeRows.value = clone(attributeRows.value.filter(_ => _.dataSource.id == selectDataSourceId.value));
     }
-    onAddAll(){
-        this.selectedAttributeRows = clone(this.attributeRows)
+    function onAddAll(){
+        selectedAttributeRows.value = clone(attributeRows.value)
     }
-    onRemoveAll(){
-        this.selectedAttributeRows = [];
+    function onRemoveAll(){
+        selectedAttributeRows.value = [];
     }
-    aggregateNetworkData(){
-        this.aggregateNetworkAction({
-            attributes: this.selectedAttributeRows,
-            networkId: this.selectNetworkItemValue
+    function aggregateNetworkData(){
+        aggregateNetworkAction({
+            attributes: selectedAttributeRows.value,
+            networkId: selectNetworkItemValue.value
         });
 
-        this.hasStartedAggregation = true;
+        hasStartedAggregation.value = true;
     }
 
-    onDeleteClick(){
-        this.deleteNetworkAction(this.selectedNetwork.id).then(() => {
-            this.hasSelectedNetwork = false;
-            this.selectNetworkItemValue = "";
-            this.selectedNetwork = clone(emptyNetwork)
+    function onDeleteClick(){
+        deleteNetworkAction(selectedNetwork.value.id).then(() => {
+            hasSelectedNetwork.value = false;
+            selectNetworkItemValue.value = "";
+            selectedNetwork.value = clone(emptyNetwork)
         })       
     }
-    disableCrudButtonsCreate() {
-
-        let allValid = this.rules['generalRules'].valueIsNotEmpty(this.selectedNetwork.name) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.spatialWeightingEquationValue.expression) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedKeyAttributeItem) === true;
-
+    function disableCrudButtonsCreate() {
+        let allValid = rules.value['generalRules'].valueIsNotEmpty(selectedNetwork.value.name) === true
+            && rules.value['generalRules'].valueIsNotEmpty(spatialWeightingEquationValue.value.expression) === true
+            && rules.value['generalRules'].valueIsNotEmpty(selectedKeyAttributeItem.value) === true;
 
         return !allValid;
     }
-    disableCrudButtonsAggregate() {
-        let isKeyPropertySelectedAttribute: Boolean = any(propEq('id', this.selectedNetwork.KeyAttribute), this.selectedAttributeRows);
-
-        let allValid = this.rules['generalRules'].valueIsNotEmpty(this.selectedNetwork.name) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttributeRows) === true
-            && this.isKeyPropertySelectedAttribute === true
-            && this.hasStartedAggregation === false;
-
+    function disableCrudButtonsAggregate() {
+        let isKeyPropertySelectedAttribute: Boolean = any(propEq('id', selectedNetwork.value.keyAttribute), selectedAttributeRows.value);
+        let allValid = rules.value['generalRules'].valueIsNotEmpty(selectedNetwork.value.name) === true
+            && rules.value['generalRules'].valueIsNotEmpty(selectedAttributeRows.value) === true
+            && isKeyPropertySelectedAttribute === true
+            && hasStartedAggregation.value === false;
 
         return !allValid;
     }
-    createNetwork(){
-        this.isNewNetwork = false;
+    function createNetwork(){
+        isNewNetwork.value = false;
 
-        this.createNetworkAction({
-            network: this.selectedNetwork,
+        createNetworkAction({
+            network: selectedNetwork.value,
             parameters: {
-                defaultEquation: this.spatialWeightingEquationValue.expression,
-                networkDefinitionAttribute: this.selectedKeyAttribute
+                defaultEquation: spatialWeightingEquationValue.value.expression,
+                networkDefinitionAttribute: selectedKeyAttribute.value
             }
         })
 
     }
 
-    getDataAggregationStatus(data: any) {
+    function getDataAggregationStatus(data: any) {
         const networkRollupDetail: NetworkRollupDetail = data.networkRollupDetail as NetworkRollupDetail;
-        if (networkRollupDetail.networkId === this.selectedNetwork.id){
-            this.networkDataAssignmentStatus = networkRollupDetail.status;
-            this.networkDataAssignmentPercentage = data.percentage as number;
+        if (networkRollupDetail.networkId === selectedNetwork.value.id){
+            networkDataAssignmentStatus.value = networkRollupDetail.status;
+            networkDataAssignmentPercentage.value = data.percentage as number;
         }
     }
     
-    pages() {
-        this.pagination.totalItems = this.attributeRows.length
-        if (this.pagination.rowsPerPage == null || this.pagination.totalItems == null) 
+    function pages() {
+        pagination.totalItems = attributeRows.value.length
+        if (pagination.rowsPerPage == null || pagination.totalItems == null) 
             return 0
 
-        return Math.ceil(this.pagination.totalItems / this.pagination.rowsPerPage)
-    }
-
-    beforeDestroy() {
-        this.$statusHub.$off(
-            Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
-            this.getDataAggregationStatus,
-        );
-    }
-}
+        return Math.ceil(pagination.totalItems / pagination.rowsPerPage)
+    }  
 </script>
 
 <style>
@@ -469,4 +485,5 @@ export default class Networks extends Vue {
         font-weight: normal;
         top: 10px !important
     }
+
 </style>

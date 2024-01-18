@@ -1,83 +1,75 @@
 <template>
-    <v-dialog width="768px" height="540px" persistent v-model='showDialog'>
+    <v-dialog width="768px" height="540px" persistent v-model="showDialog">
         <v-card class="div-padding">
-            <v-card-title class="pa-2">
-                <v-layout justify-start>
-                    <h3 class="Montserrat-font-family">Treatments Upload</h3>
-                </v-layout>
-                <v-btn @click="onSubmit(false)" icon>
-                    <i class="fas fa-times fa-2x"></i>
-                </v-btn>
-            </v-card-title>
-            <v-card-text class="pa-0">
-                <v-layout column>
-                    <TreatmentsFileSelector :closed='closed' @submit='onFileSelectorChange' />                    
-                </v-layout>
-            </v-card-text>
-            <v-card-actions>
-                <v-layout justify-center>
-                    <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' flat>Cancel</v-btn>
-                    <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' outline>Upload</v-btn>                    
-                </v-layout>
-            </v-card-actions>
+            <v-row justify="space-between" style="margin-bottom: 10px;">
+                <h3 class="Montserrat-font-family">Treatments Upload</h3>
+                <v-btn @click="onSubmit(false)" variant="flat">
+                <i class="fas fa-times fa-2x"></i>
+            </v-btn>
+            </v-row>
+            <v-row >
+                <TreatmentsFileSelector :closed='closed' :use-treatment="true" @submit='onFileSelectorChange' />                    
+            </v-row>
+            <v-row justify="center">
+                <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "flat">Cancel</v-btn>
+                <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>                    
+            </v-row>
         </v-card>
     </v-dialog>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action } from 'vuex-class';
+<script setup lang='ts'>
+import { ref, toRefs, watch } from 'vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { ImportExportTreatmentsDialogResult } from '@/shared/models/modals/import-export-treatments-dialog-result';
 import {clone} from 'ramda';
+import { useStore } from 'vuex';
 import TreatmentsFileSelector from '@/shared/components/FileSelector.vue';
 
-@Component({
-    components: { TreatmentsFileSelector }
-})
-export default class ImportExportTreatmentsDialog extends Vue {
-    @Prop() showDialog: boolean;
+    const props = defineProps<{showDialog: boolean}>()
+    const { showDialog } = toRefs(props);
 
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('setIsBusy') setIsBusyAction: any;
-
-    TreatmentsFile: File | null = null;
-    overwriteBudgets: boolean = true;
-    closed: boolean = false;
-
-    @Watch('showDialog')
-    onShowDialogChanged() {
-        if (this.showDialog) {
-            this.closed = false;
-        } else {
-            this.TreatmentsFile = null;
-            this.closed = true;
-        }
+    async function addErrorNotificationAction(payload?: any): Promise<any> {
+        await store.dispatch('addErrorNotification', payload);
     }
+
+    const TreatmentsFile = ref<File | null>(null);
+    let overwriteBudgets: boolean = true;
+    const closed = ref<boolean>(false);
+    let store = useStore();
+    const emit = defineEmits(['submit'])
+
+    watch(showDialog, () => {
+        if (showDialog.value) {
+            closed.value = false;
+        } else {
+            TreatmentsFile.value = null;
+            closed.value = true;
+        }
+    });
 
     /**
      * FileSelector submit event handler
      */
-    onFileSelectorChange(file: File) {
-        this.TreatmentsFile = hasValue(file) ? clone(file) : null;
+    function onFileSelectorChange(file: File) {
+        TreatmentsFile.value = hasValue(file) ? clone(file) : null;
     }
 
     /**
      * Dialog submit event handler
      */
-    onSubmit(submit: boolean, isExport: boolean = false) {
+    function onSubmit(submit: boolean, isExport: boolean = false) {
         if (submit) {
             const result: ImportExportTreatmentsDialogResult = {
-                file: this.TreatmentsFile as File,
+                file: TreatmentsFile.value as File,
                 isExport: isExport
             };
-            this.$emit('submit', result);
+            emit('submit', result);
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
     }
-}
+
 </script>
 <style scoped>
 .div-padding {

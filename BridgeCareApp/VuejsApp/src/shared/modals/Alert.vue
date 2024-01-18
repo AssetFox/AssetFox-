@@ -1,10 +1,10 @@
-﻿<template>
+<template>
     <v-dialog max-width="290" persistent v-model="dialogData.showDialog">
         <v-card>
             <v-card-title class="headline">
-                <v-layout justify-center>
+                <v-row justify="center">
                     {{dialogData.heading}}
-                </v-layout>
+                </v-row>
             </v-card-title>
             <v-card-text class="px-4">
                 <div class="text--primary">
@@ -12,11 +12,11 @@
                 </div>
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-center row v-if="dialogData.choice">
+                <v-row justify="center" v-if="dialogData.choice">
                     <v-btn 
                     id="Alert-Cancel-vbtn"
                     @click="onSubmit(false)" 
-                    class="ghd-blue ghd-button" outline>
+                    class="ghd-blue ghd-button" variant = "outlined">
                         Cancel
                     </v-btn>
                     <v-btn 
@@ -25,32 +25,33 @@
                     class="ghd-blue-bg ghd-white ghd-button">
                         Proceed
                     </v-btn>
-                </v-layout>
-                <v-layout justify-center v-if="!dialogData.choice">
-                    <v-btn @click="onSubmit(true)" class="ara-blue-bg white--text">
+                </v-row>
+                <v-row justify="center" v-if="!dialogData.choice">
+                    <v-btn @click="onSubmit(true)" class="ara-blue-bg text-white">
                         OK
                     </v-btn>
-                </v-layout>
+                </v-row>
             </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
 
-<script lang="ts">
-    import Vue from 'vue';
-    import {Component, Prop} from 'vue-property-decorator';
+<script setup lang="ts">
+    import { toRefs, computed } from 'vue';
     import {AlertData} from '../models/modals/alert-data';
-
-    @Component
-    export default class Alert extends Vue {
-        @Prop() dialogData: AlertData;
+    
+const emit = defineEmits(['submit'])
+const props = defineProps<{
+    dialogData: AlertData
+    }>()
+const { dialogData } = toRefs(props);
 
         /**
          * Emits a boolean result to the parent component
          * @param submit
          */
-        onSubmit(submit: boolean) {
-            this.$emit('submit', submit);
+        function onSubmit(submit: boolean) {
+            emit('submit', submit);
         }
-    }
+    
 </script>

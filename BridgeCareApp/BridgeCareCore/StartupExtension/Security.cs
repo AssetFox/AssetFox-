@@ -251,6 +251,9 @@ namespace BridgeCareCore.StartupExtension
                 // Admin Settings
                 options.AddPolicy(Policy.ModifyAdminSiteSettings,
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.AdminSiteSettingsAccess));
+
+                // Authentication
+                options.AddPolicy(Policy.AdminUser, policy => policy.RequireClaim(ClaimTypes.Name, Claim.AdminAccess));
             });
 
             services.AddSingleton<IEsecSecurity, EsecSecurity>();

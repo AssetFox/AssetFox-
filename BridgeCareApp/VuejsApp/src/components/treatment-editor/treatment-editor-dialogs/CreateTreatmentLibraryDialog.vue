@@ -1,35 +1,30 @@
 <template>
-    <v-layout>
+    <v-row>
         <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
             <v-card class="ghd-padding">
-                <v-card-title>
-                    <v-layout justify-left>
+                    <v-row justify="space-between" style="margin: 10px;">
                         <h3 class="ghd-title">Create New Treatment Library</h3>
-                    </v-layout>
-                    <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+                        <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                         X
                     </v-btn>
-                </v-card-title>
-                <v-card-text>
-                    <v-layout column>
+                    </v-row>
+                    <v-col>
                         <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
                         <v-text-field id="CreateTreatmentLibraryDialog-name-textField" class="ghd-control-border ghd-control-text ghd-control-width-lg"
-                            outline
+                            variant="outlined"
                             v-model="newTreatmentLibrary.name"
                         ></v-text-field>
                         <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
                         <v-textarea id="CreateTreatmentLibraryDialog-desc-textareaField" class="ghd-control-border ghd-control-text ghd-control-width-lg"
                             no-resize
-                            outline
+                            variant="outlined"
                             rows="3"
                             v-model="newTreatmentLibrary.description"
                         >
                         </v-textarea>
-                    </v-layout>
-                </v-card-text>
-                <v-card-actions>
-                    <v-layout row justify-center>
-                        <v-btn outline @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed
+                    </v-col>
+                    <v-row justify="center" style="margin-bottom: 10px;">
+                        <v-btn outline @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat"
                             >Cancel</v-btn
                         >
                         <v-btn
@@ -40,17 +35,15 @@
                         >
                             Save
                         </v-btn>                        
-                    </v-layout>
-                </v-card-actions>
+                    </v-row>
             </v-card>
         </v-dialog>
-    </v-layout>
+    </v-row>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Getter} from 'vuex-class';
-import { Component, Prop, Watch } from 'vue-property-decorator';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { toRefs, watch, ref} from 'vue';
 import { CreateTreatmentLibraryDialogData } from '@/shared/models/modals/create-treatment-library-dialog-data';
 import {
     emptyTreatmentLibrary,
@@ -61,25 +54,26 @@ import {
 } from '@/shared/models/iAM/treatment';
 import { getUserName } from '@/shared/utils/get-user-info';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
+import { useStore } from 'vuex';
 
-@Component
-export default class CreateTreatmentLibraryDialog extends Vue {
-    @Prop() dialogData: CreateTreatmentLibraryDialogData;
+    const props = defineProps<{dialogData: CreateTreatmentLibraryDialogData}>()
+    const { dialogData } = toRefs(props);
+    const emit = defineEmits(['submit'])
+    let store = useStore();
 
-    @Getter('getIdByUserName') getIdByUserNameGetter: any;
+    function getIdByUserNameGetter(payload?: any): Promise<any> {
+        store.dispatch('getIdByUserName');
+    }
 
-    newTreatmentLibrary: TreatmentLibrary = {
-        ...emptyTreatmentLibrary,
-        id: getNewGuid(),
-    };
+    const newTreatmentLibrary = ref<TreatmentLibrary>({...emptyTreatmentLibrary, id: getNewGuid(),});
 
-    @Watch('dialogData')
-    onDialogDataChanged() {
+    
+  watch(dialogData, () => {
         let currentUser: string = getUserName();
 
-        this.newTreatmentLibrary = {
-            ...this.newTreatmentLibrary,
-            treatments: this.dialogData.selectedTreatmentLibraryTreatments.map(
+        newTreatmentLibrary.value = {
+            ...newTreatmentLibrary.value,
+            treatments: dialogData.value.selectedTreatmentLibraryTreatments.map(
                 (treatment: Treatment) => ({
                     ...treatment,
                     id: getNewGuid(),
@@ -95,26 +89,25 @@ export default class CreateTreatmentLibraryDialog extends Vue {
                     ),
                 }),
             ),
-            owner: this.getIdByUserNameGetter(currentUser),
+            owner: getIdByUserNameGetter(currentUser),
         };
-    }
+    });
 
     /**
      * Emits the newTreatmentLibrary object or a null value to the parent component and resets the
      * newTreatmentLibrary object
      * @param submit Whether or not to emit the newTreatmentLibrary object
      */
-    onSubmit(submit: boolean) {
+   function onSubmit(submit: boolean) {
         if (submit) {
-            this.$emit('submit', this.newTreatmentLibrary);
+            emit('submit', newTreatmentLibrary.value);
         } else {
-            this.$emit('submit');
+            emit('submit');
         }
 
-        this.newTreatmentLibrary = {
+        newTreatmentLibrary.value = {
             ...emptyTreatmentLibrary,
             id: getNewGuid(),
         };
     }
-}
 </script>

@@ -1,143 +1,138 @@
 <template>
-    <v-layout column>
-        <v-layout column>        
-            <div class="div-border align-start">   
-                <div id="app" class="ghd-white-bg" v-cloak @drop.prevent="onSelect($event.dataTransfer.files)" @dragover.prevent>
-                    <v-layout fill-height justify-center>
-                        <div class="drag-drop-area">
-                            <v-layout fill-height align-center justify-center>
-                                <img :src="require('@/assets/icons/upload.svg')"/>
-                                <v-layout column align-center>
-                                    <span class="span-center Montserrat-font-family">Drag & Drop Files Here </span>
-                                    <!--<span class="span-center Montserrat-font-family">or</span>
-                                    <v-btn class="ghd-blue Montserrat-font-family a-0 ma-0" @click="chooseFiles()" flat> Click here to select files </v-btn>-->
-                                </v-layout>
-                            </v-layout>
-                        </div>
-                        </v-layout>
-                </div>
-            </div>
-            <v-flex xs12>
-                <v-layout justify-start>     
-                    <v-switch
-                        v-show="useTreatment"
-                        label="No Treatment"
-                        class="ghd-control-label ghd-md-gray Montserrat-font-family my-2"
-                        v-model="applyNoTreatment"
-                    />
-                </v-layout>
-            </v-flex>
-            <div v-show="true">
-                <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden />
-            </div>
-        </v-layout>        
-        <div class="files-table">
-            <v-data-table :headers="tableHeaders" :items="files" class="elevation-1 fixed-header v-table__overflow Montserrat-font-family"
-                        sort-icon=$vuetify.icons.ghd-table-sort
-                          hide-actions>
-                <template slot="items" slot-scope="props">
-                    <td>
-                        {{props.item.name}}
-                    </td>
-                    <td>
-                        <div><strong>{{ formatBytesSize(props.item.size) }}</strong></div>
-                    </td>
-                    <td>
-                        <v-btn @click="file = null" class="ghd-blue" icon>
-                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-                        </v-btn>
-                    </td>
-                </template>
-            </v-data-table>
-        </div>
-    </v-layout>
+    <v-container>
+    <v-row  class="div-border">    
+        <v-col align="center" id="app" class="ghd-white-bg" v-cloak @drop.prevent="onSelect($event.dataTransfer.files)" @dragover.prevent>
+            <img :src="getUrl('assets/icons/upload.svg')" style="margin: 20px;"/>
+                            <span class="span-center Montserrat-font-family">Drag & Drop Files Here </span>
+        </v-col>
+    </v-row>    
+    <v-row justify="start">     
+        <v-col cols="10">
+            <v-switch
+                color="#2A578D"
+                v-show="useTreatment"
+                label="No Treatment"
+                class="ghd-control-label ghd-md-gray Montserrat-font-family my-2"
+                v-model="applyNoTreatment"
+            />
+        </v-col>
+    </v-row>
+    <div>
+        <input @update:model-value="onSelect($event.target.files)" id="file-select" type="file" hidden />
+    </div>
+    <v-divider/>
+    <div style="margin: 10px;">
+        <v-data-table-virtual :headers="tableHeaders"
+                             :items="files"
+                             :items-length="files.length"
+                             sort-asc-icon="custom:GhdTableSortAscSvg"
+                             sort-desc-icon="custom:GhdTableSortDescSvg"
+                             class="fixed-header v-table__overflow Montserrat-font-family"
+                             >
+            <template slot="items" slot-scope="props" v-slot:item="props">
+                <td>
+                    {{props.item.name}}
+                </td>
+                <td>
+                    <div><strong>{{ formatBytesSize(props.item.size) }}</strong></div>
+                </td>
+                <td>
+                    <v-btn @click="file = null" class="ghd-blue" flat>
+                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                    </v-btn>
+                </td>
+            </template>
+        </v-data-table-virtual>
+    </div>
+    </v-container>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Watch, Prop} from 'vue-property-decorator';
-import {Action} from 'vuex-class';
+<script setup lang="ts">
+import { ref, shallowRef, toRefs, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {clone, prop} from 'ramda';
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import { formatBytes } from '@/shared/utils/math-utils';
+import { useStore } from 'vuex';
+import { getUrl } from '../utils/get-url';
 
-@Component
-export default class FileSelector extends Vue {
-    @Prop() closed: boolean = false;
-    @Prop() useTreatment: boolean = false;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('setIsBusy') setIsBusyAction: any;
+let store = useStore();
+const emit = defineEmits(['submit','treatment'])
+const props = defineProps<{
+    closed: boolean,
+    useTreatment: boolean
+    }>()
+const { useTreatment, closed } = toRefs(props);
 
-    applyNoTreatment: boolean = true;
-    fileSelect: HTMLInputElement = {} as HTMLInputElement;
-    tableHeaders: DataTableHeader[] = [
-        {text: 'Name', value: 'name', align: 'left', sortable: false, class: '', width: '50%'},
-        {text: 'Size', value: 'size', align: 'left', sortable: false, class: '', width: '35%'},
-        {text: 'Action', value: 'action', align: 'left', sortable: false, class: '', width: ''}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+
+    const applyNoTreatment = ref<boolean>(true);
+    const fileSelect = ref<HTMLInputElement>({} as HTMLInputElement);
+    let tableHeaders: any[] = [
+        {title: 'Name', key: 'name', align: 'left', sortable: false, class: '', width: '50%'},
+        {title: 'Size', key: 'size', align: 'left', sortable: false, class: '', width: '35%'},
+        {title: 'Action', key: 'action', align: 'left', sortable: false, class: '', width: ''}
     ];
-    files: File[] = [];
-    file: File | null = null;   
-
-    chooseFiles(){
+    const files = ref<File[]>([]);
+    const file = ref<File|null>(null);   
+    
+    function chooseFiles(){
         if(document != null)
         {
             document.getElementById('file-select')!.click();
         }
     }
 
-    @Watch('file')
-    onFileChanged() {        
-        this.files = hasValue(this.file) ? [this.file as File] : [];                                   
-        this.$emit('submit', this.file);
+    watch(file,()=>{        
+        files.value = hasValue(file.value) ? [file.value as File] : [];                                   
+        emit('submit', file.value);
         (<HTMLInputElement>document.getElementById('file-select')!).value = '';
-    }
+    });
 
-    @Watch('closed')
-    onClose() {
-        if (this.closed) {
-            this.files = [];
-            this.file = null;
-            this.fileSelect.value = '';
+    watch(closed,()=>{
+        if (closed.value) {
+            files.value = [];
+            file.value = null;
+            fileSelect.value.value = '';
             (<HTMLInputElement>document.getElementById('file-select')!).value = '';
         }
-    }
-    @Watch('applyNoTreatment')
-    onTreatmentChanged() {
-        this.$emit('treatment', this.applyNoTreatment);
-    }
-    mounted() {
+    });
+
+    watch(applyNoTreatment,()=>{
+        emit('treatment', applyNoTreatment.value);
+    });
+    
+    onMounted(() => {
         // couple fileSelect object with #file-select input element
-        this.fileSelect = document.getElementById('file-select') as HTMLInputElement;        
-    }    
+        fileSelect.value = document.getElementById('file-select') as HTMLInputElement;        
+    });   
 
     /**
      * File input change event handler
      */
-    onSelect(fileList: FileList) {
+    function onSelect(fileList: FileList) {
         if (hasValue(fileList)) {
             const fileName: string = prop('name', fileList[0]) as string;
 
             if (fileName.indexOf('xlsx') === -1) {
-                this.addErrorNotificationAction({
+                addErrorNotificationAction({
                     message: 'Only .xlsx file types are allowed',
                 });
             }
 
-            this.file = clone(fileList[0]);
+            file.value = clone(fileList[0]);
         }
 
-        this.fileSelect.value = '';
+        fileSelect.value.value = '';
     }
 
     /**
      * Returns a formatted string of a file's bytes
      */
-    formatBytesSize(bytes: number) {
+    function formatBytesSize(bytes: number) {
         return formatBytes(bytes);
     }
-}
 </script>
 
 <style>

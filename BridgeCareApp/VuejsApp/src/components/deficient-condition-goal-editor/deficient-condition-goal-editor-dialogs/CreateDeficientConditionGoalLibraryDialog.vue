@@ -2,41 +2,41 @@
   <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
-         <v-layout justify-space-between align-center>
+         <v-row justify="space-between" align="center">
             <div class="ghd-control-dialog-header">New Deficient Condition Goal Library</div>
-            <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+            <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
             </v-btn>
-          </v-layout>
+          </v-row>
         </v-card-title>
       <v-card-text class="ghd-dialog-box-padding-center">
         <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
         <v-text-field id="CreateDeficientConditionGoalLibraryDialog-nane-vtextarea" outline v-model="newDeficientConditionGoalLibrary.name"
                       :rules="[rules['generalRules'].valueIsNotEmpty]"
+                      variant = "outlined"
                       class="ghd-text-field-border ghd-text-field"></v-text-field>
         <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
         <v-textarea id="CreateDeficientConditionGoalLibraryDialog-description-vtextarea" no-resize outline rows="3"
                     v-model="newDeficientConditionGoalLibrary.description"
+                    variant="outlined"
                     class="ghd-text-field-border">
         </v-textarea>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
-        <v-layout justify-space-between row>
-          <v-btn id="CreateDeficientConditionGoalLibraryDialog-cancel-vbtn" @click="onSubmit(false)" outline class='ghd-blue ghd-button-text ghd-button'>Cancel</v-btn>
+        <v-row justify="center">
+          <v-btn id="CreateDeficientConditionGoalLibraryDialog-cancel-vbtn" @click="onSubmit(false)" variant = "outlined" class='ghd-blue ghd-button-text ghd-button'>Cancel</v-btn>
           <v-btn id="CreateDeficientConditionGoalLibraryDialog-save-vbtn" :disabled="newDeficientConditionGoalLibrary.name === ''" @click="onSubmit(true)"
-                 outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+          variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Save
           </v-btn>         
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Getter} from 'vuex-class';
-import {Component, Prop, Watch} from 'vue-property-decorator';
+<script setup lang="ts">
+import { ref, toRefs, watch } from 'vue';
 import {CreateDeficientConditionGoalLibraryDialogData} from '@/shared/models/modals/create-deficient-condition-goal-library-dialog-data';
 import {
   DeficientConditionGoal,
@@ -44,46 +44,47 @@ import {
   emptyDeficientConditionGoalLibrary
 } from '@/shared/models/iAM/deficient-condition-goal';
 import {getUserName} from '@/shared/utils/get-user-info';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
+import { useStore } from 'vuex';
 
-@Component
-export default class CreateDeficientConditionGoalLibraryDialog extends Vue {
-  @Prop() dialogData: CreateDeficientConditionGoalLibraryDialogData;
+  let store = useStore();
 
-  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+  const props = defineProps<{
+    dialogData: CreateDeficientConditionGoalLibraryDialogData
+  }>()
+  const { dialogData } = toRefs(props);
+  const emit = defineEmits(['submit'])
 
-  newDeficientConditionGoalLibrary: DeficientConditionGoalLibrary = {
-    ...emptyDeficientConditionGoalLibrary,
-    id: getNewGuid()
-  };
-  rules: InputValidationRules = rules;
+  let getIdByUserNameGetter: any = store.getters.getIdByUserName;
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
+  const newDeficientConditionGoalLibrary = ref<DeficientConditionGoalLibrary>({ ...emptyDeficientConditionGoalLibrary,id: getNewGuid() });
+  let rules: InputValidationRules = validationRules;
+
+  watch(dialogData, () => {
     let currentUser: string = getUserName();
 
-    this.newDeficientConditionGoalLibrary = {
-      ...this.newDeficientConditionGoalLibrary,
-      deficientConditionGoals: hasValue(this.dialogData.deficientConditionGoals)
-          ? this.dialogData.deficientConditionGoals.map((deficientConditionGoal: DeficientConditionGoal) => ({
+    newDeficientConditionGoalLibrary.value = {
+      ...newDeficientConditionGoalLibrary.value,
+      deficientConditionGoals: hasValue(dialogData.value.deficientConditionGoals)
+          ? dialogData.value.deficientConditionGoals.map((deficientConditionGoal: DeficientConditionGoal) => ({
             ...deficientConditionGoal,
             id: getNewGuid()
           }))
           : [],
-        owner: this.getIdByUserNameGetter(currentUser),
+        owner: getIdByUserNameGetter(currentUser),
     };
-  }
+  });
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newDeficientConditionGoalLibrary);
+      emit('submit', newDeficientConditionGoalLibrary.value);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newDeficientConditionGoalLibrary = {...emptyDeficientConditionGoalLibrary, id: getNewGuid()};
+    newDeficientConditionGoalLibrary.value = {...emptyDeficientConditionGoalLibrary, id: getNewGuid()};
   }
-}
+
 </script>

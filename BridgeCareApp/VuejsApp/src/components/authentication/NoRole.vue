@@ -1,11 +1,11 @@
 <template>
     <v-container fluid grid-list-xl>
-        <v-layout>
-            <v-flex xs12>
-                <v-layout justify-center>
+        <v-row>
+            <v-col cols ="12">
+                <v-row justify-center>
                     <v-card class="no-role-container">
                         <div class="bridgecare-logo-img-div">
-                            <v-img :src="require('@/assets/images/logos/Banner-logo.jpg')"
+                            <v-img :src="getUrl('assets/images/logos/Banner-logo.jpg')"
                                    class="bridgecare-logo-img">
                             </v-img>
                         </div>
@@ -18,21 +18,17 @@
                             <a href="mailto:jbruner@pa.gov">jbruner@pa.gov</a>
                         </v-card-text>
                     </v-card>
-                </v-layout>
-            </v-flex>
-        </v-layout>
+                </v-row>
+            </v-col>
+        </v-row>
     </v-container>
 </template>
 
-<script lang="ts">
-    import Vue from 'vue';
-    import {Component} from 'vue-property-decorator';
+<script setup lang="ts">
+import { getUrl } from '@/shared/utils/get-url';
 
-    @Component
-    export default class NoRole extends Vue {
-        onRequestAccess() {
-            console.error('onRequestAccess() has not been implemented!');
-        }
+    function onRequestAccess() {
+        console.error('onRequestAccess() has not been implemented!');
     }
 </script>
 

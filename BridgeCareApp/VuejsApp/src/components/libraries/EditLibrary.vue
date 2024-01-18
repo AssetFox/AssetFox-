@@ -1,21 +1,21 @@
 <template>
-    <v-layout column>
-        <v-layout>
+        <v-row>
+            <v-col class="p-0">
             <v-card
-                class="mx-auto ghd-sidebar-libary"
+                class="ghd-sidebar-libary"
                 height="100%"
                 elevation="0"
                 style="border-top-left-radius: 10px; border-bottom-left-radius: 10px; border: 1px solid #999999;"
             >
                 <v-list class="ghd-navigation-list">
-                    <v-list-item-group
+                    <v-list-item
                         class="settings-list ghd-control-text"
                         :key="navigationTab.tabName"
-                        v-for="navigationTab in visibleNavigationTabs()"
+                        :model-value="navigationTab"
+                        v-for="navigationTab in visibleNavigationTabs()"                        
                     >
-                        <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
-                            <v-list-tile-action>
-                                <v-list-tile-icon>
+                        <v-list-item :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
+                            <template v-slot:prepend>
                                     <!-- <v-icon class="mx-2" slot="prependIcon" v-text="navigationTab.tabIcon"></v-icon> -->
                                     <TreatmentSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Treatment'"/>  
                                     <TargetConditionGoalSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Target Condition Goal'"/>  
@@ -26,28 +26,23 @@
                                     <CashFlowSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Cash Flow'"/>  
                                     <BudgetPrioritySvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Budget Priority'"/>  
                                     <CalculatedAttributeSvg style="height: 32px; width: 32px"  class="library-icon-stroke" v-if="navigationTab.tabName === 'Calculated Attribute'"/>  
-                                </v-list-tile-icon>
-                            </v-list-tile-action>
-                            <v-list-tile-content>
-                                <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>
-                            </v-list-tile-content>
-                        </v-list-tile>
-                    </v-list-item-group>
+                            </template>
+                                <v-list-item-title style="text-decoration: none; padding-left: 5px;">{{navigationTab.tabName}}</v-list-item-title>
+                        </v-list-item>
+                    </v-list-item>
                 </v-list>
             </v-card>
-            <v-flex xs12 class="ghd-content">
+            <v-col cols = "12" class="ghd-content">
                 <v-container fluid grid-list-xs style="padding-left:20px;padding-right:20px;">
                     <router-view></router-view>
                 </v-container>
-            </v-flex>
-        </v-layout>
-    </v-layout>
+            </v-col>
+        </v-col>
+        </v-row>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { State } from 'vuex-class';
+<script lang="ts" setup>
+import { ref, computed } from 'vue'
 import { any } from 'ramda';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
@@ -60,32 +55,21 @@ import RemainingLifeLimitSvg from '@/shared/icons/RemainingLifeLimitSvg.vue';
 import TargetConditionGoalSvg from '@/shared/icons/TargetConditionGoalSvg.vue';
 import TreatmentSvg from '@/shared/icons/TreatmentSvg.vue';
 import CalculatedAttributeSvg from '@/shared/icons/CalculatedAttributeSvg.vue';
+import { useStore } from 'vuex'; 
 
-@Component({
-    components: {
-        TreatmentSvg, 
-        TargetConditionGoalSvg,
-        RemainingLifeLimitSvg,
-        PerformanceCurveSvg,
-        DeficientConditionGoalSvg,
-        InvestmentSvg,
-        CashFlowSvg,
-        BudgetPrioritySvg,
-        CalculatedAttributeSvg
-    },
-})
-export default class EditLibrary extends Vue {
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.authenticationModule.userId) userId: string;
+    let store = useStore(); 
 
-    networkId: string = getBlankGuid();
-    networkName: string = '';
-    navigationTabs: NavigationTab[] = [
+    const hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess) ; 
+    let userId = ref<string>(store.state.authenticationModule.userId);
+
+    let networkId: string = getBlankGuid();
+    let networkName: string = '';
+    let navigationTabs: NavigationTab[] = [
         {
             tabName: 'Investment',
             tabIcon: 'fas fa-dollar-sign',
             navigation: {
-                path: '/InvestmentEditor/Library',
+                path: '/InvestmentEditor/Library/',
             },
         },
         {
@@ -146,10 +130,11 @@ export default class EditLibrary extends Vue {
         },
     ];
 
-    
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-                vm.navigationTabs = vm.navigationTabs.map(
+    created();
+    //beforeRouteEnter(to: any, from: any, next: any) {   
+    function created() { 
+        //next((vm: any) => {
+                navigationTabs = navigationTabs.map(
                     (navTab: NavigationTab) => {
                         const navigationTab = {
                             ...navTab,
@@ -164,7 +149,7 @@ export default class EditLibrary extends Vue {
                             || navigationTab.tabName === 'Target Condition Goal' 
                             || navigationTab.tabName === 'Deficient Condition Goal' 
                             || navigationTab.tabName === 'Calculated Attribute') {
-                            navigationTab['visible'] = vm.hasAdminAccess;
+                            navigationTab['visible'] = hasAdminAccess.value;
                         }
 
                         return navigationTab;
@@ -177,19 +162,19 @@ export default class EditLibrary extends Vue {
                 const hasChildPath = any(
                     (navigationTab: NavigationTab) =>
                         href.indexOf(navigationTab.navigation.path) !== -1,
-                    vm.navigationTabs,
+                    navigationTabs,
                 );
-        });
+        //});
     }
 
 
-    visibleNavigationTabs() {
-        return this.navigationTabs.filter(
+    function visibleNavigationTabs() {
+        return navigationTabs.filter(
             navigationTab =>
                 navigationTab.visible === undefined || navigationTab.visible,
         );
     }
-}
+
 </script>
 
 <style>
@@ -205,7 +190,7 @@ export default class EditLibrary extends Vue {
     text-decoration: none;
 }
 
-.primary--text .library-icon{
+.text-primary .library-icon{
     fill: #FFFFFF !important;
 }
 
@@ -213,7 +198,7 @@ export default class EditLibrary extends Vue {
     fill: #999999 !important;
 }
 
-.primary--text .library-icon-stroke{
+.text-primary .library-icon-stroke{
     stroke: #FFFFFF !important;
 }
 

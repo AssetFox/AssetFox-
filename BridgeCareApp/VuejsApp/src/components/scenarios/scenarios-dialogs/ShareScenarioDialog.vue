@@ -2,91 +2,96 @@
   <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
-        <v-layout justify-center>
+        <v-row justify="space-between">
           <h3>Scenario Sharing</h3>
-        </v-layout>
+          <v-btn @click="onSubmit(false)" flat>
+            <i class="fas fa-times fa-2x"></i>
+          </v-btn>
+        </v-row>
       </v-card-title>
       <v-card-text>
         <v-data-table id="ShareScenarioDialog-table-vdatatable"
                       :headers="scenarioUserGridHeaders"
                       :items="scenarioUserGridRows"
-                      sort-icon=$vuetify.icons.ghd-table-sort
+                      sort-asc-icon="custom:GhdTableSortAscSvg"
+                      sort-desc-icon="custom:GhdTableSortDescSvg"
                       :search="searchTerm">
-          <template slot="items" slot-scope="props">
+          <template slot="items" slot-scope="props" v-slot:item="{item}">
+            <tr>
             <td>
-              <v-label>{{ props.item.username }}</v-label>
+              <v-label>{{ item.username }}</v-label>
             </td>
             <td>
               <v-checkbox id="ShareScenarioDialog-isShared-vcheckbox" 
-                  class="ghd-padding-top bottom-margin-zero" label="Is Shared" v-model="props.item.isShared"
-                  @change="removeUserModifyAccess(props.item.id, props.item.isShared)"/>
+                  class="ghd-padding-top bottom-margin-zero" label="Is Shared" v-model="item.isShared"
+                  @change="removeUserModifyAccess(item.id, item.isShared)"/>
             </td>
             <td>
-              <v-checkbox id="ShareScenarioDialog-canModify-vcheckbox"
-                          :disabled="!props.item.isShared" class="ghd-padding-top bottom-margin-zero" label="Can Modify" v-model="props.item.canModify"/>
+              <v-checkbox id="ShareScenarioDialog-canModify-vcheckbox" 
+                :disabled="!item.isShared" 
+                class="ghd-padding-top bottom-margin-zero" 
+                label="Can Modify" 
+                v-model="item.canModify"/>
             </td>
+          </tr>
           </template>
-          <v-alert :value="true"
+          <!-- <v-alert :model-value="true"
                    class="ara-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
-          </v-alert>
+          </v-alert> -->
         </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-layout justify-space-between row>
-          <v-btn id="ShareScenarioDialog-save-vbtn"
-                 @click="onSubmit(true)" class="ara-blue-bg white--text">
+        <v-row justify="center">
+          <v-btn id="ShareScenarioDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-button ghd-blue">Cancel</v-btn>
+          <v-btn id="ShareScenarioDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue" variant="outlined">
             Save
           </v-btn>
-          <v-btn id="ShareScenarioDialog-cancel-vbtn"
-                 @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {State} from 'vuex-class';
+<script lang="ts" setup>
+import { ref, watch, onMounted, toRefs, computed } from 'vue'; 
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {ScenarioUser} from '@/shared/models/iAM/scenario';
 import {User} from '@/shared/models/iAM/user';
 import {getUserName} from '@/shared/utils/get-user-info';
 import {setItemPropertyValueInList} from '@/shared/utils/setter-utils';
-import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {ScenarioUserGridRow, ShareScenarioDialogData} from '@/shared/models/modals/share-scenario-dialog-data';
+import { useStore } from 'vuex'; 
 
-@Component
-export default class ShareScenarioDialog extends Vue {
-  @Prop() dialogData: ShareScenarioDialogData;
+  let store = useStore(); 
 
-  @State(state => state.userModule.users) stateUsers: User[];
+  const props = defineProps<{dialogData: ShareScenarioDialogData}>();
+  const emit = defineEmits(['submit'])
+  const { dialogData } = toRefs(props);
+  const stateUsers = computed<User[]>(() => store.state.userModule.users)
 
-  scenarioUserGridHeaders: DataTableHeader[] = [
-    {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
+  let scenarioUserGridHeaders: any[] = [
+    {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Shared With', key: '', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Can Modify', key: '', align: 'left', sortable: true, class: '', width: ''}
   ];
-  scenarioUserGridRows: ScenarioUserGridRow[] = [];
-  currentUserAndOwner: ScenarioUser[] = [];
-  searchTerm: string = '';
+  let scenarioUserGridRows = ref<ScenarioUserGridRow[]>([]);
+  let currentUserAndOwner: ScenarioUser[] = [];
+  let searchTerm = ref('');
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    if (this.dialogData.showDialog) {
-      this.onSetGridData();
-      this.onSetUsersSharedWith();
+  watch(dialogData,()=> {
+    if (dialogData.value.showDialog) {
+      onSetGridData();
+      onSetUsersSharedWith();
     }
-  }
+  });
 
-  onSetGridData() {
+  function onSetGridData() {
     const currentUser: string = getUserName();
 
-    this.scenarioUserGridRows = this.stateUsers
+     scenarioUserGridRows.value =  stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -96,48 +101,48 @@ export default class ShareScenarioDialog extends Vue {
         }));
   }
 
-  onSetUsersSharedWith() {
+  function onSetUsersSharedWith() {
     const currentUser: string = getUserName();
     const isCurrentUserOrOwner = (scenarioUser: ScenarioUser) => scenarioUser.username === currentUser || scenarioUser.isOwner;
     const isNotCurrentUserOrOwner = (scenarioUser: ScenarioUser) => scenarioUser.username !== currentUser && !scenarioUser.isOwner;
 
-    this.currentUserAndOwner = filter(isCurrentUserOrOwner, this.dialogData.scenario.users) as ScenarioUser[];
-    const otherUsers: ScenarioUser[] = filter(isNotCurrentUserOrOwner, this.dialogData.scenario.users) as ScenarioUser[];
+    currentUserAndOwner = filter(isCurrentUserOrOwner, props.dialogData.scenario.users) as ScenarioUser[];
+    const otherUsers: ScenarioUser[] = filter(isNotCurrentUserOrOwner, props.dialogData.scenario.users) as ScenarioUser[];
 
     otherUsers.forEach((scenarioUser: ScenarioUser) => {
-      if (any(propEq('id', scenarioUser.userId), this.scenarioUserGridRows)) {
+      if (any(propEq('id', scenarioUser.userId),  scenarioUserGridRows.value)) {
         const scenarioUserGridRow: ScenarioUserGridRow = find(
-            propEq('id', scenarioUser.userId), this.scenarioUserGridRows) as ScenarioUserGridRow;
+            propEq('id', scenarioUser.userId),  scenarioUserGridRows.value) as ScenarioUserGridRow;
 
-        this.scenarioUserGridRows = update(
-            findIndex(propEq('id', scenarioUser.userId), this.scenarioUserGridRows),
+         scenarioUserGridRows.value = update(
+            findIndex(propEq('id', scenarioUser.userId),  scenarioUserGridRows.value),
             {...scenarioUserGridRow, isShared: true, canModify: scenarioUser.canModify},
-            this.scenarioUserGridRows
+             scenarioUserGridRows.value
         );
       }
     });
   }
 
-  removeUserModifyAccess(userId: string, isShared: boolean) {
+  function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      this.scenarioUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), this.scenarioUserGridRows),
-          'canModify', false, this.scenarioUserGridRows);
+       scenarioUserGridRows.value = setItemPropertyValueInList(
+          findIndex(propEq('id', userId),  scenarioUserGridRows.value),
+          'canModify', false,  scenarioUserGridRows.value);
     }
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.getScenarioUsers());
+      emit('submit', getScenarioUsers());
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.scenarioUserGridRows = [];
+     scenarioUserGridRows.value = [];
   }
 
-  getScenarioUsers() {
-    const usersSharedWith: ScenarioUser[] = this.scenarioUserGridRows
+  function getScenarioUsers() {
+    const usersSharedWith: ScenarioUser[] =  scenarioUserGridRows.value
         .filter((scenarioUserGridRow: ScenarioUserGridRow) => scenarioUserGridRow.isShared)
         .map((scenarioUserGridRow: ScenarioUserGridRow) => ({
           userId: scenarioUserGridRow.id,
@@ -146,9 +151,9 @@ export default class ShareScenarioDialog extends Vue {
           isOwner: false
         }));
 
-    return [...this.currentUserAndOwner, ...usersSharedWith];
+    return [...currentUserAndOwner, ...usersSharedWith];
   }
-}
+
 </script>
 
 <style>

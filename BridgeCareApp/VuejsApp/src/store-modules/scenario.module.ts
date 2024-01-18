@@ -263,7 +263,6 @@ const actions = {
             },
         );
     },
-
     async updateScenario({dispatch, commit}: any, payload: any) {
         return await ScenarioService.updateScenario(payload.scenario)
             .then((response: AxiosResponse) => {

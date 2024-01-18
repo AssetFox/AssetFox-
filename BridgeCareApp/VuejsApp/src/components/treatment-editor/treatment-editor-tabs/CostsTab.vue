@@ -1,20 +1,21 @@
 <template>
-    <v-layout class="costs-tab-content">
-        <v-flex xs12>              
-            <div class="costs-data-table">                
+    <v-row>
+        <v-col cols="12">              
+            <div >                
                 <v-data-table
                     hide-default-header id="CostsTab-vdatatable"
                     :headers="costsGridHeaders"
-                    sort-icon=$vuetify.icons.ghd-table-sort
+                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                    sort-desc-icon="custom:GhdTableSortDescSvg"
                     :items="costsGridData"
                     class="elevation-1 v-table__overflow ghd-padding-top"
                     hide-actions
                 >
-                    <template slot="items" slot-scope="props">
-                        <tr style="border:none">
-                            <td xs5>                            
-                                <v-layout xs6 align-center>                                
-                                    <v-subheader class="ghd-control-label ghd-md-gray" style="width:95%">Equation</v-subheader>
+                    <template slot="items" slot-scope="props" v-slot:item="props">
+                        <tr>
+                            <td style="border: none;">                            
+                                <v-row justify="space-between" align="end" style="margin: 5px;">
+                                    <v-subheader class="ghd-control-label ghd-md-gray" >Equation</v-subheader>
                                     <v-btn id="TreatmentCostsTab-EquationEditorBtn"
                                         @click="
                                             onShowCostEquationEditorDialog(
@@ -22,28 +23,28 @@
                                             )
                                         "
                                         class="edit-icon"
-                                        icon
+                                        flat
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                     </v-btn>                                
-                                </v-layout>
-                                <v-layout xs6 align-center>  
+                                </v-row>
+                                <v-row>  
                                     <v-textarea
                                         class="ghd-control-border ghd-control-text-sm"
                                         id="TreatmentCostsTab-Equation-TextArea"
                                         full-width
                                         no-resize
-                                        outline
+                                        variant="outlined"
                                         readonly
                                         rows="3"
                                         v-model="props.item.equation.expression"
                                     >                                
                                     </v-textarea>  
-                                </v-layout>                          
+                                </v-row>                          
                             </td>
-                            <td xs5>
-                                <v-layout xs6 align-center>
-                                    <v-subheader class="ghd-control-label ghd-md-gray" style="width:95%">Criteria</v-subheader>
+                            <td style="border: none;">
+                                <v-row justify="space-between" align="end" style="margin: 5px;">
+                                    <v-subheader class="ghd-control-label ghd-md-gray">Criteria</v-subheader>
                                     <v-btn id="TreatmentCostsTab-CriteriaEditorBtn"
                                         @click="
                                             onShowCostCriterionEditorDialog(
@@ -51,18 +52,18 @@
                                             )
                                         "
                                         class="edit-icon"
-                                        icon
+                                        flat
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                     </v-btn>
-                                </v-layout> 
-                                <v-layout xs6 align-center>              
+                                </v-row> 
+                                <v-row >              
                                     <v-textarea
                                         class="ghd-control-border ghd-control-text-sm"
                                         id="TreatmentCostsTab-Criteria-TextArea"
                                         full-width
                                         no-resize
-                                        outline
+                                        variant="outlined"
                                         readonly
                                         rows="3"
                                         v-model="
@@ -71,29 +72,29 @@
                                         "
                                     >                                
                                     </v-textarea>
-                                </v-layout>
+                                </v-row>
                             </td>     
-                            <td xs2>
-                                <v-layout align-start>
+                            <td style="border: none;">
+                                <v-row align-start>
                                     <v-btn id="TreatmentCostsTab-DeleteCostBtn"
                                         @click="onRemoveCost(props.item.id)"
-                                        icon
+                                        flat
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
-                                </v-layout>                   
+                                </v-row>                   
                             </td>
                         </tr>
                     </template>
                 </v-data-table>
             </div>
-            <v-btn @click="onAddCost" class="ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border" id="TreatmentCostsTab-AddCostBtn" >Add Cost</v-btn>
+            <v-btn flat @click="onAddCost" class="ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border" id="TreatmentCostsTab-AddCostBtn" >Add Cost</v-btn>
             <v-chip class="ma-2 ara-blue" @click="showExampleFunction">
                 Equation - Use Max(,) to enforce minimum costs
             </v-chip>            
-        </v-flex>
+        </v-col>
 
-        <CostEquationEditorDialog
+        <EquationEditorDialog
             :dialogData="costEquationEditorDialogData"
             :isFromPerformanceCurveEditor=false
             @submit="onSubmitCostEquationEditorDialogResult"
@@ -105,18 +106,16 @@
         />
 
         <Alert :dialogData="alertData" @submit="onSubmitAlertResult" />
-    </v-layout>
+    </v-row>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
+<script setup lang="ts">
+import { ShallowRef, shallowRef } from 'vue';
 import { emptyCost, TreatmentCost } from '@/shared/models/iAM/treatment';
 import {
     emptyEquationEditorDialogData,
     EquationEditorDialogData,
 } from '@/shared/models/modals/equation-editor-dialog-data';
-import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { clone, isNil } from 'ramda';
 import EquationEditorDialog from '../../../shared/modals/EquationEditorDialog.vue';
 import { Equation } from '@/shared/models/iAM/equation';
@@ -127,141 +126,141 @@ import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import { ref, onMounted, onBeforeUnmount, watch, toRefs } from 'vue';
+import { getUrl } from '@/shared/utils/get-url';
 
-@Component({
-    components: {
-        GeneralCriterionEditorDialog,
-        CostEquationEditorDialog: EquationEditorDialog,
-        Alert
-    },
-})
-export default class CostsTab extends Vue {
-    @Prop() selectedTreatmentCosts: TreatmentCost[];
-    @Prop() callFromScenario: boolean;
-    @Prop() callFromLibrary: boolean;
-
-    costsGridHeaders: DataTableHeader[] = [
+    const emit = defineEmits(['submit', 'onAddCost', 'onModifyCost', 'onRemoveCost'])
+    const props = defineProps<{
+        selectedTreatmentCosts:TreatmentCost[],
+         callFromScenario: boolean,
+         callFromLibrary: boolean  
+    }>(); 
+    const { selectedTreatmentCosts, callFromScenario, callFromLibrary } = toRefs(props);
+    const costsGridHeaders: any[] = [
         {
-            text: '',
-            value: 'equation',
+            title: '',
+            key: 'equation',
             align: 'left',
             sortable: false,
             class: '',
             width: '',
         },
         {
-            text: '',
-            value: 'criterionLibrary',
+            title: '',
+            key: 'criterionLibrary',
             align: 'left',
             sortable: false,
             class: '',
             width: '',
         },
         {
-            text: '',
-            value: '',
+            title: '',
+            key: '',
             align: 'left',
             sortable: false,
             class: '',
             width: '100px',
         },
     ];
-    costsGridData: TreatmentCost[] = [];
-    costEquationEditorDialogData: EquationEditorDialogData = clone(
+    let costsGridData: ShallowRef<TreatmentCost[] | undefined> = shallowRef([]);
+    let costEquationEditorDialogData = shallowRef(clone(
         emptyEquationEditorDialogData,
-    );
-    costCriterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+    ));
+    let costCriterionEditorDialogData = shallowRef(clone(
         emptyGeneralCriterionEditorDialogData,
-    );
-    selectedCostForEquationOrCriteriaEdit: TreatmentCost = clone(emptyCost);
-    uuidNIL: string = getBlankGuid();
-    alertData: AlertData = clone(emptyAlertData);
+    ));
+    let selectedCostForEquationOrCriteriaEdit: TreatmentCost = clone(emptyCost);
+    let uuidNIL: string = getBlankGuid();
+    let alertData = shallowRef(clone(emptyAlertData));
 
-    @Watch('selectedTreatmentCosts')
-    onSelectedTreatmentCostsChanged() {
-        this.costsGridData = clone(this.selectedTreatmentCosts);
-    }
+    onMounted(() => {
+        if(props.selectedTreatmentCosts.length > 0)
+            costsGridData.value = clone(props.selectedTreatmentCosts);
+    })
+    watch(() => props.selectedTreatmentCosts, () => {
+        costsGridData.value = clone(props.selectedTreatmentCosts);
+    });
 
-    onAddCost() {
+    function onAddCost() {
         const newCost: TreatmentCost = { ...emptyCost, id: getNewGuid() };
-        this.$emit('onAddCost', newCost);
+        emit('onAddCost', newCost);
     }
 
-    onShowCostEquationEditorDialog(cost: TreatmentCost) {
-        this.selectedCostForEquationOrCriteriaEdit = clone(cost);
+    function onShowCostEquationEditorDialog(cost: TreatmentCost) {
+        selectedCostForEquationOrCriteriaEdit = clone(cost);
 
-        this.costEquationEditorDialogData = {
+        costEquationEditorDialogData.value = {
             showDialog: true,
             equation: clone(cost.equation),
         };
     }
 
-    onSubmitCostEquationEditorDialogResult(equation: Equation) {
-        this.costEquationEditorDialogData = clone(
+    function onSubmitCostEquationEditorDialogResult(equation: Equation) {
+        costEquationEditorDialogData.value = clone(
             emptyEquationEditorDialogData,
         );
 
         if (
             !isNil(equation) &&
-            this.selectedCostForEquationOrCriteriaEdit.id !== this.uuidNIL
+            selectedCostForEquationOrCriteriaEdit.id !== uuidNIL
         ) {
-            this.$emit(
+            emit(
                 'onModifyCost',
                 setItemPropertyValue(
                     'equation',
                     equation,
-                    this.selectedCostForEquationOrCriteriaEdit,
+                    selectedCostForEquationOrCriteriaEdit,
                 ),
             );
         }
 
-        this.selectedCostForEquationOrCriteriaEdit = clone(emptyCost);
+        selectedCostForEquationOrCriteriaEdit = clone(emptyCost);
     }
 
-    onShowCostCriterionEditorDialog(cost: TreatmentCost) {
-        this.selectedCostForEquationOrCriteriaEdit = clone(cost);
+    function onShowCostCriterionEditorDialog(cost: TreatmentCost) {
+        selectedCostForEquationOrCriteriaEdit = clone(cost);
 
-        this.costCriterionEditorDialogData = {
+        costCriterionEditorDialogData.value = {
             showDialog: true,
             CriteriaExpression: cost.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onSubmitCostCriterionEditorDialogResult(
+    function onSubmitCostCriterionEditorDialogResult(
         criterionExpression: string,
     ) {
-        this.costCriterionEditorDialogData = clone(
+        costCriterionEditorDialogData.value = clone(
             emptyGeneralCriterionEditorDialogData,
         );
 
         if (
             !isNil(criterionExpression) &&
-            this.selectedCostForEquationOrCriteriaEdit.id !== this.uuidNIL
+            selectedCostForEquationOrCriteriaEdit.id !== uuidNIL
         ) {
-            if(this.selectedCostForEquationOrCriteriaEdit.criterionLibrary.id === getBlankGuid())
-                this.selectedCostForEquationOrCriteriaEdit.criterionLibrary.id = getNewGuid();
-            this.$emit(
+            if(selectedCostForEquationOrCriteriaEdit.criterionLibrary.id === getBlankGuid())
+                selectedCostForEquationOrCriteriaEdit.criterionLibrary.id = getNewGuid();
+            emit(
                 'onModifyCost',
                 setItemPropertyValue(
                     'criterionLibrary',
-                    {...this.selectedCostForEquationOrCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary,
-                    this.selectedCostForEquationOrCriteriaEdit,
+                    {...selectedCostForEquationOrCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary,
+                    selectedCostForEquationOrCriteriaEdit,
                 ),
             );
         }
 
-        this.selectedCostForEquationOrCriteriaEdit = clone(emptyCost);
+        selectedCostForEquationOrCriteriaEdit = clone(emptyCost);
     }
 
-    onRemoveCost(costId: string) {
-        this.$emit('onRemoveCost', costId);
+    function onRemoveCost(costId: string) {
+        emit('onRemoveCost', costId);
     }
 
     /**
      * Shows the Alert
      */
-    showExampleFunction() {
-        this.alertData = {
+     function showExampleFunction() {
+        alertData.value = {
             showDialog: true,
             heading: 'Example',
             choice: false,
@@ -271,24 +270,18 @@ export default class CostsTab extends Vue {
         };
     }
 
-    onSubmitAlertResult(dummy: boolean) {
-        this.alertData = clone(emptyAlertData);
+    function onSubmitAlertResult(dummy: boolean) {
+        alertData.value = clone(emptyAlertData);
     }
-}
+
 </script>
 
 <style>
-.costs-tab-content {
-    height: 185px;
-    min-width: 1100px;
-}
-
 .costs-data-table {
-    overflow-y: auto;
+    height: 395px;
+    width: 800px;
     border: 1px solid #999999 !important;
-    min-width: 1000px;
 }
-
 .costs-data-table table.v-table thead tr{
     height: 0px !important;
     border: none !important;

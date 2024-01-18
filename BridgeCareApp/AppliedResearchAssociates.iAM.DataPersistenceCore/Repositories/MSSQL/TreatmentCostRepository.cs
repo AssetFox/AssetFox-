@@ -66,6 +66,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         });
                         return equation;
                     }).ToList();
+
+                // Delete any existing entries for related treatment costs               
+                _unitOfWork.Context.DeleteAll<TreatmentCostEquationEntity>(_ => existingEntityIds.Contains(_.TreatmentCostId));
+
                 _unitOfWork.Context.AddAll(equations, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(equationsJoins, _unitOfWork.UserEntity?.Id);
             }
@@ -95,6 +99,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         });
                         return criterion;
                     }).ToList();
+
+                // Delete any existing entries for related treatment costs               
+                _unitOfWork.Context.DeleteAll<CriterionLibraryTreatmentCostEntity>(_ => existingEntityIds.Contains(_.TreatmentCostId));
 
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
@@ -145,6 +152,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         });
                         return equationEntity;
                     }).ToList();
+
+                // Delete any existing entries for related treatment costs               
+                _unitOfWork.Context.DeleteAll<ScenarioTreatmentCostEquationEntity>(_ => existingEntityIds.Contains(_.ScenarioTreatmentCostId));
+
                 _unitOfWork.Context.AddAll(equations, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(equationsJoins, _unitOfWork.UserEntity?.Id);
             }
@@ -174,6 +185,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         });
                         return criterion;
                     }).ToList();
+
+                // Delete any existing entries for related treatment costs               
+                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentCostEntity>(_ => existingEntityIds.Contains(_.ScenarioTreatmentCostId));
 
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);

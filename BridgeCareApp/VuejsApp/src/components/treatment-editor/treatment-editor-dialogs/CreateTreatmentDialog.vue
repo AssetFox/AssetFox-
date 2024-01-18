@@ -1,26 +1,27 @@
 <template>
-  <v-layout>
-    <v-dialog max-width="450px" persistent v-model="showDialog">
+  <v-row>
+    <v-dialog max-width="450px" persistent v-model="showDialogComputed">
       <v-card class="ghd-padding">
         <v-card-title>
-            <v-layout justify-left>
+            <v-row justify="space-between">
               <h3 class="ghd-title">Create New Treatment</h3>
-            </v-layout>
-            <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+              <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
               X
-            </v-btn>          
+            </v-btn>  
+            </v-row>
+                    
         </v-card-title>
         <v-card-text>
-          <v-layout column>
+          <v-row column>
             <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
-            <v-text-field id="CreateTreatmentDialog-name-textField" class="ghd-control-border ghd-control-text ghd-control-width-lg" outline v-model="newTreatment.name"></v-text-field>
-          </v-layout>
+            <v-text-field variant="outlined" id="CreateTreatmentDialog-name-textField" class="ghd-control-border ghd-control-text ghd-control-width-lg" outline v-model="newTreatment.name"></v-text-field>
+          </v-row>
         </v-card-text>
         <v-card-actions>
-          <v-layout row justify-center>
+          <v-row justify="center">
             <v-btn
               id="CreateTreatmentDialog-cancel-btn"
-              @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed>Cancel
+              @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel
             </v-btn>
             <v-btn 
               id="CreateTreatmentDialog-save-btn"
@@ -28,34 +29,35 @@
               @click="onSubmit(true)" 
               class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">Save
             </v-btn>            
-          </v-layout>
+          </v-row>
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </v-layout>
+  </v-row>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop} from 'vue-property-decorator';
+<script lang="ts" setup>
+import Vue, { computed } from 'vue';
+import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
 import {emptyTreatment, Treatment} from '@/shared/models/iAM/treatment';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 
-@Component
-export default class CreateTreatmentDialog extends Vue {
-  @Prop() showDialog: boolean;
+const props = defineProps<{showDialog: boolean}>()
+let showDialogComputed = computed(() => props.showDialog);
+let newTreatment = ref<Treatment>({...emptyTreatment, id: getNewGuid(), addTreatment: false});
+let store = useStore();
+const emit = defineEmits(['submit'])
 
-  newTreatment: Treatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
-
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.newTreatment.addTreatment = true;
-      this.$emit('submit', this.newTreatment);
+      newTreatment.value.addTreatment = true;
+      emit('submit', newTreatment.value);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newTreatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
+    newTreatment.value = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
   }
-}
+
 </script>

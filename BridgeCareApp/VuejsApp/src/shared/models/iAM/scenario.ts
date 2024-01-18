@@ -74,6 +74,8 @@ export enum WorkType {
     ImportScenarioInvestment,
     ImportScenarioPerformanceCurve,
     ImportScenarioTreatment,
+    ImportScenarioTreatmentSupersedeRule,
+    ImportLibraryTreatmentSupersedeRule,
     ImportCommittedProject,
 }
 
@@ -102,6 +104,7 @@ export interface CloneScenarioData {
     scenarioId: string;
     destinationNetworkId: string;
     networkId: string;
+    destinationNetworkId:string;
     scenarioName: string;
 }
 

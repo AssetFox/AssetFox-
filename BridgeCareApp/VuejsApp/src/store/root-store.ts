@@ -1,5 +1,4 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
+import Vuex, { createStore } from 'vuex';
 
 import busyModule from '@/store-modules/busy.module';
 import authenticationModule from '@/store-modules/authentication.module';
@@ -30,9 +29,8 @@ import adminDataModule from '@/store-modules/admin-data.module';
 import adminSiteSettingsModule from '@/store-modules/admin-site-settings.module';
 import alertModule from '@/store-modules/alert.module';
 
-Vue.use(Vuex);
 
-export default new Vuex.Store({
+export default createStore({
     modules: {
         busyModule,
         authenticationModule,

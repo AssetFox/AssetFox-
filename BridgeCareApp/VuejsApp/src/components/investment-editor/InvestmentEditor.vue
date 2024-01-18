@@ -1,254 +1,287 @@
 <template>
-    <v-layout column>
-        <v-flex xs12>
-            <v-layout row style="margin-top:-40px;">
-                <v-flex xs4 class="ghd-constant-header">
-                    <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Select an Investment library</span></v-subheader>
-                    <v-select 
+    <v-card class="elevation-0 vcard-main-layout">
+    <v-row>
+        <v-col cols="12">
+            <v-row justify="space-between">
+                <v-col cols = "auto" class="ghd-constant-header">
+                    <div style="margin-bottom: 10px;">
+                        <v-subheader class="ghd-control-label ghd-md-gray"><span>Select an Investment library</span></v-subheader><!--class="ghd-md-gray ghd-control-subheader"-->
+                    </div>
+                        <v-select 
                         id="InvestmentEditor-investmentLibrary-select"
                         :items='librarySelectItems'
-                        append-icon=$vuetify.icons.ghd-down
-                        outline
+                        menu-icon=custom:GhdDownSvg
+                        item-title="text"
+                        item-value="value"
                         v-model='librarySelectItemValue'
-                        class="ghd-select ghd-text-field ghd-text-field-border budget-parent">
+                        class="ghd-select ghd-text-field ghd-text-field-border vs-style"
+                        variant="outlined"
+                        density="compact">
                     </v-select>
                     <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
-                </v-flex>
+                </v-col>
 
                 <!-- these are only in library -->
-                <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header">
-                    <v-layout v-if='hasSelectedLibrary && !hasScenario' row class="header-alignment-padding-center">
+                <v-col cols = "auto" v-if='!hasScenario' class="ghd-constant-header">
+                    <v-row v-if='hasSelectedLibrary && !hasScenario'  class="header-alignment-padding-center">
                         <div class="header-text-content invest-owner-padding">
-                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
                         </div>
-                        <div class="header-text-content invest-owner-padding">
-                            Date Modified: {{ modifiedDate }}
-                        </div>
-                        <v-btn id="InvestmentEditor-ShareLibrary-vbtn" @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        <v-btn id="InvestmentEditor-ShareLibrary-vbtn" @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)'
+                                style="margin-left: 10px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                                v-show='!hasScenario'>
                             Share Library
                         </v-btn>
-                    </v-layout>
-                </v-flex>
-                <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header">
-                    <v-layout row align-end justify-end class="header-alignment-padding-right">
-                        <v-spacer></v-spacer>
+                    </v-row>
+                </v-col>
+                <v-col cols = "auto" v-if='!hasScenario' class="ghd-constant-header">
+                    <v-row align-end justify-end class="header-alignment-padding-center">
+                        <!-- <v-spacer></v-spacer> -->
                         <v-btn id="InvestmentEditor-CreateNewLibrary-vbtn" @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="!hasScenario"
-                        outline>
+                        variant = "outlined">
                             Create New Library
                         </v-btn>
-                    </v-layout>
-                </v-flex>
-            </v-layout>
+                    </v-row>
+                </v-col>
+            </v-row>
+
             <!-- only for scenario -->
-            <v-layout row style="margin-top:-20px;">
+            <v-row style="margin-top:40px;" v-if='hasInvestmentPlanForScenario' align="end">
                 <!-- text boxes for scenario only -->
-                <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
-                    <v-subheader class="ghd-md-gray ghd-control-subheader"><span>First Year of Analysis Period</span></v-subheader>
+                <v-col cols = "2" class="ghd-constant-header">
+                    <v-subheader class="ghd-md-gray ghd-control-label"><span>First Year of Analysis Period</span></v-subheader>
                     <v-text-field id="InvestmentEditor-firstYearAnalysisPeriod-textField"
-                                  outline
-                                  @change='onEditInvestmentPlan("firstYearOfAnalysisPeriod", $event)'
+                                  variant="outlined"
+                                  @update:model-value ='onEditInvestmentPlan("firstYearOfAnalysisPeriod", $event)'
                                   :rules="[rules['generalRules'].valueIsNotEmpty]"
-                                  :mask="'####'"
+                                  v-maska:[yearMask]
                                   v-model='investmentPlan.firstYearOfAnalysisPeriod' 
                                   class="ghd-text-field-border ghd-text-field"/>
-                </v-flex>
-                <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
-                    <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Number of Years in Analysis Period</span></v-subheader>
+                </v-col>
+                <v-col cols = "2" class="ghd-constant-header">
+                    <v-subheader class="ghd-md-gray ghd-control-label"><span>Number of Years in Analysis Period</span></v-subheader>
                     <v-text-field id="InvestmentEditor-numberYearsAnalysisPeriod-textField"
-                                  readonly outline
-                                  @change='onEditInvestmentPlan("numberOfYearsInAnalysisPeriod", $event)'
+                                  readonly variant="outlined"
+                                  @update:model-value='onEditInvestmentPlan("numberOfYearsInAnalysisPeriod", $event)'
                                   v-model='investmentPlan.numberOfYearsInAnalysisPeriod'
                                   class="ghd-text-field-border ghd-text-field" />
-                </v-flex>
-                <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
-                    <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Minimum Project Cost Limit</span></v-subheader>
-                    <v-text-field outline 
+                </v-col>
+                <v-col cols = "2" class="ghd-constant-header">
+                    <v-subheader class="ghd-md-gray ghd-control-label"><span>Minimum Project Cost Limit</span></v-subheader>
+                    <currencyTextbox outline 
                                   id='InvestmentEditor-minimumProjectCostLimit-textField'
-                                  @change='onEditInvestmentPlan("minimumProjectCostLimit", $event)'
+                                  @update:model-value='onEditInvestmentPlan("minimumProjectCostLimit", $event)'
                                   v-model='investmentPlan.minimumProjectCostLimit'
-                                  v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: true}"
                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]"
                                   :disabled="!hasAdminAccess"
+                                  variant="outlined"
                                   class="ghd-text-field-border ghd-text-field" />
-                </v-flex>
-                <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
-                    <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Inflation Rate Percentage</span></v-subheader>
+                </v-col>
+                <v-col cols = "2" class="ghd-constant-header">
+                    <v-subheader class="ghd-md-gray ghd-control-label"><span>Inflation Rate Percentage</span></v-subheader>
                     <v-text-field id="InvestmentEditor-inflationRatePercentage-textField"
-                                  outline
+                                  variant="outlined"
                                   v-model='investmentPlan.inflationRatePercentage'
-                                  @change='onEditInvestmentPlan("inflationRatePercentage", $event)'
-                                  :mask="'###'"
+                                  @update:model-value='onEditInvestmentPlan("inflationRatePercentage", $event)'
+                                  v-maska:[percentMask]
                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(investmentPlan.inflationRatePercentage, [0,100])]"
                                   :disabled="!hasAdminAccess"
                                   class="ghd-text-field-border ghd-text-field" />
-                </v-flex>
-                <v-flex xs4 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
+                </v-col>
+                <v-col cols = "4" class="ghd-constant-header">
                     <v-switch id="InvestmentEditor-allowFundingCarryover-switch"
                               style="margin-left:10px;margin-top:50px;"
+                              color="#2A578D"
                               class="ghd-checkbox"
                               label="Allow Funding Carryover"
                               :disabled="!hasAdminAccess"
                               v-model="investmentPlan.shouldAccumulateUnusedBudgetAmounts"
-                              @change='onEditInvestmentPlan("shouldAccumulateUnusedBudgetAmounts", $event)' />
-                </v-flex>
-            </v-layout>
-            <v-divider v-if='hasScenario || hasSelectedLibrary' />
-            <v-layout row justify-space-between v-show='hasSelectedLibrary || hasScenario'>
-                <v-flex xs4>
-                    <v-layout row>
+                              @update:model-value='onEditInvestmentPlan("shouldAccumulateUnusedBudgetAmounts", $event)' />
+                </v-col>
+            </v-row>
+            <v-divider :thickness="2" class="border-opacity-100" v-show ='hasScenario || hasSelectedLibrary' />
+
+            <v-row justify-space-between v-show='hasSelectedLibrary || hasScenario'>
+                <v-col cols = "6">
+                    <v-row>
+                        <v-col cols="auto">
                         <v-btn id="InvestmentEditor-editBudgets-btn"
                             @click='onShowEditBudgetsDialog'
-                            outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                            variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                             Edit Budgets
                         </v-btn>
+                        </v-col>
+                        <v-col cols="2">
                         <v-text-field id="InvestmentEditor-numberYearsToAdd-textField"
-                                      :disabled='currentPage.length === 0' type="number" min=1 :mask="'##########'"
-                                      class="ghd-text-field-border ghd-text-field ghd-left-paired-textbox shrink"
+                                      :disabled='currentPage.length === 0' type="number" min=1 v-maska:[mask]
+                                      class="ghd-text-field-border ghd-text-field"
                                       v-bind:class="{ 'ghd-blue-text-field': currentPage.length !== 0}"
-                                      outline v-model.number="range" />
+                                      variant="outlined" density="compact" v-model.number="range" />
+                        </v-col>
+                        <v-col>
                         <v-btn id="InvestmentEditor-addBudgetYearRange-btn"
                                :disabled='currentPage.length === 0'
                                @click='onSubmitAddBudgetYearRange'
-                               class='ghd-right-paired-button ghd-blue ghd-button-text ghd-outline-button-padding ' outline>
+                               class='ghd-right-paired-button ghd-blue ghd-button-text ghd-outline-button-padding ' variant = "outlined">
                             Add Year(s)
                         </v-btn>
-                    </v-layout>
-                    <v-layout row>
+                        </v-col>
+                    </v-row>
+                    <v-row>
                         <div class = "ghd-md-gray ghd-control-subheader" style="margin-left:2% !important;"> 
                             Number of Budgets: {{ currentPage.length }}
                         </div>
-                    </v-layout>
-                </v-flex>
+                    </v-row>
+                </v-col>
                 <v-spacer></v-spacer>
-                <v-flex xs4>
-                    <v-layout row align-end>
+                <v-col cols = "5">
+                    <v-row row align-end>
                         <v-spacer></v-spacer>
                         <v-btn id="InvestmentEditor-upload-btn"
                             :disabled='false' @click='showImportExportInvestmentBudgetsDialog = true;'
-                            flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                            variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                             Upload
                         </v-btn>
                         <v-divider class="investment-divider" inset vertical>
                         </v-divider>
                         <v-btn id="InvestmentEditor-download-btn"
                                :disabled='false' @click='exportInvestmentBudgets()'
-                               flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                               variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                             Download
                         </v-btn>
                         <v-divider class="upload-download-divider" inset vertical>
                         </v-divider>
                         <v-btn id="InvestmentEditor-downloadTemplate-btn"
                                :disabled='false' @click='OnDownloadTemplateClick()'
-                               flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                               variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                             Download Template
                         </v-btn>
-                    </v-layout>
-                </v-flex>
-            </v-layout>
-        </v-flex>
-        <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>            
-        <!-- datatable -->
-            <v-flex >
-                <v-data-table 
+                    </v-row>
+                </v-col>
+            </v-row>
+        </v-col>
+
+        <v-col v-show='hasSelectedLibrary || hasScenario'>             
+                <v-data-table-server
                     id="InvestmentEditor-investmentsDataTable-dataTable"
                     :headers='budgetYearsGridHeaders' 
-                    :items="budgetYearsGridData"
-                    class='v-table__overflow ghd-table' 
-                    item-key='year' 
-                    select-all 
-                    sort-icon=$vuetify.icons.ghd-table-sort
-                    v-model='selectedBudgetYearsGridData' 
-                    :pagination.sync="pagination"
-                    :total-items="totalItems"
+                    :items="budgetYearsGridData"                                       
+                    :pagination.sync="pagination"                                   
+                    :must-sort='true'
+                    :items-length="totalItems"
                     :rows-per-page-items=[5,10,25]
-                    :must-sort='true'>
-                    <template slot='items' slot-scope='props'>
+                    :items-per-page-options="[
+                        {value: 5, title: '5'},
+                        {value: 10, title: '10'},
+                        {value: 25, title: '25'},
+                    ]"
+                    item-key='year'
+                    class='v-table__overflow ghd-table'        
+                    show-select 
+                    return-object
+                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                    sort-desc-icon="custom:GhdTableSortDescSvg"
+                    v-model='selectedBudgetYearsGridData' 
+                    v-model:sort-by="pagination.sort"
+                    v-model:page="pagination.page"
+                    v-model:items-per-page="pagination.rowsPerPage"
+                    @update:options="onPaginationChanged"
+                    >
+                    <template v-slot:item="item">
+                    <tr>
                         <td>
-                            <v-checkbox hide-details primary v-model='props.selected'></v-checkbox>
+                            <v-checkbox hide-details primary v-model="selectedBudgetYearsGridData" :value="item.item"></v-checkbox>
                         </td>
                         <td v-for='header in budgetYearsGridHeaders'>
-                            <div v-if="header.value === 'year'">
-                                <span class='sm-txt'>{{ props.item.year + firstYearOfAnalysisPeriodShift}}</span>
+                            <div v-if="header.key === 'year'">
+                                <span class='sm-txt'>{{ item.item.year + firstYearOfAnalysisPeriodShift}}</span>
                             </div>       
-                            <div v-if="header.value === 'action'">
-                                <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(props.item.year)" class="ghd-blue" icon>
-                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')" />
-                                </v-btn>
-                            </div>
-                            <div v-if="header.value !== 'year' && header.value !== 'action'">
-                                <v-edit-dialog :return-value.sync='props.item.values[header.value]'
-                                               @save='onEditBudgetYearValue(props.item.year, header.value, props.item.values[header.value])'
-                                               large lazy>
-                                    <v-text-field readonly single-line class='sm-txt'
-                                                  :value='formatAsCurrency(props.item.values[header.value])'
-                                                  :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                    <template slot='input'>
-                                        <v-text-field label='Edit' single-line
-                                                      v-model.number='props.item.values[header.value]'
-                                                      v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
-                                                      :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                           
+                            <div v-if="header.key !== 'year' && header.key !== 'action'">
+                                <editDialog :return-value.sync='item.item.values[header.key]'
+                                    @save='onEditBudgetYearValue(item.item.year, header.key, item.item.values[header.key])'
+                                    size="large" lazy>
+                                    <currencyTextbox readonly single-line class='sm-txt'
+                                        variant="underlined"
+                                        :model-value='item.item.values[header.key]'
+                                        :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                    <template v-slot:input>
+                                        <currencyTextbox label='Edit' single-line
+                                            v-model.number='item.item.values[header.key]'                                             
+                                            :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     </template>
-                                </v-edit-dialog>
+                                </editDialog>
                             </div>
 
+                            <div v-if="header.key === 'action'">
+                                <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(item.item.year)" class="ghd-blue" flat>
+                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
+                                </v-btn>
+                            </div>
                         </td>
+                    </tr>
                     </template>
-                </v-data-table>
+                </v-data-table-server>
                 <v-btn id="InvestmentEditor-deleteSelected-btn"
-                       :disabled='selectedBudgetYears.length === 0' @click='onRemoveBudgetYears'
-                       class='ghd-blue ghd-button' flat>
+                        :disabled='selectedBudgetYears.length === 0' @click='onRemoveBudgetYears'
+                        class='ghd-blue ghd-button' variant = "text">
                     Delete Selected
                 </v-btn>
-            </v-flex>
-        </v-flex>
-        <v-flex v-show='hasSelectedLibrary && !hasScenario' xs12>
-            <v-layout justify-center>
-                <v-flex>
-                    <v-subheader class="ghd-subheader ">Description</v-subheader>
-                    <v-textarea no-resize outline rows='4'
+        </v-col>
+    
+        <v-col v-show='hasSelectedLibrary && !hasScenario' cols = "12">
+            <v-row justify-center>
+                <v-col>
+                    <v-subheader class="ghd-label">Description</v-subheader>
+                    <v-textarea no-resize rows='4'
                                 v-model='selectedBudgetLibrary.description'
-                                @input='checkHasUnsavedChanges()'
-                                class="ghd-text-field-border">
+                                @update:model-value="checkHasUnsavedChanges()"
+                                variant="outlined"
+                                class="ghd-control-text ghd-control-border" density="compact">
                     </v-textarea>
-                </v-flex>
-            </v-layout>
-        </v-flex>
-        <v-flex xs12>
-            <v-layout justify-center row v-show='hasSelectedLibrary || hasScenario'>
-                <v-btn id="InvestmentEditor-cancel-btn"
-                       :disabled='!hasUnsavedChanges' @click='onDiscardChanges' flat class='ghd-blue ghd-button-text ghd-button'
-                       v-show='hasScenario'>
-                    Cancel
-                </v-btn>
-                <v-btn outline id="InvestmentEditor-deleteLibrary-btn"
-                       @click='onShowConfirmDeleteAlert' flat class='ghd-blue ghd-button-text ghd-button' v-show='!hasScenario'
-                       :disabled='!hasLibraryEditPermission'>
-                    Delete Library
-                </v-btn>
-                <v-btn id="InvestmentEditor-createAsNewLibrary-btn"
-                       :disabled='disableCrudButton()'
-                       @click='onShowCreateBudgetLibraryDialog(true)'
-                       class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
-                    Create as New Library
-                </v-btn>
-                <v-btn id="InvestmentEditor-updateLibrary-btn"
-                       :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
-                       @click='onUpsertBudgetLibrary()'
-                       class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
-                       v-show='!hasScenario'>
-                    Update Library
-                </v-btn>
-                <v-btn id="InvestmentEditor-save-btn"
-                       :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
-                       @click='onUpsertInvestment()'
-                       class='ghd-blue-bg white--text ghd-button-text ghd-button'
-                       v-show='hasScenario'>
-                    Save
-                </v-btn>
-            </v-layout>
-        </v-flex>
+                </v-col>
+            </v-row>
+        </v-col>
+        <v-col cols="12">          
+            <v-row style="padding-bottom: 40px;" v-show='hasSelectedLibrary || hasScenario' justify="center">
+                <v-spacer></v-spacer>
+                    <v-btn id="InvestmentEditor-cancel-btn"
+                        :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "flat" class='ghd-blue ghd-button-text ghd-button'
+                        v-show='hasScenario'>
+                        Cancel
+                    </v-btn>
+                    <v-btn outline id="InvestmentEditor-deleteLibrary-btn"
+                        @click='onShowConfirmDeleteAlert' variant = "text" class='ghd-blue ghd-button-text ghd-button' v-show='!hasScenario'
+                        :disabled='!hasLibraryEditPermission'>
+                        Delete Library
+                    </v-btn>
+                    <v-btn id="InvestmentEditor-createAsNewLibrary-btn"
+                        :disabled='disableCrudButton()'
+                        @click='onShowCreateBudgetLibraryDialog(true)'
+                        style="margin-left: 5px;"
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
+                        Create as New Library
+                    </v-btn>
+                    <v-btn id="InvestmentEditor-updateLibrary-btn"
+                    :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
+                        @click='onUpsertBudgetLibrary()'
+                        style="margin-left: 5px;"
+                        class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
+                        v-show='!hasScenario'>
+                        Update Library
+                    </v-btn>
+                    <v-btn id="InvestmentEditor-save-btn"
+                        :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
+                        @click='onUpsertInvestment()'
+                        style="margin-left: 5px;"
+                        class='ghd-blue-bg text-white ghd-button-text ghd-button'
+                        v-show='hasScenario'>
+                        Save
+                    </v-btn>
+                <v-spacer></v-spacer>
+            </v-row>
+        </v-col>
 
         <ConfirmDeleteAlert :dialogData='confirmDeleteAlertData' @submit='onSubmitConfirmDeleteAlertResult' />
 
@@ -265,21 +298,21 @@
 
         <SetRangeForDeletingBudgetYearsDialog :showDialog='showSetRangeForDeletingBudgetYearsDialog'
                                               :endYear='lastYear'
-                                              :maxRange='yearsInAnalysisPeriod'
+                                              :maxRange='yearsInAnalysisPeriod()'
                                               @submit='onSubmitRemoveBudgetYearRange' />
 
         <EditBudgetsDialog :dialogData='editBudgetsDialogData' @submit='onSubmitEditBudgetsDialogResult' />
 
         <ImportExportInvestmentBudgetsDialog :showDialog='showImportExportInvestmentBudgetsDialog'
                                              @submit='onSubmitImportExportInvestmentBudgetsDialogResult' />
-    </v-layout>
+    </v-row>
+</v-card>
+    <ConfirmDialog></ConfirmDialog>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import { Watch } from 'vue-property-decorator';
-import Component from 'vue-class-component';
-import { Action, State, Getter, Mutation } from 'vuex-class';
+<script setup lang='ts'>
+import { shallowRef } from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import SetRangeForAddingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForAddingBudgetYearsDialog.vue';
 import SetRangeForDeletingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForDeletingBudgetYearsDialog.vue';
 import EditBudgetsDialog from './investment-editor-dialogs/EditBudgetsDialog.vue';
@@ -310,11 +343,11 @@ import {
 
 import { EditBudgetsDialogData, EmitedBudgetChanges, emptyEditBudgetsDialogData } from '@/shared/models/modals/edit-budgets-dialog';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
-import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import Alert from '@/shared/modals/Alert.vue';
+import ConfirmDeleteAlert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
-import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
+import { InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import CreateBudgetLibraryDialog
     from '@/components/investment-editor/investment-editor-dialogs/CreateBudgetLibraryDialog.vue';
@@ -343,386 +376,428 @@ import { Hub } from '@/connectionHub';
 import ScenarioService from '@/services/scenario.service';
 import { WorkType } from '@/shared/models/iAM/scenario';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
+import {inject, reactive, ref, shallowReactive, onMounted, onBeforeUnmount, computed, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import mitt, { Emitter, EventType } from 'mitt';
+import { useConfirm } from 'primevue/useconfirm';
+import ConfirmDialog from 'primevue/confirmdialog';
+import { getUrl } from '@/shared/utils/get-url';
+import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 
-@Component({
-    components: {
-        ImportExportInvestmentBudgetsDialog,
-        CreateBudgetLibraryDialog,
-        ShareBudgetLibraryDialog,
-        SetRangeForAddingBudgetYearsDialog,
-        SetRangeForDeletingBudgetYearsDialog,
-        EditBudgetsDialog,
-        ConfirmDeleteAlert: Alert,
-    },
-})
-export default class InvestmentEditor extends Vue {
-    @State(state => state.investmentModule.budgetLibraries) stateBudgetLibraries: BudgetLibrary[];
-    @State(state => state.investmentModule.selectedBudgetLibrary) stateSelectedBudgetLibrary: BudgetLibrary;
-    @State(state => state.investmentModule.investmentPlan) stateInvestmentPlan: InvestmentPlan;
-    @State(state => state.investmentModule.scenarioBudgets) stateScenarioBudgets: Budget[];
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
-    @State(state => state.investmentModule.isSuccessfulImport) isSuccessfulImport: boolean
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
-    @State(state => state.investmentModule.hasPermittedAccess) hasPermittedAccess: boolean;
-    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
-    @Action('getInvestment') getInvestmentAction: any;
-    @Action('getBudgetLibraries') getBudgetLibrariesAction: any;
-    @Action('selectBudgetLibrary') selectBudgetLibraryAction: any;
-    @Action('upsertInvestment') upsertInvestmentAction: any;
-    @Action('upsertBudgetLibrary') upsertBudgetLibraryAction: any;
-    @Action('deleteBudgetLibrary') deleteBudgetLibraryAction: any;
-    @Action('upsertOrDeleteBudgetLibraryUsers') upsertOrDeleteBudgetLibraryUsersAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('importScenarioInvestmentBudgetsFile') importScenarioInvestmentBudgetsFileAction: any;
-    @Action('importLibraryInvestmentBudgetsFile') importLibraryInvestmentBudgetsFileAction: any;
-    @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
-    @Action('setAlertMessage') setAlertMessageAction: any;
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
+let store = useStore();
+const confirm = useConfirm();
+const emit = defineEmits(['submit'])
+const $router = useRouter();
+const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
+      
+const stateBudgetLibraries = computed<BudgetLibrary[]>(() => store.state.investmentModule.budgetLibraries) ;  
 
-    @Getter('getUserNameById') getUserNameByIdGetter: any;
-    @Getter('getLibraryDateModified') getModifiedDate: any;
+const stateSelectedBudgetLibrary = computed<BudgetLibrary>(() => store.state.investmentModule.selectedBudgetLibrary);
+let stateInvestmentPlan = computed<InvestmentPlan>(() => store.state.investmentModule.investmentPlan);
+let stateScenarioBudgets = ref<Budget[]>(store.state.investmentModule.scenarioBudgets);
+const hasUnsavedChanges = computed<boolean>(() => (store.state.unsavedChangesFlagModule.hasUnsavedChanges));
+const hasAdminAccess = computed<boolean>(()=> (store.state.authenticationModule.hasAdminAccess)); 
 
-    @Mutation('budgetLibraryMutator') budgetLibraryMutator: any;
-    @Mutation('selectedBudgetLibraryMutator') selectedBudgetLibraryMutator: any;
-    @Mutation('investmentPlanMutator') investmentPlanMutator: any;
-    @Mutation('isSuccessfulImportMutator') isSuccessfulImportMutator: any;
+let isSuccessfulImport = ref<boolean>(store.state.investmentModule.isSuccessfulImport);
+let currentUserCriteriaFilter = ref<UserCriteriaFilter>(store.state.userModule.currentUserCriteriaFilter);
+let hasPermittedAccess = computed<boolean>(() => store.state.investmentModule.hasPermittedAccess);
 
-    addedBudgets: Budget[] = [];
-    updatedBudgetsMap:Map<string, [Budget, Budget]> = new Map<string, [Budget, Budget]>();//0: original value | 1: updated value
-    deletionBudgetIds: string[] = [];
-    BudgetCache: Budget[] = [];
-    budgetAmountCache: BudgetAmount[] = [];
-    updatedBudgetAmountsMaps:Map<string, [BudgetAmount, BudgetAmount]> = new Map<string, [BudgetAmount, BudgetAmount]>();//0: original value | 1: updated value 
-    addedBudgetAmounts: Map<string, BudgetAmount[]> = new  Map<string, BudgetAmount[]>();
-    deletionYears: number[] = [] 
-    updatedBudgetAmounts:  Map<string, BudgetAmount[]> = new  Map<string, BudgetAmount[]>();
-    gridSearchTerm = '';
-    currentSearch = '';
-    pagination: Pagination = clone(emptyPagination);
-    isPageInit = false;
-    totalItems = 0;
-    currentPage: Budget[] = [];
-    lastYear: number = 0;
-    firstYear: number = 0;
-    initializing: boolean = true;
-    modifiedDate: string;
+async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess', payload);}
+async function getInvestmentAction(payload?: any): Promise<any> {await store.dispatch('getInvestment', payload);}
+async function getBudgetLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getBudgetLibraries', payload);}
+async function selectBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectBudgetLibrary', payload);}
+async function upsertInvestmentAction(payload?: any): Promise<any> {await store.dispatch('upsertInvestment', payload);}
+async function upsertBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertBudgetLibrary', payload);}
+async function deleteBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteBudgetLibrary', payload);}
+async function upsertOrDeleteBudgetLibraryUsersAction(payload: any): Promise<any> {await store.dispatch('upsertOrDeleteBudgetLibraryUsers', payload);}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+async function importScenarioInvestmentBudgetsFileAction(payload?: any): Promise<any> {await store.dispatch('importScenarioInvestmentBudgetsFile', payload);}
+async function importLibraryInvestmentBudgetsFileAction(payload?: any): Promise<any> {await store.dispatch('importLibraryInvestmentBudgetsFile', payload);}
+async function getCriterionLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getCriterionLibraries', payload);}
+async function setAlertMessageAction(payload?: any): Promise<any> {await store.dispatch('setAlertMessage', payload);}
+async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification', payload);}
+    
+let getModifiedDate = store.getters.getLibraryDateModified;
+let getUserNameByIdGetter = store.getters.getUserNameById;
 
-    selectedBudgetLibrary: BudgetLibrary = clone(emptyBudgetLibrary);
-    investmentPlan: InvestmentPlan = clone(emptyInvestmentPlan);
-    selectedScenarioId: string = getBlankGuid();
-    hasSelectedLibrary: boolean = false;
-    librarySelectItems: SelectItem[] = [];
-    librarySelectItemNames: string[] = [];
-    librarySelectItemValue: string | null = '';
-    actionHeader: DataTableHeader = { text: 'Action', value: 'action', align: 'left', sortable: false, class: '', width: '' }
-    budgetYearsGridHeaders: DataTableHeader[] = [
-        { text: 'Year', value: 'year', sortable: true, align: 'left', class: '', width: '' },
-        this.actionHeader
-    ];
-    budgetYearsGridData: BudgetYearsGridData[] = [];
-    selectedBudgetYearsGridData: BudgetYearsGridData[] = [];
-    selectedBudgetYears: number[] = [];
+function budgetLibraryMutator(payload:any){store.commit('budgetLibraryMutator', payload);}
+function selectedBudgetLibraryMutator(payload:any){store.commit('selectedBudgetLibraryMutator', payload);}
+function investmentPlanMutator(payload:any){store.commit('investmentPlanMutator', payload);}
+function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImportMutator', payload);}
+    let modifiedDate = ref<string>();
 
-    createBudgetLibraryDialogData: CreateBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
-    shareBudgetLibraryDialogData: ShareBudgetLibraryDialogData = clone(emptyShareBudgetLibraryDialogData);
-    editBudgetsDialogData: EditBudgetsDialogData = clone(emptyEditBudgetsDialogData);
-    showSetRangeForAddingBudgetYearsDialog: boolean = false;
-    showSetRangeForDeletingBudgetYearsDialog: boolean = false;
-    confirmDeleteAlertData: AlertData = clone(emptyAlertData);
-    uuidNIL: string = getBlankGuid();
-    rules: InputValidationRules = clone(rules);
-    showImportExportInvestmentBudgetsDialog: boolean = false;
-    hasScenario: boolean = false;
-    hasInvestmentPlanForScenario: boolean = false;
-    hasCreatedLibrary: boolean = false;
-    budgets: Budget[] = [];
-    disableCrudButtonsResult: boolean = false;
-    hasLibraryEditPermission: boolean = false;
-    showReminder: boolean = false;
-    range: number = 1;
-    parentLibraryName: string = "None";
-    parentLibraryId: string = "";
-    scenarioLibraryIsModified: boolean = false;
-    loadedParentName: string = "";
-    loadedParentId: string = "";
-    newLibrarySelection: boolean = false;
+    let addedBudgets = ref<Budget[]>([]);
+    let updatedBudgetsMap = ref<Map<string, [Budget, Budget]>>(new Map<string, [Budget, Budget]>());//0: original value | 1: updated value
+    let deletionBudgetIds = ref<string[]>([]);
+    let BudgetCache = ref<Budget[]>([]);
+    let budgetAmountCache = ref<BudgetAmount[]>([]);
+    let updatedBudgetAmountsMaps = ref<Map<string, [BudgetAmount, BudgetAmount]>>(new Map<string, [BudgetAmount, BudgetAmount]>());//0: original value | 1: updated value 
+    let addedBudgetAmounts = ref<Map<string, BudgetAmount[]>>(new  Map<string, BudgetAmount[]>());
+    let deletionYears = ref<number[]>([]);
+    let updatedBudgetAmounts = ref<Map<string, BudgetAmount[]>>(new  Map<string, BudgetAmount[]>());
+    let gridSearchTerm = '';
+    let currentSearch = '';
+    //let pagination: Pagination = clone(emptyPagination);
+    const pagination: Pagination = shallowReactive(clone(emptyPagination));
+    
+    let isPageInit = false;
+    let totalItems = ref<number>(0);
+    let currentPage = ref<Budget[]>([]);
+    let lastYear: number = 0;
+    let firstYear: number = 0;
+    let initializing: boolean = true;
 
-    get addYearLabel() {
-        return 'Add Year (' + this.getNextYear() + ')';
+    const selectedBudgetLibrary = ref<BudgetLibrary>(clone(emptyBudgetLibrary));
+    const investmentPlan = ref<InvestmentPlan>(clone(emptyInvestmentPlan));
+    let selectedScenarioId: string = getBlankGuid();
+    let hasSelectedLibrary = ref<boolean>(false);
+
+    const librarySelectItems = ref<SelectItem[]>([]);
+    const librarySelectItemNames = ref<string[]>([]);
+    let librarySelectItemValue = ref<string|null>('');
+
+    let actionHeader: any = { title: 'Action', key: 'action', align: 'left', sortable: false, class: '', width: '' }
+    let budgetYearsGridHeaders = ref<any[]>([
+        { title: 'Year', key: 'year', sortable: true, align: 'left', class: '', width: '' },
+        actionHeader
+    ]);
+    let budgetYearsGridData = ref<BudgetYearsGridData[]>([]);
+    let selectedBudgetYearsGridData = ref<BudgetYearsGridData[]>([]);
+    let selectedBudgetYears = ref<number[]>([]);
+
+    let createBudgetLibraryDialogData = ref<CreateBudgetLibraryDialogData>(clone(emptyCreateBudgetLibraryDialogData));
+    
+    let shareBudgetLibraryDialogData = ref<ShareBudgetLibraryDialogData>(clone(emptyShareBudgetLibraryDialogData));
+    let editBudgetsDialogData = ref<EditBudgetsDialogData>(clone(emptyEditBudgetsDialogData));
+
+    let showSetRangeForAddingBudgetYearsDialog: boolean = false;
+    let showSetRangeForDeletingBudgetYearsDialog: boolean = false;
+    let confirmDeleteAlertData = ref<AlertData>(clone(emptyAlertData));
+    let uuidNIL: string = getBlankGuid();
+    let rules: InputValidationRules = validationRules;
+    let showImportExportInvestmentBudgetsDialog = ref<boolean>(false);
+    let hasScenario = ref<boolean>(false);
+    let hasInvestmentPlanForScenario = ref<boolean>(false);
+    let hasCreatedLibrary: boolean = false;
+    let budgets: Budget[] = [];
+    let disableCrudButtonsResult = ref<boolean>(false);
+    let hasLibraryEditPermission = ref<boolean>(false);
+    let showReminder: boolean = false;
+    let range: number = 1;
+    let parentLibraryName = ref<string>("None");
+    let parentLibraryId: string = "";
+    let scenarioLibraryIsModified = ref<boolean>(false);
+    let loadedParentName: string = "";
+    let loadedParentId: string = "";
+    let newLibrarySelection: boolean = false;
+
+    let originalFirstYear: number = 0
+    let firstYearOfAnalysisPeriodShift = shallowRef<number>(0);
+
+    let unsavedDialogAllowed = ref<boolean>(true);
+    let trueLibrarySelectItemValue : string | null = '';
+    let librarySelectItemValueAllowedChanged: boolean = true;
+
+    const percentMask = { mask: '###' };
+    const yearMask = { mask: '####' };
+    const mask = { mask: '##########' };
+
+    function addYearLabel() {
+        return 'Add Year (' + getNextYear() + ')';
     }
-    originalFirstYear: number = 0
-    firstYearOfAnalysisPeriodShift: number = 0;
 
-    unsavedDialogAllowed: boolean = true;
-    trueLibrarySelectItemValue: string | null = ''
-    librarySelectItemValueAllowedChanged: boolean = true;
-
-        get deleteYearLabel() {
-            const latestYear = this.lastYear;
+    function deleteYearLabel() {
+            const latestYear = lastYear;
             return latestYear ? 'Delete Year (' + latestYear + ')' : 'Delete Year';
         }
 
-        get yearsInAnalysisPeriod() {
-            return this.investmentPlan.numberOfYearsInAnalysisPeriod;
+    function yearsInAnalysisPeriod() {
+            return investmentPlan.value.numberOfYearsInAnalysisPeriod;
         }
+    
+    // REPLACE with created() ?
+    //function beforeRouteEnter() {
+    // created();
+    // async function created() {
+    //     (() => {
+    //         (async () => { 
+    //             librarySelectItemValue.value = '';
+    //             await getHasPermittedAccessAction();
+    //             await getBudgetLibrariesAction()
+        
+    //             if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
+    //                 selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
 
-        beforeRouteEnter(to: any, from: any, next:any) {
-            next((vm:any) => {
-                (async () => { 
-                    vm.librarySelectItemValue = null;
-                    await vm.getHasPermittedAccessAction();
-                    await vm.getBudgetLibrariesAction()
-                    if (to.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
-                        vm.selectedScenarioId = to.query.scenarioId;
+    //                 if (selectedScenarioId === uuidNIL) {
+    //                     addErrorNotificationAction({
+    //                         message: 'Found no selected scenario for edit',
+    //                     });
+    //                     $router.push('/Scenarios/');
+    //                 }
 
-                        if (vm.selectedScenarioId === vm.uuidNIL) {
-                            vm.addErrorNotificationAction({
-                                message: 'Found no selected scenario for edit',
-                            });
-                            vm.$router.push('/Scenarios/');
-                        }
+    //                 hasScenario.value = true;
+    //                 ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
+    //                     if(response.data){
+    //                         setAlertMessageAction("An investment import has been added to the work queue")
+    //                     }
+    //                 })
+    //                 await initializePages();
+    //             }
+    //             else
+    //                 initializing = false;               
+    //         })();                    
+    //     });
+    // }
 
-                        vm.hasScenario = true;
-                        ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: vm.scenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
-                            if(response.data){
-                                vm.setAlertMessageAction("An investment import has been added to the work queue")
-                            }
-                        })
-                        await vm.initializePages();
-                    }
-                    else
-                        vm.initializing = false;               
-                })();                    
-            });
+    onMounted(async () => {
+        librarySelectItemValue.value = '';
+        await getHasPermittedAccessAction();
+        await getBudgetLibrariesAction()
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
+            selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
+
+            if (selectedScenarioId === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Found no selected scenario for edit',
+                });
+                $router.push('/Scenarios/');
+            }
+
+            hasScenario.value = true;
+            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
+                if(response.data){
+                    setAlertMessageAction("An investment import has been added to the work queue")
+                }
+            })
+                await initializePages();
         }
+        else
+            initializing = false;        
 
-        mounted() {
-            this.$statusHub.$on(
+        $emitter.on(
                 Hub.BroadcastEventType.BroadcastImportCompletionEvent,
-                this.importCompleted,
-            );
-        }  
+                importCompleted,
+        );
+    });
 
-        beforeDestroy() {
-            this.setHasUnsavedChangesAction({ value: false });
-            this.$statusHub.$off(
-                Hub.BroadcastEventType.BroadcastImportCompletionEvent,
-                this.importCompleted,
-            );
-
-            this.setAlertMessageAction('');
-        }
-
+    onBeforeUnmount(() =>  {
+        setHasUnsavedChangesAction({ value: false });
+        $emitter.off(
+            Hub.BroadcastEventType.BroadcastImportCompletionEvent,
+            importCompleted,
+        );
+    });
+        
     // Watchers
-    @Watch('pagination')
-    async onPaginationChanged() {
-        if(this.initializing)
+    async function onPaginationChanged() {
+        if(initializing)
             return;
-        this.checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = this.pagination;
+        checkHasUnsavedChanges();
+        const { sort, descending, page, rowsPerPage } = pagination;
         const request: InvestmentPagingRequestModel= {
             page: page,
             rowsPerPage: rowsPerPage,
             syncModel: {
-                libraryId: this.selectedBudgetLibrary.id === this.uuidNIL ? null : this.selectedBudgetLibrary.id,
-                updatedBudgets: Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
-                budgetsForDeletion: this.deletionBudgetIds,
-                addedBudgets: this.addedBudgets,
-                deletionyears: this.deletionYears ,
-                updatedBudgetAmounts: mapToIndexSignature( this.updatedBudgetAmounts),
-                Investment: !isNil(this.investmentPlan) ? {
-                ...this.investmentPlan,
-                minimumProjectCostLimit: hasValue(this.investmentPlan.minimumProjectCostLimit)
-                    ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
+                libraryId: selectedBudgetLibrary.value.id === uuidNIL ? null : selectedBudgetLibrary.value.id,
+                updatedBudgets: Array.from(updatedBudgetsMap.value.values()).map(r => r[1]),
+                budgetsForDeletion: deletionBudgetIds.value,
+                addedBudgets: addedBudgets.value,
+                deletionyears: deletionYears.value ,
+                updatedBudgetAmounts: mapToIndexSignature( updatedBudgetAmounts.value),
+                Investment: !isNil(investmentPlan) ? {
+                ...investmentPlan.value,
+                minimumProjectCostLimit: hasValue(investmentPlan.value.minimumProjectCostLimit)
+                    ? parseFloat(investmentPlan.value.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
-                } : this.investmentPlan,
-                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
-                firstYearAnalysisBudgetShift: this.firstYearOfAnalysisPeriodShift,
-                isModified: this.scenarioLibraryIsModified
+                } : investmentPlan,
+                addedBudgetAmounts: mapToIndexSignature(addedBudgetAmounts.value),
+                firstYearAnalysisBudgetShift: firstYearOfAnalysisPeriodShift.value,
+                isModified: scenarioLibraryIsModified.value
             },           
-            sortColumn: sortBy === '' ? 'year' : sortBy,
-            isDescending: descending != null ? descending : false,
-            search: this.currentSearch
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : 'year',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
+            search: currentSearch
         };
         
-        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
-            await InvestmentService.getScenarioInvestmentPage(this.selectedScenarioId, request).then(response => {
+        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL){
+            
+            await InvestmentService.getScenarioInvestmentPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
-                    this.firstYear = data.firstYear;
-                    this.currentPage = data.items.sort((a, b) => a.budgetOrder - b.budgetOrder);
-                    this.BudgetCache = clone(this.currentPage);
-                    this.BudgetCache.forEach(_ => _.budgetAmounts = []);
-                    this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
-                    this.totalItems = data.totalItems;
-                    this.investmentPlan = data.investmentPlan;                   
-                    this.lastYear = data.lastYear;
-                    
-                    this.syncInvestmentPlanWithBudgets();
-                
+                    firstYear = data.firstYear;
+                    currentPage.value = data.items.sort((a, b) => a.budgetOrder - b.budgetOrder);
+                    BudgetCache.value = clone(currentPage.value);
+                    BudgetCache.value.forEach(_ => _.budgetAmounts = []);
+                    budgetAmountCache.value = currentPage.value.flatMap(_ => _.budgetAmounts)
+                    totalItems.value = data.totalItems;
+                    investmentPlan.value = data.investmentPlan;                   
+                    lastYear = data.lastYear;
+                    fillAmounts();
+                    syncInvestmentPlanWithBudgets();
                     
                 }
             });
         }            
-        else if(this.hasSelectedLibrary){
-            if(this.librarySelectItemValue === null)
+        else if(hasSelectedLibrary.value){
+            if(librarySelectItemValue === null)
                 return;
-                await InvestmentService.getBudgetLibraryModifiedDate(this.selectedBudgetLibrary.id).then(response => {
+                await InvestmentService.getBudgetLibraryModifiedDate(selectedBudgetLibrary.value.id).then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
-                      this.modifiedDate = data.slice(0, 10);
+                      modifiedDate.value = data.slice(0, 10);
                    }
              });
 
-            await InvestmentService.getLibraryInvestmentPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+            await InvestmentService.getLibraryInvestmentPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
-                    this.currentPage = data.items;
-                    this.BudgetCache = clone(this.currentPage);
-                    this.BudgetCache.forEach(_ => _.budgetAmounts = []);
-                    this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
-                    this.totalItems = data.totalItems;
-                    this.lastYear = data.lastYear
+                    currentPage.value = data.items;
+                    BudgetCache.value = clone(currentPage.value);
+                    BudgetCache.value.forEach(_ => _.budgetAmounts = []);
+                    budgetAmountCache.value = currentPage.value.flatMap(_ => _.budgetAmounts)
+                    totalItems.value = data.totalItems;
+                    lastYear = data.lastYear
+                    fillAmounts();
                 }
             }); 
         }                
     }
    
 
-    @Watch('deletionBudgetIds')
-    onDeletionBudgetIdsChanged() {
-        this.checkHasUnsavedChanges();
-    }
+    watch(deletionBudgetIds, () => {
+        checkHasUnsavedChanges();
+    });
 
-    @Watch('addedBudgets')
-    onAddedBudgetsChanged() {
-        this.checkHasUnsavedChanges();
-    }
+    watch(addedBudgets, () => {
+        checkHasUnsavedChanges();
+    });
 
-    @Watch('deletionyears')
-    onDeletionyearsChanged() {
-        this.checkHasUnsavedChanges();
-    }
+    watch(deletionYears, () => {
+        checkHasUnsavedChanges();
+    });
 
-    @Watch('addedBudgetAmounts', { deep: true })
-    onAddedBudgetAmountsChanged() {
-        this.checkHasUnsavedChanges();
-    }
+    watch(addedBudgetAmounts, () => {
+        checkHasUnsavedChanges();
+    });
 
-    @Watch('stateBudgetLibraries')
-    onStateBudgetLibrariesChanged() {
-        this.librarySelectItems = this.stateBudgetLibraries
-            .map((library: BudgetLibrary) => ({
-                text: library.name,
-                value: library.id,
-            }));
-        this.librarySelectItemNames = this.librarySelectItems.map((library: SelectItem) => library.text)
-    }
+    // watch(stateBudgetLibraries,()=> onStateBudgetLibrariesChanged)
+    // function onStateBudgetLibrariesChanged() {
+    //     librarySelectItems = stateBudgetLibraries.value
+    //         .map((library: BudgetLibrary) => ({
+    //             text: library.name,
+    //             value: library.id,
+    //         }));
+    //     librarySelectItemNames = librarySelectItems.map((library: SelectItem) => library.text)
+    // }
 
-    @Watch('selectedBudgetYearsGridData')
-    onSelectedRowsChanged() {
-        this.selectedBudgetYears = getPropertyValues('year', this.selectedBudgetYearsGridData) as number[];
-    }
+    let libraryItems =  ref<BudgetLibrary[]>([]);
+    
+    watch(stateBudgetLibraries, ()=> {
+        libraryItems.value = clone(stateBudgetLibraries.value);
+        librarySelectItems.value=[];
+        librarySelectItemNames.value =[];
 
-    @Watch('librarySelectItemValue')
-    onLibrarySelectItemValueChangedCheckUnsaved(){
-        if(this.hasScenario){
-            this.onSelectItemValueChanged();
-            this.unsavedDialogAllowed = false;
+        libraryItems.value.forEach(_=> {
+            librarySelectItems.value.push({text:_.name,value:_.id})
+            librarySelectItemNames.value.push(_.name)
+        })
+    });
+
+    watch(selectedBudgetYearsGridData,()=> {
+        selectedBudgetYears.value = getPropertyValues('year', selectedBudgetYearsGridData.value) as number[];
+    });
+
+    watch(librarySelectItemValue,() => {
+        hasSelectedLibrary.value = true;
+
+        if(hasScenario.value){
+            onSelectItemValueChanged();
+            unsavedDialogAllowed.value = false;
         }           
-        else if(this.librarySelectItemValueAllowedChanged){
-            this.CheckUnsavedDialog(this.onSelectItemValueChanged, () => {
-                this.librarySelectItemValueAllowedChanged = false;
-                this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
+        else if(librarySelectItemValueAllowedChanged){
+            CheckUnsavedDialog(onSelectItemValueChanged, () => {
+                librarySelectItemValueAllowedChanged = false;
+                librarySelectItemValue.value = trueLibrarySelectItemValue;              
             });
         }
-        this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
-        this.newLibrarySelection = true;
-        this.scenarioLibraryIsModified = false;
-        this.librarySelectItemValueAllowedChanged = true;
+        parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
+        newLibrarySelection = true;
+        librarySelectItemValueAllowedChanged = true;       
+    });
+
+    function onSelectItemValueChanged() {      
+        trueLibrarySelectItemValue = librarySelectItemValue.value
+        selectBudgetLibraryAction(librarySelectItemValue.value);
     }
 
-    onSelectItemValueChanged() {
-        this.trueLibrarySelectItemValue = this.librarySelectItemValue
-        this.selectBudgetLibraryAction(this.librarySelectItemValue);
-    }
+    watch(stateSelectedBudgetLibrary,() => {
+        selectedBudgetLibrary.value = clone(stateSelectedBudgetLibrary.value);
+    });
 
-    @Watch('stateSelectedBudgetLibrary')
-    onStateSelectedBudgetLibraryChanged() {
-        this.selectedBudgetLibrary = clone(this.stateSelectedBudgetLibrary);
-    }
-
-    @Watch('selectedBudgetLibrary')
-    onSelectedBudgetLibraryChanged() {
-        this.hasSelectedLibrary = this.selectedBudgetLibrary.id !== this.uuidNIL;
-
-        if (this.hasSelectedLibrary) {
-            this.checkLibraryEditPermission();
-            this.hasCreatedLibrary = false;
-            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: this.selectedBudgetLibrary.id, workType: WorkType.ImportLibraryInvestment}).then(response => {
+    watch(selectedBudgetLibrary,()=> {     
+        hasSelectedLibrary.value = selectedBudgetLibrary.value.id !== uuidNIL;
+        if (hasSelectedLibrary.value) {
+            checkLibraryEditPermission();
+            hasCreatedLibrary = false;
+            ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedBudgetLibrary.value.id, workType: WorkType.ImportLibraryInvestment}).then(response => {
                 if(response.data){
-                    this.setAlertMessageAction("An investment import has been added to the work queue")
+                    setAlertMessageAction("An investment import has been added to the work queue")
                 }
                 else
-                    this.setAlertMessageAction("");
+                    setAlertMessageAction("");
             })
         }
+        clearChanges()
+       onPaginationChanged()
+    });
 
-        this.clearChanges()
-        this.onPaginationChanged()
-    }
+    watch(stateInvestmentPlan,() => {
+        cloneStateInvestmentPlan();
+        hasInvestmentPlanForScenario.value = true;
+        checkHasUnsavedChanges();
+    });
 
-    @Watch('stateInvestmentPlan')
-    onStateInvestmentPlanChanged() {
-        this.cloneStateInvestmentPlan();
-        this.hasInvestmentPlanForScenario = true;
-        this.checkHasUnsavedChanges();
-    }
-
-    @Watch('currentPage')
-    onScenarioBudgetsChanged() {
-        this.setGridHeaders();
-        this.setGridData();
+    watch(currentPage, () => {
+        setGridHeaders();
+        setGridData();
         
-        this.checkHasUnsavedChanges();
+        checkHasUnsavedChanges();
 
         // Get parent name from library id
-        this.librarySelectItems.forEach(library => {
-            if (library.value === this.parentLibraryId) {
-                this.parentLibraryName = library.text;
+        librarySelectItems.value.forEach(library => {
+            if (library.value === parentLibraryId) {
+                parentLibraryName.value = library.text;
             }
         });
-    }
+    });
 
-    @Watch('investmentPlan')
-    onInvestmentPlanChanged() {
-        this.checkHasUnsavedChanges()
-        if(this.hasScenario){
-            const firstYear = +this.investmentPlan.firstYearOfAnalysisPeriod;
-            const stateFirstYear = +this.stateInvestmentPlan.firstYearOfAnalysisPeriod;
-            this.firstYearOfAnalysisPeriodShift = (firstYear - this.originalFirstYear) - (this.firstYear === 0 ? 0 : (this.firstYear - this.originalFirstYear));
+    watch(investmentPlan,() => {
+        checkHasUnsavedChanges()
+        if(hasScenario.value){
+            const localFirstYear = +investmentPlan.value.firstYearOfAnalysisPeriod;
+            const stateFirstYear = +stateInvestmentPlan.value.firstYearOfAnalysisPeriod;
+            firstYearOfAnalysisPeriodShift.value = (localFirstYear - originalFirstYear) - (firstYear === 0 ? 0 : (firstYear - originalFirstYear));
         }
             
-        if(this.investmentPlan.id === this.uuidNIL)
-            this.investmentPlan.id = getNewGuid();
-        this.hasInvestmentPlanForScenario = true;
-    }
+        if(investmentPlan.value.id === uuidNIL)
+            investmentPlan.value.id = getNewGuid();
+        hasInvestmentPlanForScenario.value = true;
+    });
 
-    @Watch('firstYearOfAnalysisPeriodShift')
-    onFirstYearOfAnalysisPeriodShiftChanged(){
-        this.setGridData();
-    }
+    watch(firstYearOfAnalysisPeriodShift,() => {
+        setGridData();
+    });
 
-    onRemoveBudgetYears() {
-        this.deletionYears = this.deletionYears.concat(this.selectedBudgetYears)
+    function onRemoveBudgetYears() {
+        deletionYears.value = deletionYears.value.concat(selectedBudgetYears.value)
         let deletedAddYears: number[] = [];
-        for(let [key, value] of this.addedBudgetAmounts){
-            let val = this.addedBudgetAmounts.get(key)! 
+        for(let [key, value] of addedBudgetAmounts.value){
+            let val = addedBudgetAmounts.value.get(key)! 
             val = val.filter(v => {
-                if(!this.deletionYears.includes(v.year)){                  
+                if(!deletionYears.value.includes(v.year)){                  
                     return true;
                 }
 
@@ -730,37 +805,37 @@ export default class InvestmentEditor extends Vue {
                 return false;
             })
             if (val.length == 0)
-                this.addedBudgetAmounts.delete(key)
+                addedBudgetAmounts.value.delete(key)
         }
         if (deletedAddYears.length > 0) {
-            this.selectedBudgetYears = this.selectedBudgetYears.filter(year => !deletedAddYears.includes(year))
-            this.deletionYears = this.deletionYears.concat(this.selectedBudgetYears)
-            this.onPaginationChanged();
+            selectedBudgetYears.value = selectedBudgetYears.value.filter(year => !deletedAddYears.includes(year))
+            deletionYears.value = deletionYears.value.concat(selectedBudgetYears.value)
+            onPaginationChanged();
             return;
         }
 
         let deletedUpdateIds: string[] = [];
 
-        for (let [key, value] of this.updatedBudgetAmounts) {
-            let val = this.updatedBudgetAmounts.get(key)!
-            const ids = val.filter(v => this.deletionYears.includes(v.year)).map(v => v.id)
+        for (let [key, value] of updatedBudgetAmounts.value) {
+            let val = updatedBudgetAmounts.value.get(key)!
+            const ids = val.filter(v => deletionYears.value.includes(v.year)).map(v => v.id)
             deletedUpdateIds = deletedUpdateIds.concat(ids)
-            val = val.filter(v => !this.deletionYears.includes(v.year))
+            val = val.filter(v => !deletionYears.value.includes(v.year))
             if (val.length == 0)
-                this.updatedBudgetAmounts.delete(key)
+                updatedBudgetAmounts.value.delete(key)
         }
 
         deletedUpdateIds.forEach(id => {
-            this.updatedBudgetAmountsMaps.delete(id);
+            updatedBudgetAmountsMaps.value.delete(id);
         })
 
-        this.onPaginationChanged();
+        onPaginationChanged();
     }
 
-    onRemoveBudgetYear(year: number) {
+    function onRemoveBudgetYear(year: number) {
         let isyearAdded = false;
-        for (let [key, value] of this.addedBudgetAmounts) {
-            let val = this.addedBudgetAmounts.get(key)!
+        for (let [key, value] of addedBudgetAmounts.value) {
+            let val = addedBudgetAmounts.value.get(key)!
             val = val.filter(v => {
                 if (v.year !== year) {
                     return true;
@@ -771,114 +846,114 @@ export default class InvestmentEditor extends Vue {
                 return false;
             })
             if(val.length == 0)
-                this.addedBudgetAmounts.delete(key)
+                addedBudgetAmounts.value.delete(key)
             else
             {
-                this.addedBudgetAmounts.set(key, val)
+                addedBudgetAmounts.value.set(key, val)
             }
         }
         if(isyearAdded){
-            this.onPaginationChanged();
+            onPaginationChanged();
             return;
         }
-        this.deletionYears.push(year)
+        deletionYears.value.push(year)
 
         let deleteIds: string[] = []
-        for (let [key, value] of this.updatedBudgetAmounts) {
-            let val = this.updatedBudgetAmounts.get(key)!
+        for (let [key, value] of updatedBudgetAmounts.value) {
+            let val = updatedBudgetAmounts.value.get(key)!
             const ids = val.filter(v => v.year === year).map(v => v.id)
             deleteIds = deleteIds.concat(ids)
             val = val.filter(v => v.year !== year)
             if (val.length == 0)
-                this.updatedBudgetAmounts.delete(key)
+                updatedBudgetAmounts.value.delete(key)
         }
 
         deleteIds.forEach(id => {
-            this.updatedBudgetAmountsMaps.delete(id);
+            updatedBudgetAmountsMaps.value.delete(id);
         })
 
-        this.onPaginationChanged();
+        onPaginationChanged();
     }
 
-    cloneStateInvestmentPlan() {
-        const investmentPlan: InvestmentPlan = clone(this.stateInvestmentPlan);
-        this.investmentPlan = {
+    function cloneStateInvestmentPlan() {
+        let investmentPlan: InvestmentPlan = clone(stateInvestmentPlan.value);
+        investmentPlan = {
             ...investmentPlan,
-            id: investmentPlan.id === this.uuidNIL ? getNewGuid() : investmentPlan.id,
+            id: investmentPlan.id === uuidNIL ? getNewGuid() : investmentPlan.id,
         };
     }
 
-    setHasUnsavedChangesFlag() {
-        if (this.hasScenario) {
-            const budgetsHaveUnsavedChanges: boolean = hasUnsavedChangesCore('', this.currentPage, this.stateScenarioBudgets);
+    function setHasUnsavedChangesFlag() {
+        if (hasScenario.value) {
+            const budgetsHaveUnsavedChanges: boolean = hasUnsavedChangesCore('', currentPage.value, stateScenarioBudgets.value);
 
 
-            const clonedInvestmentPlan: InvestmentPlan = clone(this.investmentPlan);
-            const investmentPlan: InvestmentPlan = {
+            const clonedInvestmentPlan: InvestmentPlan = clone(investmentPlan.value);
+            const NewInvestmentPlan: InvestmentPlan = {
                 ...clonedInvestmentPlan,
                 minimumProjectCostLimit: hasValue(clonedInvestmentPlan.minimumProjectCostLimit)
                     ? parseFloat(clonedInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
             };
-            const clonedStateInvestmentPlan: InvestmentPlan = clone(this.stateInvestmentPlan);
-            const stateInvestmentPlan: InvestmentPlan = {
+            const clonedStateInvestmentPlan: InvestmentPlan = clone(stateInvestmentPlan.value);
+            const NewStateInvestmentPlan: InvestmentPlan = {
                 ...clonedStateInvestmentPlan,
                 minimumProjectCostLimit: hasValue(clonedStateInvestmentPlan.minimumProjectCostLimit)
                     ? parseFloat(clonedStateInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
             };
-            const investmentPlanHasUnsavedChanges: boolean = hasUnsavedChangesCore('', investmentPlan, stateInvestmentPlan);
+            const investmentPlanHasUnsavedChanges: boolean = hasUnsavedChangesCore('', NewInvestmentPlan, NewStateInvestmentPlan);
 
 
-            this.setHasUnsavedChangesAction({ value: budgetsHaveUnsavedChanges || investmentPlanHasUnsavedChanges });
-        } else if (this.hasSelectedLibrary) {
+            setHasUnsavedChangesAction({ value: budgetsHaveUnsavedChanges || investmentPlanHasUnsavedChanges });
+        } else if (hasSelectedLibrary.value) {
             const hasUnsavedChanges: boolean = hasUnsavedChangesCore('',
-                { ...clone(this.selectedBudgetLibrary), budgets: clone(this.currentPage) },
-                this.stateSelectedBudgetLibrary);
-            this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+                { ...clone(selectedBudgetLibrary.value), budgets: clone(currentPage.value) },
+                stateSelectedBudgetLibrary.value);
+            setHasUnsavedChangesAction({ value: hasUnsavedChanges });
         }
     }
 
-    setGridHeaders() {
-        const budgetNames: string[] = getPropertyValues('name', this.currentPage) as string[];
-        const budgetHeaders: DataTableHeader[] = budgetNames
+    function setGridHeaders() {
+        const budgetNames: string[] = getPropertyValues('name', currentPage.value) as string[];
+        const budgetHeaders: any[] = budgetNames
             .map((name: string) => ({
-                text: name,
-                value: name,
+                title: name,
+                key: name,
                 sortable: true,
                 align: 'left',
                 class: '',
                 width: '',
-            }) as DataTableHeader);
-        this.budgetYearsGridHeaders = [
-            this.budgetYearsGridHeaders[0],
+            }) as any);
+        budgetYearsGridHeaders.value = [
+            budgetYearsGridHeaders.value[0],
             ...budgetHeaders,
-            this.actionHeader
+            actionHeader
         ];
     }
 
-    setGridData() {
-        this.budgetYearsGridData = [];
-        if(this.currentPage.length <= 0)
+    function setGridData() {
+        budgetYearsGridData.value = [];
+        if(currentPage.value.length <= 0)
             return;
-        for(let i = 0; i < this.currentPage[0].budgetAmounts.length; i++){
-            let year = this.currentPage[0].budgetAmounts[i].year
+        for(let i = 0; i < currentPage.value[0].budgetAmounts.length; i++){
+            let year = currentPage.value[0].budgetAmounts[i].year
             let values: {[budgetName: string]: number | null} = {}
-            for(let o = 0; o < this.currentPage.length; o++){
-                values[this.currentPage[o].name] = this.currentPage[o].budgetAmounts[i].value
+            for(let o = 0; o < currentPage.value.length; o++){
+                values[currentPage.value[o].name] = currentPage.value[o].budgetAmounts[i].value
             }
-            this.budgetYearsGridData.push({year, values})
+            budgetYearsGridData.value.push({year, values})
         }        
     }
 
-    syncInvestmentPlanWithBudgets() {//this gets call in on pagination now       
-        this.investmentPlan.numberOfYearsInAnalysisPeriod = this.totalItems > 0 ? this.totalItems : 1
+    function syncInvestmentPlanWithBudgets() {//gets call in on pagination now       
+        investmentPlan.value.numberOfYearsInAnalysisPeriod = totalItems.value > 0 ? totalItems.value : 1
     }
 
-    onShareBudgetLibraryDialogSubmit(budgetLibraryUsers: BudgetLibraryUser[]) {
-        this.shareBudgetLibraryDialogData = clone(emptyShareBudgetLibraryDialogData);
+    function onShareBudgetLibraryDialogSubmit(budgetLibraryUsers: BudgetLibraryUser[]) {
+        shareBudgetLibraryDialogData.value = clone(emptyShareBudgetLibraryDialogData);
 
-        if (!isNil(budgetLibraryUsers) && this.selectedBudgetLibrary.id !== getBlankGuid())
+        if (!isNil(budgetLibraryUsers) && selectedBudgetLibrary.value.id !== getBlankGuid())
         {
             let libraryUserData: LibraryUser[] = [];
 
@@ -901,51 +976,51 @@ export default class InvestmentEditor extends Vue {
                 libraryUserData.push(libraryUser);
             });
 
-            this.upsertOrDeleteBudgetLibraryUsersAction(this.selectedBudgetLibrary.id, libraryUserData);
+            upsertOrDeleteBudgetLibraryUsersAction((selectedBudgetLibrary.value.id, libraryUserData));
 
             //update budget library sharing
-            InvestmentService.upsertOrDeleteBudgetLibraryUsers(this.selectedBudgetLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+            InvestmentService.upsertOrDeleteBudgetLibraryUsers(selectedBudgetLibrary.value.id, libraryUserData).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
                 {
-                    this.addSuccessNotificationAction({ message: 'Shared budget library' })
-                    this.resetPage();
+                    addSuccessNotificationAction({ message: 'Shared budget library' })
+                    resetPage();
                 }
             })
         }
     }
 
-    onShowCreateBudgetLibraryDialog(createAsNewLibrary: boolean) {
-        this.createBudgetLibraryDialogData = {
+    function onShowCreateBudgetLibraryDialog(createAsNewLibrary: boolean) {
+        createBudgetLibraryDialogData.value = {
             showDialog: true,
-            budgets: createAsNewLibrary ? this.currentPage : [],
+            budgets: createAsNewLibrary ? currentPage.value : [],
         };
     }
 
-    onSubmitCreateCreateBudgetLibraryDialogResult(budgetLibrary: BudgetLibrary) {//needs a few things
-        this.createBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
+    function onSubmitCreateCreateBudgetLibraryDialogResult(budgetLibrary:BudgetLibrary) {//needs a few things        
+        createBudgetLibraryDialogData.value = clone(emptyCreateBudgetLibraryDialogData);
 
     if (!isNil(budgetLibrary)) {
-        this.hasCreatedLibrary = true;
-        this.librarySelectItemValue = budgetLibrary.id;
+        hasCreatedLibrary = true;
+        
         const libraryUpsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
             library: budgetLibrary,
             isNewLibrary: true,
             syncModel: {
-                libraryId: budgetLibrary.budgets.length === 0 || !this.hasSelectedLibrary ? null : this.selectedBudgetLibrary.id,
-                Investment: this.investmentPlan,
-                budgetsForDeletion: budgetLibrary.budgets.length === 0 ? [] : this.deletionBudgetIds,
-                updatedBudgets: budgetLibrary.budgets.length === 0 ? [] : Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
-                addedBudgets: budgetLibrary.budgets.length === 0 ? [] : this.addedBudgets,
-                deletionyears: budgetLibrary.budgets.length === 0 ? [] : this.deletionYears,
-                updatedBudgetAmounts: budgetLibrary.budgets.length === 0 ? {} : mapToIndexSignature(this.updatedBudgetAmounts),
-                addedBudgetAmounts: budgetLibrary.budgets.length === 0 ? {} : mapToIndexSignature(this.addedBudgetAmounts),
+                libraryId: budgetLibrary.budgets.length === 0 || !hasSelectedLibrary.value ? null : selectedBudgetLibrary.value.id,
+                Investment: investmentPlan.value,
+                budgetsForDeletion: budgetLibrary.budgets.length === 0 ? [] : deletionBudgetIds.value,
+                updatedBudgets: budgetLibrary.budgets.length === 0 ? [] : Array.from(updatedBudgetsMap.value.values()).map(r => r[1]),
+                addedBudgets: budgetLibrary.budgets.length === 0 ? [] : addedBudgets.value,
+                deletionyears: budgetLibrary.budgets.length === 0 ? [] : deletionYears.value,
+                updatedBudgetAmounts: budgetLibrary.budgets.length === 0 ? {} : mapToIndexSignature(updatedBudgetAmounts.value),
+                addedBudgetAmounts: budgetLibrary.budgets.length === 0 ? {} : mapToIndexSignature(addedBudgetAmounts.value),
                 firstYearAnalysisBudgetShift: 0,
                 isModified: false
             },
-            scenarioId: this.hasScenario ? this.selectedScenarioId : null
+            scenarioId: hasScenario.value ? selectedScenarioId : null
         }
         // value in v-currency is not parsed back to a number throwing an silent exception between UI and backend.
-        const parsedMinimumProjectCostLimit: number = parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''));
+        const parsedMinimumProjectCostLimit: number = parseFloat(investmentPlan.value.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''));
         let tempInvesmentPlan: InvestmentPlan | null = libraryUpsertRequest.syncModel.Investment;
         tempInvesmentPlan? tempInvesmentPlan.minimumProjectCostLimit = parsedMinimumProjectCostLimit : 0;
         libraryUpsertRequest.syncModel.Investment = tempInvesmentPlan;
@@ -953,45 +1028,45 @@ export default class InvestmentEditor extends Vue {
         InvestmentService.upsertBudgetLibrary(libraryUpsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') &&http2XX.test(response.status.toString())){
                 if(budgetLibrary.budgets.length === 0){
-                    this.clearChanges();
+                    clearChanges();
                 }
-
-                    this.budgetLibraryMutator(budgetLibrary); // mutation actions
-                    this.selectedBudgetLibraryMutator(budgetLibrary.id);
-                    this.addSuccessNotificationAction({ message: 'Added budget library' })
-                    this.resetPage();
+                    pagination.page = 1;
+                    budgetLibraryMutator(budgetLibrary); // mutation actions
+                    librarySelectItemValue.value = budgetLibrary.id;
+                    // selectedBudgetLibraryMutator(budgetLibrary.id);
+                    addSuccessNotificationAction({ message: 'Added budget library' })
                 }
             })
         }
     }
 
-    getNextYear(): number {
-        const latestYear: number = this.lastYear;
+    function getNextYear(): number {
+        const latestYear: number = lastYear;
         const nextYear = hasValue(latestYear) && latestYear !== 0 ? latestYear + 1 : moment().year();
         return nextYear;
     }
 
-    getOwnerUserName(): string {
-        
-        if (!this.hasCreatedLibrary) {  
-             return this.getUserNameByIdGetter(this.selectedBudgetLibrary.owner);
+    function getOwnerUserName(): string {
+
+        if (!hasCreatedLibrary) {
+            //return getUserNameByIdGetter(selectedBudgetLibrary.owner);
         }
 
         return getUserName();
     }
 
-    checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.hasAdminAccess || (this.hasPermittedAccess && this.checkUserIsLibraryOwner());
+    function checkLibraryEditPermission() {
+        hasLibraryEditPermission.value = hasAdminAccess.value || (hasPermittedAccess.value && checkUserIsLibraryOwner());
     }
 
-    checkUserIsLibraryOwner() {
-        return this.getUserNameByIdGetter(this.selectedBudgetLibrary.owner) == getUserName();
+    function checkUserIsLibraryOwner() {
+        return getUserNameByIdGetter(selectedBudgetLibrary.value.owner) == getUserName();
     }
 
-    onAddBudgetYear() {
-        const nextYear: number = this.getNextYear();
+    function onAddBudgetYear() {
+        const nextYear: number = getNextYear();
 
-        const budgets: Budget[] = clone(this.currentPage);
+        const budgets: Budget[] = clone(currentPage.value);
 
         budgets.forEach((budget: Budget) => {
             const newBudgetAmount: BudgetAmount = {
@@ -1000,46 +1075,46 @@ export default class InvestmentEditor extends Vue {
                 year: nextYear,
                 value: 0,
             };
-            let amounts = this.addedBudgetAmounts.get(budget.id)
+            let amounts = addedBudgetAmounts.value.get(budget.id)
             if (!isNil(amounts))
                 amounts.push(newBudgetAmount);
             else
-                this.addedBudgetAmounts.set(budget.id, [newBudgetAmount])
+                addedBudgetAmounts.value.set(budget.id, [newBudgetAmount])
         });
 
-        this.onPaginationChanged();
+        onPaginationChanged();
     }
 
-    onRemoveLatestBudgetYear() {
-        const latestYear: number = this.lastYear;
+    function onRemoveLatestBudgetYear() {
+        const latestYear: number = lastYear;
 
-        const budgets: Budget[] = clone(this.currentPage);
+        const budgets: Budget[] = clone(currentPage.value);
 
         budgets.forEach((budget: Budget) => {
             budget.budgetAmounts = budget.budgetAmounts.filter((budgetAmount: BudgetAmount) =>
                 !(budgetAmount.year == latestYear));
         });
 
-        this.currentPage = clone(budgets);
+        currentPage.value = clone(budgets);
     }
 
-    onShowShareBudgetLibraryDialog(budgetLibrary: BudgetLibrary) { 
-            this.shareBudgetLibraryDialogData = 
+    function onShowShareBudgetLibraryDialog(budgetLibrary: BudgetLibrary) { 
+            shareBudgetLibraryDialogData.value = 
             { 
                 showDialog: true, 
                 budgetLibrary: clone(budgetLibrary), 
             }; 
         } 
 
-    onSubmitAddBudgetYearRange() {
-        this.showSetRangeForAddingBudgetYearsDialog = false;
+    function onSubmitAddBudgetYearRange() {
+        showSetRangeForAddingBudgetYearsDialog = false;
 
-    if (this.range > 0) {
-        const latestYear: number = this.lastYear;
+    if (range > 0) {
+        const latestYear: number = lastYear;
         const startYear: number = hasValue(latestYear) && latestYear !== 0 ? latestYear + 1 : moment().year();
-        const endYear = moment().year(startYear).add(this.range, 'years').year();
+        const endYear = moment().year(startYear).add(range, 'years').year();
 
-            const budgets: Budget[] = clone(this.currentPage);
+            const budgets: Budget[] = clone(currentPage.value);
 
             for (let currentYear = startYear; currentYear < endYear; currentYear++) {
                 budgets.forEach((budget: Budget) => {
@@ -1049,55 +1124,89 @@ export default class InvestmentEditor extends Vue {
                         year: currentYear,
                         value: 0,
                     };
-                    let amounts = this.addedBudgetAmounts.get(budget.name)
+                    let amounts = addedBudgetAmounts.value.get(budget.name)
                     if (!isNil(amounts))
                         amounts.push(newBudgetAmount);
                     else
-                        this.addedBudgetAmounts.set(budget.name, [newBudgetAmount])
+                        addedBudgetAmounts.value.set(budget.name, [newBudgetAmount])
                 });
             }
-            this.onPaginationChanged();
+            onPaginationChanged();
         }
 
     }
 
-    onSubmitRemoveBudgetYearRange(range: number) {
-        this.showSetRangeForDeletingBudgetYearsDialog = false;
+    function onSubmitRemoveBudgetYearRange(range: number) {
+        showSetRangeForDeletingBudgetYearsDialog = false;
 
         if (range > 0) {
-            const endYear: number = this.lastYear;
+            const endYear: number = lastYear;
             const startYear: number = endYear - range + 1;
 
-            const budgets: Budget[] = clone(this.currentPage);
+            const budgets: Budget[] = clone(currentPage.value);
 
             budgets.forEach((budget: Budget) => {
                 budget.budgetAmounts = budget.budgetAmounts.filter((budgetAmount: BudgetAmount) =>
                     !(budgetAmount.year >= startYear && budgetAmount.year <= endYear));
             });
 
-            this.currentPage = clone(budgets);
+            currentPage.value = clone(budgets);
         }
     }
 
 
-    onShowEditBudgetsDialog() {
+    function onShowEditBudgetsDialog() {
 
-        this.currentPage.sort((b1, b2) => b1.budgetOrder - b2.budgetOrder);
-        this.editBudgetsDialogData = {
+        currentPage.value.sort((b1, b2) => b1.budgetOrder - b2.budgetOrder);
+        editBudgetsDialogData.value = {
             showDialog: true,
-            budgets: clone(this.BudgetCache),
-            scenarioId: this.selectedScenarioId,
+            budgets: clone(BudgetCache.value),
+            scenarioId: selectedScenarioId,
         };
     }
 
-    onSubmitEditBudgetsDialogResult(budgetChanges: EmitedBudgetChanges) {        
-        this.editBudgetsDialogData = clone(emptyEditBudgetsDialogData);
+    function fillAmounts() {
+        const isLastPage = pagination.page == Math.ceil(totalItems.value/pagination.rowsPerPage)
+        let budgets = currentPage.value.filter(_ => _.budgetAmounts.length > pagination.rowsPerPage);
+        let modelbudget = currentPage.value.find(_ => _.budgetAmounts.length === pagination.rowsPerPage ||
+        (isLastPage && _.budgetAmounts.length == totalItems.value % pagination.rowsPerPage))
+        if(!isNil(budgets) && !isNil(modelbudget)){
+            
+            budgets.forEach(_ =>{
+                let amounts: BudgetAmount[] = [];
+                let addedAmounts: BudgetAmount[] = [];
+                modelbudget!.budgetAmounts.forEach(__ => {
+                    let foundAmount = _.budgetAmounts.find(amount => amount.year === __.year);
+                    const newAmount: BudgetAmount = {
+                        id: isNil(foundAmount) ? getNewGuid() : foundAmount.id,
+                        budgetName: _.name,
+                        year: __.year,
+                        value: isNil(foundAmount) ? 0 : foundAmount.value,
+                    }
+                    if(isNil(foundAmount))
+                        addedAmounts.push(clone(newAmount))
+                    amounts.push(clone(newAmount)) 
+                })
+                _.budgetAmounts = clone(amounts)
+                let addedMap = addedBudgetAmounts.value.get(_.name);
+                if(!isNil(addedMap)){
+                    addedMap = addedMap.concat(addedAmounts);
+                    addedBudgetAmounts.value.set(_.name, clone(addedMap))
+                }                 
+                else
+                    addedBudgetAmounts.value.set(_.name, clone(addedAmounts));
+            })
+        }
+    }
+
+    function onSubmitEditBudgetsDialogResult(budgetChanges: EmitedBudgetChanges) {        
+        editBudgetsDialogData.value = clone(emptyEditBudgetsDialogData);
         if(!isNil(budgetChanges)){
-            this.addedBudgets = this.addedBudgets.concat(budgetChanges.addedBudgets);
+            addedBudgets.value = addedBudgets.value.concat(budgetChanges.addedBudgets);
             budgetChanges.addedBudgets.forEach(budget => {
                 let amounts: BudgetAmount[] = [];
-                if(this.currentPage.length > 0){
-                    this.currentPage[0].budgetAmounts.forEach(amount => {
+                if(currentPage.value.length > 0){
+                    currentPage.value[0].budgetAmounts.forEach(amount => {
                         amounts.push({
                             id: getNewGuid(),
                             budgetName: budget.name,
@@ -1106,33 +1215,33 @@ export default class InvestmentEditor extends Vue {
                         }) 
                     })
                 }
-                this.addedBudgetAmounts.set(budget.name, amounts);
+                addedBudgetAmounts.value.set(budget.name, amounts);
             });          
-            let addedIds = this.addedBudgets.map(b => b.id);            
-            budgetChanges.deletionIds.forEach(id => this.removeBudget(id));
-            this.deletionBudgetIds = this.deletionBudgetIds.filter(b => !addedIds.includes(b));
-            budgetChanges.updatedBudgets.forEach(budget => this.onUpdateBudget(budget.id, budget));                       
+            let addedIds = addedBudgets.value.map(b => b.id);            
+            budgetChanges.deletionIds.forEach(id => removeBudget(id));
+            deletionBudgetIds.value = deletionBudgetIds.value.filter(b => !addedIds.includes(b));
+            budgetChanges.updatedBudgets.forEach(budget => onUpdateBudget(budget.id, budget));                       
             
-            this.onPaginationChanged();
+            onPaginationChanged();
         }      
     }
-    removeBudget(id: string){
-        if(any(propEq('id', id), this.addedBudgets)){
-            this.addedBudgets = this.addedBudgets.filter((addBudge: Budget) => addBudge.id != id);
-            this.deletionBudgetIds.push(id);
-            const budget = this.currentPage.find(b => b.id === id);
+    function removeBudget(id: string){
+        if(any(propEq('id', id), addedBudgets.value)){
+            addedBudgets.value = addedBudgets.value.filter((addBudge: Budget) => addBudge.id != id);
+            deletionBudgetIds.value.push(id);
+            const budget = currentPage.value.find(b => b.id === id);
             if(!isNil(budget))
-                this.addedBudgetAmounts.delete(budget.name)
+                addedBudgetAmounts.value.delete(budget.name)
         }              
-        else if(any(propEq('id', id), Array.from(this.updatedBudgetsMap.values()).map(r => r[1]))){
-            this.updatedBudgetsMap.delete(id)
-            this.deletionBudgetIds.push(id);
+        else if(any(propEq('id', id), Array.from(updatedBudgetsMap.value.values()).map(r => r[1]))){
+            updatedBudgetsMap.value.delete(id)
+            deletionBudgetIds.value.push(id);
         }          
         else
-            this.deletionBudgetIds.push(id);
+            deletionBudgetIds.value.push(id);
     }
 
-    OnDownloadTemplateClick() {
+    function OnDownloadTemplateClick() {
         InvestmentService.downloadInvestmentBudgetsTemplate()
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
@@ -1142,9 +1251,9 @@ export default class InvestmentEditor extends Vue {
             });
     }
 
-    exportInvestmentBudgets() {
-        const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedBudgetLibrary.id;
-        InvestmentService.exportInvestmentBudgets(id, this.hasScenario)
+    function exportInvestmentBudgets() {
+        const id: string = hasScenario.value ? selectedScenarioId : selectedBudgetLibrary.value.id;
+        InvestmentService.exportInvestmentBudgets(id, hasScenario.value)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const fileInfo: FileInfo = response.data as FileInfo;
@@ -1152,8 +1261,8 @@ export default class InvestmentEditor extends Vue {
                 }
             });
     }
-    onSubmitImportExportInvestmentBudgetsDialogResult(result: ImportExportInvestmentBudgetsDialogResult) {
-        this.showImportExportInvestmentBudgetsDialog = false;
+    function onSubmitImportExportInvestmentBudgetsDialogResult(result: ImportExportInvestmentBudgetsDialogResult) {
+        showImportExportInvestmentBudgetsDialog.value = false;
 
         if (hasValue(result)) {
             if (result.isExport) {
@@ -1165,23 +1274,23 @@ export default class InvestmentEditor extends Vue {
                     overwriteBudgets: result.overwriteBudgets,
                 };
 
-            if (this.hasScenario) {
-                this.importScenarioInvestmentBudgetsFileAction({
+            if (hasScenario.value) {
+                importScenarioInvestmentBudgetsFileAction({
                     ...data,
-                    id: this.selectedScenarioId,
-                    currentUserCriteriaFilter: this.currentUserCriteriaFilter
+                    id: selectedScenarioId,
+                    currentUserCriteriaFilter: currentUserCriteriaFilter
                 })
                 .then((response: any) => {
-                        this.setAlertMessageAction("Investment Budgets import has been added to the work queue.");
+                        setAlertMessageAction("Investment Budgets import has been added to the work queue.");
                 });
             } else {
-                this.importLibraryInvestmentBudgetsFileAction({
+                importLibraryInvestmentBudgetsFileAction({
                     ...data,
-                    id: this.selectedBudgetLibrary.id,
-                    currentUserCriteriaFilter: this.currentUserCriteriaFilter
+                    id: selectedBudgetLibrary.value.id,
+                    currentUserCriteriaFilter: currentUserCriteriaFilter
                 })
                 .then(() => {
-                        this.setAlertMessageAction("Investment Budgets import has been added to the work queue.");                     
+                        setAlertMessageAction("Investment Budgets import has been added to the work queue.");                     
                 });
             }
 
@@ -1189,9 +1298,9 @@ export default class InvestmentEditor extends Vue {
         }
     }
 
-    onEditBudgetYearValue(year: number, budgetName: string, value: number) {//check this out
-        if (any(propEq('name', budgetName), this.currentPage)) {
-            const budget: Budget = find(propEq('name', budgetName), this.currentPage) as Budget;
+    function onEditBudgetYearValue(year: number, budgetName: string, value: number) {//check out
+        if (any(propEq('name', budgetName), currentPage.value)) {
+            const budget: Budget = find(propEq('name', budgetName), currentPage.value) as Budget;
 
             if (any(propEq('year', year), budget.budgetAmounts)) {
                 const budgetAmount: BudgetAmount = find(propEq('year', year), budget.budgetAmounts) as BudgetAmount;
@@ -1201,94 +1310,94 @@ export default class InvestmentEditor extends Vue {
                         ? parseFloat(value.toString().replace(/(\$*)(\,*)/g, ''))
                         : 0,
                 }
-                this.onUpdateBudgetAmount(budgetAmount.id, updatedRow)
-                this.onPaginationChanged();
+                onUpdateBudgetAmount(budgetAmount.id, updatedRow)
+                onPaginationChanged();
             }
         }
     }
 
-    onEditInvestmentPlan(property: string, value: any) {
-        this.investmentPlan = setItemPropertyValue(property, value, this.investmentPlan);
+    function onEditInvestmentPlan(property: string, value: any) {
+        investmentPlan.value = setItemPropertyValue(property, value, investmentPlan.value);
     }
 
-    onUpsertInvestment() {
-        const investmentPlan: InvestmentPlan = clone(this.investmentPlan);
+    function onUpsertInvestment() {
+        const investmentPlanUpsert: InvestmentPlan = clone(investmentPlan.value);
 
-        if (this.selectedBudgetLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.newLibrarySelection ===false) {this.scenarioLibraryIsModified = true;}
-        else { this.scenarioLibraryIsModified = false; }
+        if (selectedBudgetLibrary.value.id === uuidNIL || hasUnsavedChanges.value && newLibrarySelection ===false) {scenarioLibraryIsModified.value = true;}
+        else { scenarioLibraryIsModified.value = false; }
 
         const sync: InvestmentPagingSyncModel = {
-            libraryId: this.selectedBudgetLibrary.id === this.uuidNIL ? null : this.selectedBudgetLibrary.id,
-            updatedBudgets: Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
-            budgetsForDeletion: this.deletionBudgetIds,
-            addedBudgets: this.addedBudgets,
-            deletionyears: this.deletionYears,
-            updatedBudgetAmounts: mapToIndexSignature(this.updatedBudgetAmounts),
+            libraryId: selectedBudgetLibrary.value.id === uuidNIL ? null : selectedBudgetLibrary.value.id,
+            updatedBudgets: Array.from(updatedBudgetsMap.value.values()).map(r => r[1]),
+            budgetsForDeletion: deletionBudgetIds.value,
+            addedBudgets: addedBudgets.value,
+            deletionyears: deletionYears.value,
+            updatedBudgetAmounts: mapToIndexSignature(updatedBudgetAmounts.value),
             Investment: {
-                ...this.investmentPlan,
-                minimumProjectCostLimit: hasValue(this.investmentPlan.minimumProjectCostLimit)
-                    ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
+                ...investmentPlan.value,
+                minimumProjectCostLimit: hasValue(investmentPlan.value.minimumProjectCostLimit)
+                    ? parseFloat(investmentPlan.value.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
             },
-            addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
-            firstYearAnalysisBudgetShift: this.firstYearOfAnalysisPeriodShift,
-            isModified: this.scenarioLibraryIsModified,
+            addedBudgetAmounts: mapToIndexSignature(addedBudgetAmounts.value),
+            firstYearAnalysisBudgetShift: firstYearOfAnalysisPeriodShift.value,
+            isModified: scenarioLibraryIsModified.value,
         }
-        InvestmentService.upsertInvestment(sync ,this.selectedScenarioId).then((response: AxiosResponse) => {
+        InvestmentService.upsertInvestment(sync ,selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
-                this.firstYearOfAnalysisPeriodShift = 0;
-                this.investmentPlanMutator(this.investmentPlan)
-                this.clearChanges();                                            
-                this.addSuccessNotificationAction({message: "Modified investment"});
-                this.librarySelectItemValue = null;
+                parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value: "";
+                firstYearOfAnalysisPeriodShift.value = 0;
+                investmentPlanMutator(investmentPlanUpsert)
+                clearChanges();                                            
+                addSuccessNotificationAction({message: "Modified investment"});
+                librarySelectItemValue.value = null;
             }           
         });
     }
 
-    onUpsertBudgetLibrary() {
+    function onUpsertBudgetLibrary() {
         const sync: InvestmentPagingSyncModel = {
-            libraryId: this.selectedBudgetLibrary.id === this.uuidNIL ? null : this.selectedBudgetLibrary.id,
-            updatedBudgets: Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
-            budgetsForDeletion: this.deletionBudgetIds,
-            addedBudgets: this.addedBudgets,
-            deletionyears: this.deletionYears ,
-            updatedBudgetAmounts: mapToIndexSignature( this.updatedBudgetAmounts),
+            libraryId: selectedBudgetLibrary.value.id === uuidNIL ? null : selectedBudgetLibrary.value.id,
+            updatedBudgets: Array.from(updatedBudgetsMap.value.values()).map(r => r[1]),
+            budgetsForDeletion: deletionBudgetIds.value,
+            addedBudgets: addedBudgets.value,
+            deletionyears: deletionYears.value ,
+            updatedBudgetAmounts: mapToIndexSignature(updatedBudgetAmounts.value),
             Investment: null,
-            addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
+            addedBudgetAmounts: mapToIndexSignature(addedBudgetAmounts.value),
             firstYearAnalysisBudgetShift: 0,
             isModified: false
         }
 
         const upsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
-            library: this.selectedBudgetLibrary,
+            library: selectedBudgetLibrary.value,
             isNewLibrary: false,
             syncModel: sync,
             scenarioId: null
         }
         InvestmentService.upsertBudgetLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges()
-                this.budgetLibraryMutator(this.selectedBudgetLibrary);
-                this.selectedBudgetLibraryMutator(this.selectedBudgetLibrary.id);
-                this.addSuccessNotificationAction({message: "Updated budget library",});
+                clearChanges()
+                budgetLibraryMutator(selectedBudgetLibrary.value);
+                selectedBudgetLibraryMutator(selectedBudgetLibrary.value.id);
+                addSuccessNotificationAction({message: "Updated budget library",});
             }
         });
     }
 
-    onDiscardChanges() {
-        this.librarySelectItemValue = null;
+    function onDiscardChanges() {
+        librarySelectItemValue.value = null;
         setTimeout(() => {
-            if (this.hasScenario) {
-                this.clearChanges();
-                this.resetPage();
+            if (hasScenario.value) {
+                clearChanges();
+                resetPage();
             }
         });
-        this.parentLibraryName = this.loadedParentName;
-        this.parentLibraryId = this.loadedParentId;
+        parentLibraryName.value = loadedParentName;
+        parentLibraryId = loadedParentId;
     }
 
-    formatAsCurrency(value: any) {
+    function formatAsCurrency(value: any): any {
         if (hasValue(value)) {
             return formatAsCurrency(value);
         }
@@ -1296,8 +1405,8 @@ export default class InvestmentEditor extends Vue {
         return null;
     }
 
-    onShowConfirmDeleteAlert() {
-        this.confirmDeleteAlertData = {
+    function onShowConfirmDeleteAlert() {
+        confirmDeleteAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1305,129 +1414,129 @@ export default class InvestmentEditor extends Vue {
         };
     }
 
-    onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        this.confirmDeleteAlertData = clone(emptyAlertData);
+    function onSubmitConfirmDeleteAlertResult(submit: boolean) {
+        confirmDeleteAlertData.value = clone(emptyAlertData);
 
         if (submit) {
-            this.librarySelectItemValue = null;
-            this.deleteBudgetLibraryAction(this.selectedBudgetLibrary.id);
+            librarySelectItemValue.value = null;
+            deleteBudgetLibraryAction(selectedBudgetLibrary.value.id);
         }
     }
 
-    disableCrudButton() {
-        const allBudgetDataIsValid: boolean = this.currentPage.every((budget: Budget) => {
+    function disableCrudButton() {
+        const allBudgetDataIsValid: boolean = currentPage.value.every((budget: Budget) => {
             let amountsAreValid = true;
-            const addedAmounts = this.addedBudgetAmounts.get(budget.name);
-            const updatedAmounts = this.updatedBudgetAmounts.get(budget.name);
+            const addedAmounts = addedBudgetAmounts.value.get(budget.name);
+            const updatedAmounts = updatedBudgetAmounts.value.get(budget.name);
             if (!isNil(addedAmounts))
                 amountsAreValid = addedAmounts.every((budgetAmount: BudgetAmount) =>
-                    this.rules['generalRules'].valueIsNotEmpty(budgetAmount.year) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(budgetAmount.value) === true);
+                    rules['generalRules'].valueIsNotEmpty(budgetAmount.year) === true &&
+                    rules['generalRules'].valueIsNotEmpty(budgetAmount.value) === true);
             if (!isNil(updatedAmounts))
                 amountsAreValid = amountsAreValid && updatedAmounts.every((budgetAmount: BudgetAmount) =>
-                    this.rules['generalRules'].valueIsNotEmpty(budgetAmount.year) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(budgetAmount.value) === true);
+                    rules['generalRules'].valueIsNotEmpty(budgetAmount.year) === true &&
+                    rules['generalRules'].valueIsNotEmpty(budgetAmount.value) === true);
             return amountsAreValid
         });
 
-        if (this.hasSelectedLibrary) {
-            return !(this.rules['generalRules'].valueIsNotEmpty(this.selectedBudgetLibrary.name) === true &&
+        if (hasSelectedLibrary.value) {
+            return !(rules['generalRules'].valueIsNotEmpty(selectedBudgetLibrary.value.name) === true &&
                 allBudgetDataIsValid);
-        } else if (this.hasScenario) {
-            const allInvestmentPlanDataIsValid: boolean = this.rules['generalRules'].valueIsNotEmpty(this.investmentPlan.minimumProjectCostLimit) === true &&
-                this.rules['investmentRules'].minCostLimitGreaterThanZero(this.investmentPlan.minimumProjectCostLimit) === true &&
-                this.rules['generalRules'].valueIsNotEmpty(this.investmentPlan.inflationRatePercentage) === true &&
-                this.rules['generalRules'].valueIsWithinRange(this.investmentPlan.inflationRatePercentage, [0, 100]);
+        } else if (hasScenario.value) {
+            const allInvestmentPlanDataIsValid: boolean = rules['generalRules'].valueIsNotEmpty(investmentPlan.value.minimumProjectCostLimit) === true &&
+                rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.value.minimumProjectCostLimit) === true &&
+                rules['generalRules'].valueIsNotEmpty(investmentPlan.value.inflationRatePercentage) === true &&
+                rules['generalRules'].valueIsWithinRange(investmentPlan.value.inflationRatePercentage, [0, 100]);
 
             return !(allBudgetDataIsValid && allInvestmentPlanDataIsValid);
         }
 
-        this.disableCrudButtonsResult = !allBudgetDataIsValid;
+        disableCrudButtonsResult.value = !allBudgetDataIsValid;
         return !allBudgetDataIsValid;
     }
 
-    onSearchClick() {
-        this.currentSearch = this.gridSearchTerm;
-        this.resetPage();
+    function onSearchClick() {
+        currentSearch = gridSearchTerm;
+        resetPage();
     }
 
-onUpdateBudget(rowId: string, updatedRow: Budget){        
-    if(any(propEq('id', rowId), this.addedBudgets))
+    function onUpdateBudget(rowId: string, updatedRow: Budget){        
+    if(any(propEq('id', rowId), addedBudgets.value))
     {            
-        this.addedBudgets[this.addedBudgets.findIndex((b => b.id == rowId))] = updatedRow;
+        addedBudgets.value[addedBudgets.value.findIndex((b => b.id == rowId))] = updatedRow;
         return;
     }
-    let mapEntry = this.updatedBudgetsMap.get(rowId)
+    let mapEntry = updatedBudgetsMap.value.get(rowId)
     if(isNil(mapEntry)){
-        const row = this.BudgetCache.find(r => r.id === rowId);
+        const row = BudgetCache.value.find(r => r.id === rowId);
         if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
-            this.updatedBudgetsMap.set(rowId, [row , updatedRow])
+            updatedBudgetsMap.value.set(rowId, [row , updatedRow])
     }
     else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
         mapEntry[1] = updatedRow;
     }
     else
-        this.updatedBudgetsMap.delete(rowId)
+        updatedBudgetsMap.value.delete(rowId)
 
-        this.checkHasUnsavedChanges();
+        checkHasUnsavedChanges();
     }
 
-    onUpdateBudgetAmount(rowId: string, updatedRow: BudgetAmount) {
-        if (!isNil(this.addedBudgetAmounts.get(updatedRow.budgetName)))
-            if (any(propEq('id', rowId), this.addedBudgetAmounts.get(updatedRow.budgetName)!)) {
-                let amounts = this.addedBudgetAmounts.get(updatedRow.budgetName)!
+    function onUpdateBudgetAmount(rowId: string, updatedRow: BudgetAmount) {
+        if (!isNil(addedBudgetAmounts.value.get(updatedRow.budgetName)))
+            if (any(propEq('id', rowId), addedBudgetAmounts.value.get(updatedRow.budgetName)!)) {
+                let amounts = addedBudgetAmounts.value.get(updatedRow.budgetName)!
                 amounts[amounts.findIndex(b => b.id == rowId)] = updatedRow;
             }
 
 
-        let mapEntry = this.updatedBudgetAmountsMaps.get(rowId)
+        let mapEntry = updatedBudgetAmountsMaps.value.get(rowId)
 
         if(isNil(mapEntry)){
-            const row = this.budgetAmountCache.find(r => r.id === rowId);
+            const row = budgetAmountCache.value.find(r => r.id === rowId);
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row)){
-                this.updatedBudgetAmountsMaps.set(rowId, [row , updatedRow])
-                if(!isNil(this.updatedBudgetAmounts.get(updatedRow.budgetName)))
-                    this.updatedBudgetAmounts.get(updatedRow.budgetName)!.push(updatedRow)
+                updatedBudgetAmountsMaps.value.set(rowId, [row , updatedRow])
+                if(!isNil(updatedBudgetAmounts.value.get(updatedRow.budgetName)))
+                    updatedBudgetAmounts.value.get(updatedRow.budgetName)!.push(updatedRow)
                 else
-                    this.updatedBudgetAmounts.set(updatedRow.budgetName, [updatedRow])
+                    updatedBudgetAmounts.value.set(updatedRow.budgetName, [updatedRow])
             }               
         }
         else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
             mapEntry[1] = updatedRow;
-            let amounts = this.updatedBudgetAmounts.get(updatedRow.budgetName)
+            let amounts = updatedBudgetAmounts.value.get(updatedRow.budgetName)
             if(!isNil(amounts))
                 amounts[amounts.findIndex(r => r.id == updatedRow.id)] = updatedRow
         }
         else{
-            this.updatedBudgetsMap.delete(rowId)
-            let amounts = this.updatedBudgetAmounts.get(updatedRow.budgetName)
+            updatedBudgetsMap.value.delete(rowId)
+            let amounts = updatedBudgetAmounts.value.get(updatedRow.budgetName)
             if(!isNil(amounts))
                 amounts.splice(amounts.findIndex(r => r.id == updatedRow.id), 1)
         }
             
-        this.checkHasUnsavedChanges();
+        checkHasUnsavedChanges();
     }
 
-    clearChanges() {
-        this.updatedBudgetsMap.clear();
-        this.addedBudgets = [];
-        this.deletionBudgetIds = [];
-        this.updatedBudgetAmountsMaps.clear();
-        this.updatedBudgetAmounts.clear();
-        this.addedBudgetAmounts.clear();
-        this.deletionYears = [];
-        if (this.hasScenario)
-            this.investmentPlan = clone(this.stateInvestmentPlan);
+    function clearChanges() {
+        updatedBudgetsMap.value.clear();
+        addedBudgets.value = [];
+        deletionBudgetIds.value = [];
+        updatedBudgetAmountsMaps.value.clear();
+        updatedBudgetAmounts.value.clear();
+        addedBudgetAmounts.value.clear();
+        deletionYears.value = [];
+        if (hasScenario.value)
+            investmentPlan.value = clone(stateInvestmentPlan.value);
     }
 
-    resetPage() {
-        this.pagination.page = 1;
-        this.onPaginationChanged();
+    function resetPage() {
+        pagination.page = 1;
+        onPaginationChanged();
     }
 
-    checkHasUnsavedChanges() {
-        const clonedStateInvestmentPlan: InvestmentPlan = clone(this.stateInvestmentPlan);
-        const stateInvestmentPlan: InvestmentPlan = {
+    function checkHasUnsavedChanges() {
+        const clonedStateInvestmentPlan: InvestmentPlan = clone(stateInvestmentPlan.value);
+        const CheckStateInvestmentPlan: InvestmentPlan = {
             ...clonedStateInvestmentPlan,
             inflationRatePercentage: +clonedStateInvestmentPlan.inflationRatePercentage,
             firstYearOfAnalysisPeriod: +clonedStateInvestmentPlan.firstYearOfAnalysisPeriod,
@@ -1435,8 +1544,8 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
                 ? parseFloat(clonedStateInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                 : 0,
         };
-        const clonedInvestmentPlan: InvestmentPlan = clone(this.investmentPlan);
-        const investmentPlan: InvestmentPlan = {
+        const clonedInvestmentPlan: InvestmentPlan = clone(investmentPlan.value);
+        const CheckInvestmentPlan: InvestmentPlan = {
             ...clonedInvestmentPlan,
             inflationRatePercentage: +clonedInvestmentPlan.inflationRatePercentage,
             firstYearOfAnalysisPeriod: +clonedInvestmentPlan.firstYearOfAnalysisPeriod,
@@ -1445,63 +1554,62 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
                 : 0,
         };
         const hasUnsavedChanges: boolean = 
-            this.deletionBudgetIds.length > 0 || 
-            this.addedBudgets.length > 0 ||
-            this.updatedBudgetsMap.size > 0 || 
-            this.deletionYears.length > 0 || 
-            this.addedBudgetAmounts.size > 0 ||
-            this.updatedBudgetAmounts.size > 0 || 
-            (this.hasScenario && this.hasSelectedLibrary) ||
-            (this.hasScenario && hasUnsavedChangesCore('', investmentPlan, stateInvestmentPlan)) || 
-            (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.selectedBudgetLibrary, this.stateSelectedBudgetLibrary))
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+            deletionBudgetIds.value.length > 0 || 
+            addedBudgets.value.length > 0 ||
+            updatedBudgetsMap.value.size > 0 || 
+            deletionYears.value.length > 0 || 
+            addedBudgetAmounts.value.size > 0 ||
+            updatedBudgetAmounts.value.size > 0 || 
+            (hasScenario.value && hasSelectedLibrary.value) ||
+            (hasScenario.value && hasUnsavedChangesCore('', CheckInvestmentPlan, CheckStateInvestmentPlan)) || 
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedBudgetLibrary.value, stateSelectedBudgetLibrary.value))
+        setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    CheckUnsavedDialog(next: any, otherwise: any) {
-        if (this.hasUnsavedChanges && this.unsavedDialogAllowed) {
-            // @ts-ignore
-            Vue.dialog
-                .confirm(
-                    'You have unsaved changes. Are you sure you wish to continue?',
-                    { reverse: true },
-                )
-                .then(() => next())
-                .catch(() => otherwise())
+    function CheckUnsavedDialog(next: any, otherwise: any) {
+        if (hasUnsavedChanges.value && unsavedDialogAllowed.value) {
+            confirm.require({
+                message: "You have unsaved changes. Are you sure you wish to continue?",
+                acceptLabel: "Continue",
+                rejectLabel: "Close",
+                accept: ()=>next(),
+                reject: ()=>otherwise()
+            });
         } 
         else {
-            this.unsavedDialogAllowed = true;
+            unsavedDialogAllowed.value = true;
             next();
         }
     };
 
-    setParentLibraryName(libraryId: string) {
+    function setParentLibraryName(libraryId: string) {
         if (libraryId === "None") {
-            this.parentLibraryName = "None";
+            parentLibraryName.value = "None";
             return;
         }
         let foundLibrary: BudgetLibrary = emptyBudgetLibrary;
-        this.stateBudgetLibraries.forEach(library => {
+        stateBudgetLibraries.value.forEach(library => {
             if (library.id === libraryId ) {
                 foundLibrary = clone(library);
             }
         });
-        this.parentLibraryId = foundLibrary.id;
-        this.parentLibraryName = foundLibrary.name;
+        parentLibraryId = foundLibrary.id;
+        parentLibraryName.value = foundLibrary.name;
     }
 
-    importCompleted(data: any){
+    function importCompleted(data: any){
         var importComp = data.importComp as importCompletion
-        if( importComp.workType === WorkType.ImportScenarioInvestment && importComp.id === this.selectedScenarioId ||
-            this.hasSelectedLibrary && importComp.workType === WorkType.ImportLibraryInvestment && importComp.id === this.selectedBudgetLibrary.id){
-            this.clearChanges()
-            this.pagination.page = 1
-            this.initializePages().then(async () => {
-                this.setAlertMessageAction('');
-                this.isSuccessfulImportMutator(true);
-                await this.getBudgetLibrariesAction()
-                if(this.hasScenario){                
-                    this.investmentPlanMutator(this.investmentPlan);
-                    this.firstYearOfAnalysisPeriodShift = 0;
+        if( importComp.workType === WorkType.ImportScenarioInvestment && importComp.id === selectedScenarioId ||
+            hasSelectedLibrary.value && importComp.workType === WorkType.ImportLibraryInvestment && importComp.id === selectedBudgetLibrary.value.id){
+            clearChanges()
+            pagination.page = 1
+            initializePages().then(async () => {
+                setAlertMessageAction('');
+                isSuccessfulImportMutator(true);
+                await getBudgetLibrariesAction()
+                if(hasScenario.value){                
+                    investmentPlanMutator(investmentPlan.value);
+                    firstYearOfAnalysisPeriodShift.value = 0;
                 }
                 else{
 
@@ -1510,19 +1618,19 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
         }        
     }
 
-    async initializePages(){
+    async function initializePages(){
         const request: InvestmentPagingRequestModel= {
             page: 1,
             rowsPerPage: 5,
             syncModel: {
-                libraryId: this.selectedBudgetLibrary.id === this.uuidNIL ? null : this.selectedBudgetLibrary.id,
-                updatedBudgets: Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
-                budgetsForDeletion: this.deletionBudgetIds,
-                addedBudgets: this.addedBudgets,
-                deletionyears: this.deletionYears ,
-                updatedBudgetAmounts: mapToIndexSignature( this.updatedBudgetAmounts),
+                libraryId: selectedBudgetLibrary.value.id === uuidNIL ? null : selectedBudgetLibrary.value.id,
+                updatedBudgets: Array.from(updatedBudgetsMap.value.values()).map(r => r[1]),
+                budgetsForDeletion: deletionBudgetIds.value,
+                addedBudgets: addedBudgets.value,
+                deletionyears: deletionYears.value ,
+                updatedBudgetAmounts: mapToIndexSignature( updatedBudgetAmounts.value),
                 Investment: null,
-                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
+                addedBudgetAmounts: mapToIndexSignature(addedBudgetAmounts.value),
                 firstYearAnalysisBudgetShift: 0,
                 isModified: false
             },           
@@ -1531,48 +1639,48 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
             search: ''
         };
         
-        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
-            await InvestmentService.getScenarioInvestmentPage(this.selectedScenarioId, request).then(response => {
+        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL){
+            await InvestmentService.getScenarioInvestmentPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
-                    this.currentPage = data.items.sort((a, b) => a.budgetOrder - b.budgetOrder);
-                    this.BudgetCache = clone(this.currentPage);
-                    this.BudgetCache.forEach(_ => _.budgetAmounts = []);
-                    this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
-                    this.totalItems = data.totalItems;
-                    this.investmentPlan = data.investmentPlan;
-                    this.investmentPlanMutator(this.investmentPlan)
-                    this.syncInvestmentPlanWithBudgets();
-                    this.lastYear = data.lastYear;
-                    this.firstYear = data.firstYear;
-                    this.originalFirstYear = data.firstYear;
+                    currentPage.value = data.items.sort((a, b) => a.budgetOrder - b.budgetOrder);
+                    BudgetCache.value = clone(currentPage.value);
+                    BudgetCache.value.forEach(_ => _.budgetAmounts = []);
+                    budgetAmountCache.value = currentPage.value.flatMap(_ => _.budgetAmounts)
+                    totalItems.value = data.totalItems;
+                    investmentPlan.value = data.investmentPlan;
+                    investmentPlanMutator(investmentPlan.value)
+                    syncInvestmentPlanWithBudgets();
+                    lastYear = data.lastYear;
+                    firstYear = data.firstYear;
+                    originalFirstYear = data.firstYear;
                     if(data.firstYear === 0)
-                        this.originalFirstYear = moment().year()
+                        originalFirstYear = moment().year()
                 }
-                this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
-                this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";
-                this.loadedParentName = this.parentLibraryName; //store original
-                this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
-                this.initializing = false;
+                setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
+                loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
+                loadedParentName = parentLibraryName.value; //store original
+                scenarioLibraryIsModified.value = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
+                initializing = false;
             });
         }            
-        else if(this.hasSelectedLibrary)
-                await InvestmentService.getLibraryInvestmentPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+        else if(hasSelectedLibrary.value)
+                await InvestmentService.getLibraryInvestmentPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
-                    this.currentPage = data.items;
-                    this.BudgetCache = clone(this.currentPage);
-                    this.BudgetCache.forEach(_ => _.budgetAmounts = []);
-                    this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
-                    this.totalItems = data.totalItems;
-                    this.lastYear = data.lastYear;
+                    currentPage.value = data.items;
+                    BudgetCache.value = clone(currentPage.value);
+                    BudgetCache.value.forEach(_ => _.budgetAmounts = []);
+                    budgetAmountCache.value = currentPage.value.flatMap(_ => _.budgetAmounts)
+                    totalItems.value = data.totalItems;
+                    lastYear = data.lastYear;
                 }
-                this.initializing = false;
+                initializing = false;
             });
         else
-            this.initializing = false;
+            initializing = false;
     }
-}
+
 </script>
 
 <style>
@@ -1606,4 +1714,5 @@ onUpdateBudget(rowId: string, updatedRow: Budget){
         height: 22px;
         margin-top: 12px !important;
     }
+    
 </style>

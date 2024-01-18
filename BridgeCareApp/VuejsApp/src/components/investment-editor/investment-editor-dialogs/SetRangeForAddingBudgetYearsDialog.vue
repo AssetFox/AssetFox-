@@ -1,46 +1,49 @@
 <template>
-  <v-dialog max-width="200px" persistent v-model="showDialog">
+  <v-dialog max-width="200px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title>
-        <v-layout justify-center>
+        <v-row justify-center>
           <h3>Set Number of Years to Add</h3>
-        </v-layout>
+        </v-row>
       </v-card-title>
       <v-card-text>
-        <v-text-field type="number" min=1 :mask="'##########'" label="Edit" outline v-model.number="range"/>
+        <v-text-field type="number" min=1 v-maska:[mask] label="Edit" outline v-model.number="range"/>
         <label>{{rangeLabel}}</label>
       </v-card-text>
       <v-card-actions>
-        <v-btn :disabled="range === 0" @click="onSubmit(true)" class="ara-blue-bg white--text">Save</v-btn>
-        <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
+        <v-btn :disabled="range === 0" @click="onSubmit(true)" class="ara-blue-bg text-white">Save</v-btn>
+        <v-btn @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop} from 'vue-property-decorator';
+<script setup lang="ts">
+import Vue, { computed } from 'vue';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class SetRangeForAddingBudgetYearsDialog extends Vue {
-  @Prop() showDialog: boolean;
-  @Prop() startYear : number;  
+const emit = defineEmits(['submit'])
+const props = defineProps<{
+  showDialog: boolean,
+  startYear: number
+}>()
+let showDialogComputed = computed(() => props.showDialog);
+let range: number = 1;
+const mask = { mask: '##########' };
 
-  range: number = 1;
-
-  get rangeLabel() {
-    return 'Year Range: ' + (this.range <= 1 ? this.startYear : this.startYear + '-' + (this.startYear + this.range - 1));
+function rangeLabel() {
+    return 'Year Range: ' + (range <= 1 ? props.startYear : props.startYear + '-' + (props.startYear + range - 1));
   }
-
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.range);
+      emit('submit', range);
     } else {
-      this.$emit('submit', 0);
+      emit('submit', 0);
     }
 
-    this.range = 1;
-  }
+    range = 1;
 }
+
 </script>

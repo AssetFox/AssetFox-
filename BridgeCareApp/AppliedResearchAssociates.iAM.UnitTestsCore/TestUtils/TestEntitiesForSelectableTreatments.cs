@@ -179,14 +179,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var treatmentJoin = new CriterionLibraryScenarioSelectableTreatmentEntity { CriterionLibrary = CreateCriterionLibrary() };
             var entity = new ScenarioSelectableTreatmentEntity
             {
-                Id = treatmentId,                
+                Id = treatmentId,
                 Description = "Test description",
                 Name = name,
                 SimulationId = TestDataForSelectableTreatments.SimulationId,
                 ScenarioTreatmentCosts = costs,
                 ScenarioTreatmentConsequences = new List<ScenarioConditionalTreatmentConsequenceEntity>(),
                 ScenarioSelectableTreatmentScenarioBudgetJoins = new List<ScenarioSelectableTreatmentScenarioBudgetEntity>(),
-                CriterionLibraryScenarioSelectableTreatmentJoin = treatmentJoin,
+                CriterionLibraryScenarioSelectableTreatmentJoin = name == "No Treatment" ? null : treatmentJoin,
                 ScenarioTreatmentSupersedeRules = new List<ScenarioTreatmentSupersedeRuleEntity>()
             };
 

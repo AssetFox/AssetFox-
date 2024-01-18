@@ -1,26 +1,27 @@
 ﻿<template>
-    <v-layout>
-        <v-dialog content content-class="centered-dialog" persistent v-model="loading">
+    <v-row>
+        <v-dialog content content-class="centered-dialog" persistent v-model="showDialogComputed">
             <v-container>
-                <v-layout align-center column justify-center>
-                    <v-progress-circular :size="70" :width="7" class="ara-blue-pantone-281"
-                                         indeterminate></v-progress-circular>
-                    <h1>Please wait</h1>
-                </v-layout>
+                <v-row   justify="center">
+                    <v-col align="center">
+                        <v-progress-circular :size="70" :width="7" class="ara-blue-pantone-281" indeterminate></v-progress-circular>
+                        <h1>Please wait</h1>
+                    </v-col>
+                    
+                </v-row>
             </v-container>
         </v-dialog>
-    </v-layout>
+    </v-row>
 </template>
 
-<script lang="ts">
-    import Vue from 'vue';
-    import {Component} from 'vue-property-decorator';
-    import {State} from 'vuex-class';
+<script lang="ts" setup>
+    import Vue, { computed } from 'vue';
+import { useStore } from 'vuex';
 
-    @Component
-    export default class Spinner extends Vue {
-        @State(store => store.busyModule.isBusy) loading: boolean;
-    }
+
+let store = useStore();
+let showDialogComputed = computed<boolean>(() => store.state.busyModule.processCounter !== 0)
+
 </script>
 
 <style>

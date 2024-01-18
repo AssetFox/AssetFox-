@@ -1,34 +1,35 @@
 <template>
-    <v-layout>
-        <v-dialog style="overflow-y: auto" max-width='800px' persistent scrollable v-model="dialogDataPreChecks.showDialog">
+    <v-row>
+        <v-dialog style="overflow-y: auto" max-width='800px' persistent scrollable v-model="showDialogComputed">
             <v-card>
                 <v-card-title class="ghd-dialog-box-padding-top">
-                    <v-layout justify-space-between align-center>
-                        <div class="ghd-control-dialog-header">Interactive pre-checks</div>
-                        <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+                    <v-row justify-space-between align-center>
+                        <div style="margin-left: 250px" class="ghd-control-dialog-header">Interactive pre-checks</div>
+                        <v-btn style='margin-left:241px; font-size: 17px' @click="onSubmit(false)" variant = "flat">
                             X
                         </v-btn>
-                    </v-layout>
+                    </v-row>
                 </v-card-title>
-                    <v-layout justify-center style="font-weight: 500">
+                    <div justify-center style="font-weight: 500; margin-left:50px; margin-top: 0px">
                         {{dialogDataPreChecks.heading}}
-                    </v-layout>
+                    </div>
                 <div style='height: 100%; max-width:100%' class="ghd-dialog-box-padding-center">
                     <div style='max-height: 450px; overflow-y:auto;'>
                         <v-card-text style="border:1px solid black;" class="px-4">
                             <ul>
-                                <li class="text--primary" v-for="(key, index) in filteredMessage" :key="index">
-            {{ key }}                                </li>
+                                <li class="text--primary" v-for="(key, index) in filteredMessages" :key="index">
+                                    {{ key }}                                
+                                </li>
                             </ul>
                          </v-card-text>
                     </div>
                 </div>
                 <v-card-actions>
-                    <v-layout justify-center row v-if="dialogDataPreChecks.choice">
+                    <v-row style="margin-left:20px" justify-center row v-if="dialogDataPreChecks.choice">
                         <v-btn 
                         id="Alert-Cancel-vbtn"
                         @click="onSubmit(false)" 
-                        class="ghd-blue ghd-button" outline>
+                        class="ghd-blue ghd-button" variant = "outlined">
                             Cancel
                         </v-btn>
                         <v-btn 
@@ -37,37 +38,52 @@
                         class="ghd-blue-bg ghd-white ghd-button">
                             Proceed
                         </v-btn>
-                    </v-layout>
-                    <v-layout justify-center v-if="!dialogDataPreChecks.choice">
-                        <v-btn @click="onSubmit(false)" class="ara-blue-bg white--text">
+                    </v-row>
+                    <v-row justify-center v-if="!dialogDataPreChecks.choice">
+                        <v-btn @click="onSubmit(false)" class="ara-blue-bg text-white">
                             OK
                         </v-btn>
-                    </v-layout>
+                    </v-row>
                 </v-card-actions>
             </v-card>
         </v-dialog>
-    </v-layout>
+    </v-row>
 </template>
 
-<script lang="ts">
-    import Vue from 'vue';
-    import {Component, Prop} from 'vue-property-decorator';
+<script lang="ts" setup>
+    import Vue, { computed } from 'vue';
     import {AlertPreChecksData} from '../models/modals/alert-data';
+    import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+    import { useStore } from 'vuex';
+    import { useRouter } from 'vue-router';
+    
+    const props = defineProps<{
+        dialogDataPreChecks: AlertPreChecksData
+    }>()
+    let showDialogComputed = computed(() => props.dialogDataPreChecks.showDialog);
+    const emit = defineEmits(['submit'])
 
-    @Component
-    export default class AlertPreChecks extends Vue {
-        @Prop() dialogDataPreChecks: AlertPreChecksData;
 
-        get filteredMessage() {
-            // Split the message by periods and filter out empty strings
-            return this.dialogDataPreChecks.message.split('.').filter(sentence => sentence.trim() !== '');
-        }
-        /**
+    const filteredMessages = computed(() => {
+    const message = props.dialogDataPreChecks.message;
+
+    if (props.dialogDataPreChecks.message) {
+        // Split the message by periods and filter out empty strings
+        const sentences = message.split('.');
+        
+        var filtered = sentences.filter(function (el) {
+            return el != null && el != '';
+        });
+
+        return filtered;
+    }
+    return [];
+});        /**
          * Emits a boolean result to the parent component
          * @param submit
          */
-        onSubmit(submit: boolean) {
-            this.$emit('submit', submit);
+        function onSubmit(submit: boolean) {
+            emit('submit', submit);
         }
-    }
+    
 </script>

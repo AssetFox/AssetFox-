@@ -1,7 +1,4 @@
-﻿import Vue from 'vue';
-import VueRouter from 'vue-router';
-import './register-hooks';
-import EditAnalysisMethod from '@/components/scenarios/EditAnalysisMethod.vue';
+﻿import EditAnalysisMethod from '@/components/scenarios/EditAnalysisMethod.vue';
 import UnderConstruction from '@/components/UnderConstruction.vue';
 import Logout from '@/components/Logout.vue';
 import AuthenticationStart from '@/components/authentication/AuthenticationStart.vue';
@@ -13,6 +10,8 @@ import {
     isAuthenticatedUser,
     onHandleLogout,
 } from '@/shared/utils/authentication-utils';
+import { createRouter, createWebHistory } from 'vue-router';
+import { useConfirm } from 'primevue/useconfirm';
 
 // Lazily-loaded pages
 const Scenario = () =>
@@ -130,13 +129,14 @@ const onHandlingUnsavedChanges = (to: any, next: any): void => {
     // @ts-ignore
     if (store.state.unsavedChangesFlagModule.hasUnsavedChanges) {
         // @ts-ignore
-        Vue.dialog
-            .confirm(
-                'You have unsaved changes. Are you sure you wish to continue?',
-                { reverse: true },
-            )
-            .then(() => next())
-            .catch(() => next(false));
+        const confirm = useConfirm(); 
+        confirm.require({
+            message: "You have unsaved changes. Are you sure you wish to continue?",
+            acceptLabel: "Continue",
+            rejectLabel: "Close",
+            accept: ()=>next(),
+            reject: ()=>next(false)
+        });
     } else {
         next();
     }
@@ -195,10 +195,9 @@ const beforeEnterFunc = (to: any, from: any, next: any) => {
     }
 };
 
-Vue.use(VueRouter);
 
-const router = new VueRouter({
-    mode: 'history',
+const router = createRouter({
+    history: createWebHistory(),
     routes: [
         {
             path: '/Inventory/',
@@ -265,7 +264,7 @@ const router = new VueRouter({
                     beforeEnter: beforeEnterFunc,
                 },
                 {
-                    path: '/RemainingLifeLimitEditor/Scenario/',
+                    path: '/RemainingLifeLimitEditor/Scenario',
                     component: RemainingLifeLimitEditor,
                     props: true,
                     beforeEnter: beforeEnterFunc,
@@ -328,7 +327,7 @@ const router = new VueRouter({
                     component: RemainingLifeLimitEditor,
                 },
                 {
-                    path: '/CashFlowEditor/Library',
+                    path: '/CashFlowEditor/Library/',
                     component: CashFlowEditor,
                 },
                 {
@@ -516,9 +515,14 @@ const router = new VueRouter({
             props: true,
         },
         {
-            path: '*',
-            redirect: '/AuthenticationStart/',
-        },
+            path: '/',
+            component: Scenario,
+        }
+        // TODO: Does below need to be here?
+        // {
+        //     path: '*',
+        //     redirect: '/AuthenticationStart/',
+        // },
     ],
 });
 

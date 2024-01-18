@@ -1,96 +1,88 @@
-﻿<template>
-    <v-form ref="form" v-model="valid" lazy-validation>
-        <v-layout column>
-            <v-flex xs6>
-                <v-layout column>
-                    <v-layout justify-center>
-                        <v-flex id="EditAnalysisMethod-weightingParent-vflex" xs4>
-                            <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
-                            <v-select
-                                id="EditAnalysisMethod-weighting-vselect"
-                                class="ghd-select ghd-control-border ghd-control-text"
-                                :items="weightingAttributes"
-                                append-icon=$vuetify.icons.ghd-down
-                                @change="
-                                    onSetAnalysisMethodProperty(
-                                        'attribute',
-                                        $event,
-                                    )
-                                "
-                                outline
-                                clearable
-                                :value="analysisMethod.attribute"
-                                :disabled="!hasAdminAccess"
-                            >
-                            </v-select>
-                        </v-flex>
-                        <v-flex id="EditAnalysisMethod-optimizationStrategyParent-vflex" xs4>
-                            <v-subheader class="ghd-control-label ghd-md-gray">Optimization Strategy</v-subheader>
-                            <v-select 
-                                id="EditAnalysisMethod-optimizationStrategy-select"
-                                class="ghd-select ghd-control-border ghd-control-text"
-                                :items="optimizationStrategy"
-                                append-icon=$vuetify.icons.ghd-down
-                                @change="
-                                    onSetAnalysisMethodProperty(
-                                        'optimizationStrategy',
-                                        $event,
-                                    )
-                                "
-                                outline
-                                :value="analysisMethod.optimizationStrategy"
-                                :disabled="!hasAdminAccess"
-                            >
-                            </v-select>
-                        </v-flex>
-                        <v-flex xs4 id="EditAnalysisMethod-spendingStrategyParent-vflex">
+<template>
+    <v-card height="800px" class="elevation-0 vcard-main-layout">
+        <v-row>
+            <v-col id="EditAnalysisMethod-weightingParent-vflex">
+        <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
+        <v-select
+            id="EditAnalysisMethod-weighting-vselect"
+            class="ghd-select ghd-control-border ghd-control-text"
+            :items="weightingAttributes"
+            variant="outlined"
+            clearable
+            item-title="text"
+            item-value="value"
+            density="compact"
+            menu-icon=custom:GhdDownSvg
+            v-model="analysisMethod.attribute"
+            :disabled="!hasAdminAccess"
+            @update:model-value="onSetAnalysisMethodProperty('attribute',$event)"
+        >
+        </v-select>
+        </v-col>
+        <v-col id="EditAnalysisMethod-optimizationStrategyParent-vflex" xs4>
+        <v-subheader class="ghd-control-label ghd-md-gray">Optimization Strategy</v-subheader>
+        <v-select 
+            id="EditAnalysisMethod-optimizationStrategy-select"
+            class="ghd-select ghd-control-border ghd-control-text"
+            :items="optimizationStrategy"
+            item-title="text"
+            item-value="value"
+            variant="outlined"
+            density="compact"
+            menu-icon=custom:GhdDownSvg
+            v-model="analysisMethod.optimizationStrategy"
+            @update:model-value="onSetAnalysisMethodProperty('optimizationStrategy',$event)"
+            :disabled="!hasAdminAccess"
+        >
+        </v-select>
+        </v-col>    
+        <v-col cols = "4" id="EditAnalysisMethod-spendingStrategyParent-vflex">
                             <v-subheader class="ghd-control-label ghd-md-gray">Spending Strategy</v-subheader>
                             <v-select
                                 id="EditAnalysisMethod-spendingStrategy-select"
                                 class="ghd-select ghd-control-border ghd-control-text"
                                 :items="spendingStrategy"
-                                append-icon=$vuetify.icons.ghd-down
-                                @change="
-                                    onSetAnalysisMethodProperty(
-                                        'spendingStrategy',
-                                        $event,
-                                    )
-                                "
-                                outline
-                                :value="analysisMethod.spendingStrategy"
+                                variant="outlined"
+                                item-title="text"
+                                item-value="value"
+                                density="compact"
+                                menu-icon=custom:GhdDownSvg
+                                v-model="analysisMethod.spendingStrategy"
+                                @update:model-value="onSetAnalysisMethodProperty('spendingStrategy',$event)"
                             >
                             </v-select>
-                        </v-flex>                        
-                    </v-layout>
-                    <v-layout justify-center>
-                        <v-spacer />
-                         <v-flex xs4>
+                        </v-col>                      
+                    </v-row>
+                    <v-row>
+                        <v-col cols = "4">
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Attribute</v-subheader>
                             <v-select
                                 id="EditAnalysisMethod-benefitAttribute-select"
                                 class="ghd-select ghd-control-text ghd-control-border"
                                 :items="benefitAttributes"
-                                append-icon=$vuetify.icons.ghd-down
-                                @change="
-                                    onSetBenefitProperty('attribute', $event)
-                                "
-                                outline
-                                :value="analysisMethod.benefit.attribute"
+                                item-title="text"
+                                item-value="value"
+                                variant="outlined"
+                                density="compact"
+                                v-model="benefit.attribute"
+                                menu-icon=custom:GhdDownSvg
+                                @update:model-value="onSetBenefitProperty('attribute', $event)"
                                 :disabled="!hasAdminAccess"
                             >
                             </v-select>
-                        </v-flex>
-                        <v-flex xs4>
+                        </v-col>
+                        <v-col cols = "4">
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Limit</v-subheader>
                             <v-text-field
                                 id="EditAnalysisMethod-benefitLimit-textField"
                                 style="margin:0px"
                                 class="ghd-control-text ghd-control-border"
-                                @input="onSetBenefitProperty('limit', $event)"
-                                outline
+                                @update:model-value="onSetBenefitProperty('limit',$event)"
+                                variant="outlined"
+                                density="compact"
                                 type="number"
                                 min="0"
-                                :value.number="analysisMethod.benefit.limit"
+                                :value.number="benefit.limit"
                                 :rules="[
                                     rules['generalRules'].valueIsNotEmpty,
                                     rules['generalRules'].valueIsNotNegative(
@@ -100,119 +92,103 @@
                                 :disabled="!hasAdminAccess"
                             >
                             </v-text-field>
-                        </v-flex>
-                        <v-flex xs4 class="ghd-constant-header">
+                        </v-col>
+                        <v-col cols = "4" class="ghd-constant-header">
                             <v-switch style="margin-left:10px;margin-top:30px;"
                                 id="EditAnalysisMethod-allowMultiBudgetFunding-switch"
                                 class="ghd-checkbox"
+                                color="#2A578D"
                                 label="Allow Multi Budget Funding"
                                 :disabled="!hasAdminAccess"
                                 v-model="analysisMethod.shouldUseExtraFundsAcrossBudgets"
-                                @change='onSetAnalysisMethodProperty("shouldUseExtraFundsAcrossBudgets",$event)'/>
-                        </v-flex>
-                        <v-spacer />
-                    </v-layout>
-                    <v-layout justify-center>
-                        <v-spacer></v-spacer>
-                        <v-flex xs6>
-                            <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
-                            <v-textarea
-                                id="EditAnalysisMethod-description-textArea"
-                                class="ghd-control-text ghd-control-border"
-                                @input="
-                                    onSetAnalysisMethodProperty(
-                                        'description',
-                                        $event,
-                                    )
-                                "
-                                no-resize
-                                outline
-                                rows="6"
-                                :value="analysisMethod.description"
-                            >
-                            </v-textarea>
-                        </v-flex>
-                        <v-flex xs6>
-                            <v-layout style="height=12px;padding-bottom:0px;">
-                                <v-flex xs12 style="height=12px;padding-bottom:0px">
-                                    <v-subheader class="ghd-control-label ghd-md-gray">                             
-                                        Criteria</v-subheader>
-                                </v-flex>
-                                <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
-                                    <v-btn
-                                        id="EditAnalysisMethod-criteriaEditor-btn"
-                                        style="padding-right:20px !important;"
-                                        @click="
-                                            onShowCriterionEditorDialog
-                                        "
-                                        class="edit-icon ghd-control-label"
-                                        icon
-                                    >
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
-                                    </v-btn>
-                                </v-flex>
-                            </v-layout>
-                            <v-textarea
-                                id="EditAnalysisMethod-criteria-textArea"
-                                class="ghd-control-text ghd-control-border"
-                                style="padding-bottom: 0px; height: 90px;"
-                                no-resize
-                                outline
-                                readonly
-                                :rows="criteriaRows()"
-                                v-model="
-                                    analysisMethod.criterionLibrary
-                                        .mergedCriteriaExpression
-                                "
-                            >
-                            </v-textarea>
-                            <v-checkbox
-                                id="EditAnalysisMethod-criteria-checkbox"
-                                style="padding-top: 0px; margin-top: 4px;"
-                                class="ghd-checkbox ghd-md-gray"
-                                label="Criteria is intentionally empty (MUST check to Save)" 
-                                v-model="criteriaIsIntentionallyEmpty"
-                                v-show="criteriaIsEmpty()"
-                            >
-                            </v-checkbox>
-                        </v-flex>
-                        <v-spacer></v-spacer>
-                    </v-layout>
-                </v-layout>
-            </v-flex>
-
-            <v-flex xs6>
-                <v-layout justify-center row>
+                                @update:model-value='onSetAnalysisMethodProperty("shouldUseExtraFundsAcrossBudgets",$event)'/>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-row justify="space-between" style="padding-left: 10px;">
+                            <v-col>
+                                <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
+                                <v-textarea
+                                    id="EditAnalysisMethod-description-textArea"
+                                    class="ghd-control-text ghd-control-border"
+                                    @update:model-value="onSetAnalysisMethodProperty('description', $event)"
+                                    no-resize
+                                    variant="outlined"
+                                    rows="6"
+                                    :model-value="analysisMethod.description"
+                                >
+                                </v-textarea>
+                            </v-col>
+                            <v-col>
+                                <v-row justify="space-between" style="padding: 10px;">
+                                <v-subheader class="ghd-control-label ghd-md-gray">                             
+                                    Criteria
+                                </v-subheader>
+                                <v-btn
+                                    id="EditAnalysisMethod-criteriaEditor-btn"
+                                    style="padding-right:30px; padding-bottom: 5px; margin-bottom: 5px; !important;"
+                                    @click="
+                                        onShowCriterionEditorDialog
+                                    "
+                                    class="edit-icon ghd-control-label"
+                                    flat
+                                >
+                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                </v-btn>
+                                </v-row>
+                                <v-textarea
+                                    id="EditAnalysisMethod-criteria-textArea"
+                                    class="ghd-control-text ghd-control-border"
+                                    style="padding-bottom: 0px; height: 100px;"
+                                    no-resize
+                                    variant="outlined"
+                                    readonly
+                                    :rows="criteriaRows()"
+                                    v-model="analysisMethod.criterionLibrary.mergedCriteriaExpression"
+                                >
+                                </v-textarea>
+                                <div style="padding-top: 20px;"></div>
+                                <v-checkbox
+                                    id="EditAnalysisMethod-criteria-checkbox"
+                                    style="padding-top: 0px; margin-top: 4px;"
+                                    class="ghd-checkbox ghd-md-gray"
+                                    label="Criteria is intentionally empty (MUST check to Save)" 
+                                    v-model="criteriaIsIntentionallyEmpty"
+                                    v-show="criteriaIsEmpty()"
+                                >
+                                </v-checkbox>
+                            </v-col>
+                        </v-row>
+                    </v-row>
+                <v-row justify="center">
                     <v-btn
                         id="EditAnalysisMethod-cancel-btn"
                         @click="onDiscardChanges"
+                        :disabled="!hasUnsavedChanges"
                         class="ghd-white-bg ghd-blue ghd-button-text ghd-button"
-                        depressed
+                        variant = "flat"
                         >Cancel</v-btn
                     >
                     <v-btn
                         id="EditAnalysisMethod-save-btn"
+                        :disabled="(criteriaIsInvalid() || !valid) || !hasUnsavedChanges"
                         @click="onUpsertAnalysisMethod"
-                        depressed
+                        variant = "flat"
                         class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
+                        style="margin-left: 5px;"
                         >Save</v-btn
                     >
-                </v-layout>
-            </v-flex>
-
+                </v-row>
+    </v-card>
             <GeneralCriterionEditorDialog
                 :dialogData="criterionEditorDialogData"
                 @submit="onCriterionEditorDialogSubmit"
             />
-        </v-layout>
-    </v-form>
+            <ConfirmDialog></ConfirmDialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import { Watch } from 'vue-property-decorator';
-import Component from 'vue-class-component';
-import { Action, State } from 'vuex-class';
+<script lang="ts" setup>
+import Vue, { computed, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, inject } from 'vue'; 
 import { clone, equals, isNil } from 'ramda';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { Attribute } from '@/shared/models/iAM/attribute';
@@ -220,6 +196,7 @@ import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import {
     AnalysisMethod,
+    Benefit,
     emptyAnalysisMethod,
     OptimizationStrategy,
     SpendingStrategy,
@@ -228,31 +205,38 @@ import { SelectItem } from '@/shared/models/vue/select-item';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import {
     InputValidationRules,
-    rules,
+    rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import { useStore } from 'vuex'; 
+import { useRouter } from 'vue-router'; 
+import { getUrl } from '@/shared/utils/get-url';
+import ConfirmDialog from 'primevue/confirmdialog';
 
-@Component({
-    components: { GeneralCriterionEditorDialog },
-})
-export default class EditAnalysisMethod extends Vue {
-    @State(state => state.analysisMethodModule.analysisMethod)
-    stateAnalysisMethod: AnalysisMethod;
-    @State(state => state.attributeModule.numericAttributes)
-    stateNumericAttributes: Attribute[];
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
+    let store = useStore(); 
+    const router = useRouter(); 
+    // ToDo - verify if below is correct. Its used in onUpsertAnalysisMethod()
+    const $refs = inject('$refs') as any
 
-    @Action('getAnalysisMethod') getAnalysisMethodAction: any;
-    @Action('upsertAnalysisMethod') upsertAnalysisMethodAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
-    @Action('selectScenario') selectScenarioAction: any;
+    const stateAnalysisMethod = computed<AnalysisMethod>(() => store.state.analysisMethodModule.analysisMethod) ;
+    const stateNumericAttributes = computed<Attribute[]>( ()=> store.state.attributeModule.numericAttributes) ;
 
-    selectedScenarioId: string = getBlankGuid();
-    analysisMethod: AnalysisMethod = clone(emptyAnalysisMethod);
-    optimizationStrategy: SelectItem[] = [
+    const hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess) ; 
+
+    async function getAnalysisMethodAction(payload?: any): Promise<any>{await store.dispatch('getAnalysisMethod', payload)} 
+    async function upsertAnalysisMethodAction(payload?: any): Promise<any>{await store.dispatch('upsertAnalysisMethod', payload)} 
+
+    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification', payload)}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any>{await store.dispatch('setHasUnsavedChanges', payload)} 
+
+    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>{await store.dispatch('getCurrentUserOrSharedScenario', payload)}
+    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario', payload)} 
+
+    const selectedScenarioId = ref<string>(getBlankGuid());
+    const analysisMethod = ref<AnalysisMethod>(clone(emptyAnalysisMethod));
+    let benefit = computed<Benefit>(() => analysisMethod.value.benefit)
+    const optimizationStrategy: SelectItem[] = [
         { text: 'Benefit', value: OptimizationStrategy.Benefit },
         {
             text: 'Benefit-to-Cost Ratio',
@@ -264,7 +248,7 @@ export default class EditAnalysisMethod extends Vue {
             value: OptimizationStrategy.RemainingLifeToCostRatio,
         },
     ];
-    spendingStrategy: SelectItem[] = [
+    const spendingStrategy: SelectItem[] = [
         { text: 'No Spending', value: SpendingStrategy.NoSpending },
         {
             text: 'Unlimited Spending',
@@ -284,173 +268,184 @@ export default class EditAnalysisMethod extends Vue {
         },
         { text: 'As Budget Permits', value: SpendingStrategy.AsBudgetPermits },
     ];
-    benefitAttributes: SelectItem[] = [];
-    weightingAttributes: SelectItem[] = [{ text: '', value: '' }];
-    simulationName: string;
-    networkName: string = '';
-    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
-        emptyGeneralCriterionEditorDialogData,
-    );
-    rules: InputValidationRules = rules;
-    valid: boolean = true;
-    criteriaIsIntentionallyEmpty: boolean = false;
+    const benefitAttributes = ref<SelectItem[]>([]);
+    const weightingAttributes = ref<SelectItem[]>([{ text: '', value: '' }]);
+    const simulationName = ref<string>();
+    const networkName = ref<string>();
+    const criterionEditorDialogData = ref<GeneralCriterionEditorDialogData>(clone(emptyGeneralCriterionEditorDialogData));
+    const rules = ref<InputValidationRules>(validationRules);
+    const valid = ref<boolean>(true);
+    const criteriaIsIntentionallyEmpty = ref<boolean>(false);
+    let hasUnsavedChanges = ref<boolean>(false);
 
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            vm.selectedScenarioId = to.query.scenarioId;
-            vm.simulationName = to.query.simulationName;
-            vm.networkName = to.query.networkName;
-            console.log("check it!");
-            if (vm.selectedScenarioId === getBlankGuid()) {
+    //beforeRouteEnter(to: any, from: any, next: any) {
+       //next((vm: any) => {
+    created(); 
+    function created() { 
+    }
+
+    onMounted(() => {
+        selectedScenarioId.value = router.currentRoute.value.query.scenarioId as string;
+            simulationName.value = router.currentRoute.value.query.simulationName as string;
+            networkName.value = router.currentRoute.value.query.networkName as string;
+            if (selectedScenarioId.value === getBlankGuid()) {
                 // set 'no selected scenario' error message, then redirect user to Scenarios UI
-                vm.addErrorNotificationAction({
+                addErrorNotificationAction({
                     message: 'Found no selected scenario for edit',
                 });
-                vm.$router.push('/Scenarios/');
+                router.push('/Scenarios/');
             }
 
             // get the selected scenario's analysisMethod data
-            vm.getAnalysisMethodAction({ scenarioId: vm.selectedScenarioId }).then(() => {                       
-                vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                    vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+            getAnalysisMethodAction({ scenarioId: selectedScenarioId.value }).then(() => {                       
+                getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId.value}).then(() => {         
+                    selectScenarioAction({ scenarioId: selectedScenarioId.value });        
                 });
             });
-        });
-    }
 
-    mounted() {
-        if (hasValue(this.stateNumericAttributes)) {
-            this.setBenefitAndWeightingAttributes();
+        if (hasValue(stateNumericAttributes.value)) {
+            setBenefitAndWeightingAttributes();
         }
-    }
+    });
 
-    beforeDestroy() {
-        this.setHasUnsavedChangesAction({ value: false });
-    }
+    onBeforeUnmount(() => {
+        setHasUnsavedChangesAction({ value: false });
+    });
 
-    @Watch('stateAnalysisMethod')
-    onStateAnalysisChanged() {
-        this.analysisMethod = {
-            ...this.stateAnalysisMethod,
+    watch(stateAnalysisMethod, () => {
+        analysisMethod.value = {
+            ...stateAnalysisMethod.value,
             benefit: {
-                ...this.stateAnalysisMethod.benefit,
+                ...stateAnalysisMethod.value.benefit,
                 id:
-                    this.stateAnalysisMethod.benefit.id === getBlankGuid()
+                    stateAnalysisMethod.value.benefit.id === getBlankGuid()
                         ? getNewGuid()
-                        : this.stateAnalysisMethod.benefit.id,
+                        : stateAnalysisMethod.value.benefit.id,
             },
         };
-    }
+    });
 
-    @Watch('analysisMethod')
-    onAnalysisChanged() {
-        this.setHasUnsavedChangesAction({
+    // watch(benefit, onAnalysisChanged)
+    watch(analysisMethod, onAnalysisChanged)
+    function onAnalysisChanged() {
+        hasUnsavedChanges.value = !equals(analysisMethod.value, stateAnalysisMethod.value)
+        setHasUnsavedChangesAction({
             value:
-                !equals(this.analysisMethod, this.stateAnalysisMethod),
+                hasUnsavedChanges.value
         });
 
-        this.setBenefitAttributeIfEmpty();        
+        setBenefitAttributeIfEmpty();        
     }
 
-    @Watch('stateNumericAttributes')
-    onStateNumericAttributesChanged() {
-        if (hasValue(this.stateNumericAttributes)) {
-            this.setBenefitAndWeightingAttributes();
-            this.setBenefitAttributeIfEmpty();
+    watch(stateNumericAttributes, () => {
+        if (hasValue(stateNumericAttributes.value)) {
+            setBenefitAndWeightingAttributes();
+            setBenefitAttributeIfEmpty();
         }
-    }
+    });
 
-    setBenefitAttributeIfEmpty() {
+     function setBenefitAttributeIfEmpty() {
         if (
-            !hasValue(this.analysisMethod.benefit.attribute) &&
-            hasValue(this.benefitAttributes)
+            !hasValue(analysisMethod.value.benefit.attribute) &&
+            hasValue(benefitAttributes.value)
         ) {
-            this.analysisMethod.benefit.attribute = this.benefitAttributes[0].value.toString();
+            analysisMethod.value.benefit.attribute = benefitAttributes.value[0].value.toString();
         }
     }
-
-    onSetAnalysisMethodProperty(property: string, value: any) {
-        this.analysisMethod = setItemPropertyValue(
+ 
+    function onSetAnalysisMethodProperty(property: string, value: any) {
+        analysisMethod.value = setItemPropertyValue(
             property,
             value,
-            this.analysisMethod,
+            analysisMethod.value,
         );
     }
 
-    onSetBenefitProperty(property: string, value: any) {
-        this.analysisMethod.benefit = setItemPropertyValue(
+    function onSetBenefitProperty(property: string, value: any) {
+        analysisMethod.value.benefit = setItemPropertyValue(
             property,
             value,
-            this.analysisMethod.benefit,
+            analysisMethod.value.benefit,
         );
+        onAnalysisChanged();
     }
 
-    setBenefitAndWeightingAttributes() {
-        const numericAttributeSelectItems: SelectItem[] = this.stateNumericAttributes.map(
+    function setBenefitAndWeightingAttributes() {
+        const numericAttributeSelectItems: SelectItem[] = stateNumericAttributes.value.map(
             (attribute: Attribute) => ({
                 text: attribute.name,
                 value: attribute.name,
             }),
         );
-        this.benefitAttributes = [...numericAttributeSelectItems];
-        this.weightingAttributes = [
-            this.weightingAttributes[0],
+        benefitAttributes.value = [...numericAttributeSelectItems];
+        weightingAttributes.value = [
+            weightingAttributes.value[0],
             ...numericAttributeSelectItems,
         ];
     }
 
-    onShowCriterionEditorDialog() {
-        this.criterionEditorDialogData = {
+    function onShowCriterionEditorDialog() {
+        criterionEditorDialogData.value = {
             showDialog: true,
-            CriteriaExpression: this.analysisMethod.criterionLibrary.mergedCriteriaExpression,
+            CriteriaExpression: analysisMethod.value.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onCriterionEditorDialogSubmit(criterionexpression: string) {
-        this.criterionEditorDialogData = clone(
+    function onCriterionEditorDialogSubmit(criterionexpression: string) {
+        criterionEditorDialogData.value = clone(
             emptyGeneralCriterionEditorDialogData,
         );
 
         if (!isNil(criterionexpression)) {
-            if(this.analysisMethod.criterionLibrary.id == getBlankGuid())
-                this.analysisMethod.criterionLibrary.id = getNewGuid();
-            this.analysisMethod = {
-                ...this.analysisMethod,
-                criterionLibrary: {...this.analysisMethod.criterionLibrary, mergedCriteriaExpression: criterionexpression} as CriterionLibrary,
+            if(analysisMethod.value.criterionLibrary.id == getBlankGuid())
+                analysisMethod.value.criterionLibrary.id = getNewGuid();
+            analysisMethod.value = {
+                ...analysisMethod.value,
+                criterionLibrary: {...analysisMethod.value.criterionLibrary, mergedCriteriaExpression: criterionexpression} as CriterionLibrary,
             };
         }
     }
 
-    criteriaIsEmpty()
+    function criteriaIsEmpty()
     {
-        return (isNil(this.analysisMethod.criterionLibrary) ||
-                isNil(this.analysisMethod.criterionLibrary.mergedCriteriaExpression) ||
-                this.analysisMethod.criterionLibrary.mergedCriteriaExpression == ""
+        return (isNil(analysisMethod.value.criterionLibrary) ||
+                isNil(analysisMethod.value.criterionLibrary.mergedCriteriaExpression) ||
+                analysisMethod.value.criterionLibrary.mergedCriteriaExpression == ""
                 );
     }
 
-    criteriaRows()
+    function criteriaRows()
     {
-        return this.criteriaIsEmpty() ? 4 : 6;
+        return criteriaIsEmpty() ? 4 : 6;
     }
 
-    criteriaIsInvalid() {
-        return this.criteriaIsEmpty() && !this.criteriaIsIntentionallyEmpty;
+    function criteriaIsInvalid() {
+        return criteriaIsEmpty() && !criteriaIsIntentionallyEmpty.value;
     }    
 
-    onUpsertAnalysisMethod() {
-        const form: any = this.$refs.form;
+    async function onUpsertAnalysisMethod() {
 
-        if (form.validate()) {
-            this.upsertAnalysisMethodAction({
-                analysisMethod: this.analysisMethod,
-                scenarioId: this.selectedScenarioId,
+        upsertAnalysisMethodAction({
+                analysisMethod: analysisMethod.value,
+                scenarioId: selectedScenarioId.value,
             });
-        }
+        // const form: any = $refs.form;
+
+        // await(form.validate(), () =>{
+        //     if(form.result.valid){
+        //         upsertAnalysisMethodAction({
+        //         analysisMethod: analysisMethod,
+        //         scenarioId: selectedScenarioId,
+        //     });
+        //     }
+        // })
+         
     }
 
-    onDiscardChanges() {
-        this.analysisMethod = clone(this.stateAnalysisMethod);
+    function onDiscardChanges() {
+        analysisMethod.value = clone(stateAnalysisMethod.value);
     }
-}
+
+
+
 </script>

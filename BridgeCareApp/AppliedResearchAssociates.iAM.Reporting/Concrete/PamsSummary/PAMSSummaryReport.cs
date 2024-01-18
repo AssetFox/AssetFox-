@@ -212,7 +212,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 }
             }
 
-            var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int pavementCount, string projectSource)>>();
+            var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int pavementCount, string projectSource, string treatmentCategory)>>();
             var simulationYears = new List<int>();
             foreach (var item in reportOutputData.Years) {
                 simulationYears.Add(item.Year);
@@ -244,6 +244,43 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 }
             }
 
+            //get treatment category lookup
+            var treatmentCategoryLookup = new Dictionary<string, string>();
+            var treatmentList = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            if (treatmentList?.Any() == true)
+            {
+
+                reportDetailDto.Status = $"Checking treatment list";
+
+                workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+                foreach (var treatmentObject in treatmentList)
+                {
+
+                    checkCancelled(cancellationToken, simulationId);
+                    if (!treatmentCategoryLookup.ContainsKey(treatmentObject.Name))
+                    {
+                        treatmentCategoryLookup.Add(treatmentObject.Name, treatmentObject.Category.ToString());
+                    }
+                }
+            }
+
+            // Pull best guess on committed project treatment categories here
+            var committedProjectList = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
+            var treatmentsToAdd = committedProjectList.Select(_ => _.Treatment).Where(_ => !treatmentCategoryLookup.ContainsKey(_));
+            foreach (var newTreatment in treatmentsToAdd)
+            {
+                var bestTreatmentEntry = committedProjectList.Where(_ => _.Treatment == newTreatment)
+                    .GroupBy(_ => _.Category)
+                    .Select(_ => new { Category = _.Key, Count = _.Count() })
+                    .OrderByDescending(_ => _.Count)
+                    .Select(_ => _.Category)
+                    .FirstOrDefault();
+                if (!treatmentCategoryLookup.ContainsKey(newTreatment))
+                {
+                    treatmentCategoryLookup.Add(newTreatment, bestTreatmentEntry.ToString());
+                }
+            }
+
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
 
             checkCancelled(cancellationToken, simulationId);
@@ -271,7 +308,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var pamsWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummary_Tab);
-            var chartRowModel = _pavementWorkSummary.Fill(pamsWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments, simulation.CommittedProjects);
+            var committedProjectsForWorkOutsideScope = committedProjectList;
+            var chartRowModel = _pavementWorkSummary.Fill(pamsWorkSummaryWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments, simulation.CommittedProjects, treatmentCategoryLookup, committedProjectsForWorkOutsideScope);
 
             checkCancelled(cancellationToken, simulationId);
             //// Pavement Work Summary By Budget TAB
@@ -279,7 +317,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var pavementWorkSummaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummaryByBudget_Tab);
-            _pavementWorkSummaryByBudget.Fill(pavementWorkSummaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, yearlyCostCommittedProj, simulation.Treatments, simulation.CommittedProjects);
+            _pavementWorkSummaryByBudget.Fill(pavementWorkSummaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, yearlyCostCommittedProj, simulation.Treatments, simulation.CommittedProjects, treatmentCategoryLookup, committedProjectsForWorkOutsideScope);
 
             checkCancelled(cancellationToken, simulationId);
             // Unfunded Pavement Projects TAB

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+
 .theme--dark.v-table thead th {
     background-color: #424242;
 }
@@ -153,12 +155,12 @@
 }
 
 /* Select */
-v-input.ghd-control-text  {
+.ghd-control-text span  {
     font-family: 'Montserrat', sans-serif !important;
     font-size: 14px !important;    
 }
 
-v-list-item.ghd-control-text {
+.ghd-control-text .v-list-item{
     font-family: 'Montserrat', sans-serif !important;
     font-size: 14px !important;    
     font-weight: 600 !important;
@@ -318,7 +320,7 @@ v-list-item.ghd-control-text {
     font-size: 14px !important;
     font-weight: 400 !important;
     padding-top: 6px !important;
-    min-height: 14px;
+    min-height: 20px;
 }
 
 .ghd-checkbox .v-input .v-input__control .v-input__slot .v-input--checkbox .v-input--selection-controls {
@@ -347,12 +349,12 @@ v-list-item.ghd-control-text {
 
 
 /* Navigation List */
-.ghd-navigation-list .primary--text {
+.ghd-navigation-list .text-primary {
     background-color: #2A578D !important;
     color: #FFFFFF !important;
 }
 
-.ghd-navigation-list .primary--text .v-icon {
+.ghd-navigation-list .text-primary .v-icon {
     background-color: #2A578D !important;
     color: #FFFFFF !important;
 }
@@ -362,7 +364,7 @@ v-list-item.ghd-control-text {
     color: #999999 ! important;
 }
 
-.ghd-navigation-rawdata-list .primary--text {
+.ghd-navigation-rawdata-list .text-primary {
     background-color: #FFFFFF !important;
     color: black !important;
 }
@@ -453,8 +455,9 @@ table.v-table tbody td input {
 .notification-long-message {
     display: inline-block;
     min-inline-size: 90%;
+    max-width: 100%; 
     padding: 10pt;
-    margin: 10pt 10pt 10pt 10pt;
+    margin: 10pt;
     border-radius: 4pt;
     box-shadow: 0 3pt 5pt rgba(0, 0, 0, 0.25);
     font-size: 100%;
@@ -470,6 +473,7 @@ table.v-table tbody td input {
 
 .notification-message {
     text-align: left;
+    cursor: pointer;
 }
 
 /* Tabbing */
@@ -619,12 +623,12 @@ table.v-table tbody td input {
 
 .ghd-sidebar-libary{
     position: absolute;
-    max-height: 468px;
+    max-height: 473px;
 }
 
 .ghd-sidebar-scenario{
     position: absolute;
-    max-height: 600px;
+    max-height: 700px;
 }
 
 .ghd-blue-border
@@ -676,8 +680,14 @@ table.v-table tbody td input {
 .v-label--active{
 display: none !important;
 }
-
-.v-small-dialog__actions .v-btn
+.vcard-main-layout {
+        
+    margin-left: 20px; 
+    margin-right: 20px; 
+    padding-left: 10px; 
+    padding-right: 20px;
+}
+.v-small-dialog__actions .v-btn .p-button
 {
     padding: 0px !important;
     font-family: 'Montserrat', sans-serif !important;
@@ -739,7 +749,65 @@ display: none !important;
     margin-top: 25px !important;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 .ghd-content{
     padding-left: 295px !important;
 }
+
+.p-confirm-dialog {
+    position: absolute;
+    top: 35%;
+    -webkit-transform: translateY(-70%);
+    transform: translateY(-70%);
+    margin-top: 0;
+    max-width: 400px;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.pi-question-circle {
+    visibility: hidden;
+}
+
+.p-dialog-header {
+    visibility: hidden;
+}
+
+.p-dialog-footer {
+    position: relative;
+    padding: 15px 0 0;
+}
+
+
+.p-button {
+    display: inline-block;
+    position: relative;
+    min-width: 80px;
+    padding: 6px 20px;
+    border-radius: 4px;
+    outline: 0;
+    border: 4px solid transparent;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 15px;
+}
+
+.p-confirm-dialog-accept {
+    color: #0096d9;
+    background-color: #fefefe;
+    border-color: #0096d9;
+    float: left;
+}
+
+.p-confirm-dialog-reject {
+    color: #fefefe;
+    background-color: #0096d9;
+    float: right;
+}
+

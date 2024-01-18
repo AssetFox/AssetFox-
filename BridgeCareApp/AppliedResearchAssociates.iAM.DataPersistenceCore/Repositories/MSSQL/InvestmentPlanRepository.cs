@@ -31,6 +31,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
+            if(!_unitOfWork.Context.InvestmentPlan.Any(_ => _.Simulation.Id == simulation.Id))
+            {
+                throw new RowNotInTableException("No budgets were found for the given scenario.");
+            }
+
             _unitOfWork.Context.InvestmentPlan.AsNoTracking()
                 .Include(_ => _.Simulation)
                 .ThenInclude(_ => _.Budgets)
@@ -46,7 +51,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Simulation)
                 .ThenInclude(_ => _.CashFlowRules)
                 .ThenInclude(_ => _.ScenarioCashFlowDistributionRules)
-                .AsNoTracking()
                 .Single(_ => _.Simulation.Id == simulation.Id)
                 .FillSimulationInvestmentPlan(simulation);
         }

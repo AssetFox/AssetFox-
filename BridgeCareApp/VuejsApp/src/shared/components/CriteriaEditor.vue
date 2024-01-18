@@ -1,160 +1,91 @@
 <template>
-    <v-layout justify-center column class="criteria-editor-card-text">
-        <div>
-            <v-layout justify-space-between>
-                <v-flex xs6>
-                    <v-layout justify-start
-                    >
-                        <h3 class="ghd-dialog">Output</h3>
-                    </v-layout>
-                    <v-card class="elevation-0" style="border: 1px solid;">
-                        <div class="conjunction-and-messages-container" style="margin-top:4px;">
-                            <v-layout
-                                :class="{
-                                    'justify-space-between': !criteriaEditorData.isLibraryContext,
-                                    'justify-start':
-                                        criteriaEditorData.isLibraryContext,
-                                }"
-                            >
-                            <v-flex xs2>
-                                <v-layout>
+    <v-row>
+        <v-col>
+            <h3 class="ghd-dialog">Output</h3>
+            <v-card class="elevation-0" style="border: 1px solid;" width="600px">
+                <div class="conjunction-and-messages-container" >
+                    <v-row :class="{'justify-space-between': !criteriaEditorData.isLibraryContext,
+                        'justify-start':criteriaEditorData.isLibraryContext}">
+                        <v-col cols = "4">
+                            <v-row style="padding: 20px;">
                                 <v-select
+                                    menu-icon=custom:GhdDownSvg
                                     :items="conjunctionSelectListItems"
-                                    append-icon=$vuetify.icons.ghd-down
                                     class="ghd-control-border ghd-control-text ghd-select"
                                     v-model="selectedConjunction"
+                                    item-title="text"
+                                    item-value="value"
+                                    density="compact"
+                                    variant="outlined"
                                 >
-                                    <template v-slot:selection="{ item }">
-                                        <span class="ghd-control-text">{{ item.text }}</span>
-                                    </template>
-                                    <template v-slot:item="{ item }">
-                                        <v-list-item class="ghd-control-text" v-on="on" v-bind="attrs">
-                                        <v-list-item-content>
-                                            <v-list-item-title>
-                                            <v-row no-gutters align="center">
-                                            <span>{{ item.text }}</span>
-                                            </v-row>
-                                            </v-list-item-title>
-                                        </v-list-item-content>
-                                        </v-list-item>
-                                    </template>                                    
                                 </v-select>
-                                </v-layout>
-                            </v-flex>
-                                <v-btn
-                                    id="CriteriaEditor-addSubCriteria-btn"
-                                    @click="onAddSubCriteria"
-                                    class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"    
-                                    depressed                                
-                                    >Add Subcriteria
-                                </v-btn>
-                            </v-layout>
+                            </v-row>
+                        </v-col>
+                        <div style="padding:20px">
+                            <v-btn
+                                id="CriteriaEditor-addSubCriteria-btn"
+                                @click="onAddSubCriteria"
+                                class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
+                                variant = "flat"
+                                >Add Subcriteria
+                            </v-btn>
                         </div>
-                        <v-card-text
-    :class="{
-        'clauses-card-dialog': 
-            !criteriaEditorData.isLibraryContext,
-        'clauses-card-library': 
-            criteriaEditorData.isLibraryContext,
-    }"
->
-<v-textarea
-    v-if="isAndConjunction"
-    style="padding-left:0px;"
-    :class="getClassForTextarea(-1)"
-    :value="getValueForTextarea(-1)"
-    @click="onClickSubCriteriaClauseTextarea(subCriteriaClauses.join(' '), -1)"
-    box
-    class="ghd-control-text"
-    full-width
-    no-resize
-    readonly
-    rows="3"
->
-    <template slot="append">
-        <v-btn
-            @click="onRemoveSubCriteria(selectedSubCriteriaClauseIndex)"
-            class="ghd-blue"
-            icon
-        >
-            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-        </v-btn>
-    </template>
-</v-textarea>
-<div v-else>
-    <div v-for="(clause, index) in subCriteriaClauses" :key="index">
-        <v-textarea style="padding-left:0px;"
-            :class="getClassForTextarea(index)"
-            :value="getValueForTextarea(index)"
-            @click="onClickSubCriteriaClauseTextarea(clause, index)"
-            box
-            class="ghd-control-text"
-            full-width
-            no-resize
-            readonly
-            rows="3"
-        >
-            <template slot="append">
-                <v-btn id="CriteriaEditor-removeSubCriteria-btn"
-                    @click="onRemoveSubCriteria(index)"
-                    class="ghd-blue"
-                    icon
-                >
-                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-                </v-btn>
-            </template>
-        </v-textarea>
-    </div>
-</div>
-</v-card-text>
-                        <v-card-actions
-                            :class="{
-                                'validation-actions':
-                                    criteriaEditorData.isLibraryContext,
-                            }"
-                        >
-                            <v-layout>
-                                <div class="validation-check-btn-container">
-                                    <v-btn
-                                        id="CriteriaEditor-checkOutput-btn"
-                                        :disabled="onDisableCheckOutputButton()"
-                                        @click="onCheckCriteria"
-                                        class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                                        depressed
-                                    >
-                                        Check Output
-                                    </v-btn>
-                                </div>
-                                <div class="validation-messages-container">
-                                    <p
-                                        class="invalid-message"
-                                        v-if="invalidCriteriaMessage !== null"
-                                    >
-                                        <strong>{{
-                                            invalidCriteriaMessage
-                                        }}</strong>
-                                    </p>
-                                    <p
-                                        id="CriteriaEditor-validOutput-p"
-                                        class="valid-message"
-                                        v-if="validCriteriaMessage !== null"
-                                    >
-                                        {{ validCriteriaMessage }}
-                                    </p>
-                                    <p v-if="checkOutput">
-                                        Please click here to check entire rule
-                                    </p>
-                                </div>
-                            </v-layout>
-                        </v-card-actions>
-                    </v-card>
-                </v-flex>
-                <v-flex xs6>
-                    <v-layout justify-start
-                    >
-                        <h3 class="ghd-dialog">Criteria Editor</h3>
-                    </v-layout>
-                    <v-card class="elevation-0" style="border: 1px solid;height:682px;">                  
+                    </v-row>
+                </div>
+                <v-card-text :class="{'clauses-card-dialog':!criteriaEditorData.isLibraryContext,
+                    'clauses-card-library':criteriaEditorData.isLibraryContext}">  
+                    <div v-for="(clause, index) in subCriteriaClauses" :key="index">
+                        <v-textarea style="padding-left:0px;"
+                            :value="getValueForTextarea(index)"
+                            variant="outlined"
+                            @click="onClickSubCriteriaClauseTextarea(clause, index)"
+                            class="ghd-control-text"
+                            full-width
+                            no-resize
+                            readonly
+                            rows="3">
+                            <template v-slot:append>
+                                <v-btn id="CriteriaEditor-removeSubCriteria-btn"
+                                    @click.stop="onRemoveSubCriteria(index)"
+                                    class="ghd-blue"
+                                    flat>
+                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                </v-btn>
+                            </template>
+                        </v-textarea>
+                    </div>
+                </v-card-text>
+                <v-card-actions :class="{'validation-actions':criteriaEditorData.isLibraryContext,}">
+                    <v-row>
+                        <div class="validation-check-btn-container">
+                            <v-btn
+                                id="CriteriaEditor-checkOutput-btn"
+                                :disabled="onDisableCheckOutputButton()"
+                                @click="onCheckCriteria"
+                                class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
+                                variant = "flat"
+                            >
+                                Check Output
+                            </v-btn>
+                        </div>
+                        <div style="padding: 10px;">
+                            <p class="invalid-message" v-if="invalidCriteriaMessage !== null">
+                                <strong>{{ invalidCriteriaMessage }}</strong>
+                            </p>
+                            <p id="CriteriaEditor-validOutput-p" class="valid-message" v-if="validCriteriaMessage !== null">
+                                <strong>{{ validCriteriaMessage }}</strong>
+                            </p>
+                            <p v-if="checkOutput">
+                                Please click here to check entire rule
+                            </p>
+                        </div>
+                    </v-row>
+                </v-card-actions>
+            </v-card>
+        </v-col>
+        <v-col>
+            <h3 class="ghd-dialog">Criteria Editor</h3>
+            <v-card class="elevation-0" style="border: 1px solid;" width="600px">
                         <v-card-text
                             :class="{
                                 'criteria-editor-card-dialog':
@@ -163,124 +94,100 @@
                                     criteriaEditorData.isLibraryContext,
                             }"
                         >
-                            <v-layout
+                            <v-row
                                 :class="{
                                     'justify-space-between': !criteriaEditorData.isLibraryContext,
                                     'justify-end':
                                         criteriaEditorData.isLibraryContext,
                                 }"
-                            >                        
-                            </v-layout>                     
-                            <v-tabs class="ghd-control-text" style="margin-left:4px;margin-right:4px;"
-                                v-if="selectedSubCriteriaClauseIndex !== -1"
                             >
-                                <v-tab @click="onParseRawSubCriteria" ripple  id="CriteriaEditor-treeView-tab">
+                            </v-row>
+                            <v-tabs class="ghd-control-text" style="margin-left:4px;margin-right:4px;"
+                                 v-model="tab"
+                            >
+                                <v-tab @click="onParseRawSubCriteria" id="CriteriaEditor-treeView-tab" value="tree">
                                     Tree View
                                 </v-tab>
-                                <v-tab @click="onParseSubCriteriaJson" ripple id="CriteriaEditor-rawView-tab">
+                                <v-tab @click="onParseSubCriteriaJson" id="CriteriaEditor-rawView-tab" value="raw">
                                     Raw Criteria
                                 </v-tab>
-                                <v-tab-item>
-                                    <vue-query-builder 
-                                        id="CriteriaEditor-criteria-vuequerybuilder"
-                                        :labels="queryBuilderLabels"
-                                        :maxDepth="25"
-                                        :rules="queryBuilderRules"
-                                        :styled="true"
-                                        v-if="queryBuilderRules.length > 0"
-                                        v-model="selectedSubCriteriaClause"
-                                    >
-                                    </vue-query-builder>
-                                </v-tab-item>
-                                <v-tab-item>
+                           </v-tabs>
+                            <v-window v-model="tab">
+                                <v-window-item value="tree">
+                                    <QueryEditor v-model:criteria="selectedSubCriteriaClause" 
+                                        :maxDepth="3" 
+                                        :queryRules="queryBuilderRules" 
+                                        :depth="0"
+                                        v-if="queryBuilderRules.length > 0 "></QueryEditor>
+                                </v-window-item>
+                                <v-window-item value="raw">
                                     <v-textarea
                                         id="CriteriaEditor-rawText-vtextarea"
                                         no-resize
-                                        outline
-                                        rows="23"
+                                        variant="outlined"
+                                        rows="20"
                                         v-model="selectedRawSubCriteriaClause"
                                         class="ghd-control-text"
+                                        
                                     ></v-textarea>
-                                </v-tab-item>
-                            </v-tabs>
+                                </v-window-item>
+                            </v-window>
                         </v-card-text>
-                        <v-card-actions
-                            :class="{
-                                'validation-actions':
-                                    criteriaEditorData.isLibraryContext,
-                            }"
-                        >
-                            <v-layout column>          
-                                <div class="validation-messages-container">
-                                    <p
-                                        class="invalid-message"
-                                        v-if="
-                                            invalidSubCriteriaMessage !== null
-                                        "
+                        <v-card-actions :class="{ 'validation-actions':criteriaEditorData.isLibraryContext, }">
+                            <v-row>
+                                <div class="validation-check-btn-container">
+                                    <v-btn
+                                        id="CriteriaEditor-updateSubcriteria-btn"
+                                        @click="onCheckSubCriteria"
+                                        class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
+                                        variant = "flat"
                                     >
+                                        Update Subcriteria
+                                    </v-btn>
+                                </div>
+                                <div>
+                                    <p class="invalid-message" v-if="invalidSubCriteriaMessage !== null">
                                         <strong>{{
                                             invalidSubCriteriaMessage
                                         }}</strong>
                                     </p>
-                                    <p
-                                        class="valid-message"
-                                        v-if="validSubCriteriaMessage !== null"
-                                    >
+                                    <p class="valid-message" v-if="validSubCriteriaMessage !== null">
                                         {{ validSubCriteriaMessage }}
                                     </p>
-                                </div>        
-                                <div class="validation-check-btn-container" style="height:64px;margin-top:4px;">
-                                    <v-btn 
-                                        id="CriteriaEditor-updateSubcriteria-btn"
-                                        :disabled="
-                                            onDisableCheckCriteriaButton()
-                                        "
-                                        @click="onCheckSubCriteria"
-                                        class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                                        depressed
-                                    >
-                                        Update Subcriteria
-                                    </v-btn>
-                                </div>                                                         
-                            </v-layout>
+                                </div>       
+                            </v-row>
                         </v-card-actions>
-                    </v-card>
-                </v-flex>
-            </v-layout>
-        </div>
-        <div class="main-criteria-check-output-container">
-            <v-flex
-                v-show="!criteriaEditorData.isLibraryContext"
-                class="save-cancel-flex"
-            >
-                <v-layout justify-center wrap>
-                    <v-btn
-                        id="CriteriaEditor-save-btn"
-                        :disabled="cannotSubmit"
-                        @click="onSubmitCriteriaEditorResult(true)"
-                        class="ara-blue-bg white--text"
-                    >
-                        Save
-                    </v-btn>
-                    <v-btn
-                        id="CriteriaEditor-cancel-btn"
-                        @click="onSubmitCriteriaEditorResult(false)"
-                        class="ara-orange-bg white--text"
-                        >Cancel</v-btn
-                    >
-                </v-layout>
-            </v-flex>
-        </div>
-    </v-layout>
+            </v-card>
+        </v-col>
+    </v-row>
+    <div class="main-criteria-check-output-container">
+        <v-col
+            v-show="!criteriaEditorData.isLibraryContext"
+            class="save-cancel-flex"
+        >
+            <v-row justify-center wrap>
+                <v-btn
+                    id="CriteriaEditor-save-btn"
+                    :disabled="cannotSubmit"
+                    @click="onSubmitCriteriaEditorResult(true)"
+                    class="ara-blue-bg text-white"
+                >
+                    Save
+                </v-btn>
+                <v-btn
+                    id="CriteriaEditor-cancel-btn"
+                    @click="onSubmitCriteriaEditorResult(false)"
+                    class="ara-orange-bg text-white"
+                    >Cancel</v-btn>
+            </v-row>
+        </v-col>
+    </div>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
-import VueQueryBuilder from "vue-query-builder/src/VueQueryBuilder.vue";
+<script lang="ts" setup>
 import {
     Criteria,
+    CriteriaConfigRule,
     CriteriaEditorData,
     CriteriaRule,
     CriteriaType,
@@ -290,6 +197,7 @@ import {
     convertCriteriaObjectToCriteriaExpression,
     convertCriteriaTypeObjectToCriteriaExpression,
     convertCriteriaExpressionToCriteriaObject,
+queryBuilderTypes,
 } from '../utils/criteria-editor-parsers';
 import { hasValue } from '../utils/has-value-util';
 import {
@@ -317,81 +225,88 @@ import {
     ValidationParameter,
 } from '@/shared/models/iAM/expression-validation';
 import { UserCriteriaFilter } from '../models/iAM/user-criteria-filter';
-import { getBlankGuid } from '../utils/uuid-utils';
+import { getBlankGuid, getNewGuid } from '../utils/uuid-utils';
+import { ref, onMounted, computed, toRefs, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { getUrl } from "../utils/get-url";
+import { reactive } from 'vue';
+import QueryEditor from "../components/queryEditor/QueryEditorGroup.vue"
 
-@Component({
-    components: { VueQueryBuilder },
-})
-export default class CriteriaEditor extends Vue {
-    @Prop() criteriaEditorData: CriteriaEditorData;
+let store = useStore();
+const $router = useRouter();
+const emit = defineEmits(['submit','submitCriteriaEditorResult'])
+const props = defineProps<{
+    criteriaEditorData: CriteriaEditorData
+    }>()
+const { criteriaEditorData } = toRefs(props);
+const stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
+const stateAttributesSelectValues = computed<AttributeSelectValues[]>(() => store.state.attributeModule.attributesSelectValues);
+const stateNetworks = computed<Network[]>(() => store.state.networkModule.networks);
+const currentUserCriteriaFilter = computed<UserCriteriaFilter>(() => store.state.userModule.currentUserCriteriaFilter);
 
-    @State(state => state.attributeModule.attributes)
-    stateAttributes: Attribute[];
-    @State(state => state.attributeModule.attributesSelectValues)
-    stateAttributesSelectValues: AttributeSelectValues[];
-    @State(state => state.networkModule.networks) stateNetworks: Network[];
-    @State(state => state.userModule.currentUserCriteriaFilter)
-    currentUserCriteriaFilter: UserCriteriaFilter;
-
-    @Action('getAttributes') getAttributesAction: any;
-    @Action('getAttributeSelectValues') getAttributeSelectValuesAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-
-    queryBuilderRules: any[] = [];
-    queryBuilderLabels: object = {
-        matchType: '',
-        matchTypes: [
-            { id: 'AND', label: 'AND' },
-            { id: 'OR', label: 'OR' },
-        ],
-        addRule: 'Add Rule',
-        removeRule: `<img class='img-general' src="${require("@/assets/icons/trash-ghd-blue.svg")}" style="margin-top:4px;margin-left:4px;"/>`,
-        addGroup: 'Add Group',
-        removeGroup: `<img class='img-general' src="${require("@/assets/icons/trash-ghd-blue.svg")}"/>`,
-        textInputPlaceholder: 'value',
-    };
-
-    cannotSubmit: boolean = true;
-    validCriteriaMessage: string | null = null;
-    invalidCriteriaMessage: string | null = null;
-    validSubCriteriaMessage: string | null = null;
-    invalidSubCriteriaMessage: string | null = null;
-    conjunctionSelectListItems: SelectItem[] = [
+async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes', payload);}
+async function getAttributeSelectValuesAction(payload?: any): Promise<any> {await store.dispatch('getAttributeSelectValues',payload);}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification',payload);}
+const tab = ref<any>(null);
+    const queryBuilderRules = ref<CriteriaConfigRule[]>([]);
+    
+    const cannotSubmit = ref<boolean>(true);
+    const validCriteriaMessage = ref<string | null>(null);
+    const invalidCriteriaMessage = ref<string | null>(null);
+    const validSubCriteriaMessage = ref<string | null>(null);
+    const invalidSubCriteriaMessage = ref<string | null>(null);
+    const conjunctionSelectListItems = ref<SelectItem[]>([
         { text: 'OR', value: 'OR' },
         { text: 'AND', value: 'AND' },
-    ];
-    selectedConjunction: string = 'OR';
-    subCriteriaClauses: string[] = [];
-    selectedSubCriteriaClauseIndex: number = -1;
-    selectedSubCriteriaClause: Criteria | null = null;
-    selectedRawSubCriteriaClause: string = '';
-    activeTab = 'tree-view';
-    checkOutput: boolean = false;
+    ]);
+    const selectedConjunction = ref<string>('OR');
+    const subCriteriaClauses= ref<string[]>([]);
+    let subCriterias:CriteriaType[] = []
 
-    mounted() {
-        if (hasValue(this.stateAttributes)) {
-            this.setQueryBuilderRules();
+    const selectedSubCriteriaClauseIndex = ref<number>(-1);
+    const selectedSubCriteriaClause= ref<Criteria |null>(null);
+    const selectedRawSubCriteriaClause = ref<string>('');
+    let activeTab = 'tree-view';
+    const checkOutput = ref<boolean>(false);
+
+    onMounted(()=> {     
+        const mainCriteria: Criteria = convertCriteriaExpressionToCriteriaObject(
+            criteriaEditorData.value.mergedCriteriaExpression != null
+                ? criteriaEditorData.value.mergedCriteriaExpression
+                : '',
+            addErrorNotificationAction,
+        ) as Criteria;
+
+        selectedConjunction.value = mainCriteria.logicalOperator;
+        setSubCriteriaClauses(mainCriteria);
+
+        if (hasValue(stateAttributes)) {
             
-        }     
-    }
+            onStateAttributesChanged();
+            onStateAttributesSelectValues();
+            // setQueryBuilderRules();
+        }
+    });
 
-    @Watch('criteriaEditorData')
-    onCriteriaEditorDataChanged() {
+    // doesn't seem like excecuted at all 
+    watch(criteriaEditorData,() => {
         //TODO
         /*const mainCriteria: Criteria = parseCriteriaString(
-      this.criteriaEditorData.mergedCriteriaExpression != null ? this.criteriaEditorData.mergedCriteriaExpression : ''
+      criteriaEditorData.mergedCriteriaExpression != null ? criteriaEditorData.mergedCriteriaExpression : ''
       ) as Criteria;*/
-        this.selectedSubCriteriaClauseIndex = -1;
+      
+        selectedSubCriteriaClauseIndex.value = -1;
         const mainCriteria: Criteria = convertCriteriaExpressionToCriteriaObject(
-            this.criteriaEditorData.mergedCriteriaExpression != null
-                ? this.criteriaEditorData.mergedCriteriaExpression
+            criteriaEditorData.value.mergedCriteriaExpression != null
+                ? criteriaEditorData.value.mergedCriteriaExpression
                 : '',
-            this.addErrorNotificationAction,
+            addErrorNotificationAction,
         ) as Criteria;
         const parsedSubCriteria:
             | string[]
             | null = convertCriteriaObjectToCriteriaExpression(
-            this.getMainCriteria(),
+            getMainCriteria(),
         );
         const mergedCriteriaExpression: string | null = hasValue(
             parsedSubCriteria,
@@ -401,7 +316,7 @@ export default class CriteriaEditor extends Vue {
 
         if (
             !equals(
-                this.criteriaEditorData.mergedCriteriaExpression,
+                criteriaEditorData.value.mergedCriteriaExpression,
                 mergedCriteriaExpression,
             ) &&
             mainCriteria
@@ -410,76 +325,73 @@ export default class CriteriaEditor extends Vue {
                 mainCriteria.logicalOperator = 'OR';
             }
 
-            this.selectedConjunction = mainCriteria.logicalOperator;
+            selectedConjunction.value = mainCriteria.logicalOperator;
 
-            this.andArray = this.criteriaEditorData.mergedCriteriaExpression ? this.criteriaEditorData.mergedCriteriaExpression.split(' AND ') : [];
-            this.orArray  = this.criteriaEditorData.mergedCriteriaExpression ? this.criteriaEditorData.mergedCriteriaExpression.split(' OR ') : [];
+             const andArray = criteriaEditorData.value.mergedCriteriaExpression ? criteriaEditorData.value.mergedCriteriaExpression.split(' AND ') : [];
+            const orArray  = criteriaEditorData.value.mergedCriteriaExpression ? criteriaEditorData.value.mergedCriteriaExpression.split(' OR ') : [];
 
-            this.setSubCriteriaClauses(mainCriteria);
+            setSubCriteriaClauses(mainCriteria);
+        }
+    });
+
+    watch(stateAttributes, onStateAttributesChanged);
+    function onStateAttributesChanged(){
+        if (hasValue(stateAttributes.value)) {
+            setQueryBuilderRules();
         }
     }
 
-    @Watch('stateAttributes')
-    onStateAttributesChanged() {
-        if (hasValue(this.stateAttributes)) {
-            this.setQueryBuilderRules();
-        }
-    }
+    watch(subCriteriaClauses,()=> {
+        resetCriteriaValidationProperties();
+    });
 
-    @Watch('subCriteriaClauses')
-    onSubCriteriaClausesChanged() {
-        this.resetCriteriaValidationProperties();
-    }
-
-    @Watch('selectedSubCriteriaClause')
-    onSelectedClauseChanged() {
-        this.resetSubCriteriaValidationProperties();
+    watch(selectedSubCriteriaClause,()=> {
+        resetSubCriteriaValidationProperties();
         if (
-            hasValue(this.selectedSubCriteriaClause) &&
-            hasValue(this.selectedSubCriteriaClause!.children)
+            hasValue(selectedSubCriteriaClause.value) &&
+            hasValue(selectedSubCriteriaClause.value!.children)
         ) {
             let missingAttributes: string[] = [];
 
             for (
                 let index = 0;
-                index < this.selectedSubCriteriaClause!.children!.length;
+                index < selectedSubCriteriaClause.value!.children!.length;
                 index++
             ) {
-                missingAttributes = this.getMissingAttribute(
-                    this.selectedSubCriteriaClause!.children![index].query,
+                missingAttributes = getMissingAttribute(
+                    selectedSubCriteriaClause.value!.children![index].query,
                     missingAttributes,
                 );
             }
 
             if (hasValue(missingAttributes)) {
-                this.getAttributeSelectValuesAction({
+                getAttributeSelectValuesAction({
                     attributeNames: missingAttributes,
                 });
             }
         }
-    }
+    });
 
-    @Watch('selectedRawSubCriteriaClause')
-    onSelectedClauseRawChanged() {
-        this.resetSubCriteriaValidationProperties();
-    }
+    watch(selectedRawSubCriteriaClause,()=> {
+        resetSubCriteriaValidationProperties();
+    });
 
-    @Watch('stateAttributesSelectValues')
-    onStateAttributesSelectValuesChanged() {
+    watch(stateAttributesSelectValues, onStateAttributesSelectValues)
+    function onStateAttributesSelectValues(){
         if (
-            hasValue(this.queryBuilderRules) &&
-            hasValue(this.stateAttributesSelectValues)
+            hasValue(queryBuilderRules.value) &&
+            hasValue(stateAttributesSelectValues.value)
         ) {
-            const filteredAttributesSelectValues: AttributeSelectValues[] = this.stateAttributesSelectValues.filter(
+            const filteredAttributesSelectValues: AttributeSelectValues[] = stateAttributesSelectValues.value.filter(
                 (asv: AttributeSelectValues) => hasValue(asv.values),
             );
             if (hasValue(filteredAttributesSelectValues)) {
                 filteredAttributesSelectValues.forEach(
                     (asv: AttributeSelectValues) => {
-                        this.queryBuilderRules = update(
+                        queryBuilderRules.value = update(
                             findIndex(
                                 propEq('id', asv.attribute),
-                                this.queryBuilderRules,
+                                queryBuilderRules.value,
                             ),
                             {
                                 type: 'select',
@@ -487,11 +399,11 @@ export default class CriteriaEditor extends Vue {
                                 label: asv.attribute,
                                 operators: ['=', '<>', '<', '<=', '>', '>='],
                                 choices: asv.values.map((value: string) => ({
-                                    label: value,
+                                    text: value,
                                     value: value,
                                 })),
                             },
-                            this.queryBuilderRules,
+                            queryBuilderRules.value,
                         );
                     },
                 );
@@ -499,130 +411,144 @@ export default class CriteriaEditor extends Vue {
         }
     }
 
-    get isAndConjunction() {
-        return this.selectedConjunction === 'AND';
-    }
-
-    getClassForTextarea(index: number) {
-        if (this.isAndConjunction) {
+    function getClassForTextarea(index: number) {
+        if (isAndConjunction()) {
             return {
-                'textarea-focused': this.selectedSubCriteriaClauseIndex === -1,
-                'clause-textarea': this.selectedSubCriteriaClauseIndex !== -1
+                'textarea-focused': selectedSubCriteriaClauseIndex.value === -1,
+                'clause-textarea': selectedSubCriteriaClauseIndex.value !== -1
             };
         } else {
             return {
-                'textarea-focused': index === this.selectedSubCriteriaClauseIndex,
-                'clause-textarea': index !== this.selectedSubCriteriaClauseIndex
+                'textarea-focused': index === selectedSubCriteriaClauseIndex.value,
+                'clause-textarea': index !== selectedSubCriteriaClauseIndex.value
             };
         }
     }
 
-    getValueForTextarea(index: number) {
-        return this.isAndConjunction ? this.subCriteriaClauses.join(' ') : this.subCriteriaClauses[index];
+    function getValueForTextarea(index: number) {
+        return subCriteriaClauses.value[index];
     }
 
-    setQueryBuilderRules() {
-        this.queryBuilderRules = this.stateAttributes.map(
+    function setQueryBuilderRules() {
+        queryBuilderRules.value = stateAttributes.value.map(
             (attribute: Attribute) => ({
-                type: 'text',
+                type: attribute.type,
                 label: attribute.name,
                 id: attribute.name,
                 operators: ['=', '<>', '<', '<=', '>', '>='],
+                choices: []
             }),
         );
     }
 
-    setSubCriteriaClauses(mainCriteria: Criteria) {
-        this.subCriteriaClauses = [];
-        if (hasValue(mainCriteria) && hasValue(mainCriteria.children)) {
+    function setSubCriteriaClauses(mainCriteria: Criteria) {
+        subCriteriaClauses.value = [];
+        subCriterias = [];
+        if (hasValue(mainCriteria) && hasValue(mainCriteria.children)) {          
             mainCriteria.children!.forEach((criteriaType: CriteriaType) => {
                 const clause: string = convertCriteriaTypeObjectToCriteriaExpression(
                     criteriaType,
                 );
                 if (hasValue(clause)) {
-                    this.subCriteriaClauses.push(clause);
+                    subCriteriaClauses.value.push(clause);
+                    subCriterias.push(clone(criteriaType))
                 }
             });
         }
     }
 
-    resetCriteriaValidationProperties() {
-        this.validCriteriaMessage = null;
-        this.invalidCriteriaMessage = null;
-        this.cannotSubmit = !isEmpty(
-            convertCriteriaObjectToCriteriaExpression(this.getMainCriteria()),
+    function resetCriteriaValidationProperties() {
+        validCriteriaMessage.value = null;
+        invalidCriteriaMessage.value = null;
+        cannotSubmit.value = !isEmpty(
+            convertCriteriaObjectToCriteriaExpression(getMainCriteria()),
         );
     }
 
-    resetSubCriteriaValidationProperties() {
-        this.validSubCriteriaMessage = null;
-        this.invalidSubCriteriaMessage = null;
-        this.checkOutput = false;
+    function resetSubCriteriaValidationProperties() {
+        validSubCriteriaMessage.value = null;
+        invalidSubCriteriaMessage.value = null;
+        checkOutput.value = false;
     }
 
-    resetSubCriteriaSelectedProperties() {
-        this.selectedSubCriteriaClauseIndex = -1;
-        this.selectedSubCriteriaClause = null;
-        this.selectedRawSubCriteriaClause = '';
+    function resetSubCriteriaSelectedProperties() {
+        selectedSubCriteriaClauseIndex.value = -1;
+        selectedSubCriteriaClause.value = null;
+        selectedRawSubCriteriaClause.value = '';
     }
 
-    onAddSubCriteria() {
-        this.resetSubCriteriaSelectedProperties();
+    function onAddSubCriteria() {
+        resetSubCriteriaSelectedProperties();
         setTimeout(() => {
-            this.onClickSubCriteriaClauseTextarea(
+            subCriteriaClauses.value = subCriteriaClauses.value.filter(_ => _.trim() !== '');
+            onClickSubCriteriaClauseTextarea(
                 '',
-                this.subCriteriaClauses.length,
+                subCriteriaClauses.value.length,
             );
-            this.subCriteriaClauses.push('');
-            this.selectedSubCriteriaClauseIndex =
-                this.subCriteriaClauses.length - 1;
-            this.selectedSubCriteriaClause = clone(emptyCriteria);
-            this.resetCriteriaValidationProperties();
+            subCriteriaClauses.value.push('');
+            subCriterias.push({
+                id: getNewGuid(),
+                type: 'query-builder-group',
+                query: clone(emptyCriteria)
+            });
+            selectedSubCriteriaClauseIndex.value =
+                subCriteriaClauses.value.length - 1;
+            selectedSubCriteriaClause.value = clone(emptyCriteria);
+            resetCriteriaValidationProperties();
         });
     }
 
-    onClickSubCriteriaClauseTextarea(
+    function onClickSubCriteriaClauseTextarea(
         subCriteriaClause: string,
         subCriteriaClauseIndex: number,
     ) {
-        this.resetSubCriteriaSelectedProperties();
+        resetSubCriteriaSelectedProperties();
         setTimeout(() => {
-            this.selectedSubCriteriaClauseIndex = subCriteriaClauseIndex;
+            selectedSubCriteriaClauseIndex.value = subCriteriaClauseIndex;
             // TODO
-            //this.selectedSubCriteriaClause = parseCriteriaString(subCriteriaClause);
-            this.selectedSubCriteriaClause = convertCriteriaExpressionToCriteriaObject(
+            //selectedSubCriteriaClause = parseCriteriaString(subCriteriaClause);
+            selectedSubCriteriaClause.value = convertCriteriaExpressionToCriteriaObject(
                 subCriteriaClause,
-                this.addErrorNotificationAction,
+                addErrorNotificationAction,
             );
-            if (this.selectedSubCriteriaClause) {
-                if (!hasValue(this.selectedSubCriteriaClause.logicalOperator)) {
-                    this.selectedSubCriteriaClause.logicalOperator = 'AND';
+            if (selectedSubCriteriaClause.value) {
+                if (!hasValue(selectedSubCriteriaClause.value?.logicalOperator)) {
+                    selectedSubCriteriaClause.value!.logicalOperator = 'AND';
                 }
+                // fix until treeview is implemented - show SubCriteria on Raw Criteria tab
+                selectedRawSubCriteriaClause.value = subCriteriaClause;
+
             } else {
-                this.invalidSubCriteriaMessage =
+                invalidSubCriteriaMessage.value =
                     'Unable to parse selected criteria';
             }
         });
     }
 
-    onRemoveSubCriteria(subCriteriaClauseIndex: number) {
-        const subCriteriaClause: string = this.subCriteriaClauses[
+    function onRemoveSubCriteria(subCriteriaClauseIndex: number) {
+        const subCriteriaClause: string = subCriteriaClauses.value[
             subCriteriaClauseIndex
         ];
 
-        this.subCriteriaClauses = remove(
+        subCriteriaClauses.value = remove(
             subCriteriaClauseIndex,
             1,
-            this.subCriteriaClauses,
+            subCriteriaClauses.value,
         );
 
-        if (this.selectedSubCriteriaClauseIndex === subCriteriaClauseIndex) {
-            this.resetSubCriteriaSelectedProperties();
+        subCriterias = remove(
+            subCriteriaClauseIndex,
+            1,
+            subCriterias,
+        );
+
+        if (selectedSubCriteriaClauseIndex.value === subCriteriaClauseIndex) {
+            resetSubCriteriaSelectedProperties();
         } else {
-            this.selectedSubCriteriaClauseIndex = findIndex(
+            selectedSubCriteriaClauseIndex.value = findIndex(
                 (subCriteriaClause: string) => {
                     const parsedCriteriaJson = convertCriteriaObjectToCriteriaExpression(
-                        this.selectedSubCriteriaClause as Criteria,
+                        selectedSubCriteriaClause.value as Criteria,
                     );
                     if (parsedCriteriaJson) {
                         return (
@@ -630,23 +556,26 @@ export default class CriteriaEditor extends Vue {
                         );
                     }
                     return (
-                        subCriteriaClause === this.selectedRawSubCriteriaClause
+                        subCriteriaClause === selectedRawSubCriteriaClause.value
                     );
                 },
-                this.subCriteriaClauses,
+                subCriteriaClauses.value,
             );
         }
 
-        this.resetCriteriaValidationProperties();
+        resetCriteriaValidationProperties();
 
-        if (this.criteriaEditorData.isLibraryContext) {
-            if (!hasValue(this.subCriteriaClauses)) {
-                this.$emit('submitCriteriaEditorResult', {
+        if (criteriaEditorData.value.isLibraryContext) {
+            //if (!hasValue(subCriteriaClauses)) {
+            if(subCriteriaClauses.value.length === 0) {
+                emit('submitCriteriaEditorResult', {
                     validated: true,
                     criteria: '',
                 });
-            } else if (hasValue(subCriteriaClause)) {
-                this.$emit('submitCriteriaEditorResult', {
+            }
+             //else if (hasValue(subCriteriaClause)) {
+            else if (subCriteriaClauses.value.length != 0) {
+                emit('submitCriteriaEditorResult', {
                     validated: false,
                     criteria: null,
                 });
@@ -654,63 +583,63 @@ export default class CriteriaEditor extends Vue {
         }
     }
 
-    onParseRawSubCriteria() {
-        this.activeTab = 'tree-view';
-        this.resetSubCriteriaValidationProperties();
+    function onParseRawSubCriteria() {
+        activeTab = 'tree-view';
+        resetSubCriteriaValidationProperties();
         //TODO
-        //const parsedRawSubCriteria = parseCriteriaString(this.selectedRawSubCriteriaClause);
+        //const parsedRawSubCriteria = parseCriteriaString(selectedRawSubCriteriaClause);
         const parsedRawSubCriteria = convertCriteriaExpressionToCriteriaObject(
-            this.selectedRawSubCriteriaClause,
-            this.addErrorNotificationAction,
+            selectedRawSubCriteriaClause.value,
+            addErrorNotificationAction,
         );
-        if (parsedRawSubCriteria) {
-            this.selectedSubCriteriaClause = parsedRawSubCriteria;
-            if (!hasValue(this.selectedSubCriteriaClause.logicalOperator)) {
-                this.selectedSubCriteriaClause.logicalOperator = 'OR';
+        if (parsedRawSubCriteria && selectedRawSubCriteriaClause.value != '') {
+            selectedSubCriteriaClause.value = parsedRawSubCriteria;
+            if (!hasValue(selectedSubCriteriaClause.value.logicalOperator)) {
+                selectedSubCriteriaClause.value.logicalOperator = 'OR';
             }
         } else {
-            this.invalidSubCriteriaMessage =
+            invalidSubCriteriaMessage.value =
                 'The raw criteria string is invalid';
         }
     }
 
-    onParseSubCriteriaJson() {
-        this.activeTab = 'raw-criteria';
-        this.resetSubCriteriaValidationProperties();
+    function onParseSubCriteriaJson() {
+        activeTab = 'raw-criteria';
+        resetSubCriteriaValidationProperties();
         const parsedSubCriteria = convertCriteriaObjectToCriteriaExpression(
-            this.selectedSubCriteriaClause as Criteria,
+            selectedSubCriteriaClause.value as Criteria,
         );
         if (parsedSubCriteria) {
-            this.selectedRawSubCriteriaClause = parsedSubCriteria.join('');
+            selectedRawSubCriteriaClause.value = parsedSubCriteria.join('');
         } else {
-            this.invalidSubCriteriaMessage = 'The criteria json is invalid';
+            invalidSubCriteriaMessage.value = 'The criteria json is invalid';
         }
     }
 
-    onCheckCriteria() {
-        this.checkOutput = false;
-        this.resetSubCriteriaSelectedProperties();
+    function onCheckCriteria() {
+        checkOutput.value = false;
+        resetSubCriteriaSelectedProperties();
 
         const parsedCriteria = convertCriteriaObjectToCriteriaExpression(
-            this.getMainCriteria(),
+            getMainCriteria(),
         );
         if (parsedCriteria) {
-            if(!isNil(this.$router.currentRoute.query['networkId']))
-                this.criteriaValidationWithCount(parsedCriteria)
+            if(!isNil($router.currentRoute.value.query['networkId']))
+                criteriaValidationWithCount(parsedCriteria)
             else
-                this.criteriaValidationNoCount(parsedCriteria)
+                criteriaValidationNoCount(parsedCriteria)
         } else {
-            this.invalidCriteriaMessage = 'Unable to parse criteria';
+            invalidCriteriaMessage.value = 'Unable to parse criteria';
         }
     }
 
-    private criteriaValidationWithCount(parsedCriteria: string[])
+    function  criteriaValidationWithCount(parsedCriteria: string[])
     {
         let networkId = ''
-        networkId = this.$router.currentRoute.query['networkId'].toString()
+        networkId = $router.currentRoute.value.query['networkId'] as string
         const validationParameter = {
                 expression: parsedCriteria.join(''),
-                currentUserCriteriaFilter: this.currentUserCriteriaFilter,
+                currentUserCriteriaFilter: currentUserCriteriaFilter.value,
                 networkId:networkId
             } as ValidationParameter;
         ValidationService.getCriterionValidationResult(
@@ -720,37 +649,37 @@ export default class CriteriaEditor extends Vue {
                     const result: CriterionValidationResult = response.data as CriterionValidationResult;
                     const message = `${result.resultsCount} result(s) returned`;
                     if (result.isValid) {
-                        this.validCriteriaMessage = message;
-                        this.cannotSubmit = false;
+                        validCriteriaMessage.value = message;
+                        cannotSubmit.value = false;
 
-                        if (this.criteriaEditorData.isLibraryContext) {
+                        if (criteriaEditorData.value.isLibraryContext) {
                             const parsedCriteria = convertCriteriaObjectToCriteriaExpression(
-                                this.getMainCriteria(),
+                                getMainCriteria(),
                             );
                             if (parsedCriteria) {
-                                this.$emit('submitCriteriaEditorResult', {
+                                emit('submitCriteriaEditorResult', {
                                     validated: true,
                                     criteria: parsedCriteria.join(''),
                                 });
                             } else {
-                                this.invalidCriteriaMessage =
+                                invalidCriteriaMessage.value =
                                     'Unable to parse the criteria';
                             }
                         }
                     } else {
-                        this.resetCriteriaValidationProperties();
+                        resetCriteriaValidationProperties();
                         setTimeout(() => {
                             if (result.resultsCount === 0) {
-                                this.invalidCriteriaMessage = message;
-                                this.cannotSubmit = false;
+                                invalidCriteriaMessage.value = message;
+                                cannotSubmit.value = false;
                             } else {
-                                this.invalidCriteriaMessage =
+                                invalidCriteriaMessage.value =
                                     result.validationMessage;
                             }
                         });
 
-                        if (this.criteriaEditorData.isLibraryContext) {
-                            this.$emit('submitCriteriaEditorResult', {
+                        if (criteriaEditorData.value.isLibraryContext) {
+                            emit('submitCriteriaEditorResult', {
                                 validated: false,
                                 criteria: null,
                             });
@@ -760,11 +689,11 @@ export default class CriteriaEditor extends Vue {
             });
     }
 
-     private criteriaValidationNoCount(parsedCriteria: string[])
+     function criteriaValidationNoCount(parsedCriteria: string[])
     {
         const validationParameter = {
                 expression: parsedCriteria.join(''),
-                currentUserCriteriaFilter: this.currentUserCriteriaFilter,
+                currentUserCriteriaFilter: currentUserCriteriaFilter.value,
                 networkId:getBlankGuid()
             } as ValidationParameter;
         ValidationService.getCriterionValidationResultNoCount(
@@ -774,37 +703,37 @@ export default class CriteriaEditor extends Vue {
                     const result: CriterionValidationResult = response.data as CriterionValidationResult;
                     const message = `Criterion is Valid`;
                     if (result.isValid) {
-                        this.validCriteriaMessage = message;
-                        this.cannotSubmit = false;
+                        validCriteriaMessage.value = message;
+                        cannotSubmit.value = false;
 
-                        if (this.criteriaEditorData.isLibraryContext) {
+                        if (criteriaEditorData.value.isLibraryContext) {
                             const parsedCriteria = convertCriteriaObjectToCriteriaExpression(
-                                this.getMainCriteria(),
+                                getMainCriteria(),
                             );
                             if (parsedCriteria) {
-                                this.$emit('submitCriteriaEditorResult', {
+                                emit('submitCriteriaEditorResult', {
                                     validated: true,
                                     criteria: parsedCriteria.join(''),
                                 });
                             } else {
-                                this.invalidCriteriaMessage =
+                                invalidCriteriaMessage.value =
                                     'Unable to parse the criteria';
                             }
                         }
                     } else {
-                        this.resetCriteriaValidationProperties();
+                        resetCriteriaValidationProperties();
                         setTimeout(() => {
                             if (result.resultsCount === 0) {
-                                this.invalidCriteriaMessage = message;
-                                this.cannotSubmit = false;
+                                invalidCriteriaMessage.value = message;
+                                cannotSubmit.value = false;
                             } else {
-                                this.invalidCriteriaMessage =
+                                invalidCriteriaMessage.value =
                                     result.validationMessage;
                             }
                         });
 
-                        if (this.criteriaEditorData.isLibraryContext) {
-                            this.$emit('submitCriteriaEditorResult', {
+                        if (criteriaEditorData.value.isLibraryContext) {
+                            emit('submitCriteriaEditorResult', {
                                 validated: false,
                                 criteria: null,
                             });
@@ -814,74 +743,106 @@ export default class CriteriaEditor extends Vue {
             });
     }
 
-    onCheckSubCriteria() {
-        const criteria = this.getSubCriteriaValueToCheck();
+    function onCheckSubCriteria() {
+
+        const criteria = getSubCriteriaValueToCheck();
 
         if (isNil(criteria)) {
-            this.invalidSubCriteriaMessage = 'Unable to parse criteria';
+            invalidSubCriteriaMessage.value = 'Unable to parse criteria';
             return;
         }
         if (isEmpty(criteria)) {
-            this.invalidSubCriteriaMessage = 'No criteria to evaluate';
+            invalidSubCriteriaMessage.value = 'No criteria to evaluate';
             return;
         }
-        
-        this.subCriteriaClauses = update(
-            this.selectedSubCriteriaClauseIndex,
-            criteria,
-            this.subCriteriaClauses,
-        );
-        this.resetCriteriaValidationProperties();
-        this.checkOutput = true;
-        this.resetSubCriteriaValidationProperties();
 
-        if (this.criteriaEditorData.isLibraryContext) {
-            this.$emit('submitCriteriaEditorResult', {
+        // fix until treeview is implemented
+        // added the if clause for AND, to copy expression from raw criteria tab to the SubCriteria textarea on left
+
+        subCriteriaClauses.value= update(
+            selectedSubCriteriaClauseIndex.value,
+            criteria as any,
+            subCriteriaClauses.value,
+        );
+
+        subCriterias= update(
+            selectedSubCriteriaClauseIndex.value,
+            clone({type: getSelectectedSubCriteriaType(), query: getSubCriteriasUpdateObject()}) as any,
+            subCriterias,
+        );
+
+        resetCriteriaValidationProperties();
+        checkOutput.value = true;
+        resetSubCriteriaValidationProperties();
+
+        if (criteriaEditorData.value.isLibraryContext) {
+            emit('submitCriteriaEditorResult', {
                 validated: false,
                 criteria: null,
             });
         }
     }
 
-    getSubCriteriaValueToCheck() {
-        if (this.activeTab === 'tree-view') {
+    function getSelectectedSubCriteriaType(): string{
+        const children = selectedSubCriteriaClause.value!.children;
+        if(!isNil(children)){
+            if(children.length > 1)
+                return "query-builder-group"
+            else if(children.length === 1 && children[0].type == "query-builder-rule")
+                return queryBuilderTypes.QueryBuilderRule
+        }
+
+        return queryBuilderTypes.QueryBuilderGroup
+    }
+
+    function getSubCriteriasUpdateObject(){
+        if(getSelectectedSubCriteriaType() === queryBuilderTypes.QueryBuilderRule){
+            return clone(selectedSubCriteriaClause.value!.children![0].query)
+        }
+        else{
+            return clone(selectedSubCriteriaClause.value)
+        }
+    }
+
+    function getSubCriteriaValueToCheck() {
+        if (activeTab === 'tree-view') {
             const parsedCriteriaJson = convertCriteriaObjectToCriteriaExpression(
-                this.selectedSubCriteriaClause as Criteria,
+                selectedSubCriteriaClause.value as Criteria,
             );
             if (parsedCriteriaJson) {
                 return parsedCriteriaJson.join('');
             }
             return null;
         }
-        return this.selectedRawSubCriteriaClause;
+        return selectedRawSubCriteriaClause.value;
     }
 
-    onSubmitCriteriaEditorResult(submit: boolean) {
-        this.resetSubCriteriaSelectedProperties();
-        this.resetCriteriaValidationProperties();
+    function onSubmitCriteriaEditorResult(submit: boolean) {
+        resetSubCriteriaSelectedProperties();
+        resetCriteriaValidationProperties();
 
         if (submit) {
             const parsedCriteria = convertCriteriaObjectToCriteriaExpression(
-                this.getMainCriteria(),
+                getMainCriteria(),
             );
             if (parsedCriteria) {
-                this.selectedConjunction = 'OR';
-                this.$emit(
+                selectedConjunction.value = 'OR';
+                emit(
                     'submitCriteriaEditorResult',
                     parsedCriteria.join(''),
                 );
             } else {
-                this.invalidCriteriaMessage = 'Unable to parse the criteria';
+                invalidCriteriaMessage.value = 'Unable to parse the criteria';
             }
         } else {
-            this.selectedConjunction = 'OR';
-            this.$emit('submitCriteriaEditorResult', null);
+            selectedConjunction.value = 'OR';
+            emit('submitCriteriaEditorResult', null);
         }
     }
 
-    onDisableCheckOutputButton() {
-        const mainCriteria: Criteria = this.getMainCriteria();
-        const subCriteriaClausesAreEmpty = this.subCriteriaClauses.every(
+    function onDisableCheckOutputButton() {
+        const mainCriteria: Criteria = getMainCriteria();
+        const subCriteriaClausesAreEmpty = subCriteriaClauses.value.every(
             (subCriteriaClause: string) => isEmpty(subCriteriaClause),
         );
 
@@ -895,44 +856,44 @@ export default class CriteriaEditor extends Vue {
         return disable;
     }
 
-    onDisableCheckCriteriaButton() {
+    function onDisableCheckCriteriaButton() {
         const parsedSelectedSubCriteriaClause = convertCriteriaObjectToCriteriaExpression(
-            this.selectedSubCriteriaClause as Criteria,
+            selectedSubCriteriaClause.value as Criteria,
         );
         //TODO
-        //const parsedSelectedRawSubCriteriaClause = convertCriteriaObjectToCriteriaExpression(parseCriteriaString(this.selectedRawSubCriteriaClause) as Criteria);
+        //const parsedSelectedRawSubCriteriaClause = convertCriteriaObjectToCriteriaExpression(parseCriteriaString(selectedRawSubCriteriaClause) as Criteria);
         const parsedSelectedRawSubCriteriaClause = convertCriteriaObjectToCriteriaExpression(
             convertCriteriaExpressionToCriteriaObject(
-                this.selectedRawSubCriteriaClause,
-                this.addErrorNotificationAction,
+                selectedRawSubCriteriaClause.value,
+                addErrorNotificationAction,
             ) as Criteria,
         );
 
         const disable: boolean =
-            this.selectedSubCriteriaClauseIndex === -1 ||
-            (this.activeTab === 'tree-view' &&
+            selectedSubCriteriaClauseIndex.value === -1 ||
+            (activeTab === 'tree-view' &&
                 (parsedSelectedSubCriteriaClause === null ||
-                    equals(this.selectedSubCriteriaClause, emptyCriteria))) ||
+                    equals(selectedSubCriteriaClause.value, emptyCriteria))) ||
             (parsedSelectedSubCriteriaClause &&
                 isEmpty(parsedSelectedSubCriteriaClause.join(''))) ||
-            (this.activeTab === 'raw-criteria' &&
-                (isEmpty(this.selectedRawSubCriteriaClause) ||
-                    parsedSelectedRawSubCriteriaClause === null ||
+            (activeTab === 'raw-criteria' &&
+                (isEmpty(selectedRawSubCriteriaClause.value) ||
+                    parsedSelectedRawSubCriteriaClause == null ||
                     (parsedSelectedRawSubCriteriaClause &&
                         isEmpty(parsedSelectedRawSubCriteriaClause.join('')))));
 
         return disable;
     }
 
-    getMainCriteria() {
-        const filteredSubCriteria: string[] = this.subCriteriaClauses.filter(
+    function getMainCriteria() {
+        const filteredSubCriteria: string[] = subCriteriaClauses.value.filter(
             (subCriteriaClause: string) => !isEmpty(subCriteriaClause),
         );
 
         if (hasValue(filteredSubCriteria)) {
             return {
-                logicalOperator: this.selectedConjunction,
-                children: this.subCriteriaClauses
+                logicalOperator: selectedConjunction.value,
+                children: subCriteriaClauses.value
                     .filter(
                         (subCriteriaClause: string) =>
                             !isEmpty(subCriteriaClause),
@@ -942,7 +903,7 @@ export default class CriteriaEditor extends Vue {
                         //const parsedSubCriteriaClause: Criteria = parseCriteriaString(subCriteriaClause) as Criteria;
                         const parsedSubCriteriaClause: Criteria = convertCriteriaExpressionToCriteriaObject(
                             subCriteriaClause,
-                            this.addErrorNotificationAction,
+                            addErrorNotificationAction,
                         ) as Criteria;
                         if (
                             hasValue(parsedSubCriteriaClause) &&
@@ -951,6 +912,7 @@ export default class CriteriaEditor extends Vue {
                             return parsedSubCriteriaClause.children![0];
                         }
                         return {
+                            id: getNewGuid(),
                             type: 'query-builder-group',
                             query: {
                                 logicalOperator:
@@ -965,12 +927,12 @@ export default class CriteriaEditor extends Vue {
         return clone(emptyCriteria);
     }
 
-    getMissingAttribute(query: any, missingAttributes: string[]) {
+    function getMissingAttribute(query: any, missingAttributes: string[]) {
         if (query.hasOwnProperty('children')) {
             const criteria: Criteria = query as Criteria;
             if (hasValue(criteria.children)) {
                 criteria.children!.forEach((child: CriteriaType) => {
-                    missingAttributes = this.getMissingAttribute(
+                    missingAttributes = getMissingAttribute(
                         child.query,
                         missingAttributes,
                     );
@@ -981,7 +943,7 @@ export default class CriteriaEditor extends Vue {
             if (
                 !any(
                     propEq('attribute', criteriaRule.rule),
-                    this.stateAttributesSelectValues,
+                    stateAttributesSelectValues.value,
                 ) &&
                 missingAttributes.indexOf(criteriaRule.rule) === -1
             ) {
@@ -991,10 +953,11 @@ export default class CriteriaEditor extends Vue {
 
         return missingAttributes;
     }
-}
+
 </script>
 
 <style>
+
 .invalid-message {
     color: red;
 }
@@ -1037,15 +1000,15 @@ export default class CriteriaEditor extends Vue {
 .clause-textarea textarea {
     border: 1px solid #999999;
     margin-left:-12px;
-    padding-left:12px;  
-    border-radius: 4px;    
+    padding-left:12px;
+    border-radius: 4px;
 }
 
 
 .textarea-focused textarea {
     background-color: #ffffff !important;
     margin-left:-12px;
-    padding-left:12px;  
+    padding-left:12px;
     border: 2px solid #2A578D;
     border-radius: 4px;
 }
@@ -1085,9 +1048,9 @@ button.btn.btn-default {
     border: 1px solid #99999980 !important;
     padding-left: 5px;
     padding-right: 5px;
-    background-color: #FFFFFF !important;   
+    background-color: #FFFFFF !important;
     color: #2A578D !important;
-    font-weight: 600 !important;    
+    font-weight: 600 !important;
 }
 
 </style>

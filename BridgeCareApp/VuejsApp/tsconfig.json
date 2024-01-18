@@ -13,12 +13,13 @@
         "allowSyntheticDefaultImports": true,
         "sourceMap": true,
         "baseUrl": ".",
-        "types": ["webpack-env", "vuetify"],
+        "types": [ "vuetify","node"],
         "paths": {
             "*": ["types/*"],
             "@/*": ["src/*"]
         },
-        "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+        "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
+        "resolveJsonModule": true,
     },
     "include": [
         "src/*.d.ts",

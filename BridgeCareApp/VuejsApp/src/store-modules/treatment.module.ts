@@ -265,6 +265,30 @@ const actions = {
             dispatch('setAlertMessage', "A treatment import has been added to the work queue");
         });
     },
+    async importScenarioTreatmentSupersedeRulesFile(
+        { commit, dispatch }: any,
+        payload: any,
+    ) {
+        await TreatmentService.importSupersedeRules(
+            payload.file,
+            payload.id,
+            true
+        ).then((response: AxiosResponse) => {
+            dispatch('setAlertMessage', "A supersede import has been added to the work queue");
+        });
+    },
+    async importLibraryTreatmentSupersedeRulesFile(
+        { commit, dispatch }: any,
+        payload: any,
+    ) {
+        await TreatmentService.importSupersedeRules(
+            payload.file,
+            payload.id,
+            false
+        ).then((response: AxiosResponse) => {
+            dispatch('setAlertMessage', "A supersede import has been added to the work queue");
+        });
+    },
     async deleteTreatment(
         { dispatch, commit }: any,
         payload: any,

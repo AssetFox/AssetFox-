@@ -348,7 +348,7 @@ namespace BridgeCareCore.Services
                 if (maintainableAssetIdsPerLocationIdentifier.Keys.ToList().Contains(locationIdentifier))
                 {
                     // The location matches an asset in the network
-                    locationInformation["ID"] = maintainableAssetIdsPerLocationIdentifier[locationIdentifier].ToString();
+                    locationInformation["ID"] = Guid.NewGuid().ToString();
                 }
                 else
                     throw new RowNotInTableException($"An asset with the location identifier '{locationIdentifier}' does not exist");

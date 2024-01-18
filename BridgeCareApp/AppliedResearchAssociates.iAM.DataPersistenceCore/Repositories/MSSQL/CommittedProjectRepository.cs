@@ -53,7 +53,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var projects = _unitOfWork.Context.CommittedProject
                 .Include(_ => _.CommittedProjectLocation)
                 .Include(_ => _.ScenarioBudget)
-                .Where(_ => _.SimulationId == simulation.Id).ToList();
+                .Where(_ => _.SimulationId == simulation.Id)
+                .OrderBy(_ => _.Year).ToList();
 
             var keyPropertyNames = (List<string>)_unitOfWork.AdminSettingsRepo.GetKeyFields();
 
@@ -314,8 +315,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 allExistingCommittedProjectIds.AddRange(simulationProjects);
             }
             _unitOfWork.AsTransaction(() =>
-            {
+            {                
                 _unitOfWork.Context.UpsertAll(committedProjectEntities);
+                var committedProjectLocations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
+                _unitOfWork.Context.UpsertAll(committedProjectLocations);
             });
         }
 

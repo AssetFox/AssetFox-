@@ -1,49 +1,49 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="showDialog">
+  <v-dialog max-width="450px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title>
-        <v-layout justify-center>
+        <v-row justify-center>
           <h3>New Network</h3>
-        </v-layout>
+        </v-row>
       </v-card-title>
       <v-card-text>
-        <v-layout column>
+        <v-row column>
           <v-text-field label="Name" outline v-model="newNetwork.name"></v-text-field>
-        </v-layout>
+        </v-row>
       </v-card-text>
       <v-card-actions>
-        <v-layout justify-space-between row>
+        <v-row justify-space-between row>
           <v-btn :disabled="newNetwork.name === ''" @click="onSubmit(true)"
-                 class="ara-blue-bg white--text">
+                 class="ara-blue-bg text-white">
             Save
           </v-btn>
-          <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
-        </v-layout>
+          <v-btn @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop} from 'vue-property-decorator';
+<script lang="ts" setup>
+import Vue, { computed } from 'vue';
 import {emptyNetwork, Network} from '@/shared/models/iAM/network';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 
-@Component
-export default class CreateNetworkDialog extends Vue {
-  @Prop() showDialog: boolean;
+  const props = defineProps<{showDialog: boolean}>();
+  const emit = defineEmits(['submit'])
 
-  newNetwork: Network = {...emptyNetwork, id: getNewGuid()};
+  let showDialogComputed = computed(() => props.showDialog);
 
-  onSubmit(submit: boolean) {
+  let newNetwork: Network = {...emptyNetwork, id: getNewGuid()};
+
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newNetwork);
+      emit('submit', newNetwork);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newNetwork = {...emptyNetwork, id: getNewGuid()};
+    newNetwork = {...emptyNetwork, id: getNewGuid()};
   }
-}
+
 </script>

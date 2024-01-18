@@ -1,11 +1,11 @@
 <template>
     <v-container fluid grid-list-xl>
-        <v-layout>
-            <v-flex xs12>
-                <v-layout justify-center>
+        <v-row>
+            <v-col cols = "12">
+                <v-row justify-center>
                     <v-card class="under-construction-card">
                         <div class="under-construction-img-div">
-                            <v-img :src="require('@/assets/images/under-construction.png')"
+                            <v-img :src="getUrl('assets/images/under-construction.png')"
                                    class="under-construction-img">
                             </v-img>
                         </div>
@@ -16,19 +16,18 @@
                             <p>The page you are viewing has not yet been developed, but we are hard at work on it.</p>
                         </v-card-text>
                     </v-card>
-                </v-layout>
-            </v-flex>
-        </v-layout>
+                </v-row>
+            </v-col>
+        </v-row>
     </v-container>
 </template>
 
-<script lang="ts">
-    import Vue from 'vue';
-    import {Component} from 'vue-property-decorator';
+<script lang="ts" setup>
+    import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { getUrl } from '@/shared/utils/get-url';
 
-    @Component
-    export default class UnderConstruction extends Vue {
-    }
 </script>
 
 <style>

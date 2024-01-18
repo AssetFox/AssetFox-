@@ -1,12 +1,12 @@
 <template>
-    <v-dialog
+    <v-dialog         
         scrollable
         persistent
-        v-model="dialogData.showDialog"
+        v-model="showDialogComputed"
         max-width="60%"
         transition="dialog-bottom-transition"
     >
-        <v-card elevation="5" outlined >
+        <v-card elevation="5"  >
             <v-card-title>
                 <h3 class="dialog-header">
                     Aggregate Data
@@ -20,18 +20,19 @@
                     <i class="fas fa-times fa-2x"></i>
                 </v-btn>
             </v-card-title>
-            <v-flex xs10>
-                <v-layout>
+            <v-col cols = "10">
+                <v-row>
                     <div class="network-min-width">
                         <v-data-table
                             :headers="networkGridHeaders"
-                            sort-icon=$vuetify.icons.ghd-table-sort
+                            sort-asc-icon="custom:GhdTableSortAscSvg"
+                            sort-desc-icon="custom:GhdTableSortDescSvg"
                             :items="networks"
                             :items-per-page="5"
                             class="elevation-1"
                             hide-actions
                         >
-                            <template slot="items" slot-scope="props">
+                            <template slot="items" slot-scope="props" v-slot:item="props">
                                 <td>{{ props.item.name }}</td>
                                 <td>{{ props.item.createdDate }}</td>
                                 <td class="text-xs-center">
@@ -40,7 +41,7 @@
                                         min-height="500px"
                                         min-width="500px"
                                     >
-                                        <template slot="activator">
+                                        <template v-slot:activator>
                                             <v-btn class="ara-blue" icon>
                                                 <v-icon>fas fa-eye</v-icon>
                                             </v-btn>
@@ -49,7 +50,7 @@
                                             <v-card-text>
                                                 <v-textarea
                                                     class="sm-txt"
-                                                    :value="
+                                                    :model-value="
                                                         props.item
                                                             .benefitQuantifier
                                                             .equation.expression
@@ -97,15 +98,15 @@
                                     </v-progress-linear>
                                 </td>
                                 <td>
-                                    <v-layout row wrap>
-                                        <v-flex class="play-button-center">
+                                    <v-row row wrap>
+                                        <v-col class="play-button-center">
                                             <v-btn
                                                 @click="
                                                     onShowConfirmDataAggregationAlert(
                                                         props.item.id,
                                                     )
                                                 "
-                                                class="green--text darken-1"
+                                                class="text-green darken-1"
                                                 :disabled="
                                                     props.item.benefitQuantifier
                                                         .equation.expression ===
@@ -122,13 +123,13 @@
                                             >
                                                 <v-icon>fas fa-play</v-icon>
                                             </v-btn>
-                                        </v-flex>
-                                    </v-layout>
+                                        </v-col>
+                                    </v-row>
                                 </td>
                             </template>
                         </v-data-table>
                     </div>
-                </v-layout>
+                </v-row>
                 <EquationEditorDialog
                     :dialogData="equationEditorDialogData"
                     @submit="onSubmitEquationEditorDialogSubmit"
@@ -137,13 +138,13 @@
                     :dialogData="confirmDataAggregationAlertData"
                     @submit="onConfirmDataAggregationAlertSubmit"
                 />
-            </v-flex>
+            </v-col>
         </v-card>
     </v-dialog>
 </template>
 
-<script lang="ts">
-import Alert from '@/shared/modals/Alert.vue';
+<script lang="ts" setup>
+import ConfirmDataAssignmentAlert from '@/shared/modals/Alert.vue';
 import EquationEditorDialog from '@/shared/modals/EquationEditorDialog.vue';
 import { Equation } from '@/shared/models/iAM/equation';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
@@ -156,32 +157,29 @@ import {
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { any, clone, find, findIndex, isNil, propEq, update } from 'ramda';
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
 import { Hub } from '@/connectionHub';
+import Vue, { Ref, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, inject, computed } from 'vue'; 
+import { useStore } from 'vuex'; 
+import mitt, { Emitter, EventType } from 'mitt';
 
-@Component({
-    components: {
-        EquationEditorDialog,
-        ConfirmDataAssignmentAlert: Alert,
-    },
-})
-export default class ShowAggregationDialog extends Vue {
-    @Prop() dialogData: any;
-    @State(state => state.networkModule.networks) stateNetworks: Network[];
+    let store = useStore();     
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
 
-    @Action('aggregateNetworkData') aggregateNetworkDataAction: any;
-    @Action('upsertBenefitQuantifier') upsertBenefitQuantifierAction: any;
+    const props = defineProps<{dialogData: any}>();
+    let showDialogComputed = computed(() => props.dialogData.showDialog);
+    const stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks);
 
-    equationEditorDialogData: EquationEditorDialogData = clone(
+    async function aggregateNetworkDataAction(payload?: any): Promise<any>{await store.dispatch('aggregateNetworkData')}
+    async function upsertBenefitQuantifierAction(payload?: any): Promise<any>{await store.dispatch('upsertBenefitQuantifier')} 
+
+    let equationEditorDialogData: EquationEditorDialogData = clone(
         emptyEquationEditorDialogData,
     );
-    confirmDataAggregationAlertData: AlertData = clone(emptyAlertData);
-
-    networkDataAssignmentStatus: string = '';
-    networkDataAssignmentPercentage = 0;
-    networkGridHeaders: DataTableHeader[] = [
+    let confirmDataAggregationAlertData: AlertData = clone(emptyAlertData);
+    
+    let networkDataAssignmentStatus: string = '';
+    let networkDataAssignmentPercentage = 0;
+    let networkGridHeaders: DataTableHeader[] = [
         {
             text: 'Network',
             value: 'name',
@@ -223,39 +221,41 @@ export default class ShowAggregationDialog extends Vue {
             width: '',
         },
     ];
-    networks: Network[] = [];
-    selectedNetworkId: string = '';
+    let networks: Network[] = [];
+    let selectedNetworkId: string = '';
 
-    @Watch('stateNetworks')
-    onStateNetworksChanged() {
-        this.networks = clone(this.stateNetworks);
+    watch(stateNetworks, ()=> onStateNetworksChanged)
+    function onStateNetworksChanged() {
+        networks = clone(stateNetworks);
     }
-    mounted() {
-        this.networks = clone(this.stateNetworks);
 
-        this.$statusHub.$on(
+    onMounted(() => mounted)
+    function mounted() {
+        networks = clone(stateNetworks);
+
+        $emitter.on(
             Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
-            this.getDataAggregationStatus,
+            getDataAggregationStatus,
         );
     }
 
-    onShowEquationEditorDialog(equation: Equation, networkId: string) {
-        this.selectedNetworkId = networkId;
-        this.equationEditorDialogData = {
+    function onShowEquationEditorDialog(equation: Equation, networkId: string) {
+        selectedNetworkId = networkId;
+        equationEditorDialogData = {
             showDialog: true,
             equation: equation,
         };
     }
-    onSubmitEquationEditorDialogSubmit(equation: Equation) {
-        this.equationEditorDialogData = clone(emptyEquationEditorDialogData);
+    function onSubmitEquationEditorDialogSubmit(equation: Equation) {
+        equationEditorDialogData = clone(emptyEquationEditorDialogData);
 
-        if (!isNil(equation) && hasValue(this.networks)) {
-            var localNetworkObj = this.networks.find(_ => _.id == this.selectedNetworkId);
+        if (!isNil(equation) && hasValue(networks)) {
+            var localNetworkObj = networks.find(_ => _.id == selectedNetworkId);
 
             if(isNil(localNetworkObj)){
-                return `no network found with networkId ${this.selectedNetworkId}`;
+                return `no network found with networkId ${selectedNetworkId}`;
             }
-            this.upsertBenefitQuantifierAction({
+            upsertBenefitQuantifierAction({
                 benefitQuantifier: {
                     ...localNetworkObj.benefitQuantifier,
                     equation: equation,
@@ -264,9 +264,9 @@ export default class ShowAggregationDialog extends Vue {
         }
     }
 
-    onShowConfirmDataAggregationAlert(networkId: string) {
-        this.selectedNetworkId = networkId;
-        this.confirmDataAggregationAlertData = {
+    function onShowConfirmDataAggregationAlert(networkId: string) {
+        selectedNetworkId = networkId;
+        confirmDataAggregationAlertData = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -276,40 +276,42 @@ export default class ShowAggregationDialog extends Vue {
         };
     }
 
-    onConfirmDataAggregationAlertSubmit(response: boolean) {
-        this.confirmDataAggregationAlertData = clone(emptyAlertData);
+    function onConfirmDataAggregationAlertSubmit(response: boolean) {
+        confirmDataAggregationAlertData = clone(emptyAlertData);
 
         if (response) {
-            this.aggregateNetworkDataAction({
-                networkId: this.selectedNetworkId,
+            aggregateNetworkDataAction({
+                networkId: selectedNetworkId,
             });
         }
     }
 
-    getDataAggregationStatus(data: any) {
+    function getDataAggregationStatus(data: any) {
         const networkRollupDetail: NetworkRollupDetail = data.networkRollupDetail as NetworkRollupDetail;
-        if (any(propEq('id', networkRollupDetail.networkId), this.networks)) {
+        if (any(propEq('id', networkRollupDetail.networkId), networks)) {
             const updatedNetwork: Network = find(
                 propEq('id', networkRollupDetail.networkId),
-                this.networks,
+                networks,
             ) as Network;
             updatedNetwork.status = networkRollupDetail.status;
             updatedNetwork.networkDataAssignmentPercentage = data.percentage as number;
 
-            this.networks = update(
-                findIndex(propEq('id', updatedNetwork.id), this.networks),
+            networks = update(
+                findIndex(propEq('id', updatedNetwork.id), networks),
                 updatedNetwork,
-                this.networks,
+                networks,
             );
         }
     }
-    beforeDestroy() {
-        this.$statusHub.$off(
+
+    onBeforeUnmount(() => beforeDestroy); 
+    function beforeDestroy() {
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
-            this.getDataAggregationStatus,
+            getDataAggregationStatus,
         );
     }
-}
+
 </script>
 
 <style scoped>

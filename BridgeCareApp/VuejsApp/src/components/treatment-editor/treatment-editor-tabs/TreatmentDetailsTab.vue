@@ -1,209 +1,165 @@
 <template>
-    <v-layout class="treatment-details-tab-content">
-        <v-flex xs12>
-            <v-layout column>                
-                <v-flex>
-                    <v-subheader class="ghd-control-label ghd-md-gray">Treatment Description</v-subheader>
-                    <v-textarea  
-                        id ="TreatmentDetailsTab-desc-vtextarea"                      
-                        class='ghd-control-border ghd-control-text'
-                        no-resize
-                        outline
-                        rows="3"
-                        v-model="selectedTreatmentDetails.description"
-                        @input="
-                            onEditTreatmentDetails(
-                                'description',
-                                selectedTreatmentDetails.description,
-                            )
-                        "
-                    />
-                </v-flex>                
-                <v-layout xs12 row class="ghd-left-padding ghd-right-padding">
-                    <v-flex xs3>
-                        <v-subheader class="ghd-control-label ghd-md-gray">Category</v-subheader>
-                        <v-select id="TreatmentDetailsTab-category-vselect"
-                        class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
-                            :items="Array.from(treatmentCategoryMap.keys())"
-                            append-icon=$vuetify.icons.ghd-down
-                            @input="
-                                onEditTreatmentType(
-                                    'category',
-                                    treatmentCategoryBinding,
-                                )
-                            "
-                            label="Category"
-                            outline
-                            v-model="treatmentCategoryBinding"
-                            :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        />
-                    </v-flex>
-                    <v-flex xs3>
-                        <v-subheader class="ghd-control-label ghd-md-gray">Asset type</v-subheader>
-                        <v-select id="TreatmentDetailsTab-assetType-vselect"
-                        class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
-                        :items="Array.from(assetTypeMap.keys())"
-                        append-icon=$vuetify.icons.ghd-down
-                            @input="
-                                onEditAssetType(
-                                    'assetType',
-                                    assetTypeBinding,
-                                )
-                            "
-                            label="Asset type"
-                            outline
-                            v-model="assetTypeBinding"
-                            :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        />
-                    </v-flex>
-                    <v-flex xs3>
-                        <v-subheader class="ghd-control-label ghd-md-gray">Years Before Any</v-subheader>
-                        <v-text-field id="TreatmentDetailsTab-yearsBeforeAny-vtext"
-                            class='ghd-control-border ghd-control-text ghd-control-width-sm'
-                            :mask="'####'"
-                            @input="
-                                onEditTreatmentDetails(
-                                    'shadowForAnyTreatment',
-                                    selectedTreatmentDetails.shadowForAnyTreatment,
-                                )
-                            "
-                            label="Years Before Any"
-                            outline
-                            v-model="
-                                selectedTreatmentDetails.shadowForAnyTreatment
-                            "
-                            :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        />
-                    </v-flex>
-                    <v-flex xs3>
-                        <v-subheader class="ghd-control-label ghd-md-gray">Years Before Same</v-subheader>
-                        <v-text-field id="TreatmentDetailsTab-yearsBeforeSame-vtext"
-                            class='ghd-control-border ghd-control-text ghd-control-width-sm'
-                            :mask="'####'"
-                            rows="4"
-                            @input="
-                                onEditTreatmentDetails(
-                                    'shadowForSameTreatment',
-                                    selectedTreatmentDetails.shadowForSameTreatment,
-                                )
-                            "
-                            label="Years Before Same"
-                            outline
-                            v-model="
-                                selectedTreatmentDetails.shadowForSameTreatment
-                            "
-                            :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        />
-                    </v-flex>
-<!--                     <v-flex xs3>
-                        <v-subheader class="ghd-control-label ghd-md-gray">Performance Factor</v-subheader>
-                        <v-text-field
-                            class='ghd-control-border ghd-control-text ghd-control-width-sm'
-                            @input="
-                                onEditTreatmentDetails(
-                                    'performanceFactor',
-                                    selectedTreatmentDetails.performanceFactor,
-                                )
-                            "
-                            label="Performance Factor"
-                            outline
-                            :value='parseFloat(selectedTreatmentDetails.performanceFactor).toFixed(2)'
-                            v-model.number="
-                                selectedTreatmentDetails.performanceFactor
-                            "
-                            :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        />
-                    </v-flex>
- -->                </v-layout>                
-                <v-flex class="criteria-flex">
-                    <v-menu
-                        full-width
-                        bottom
-                        min-height="500px"
-                        min-width="1000px"
-                    >   
-                        <template slot="activator">                                                                                       
-                            <v-layout column class="ghd-left-padding">  
-                                <v-layout xs12 align-center style="height:50px;">                                    
-                                    <v-flex xs11>
-                                        <v-subheader class="ghd-control-label ghd-md-gray">Treatment Criteria</v-subheader>    
-                                    </v-flex>
-                                    <v-flex xs2>                                 
-                                        <v-btn id="TreatmentDetailsTab-RemoveCriteria-vbtn"
-                                            @click="
-                                                onRemoveTreatmentCriterion
-                                            "
-                                            class="ghd-white-bg ghd-blue ghd-button-text"
-                                            icon
-                                        >
-                                            <v-icon style="font-size:20px !important" class="ghd-blue">fas fa-eraser</v-icon>
-                                        </v-btn>
-                                        <v-btn id="TreatmentDetailsTab-EditCriteria-vbtn"
-                                            @click="
-                                                onShowTreatmentCriterionEditorDialog
-                                            "
-                                            class="edit-icon"
-                                            icon
-                                            style="left:25px"
-                                        >
-                                            <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
-                                        </v-btn>   
-                                    </v-flex>                                    
-                                </v-layout>       
-                                <v-layout align-center class="ghd-right-padding">  
-                                    <v-flex>
-                                        <v-textarea
-                                            class="ghd-control-border sm-txt"                                            
-                                            no-resize
-                                            outline
-                                            rows="3"
-                                            readonly                                            
-                                            :value="
-                                                selectedTreatmentDetails.criterionLibrary
-                                                    .mergedCriteriaExpression
-                                            "
-                                        >
-                                        </v-textarea>         
-                                    </v-flex>      
-                                </v-layout>                            
-                            </v-layout>        
-                        </template>                
-                        <v-card>
-                            <v-card-text>
+    <v-row class="treatment-details-tab-content">
+        <v-col cols="12">
+            <v-textarea  
+                id ="TreatmentDetailsTab-desc-vtextarea"                      
+                class='ghd-control-border ghd-control-text'
+                no-resize
+                label="Treatment Description"
+                variant="outlined"
+                rows="3"
+                item-title="text"
+                item-value="value" 
+                v-model="selectedTreatmentDetails.description"
+                @update:model-value="onEditTreatmentDetails('description', selectedTreatmentDetails.description)"
+            />
+        </v-col>                
+        <v-row class="ghd-left-padding ghd-right-padding" style="margin: 10px;">
+            <v-col cols="3">
+                <v-select id="TreatmentDetailsTab-category-vselect"
+                class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
+                    :items="Array.from(treatmentCategoryMap.keys())"
+                    menu-icon=custom:GhdDownSvg  
+                    label="Category"
+                    variant="outlined"
+                    density="compact"
+                    v-model="treatmentCategoryBinding"
+                    item-title="text"
+                    item-value="value" 
+                    :rules="[rules['generalRules'].valueIsNotEmpty]"
+                />
+            </v-col>
+            <v-col >
+                <v-select id="TreatmentDetailsTab-assetType-vselect"
+                class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
+                :items="Array.from(assetTypeMap.keys())"
+                append-icon=ghd-down
+                label="Asset type"
+                variant="outlined"
+                density="compact"
+                v-model="assetTypeBinding"
+                :rules="[rules['generalRules'].valueIsNotEmpty]"
+                />
+            </v-col>
+            <v-col >
+                <v-text-field id="TreatmentDetailsTab-yearsBeforeAny-vtext"
+                    class='ghd-control-border ghd-control-text ghd-control-width-sm'
+                    v-maska:[mask]
+                    @update:model-value="onEditTreatmentDetails('shadowForAnyTreatment', $event)"
+                    label="Years Before Any"
+                    variant="outlined"
+                    density="compact"
+                    v-model="
+                        selectedTreatmentDetails.shadowForAnyTreatment
+                    "
+                    :rules="[rules['generalRules'].valueIsNotEmpty]"
+                />
+            </v-col>
+            <v-col >
+                <v-text-field id="TreatmentDetailsTab-yearsBeforeSame-vtext"
+                    class='ghd-control-border ghd-control-text ghd-control-width-sm'
+                    v-maska:[mask]
+                    rows="4"
+                    @update:model-value="onEditTreatmentDetails('shadowForSameTreatment', $event)"
+                    label="Years Before Same"
+                    variant="outlined"
+                    density="compact"
+                    v-model="
+                        selectedTreatmentDetails.shadowForSameTreatment
+                    "
+                    :rules="[rules['generalRules'].valueIsNotEmpty]"
+                />
+            </v-col>
+        </v-row>                
+        <v-col cols="12">
+            <v-menu
+                full-width
+                location="bottom"
+                min-height="500px"
+                min-width="1000px"
+            >   
+                <template v-slot:activator>                                                                                       
+                    <v-row justify="space-between" class="ghd-left-padding">  
+                        <v-row  align-center style="height:50px;">                                    
+                            <v-col cols = "9">
+                                <v-subheader class="ghd-control-label ghd-md-gray">Treatment Criteria</v-subheader>    
+                            </v-col>
+                            <v-col>                                 
+                                <v-btn id="TreatmentDetailsTab-RemoveCriteria-vbtn"
+                                    @click="
+                                        onRemoveTreatmentCriterion
+                                    "
+                                    class="ghd-white-bg ghd-blue ghd-button-text"
+                                    flat
+                                >
+                                    <v-icon style="font-size:20px !important" class="ghd-blue">fas fa-eraser</v-icon>
+                                </v-btn>
+                                <v-btn id="TreatmentDetailsTab-EditCriteria-vbtn"
+                                    @click="
+                                        onShowTreatmentCriterionEditorDialog
+                                    "
+                                    class="edit-icon"
+                                    flat
+                                    style="left:25px"
+                                >
+                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                </v-btn>   
+                            </v-col>                                    
+                        </v-row>       
+                    </v-row>   
+                    <v-row  class="ghd-right-padding">  
+                            <v-col cols ="26">
                                 <v-textarea
-                                    class="ghd-card-width"
-                                    :value="
-                                        selectedTreatmentDetails
-                                            .criterionLibrary
+                                    class="ghd-control-border sm-txt"                                            
+                                    no-resize
+                                    variant="outlined"
+                                    rows="3"
+                                    readonly                                            
+                                    :model-value="
+                                        selectedTreatmentDetails.criterionLibrary
                                             .mergedCriteriaExpression
                                     "
-                                    full-width
-                                    no-resize
-                                    outline
-                                    readonly
-                                    rows="5"
-                                />
-                            </v-card-text>
-                        </v-card>
-                    </v-menu>
-                    <v-switch
-                        v-model="TreatmentIsUnSelectable"
-                        label="Mark treatment as unselectable by scenario engine"
-                        style="margin-left: 10px; margin-top: 30px;"
-                    ></v-switch>    
-                </v-flex>              
-            </v-layout>
-        </v-flex>   
-        <GeneralCriterionEditorDialog
-            :dialogData="treatmentCriterionEditorDialogData"
-            @submit="onSubmitTreatmentCriterionEditorDialogResult"
-        />
-    </v-layout>
+                                >
+                                </v-textarea>         
+                            </v-col>      
+                        </v-row>
+                </template>                
+                <v-card>
+                    <v-card-text>
+                        <v-textarea
+                            class="ghd-card-width"
+                            :model-value="
+                                selectedTreatmentDetails
+                                    .criterionLibrary
+                                    .mergedCriteriaExpression
+                            "
+                            full-width
+                            no-resize
+                            variant="outlined"
+                            readonly
+                            rows="5"
+                        />
+                    </v-card-text>
+                </v-card>
+            </v-menu>
+            <v-switch
+                color="#2A578D"
+                v-model="TreatmentIsUnSelectable"
+                label="Mark treatment as unselectable by scenario engine"
+                style="margin-left: 0px; margin-top: 10px;"
+            ></v-switch>    
+        </v-col>              
+    </v-row>
+    <GeneralCriterionEditorDialog
+        :dialogData="treatmentCriterionEditorDialogData"
+        @submit="onSubmitTreatmentCriterionEditorDialogResult"
+    />
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch, toRefs } from 'vue';
+import { useStore } from 'vuex';
 import { clone, isNil } from 'ramda';
 import { InputValidationRules } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
@@ -223,110 +179,113 @@ import {
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import { getUrl } from '@/shared/utils/get-url';
 
-@Component({
-    components: {
-        GeneralCriterionEditorDialog,
-    },
-})
-export default class TreatmentDetailsTab extends Vue {
-    @Prop() selectedTreatmentDetails: TreatmentDetails;
-    @Prop() rules: InputValidationRules;
-    @Prop() callFromScenario: boolean;
-    @Prop() callFromLibrary: boolean;
+    const emit = defineEmits(['submit', 'onModifyTreatmentDetails'])
+    const props = defineProps<{
+        selectedTreatmentDetails: TreatmentDetails,
+        rules: InputValidationRules,
+        callFromScenario: boolean,
+        callFromLibrary: boolean
+    }>();
+    const { rules, callFromScenario, callFromLibrary, selectedTreatmentDetails } = toRefs(props);
+    const TreatmentIsUnSelectable = ref(false);
+    const treatmentCriterionEditorDialogData = ref(clone(emptyGeneralCriterionEditorDialogData));
+    let uuidNIL: string = getBlankGuid();
+    let treatmentCategoryMapValue: Map<string, TreatmentCategory> = clone(treatmentCategoryMap);
+    let treatmentCategoryReverseMapValue: Map<TreatmentCategory, string> = clone(treatmentCategoryReverseMap);
+    let assetTypeReverseMapValue: Map<AssetType, string> = clone(assetTypeReverseMap);
+    let treatmentCategoryBinding = ref('');
+    let categories = Array.from(treatmentCategoryMap.keys());
+    let assetTypeMapValue: Map<string, AssetType> = clone(assetTypeMap);
+    let assetTypeBinding = ref('');
 
-    treatmentCriterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
-        emptyGeneralCriterionEditorDialogData,
-    );
-    uuidNIL: string = getBlankGuid();
+    const mask = { mask: '##########' };
 
-    treatmentCategoryMap: Map<string, TreatmentCategory> = clone(treatmentCategoryMap);
-    treatmentCategoryReverseMap: Map<TreatmentCategory, string> = clone(treatmentCategoryReverseMap);
-    assetTypeReverseMap: Map<AssetType, string> = clone(assetTypeReverseMap);
-    treatmentCategoryBinding: string = '';
-    assetTypeMap: Map<string, AssetType> = clone(assetTypeMap);
-    assetTypeBinding: string = '';
-    TreatmentIsUnSelectable: boolean = false;
+    watch(assetTypeBinding, () => {
+        onEditAssetType('assetType', assetTypeBinding.value)
+    })
 
-    @Watch('selectedTreatmentDetails')
-onSelectedTreatmentDetailsChanged(){
-  this.treatmentCategoryBinding = treatmentCategoryReverseMap.get(this.selectedTreatmentDetails.category)!;
-  this.assetTypeBinding = this.assetTypeReverseMap.get(this.selectedTreatmentDetails.assetType)!;
-  this.TreatmentIsUnSelectable = this.selectedTreatmentDetails.isUnselectable;
-}
+    watch(treatmentCategoryBinding, () => {
+        onEditTreatmentType('category', treatmentCategoryBinding.value)
+    })
+    watch(selectedTreatmentDetails, () => {
+        treatmentCategoryBinding.value = treatmentCategoryReverseMap.get(selectedTreatmentDetails.value.category)!;
+        assetTypeBinding.value = assetTypeReverseMap.get(selectedTreatmentDetails.value.assetType)!;
+        TreatmentIsUnSelectable.value = selectedTreatmentDetails.value.isUnselectable;
+    });
 
-@Watch('TreatmentIsUnSelectable')
-onToggleIsUnSelectable(value: boolean) {
-  console.log('onToggleIsUnSelectable called with value:', value);
-  this.$emit(
-    'onModifyTreatmentDetails',
-    setItemPropertyValue(
-      'isUnselectable',
-      value,
-      this.selectedTreatmentDetails,
-    ),
-  );
-}
+    watch(TreatmentIsUnSelectable, (newValue, oldValue) => onToggleIsUnSelectable(newValue))
+    function onToggleIsUnSelectable(value: boolean) {
+        emit(
+        'onModifyTreatmentDetails',
+         setItemPropertyValue(
+         'isUnselectable',
+         value,
+        selectedTreatmentDetails.value,
+        ),
+        );
+    }
 
-    onShowTreatmentCriterionEditorDialog() {
-        this.treatmentCriterionEditorDialogData = {
+    function onShowTreatmentCriterionEditorDialog() {
+        treatmentCriterionEditorDialogData.value = {
             showDialog: true,
-            CriteriaExpression: this.selectedTreatmentDetails.criterionLibrary.mergedCriteriaExpression
+            CriteriaExpression: selectedTreatmentDetails.value.criterionLibrary.mergedCriteriaExpression
         };
     }
 
-    onSubmitTreatmentCriterionEditorDialogResult(
+    function onSubmitTreatmentCriterionEditorDialogResult(
         criterionExpression: string,
     ) {
-        this.treatmentCriterionEditorDialogData = clone(
+        treatmentCriterionEditorDialogData.value = clone(
             emptyGeneralCriterionEditorDialogData,
         );
 
         if (!isNil(criterionExpression)) {
-            if(this.selectedTreatmentDetails.criterionLibrary.id === getBlankGuid())
-                this.selectedTreatmentDetails.criterionLibrary.id = getNewGuid();
-            this.$emit(
+            if(selectedTreatmentDetails.value.criterionLibrary.id === getBlankGuid())
+                selectedTreatmentDetails.value.criterionLibrary.id = getNewGuid();
+            emit(
                 'onModifyTreatmentDetails',
                 setItemPropertyValue(
                     'criterionLibrary',
-                    {...this.selectedTreatmentDetails.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary,
-                    this.selectedTreatmentDetails,
+                    {...selectedTreatmentDetails.value.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary,
+                     selectedTreatmentDetails.value,
                 ),
             );
         }
     }
 
-    onEditTreatmentType(property: string, key: any){
-        var category = this.treatmentCategoryMap.get(key);
-        this.onEditTreatmentDetails(property, category);
+    function onEditTreatmentType(property: string, key: any){
+        var category = treatmentCategoryMap.get(key);
+        onEditTreatmentDetails(property, category);
     }
-    onEditAssetType(property: string, key: any){
-        var asset = this.assetTypeMap.get(key);
-        this.onEditTreatmentDetails(property, asset);
+    function onEditAssetType(property: string, key: any){
+        var asset = assetTypeMap.get(key);
+        onEditTreatmentDetails(property, asset);
     }
 
-    onEditTreatmentDetails(property: string, value: any) {
-        this.$emit(
+    function onEditTreatmentDetails(property: string, value: any) {
+        emit(
             'onModifyTreatmentDetails',
             setItemPropertyValue(
                 property,
                 value,
-                this.selectedTreatmentDetails,
+                selectedTreatmentDetails.value,
             ),
         );
     }
 
-    onRemoveTreatmentCriterion() {
-        this.$emit(
+    function onRemoveTreatmentCriterion() {
+        emit(
             'onModifyTreatmentDetails',
             setItemPropertyValue(
                 'criterionLibrary',
                 clone(emptyCriterionLibrary),
-                this.selectedTreatmentDetails,
+                selectedTreatmentDetails.value,
             ),
         );
     }
-}
+
 </script>
 
 <style>

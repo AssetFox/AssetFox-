@@ -6,6 +6,7 @@ using System.Text;using System.Threading;
 using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.ExcelHelpers;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Services.Treatment;
 using OfficeOpenXml;
@@ -65,6 +66,7 @@ namespace BridgeCareCore.Services
             {
                 var treatmentLoadResult = _treatmentLoader.LoadScenarioTreatment(worksheet, scenarioBudgets);
                 scenarioTreatments.Add(treatmentLoadResult.Treatment);
+                _unitOfWork.SelectableTreatmentRepo.AddDefaultPerformanceFactors(simulationId, scenarioTreatments);
                 validationMessages.AddRange(treatmentLoadResult.ValidationMessages);
             }
             var combinedValidationMessage = string.Empty;
@@ -178,6 +180,7 @@ namespace BridgeCareCore.Services
             {                
                 var treatmentLoadResult = _treatmentLoader.LoadScenarioTreatment(worksheet, scenarioBudgets);
                 scenarioTreatments.Add(treatmentLoadResult.Treatment);
+                _unitOfWork.SelectableTreatmentRepo.AddDefaultPerformanceFactors(simulationId, scenarioTreatments);
                 validationMessages.AddRange(treatmentLoadResult.ValidationMessages);
             }
             var combinedValidationMessage = string.Empty;
@@ -261,16 +264,20 @@ namespace BridgeCareCore.Services
             var scenarioTreatmentSupersedeRules = _unitOfWork.TreatmentSupersedeRuleRepo.GetScenarioTreatmentSupersedeRulesBysimulationId(simulationId); 
             var fileName = $"ScenarioTreatmentSupersedeRules_{simulation.Name.Trim().Replace(" ", "_")}.xlsx";
 
-            return CreateExportScenarioTreatmentRuleExportFile(scenarioTreatmentSupersedeRules, fileName);
+            return CreateExportTreatmentSupersedeRuleExportFile(scenarioTreatmentSupersedeRules, fileName);
         }
 
         public FileInfoDTO ExportLibraryTreatmentSupersedeRuleExcelFile(Guid libraryId)
         {
+            if (libraryId.Equals(Guid.Empty))
+            {
+                return null;
+            }
             var library = _unitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibaryNoChildren(libraryId) ?? throw new NullReferenceException("No Treatment Library found for given id");
             var libraryTreatmentSupersedeRules = _unitOfWork.TreatmentSupersedeRuleRepo.GetLibraryTreatmentSupersedeRulesByLibraryId(libraryId);
             var fileName = $"TreatmentSupersedeRules_{library.Name.Trim().Replace(" ", "_")}.xlsx";
 
-            return CreateExportScenarioTreatmentRuleExportFile(libraryTreatmentSupersedeRules, fileName);
+            return CreateExportTreatmentSupersedeRuleExportFile(libraryTreatmentSupersedeRules, fileName);
         }
 
         public TreatmentSupersedeRuleImportResultDTO ImportLibraryTreatmentSupersedeRulesFile(Guid libraryId, ExcelPackage excelPackage, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
@@ -321,7 +328,7 @@ namespace BridgeCareCore.Services
             return scenarioTreatmentSupersedeRuleImportResult;
         }
 
-        private static FileInfoDTO CreateExportScenarioTreatmentRuleExportFile(List<TreatmentSupersedeRuleExportDTO> treatmentSupersedeRules, string fileName)
+        private static FileInfoDTO CreateExportTreatmentSupersedeRuleExportFile(List<TreatmentSupersedeRuleExportDTO> treatmentSupersedeRules, string fileName)
         {
             using var excelPackage = new ExcelPackage(new FileInfo(fileName));
             var worksheet = excelPackage.Workbook.Worksheets.Add("Treatment Supersede Rules");
@@ -332,7 +339,8 @@ namespace BridgeCareCore.Services
             var headerColumn = startColumn;
             worksheet.Cells[startRow, headerColumn++].Value = "Treatment Name (selected treatment)";
             worksheet.Cells[startRow, headerColumn++].Value = "Superseded treatment";
-            worksheet.Cells[startRow, headerColumn++].Value = "Criteria";
+            worksheet.Cells[startRow, headerColumn++].Value = "Criteria";            
+            ExcelHelper.ApplyStyleNoWrap(worksheet.Cells[startRow, startColumn, startRow, headerColumn - 1]);
 
             // data rows
             var dataRow = startRow + 1;

@@ -1,58 +1,63 @@
 <template>
-    <v-dialog  width="768px" height="540px" persistent v-model='showDialog'>
+    <v-dialog width="768px" height="540px" persistent v-model='showDialogComputed'>
         <v-card class="div-padding">
             <v-card-title class="pa-2">
-                <v-layout justify-start>
-                    <h3 class="Montserrat-font-family">Performance Curves Upload</h3>
-                </v-layout>
-                <v-btn @click="onSubmit(false)" icon>
-                    <i class="fas fa-times fa-2x"></i>
-                </v-btn>
+                <v-row justify="space-between">
+                    <v-col class="pt-0">
+                        <h3  style="padding-top: 10px;" class="Montserrat-font-family">Performance Curves Upload</h3>
+                    </v-col>
+                    <v-spacer/>
+                    <v-col class="pt-0" align="end">
+                        <v-btn @click="onSubmit(false)" icon variant="flat">
+                            <i class="fas fa-times fa-2x"></i>
+                        </v-btn>
+                    </v-col> 
+                </v-row>              
             </v-card-title>
-            <v-card-text class="pa-0">
-                <v-layout column>
+            <v-card-text >
+                <v-row column>
                     <PerformanceCurvesFileSelector :closed='closed' @submit='onFileSelectorChange' />                    
-                </v-layout>
+                </v-row>
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-center>
-                    <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue Montserrat-font-family' flat>Cancel</v-btn>
-                    <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' outline>Upload</v-btn>
-                </v-layout>
+                <v-row justify="center">
+                    <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue Montserrat-font-family' variant = "flat">Cancel</v-btn>
+                    <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>
+                </v-row>
             </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action } from 'vuex-class';
+<script lang='ts' setup>
+import Vue, { computed } from 'vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { ImportExportPerformanceCurvesDialogResult } from '@/shared/models/modals/import-export-performance-curves-dialog-result';
 import {clone} from 'ramda';
 import PerformanceCurvesFileSelector from '@/shared/components/FileSelector.vue';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component({
-    components: { PerformanceCurvesFileSelector }
-})
-export default class ImportExportPerformanceCurvesDialog extends Vue {
-    @Prop() showDialog: boolean;
+const emit = defineEmits(['submit'])
+let store = useStore();
+const props = defineProps<{
+    showDialog: boolean
+    }>()
+    let showDialogComputed = computed(() => props.showDialog);
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
 
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('setIsBusy') setIsBusyAction: any;
+    let PerformanceCurvesFile: File | null = null;
+    let overwriteBudgets: boolean = true;
+    let closed: boolean = false;
 
-    PerformanceCurvesFile: File | null = null;
-    overwriteBudgets: boolean = true;
-    closed: boolean = false;
-
-    @Watch('showDialog')
-    onShowDialogChanged() {
-        if (this.showDialog) {
-            this.closed = false;
+    watch(()=>props.showDialog,()=>onShowDialogChanged())
+    function onShowDialogChanged() {
+        if (props.showDialog) {
+            closed = false;
         } else {
-            this.PerformanceCurvesFile = null;
-            this.closed = true;
+            PerformanceCurvesFile = null;
+            closed = true;
         }
     }
 
@@ -60,25 +65,25 @@ export default class ImportExportPerformanceCurvesDialog extends Vue {
      * FileSelector submit event handler
      */
 
-    onFileSelectorChange(file: File) {
-        this.PerformanceCurvesFile = hasValue(file) ? clone(file) : null;
+    function onFileSelectorChange(file: File) {
+        PerformanceCurvesFile = hasValue(file) ? clone(file) : null;
     }
 
     /**
      * Dialog submit event handler
      */
-    onSubmit(submit: boolean, isExport: boolean = false) {
+    function onSubmit(submit: boolean, isExport: boolean = false) {
         if (submit) {
             const result: ImportExportPerformanceCurvesDialogResult = {
-                file: this.PerformanceCurvesFile as File,
+                file: PerformanceCurvesFile as File,
                 isExport: isExport
             };
-            this.$emit('submit', result);
+            emit('submit', result);
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
     }
-}
+
 </script>
 <style scoped>
 .div-padding {

@@ -1,44 +1,38 @@
 <template>
-  <v-layout>
-    <v-dialog max-width="900px" persistent scrollable v-model="dialogData.showDialog">
+  <v-row>
+    <v-dialog max-width="900px" persistent scrollable v-model="showDialogComputed">
       <v-card class="equation-container-card Montserrat-font-family">
         <v-card-title class="ghd-dialog-box-padding-top">
-          <v-flex xs12>
-            <v-layout justify-space-between >
-              <div class="ghd-control-dialog-header">Equation Editor</div>
-              <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+          <v-col cols = "12">
+            <v-row justify="space-between" class="text-center" >
+              <div style="margin-left: 347px" class="ghd-control-dialog-header">Equation Editor</div>
+              <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                 X
             </v-btn>
-            </v-layout>
-          </v-flex>
+            </v-row>
+          </v-col>
         </v-card-title>
-        <v-card-text class="equation-content ghd-dialog-box-padding-center">
-          <v-layout column>
-            <v-flex xs12>
-              <div class="validation-message-div">
-                <v-layout justify-center>
+         <v-card-text class="equation-content ghd-dialog-box-padding-center">
+                <v-row justify="center">
                   <p class="invalid-message" v-if="invalidExpressionMessage !== ''">{{ invalidExpressionMessage }}</p>
                   <p id="EquationEditor-validEquatiionMsg-p" class="valid-message" v-if="validExpressionMessage !== ''">{{ validExpressionMessage }}</p>
-                </v-layout>
-              </div>
-            </v-flex>
-            <v-flex xs12>
+                </v-row>
+            <v-col cols = "12">
               <v-tabs v-model="selectedTab">
-                <v-tab :key="0" @click="isPiecewise = false">Equation</v-tab>
-                <v-tab :key="1" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Piecewise</v-tab>
-                <v-tab :key="2" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Time In Rating</v-tab>
-                <v-tab-item>
-                  <div class="equation-container-div">
-                    <v-layout column>
-                      <div>
-                        <v-layout justify-space-between row>
-                          <div>
-                            <v-list>
-                              <template>
+                <v-tab @click="isPiecewise = false">Equation</v-tab>
+                <v-tab @click="isPiecewise = true">Piecewise</v-tab>
+                <v-tab @click="isPiecewise = true">Time In Rating</v-tab>
+              </v-tabs>
+            </v-col>
+                <v-window>
+                    <v-window-item v-if="selectedTab === 0">
+                      <div class="equation-container-div">
+                            <v-row>
+                              <v-col>
                                 <v-subheader class="equation-list-subheader">Attributes: Click to add</v-subheader>
                                 <div class="attributes-list-container">
-                                  <template v-for="(attribute, index) in attributesList">
-                                    <v-list-tile :key="attribute"
+                                  <template v-for="(attribute, index) in attributesList" :key="attribute">
+                                    <v-list-tile 
                                                 @click="onAddValueToExpression(`[${attribute}]`)" class="list-tile"
                                                 ripple>
                                       <v-list-tile-content>
@@ -49,16 +43,12 @@
                                      <v-divider v-if="index + 1 < attributesList.length" :key="`divider-${index}`"></v-divider>
                                   </template>
                                 </div>
-                              </template>
-                            </v-list>
-                          </div>
-                          <div>
-                            <v-list>
-                              <template>
+                              </v-col>
+                              <v-col>
                                 <v-subheader class="equation-list-subheader">Formulas: Click to add</v-subheader>
                                 <div class="formulas-list-container">
-                                  <template v-for="(formula, index) in formulasList">
-                                    <v-list-tile :key="formula"
+                                  <template v-for="(formula, index) in formulasList" :key="formula">
+                                    <v-list-tile 
                                                 @click="onAddFormulaToEquation(formula)" class="list-tile"
                                                 ripple
                                                 >
@@ -70,228 +60,212 @@
                                     <v-divider v-if="index + 1 < formulasList.length" :key="`divider-${index}`"></v-divider>
                                   </template>
                                 </div>
-                              </template>
-                            </v-list>
-                          </div>
-                        </v-layout>
+                              </v-col>
+                            </v-row>
+                            <v-row justify="center" style="padding-top: 10px"> 
+                              <div class="math-buttons-container">
+                                <v-btn @click="onAddValueToExpression('+')" class="math-button add circular-button" icon
+                                      size="small">
+                                  <span>+</span>
+                                </v-btn>
+                                <v-btn @click="onAddValueToExpression('-')" class="math-button subtract circular-button" icon
+                                size="small">
+                                  <span>-</span>
+                                </v-btn>
+                                <v-btn @click="onAddValueToExpression('*')" class="math-button multiply circular-button" icon
+                                size="small">
+                                  <span>*</span>
+                                </v-btn>
+                                <v-btn @click="onAddValueToExpression('/')" class="math-button divide circular-button" icon
+                                size="small">
+                                  <span>/</span>
+                                </v-btn>
+                                <v-btn @click="onAddValueToExpression('(')" class="math-button parentheses circular-button" icon
+                                size="small">
+                                  <span>(</span>
+                                </v-btn>
+                                <v-btn @click="onAddValueToExpression(')')" class="math-button parentheses circular-button" icon
+                                size="small">
+                                  <span>)</span>
+                                </v-btn>
+                              </div>
+                            </v-row>
+
+                            
+                            <v-row style="padding-left: 15px; padding-top: 11px">
+                              <v-textarea :rows="5" @blur="setCursorPosition" @focus="setTextareaCursorPosition"
+                                          id="equation_textarea"
+                                          ref="textareaInput"
+                                          no-resize outline
+                                          spellcheck="false"
+                                          variant="outlined"
+                                          density="compact"
+                                          style="max-width: 825px; height: 2.5em"
+                                          v-model="expression" class="ghd-text-field-border">
+                              </v-textarea>
+                            </v-row>
                       </div>
-                      <div>
-                        <v-layout justify-center>
-                          <div class="math-buttons-container">
-                            <v-layout justify-space-between row>
-                              <v-btn @click="onAddValueToExpression('+')" class="math-button add circular-button" fab
-                                     small>
-                                <span>+</span>
-                              </v-btn>
-                              <v-btn @click="onAddValueToExpression('-')" class="math-button subtract circular-button" fab
-                                     small>
-                                <span>-</span>
-                              </v-btn>
-                              <v-btn @click="onAddValueToExpression('*')" class="math-button multiply circular-button" fab
-                                     small>
-                                <span>*</span>
-                              </v-btn>
-                              <v-btn @click="onAddValueToExpression('/')" class="math-button divide circular-button" fab
-                                     small>
-                                <span>/</span>
-                              </v-btn>
-                              <v-btn @click="onAddValueToExpression('(')" class="math-button parentheses circular-button" fab
-                                     small>
-                                <span>(</span>
-                              </v-btn>
-                              <v-btn @click="onAddValueToExpression(')')" class="math-button parentheses circular-button" fab
-                                     small>
-                                <span>)</span>
-                              </v-btn>
-                            </v-layout>
-                          </div>
-                        </v-layout>
+                    </v-window-item>
+                    <v-window-item v-if="selectedTab === 1">
+                      <div class="equation-container-div">
+                        <v-row>
+                          <v-col cols = "5" >
+                            <div>                 
+                              <div class="data-points-grid">
+                                <v-data-table :headers="piecewiseGridHeaders" :items="piecewiseGridData" class="v-table__overflow ghd-table" hide-actions
+                                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                                    sort-desc-icon="custom:GhdTableSortDescSvg">
+                                    <template slot="items" slot-scope="props" v-slot:item="props">
+                                      <tr>
+                                        <td v-for="header in piecewiseGridHeaders">
+                                          <div v-if="header.key !== ''">
+                                            <div @click="onEditDataPoint(props.item, header.key)" justify="space-between" style="margin-left: 10px" class="edit-data-point-span">
+                                              {{ props.item[header.key] }}
+                                            </div>
+                                          </div>
+                                          <div v-else>
+                                            <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue" flat icon v-if="props.item.timeValue !== 0">
+                                              <img :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
+                                            </v-btn>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    </template>
+                                  </v-data-table>
+                              </div>
+                              <v-row justify="space-between" class="add-addmulti-container">
+                                <v-btn @click="onAddTimeAttributeDataPoint"
+                                variant = "flat"  class='ghd-blue ghd-button ghd-button-text'>
+                                  Add
+                                </v-btn>
+                                <v-btn @click="showAddMultipleDataPointsPopup = true"
+                                variant = "flat" class="ghd-blue ghd-button ghd-button-text">
+                                  Add Multi
+                                </v-btn>
+                              </v-row>
+                            </div>
+                          </v-col>
+                          <v-col cols = "7" >
+                            <div class="kendo-chart-container">
+                              <kendo-chart :data-source="piecewiseGridData"
+                                          :pannable-lock="'y'"
+                                          :series-defaults-style="'smooth'"
+                                          :series-defaults-type="'scatterLine'"
+                                          :theme="'sass'"
+                                          :tooltip-format="'({0},{1})'"
+                                          :tooltip-visible="true"
+                                          :x-axis-max="xAxisMax"
+                                          :x-axis-min="0"
+                                          :x-axis-title-text="'Time'"
+                                          :y-axis-max="yAxisMax"
+                                          :y-axis-min="0"
+                                          :y-axis-title-text="'Condition'"
+                                          :zoomable-mousewheel-lock="'y'"
+                                          :zoomable-selection-lock="'y'">
+                                <kendo-chart-series-item :data="dataPointsSource"
+                                                        :markers-visible="false">
+                                </kendo-chart-series-item>
+                              </kendo-chart>
+                            </div>
+                          </v-col>
+                        </v-row>
                       </div>
-                      <div>
-                        <v-layout justify-center>
-                          <v-textarea :rows="5" @blur="setCursorPosition" @focus="setTextareaCursorPosition" full-width
-                                      id="equation_textarea"
-                                      no-resize outline
-                                      spellcheck="false"
-                                      v-model="expression" class="ghd-text-field-border">
-                          </v-textarea>
-                        </v-layout>
+                    </v-window-item>
+                    <v-window-item v-if="selectedTab === 2">
+                      <div class="equation-container-div">
+                        <v-row>
+                          <v-col cols = "5">
+                            <div>
+                              <div class="data-points-grid">
+                                <div>
+                                  <v-data-table :headers="timeInRatingGridHeaders" :items="timeInRatingGridData" class="v-table__overflow ghd-table" hide-actions
+                                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                                    sort-desc-icon="custom:GhdTableSortDescSvg">
+                                    <template slot="items" slot-scope="props" v-slot:item="props">
+                                      <tr>
+                                        <td v-for="header in timeInRatingGridHeaders">
+                                          <div v-if="header.key !== ''">
+                                            <div @click="onEditDataPoint(props.item, header.key)" justify="space-between" style="margin-left: 10px" class="edit-data-point-span">
+                                              {{ props.item[header.key] }}
+                                            </div>
+                                          </div>
+                                          <div v-else>
+                                            <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue" icon v-if="props.item.timeValue !== 0">
+                                              <img :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
+                                            </v-btn>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    </template>
+                                  </v-data-table>
+                                </div>
+                             </div>
+                              <v-row justify="space-between" class="add-addmulti-container">
+                                <v-btn @click="onAddTimeAttributeDataPoint"
+                                variant = "flat" class='ghd-blue ghd-button ghd-button-text' >
+                                  Add
+                                </v-btn>
+                                <v-btn @click="showAddMultipleDataPointsPopup = true"
+                                variant = "flat" class='ghd-blue ghd-button ghd-button-text'>
+                                  Add Multi
+                                </v-btn>
+                              </v-row>
+                            </div>
+                          </v-col>
+                          <v-col cols = "7" >
+                            <div class="kendo-chart-container">
+                              <kendo-chart :data-source="piecewiseGridData"
+                                          :pannable-lock="'y'"
+                                          :series-defaults-style="'smooth'"
+                                          :series-defaults-type="'scatterLine'"
+                                          :theme="'sass'"
+                                          :tooltip-format="'({0},{1})'"
+                                          :tooltip-visible="true"
+                                          :x-axis-max="xAxisMax"
+                                          :x-axis-min="0"
+                                          :x-axis-title-text="'Time'"
+                                          :y-axis-max="yAxisMax"
+                                          :y-axis-min="0"
+                                          :y-axis-title-text="'Condition'"
+                                          :zoomable-mousewheel-lock="'y'"
+                                          :zoomable-selection-lock="'y'">
+                                <kendo-chart-series-item :data="dataPointsSource"
+                                                        :markers-visible="false">
+                                </kendo-chart-series-item>
+                              </kendo-chart>
+                            </div>
+                          </v-col>
+                        </v-row>
                       </div>
-                    </v-layout>
-                  </div>
-                </v-tab-item>
-                <v-tab-item>
-                  <div class="equation-container-div">
-                    <v-layout>
-                      <v-flex xs5 >
-                        <div>                 
-                          <div class="data-points-grid">
-                            <v-data-table :headers="piecewiseGridHeaders"
-                                          :items="piecewiseGridData"
-                                          sort-icon=$vuetify.icons.ghd-table-sort
-                                          class="v-table__overflow ghd-table"
-                                          hide-actions>
-                              <template slot="items" slot-scope="props">
-                                <td v-for="header in piecewiseGridHeaders">
-                                  <div v-if="header.value !== ''">
-                                    <div v-if="props.item.timeValue === 0">
-                                      {{ props.item[header.value] }}
-                                    </div>
-                                    <div @click="onEditDataPoint(props.item, header.value)" class="edit-data-point-span"
-                                         v-else>
-                                      {{ props.item[header.value] }}
-                                    </div>
-                                  </div>
-                                  <div v-else>
-                                    <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
-                                           icon
-                                           v-if="props.item.timeValue !== 0">
-                                      <img :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-                                    </v-btn>
-                                  </div>
-                                </td>
-                              </template>
-                            </v-data-table>
-                          </div>
-                          <v-layout justify-space-between class="add-addmulti-container">
-                            <v-btn @click="onAddTimeAttributeDataPoint"
-                                    flat  class='ghd-blue ghd-button ghd-button-text'>
-                              Add
-                            </v-btn>
-                            <v-btn @click="showAddMultipleDataPointsPopup = true"
-                                    flat class="ghd-blue ghd-button ghd-button-text">
-                              Add Multi
-                            </v-btn>
-                          </v-layout>
-                        </div>
-                      </v-flex>
-                      <v-flex xs7 >
-                        <div class="kendo-chart-container">
-                          <kendo-chart :data-source="piecewiseGridData"
-                                       :pannable-lock="'y'"
-                                       :series-defaults-style="'smooth'"
-                                       :series-defaults-type="'scatterLine'"
-                                       :theme="'sass'"
-                                       :tooltip-format="'({0},{1})'"
-                                       :tooltip-visible="true"
-                                       :x-axis-max="xAxisMax"
-                                       :x-axis-min="0"
-                                       :x-axis-title-text="'Time'"
-                                       :y-axis-max="yAxisMax"
-                                       :y-axis-min="0"
-                                       :y-axis-title-text="'Condition'"
-                                       :zoomable-mousewheel-lock="'y'"
-                                       :zoomable-selection-lock="'y'">
-                            <kendo-chart-series-item :data="dataPointsSource"
-                                                     :markers-visible="false">
-                            </kendo-chart-series-item>
-                          </kendo-chart>
-                        </div>
-                      </v-flex>
-                    </v-layout>
-                  </div>
-                </v-tab-item>
-                <v-tab-item>
-                  <div class="equation-container-div">
-                    <v-layout>
-                      <v-flex xs5>
-                        <div>
-                          <div class="data-points-grid">
-                            <v-data-table :headers="timeInRatingGridHeaders"
-                                          :items="timeInRatingGridData"
-                                          sort-icon=$vuetify.icons.ghd-table-sort
-                                          class="v-table__overflow ghd-table"
-                                          hide-actions>
-                              <template slot="items" slot-scope="props">
-                                <td v-for="header in timeInRatingGridHeaders">
-                                  <div v-if="header.value !== ''">
-                                    <div @click="onEditDataPoint(props.item, header.value)"
-                                         class="edit-data-point-span">
-                                      {{ props.item[header.value] }}
-                                    </div>
-                                  </div>
-                                  <div v-else>
-                                    <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
-                                           icon>
-                                      <img :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-                                    </v-btn>
-                                  </div>
-                                </td>
-                              </template>
-                            </v-data-table>
-                          </div>
-                          <v-layout justify-space-between class="add-addmulti-container">
-                            <v-btn @click="onAddTimeAttributeDataPoint"
-                                    flat class='ghd-blue ghd-button ghd-button-text' >
-                              Add
-                            </v-btn>
-                            <v-btn @click="showAddMultipleDataPointsPopup = true"
-                                    flat class='ghd-blue ghd-button ghd-button-text'>
-                              Add Multi
-                            </v-btn>
-                          </v-layout>
-                        </div>
-                      </v-flex>
-                      <v-flex xs7 >
-                        <div class="kendo-chart-container">
-                          <kendo-chart :data-source="piecewiseGridData"
-                                       :pannable-lock="'y'"
-                                       :series-defaults-style="'smooth'"
-                                       :series-defaults-type="'scatterLine'"
-                                       :theme="'sass'"
-                                       :tooltip-format="'({0},{1})'"
-                                       :tooltip-visible="true"
-                                       :x-axis-max="xAxisMax"
-                                       :x-axis-min="0"
-                                       :x-axis-title-text="'Time'"
-                                       :y-axis-max="yAxisMax"
-                                       :y-axis-min="0"
-                                       :y-axis-title-text="'Condition'"
-                                       :zoomable-mousewheel-lock="'y'"
-                                       :zoomable-selection-lock="'y'">
-                            <kendo-chart-series-item :data="dataPointsSource"
-                                                     :markers-visible="false">
-                            </kendo-chart-series-item>
-                          </kendo-chart>
-                        </div>
-                      </v-flex>
-                    </v-layout>
-                  </div>
-                </v-tab-item>
-              </v-tabs>
-            </v-flex>
-          </v-layout>
+                    </v-window-item>
+                </v-window>
+
         </v-card-text>
-        <v-card-actions class="ghd-dialog-box-padding-bottom">
-          <v-layout>
-            <v-flex xs12>
-              <div>
-                 <v-layout justify-center row>
-                  <v-btn :disabled="disableEquationCheck()" @click="onCheckEquation" flat id="EquationEditor-checkEquation-btn" class="ghd-blue check-eq ghd-button ghd-button-text">Check Equation</v-btn>
-                </v-layout>
-                <v-layout justify-center row>
-                  <v-btn @click="onSubmit(false)" outline class='ghd-blue ghd-button ghd-button-text' id="EquationEditorDialog-Cancel-Btn">Cancel</v-btn>
-                  <v-btn :disabled="cannotSubmit" @click="onSubmit(true)"
-                         class="white--text ghd-blue ghd-button ghd-button-text">Save
-                  </v-btn>                  
-                </v-layout>
-              </div>
-            </v-flex>
-          </v-layout>
+        <v-row justify="center" style="margin-bottom: 5px">
+          <v-btn id="EquationEditor-checkEquation-btn" :disabled="disableEquationCheck()" @click="onCheckEquation" density="compact" variant = "flat" class="ghd-blue check-eq ghd-button ghd-button-text">Check Equation</v-btn>
+        </v-row>
+       <v-card-actions class="ghd-dialog-box-padding-bottom">
+          <v-row>
+            <v-col cols = "12">
+                <v-row justify="center">
+                  <v-btn @click="onSubmit(false)" variant = "outlined" class='ghd-blue ghd-button ghd-button-text' id="EquationEditorDialog-Cancel-Btn">Cancel</v-btn>
+                  <v-btn :disabled="cannotSubmit" @click="onSubmit(true)" variant = "outlined" class='ghd-blue ghd-button ghd-button-text' id="EquationEditorDialog-Save-Btn">Save</v-btn>
+                </v-row>
+            </v-col>
+          </v-row>
         </v-card-actions>
       </v-card>
     </v-dialog>
-
     <v-dialog max-width="250px" persistent v-model="showAddDataPointPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
-          <v-layout column justify-center>
+          <v-row column justify-center>
             <div>
-              <v-flex xs12>
-                <v-layout justify-space-between >
+              <v-col cols = "12">
+                <v-row justify-space-between >
                   <h6 class="header-title">Time Value</h6>
-                </v-layout>
-              </v-flex>
+                </v-row>
+              </v-col>
               <v-text-field :rules="[timeValueIsNotEmpty, timeValueIsGreaterThanZero, timeValueIsNew]"
                             outline
                             type="number"
@@ -299,70 +273,68 @@
               </v-text-field>
             </div>
             <div>
-              <v-flex xs12>
-                <v-layout justify-space-between >
+              <v-col cols = "12">
+                <v-row justify-space-between >
                   <h6 class="header-title">Condition Value</h6>
-                </v-layout>
-              </v-flex>
+                </v-row>
+              </v-col>
               <v-text-field :rules="[conditionValueIsNotEmpty, conditionValueIsNew]" outline
                             type="number" v-model="newDataPoint.conditionValue" class="ghd-text-field ghd-text-field-border">
               </v-text-field>
             </div>
-          </v-layout>
+          </v-row>
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
-          <v-layout justify-center row>
-            <v-btn @click="onSubmitNewDataPoint(false)" flat small class="ghd-blue ghd-button ghd-button-text">Cancel</v-btn>
+          <v-row justify="center">
+            <v-btn @click="onSubmitNewDataPoint(false)" variant = "flat" size="small" class="ghd-blue ghd-button ghd-button-text">Cancel</v-btn>
             <v-btn :disabled="disableNewDataPointSubmit()" @click="onSubmitNewDataPoint(true)"
-                   outline
-                   small class="ghd-blue ghd-button ghd-button-text">
+            variant = "outlined"
+            size="small" class="ghd-blue ghd-button ghd-button-text">
               Save
             </v-btn>            
-          </v-layout>
+          </v-row>
         </v-card-actions>
       </v-card>
     </v-dialog>
-
     <v-dialog max-width="400px" persistent v-model="showAddMultipleDataPointsPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
-          <v-layout column justify-center>
+          <v-row column justify-center>
             <p>Data point entries must follow the format <strong>#,#</strong> (time,attribute) with each entry on a
               separate line.</p>
-            <v-flex xs2>
+            <v-col cols = "12">
               <v-textarea
                   :rules="[multipleDataPointsFormIsNotEmpty, isCorrectMultipleDataPointsFormat, timeValueIsGreaterThanZero, multipleDataPointsAreNew]"
                   no-resize outline rows="10"
                   v-model="multipleDataPoints" class="ghd-text-field-border">
               </v-textarea>
-            </v-flex>
+            </v-col>
 
-          </v-layout>
+          </v-row>
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
-          <v-layout justify-center row>
-            <v-btn @click="onSubmitNewDataPointMulti(false)" flat small class="ghd-blue ghd-button ghd-button-text">Cancel
+          <v-row justify="center">
+            <v-btn @click="onSubmitNewDataPointMulti(false)" variant = "flat" size="small" class="ghd-blue ghd-button ghd-button-text">Cancel
             </v-btn>
             <v-btn :disabled="disableMultipleDataPointsSubmit()" @click="onSubmitNewDataPointMulti(true)"
-                   outline
-                   small class="ghd-blue ghd-button ghd-button-text">
+            variant = "outlined"
+            size="small" class="ghd-blue ghd-button ghd-button-text">
               Save
             </v-btn>           
-          </v-layout>
+          </v-row>
         </v-card-actions>
       </v-card>
     </v-dialog>
-
     <v-dialog max-width="250px" persistent v-model="showEditDataPointPopup">
       <v-card class="Montserrat-font-family">
         <v-card-text class="ghd-dialog-box-padding-top">
-          <v-layout column justify-center>
+          <v-row column justify-center>
             <div>
-              <v-flex xs12>
-                <v-layout justify-space-between >
+              <v-col cols = "12">
+                <v-row justify-space-between >
                   <h6 class="header-title">Time Value</h6>
-                </v-layout>
-              </v-flex>
+                </v-row>
+              </v-col>
               <v-text-field :rules="[timeValueIsNotEmpty, timeValueIsGreaterThanZero, timeValueIsNew]"
                             outline
                             type="number"
@@ -370,36 +342,35 @@
               </v-text-field>
             </div>
             <div>
-              <v-flex xs12>
-                <v-layout justify-space-between >
+              <v-col cols = "12">
+                <v-row justify-space-between >
                   <h6 class="header-title">Condition Value</h6>
-                </v-layout>
-              </v-flex>
+                </v-row>
+              </v-col>
               <v-text-field :rules="[conditionValueIsNotEmpty, conditionValueIsNew]" outline
                             type="number" v-model="editedDataPoint.conditionValue" class="ghd-text-field ghd-text-field-border">
               </v-text-field>
             </div>
-          </v-layout>
+          </v-row>
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
-          <v-layout justify-center row>
-            <v-btn @click="onSubmitEditedDataPointValue(false)" flat small class="ghd-blue ghd-button-text">Cancel</v-btn>
+          <v-row justify-center>
+            <v-btn @click="onSubmitEditedDataPointValue(false)" variant = "flat" size="small" class="ghd-blue ghd-button-text">Cancel</v-btn>
             <v-btn :disabled="disableEditDataPointSubmit()" @click="onSubmitEditedDataPointValue(true)"
-                   outline
-                   small class="ghd-blue ghd-button ghd-button-text">
+            variant = "outlined"
+            size="small" class="ghd-blue ghd-button ghd-button-text">
               Save
             </v-btn>            
-          </v-layout>
+          </v-row>
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </v-layout>
+  </v-row>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {Action, State} from 'vuex-class';
+<script lang="ts" setup>
+import { getUrl } from '@/shared/utils/get-url';
+import Vue, {ShallowRef, computed, shallowRef} from 'vue';
 import {EquationEditorDialogData} from '@/shared/models/modals/equation-editor-dialog-data';
 import {formulas} from '@/shared/utils/formulas';
 import {AxiosResponse} from 'axios';
@@ -415,143 +386,145 @@ import {getBlankGuid, getNewGuid} from '@/shared/utils/uuid-utils';
 import ValidationService from '@/services/validation.service';
 import {EquationValidationParameters, ValidationResult} from '@/shared/models/iAM/expression-validation';
 import { emptyUserCriteriaFilter } from '../models/iAM/user-criteria-filter';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class EquationEditorDialog extends Vue {
-    @Prop() dialogData: EquationEditorDialogData;
-    @Prop() isFromPerformanceCurveEditor: Boolean;
+let store = useStore();
+const emit = defineEmits(['submit'])
+const props = defineProps<{
+  dialogData: EquationEditorDialogData,
+  isFromPerformanceCurveEditor: Boolean
+    }>()
+    let showDialogComputed = computed(() => props.dialogData.showDialog);
+    
+let stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributes);
+async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
+async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
 
-    @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
-
-    @Action('getAttributes') getAttributesAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-
-  equation: Equation = {...emptyEquation, id: getNewGuid()};
-  attributesList: string[] = [];
-  formulasList: string[] = formulas;
-  expression: string = '';
-  isPiecewise: boolean = false;
-  textareaInput: HTMLTextAreaElement = {} as HTMLTextAreaElement;
-  cursorPosition: number = 0;
-  cannotSubmit: boolean = true;
-  invalidExpressionMessage: string = '';
-  validExpressionMessage: string = '';
-  piecewiseGridHeaders: DataTableHeader[] = [
-    {text: 'Time', value: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {text: 'Condition', value: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {text: 'Action', value: '', align: 'left', sortable: false, class: '', width: '10px'}
-  ];
-  timeInRatingGridHeaders: DataTableHeader[] = [
-    {text: 'Condition', value: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {text: 'Time', value: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {text: 'Action', value: '', align: 'left', sortable: false, class: '', width: '10px'}
-  ];
-  piecewiseGridData: TimeConditionDataPoint[] = [];
-  timeInRatingGridData: TimeConditionDataPoint[] = [];
-  showAddDataPointPopup: boolean = false;
-  newDataPoint: TimeConditionDataPoint = clone(emptyTimeConditionDataPoint);
-  xAxisMax: number = 0;
-  yAxisMax: number = 0;
-  dataPointsSource: number[][] = [];
-  showAddMultipleDataPointsPopup: boolean = false;
-  multipleDataPoints: string = '';
-  selectedTab: number = 0;
-  showEditDataPointPopup: boolean = false;
-  editedDataPointProperty: string = '';
-  editedDataPoint: TimeConditionDataPoint = clone(emptyTimeConditionDataPoint);
-  piecewiseRegex: RegExp = /(\(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*\))/;
-  multipleDataPointsRegex: RegExp = /(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*)/;
-  uuidNIL: string = getBlankGuid();
-
-  /**
-   * mounted => This event handler is used to set the textareaInput object, set the cursorPosition object, and to trigger
+  let equation: Equation = {...emptyEquation, id: getNewGuid()};
+  const attributesList = ref<string[]>([]);  
+  const formulasList = ref<string[]>(formulas);
+  let expression = shallowRef<string>('');
+  const isPiecewise = ref<boolean>(false);
+  const textareaInput: any = ref(null);
+  let cursorPosition: number = 0;
+  const cannotSubmit = ref<boolean>(true);
+  const invalidExpressionMessage = ref('');
+  const validExpressionMessage = ref('');
+  const piecewiseGridHeaders = ref<any[]>([
+    {title: 'Time', key: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {title: 'Condition', key: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {title: 'Action', key: '', align: 'left', sortable: false, class: '', width: '10px'}
+  ]);
+  const timeInRatingGridHeaders= ref<any[]>([
+    {title: 'Condition', key: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {title: 'Time', key: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
+    {title: 'Action', key: '', align: 'left', sortable: false, class: '', width: '10px'}
+  ]);
+  const piecewiseGridData = ref<TimeConditionDataPoint[]>([]); 
+  const timeInRatingGridData = ref<TimeConditionDataPoint[]>([]);
+  const showAddDataPointPopup = ref<boolean>(false);
+  const newDataPoint = ref<TimeConditionDataPoint>(clone(emptyTimeConditionDataPoint));
+  let xAxisMax: number = 0;
+  let yAxisMax: number = 0;
+  const dataPointsSource = ref<number[][]>([]);
+  const showAddMultipleDataPointsPopup = ref<boolean>(false);
+  const multipleDataPoints = ref('');;
+  const selectedTab = ref<number>(0);
+  const showEditDataPointPopup = ref<boolean>(false);
+  let editedDataPointProperty: string = '';
+  const editedDataPoint = ref<TimeConditionDataPoint>(clone(emptyTimeConditionDataPoint));
+  let piecewiseRegex: RegExp = /(\(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*\))/;
+  let multipleDataPointsRegex: RegExp = /(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*)/;
+  let uuidNIL: string = getBlankGuid();
+/**
+   * mounted => event handler is used to set the textareaInput object, set the cursorPosition object, and to trigger
    * a function to set the attributesList object.
    */
-  mounted() {
-    this.textareaInput = document.getElementById('equation_textarea') as HTMLTextAreaElement;
-    this.cursorPosition = this.textareaInput.selectionStart;
-    if (hasValue(this.stateNumericAttributes)) {
-      this.setAttributesList();
+  onMounted(()=>mounted())
+   function mounted() {
+    if (hasValue(stateNumericAttributes.value)) {
+      setAttributesList();
     }
   }
 
   /**
-   * onStateNumericAttributesChanged => This stateNumericAttributes watcher is used to trigger a function to set the
+   * onStateNumericAttributesChanged => stateNumericAttributes watcher is used to trigger a function to set the
    * attributesList object.
    */
-  @Watch('stateNumericAttributes')
-  onStateNumericAttributesChanged() {
-    if (hasValue(this.stateNumericAttributes)) {
-      this.setAttributesList();
+  watch(stateNumericAttributes,()=>onStateNumericAttributesChanged())
+  function onStateNumericAttributesChanged() {
+    if (hasValue(stateNumericAttributes.value)) {
+      setAttributesList();
     }
   }
 
   /**
-   * onDialogDataChanged => This dialogData watcher is used to set the equation object, set the expression object, set
+   * onDialogDataChanged => dialogData watcher is used to set the equation object, set the expression object, set
    * the isPiecewise object, set the selectedTab object (if expression is piecewise), and trigger a function to set
    * some of the piecewise chart properties (if expression is piecewise).
    */
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    this.equation = {
-      id: this.dialogData.equation.id === this.uuidNIL ? this.equation.id : this.dialogData.equation.id,
-      expression: !isNil(this.dialogData.equation.expression) ? this.dialogData.equation.expression : ''
+  watch(()=>props.dialogData,()=>onDialogDataChanged())
+  function onDialogDataChanged() {
+    equation = {
+      id: props.dialogData.equation.id === uuidNIL ? equation.id : props.dialogData.equation.id,
+      expression: !isNil(props.dialogData.equation.expression) ? props.dialogData.equation.expression : ''
     };
-    this.expression = this.equation.expression;
+    expression.value = equation.expression;
 
-    if (this.piecewiseRegex.test(this.expression)) {
-      this.isPiecewise = true;
-      this.selectedTab = 1;
-      this.onParsePiecewiseEquation();
+    if (piecewiseRegex.test(expression.value)) {
+      isPiecewise.value = true;
+      selectedTab.value = 1;
+      onParsePiecewiseEquation();
     } else {
-      this.isPiecewise = false;
+      isPiecewise.value = false;
     }
   }
 
   /**
-   * onPiecewiseGridDataChanged => This piecewiseGridData watcher is used to reset the cannotSubmit, invalidExpressionMessage,
+   * onPiecewiseGridDataChanged => piecewiseGridData watcher is used to reset the cannotSubmit, invalidExpressionMessage,
    * and validExpressionMessage objects. It will also set the xAxisMax, yAxisMax, and dataPointsSource objects.
    */
-  @Watch('piecewiseGridData')
-  onPiecewiseGridDataChanged() {
-    this.cannotSubmit = true;
-    this.invalidExpressionMessage = '';
-    this.validExpressionMessage = '';
+  watch(piecewiseGridData,()=> onPiecewiseGridDataChanged())
+  function onPiecewiseGridDataChanged() {
+    cannotSubmit.value = true;
+    invalidExpressionMessage.value = '';
+    validExpressionMessage.value = '';
 
-    let highestTimeValue: number = getLastPropertyValue('timeValue', this.piecewiseGridData);
+    let highestTimeValue: number = getLastPropertyValue('timeValue', piecewiseGridData.value);
     if (highestTimeValue % 2 !== 0) {
       highestTimeValue += 1;
     }
-    this.xAxisMax = highestTimeValue;
+    xAxisMax = highestTimeValue;
 
-    let highestConditionValue: number = getLastPropertyValue('conditionValue', this.piecewiseGridData);
+    let highestConditionValue: number = getLastPropertyValue('conditionValue', piecewiseGridData.value);
     if (highestConditionValue % 2 !== 0) {
       highestConditionValue += 1;
     }
-    this.yAxisMax = highestConditionValue;
+    yAxisMax = highestConditionValue;
 
-    this.dataPointsSource = this.piecewiseGridData.map((dataPoint: TimeConditionDataPoint) =>
+    dataPointsSource.value = piecewiseGridData.value.map((dataPoint: TimeConditionDataPoint) =>
         [dataPoint.timeValue, dataPoint.conditionValue]);
   }
 
   /**
-   * onExpressionChanged => This expression watcher is used to reset the invalidExpressionMessage and validExpressionMessage
+   * onExpressionChanged => expression watcher is used to reset the invalidExpressionMessage and validExpressionMessage
    * objects as well as set the cannotSubmit object.
    */
-  @Watch('expression')
-  onExpressionChanged() {
-    this.invalidExpressionMessage = '';
-    this.validExpressionMessage = '';
-    this.cannotSubmit = !(this.expression === '' && !this.isPiecewise);
-  }
+  watch(expression,()=>{
+    invalidExpressionMessage.value = '';
+    validExpressionMessage.value = '';
+    cannotSubmit.value = !(expression.value === '' && !isPiecewise.value);
+  })
 
   /**
-   * onParsePiecewiseEquation => This function is used to
+   * onParsePiecewiseEquation => function is used to
    */
-  onParsePiecewiseEquation() {
+  function onParsePiecewiseEquation() {
     let dataPoints: TimeConditionDataPoint[] = [];
 
-    const dataPointStrings: string[] = this.expression.split(this.piecewiseRegex)
+    const dataPointStrings: string[] = expression.value.split(piecewiseRegex)
         .filter((dataPoint: string) => hasValue(dataPoint) && dataPoint.indexOf(',') !== -1);
 
     dataPointStrings.forEach((dataPoint: string) => {
@@ -569,134 +542,134 @@ export default class EquationEditorDialog extends Vue {
 
     dataPoints = sortByProperty('timeValue', dataPoints);
 
-    this.syncDataGridLists(dataPoints);
+    syncDataGridLists(dataPoints);
   }
 
   /**
-   * setAttributesList => This function is used to set the attributesList object.
+   * setAttributesList => function is used to set the attributesList object.
    */
-  setAttributesList() {
-    this.attributesList = getPropertyValues('name', this.stateNumericAttributes);
+  function setAttributesList() {
+    attributesList.value = getPropertyValues('name', stateNumericAttributes.value);
   }
 
   /**
    * Setter: cursorPosition
    */
-  setCursorPosition() {
-    this.cursorPosition = this.textareaInput.selectionStart;
+   function setCursorPosition() {
+    cursorPosition = textareaInput.value.selectionStart;
   }
 
   /**
    * One of the formula list items in the list of formulas has been clicked
    * @param formula The formula string to add to the expression string
    */
-  onAddFormulaToEquation(formula: string) {
-    if (this.cursorPosition === 0) {
-      this.expression = `${formula}${this.expression}`;
-      this.cursorPosition = formula !== 'E' && formula !== 'PI'
+   function onAddFormulaToEquation(formula: string) {
+    if (cursorPosition === 0) {
+      expression.value = `${formula}${expression.value}`;
+      cursorPosition = formula !== 'E' && formula !== 'PI'
           ? formula.indexOf('(') + 1
           : formula.length;
-    } else if (this.cursorPosition === this.expression.length) {
-      this.expression = `${this.expression}${formula}`;
+    } else if (cursorPosition === expression.value.length) {
+      expression.value = `${expression.value}${formula}`;
       if (formula !== 'E' && formula !== 'PI') {
-        let i = this.expression.length;
-        while (this.expression.charAt(i) !== '(') {
+        let i = expression.value.length;
+        while (expression.value.charAt(i) !== '(') {
           i--;
         }
-        this.cursorPosition = i + 1;
+        cursorPosition = i + 1;
       } else {
-        this.cursorPosition = this.expression.length;
+        cursorPosition = expression.value.length;
       }
     } else {
-      const output = `${this.expression.substr(0, this.cursorPosition)}${formula}`;
-      this.expression = `${output}${this.expression.substr(this.cursorPosition)}`;
+      const output = `${expression.value.substr(0, cursorPosition)}${formula}`;
+      expression.value = `${output}${expression.value.substr(cursorPosition)}`;
       if (formula !== 'E' && formula !== 'PI') {
         let i = output.length;
         while (output.charAt(i) !== '(') {
           i--;
         }
-        this.cursorPosition = i + 1;
+        cursorPosition = i + 1;
       } else {
-        this.cursorPosition = output.length;
+        cursorPosition = output.length;
       }
     }
-    this.textareaInput.focus();
+    textareaInput.value.focus();
   }
 
   /**
-   * onAddValueToExpression => This function is used to add a string value to the expression object using the cursorPosition
+   * onAddValueToExpression => function is used to add a string value to the expression object using the cursorPosition
    * object's value and then to reset the cursorPosition object's value after modifying the expression object. Finally,
    * the textareaInput object is put into focus.
    */
-  onAddValueToExpression(value: string) {
-    if (this.cursorPosition === 0) {
-      this.cursorPosition = value.length;
-      this.expression = `${value}${this.expression}`;
-    } else if (this.cursorPosition === this.expression.length) {
-      this.expression = `${this.expression}${value}`;
-      this.cursorPosition = this.expression.length;
+   function onAddValueToExpression(value: string) {
+    if (cursorPosition === 0) {
+      cursorPosition = value.length;
+      expression.value = `${value}${expression.value}`;
+    } else if (cursorPosition === expression.value.length) {
+      expression.value = `${expression.value}${value}`;
+      cursorPosition = expression.value.length;
     } else {
-      const output = `${this.expression.substr(0, this.cursorPosition)}${value}`;
-      this.expression = `${output}${this.expression.substr(this.cursorPosition)}`;
-      this.cursorPosition = output.length;
+      const output = `${expression.value.substr(0, cursorPosition)}${value}`;
+      expression.value = `${output}${expression.value.substr(cursorPosition)}`;
+      cursorPosition = output.length;
     }
-    this.textareaInput.focus();
+    textareaInput.value.focus();
   }
 
   /**
-   * setTextareaCursorPosition => This function is used to set the textareaInput object's cursor position.
+   * setTextareaCursorPosition => function is used to set the textareaInput object's cursor position.
    */
-  setTextareaCursorPosition() {
+   function setTextareaCursorPosition() {
     setTimeout(() =>
-        this.textareaInput.setSelectionRange(this.cursorPosition, this.cursorPosition)
+        textareaInput.value.setSelectionRange(cursorPosition, cursorPosition)
     );
   }
 
   /**
-   * onAddTimeAttributeDataPoint => This function is used to set the newDataPoint object's id property with a new uuid
+   * onAddTimeAttributeDataPoint => function is used to set the newDataPoint object's id property with a new uuid
    * and then set the showAddDataPointPopup object to 'true'.
    */
-  onAddTimeAttributeDataPoint() {
-    this.newDataPoint = {
-      ...this.newDataPoint,
+   function onAddTimeAttributeDataPoint() {
+    newDataPoint.value = {
+      ...newDataPoint.value,
       id: getNewGuid()
     };
-    this.showAddDataPointPopup = true;
+    showAddDataPointPopup.value = true;
   }
 
   /**
-   * onSubmitNewDataPoint => This function is used to parse the newDataPoint object's timeValue and conditionValue properties
+   * onSubmitNewDataPoint => function is used to parse the newDataPoint object's timeValue and conditionValue properties
    * and then sync it with the other data point values between the piecewise and time-in-rating data grids/charts.
    */
-  onSubmitNewDataPoint(submit: boolean) {
-    this.showAddDataPointPopup = false;
+   function onSubmitNewDataPoint(submit: boolean) {
+    showAddDataPointPopup.value = false;
 
     if (submit) {
       const newParsedDataPoint: TimeConditionDataPoint = {
-        ...this.newDataPoint,
-        timeValue: parseInt(this.newDataPoint.timeValue.toString()),
-        conditionValue: parseFloat(this.newDataPoint.conditionValue.toString())
+        ...newDataPoint.value,
+        timeValue: parseInt(newDataPoint.value.timeValue.toString()),
+        conditionValue: parseFloat(newDataPoint.value.conditionValue.toString())
       };
 
-      const dataPoints: TimeConditionDataPoint[] = this.selectedTab === 1
-          ? [...this.piecewiseGridData, newParsedDataPoint]
-          : [...this.timeInRatingGridData, newParsedDataPoint];
+      const dataPoints: TimeConditionDataPoint[] = selectedTab.value === 1
+          ? [...piecewiseGridData.value, newParsedDataPoint]
+          : [...timeInRatingGridData.value, newParsedDataPoint];
 
-      this.syncDataGridLists(dataPoints);
+      syncDataGridLists(dataPoints);
     }
 
-    this.newDataPoint = clone(emptyTimeConditionDataPoint);
+    newDataPoint.value = clone(emptyTimeConditionDataPoint);
   }
 
   /**
-   * syncDataGridLists => This function is used to calculate and sync the data points between the piecewise and
+   * syncDataGridLists => function is used to calculate and sync the data points between the piecewise and
    * time-in-rating data grids/charts.
    */
-  syncDataGridLists(dataPoints: TimeConditionDataPoint[]) {
+   function syncDataGridLists(dataPoints: TimeConditionDataPoint[]) {
     let piecewiseData: TimeConditionDataPoint[] = [];
     let timeInRatingData: TimeConditionDataPoint[] = [];
 
-    if (this.selectedTab === 1) {
+    if (selectedTab.value === 1) {
       piecewiseData = sortByProperty('timeValue', dataPoints)
           .filter((dataPoint: TimeConditionDataPoint) => dataPoint.timeValue !== 0);
 
@@ -745,35 +718,35 @@ export default class EquationEditorDialog extends Vue {
       }
     }
 
-    this.piecewiseGridData = piecewiseData;
-    this.timeInRatingGridData = timeInRatingData;
+    piecewiseGridData.value = piecewiseData;
+    timeInRatingGridData.value = timeInRatingData;
   }
 
   /**
-   * onSubmitNewDataPointMulti => This function is used to parse the Multiple Data Points Popup's 'submit' result and
+   * onSubmitNewDataPointMulti => function is used to parse the Multiple Data Points Popup's 'submit' result and
    * then to sync the parsed data point values between the piecewise and time-in-rating data grids/charts.
    */
-  onSubmitNewDataPointMulti(submit: boolean) {
+   function onSubmitNewDataPointMulti(submit: boolean) {
     if (submit) {
-      const parsedMultiDataPoints: TimeConditionDataPoint[] = this.parseMultipleDataPoints();
+      const parsedMultiDataPoints: TimeConditionDataPoint[] = parseMultipleDataPoints();
 
-      const dataPoints = this.selectedTab === 1
-          ? [...this.piecewiseGridData, ...parsedMultiDataPoints]
-          : [...this.timeInRatingGridData, ...parsedMultiDataPoints];
+      const dataPoints = selectedTab.value === 1
+          ? [...piecewiseGridData.value, ...parsedMultiDataPoints]
+          : [...timeInRatingGridData.value, ...parsedMultiDataPoints];
 
-      this.syncDataGridLists(dataPoints);
+      syncDataGridLists(dataPoints);
     }
 
-    this.showAddMultipleDataPointsPopup = false;
-    this.multipleDataPoints = '';
+    showAddMultipleDataPointsPopup.value = false;
+    multipleDataPoints.value = '';
   }
 
   /**
-   * parseMultipleDataPoints => This function is used to parse the multipleDataPoints string into a list of
+   * parseMultipleDataPoints => function is used to parse the multipleDataPoints string into a list of
    * TimeConditionDataPoint objects.
    */
-  parseMultipleDataPoints() {
-    const splitDataPoints: string[] = this.multipleDataPoints
+   function parseMultipleDataPoints() {
+    const splitDataPoints: string[] = multipleDataPoints.value
         .split(/\r?\n/).filter((dataPoints: string) => dataPoints !== '');
 
     if (hasValue(splitDataPoints)) {
@@ -794,65 +767,65 @@ export default class EquationEditorDialog extends Vue {
   }
 
   /**
-   * onEditDataPoint => This function is used to set the objects editedDataPoint, editedDataPointProperty, and
+   * onEditDataPoint => function is used to set the objects editedDataPoint, editedDataPointProperty, and
    * showEditDataPointPopup.
    */
-  onEditDataPoint(dataPoint: TimeConditionDataPoint, property: string) {
-    this.editedDataPoint = clone(dataPoint);
-    this.editedDataPointProperty = property;
-    this.showEditDataPointPopup = true;
+   function onEditDataPoint(dataPoint: TimeConditionDataPoint, property: string) {
+    editedDataPoint.value = clone(dataPoint);
+    editedDataPointProperty = property;
+    showEditDataPointPopup.value = true;
   }
 
   /**
-   * onSubmitEditedDataPointValue => This function is used to update a data point that was edited via the
+   * onSubmitEditedDataPointValue => function is used to update a data point that was edited via the
    * Edit Data Point Popup and then to sync the changes between the piecewise and time-in-rating data grids/charts.
    */
-  onSubmitEditedDataPointValue(submit: boolean) {
+   function onSubmitEditedDataPointValue(submit: boolean) {
     if (submit) {
-      let dataPoints = this.selectedTab === 1 ? clone(this.piecewiseGridData) : clone(this.timeInRatingGridData);
-      var timeValue = parseFloat(this.editedDataPoint.timeValue.toString());
-      var conditionValue = parseFloat(this.editedDataPoint.conditionValue.toString());
+      let dataPoints = selectedTab.value === 1 ? clone(piecewiseGridData.value) : clone(timeInRatingGridData.value);
+      var timeValue = parseFloat(editedDataPoint.value.timeValue.toString());
+      var conditionValue = parseFloat(editedDataPoint.value.conditionValue.toString());
       if (!isNaN(timeValue) && !isNaN(conditionValue)) {
-        this.editedDataPoint.timeValue = timeValue;
-        this.editedDataPoint.conditionValue = conditionValue;
+        editedDataPoint.value.timeValue = timeValue;
+        editedDataPoint.value.conditionValue = conditionValue;
         dataPoints = update(
-          findIndex(propEq('id', this.editedDataPoint.id), dataPoints), this.editedDataPoint, dataPoints
+          findIndex(propEq('id', editedDataPoint.value.id), dataPoints), editedDataPoint.value, dataPoints
         );
 
-        this.syncDataGridLists(dataPoints);
+        syncDataGridLists(dataPoints);
       }
     }
 
-    this.editedDataPoint = clone(emptyTimeConditionDataPoint);
-    this.editedDataPointProperty = '';
-    this.showEditDataPointPopup = false;
+    editedDataPoint.value = clone(emptyTimeConditionDataPoint);
+    editedDataPointProperty = '';
+    showEditDataPointPopup.value = false;
   }
 
   /**
-   * onRemoveTimeAttributeDataPoint => This function is used to remove a TimeConditionDataPoint object from either the
+   * onRemoveTimeAttributeDataPoint => function is used to remove a TimeConditionDataPoint object from either the
    * piecewise data grid/chart list or the time-in-rating data grid/chart list and then to sync the data point values
    * between the piecewise and time-in-rating data grids/charts.
    */
-  onRemoveTimeAttributeDataPoint(id: string) {
-    const dataPoints: TimeConditionDataPoint[] = this.selectedTab === 1
-        ? this.piecewiseGridData.filter((dataPoint: TimeConditionDataPoint) => dataPoint.id !== id)
-        : this.timeInRatingGridData.filter((dataPoint: TimeConditionDataPoint) => dataPoint.id !== id);
+   function onRemoveTimeAttributeDataPoint(id: string) {
+    const dataPoints: TimeConditionDataPoint[] = selectedTab.value === 1
+        ? piecewiseGridData.value.filter((dataPoint: TimeConditionDataPoint) => dataPoint.id !== id)
+        : timeInRatingGridData.value.filter((dataPoint: TimeConditionDataPoint) => dataPoint.id !== id);
 
-    this.syncDataGridLists(dataPoints);
+    syncDataGridLists(dataPoints);
   }
 
-    disableEquationCheck() {
-        return this.isPiecewise ? !hasValue(this.onParseTimeAttributeDataPoints()) : !hasValue(this.expression);
+  function disableEquationCheck() {
+        return isPiecewise.value ? !hasValue(onParseTimeAttributeDataPoints()) : !hasValue(expression.value);
     }
 
   /**
-   * onCheckEquation => This function is used to trigger a service function to make an HTTP request to the backend API
+   * onCheckEquation => function is used to trigger a service function to make an HTTP request to the backend API
    * equation validation service in order to validate the current expression.
    */
-  onCheckEquation() {
+   function onCheckEquation() {
     const equationValidationParameters: EquationValidationParameters = {
-      expression: this.isPiecewise ? this.onParseTimeAttributeDataPoints() : this.expression,
-      isPiecewise: this.isPiecewise,
+      expression: isPiecewise.value ? onParseTimeAttributeDataPoints() : expression.value,
+      isPiecewise: isPiecewise.value,
       currentUserCriteriaFilter: {...emptyUserCriteriaFilter},
       networkId: getBlankGuid()
     };
@@ -862,90 +835,90 @@ export default class EquationEditorDialog extends Vue {
           if (hasValue(response, 'data')) {
             const result: ValidationResult = response.data as ValidationResult;
             if (result.isValid) {
-              this.validExpressionMessage = 'Equation is valid.';
-              this.invalidExpressionMessage = '';
-              this.cannotSubmit = false;
+              validExpressionMessage.value = 'Equation is valid.';
+              invalidExpressionMessage.value = '';
+              cannotSubmit.value = false;
             } else {
-              this.invalidExpressionMessage = result.validationMessage;
-              this.validExpressionMessage = '';
-              this.cannotSubmit = true;
+              invalidExpressionMessage.value = result.validationMessage;
+              validExpressionMessage.value = '';
+              cannotSubmit.value = true;
             }
           }
         });
   }
 
   /**
-   * onParseTimeAttributeDataPoints => This function is used to parse a list of TimeAttributeDataPoints objects into a
+   * onParseTimeAttributeDataPoints => function is used to parse a list of TimeAttributeDataPoints objects into a
    * string of (x,y) data points.
    */
-  onParseTimeAttributeDataPoints() {
-    return this.piecewiseGridData.map((timeAttributeDataPoint: TimeConditionDataPoint) =>
+   function onParseTimeAttributeDataPoints() {
+    return piecewiseGridData.value.map((timeAttributeDataPoint: TimeConditionDataPoint) =>
         `(${timeAttributeDataPoint.timeValue},${timeAttributeDataPoint.conditionValue})`
     ).join('');
   }
 
   /**
-   * onSubmit => This function is used to emit the modified equation object back to the parent component.
+   * onSubmit => function is used to emit the modified equation object back to the parent component.
    */
-  onSubmit(submit: boolean) {
-    this.resetComponentCalculatedProperties();
+   function onSubmit(submit: boolean) {
+    resetComponentCalculatedProperties();
 
     if (submit) {
-      this.equation.expression = this.isPiecewise ? this.onParseTimeAttributeDataPoints() : this.expression;
-      this.$emit('submit', this.equation);
+      equation.expression = isPiecewise.value ? onParseTimeAttributeDataPoints() : expression.value;
+      emit('submit', equation);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.piecewiseGridData = [];
-    this.timeInRatingGridData = [];
-    this.selectedTab = 0;
-    this.equation = {...emptyEquation, id: getNewGuid()};
+    piecewiseGridData.value = [];
+    timeInRatingGridData.value = [];
+    selectedTab.value = 0;
+    equation = {...emptyEquation, id: getNewGuid()};
   }
 
   /**
-   * resetComponentCalculatedProperties => This function is used to reset the cursorPosition, invalidExpressionMessage,
+   * resetComponentCalculatedProperties => function is used to reset the cursorPosition, invalidExpressionMessage,
    * and validExpressionMessage objects.
    */
-  resetComponentCalculatedProperties() {
-    this.cursorPosition = 0;
-    this.invalidExpressionMessage = '';
-    this.validExpressionMessage = '';
+   function resetComponentCalculatedProperties() {
+    cursorPosition = 0;
+    invalidExpressionMessage.value = '';
+    validExpressionMessage.value = '';
   }
 
   /**
-   * disableNewDataPointSubmit => This function is used to disable the New Data Point Popup's 'submit' button if the data
+   * disableNewDataPointSubmit => function is used to disable the New Data Point Popup's 'submit' button if the data
    * point value is not valid.
    */
-  disableNewDataPointSubmit() {
-    return this.timeValueIsNotEmpty(this.newDataPoint.timeValue.toString()) !== true ||
-        this.timeValueIsGreaterThanZero(this.newDataPoint.timeValue.toString()) !== true ||
-        this.timeValueIsNew(this.newDataPoint.timeValue.toString()) !== true ||
-        this.conditionValueIsNotEmpty(this.newDataPoint.conditionValue.toString()) !== true ||
-        this.conditionValueIsNew(this.newDataPoint.conditionValue.toString()) !== true;
+   function disableNewDataPointSubmit() {
+    return timeValueIsNotEmpty(newDataPoint.value.timeValue.toString()) !== true ||
+        timeValueIsGreaterThanZero(newDataPoint.value.timeValue.toString()) !== true ||
+        timeValueIsNew(newDataPoint.value.timeValue.toString()) !== true ||
+        conditionValueIsNotEmpty(newDataPoint.value.conditionValue.toString()) !== true ||
+        conditionValueIsNew(newDataPoint.value.conditionValue.toString()) !== true;
   }
 
   /**
-   * disableMultipleDataPointsSubmit => This function is used to disable the Multiple Data Points Popup's 'submit' button
+   * disableMultipleDataPointsSubmit => function is used to disable the Multiple Data Points Popup's 'submit' button
    * if the multiple data points' values are not valid.
    */
-  disableMultipleDataPointsSubmit() {
-    return this.multipleDataPoints === '' ||
-        this.isCorrectMultipleDataPointsFormat() !== true ||
-        this.multipleDataPointsAreNew() !== true;
+   function disableMultipleDataPointsSubmit() {
+    return multipleDataPoints.value === '' ||
+        isCorrectMultipleDataPointsFormat() !== true ||
+        multipleDataPointsAreNew() !== true;
   }
 
   /**
-   * disableEditDataPointSubmit => This function is used to disable the Edit Data Point Popup's 'submit' button if the
+   * disableEditDataPointSubmit => function is used to disable the Edit Data Point Popup's 'submit' button if the
    * data point's modified value is not valid.
    */
-  disableEditDataPointSubmit() {
+   function disableEditDataPointSubmit() {
 
-      return (this.timeValueIsNotEmpty(this.editedDataPoint.timeValue.toString()) !== true ||
-          this.timeValueIsGreaterThanZero(this.editedDataPoint.timeValue.toString()) !== true ||
-          this.timeValueIsNew(this.editedDataPoint.timeValue.toString()) !== true) &&
-       (this.conditionValueIsNotEmpty(this.editedDataPoint.conditionValue.toString()) !== true ||
-          this.conditionValueIsNew(this.editedDataPoint.conditionValue.toString()) !== true);
+      return (timeValueIsNotEmpty(editedDataPoint.value.timeValue.toString()) !== true ||
+          timeValueIsGreaterThanZero(editedDataPoint.value.timeValue.toString()) !== true ||
+          timeValueIsNew(editedDataPoint.value.timeValue.toString()) !== true) &&
+       (conditionValueIsNotEmpty(editedDataPoint.value.conditionValue.toString()) !== true ||
+          conditionValueIsNew(editedDataPoint.value.conditionValue.toString()) !== true);
     
   }
 
@@ -953,7 +926,7 @@ export default class EquationEditorDialog extends Vue {
    * Rule: Checks if a given time value is > 0
    * @param value
    */
-  timeValueIsGreaterThanZero(value: string) {
+   function timeValueIsGreaterThanZero(value: string) {
     return parseInt(value) > 0 || 'Time values cannot be less than or equal to 0';
   }
 
@@ -961,9 +934,9 @@ export default class EquationEditorDialog extends Vue {
    * Rule: Checks if a given time value is new
    * @param value
    */
-  timeValueIsNew(value: string) {
-    if (this.selectedTab === 1) {
-      const timeValues: number[] = getPropertyValues('timeValue', this.piecewiseGridData);
+   function timeValueIsNew(value: string) {
+    if (selectedTab.value === 1) {
+      const timeValues: number[] = getPropertyValues('timeValue', piecewiseGridData.value);
 
       return timeValues.indexOf(parseInt(value)) === -1 || 'Time value already exists';
     }
@@ -975,7 +948,7 @@ export default class EquationEditorDialog extends Vue {
    * Rule: Checks if a given time value is not empty
    * @param value
    */
-  timeValueIsNotEmpty(value: string) {
+   function timeValueIsNotEmpty(value: string) {
     return hasValue(value) || 'A value must be entered';
   }
 
@@ -983,10 +956,10 @@ export default class EquationEditorDialog extends Vue {
    * Rule: Checks if a given condition value is new
    * @param value
    */
-  conditionValueIsNew(value: string) {
-    const conditionValues: number[] = this.selectedTab === 1
-        ? getPropertyValues('conditionValue', this.piecewiseGridData)
-        : getPropertyValues('conditionValue', this.timeInRatingGridData);
+   function conditionValueIsNew(value: string) {
+    const conditionValues: number[] = selectedTab.value === 1
+        ? getPropertyValues('conditionValue', piecewiseGridData.value)
+        : getPropertyValues('conditionValue', timeInRatingGridData.value);
 
     return conditionValues.indexOf(parseFloat(value)) === -1 || 'Condition value already exists';
   }
@@ -995,25 +968,25 @@ export default class EquationEditorDialog extends Vue {
    * Rule: Checks if a given condition value is not empty
    * @param value
    */
-  conditionValueIsNotEmpty(value: string) {
+   function conditionValueIsNotEmpty(value: string) {
     return hasValue(value) || 'A value must be entered';
   }
 
   /**
    * Rule: Checks if the multiple data points popup's textarea is not empty
    */
-  multipleDataPointsFormIsNotEmpty() {
-    return this.multipleDataPoints !== '' || 'Values must be entered';
+   function multipleDataPointsFormIsNotEmpty() {
+    return multipleDataPoints.value !== '' || 'Values must be entered';
   }
 
   /**
    * Rule: Checks if the multiple data points popup's textarea has correctly formatted data
    */
-  isCorrectMultipleDataPointsFormat() {
-    const eachDataPointIsValid = this.multipleDataPoints
+   function isCorrectMultipleDataPointsFormat() {
+    const eachDataPointIsValid = multipleDataPoints.value
         .split(/\r?\n/).filter((dataPoints: string) => dataPoints !== '')
         .every((dataPoints: string) => {
-          return this.multipleDataPointsRegex.test(dataPoints) &&
+          return multipleDataPointsRegex.test(dataPoints) &&
               dataPoints.split(',').every((value: string) => !isNaN(parseFloat(value)));
         });
 
@@ -1023,26 +996,26 @@ export default class EquationEditorDialog extends Vue {
   /**
    * Rule: Checks if the multiple data points popup's textarea data has all new values for times & conditions
    */
-  multipleDataPointsAreNew() {
-    const dataPoints: TimeConditionDataPoint[] = this.parseMultipleDataPoints();
+   function multipleDataPointsAreNew() {
+    const dataPoints: TimeConditionDataPoint[] = parseMultipleDataPoints();
     const existingConditionValues: number[] = [];
     const existingTimeValues: number[] = [];
 
     const eachDataPointIsNew = dataPoints.every((dataPoint: TimeConditionDataPoint) => {
-      const conditionValueIsNew = this.conditionValueIsNew(dataPoint.conditionValue.toString()) === true;
-      const timeValueIsNew: boolean = this.timeValueIsNew(dataPoint.timeValue.toString()) === true;
+      const conditionEditorValueIsNew = conditionValueIsNew(dataPoint.conditionValue.toString()) === true;
+      const timeEditorValueIsNew: boolean = timeValueIsNew(dataPoint.timeValue.toString()) === true;
 
       if (!conditionValueIsNew) {
         existingConditionValues.push(dataPoint.conditionValue);
       }
 
-      if (this.selectedTab === 1 && !timeValueIsNew) {
+      if (selectedTab.value === 1 && !timeValueIsNew) {
         existingTimeValues.push(dataPoint.timeValue);
       }
 
-      return this.selectedTab === 1
-          ? conditionValueIsNew && timeValueIsNew
-          : conditionValueIsNew;
+      return selectedTab.value === 1
+          ? conditionEditorValueIsNew && timeEditorValueIsNew
+          : conditionEditorValueIsNew;
     });
 
     let conditionValuesAlreadyExistsMessage: string = '';
@@ -1065,7 +1038,6 @@ export default class EquationEditorDialog extends Vue {
 
     return eachDataPointIsNew || `${conditionValuesAlreadyExistsMessage}\n${timeValuesAlreadyExistsMessage}`;
   }
-}
 </script>
 
 <style>

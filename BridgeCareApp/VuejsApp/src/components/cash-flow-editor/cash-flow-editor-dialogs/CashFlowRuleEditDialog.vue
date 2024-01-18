@@ -1,50 +1,50 @@
 <template>
-  <v-dialog max-width="850px" persistent v-model="showDialog">
+    <v-dialog max-width="850px" v-model="showDialogComputed">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
-        <v-layout justify-space-between align-center>
-          <div class="ghd-control-dialog-header">Cash Flow Rule Settings: {{this.selectedCashFlowRule.name}}</div>
-          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+        <v-row justify="space-between" align-center>
+          <div class="ghd-control-dialog-header">Cash Flow Rule Settings: {{selectedCashFlowRule.name}}</div>
+          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
             </v-btn>
-        </v-layout>
+        </v-row>
       </v-card-title>
-
-            
-            <div style='height: 500px; max-width:850px' class="ghd-dialog-box-padding-center">
-                    <div style='max-height: 450px; overflow-y:auto;'>
             <v-data-table
                 :headers="cashFlowRuleDistributionGridHeaders"
                 :items="cashFlowDistributionRuleGridData"
-                sort-icon=$vuetify.icons.ghd-table-sort
+                sort-asc-icon="custom:GhdTableSortAscSvg"
+                sort-desc-icon="custom:GhdTableSortDescSvg"
                 hide-actions
                 class="ghd-table v-table__overflow">
-                <template slot="items" slot-scope="props">
+                <template v-slot:item ="item" slot="items" slot-scope="props">
+                    <tr>
                     <td>
-                        <v-edit-dialog
-                            :return-value.sync="props.item.durationInYears"
-                            @save="onEditSelectedLibraryListData(props.item,'durationInYears')"
+                        <editDialog
+                            v-model:return-value="item.item.durationInYears"
+                            @save="onEditSelectedLibraryListData(item,'durationInYears')"
                             full-width
-                            large
+                            size="large"
                             lazy
                             persistent>
                             <v-text-field
                                 id="CashFlowRuleEditDialog-yearReadOnly-vtextfield"
                                 readonly
                                 single-line
+                                variant="underlined"
                                 class="sm-txt"
-                                :value="props.item.durationInYears"
+                                :model-value="item.item.durationInYears"
                                 :rules="[
                                     rules['generalRules'].valueIsNotEmpty,
                                     rules[
                                         'cashFlowRules'
-                                    ].isDurationGreaterThanPreviousDuration(props.item,selectedCashFlowRule)]"/>
-                            <template slot="input">
+                                    ].isDurationGreaterThanPreviousDuration(item.item,selectedCashFlowRule)]"/>
+                            <template v-slot:input>
                                 <v-text-field
                                     id="CashFlowRuleEditDialog-yearEdit-vtextfield"
                                     label="Edit"
                                     single-line
-                                    v-model.number="props.item.durationInYears"
+                                    variant="underlined"
+                                    v-model.number="item.item.durationInYears"
                                     :rules="[
                                         rules[
                                             'generalRules'
@@ -52,54 +52,47 @@
                                         rules[
                                             'cashFlowRules'
                                         ].isDurationGreaterThanPreviousDuration(
-                                            props.item,
+                                            item,
                                             selectedCashFlowRule
                                         )
                                     ]"/>
                             </template>
-                        </v-edit-dialog>
+                        </editDialog>
                     </td>
                     <td>
-                        <v-edit-dialog
-                            :return-value.sync="props.item.costCeiling"
-                            large
+                        <editDialog
+                            v-model:return-value="item.item.costCeiling"
+                            size="large"
                             lazy
                             persistent
                             full-width
-                            @save="onEditSelectedLibraryListData(props.item,'costCeiling')"
-                            @open="onOpenCostCeilingEditDialog(props.item.id)">
-                            <v-text-field
+                            @save="onEditSelectedLibraryListData(item.item,'costCeiling')"
+                            @open="onOpenCostCeilingEditDialog(item.item.id)">
+                            <currencyTextbox
                                 id="CashFlowRuleEditDialog-dollarReadOnly-vtextfield"
                                 readonly
                                 single-line
+                                variant="underlined"
                                 class="sm-txt"
-                                :value="
-                                    formatAsCurrency(props.item.costCeiling)"
+                                :model-value="item.item.costCeiling"
                                 :rules="[
                                     rules['generalRules']
                                         .valueIsNotEmpty,
                                     rules[
                                         'cashFlowRules'
                                     ].isAmountGreaterThanOrEqualToPreviousAmount(
-                                        props.item,
+                                        item,
                                         selectedCashFlowRule
                                     )
                                 ]"/>
-                            <template slot="input">
-                                <v-text-field
+                            <template v-slot:input>
+                                <currencyTextbox
                                     name="CashFlowRuleEditDialog-dollarEdit-vtextfield"
                                     label="Edit"
                                     single-line
-                                    :id="props.item.id"
-                                    v-model="props.item.costCeiling"
-                                    v-currency="{
-                                        currency: {
-                                            prefix: '$',
-                                            suffix: ''
-                                        },
-                                        locale: 'en-US',
-                                        distractionFree: false
-                                    }"
+                                    variant="underlined"
+                                    :id="item.item.id"
+                                    v-model="item.item.costCeiling"
                                     :rules="[
                                         rules[
                                             'generalRules'
@@ -107,39 +100,41 @@
                                         rules[
                                             'cashFlowRules'
                                         ].isAmountGreaterThanOrEqualToPreviousAmount(
-                                            props.item,
+                                            item,
                                             selectedCashFlowRule
                                         )
                                     ]"/>
                             </template>
-                        </v-edit-dialog>
+                        </editDialog>
                     </td>
                     <td>
-                        <v-edit-dialog
-                            :return-value.sync="props.item.yearlyPercentages"
-                            @save="onEditSelectedLibraryListData(props.item,'yearlyPercentages')"
+                        <editDialog
+                            v-model:return-value="item.item.yearlyPercentages"
+                            @save="onEditSelectedLibraryListData(item.item,'yearlyPercentages')"
                             full-width
-                            large
+                            size="large"
                             lazy
                             persistent>
                             <v-text-field
+                            variant="underlined"
                                 id="CashFlowRuleEditDialog-distributionReadOnly-vtextfield"
                                 readonly
                                 single-line
                                 class="sm-txt"
-                                :value="props.item.yearlyPercentages"
+                                :model-value="item.item.yearlyPercentages"
                                 :rules="[
                                     rules['generalRules']
                                         .valueIsNotEmpty,
                                     rules['cashFlowRules']
                                         .doesTotalOfPercentsEqualOneHundred
                                 ]"/>
-                            <template slot="input">
+                            <template v-slot:input>
                                 <v-text-field
                                     id="CashFlowRuleEditDialog-distributionEdit-vtextfield"
                                     label="Edit"
                                     single-line
-                                    v-model="props.item.yearlyPercentages"
+                                    variant="underlined"
+                                    v-model="item.item.yearlyPercentages"
                                     :rules="[
                                         rules[
                                             'generalRules'
@@ -150,47 +145,46 @@
                                             .doesTotalOfPercentsEqualOneHundred
                                     ]"/>
                             </template>
-                        </v-edit-dialog>
+                        </editDialog>
                     </td>
                     <td>
                         <v-btn
-                            @click="onDeleteCashFlowDistributionRule(props.item.id)"
+                            @click="onDeleteCashFlowDistributionRule(item.item.id)"
                             class="ghd-blue"
+                            variant="flat"
                             icon>
-                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                            <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </td>
+                    </tr>
                 </template>
             </v-data-table>
-                </div>
-                <v-btn @click="onAddCashFlowDistributionRule" class='ghd-blue ghd-button' flat id="CashFlowRuleEditDialog-addDistributionRule-btn">
+                <v-btn @click="onAddCashFlowDistributionRule" class='ghd-blue ghd-button' variant = "flat" id="CashFlowRuleEditDialog-addDistributionRule-btn">
                     Add Distribution Rule
                 </v-btn>
-            </div>
                      
 
                             
       <v-card-actions>
-        <v-layout justify-center row>
-            <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline id="CashFlowRuleEditDialog-cancel-btn">
+        <v-row justify="center">
+            <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" id="CashFlowRuleEditDialog-cancel-btn">
             Cancel
           </v-btn>
           <v-btn @click="onSubmit(true)"
                  :disabled="!hasUnsavedChanges || !isDataValid"
                  id="CashFlowRuleEditDialog-submit-btn"
-                 class='ghd-blue hd-button-text ghd-button' flat>
+                 class='ghd-blue hd-button-text ghd-button' variant = "flat">
             Submit
           </v-btn>         
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import {Prop, Watch} from 'vue-property-decorator';
+<script lang="ts" setup>
+import { nextTick, ref, watch, Ref, computed } from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import {
   CashFlowDistributionRule,
   CashFlowRule,
@@ -207,108 +201,110 @@ import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { getLastPropertyValue } from '@/shared/utils/getter-utils';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
+import { getUrl } from '@/shared/utils/get-url';
+import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 
-@Component
-export default class CashFlowRuleEditDialog extends Vue {
-  @Prop() selectedCashFlowRule: CashFlowRule;
-  @Prop() showDialog: boolean;
+  const props = defineProps<{showDialog: boolean, selectedCashFlowRule: CashFlowRule}>()
+  let showDialogComputed = computed(() => props.showDialog);
+  const emit = defineEmits(['submit']);
 
-  hasUnsavedChanges: boolean = false;
-  isDataValid: boolean = true;
+  let hasUnsavedChanges = ref(false);
+  let isDataValid = ref(true);
 
-  cashFlowDistributionRuleGridData: CashFlowDistributionRule[] = []
-  processedGridData: CashFlowDistributionRule[] = [];
+  let cashFlowDistributionRuleGridData = ref<CashFlowDistributionRule[]>([])
+  let processedGridData = ref<CashFlowDistributionRule[]>([]);
 
-    cashFlowRuleDistributionGridHeaders: DataTableHeader[] = [
-        {
-            text: 'Duration (yr)',
-            value: 'durationInYears',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '31.6%',
-        },
-        {
-            text: 'Cost Ceiling',
-            value: 'costCeiling',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '31.6%',
-        },
-        {
-            text: 'Yearly Distribution (%)',
-            value: 'yearlyPercentages',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '31.6%',
-        },
-        {
-            text: '',
-            value: '',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '4.2%',
-        },
-    ];
-  newCashFlowRuleLibrary: CashFlowRuleLibrary = {...emptyCashFlowRuleLibrary, id: getNewGuid()};
-  rules: InputValidationRules = clone(rules);
+  let cashFlowRuleDistributionGridHeaders: any[] = [
+    {
+        title: 'Duration (yr)',
+        key: 'durationInYears',
+        align: 'left',
+        sortable: false,
+        class: '',
+        width: '31.6%',
+    },
+    {
+        title: 'Cost Ceiling',
+        key: 'costCeiling',
+        align: 'left',
+        sortable: false,
+        class: '',
+        width: '31.6%',
+    },
+    {
+        title: 'Yearly Distribution (%)',
+        key: 'yearlyPercentages',
+        align: 'left',
+        sortable: false,
+        class: '',
+        width: '31.6%',
+    },
+    {
+        title: '',
+        key: '',
+        align: 'left',
+        sortable: false,
+        class: '',
+        width: '4.2%',
+    },
+  ];
+  let newCashFlowRuleLibrary: CashFlowRuleLibrary = {...emptyCashFlowRuleLibrary, id: getNewGuid()};
+  let inputRules: InputValidationRules = clone(rules);
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.hasUnsavedChanges = false;
-      this.$emit('submit', this.processedGridData);
+      hasUnsavedChanges.value = false;
+      emit('submit', processedGridData.value);
     } else {
-      this.onSelectedSplitTreatmentIdChanged()
-      this.$emit('submit', null);      
+      onSelectedSplitTreatmentIdChanged()
+      emit('submit', null);      
     }
   }
 
-  onEditSelectedLibraryListData(data: any, property: string) {
+function onEditSelectedLibraryListData(data: any, property: string) {
         let changedRule = data as CashFlowDistributionRule
-        let rule = this.processedGridData.find(o => o.id === changedRule.id)
+        let rule = processedGridData.value.find(o => o.id === changedRule.id)
         if(!isNil(rule))
             switch (property) {
                 case 'durationInYears':
                     rule.durationInYears = changedRule.durationInYears;
                     break;
                 case 'costCeiling':
-                    rule.costCeiling = this.unFormatAsCurrency(changedRule.costCeiling);
+                    rule.costCeiling = unFormatAsCurrency(changedRule.costCeiling);
                     break;
                 case 'yearlyPercentages':
                     rule.yearlyPercentages = changedRule.yearlyPercentages;
                     break;
             }
-            this.onCashFlowDistributionRuleGridDataChanged()
+            onCashFlowDistributionRuleGridDataChanged()
     }
 
-    onAddCashFlowDistributionRule() {
-        const newCashFlowDistributionRule: CashFlowDistributionRule = this.modifyNewCashFlowDistributionRuleDefaultValues();
-        this.processedGridData.push(clone(newCashFlowDistributionRule))
-        this.cashFlowDistributionRuleGridData.push(newCashFlowDistributionRule);
+    function onAddCashFlowDistributionRule() {
+        const newCashFlowDistributionRule: CashFlowDistributionRule = modifyNewCashFlowDistributionRuleDefaultValues();
+        processedGridData.value.push(clone(newCashFlowDistributionRule))
+        cashFlowDistributionRuleGridData.value.push(newCashFlowDistributionRule);
+        hasUnsavedChanges.value = true;
     }
 
-    modifyNewCashFlowDistributionRuleDefaultValues() {
+    function modifyNewCashFlowDistributionRuleDefaultValues() {
         const newCashFlowDistributionRule: CashFlowDistributionRule = {
             ...emptyCashFlowDistributionRule,
             id: getNewGuid(),
         };
 
-        if (this.cashFlowDistributionRuleGridData.length === 0) {
+        if (cashFlowDistributionRuleGridData.value.length === 0) {
             return newCashFlowDistributionRule;
         } else {
             const durationInYears: number =
                 getLastPropertyValue(
                     'durationInYears',
-                    this.cashFlowDistributionRuleGridData,
+                    cashFlowDistributionRuleGridData.value,
                 ) + 1;
             const costCeiling: number = getLastPropertyValue(
                 'costCeiling',
-                this.processedGridData,
+                processedGridData.value,
             );
-            const yearlyPercentages = this.getNewCashFlowDistributionRuleYearlyPercentages(
+            const yearlyPercentages = getNewCashFlowDistributionRuleYearlyPercentages(
                 durationInYears,
             );
 
@@ -324,7 +320,7 @@ export default class CashFlowRuleEditDialog extends Vue {
         }
     }
 
-    getNewCashFlowDistributionRuleYearlyPercentages(durationInYears: number) {
+    function getNewCashFlowDistributionRuleYearlyPercentages(durationInYears: number) {
         const percentages: number[] = [];
         let percentage = 100 / durationInYears;
 
@@ -350,8 +346,8 @@ export default class CashFlowRuleEditDialog extends Vue {
         return percentages.join('/');
     }
 
-    onOpenCostCeilingEditDialog(distributionRuleId: string) {
-        this.$nextTick(() => {
+    function onOpenCostCeilingEditDialog(distributionRuleId: string) {
+        nextTick(() => {
             const editDialogInputElement: HTMLElement = document.getElementById(
                 distributionRuleId,
             ) as HTMLElement;
@@ -364,45 +360,45 @@ export default class CashFlowRuleEditDialog extends Vue {
         });
     }
 
-    @Watch('selectedCashFlowRule')
-    onSelectedSplitTreatmentIdChanged() {
-        this.cashFlowDistributionRuleGridData = hasValue(this.selectedCashFlowRule.cashFlowDistributionRules)
-            ? clone(this.selectedCashFlowRule.cashFlowDistributionRules) : [];
+    watch(() => props.selectedCashFlowRule, () => onSelectedSplitTreatmentIdChanged())
+    function onSelectedSplitTreatmentIdChanged() {
+        cashFlowDistributionRuleGridData.value = hasValue(props.selectedCashFlowRule.cashFlowDistributionRules)
+            ? clone(props.selectedCashFlowRule.cashFlowDistributionRules) : [];
         
-        this.processedGridData = hasValue(this.selectedCashFlowRule.cashFlowDistributionRules)
-            ? clone(this.selectedCashFlowRule.cashFlowDistributionRules) : [];
+        processedGridData.value = hasValue(props.selectedCashFlowRule.cashFlowDistributionRules)
+            ? clone(props.selectedCashFlowRule.cashFlowDistributionRules) : [];
     }
 
-    @Watch('processedGridData')
-    onCashFlowDistributionRuleGridDataChanged() {
-        if(this.checkIsDataValid())
-            this.hasUnsavedChanges = 
+    watch(processedGridData, () => onCashFlowDistributionRuleGridDataChanged())
+    function onCashFlowDistributionRuleGridDataChanged() {
+        if(checkIsDataValid())
+            hasUnsavedChanges.value = 
                 hasUnsavedChangesCore(
                     '',
-                    this.processedGridData,
-                    this.selectedCashFlowRule.cashFlowDistributionRules,
+                    processedGridData.value,
+                    props.selectedCashFlowRule.cashFlowDistributionRules,
                 )
     }
 
-    checkIsDataValid() : boolean
+    function checkIsDataValid() : boolean
     {
         let rule =  clone(emptyCashFlowRule)
-        rule.cashFlowDistributionRules = this.processedGridData;
-        this.isDataValid = this.processedGridData.every((
+        rule.cashFlowDistributionRules = processedGridData.value;
+        isDataValid.value = processedGridData.value.every((
                         distributionRule: CashFlowDistributionRule,
                         index: number,
                     ) => {
                         let isValid: boolean =
-                            this.rules['generalRules'].valueIsNotEmpty(
+                            inputRules['generalRules'].valueIsNotEmpty(
                                 distributionRule.durationInYears,
                             ) === true &&
-                            this.rules['generalRules'].valueIsNotEmpty(
+                            inputRules['generalRules'].valueIsNotEmpty(
                                 distributionRule.costCeiling,
                             ) === true &&
-                            this.rules['generalRules'].valueIsNotEmpty(
+                            inputRules['generalRules'].valueIsNotEmpty(
                                 distributionRule.yearlyPercentages,
                             ) === true &&
-                            this.rules[
+                            inputRules[
                                 'cashFlowRules'
                             ].doesTotalOfPercentsEqualOneHundred(
                                 distributionRule.yearlyPercentages,
@@ -411,13 +407,13 @@ export default class CashFlowRuleEditDialog extends Vue {
                         if (index !== 0) {
                             isValid =
                                 isValid &&
-                                this.rules[
+                                inputRules[
                                     'cashFlowRules'
                                 ].isDurationGreaterThanPreviousDuration(
                                     distributionRule,
                                     rule,
                                 ) === true &&
-                                this.rules[
+                                inputRules[
                                     'cashFlowRules'
                                 ].isAmountGreaterThanOrEqualToPreviousAmount(
                                     distributionRule,
@@ -427,17 +423,17 @@ export default class CashFlowRuleEditDialog extends Vue {
 
                         return isValid;
                     },);
-        return this.isDataValid;     
+        return isDataValid.value;     
     }
 
-    formatAsCurrency(value: any) {
+    function formatAsCurrencyLocaal(value: any) {
         if (hasValue(value)) {
             return formatAsCurrency(value);
         }
         return null;
     }
 
-    unFormatAsCurrency(value: any) : number {
+    function unFormatAsCurrency(value: any) : number {
         if (hasValue(value)) {
             let num = Number(value.toString().replace(/[^0-9.-]+/g,""));
             return num;
@@ -445,9 +441,8 @@ export default class CashFlowRuleEditDialog extends Vue {
         return 0;
     }
 
-    onDeleteCashFlowDistributionRule(id: string) {
-        this.cashFlowDistributionRuleGridData = this.cashFlowDistributionRuleGridData.filter((rule: CashFlowDistributionRule) => rule.id !== id)
-        this.processedGridData = this.processedGridData.filter((rule: CashFlowDistributionRule) => rule.id !== id)
+    function onDeleteCashFlowDistributionRule(id: string) {
+        cashFlowDistributionRuleGridData.value = cashFlowDistributionRuleGridData.value.filter((rule: CashFlowDistributionRule) => rule.id !== id)
+        processedGridData.value = processedGridData.value.filter((rule: CashFlowDistributionRule) => rule.id !== id)
     }
-}
 </script>

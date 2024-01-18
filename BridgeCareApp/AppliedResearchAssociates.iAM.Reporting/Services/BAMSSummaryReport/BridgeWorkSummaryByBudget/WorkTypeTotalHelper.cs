@@ -1,5 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.DTOs.Enums;
+﻿using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget
@@ -82,6 +81,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
                 }
                 workTypeTotal.OtherCostPerYear[item.Year] += item.Amount;
+                workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
+                break;
+            case TreatmentCategory.WorkOutsideScope:
+                if (!workTypeTotal.WorkOutsideScopeCostPerYear.ContainsKey(item.Year))
+                {
+                    workTypeTotal.WorkOutsideScopeCostPerYear.Add(item.Year, 0);
+                }
+                if (!workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
+                {
+                    workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
+                }
+                workTypeTotal.WorkOutsideScopeCostPerYear[item.Year] += item.Amount;
                 workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
                 break;
             default:

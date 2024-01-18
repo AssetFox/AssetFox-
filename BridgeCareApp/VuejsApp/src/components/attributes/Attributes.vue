@@ -31,7 +31,8 @@
                 <v-col cols="2"> 
                     <v-subheader class="ghd-md-gray ghd-control-label" style="margin-left:2%;">Attribute</v-subheader>
                     <v-text-field id="Attributes-attributeName-vtextfield" variant="outlined" class="ghd-text-field-border ghd-text-field"
-                         v-model='selectedAttribute.name' density="compact"/>
+                         v-model='selectedAttribute.name' 
+                         @update:model-value="onSetSelectedAttributeProperty('name',$event)" density="compact"/>
                 </v-col>
                 <v-col cols="2">
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Type</v-subheader>
@@ -44,6 +45,7 @@
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='typeSelectValues'
                         v-model='selectedAttribute.type'
+                        @update:model-value="onSetSelectedAttributeProperty('type',$event)"
                         density="compact">
                     </v-select>                           
                 </v-col>
@@ -60,6 +62,7 @@
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='aggregationRuleSelectValues'
                         v-model='selectedAttribute.aggregationRuleType'
+                        @update:model-value="onSetSelectedAttributeProperty('aggregationRuleType',$event)"
                         density="compact">
                     </v-select>                           
                 </v-col>
@@ -71,29 +74,35 @@
                     <v-col cols="2" class="pl-0">
                         <v-subheader class="ghd-md-gray ghd-control-label">Default Value</v-subheader>
                         <v-text-field id="Attributes-attributeDefaultString-vtextfield" v-if="selectedAttribute.type == 'STRING'" variant="outlined" class="ghd-text-field-border ghd-text-field"
-                            v-model='selectedAttribute.defaultValue' density="compact"/>
+                            v-model='selectedAttribute.defaultValue'
+                            @update:model-value="onSetSelectedAttributeProperty('defaultValue',$event)" density="compact"/>
                         <v-text-field id="Attributes-attributeDefaultNumber-vtextfield" v-if="selectedAttribute.type != 'STRING'" variant="outlined" class="ghd-text-field-border ghd-text-field"
                             v-model='selectedAttribute.defaultValue'
+                            @update:model-value="onSetSelectedAttributeProperty('defaultValue',$event)"
                             density="compact"/>
                     </v-col>
                     <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Minimum Value</v-subheader>
                         <v-text-field id="Attributes-attributeMinimumValue-vtextfield" variant="outlined" class="ghd-text-field-border ghd-text-field"                            
                             v-model='selectedAttribute.minimum'
+                            @update:model-value="onSetSelectedAttributeProperty('minimum',$event)"
                             density="compact"/>
                     </v-col>
                     <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Maximum Value</v-subheader>
                         <v-text-field id="Attributes-attributeMaximumValue-vtextfield" variant="outlined" class="ghd-text-field-border ghd-text-field"
                             v-model='selectedAttribute.maximum'
+                            @update:model-value="onSetSelectedAttributeProperty('maximum',$event)"
                             density="compact"/>
                     </v-col>
                     <v-col cols="4" style="padding-top:40px;">
                         <v-row>
                         <v-switch id="Attributes-attributeCalculated-vswitch" class='sharing header-text-content' color="#2A578D"  label='Calculated' 
-                            v-model='selectedAttribute.isCalculated'/>
+                            v-model='selectedAttribute.isCalculated'
+                            @update:model-value="onSetSelectedAttributeProperty('isCalculated',$event)"/>
                         <v-switch id="Attributes-attributeAscending-vswitch" class='sharing header-text-content' color="#2A578D" label='Ascending' 
-                            v-model='selectedAttribute.isAscending'/>
+                            v-model='selectedAttribute.isAscending'
+                            @update:model-value="onSetSelectedAttributeProperty('isAscending',$event)"/>
                         </v-row>
                     </v-col>
                 </v-row>
@@ -125,7 +134,8 @@
             <v-row justify-center>
                 <v-col >
                     <v-subheader class="ghd-subheader ">Command</v-subheader>
-                    <v-textarea no-resize outline rows='4' class="ghd-text-field-border" v-model='selectedAttribute.command'>
+                    <v-textarea no-resize outline rows='4' class="ghd-text-field-border" v-model='selectedAttribute.command'
+                    @update:model-value="onSetSelectedAttributeProperty('command',$event)">
                     </v-textarea>
                     <v-subheader
                         v-if="validationErrorMessage != ''" class="ghd-subheader "
@@ -156,6 +166,7 @@
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='selectExcelColumns'
                         v-model='selectedAttribute.command'
+                        @update:model-value="onSetSelectedAttributeProperty('command',$event)"
                         density="compact">
                     </v-select>                           
                 </v-row>
@@ -174,7 +185,7 @@
                     Test
                 </v-btn>
                 <p>&nbsp;&nbsp;&nbsp;</p>
-                <v-btn id="Attributes-save-vbtn" @click='saveAttribute' :disabled='disableCrudButtons()'  variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
+                <v-btn id="Attributes-save-vbtn" @click='saveAttribute' :disabled='disableCrudButtons() || !hasUnsavedChanges'  variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>
                     Save
                 </v-btn>               
             </v-row>
@@ -200,6 +211,7 @@ import Vue, { computed, onBeforeMount, onBeforeUnmount, Ref, ref, shallowRef, Sh
 import { Console } from 'console';
 import { useStore } from 'vuex';
 import ConfirmDialog from 'primevue/confirmdialog';
+import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 
     let store = useStore();
     let hasSelectedAttribute = ref<boolean>(false);
@@ -261,7 +273,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }
 
     watch(stateAttributes, () =>  {
-
             let temp = clone(stateAttributes.value)
             temp.forEach(_ => {
                 selectAttributeItems.value.push({text: _.name, value: _.id})
@@ -280,21 +291,16 @@ import ConfirmDialog from 'primevue/confirmdialog';
         hasSelectedAttribute.value = true;
         checkedCommand.value = "";
         commandIsValid.value = false;
-
-        getAggregationRulesForTypeAction(selectedAttribute.value.type)
-        let temp = stateAggregationRulesForType.value.map((rule: string) => ({
-            text: rule,
-            value: rule,
-        }));
-
-        temp.forEach(_ => {
-            aggregationRuleSelectValues.value.push(_)
-        })
     })
     
     watch(selectedAttribute, () =>  {
-       getAggregationRulesForTypeAction(selectedAttribute.value.type)
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', selectedAttribute.value, stateSelectedAttribute.value);
+        setHasUnsavedChangesAction({ value: hasUnsavedChanges });
 
+        getAggregationRulesForTypeAction(selectedAttribute.value.type)
+    })
+
+    watch(stateAggregationRulesForType, () => {
         aggregationRuleSelectValues.value = stateAggregationRulesForType.value.map((rule: string) => ({
             text: rule,
             value: rule,
@@ -328,11 +334,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
         temp.forEach(_ =>{
             selectExcelColumns.value.push({text: _, value: _});
         });
-
-        //selectExcelColumns.value = excelColumns.value.columnHeaders.map((header: string) => ({
-          //  text: header,
-           // value: header,
-       // }));
     })
 
     watch(stateSelectedAttribute, () =>  {       
@@ -346,10 +347,13 @@ import ConfirmDialog from 'primevue/confirmdialog';
             selectDatasourceItemValue.value = selectedAttribute.value.dataSource.id;
     })
 
-    watch(selectedAttribute, () => {
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', selectedAttribute.value, stateSelectedAttribute.value);
-        setHasUnsavedChangesAction({ value: hasUnsavedChanges });
-    })
+    function onSetSelectedAttributeProperty(property: string, value: any){
+        selectedAttribute.value = setItemPropertyValue(
+            property,
+            value,
+            selectedAttribute.value,
+        );
+    }
 
     function addAttribute()
     {

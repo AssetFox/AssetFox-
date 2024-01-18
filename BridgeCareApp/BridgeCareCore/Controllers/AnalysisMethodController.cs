@@ -38,7 +38,9 @@ namespace BridgeCareCore.Controllers
             if (analysisMethodDTO.Attribute == null && analysisMethodDTO.Benefit.Id == Guid.Empty && analysisMethodDTO.CriterionLibrary.Id == Guid.Empty)
             {
                 var analysisDefaultData = _analysisDefaultDataService.GetAnalysisDefaultData().Result;
+                analysisMethodDTO.Attribute = analysisDefaultData.Weighting;
                 analysisMethodDTO.OptimizationStrategy = analysisDefaultData.OptimizationStrategy;
+                analysisMethodDTO.Benefit.Attribute = analysisDefaultData.BenefitAttribute;
                 analysisMethodDTO.Benefit.Limit = analysisDefaultData.BenefitLimit;
                 analysisMethodDTO.SpendingStrategy = analysisDefaultData.SpendingStrategy;
             }

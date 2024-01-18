@@ -9,9 +9,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class SimulationUserDtos
     {
-        public static SimulationUserDTO Dto(Guid? id = null, string username = "username")
+        public static SimulationUserDTO Dto(Guid? userId = null, string username = "username")
         {
-            var resolveId = id ?? Guid.NewGuid();
+            var resolveId = userId ?? Guid.NewGuid();
             var dto = new SimulationUserDTO
             {
                 CanModify = true,

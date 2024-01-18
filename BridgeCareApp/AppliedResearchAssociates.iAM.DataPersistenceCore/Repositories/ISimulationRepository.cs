@@ -12,10 +12,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ISimulationRepository
     {
-        void CreateSimulation(Simulation simulation);
-
-        void GetAllInNetwork(Network network);
-
         void GetSimulationInNetwork(Guid simulationId, Network network);
 
         List<SimulationDTO> GetAllScenario();

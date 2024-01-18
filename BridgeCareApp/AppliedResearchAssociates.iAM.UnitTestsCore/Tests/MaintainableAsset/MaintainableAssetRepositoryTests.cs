@@ -95,6 +95,31 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
+        public void GetMaintainableAssetByTextKeyAttribute_AssetExists_Gets()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var keyAttributeName = RandomStrings.WithPrefix("keyAttribute");
+            var keyAttributeId = Guid.NewGuid();
+            var keyAttributeDto = AttributeTestSetup.CreateSingleTextAttribute(
+                TestHelper.UnitOfWork, keyAttributeId, keyAttributeName, ConnectionType.EXCEL, keyAttributeName);
+            var assetId = Guid.NewGuid();
+            var networkId = Guid.NewGuid();
+            var locationIdentifier = RandomStrings.WithPrefix("Location");
+            var location = Locations.Section(locationIdentifier);
+            var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
+            var maintainableAssets = new List<MaintainableAsset> { maintainableAsset };
+            var network = NetworkTestSetup.ModelForEntityInDbWithExistingKeyAttribute(TestHelper.UnitOfWork, maintainableAssets, keyAttributeDto.Id, networkId);
+            var textAttribute = AttributeTestSetup.Text(keyAttributeDto.Id, keyAttributeDto.Name, ConnectionType.EXCEL);
+            var attributeList = new List<IamAttribute> { textAttribute };
+            var assetList = new List<MaintainableAsset> { maintainableAsset };
+            AggregatedResultTestSetup.SetTextAggregatedResultsInDb(TestHelper.UnitOfWork, assetList, attributeList, "keyAttributeValue");
+
+            var retreivedAsset = TestHelper.UnitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(network.Id, "keyAttributeValue");
+
+            ObjectAssertions.Equivalent(maintainableAsset, retreivedAsset);
+        }
+
+        [Fact]
         public void GetMaintainableAssetByKeyAttribute_AssetDoesNotExist_ReturnsNull()
         {
             var dataSource = AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
@@ -171,7 +196,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
             var maintainableAssets = new List<MaintainableAsset> { maintainableAsset };
             var network = NetworkTestSetup.ModelForEntityInDbWithExistingKeyAttribute(TestHelper.UnitOfWork, maintainableAssets, keyAttributeDto.Id, networkId);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId, simulationName, user.Id, networkId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName, user.Id, networkId);
             var committedProjectId = Guid.NewGuid();
             var sectionCommittedProjectDto = SectionCommittedProjectDtos.Dto1(committedProjectId, simulation.Id);
             var sectionCommittedProjectDtos = new List<SectionCommittedProjectDTO> { sectionCommittedProjectDto };

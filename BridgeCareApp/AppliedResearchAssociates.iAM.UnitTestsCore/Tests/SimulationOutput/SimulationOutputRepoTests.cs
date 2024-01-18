@@ -1,18 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
-using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -21,6 +14,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void SaveSimulationOutput_Does()
         {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
@@ -30,6 +24,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void SaveSimulationOutput_ThenLoad_Same()
         {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
@@ -45,6 +40,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [InlineData(12)]
         public void SaveMultiYearSimulationOutput_ThenLoad_Same(int numberOfYears)
         {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
@@ -80,6 +76,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public void SaveSimulationOutput_ThenLoad_LastModifiedDate_Expected()
         {
             var numberOfYears = 1;
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
@@ -91,17 +88,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             DateTimeAssertions.Between(startDate, endDate, lastModifiedDate, TimeSpan.FromMilliseconds(1));
         }
 
-
         [Fact]
         public void SaveSimulationOutput_UpdateSimulation_ThenLoad_LastModifiedDate_MatchesSimulationUpdateDate()
         {
             var numberOfYears = 1;
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
-            var startDate = DateTime.Now;
             TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutputViaRelational(context.SimulationId, simulationOutput);
-            var endDate = DateTime.Now;
             var oldSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(context.SimulationId);
             oldSimulation.Name = RandomStrings.WithPrefix("Modified simulation");
             var updateStartDate = DateTime.Now;
@@ -110,6 +105,41 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutputViaRelation(context.SimulationId);
             var lastModifiedDate = loadedOutput.LastModifiedDate;
             DateTimeAssertions.Between(updateStartDate, updateEndDate, lastModifiedDate, TimeSpan.FromMilliseconds(1));
+        }
+
+        [Fact]
+        public void CreateSimulationOutputViaJson_Does()
+        {
+            var numberOfYears = 1;
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
+            var simulationOutput = SimulationOutputModels.SimulationOutput(context);
+            var before = DateTime.Now;
+
+            TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutputViaJson(context.SimulationId, simulationOutput);
+
+            var after = DateTime.Now;
+            var simulationOutputAfter = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(context.SimulationId);
+            ObjectAssertions.EquivalentExcluding(simulationOutput, simulationOutputAfter, so => so.LastModifiedDate);
+            DateTimeAssertions.Between(before, after, simulationOutputAfter.LastModifiedDate, TimeSpan.FromSeconds(1));
+        }
+
+
+        [Fact]
+        public void ConvertOutputFromJsonToRelational_JsonOutputInDb_Converts()
+        {
+            var numberOfYears = 1;
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
+            var simulationOutput = SimulationOutputModels.SimulationOutput(context);
+            TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutputViaJson(context.SimulationId, simulationOutput);
+
+            TestHelper.UnitOfWork.SimulationOutputRepo.ConvertSimulationOutpuFromJsonTorelational(context.SimulationId);
+
+            var simulationOutputAfter = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(context.SimulationId);
+            ObjectAssertions.EquivalentExcluding(simulationOutput, simulationOutputAfter, so => so.LastModifiedDate);
         }
     }
 }

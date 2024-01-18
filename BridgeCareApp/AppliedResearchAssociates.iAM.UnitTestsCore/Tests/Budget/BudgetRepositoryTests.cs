@@ -55,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var budgetDto = BudgetDtos.New();
             var budgetDtos = new List<BudgetDTO> { budgetDto };
 
@@ -73,7 +73,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var simulationId = simulation.Id;
             var budgetPriority = BudgetPriorityDtos.New();
             var budgetPriorities = new List<BudgetPriorityDTO> { budgetPriority };
@@ -221,7 +221,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public void GetScenarioSimpleBudgetDetails_SimulationInDb_EmptyList()
         {
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
 
             var simpleDetails = TestHelper.UnitOfWork.BudgetRepo.GetScenarioSimpleBudgetDetails(simulation.Id);
 
@@ -322,7 +322,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var budgetDtos = new List<BudgetDTO>();
 
             // Act

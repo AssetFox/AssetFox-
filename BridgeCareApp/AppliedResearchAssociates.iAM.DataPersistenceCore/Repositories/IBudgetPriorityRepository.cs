@@ -32,9 +32,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpsertOrDeleteUsers(Guid budgetPriorityLibraryId, IList<LibraryUserDTO> libraryUsers);
 
         List<LibraryUserDTO> GetLibraryUsers(Guid budgetPriorityLibraryId);
-
-        void AddLibraryIdToScenarioBudgetPriority(List<BudgetPriorityDTO> budgetPriorityDTOs, Guid? libraryId);
-
-        void AddModifiedToScenarioBudgetPriority(List<BudgetPriorityDTO> budgetPriorityDTOs, bool IsModified);
     }
 }

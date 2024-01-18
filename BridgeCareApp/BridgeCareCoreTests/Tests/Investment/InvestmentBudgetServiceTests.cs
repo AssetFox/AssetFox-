@@ -308,11 +308,12 @@ namespace BridgeCareCoreTests.Tests
             var meaninglessDictionary = new Dictionary<string, string> { { "Budget", "expression" } };
             budgetRepo.Setup(b => b.GetCriteriaPerBudgetNameForBudgetLibrary(libraryId)).Returns(meaninglessDictionary);
             var service2 = CreateService(unitOfWork);
-            var year = 2023;
+            var yearBefore = DateTime.Now.Year;
 
             // Act
             var fileInfo = service2.ExportLibraryInvestmentBudgetsFile(libraryId);
 
+            var yearAfter = DateTime.Now.Year;
             Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileInfo.MimeType);
             Assert.Equal("sample_investment_budgets_import_export_file.xlsx", fileInfo.FileName);
 
@@ -326,12 +327,12 @@ namespace BridgeCareCoreTests.Tests
                 .Select(cell => cell.GetValue<string>()).ToList();
             Assert.Equal(4, worksheetBudgetNames.Count);
             Assert.True(worksheetBudgetNames.All(name => name.Contains("Sample Budget")));
-            var expectedYear = year;
+            var yearOffset = 0;
             worksheet.Cells[2, 1, worksheet.Dimension.End.Row, 1]
-                .Select(cell => cell.GetValue<int>()).ToList().ForEach(year =>
+                .Select(cell => cell.GetValue<int>()).ToList().ForEach(cellYear =>
                 {
-                    Assert.Equal(expectedYear, year);
-                    expectedYear++;
+                    DoubleAssertions.Between(yearBefore + yearOffset, yearAfter + yearOffset, cellYear);
+                    yearOffset++;
                 });
             var budgetAmounts = worksheet.Cells[2, 2, worksheet.Dimension.End.Row, worksheet.Dimension.End.Column]
                 .Select(cell => cell.GetValue<decimal>()).ToList();

@@ -25,12 +25,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public List<TreatmentConsequenceDTO> GetScenarioTreatmentConsequencesByTreatmentId(Guid treatmentId)
         {
-            if (!_unitOfWork.Context.ScenarioConditionalTreatmentConsequences.Any(_ => _.Id == treatmentId))
+            if (!_unitOfWork.Context.ScenarioSelectableTreatment.Any(_ => _.Id == treatmentId))
             {
                 throw new RowNotInTableException("The specified scenario treamtment was not found");
             }
 
             return  _unitOfWork.Context.ScenarioConditionalTreatmentConsequences
+                .Where(_ => _.ScenarioSelectableTreatmentId == treatmentId )
                 .Include(_ => _.Attribute)
                 .Include(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
                 .ThenInclude(_ => _.Equation)
@@ -40,12 +41,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public List<TreatmentConsequenceDTO> GetTreatmentConsequencesByTreatmentId(Guid treatmentId)
         {
-            if (!_unitOfWork.Context.TreatmentConsequence.Any(_ => _.Id == treatmentId))
+            if (!_unitOfWork.Context.SelectableTreatment.Any(_ => _.Id == treatmentId))
             {
                 throw new RowNotInTableException("The specified treamtment was not found");
             }
 
             return _unitOfWork.Context.TreatmentConsequence
+                .Where(tc => tc.SelectableTreatmentId == treatmentId)
                 .Include(_ => _.Attribute)
                 .Include(_ => _.ConditionalTreatmentConsequenceEquationJoin)
                 .ThenInclude(_ => _.Equation)
@@ -62,69 +64,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return _unitOfWork.Context.CommittedProjectConsequence
                 .Include(_ => _.Attribute).Select(_ => _.ToDTO()).ToList();
-        }
-
-        public void CreateScenarioConditionalTreatmentConsequences(Dictionary<Guid, List<ConditionalTreatmentConsequence>> consequencesPerTreatmentId)
-        {
-            var consequenceEntities = new List<ScenarioConditionalTreatmentConsequenceEntity>();
-            var equationEntities = new List<EquationEntity>();
-            var equationJoinEntities = new List<ScenarioConditionalTreatmentConsequenceEquationEntity>();
-            var criterionEntities = new List<CriterionLibraryEntity>();
-            var criterionJoinEntities = new List<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>();
-
-            var allConsequences = consequencesPerTreatmentId.Values.SelectMany(_ => _).ToList();
-            var attributeEntities = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
-            var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
-            if (!allConsequences.All(_ => attributeNames.Contains(_.Attribute.Name)))
-            {
-                var missingAttributes = allConsequences.Select(_ => _.Attribute.Name)
-                    .Except(attributeNames).ToList();
-                if (missingAttributes.Count == 1)
-                {
-                    throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
-                }
-
-                throw new RowNotInTableException(
-                    $"No attributes found having the names: {string.Join(", ", missingAttributes)}.");
-            }
-
-            consequencesPerTreatmentId.Keys.ForEach(treatmentId =>
-            {
-                consequenceEntities.AddRange(consequencesPerTreatmentId[treatmentId].Select(_ =>
-                    {
-                        var consequenceEntity = _.ToScenarioEntity(treatmentId,
-                            attributeEntities.Single(__ => __.Name == _.Attribute.Name).Id);
-
-                        if (!_.Equation.ExpressionIsBlank)
-                        {
-                            var equationEntity = _.Equation.ToEntity();
-                            equationEntities.Add(equationEntity);
-                            equationJoinEntities.Add(new ScenarioConditionalTreatmentConsequenceEquationEntity
-                            {
-                                ScenarioConditionalTreatmentConsequenceId = _.Id, EquationId = equationEntity.Id
-                            });
-                        }
-
-                        if (!_.Criterion.ExpressionIsBlank)
-                        {
-                            var criterionEntity = _.Criterion.ToEntity("");
-                            criterionEntity.IsSingleUse = true;
-                            criterionEntities.Add(criterionEntity);
-                            criterionJoinEntities.Add(new CriterionLibraryScenarioConditionalTreatmentConsequenceEntity
-                            {
-                                CriterionLibraryId = criterionEntity.Id, ScenarioConditionalTreatmentConsequenceId = _.Id
-                            });
-                        }
-
-                        return consequenceEntity;
-                    }).ToList());
-            });
-
-            _unitOfWork.Context.AddAll(consequenceEntities);
-            _unitOfWork.Context.AddAll(equationEntities);
-            _unitOfWork.Context.AddAll(equationJoinEntities);
-            _unitOfWork.Context.AddAll(criterionEntities);
-            _unitOfWork.Context.AddAll(criterionJoinEntities);
         }
 
         public void UpsertOrDeleteTreatmentConsequences(Dictionary<Guid, List<TreatmentConsequenceDTO>> treatmentConsequencePerTreatmentId,

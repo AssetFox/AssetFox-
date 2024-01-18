@@ -11,7 +11,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses.PerformanceCurve
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class PerformanceCurveRepositoryUpsertTests
     {

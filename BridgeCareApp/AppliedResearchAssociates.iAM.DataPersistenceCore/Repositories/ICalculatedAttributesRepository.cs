@@ -44,9 +44,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpsertOrDeleteUsers(Guid calculatedAttribueLibraryId, IList<LibraryUserDTO> libraryUsers);
 
         List<LibraryUserDTO> GetLibraryUsers(Guid calculatedAttributeLibraryId);
-
-        void AddLibraryIdToScenarioCalculatedAttributes(List<CalculatedAttributeDTO> calculatedAttributesDTOs, Guid? libraryId);
-
-        void AddModifiedToScenarioCalculatedAttributes(List<CalculatedAttributeDTO> calculatedAttributesDTOs, bool IsModified);
     }
 }

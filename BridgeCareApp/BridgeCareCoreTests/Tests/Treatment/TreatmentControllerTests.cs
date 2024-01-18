@@ -102,7 +102,6 @@ namespace BridgeCareCoreTests.Tests
             var treatementLibraryUserRepo = TreatmentLibraryUserMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();
-            var treatmentService = TreatmentServiceMocks.EmptyMock;
             var pagingService = TreatmentPagingServiceMocks.EmptyMock;
             var dto = new TreatmentLibraryDTO
             {
@@ -137,7 +136,6 @@ namespace BridgeCareCoreTests.Tests
             var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();
-            var treatmentService = TreatmentServiceMocks.EmptyMock;
             var pagingService = TreatmentPagingServiceMocks.EmptyMock;
             var dto = new TreatmentLibraryDTO
             {
@@ -151,7 +149,7 @@ namespace BridgeCareCoreTests.Tests
                 IsNewLibrary = true,
                 Library = dto,
             };
-            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService);
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork, pagingService);
             var dtos = new List<TreatmentDTO>();
             var simulation = new SimulationDTO { Id = simulationId };
 
@@ -302,9 +300,8 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.New();
             var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);
             var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
-            var treatmentService = TreatmentServiceMocks.EmptyMock;
             var pagingService = TreatmentPagingServiceMocks.EmptyMock;
-            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork, pagingService);
             var libraryId = Guid.NewGuid();
             var simulationId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();

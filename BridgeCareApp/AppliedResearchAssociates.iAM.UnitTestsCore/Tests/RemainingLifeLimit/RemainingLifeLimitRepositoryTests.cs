@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
@@ -21,7 +23,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class RemainingLifeLimitRepositoryTests
     {
-
         private void Setup()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
@@ -91,6 +92,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var result = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetAllRemainingLifeLimitLibrariesNoChildren();
             var libraryAfter = result.Single(x => x.Id == library.Id);
             Assert.Empty(libraryAfter.RemainingLifeLimits);
+        }
+
+        [Fact]
+        public void GetLastModifiedDate_Expected()
+        {
+            var before = DateTime.Now;
+            var library = RemainingLifeLimitLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var after = DateTime.Now;
+
+            var actual = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetLibraryModifiedDate(library.Id);
+            DateTimeAssertions.Between(before, after, actual, TimeSpan.FromSeconds(1));
         }
 
         [Fact]
@@ -180,6 +192,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
+        public async Task GetRemainingLifeLimitLibrariesNoChildrenAccessibleToUser_LibraryInDbWithoutAccessForUser_LibraryIsNotInList()
+        {
+            var dto = RemainingLifeLimitLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+
+        }
+
+        [Fact]
         public void GetRemainingLifeLimitsByLibraryId_LibraryInDbWithRemainingLifeLimit_Gets()
         {
             Setup();
@@ -223,7 +243,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Arrange
             Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var lifeLimitLibrary = SetupForGet();
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             var dtos = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits();
@@ -248,7 +268,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Arrange
             Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var limitEntity = SetupForScenarioGet(simulation.Id);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             var dto = limitEntity.ToDto();
@@ -270,7 +290,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Arrange
             Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var limitEntity = SetupForScenarioGet(simulation.Id);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             var updateDto = limitEntity.ToDto();
@@ -298,7 +318,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             Setup();
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var limit = SetupForScenarioGet(simulation.Id).ToDto();
 
             // Act
@@ -393,6 +413,69 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var user2After = libraryUsersAfter.Single(u => u.UserId == user2.Id);
             Assert.Equal(LibraryAccessLevel.Modify, user1After.AccessLevel);
             Assert.Equal(LibraryAccessLevel.Read, user2After.AccessLevel);
+        }
+
+        [Fact]
+        public async Task GetRemainingLifeLimitLibrariesNoChildrenAccessibleToUser_LibraryIsNotAccessibleToUser_NotInList()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = RemainingLifeLimitLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+
+            var accessibleLibraries = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitLibrariesNoChildrenAccessibleToUser(user.Id);
+
+            Assert.DoesNotContain(accessibleLibraries, l => l.Id == library.Id);
+        }
+
+        [Fact]
+        public async Task GetRemainingLifeLimitLibrariesNoChildrenAccessibleToUser_LibraryAccessibleToUser_InList()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = RemainingLifeLimitLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            RemainingLifeLimitLibraryUserTestSetup.SetUsersOfRemainingLifeLimitLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Owner, user.Id);
+
+            var accessibleLibraries = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitLibrariesNoChildrenAccessibleToUser(user.Id);
+
+            Assert.Contains(accessibleLibraries, l => l.Id == library.Id);
+        }
+
+        [Fact]
+        public async Task GetLibraryAccess_UserDoesNotHaveAccess_AccessPropertyIsNull()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = RemainingLifeLimitLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+
+            var access = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetLibraryAccess(library.Id, user.Id);
+
+            var expected = new LibraryUserAccessModel
+            {
+                Access = null,
+                LibraryExists = true,
+                UserId = user.Id,
+            };
+            ObjectAssertions.Equivalent(expected, access);
+        }
+
+        [Fact]
+        public async Task GetLibraryAccess_UserDoesHaveAccess_Expected()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = RemainingLifeLimitLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            RemainingLifeLimitLibraryUserTestSetup.SetUsersOfRemainingLifeLimitLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
+
+            var access = TestHelper.UnitOfWork.RemainingLifeLimitRepo.GetLibraryAccess(library.Id, user.Id);
+
+            var expected = new LibraryUserAccessModel
+            {
+                Access = new LibraryUserDTO
+                {
+                    AccessLevel = LibraryAccessLevel.Modify,
+                    UserId = user.Id,
+                    UserName = user.Username,
+                },
+                LibraryExists = true,
+                UserId = user.Id,
+            };
+            ObjectAssertions.Equivalent(expected, access);
         }
     }
 }

@@ -89,7 +89,7 @@
         <v-col>
                 <p-card style="padding: 10px; width: auto;">
                     <v-row>
-                        <v-data-table
+                        <v-data-table-server
                         id="CommittedProjectsEditor-committedProjects-vdatatable"
                         :headers="cpGridHeaders"
                         :items-length="totalItems"
@@ -98,7 +98,6 @@
                         sort-asc-icon="custom:GhdTableSortAscSvg"
                         sort-desc-icon="custom:GhdTableSortDescSvg"
                         :pagination.sync="projectPagination"
-                        :total-items="totalItems"
                         :items-per-page-options="[
                                         {value: 5, title: '5'},
                                         {value: 10, title: '10'},
@@ -252,7 +251,7 @@
                                 </td>
                             </tr>
                             </template>
-                        </v-data-table>    
+                        </v-data-table-server>    
                     </v-row>
             </p-card>
         </v-col>

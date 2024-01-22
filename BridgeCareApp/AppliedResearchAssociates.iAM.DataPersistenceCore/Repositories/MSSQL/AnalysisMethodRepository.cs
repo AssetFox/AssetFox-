@@ -27,6 +27,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
+            if(!_unitOfWork.Context.AnalysisMethod.Any(_ => _.Simulation.Id == simulation.Id))
+            {
+                throw new RowNotInTableException("No analysis method was found for the given scenario.");
+            }
+
            var analysisMethodEntity = _unitOfWork.Context.AnalysisMethod
                 .Include(_ => _.Attribute)
                 .Include(_ => _.Benefit)

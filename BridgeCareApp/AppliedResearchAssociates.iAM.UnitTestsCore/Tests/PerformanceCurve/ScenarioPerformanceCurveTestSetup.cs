@@ -30,12 +30,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         /// If a criterionLibrary or an equation is passed in, it is expected to NOT yet
         /// be in the db. This setup will add it, but with a different id.
         /// </summary>
-        public static PerformanceCurveDTO DtoForEntityInDb(UnitOfDataPersistenceWork unitOfWork, Guid simulationId, Guid curveId, CriterionLibraryDTO criterionLibraryDto = null, string equation = null)
+        public static PerformanceCurveDTO DtoForEntityInDb(UnitOfDataPersistenceWork unitOfWork, Guid simulationId, Guid curveId, CriterionLibraryDTO criterionLibraryDto = null, string equation = null, string attribute = TestAttributeNames.ActionType)
         {
             var equationDto = equation == null ? null : EquationTestSetup.Dto(equation);
             var performanceCurveDto = new PerformanceCurveDTO
             {
-                Attribute = TestAttributeNames.ActionType,
+                Attribute = attribute,
                 Id = curveId,
                 Name = "Curve",
                 CriterionLibrary = criterionLibraryDto,

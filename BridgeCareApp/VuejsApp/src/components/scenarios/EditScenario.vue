@@ -1,24 +1,23 @@
 <template>
-    <v-layout column>
-        <v-layout>
-            <v-card
+        <v-row>
+            <v-col class="p-0">
+                <v-card
                 class="mx-auto ghd-sidebar-scenario"
-                height="100%"
+                
                 elevation="0"
                 style="border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; border: 1px solid #999999;"
             >
-                <v-list 
+                <v-list
                     id = "EditScenario-navigation-vList"
                     class="ghd-navigation-list">
-                    <v-list-item-group
+                    <v-list-item
                         id = "EditScenario-navigation-vlistItemGroup"
                         class="settings-list ghd-control-text"
                         :key="navigationTab.tabName"
                         v-for="navigationTab in visibleNavigationTabs()"
                     >
-                        <v-list-tile id="EditScenario-tabs-vListTile" :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
-                            <v-list-tile-action>
-                                <v-list-tile-icon>
+                        <v-list-item id="EditScenario-tabs-vListTile" :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
+                            <template v-slot:prepend>
                                     <TreatmentSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Treatment'"/>  
                                     <TargetConditionGoalSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Target Condition Goal'"/>  
                                     <RemainingLifeLimitSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Remaining Life Limit'"/>  
@@ -29,34 +28,42 @@
                                     <BudgetPrioritySvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Budget Priority'"/>  
                                     <AnalysisMethodSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Analysis Method'"/>  
                                     <CalculatedAttributeSvg style="height: 32px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Calculated Attribute'"/>  
-                                    <CommittedProjectSvg style="height: 32px; width: 24px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Committed Projects'"/>  
-                                    <ReportsSvg style="height: 38px; width: 30px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Reports & Outputs'"/>  
-                                </v-list-tile-icon>
-                            </v-list-tile-action>
-                            <v-list-tile-content>
-                                <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>
-                            </v-list-tile-content>
-                        </v-list-tile>
-                    </v-list-item-group>
+                                    <CommittedProjectSvg style="height: 32px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Committed Projects'"/>  
+                                    <ReportsSvg style="height: 38px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Reports & Outputs'"/>  
+                            </template>
+                            <v-list-item-title style="width: auto; padding-left: 5px;" v-text="navigationTab.tabName"></v-list-item-title>
+                        </v-list-item>
+                    </v-list-item>
                 </v-list>
-                <div style="margin: auto; width: 85%;">
+                <div style="margin: 10px;">
                     <v-btn
                         class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border"
                         @click="onShowRunSimulationAlert"
-                        depressed
                         block
-                        outlined>
+                        variant = "outlined">
                         Run Scenario
                     </v-btn>
                 </div>
             </v-card>
-            <v-flex xs12 class="ghd-content">
-                <v-container fluid grid-list-xs style="padding-left:20px;padding-right:20px;">
+            </v-col>
+            
+            <v-col class=" p-0" cols="10">
+                <v-container class="p-0" fluid grid-list-xs >
                     <router-view></router-view>
                 </v-container>
-            </v-flex>
-        </v-layout>
+            </v-col>
+        </v-row>
         <Alert :dialogData="alertData" @submit="onSubmitAlertResult" />
+
+        <AlertPreChecks
+            :dialogDataPreChecks="confirmAnalysisPreCheckAlertData"
+            @submit="onConfirmAnalysisPreCheckAlertSubmit"
+        />
+
+        <AlertWithButtons
+            :dialogDataWithButtons="confirmAnalysisRunAlertData"
+            @submit="onConfirmAnalysisRunAlertSubmit"
+        />
 
         <Alert
             :dialogData="alertDataForDeletingCommittedProjects"
@@ -68,14 +75,11 @@
             @submit="onSubmitImportExportCommittedProjectsDialogResult"
             @delete="onDeleteCommittedProjects"
         />
-    </v-layout>
+
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
+<script lang="ts" setup>
+import Vue, { ref, shallowReactive, computed, watch, onMounted, onBeforeUnmount, onBeforeMount } from 'vue'; 
 import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
 import ImportExportCommittedProjectsDialog from '@/components/scenarios/scenarios-dialogs/ImportExportCommittedProjectsDialog.vue';
 import { any, clone, isNil, propEq } from 'ramda';
@@ -85,7 +89,9 @@ import { Network } from '@/shared/models/iAM/network';
 import FileDownload from 'js-file-download';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
-import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
+import { AlertData, AlertDataWithButtons, AlertPreChecksData, emptyAlertData, emptyAlertDataWithButtons, emptyAlertPreChecksData } from '@/shared/models/modals/alert-data';
+import AlertPreChecks from '@/shared/modals/AlertPreChecks.vue';
+import AlertWithButtons from '@/shared/modals/AlertWithButtons.vue';
 import Alert from '@/shared/modals/Alert.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
@@ -104,46 +110,44 @@ import TreatmentSvg from '@/shared/icons/TreatmentSvg.vue';
 import CalculatedAttributeSvg from '@/shared/icons/CalculatedAttributeSvg.vue';
 import CommittedProjectSvg from '@/shared/icons/CommittedProjectSvg.vue';
 import ReportsSvg from '@/shared/icons/ReportsSvg.vue';
+import { useStore } from 'vuex'; 
+import { useRouter } from 'vue-router'; 
+import ScenarioService from '@/services/scenario.service';
 
-@Component({
-    components: {
-        CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
-        Alert,
-        TreatmentSvg, 
-        TargetConditionGoalSvg,
-        RemainingLifeLimitSvg,
-        PerformanceCurveSvg,
-        DeficientConditionGoalSvg,
-        InvestmentSvg,
-        CashFlowSvg,
-        BudgetPrioritySvg,
-        AnalysisMethodSvg,
-        CalculatedAttributeSvg,
-        CommittedProjectSvg,
-        ReportsSvg
-    },
-})
-export default class EditScenario extends Vue {
-    @State(state => state.networkModule.networks) stateNetworks: Network[];
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.authenticationModule.hasSimulationAccess) hasSimulationAccess: boolean;
-    @State(state => state.scenarioModule.selectedScenario) stateSelectedScenario: Scenario;
-    @State(state => state.scenarioModule.currentSharedScenariosPage) stateSharedScenariosPage: Scenario[];
-    @State(state => state.scenarioModule.currentUserScenarioPage) stateUserScenariosPage: Scenario[];
-    @State(state => state.authenticationModule.userId) userId: string;
+    let store = useStore(); 
+    const router = useRouter(); 
 
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('selectScenario') selectScenarioAction: any;
-    @Action('runSimulation') runSimulationAction: any;
-    @Action('runNewSimulation') runNewSimulationAction: any;    
+    const stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks) ;
+    const hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess) ; 
+    let hasSimulationAccess:boolean = (store.state.authenticationModule.hasSimulationAccess) ; 
 
-    selectedScenarioId: string = getBlankGuid();
-    showImportExportCommittedProjectsDialog: boolean = false;
-    networkId: string = getBlankGuid();
-    networkName: string = '';
-    selectedScenario: Scenario = clone(emptyScenario);
-    navigationTabs: NavigationTab[] = [
+    const stateSelectedScenario = computed<Scenario>(() => store.state.scenarioModule.selectedScenario) ;
+    const stateSharedScenariosPage = computed<Scenario[]>(() => store.state.scenarioModule.currentSharedScenariosPage) ;
+    const stateUserScenariosPage = computed<Scenario[]>(() =>store.state.scenarioModule.currentUserScenarioPage) ;
+
+    let userId = ref<string>(store.state.authenticationModule.userId);
+
+    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification',payload)}
+    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification',payload)}
+
+    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario',payload)} 
+
+    async function runSimulationAction(payload?: any): Promise<any>{await store.dispatch('runSimulation', payload)}   
+    async function runNewSimulationAction(payload?: any): Promise<any>{await store.dispatch('runNewSimulation',payload)}
+
+    let selectedScenarioId: string = getBlankGuid();
+    let showImportExportCommittedProjectsDialog: boolean = false;
+    let networkId: string = getBlankGuid();
+    let simulationName: string;
+    let networkName: string = '';
+    let selectedScenario: Scenario = clone(emptyScenario);
+    let runAnalysisScenario: Scenario = clone(emptyScenario);
+    let preCheckMessages: any;
+    let preCheckHeading: string;
+    let preCheckStatus: any;
+    let confirmAnalysisRunAlertData= ref(clone(emptyAlertDataWithButtons));
+    let confirmAnalysisPreCheckAlertData= ref(clone(emptyAlertPreChecksData));
+    let navigationTabs: NavigationTab[] = [
         {
             tabName: 'Analysis Method',
             tabIcon: 'fas fa-chart-bar',
@@ -229,36 +233,41 @@ export default class EditScenario extends Vue {
             },
         },
     ];
-    alertData: AlertData = clone(emptyAlertData);
-    alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
+    const alertData = ref<AlertData>(clone(emptyAlertData));
+    const alertDataForDeletingCommittedProjects = ref<AlertData>({ ...emptyAlertData });
 
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
+    onMounted(() => {
+    });
+    onBeforeMount(() => {
+        selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
+    });
+    created();
+    function created() { 
             // set selectedScenarioId
-            vm.selectedScenarioId = to.query.scenarioId;
-            vm.networkId = to.query.networkId;
-            vm.simulationName = to.query.scenarioName;
-            vm.networkName = to.query.networkName;
+            selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
+            networkId = router.currentRoute.value.query.networkId as string;
+            simulationName = router.currentRoute.value.query.scenarioName as string;
+            networkName = router.currentRoute.value.query.networkName as string;
 
             // check that selectedScenarioId is set
-            if (vm.selectedScenarioId === getBlankGuid()) {
+            if (selectedScenarioId === getBlankGuid()) {
                 // set 'no selected scenario' error message, then redirect user to Scenarios UI
-                vm.addErrorNotificationAction({
+                addErrorNotificationAction({
                     message: 'Found no selected scenario for edit',
                 });
-                vm.$router.push('/Scenarios/');
+                router.push('/Scenarios/');
             } else {                
-                vm.navigationTabs = vm.navigationTabs.map(
+                navigationTabs = navigationTabs.map(
                     (navTab: NavigationTab) => {
                         const navigationTab = {
                             ...navTab,
                             navigation: {
                                 ...navTab.navigation,
                                 query: {
-                                    scenarioName: vm.simulationName,
-                                    scenarioId: vm.selectedScenarioId,
-                                    networkId: vm.networkId,
-                                    networkName: vm.networkName,
+                                    scenarioName: simulationName,
+                                    scenarioId: selectedScenarioId,
+                                    networkId: networkId,
+                                    networkName: networkName,
                                 },
                             },
                         };
@@ -267,7 +276,7 @@ export default class EditScenario extends Vue {
                             || navigationTab.tabName === 'Target Condition Goal' 
                             || navigationTab.tabName === 'Deficient Condition Goal' 
                             || navigationTab.tabName === 'Calculated Attribute') {
-                            navigationTab['visible'] = vm.hasAdminAccess;
+                            navigationTab['visible'] = hasAdminAccess.value;
                         }
 
                         return navigationTab;
@@ -280,60 +289,61 @@ export default class EditScenario extends Vue {
                 const hasChildPath = any(
                     (navigationTab: NavigationTab) =>
                         href.indexOf(navigationTab.navigation.path) !== -1,
-                    vm.navigationTabs,
+                    navigationTabs,
                 );
                 // if no matching navigation path was found in the href, then route with path of first navigationTabs entry
                 if (!hasChildPath) {
-                    vm.$router.push(vm.navigationTabs[0].navigation);
+                    router.push(navigationTabs[0].navigation);
                 }                
             }
-        });
     }
 
-    @Watch('stateSelectedScenario')
-    onStateSelectedScenarioChanged() {
-        this.selectedScenario = clone(this.stateSelectedScenario);
+    watch(stateSelectedScenario, () => onStateSelectedScenarioChanged)
+    function onStateSelectedScenarioChanged() {
+        selectedScenario = clone(stateSelectedScenario.value);
     }
 
-    @Watch('stateSharedScenariosPage')
-    onStateSharedScenariosPageChanged() {
-        if (any(propEq('id', this.selectedScenario.id))) {
-            this.selectScenarioAction({
-                scenarioId: this.selectedScenario.id,
+    watch(stateSharedScenariosPage, () => onStateSharedScenariosPageChanged)
+    function onStateSharedScenariosPageChanged() {
+        if (any(propEq('id', selectedScenario.id))) {
+            selectScenarioAction({
+                scenarioId: selectedScenario.id,
             });
         }
     }
 
-     @Watch('stateUserScenariosPage')
-    onStateUserScenariosPagePageChanged() {
-        if (any(propEq('id', this.selectedScenario.id))) {
-            this.selectScenarioAction({
-                scenarioId: this.selectedScenario.id,
+    watch(stateUserScenariosPage, () => onStateUserScenariosPagePageChanged)
+    function onStateUserScenariosPagePageChanged() {
+        if (any(propEq('id', selectedScenario.id))) {
+            selectScenarioAction({
+                scenarioId: selectedScenario.id,
             });
         }
     }
 
-    mounted() {
-        if (this.selectedScenarioId !== getBlankGuid()) {            
-            this.selectScenarioAction({
-                scenarioId: this.selectedScenarioId,
+    onMounted(() => mounted);
+    function mounted() {
+        if (selectedScenarioId !== getBlankGuid()) {            
+            selectScenarioAction({
+                scenarioId: selectedScenarioId,
             });
         }
     }
 
-    beforeDestroy() {
-        this.selectScenarioAction({ scenarioId: getBlankGuid() });
+    onBeforeUnmount(() => beforeDestroy); 
+    function beforeDestroy() {
+        selectScenarioAction({ scenarioId: getBlankGuid() });
     }
 
-    onSubmitImportExportCommittedProjectsDialogResult(
+    function onSubmitImportExportCommittedProjectsDialogResult(
         result: ImportExportCommittedProjectsDialogResult,
     ) {
-        this.showImportExportCommittedProjectsDialog = false;
+        showImportExportCommittedProjectsDialog = false;
 
         if (hasValue(result)) {
             if (result.isExport) {
                 CommittedProjectsService.exportCommittedProjects(
-                    this.selectedScenarioId,
+                    selectedScenarioId,
                 ).then((response: AxiosResponse) => {
                     if (hasValue(response, 'data')) {
                         const fileInfo: FileInfo = response.data as FileInfo;
@@ -349,13 +359,13 @@ export default class EditScenario extends Vue {
                     CommittedProjectsService.importCommittedProjects(
                         result.file,
                         result.applyNoTreatment,
-                        this.selectedScenarioId,
+                        selectedScenarioId,
                     ).then((response: AxiosResponse) => {
                         if (
                             hasValue(response, 'status') &&
                             http2XX.test(response.status.toString())
                         ) {
-                            this.addSuccessNotificationAction({
+                            addSuccessNotificationAction({
                                 message: 'Successful upload.',
                                 longMessage:
                                     'Successfully uploaded committed projects.',
@@ -363,7 +373,7 @@ export default class EditScenario extends Vue {
                         }
                     });
                 } else {
-                    this.addErrorNotificationAction({
+                    addErrorNotificationAction({
                         message: 'No file selected.',
                         longMessage:
                             'No file selected to upload the committed projects.',
@@ -373,8 +383,8 @@ export default class EditScenario extends Vue {
         }
     }
 
-    onDeleteCommittedProjects() {
-        this.alertDataForDeletingCommittedProjects = {
+    function onDeleteCommittedProjects() {
+        alertDataForDeletingCommittedProjects.value = {
             showDialog: true,
             heading: 'Are you sure?',
             message:
@@ -383,18 +393,18 @@ export default class EditScenario extends Vue {
         };
     }
 
-    onDeleteCommittedProjectsSubmit(doDelete: boolean) {
-        this.alertDataForDeletingCommittedProjects = { ...emptyAlertData };
+    function onDeleteCommittedProjectsSubmit(doDelete: boolean) {
+        alertDataForDeletingCommittedProjects.value = { ...emptyAlertData };
 
         if (doDelete) {
             CommittedProjectsService.deleteSimulationCommittedProjects(
-                this.selectedScenarioId,
+                selectedScenarioId,
             ).then((response: AxiosResponse) => {
                 if (
                     hasValue(response) &&
                     http2XX.test(response.status.toString())
                 ) {
-                    this.addSuccessNotificationAction({
+                    addSuccessNotificationAction({
                         message: 'Committed projects have been deleted.',
                     });
                 }
@@ -402,8 +412,8 @@ export default class EditScenario extends Vue {
         }
     }
 
-    visibleNavigationTabs() {
-        return this.navigationTabs.filter(
+    function visibleNavigationTabs() {
+        return navigationTabs.filter(
             navigationTab =>
                 navigationTab.visible === undefined || navigationTab.visible,
         );
@@ -412,32 +422,132 @@ export default class EditScenario extends Vue {
     /**
      * Shows the Alert
      */
-    onShowRunSimulationAlert() {
-        this.alertData = {
+    function onShowRunSimulationAlert() {
+        confirmAnalysisRunAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
             message:
                 'Only one simulation can be run at a time. The model run you are about to queue will be ' +
                 'executed in the order in which it was received.',
+            buttons: []
         };
     }
+
+    async function onConfirmAnalysisRunAlertSubmit(submit: string) {
+        confirmAnalysisRunAlertData.value.showDialog = false;
+        confirmAnalysisPreCheckAlertData.value = clone(emptyAlertPreChecksData);
+        runAnalysisScenario = selectedScenario;
+
+        if (submit == "pre-checks") {
+            preCheckMessages = [];
+                if (submit && selectedScenarioId !== getBlankGuid()) 
+                {
+                    await ScenarioService.upsertValidateSimulation(networkId, selectedScenarioId).then((response: AxiosResponse) => {
+                        if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                            addSuccessNotificationAction({message: "Simulation pre-checks completed",});
+                            if(response.data.length > 0)
+                            {
+                                preCheckStatus = response.data[0].status;
+                                for(const item of response.data)
+                                {
+                                    if (item.message != '') {
+                                    preCheckMessages += item.message;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                preCheckStatus = 3;
+                            }
+                        }
+                    });
+
+                }
+                secondRunAnalysisModal();
+        }
+        else if(submit == "continue") {
+            if (submit && selectedScenarioId !== getBlankGuid()) {
+                runSimulationAction({
+                    networkId: networkId,
+                    scenarioId: selectedScenarioId,
+                }).then(() => (selectedScenario = clone(emptyScenario)));
+            }
+        }
+
+    }
+
+    function secondRunAnalysisModal() {
+        confirmAnalysisPreCheckAlertData.value = clone(emptyAlertPreChecksData);
+
+            if(preCheckStatus == 0)
+            {
+                preCheckHeading = 'Error';
+            }
+            else if(preCheckStatus == 1)
+            {
+                preCheckHeading = 'Warning';
+            }
+            else if(preCheckStatus == 2)
+            {
+                preCheckHeading = 'Information';
+            }
+            else if(preCheckStatus == 3)
+            {
+                preCheckHeading = 'Success';
+                preCheckMessages += 'No warnings have been returned.' + 'No errors have been returned';
+            }
+
+            if(preCheckStatus == 0)
+            {
+                (selectedScenario = clone(emptyScenario));
+                confirmAnalysisPreCheckAlertData.value = {
+                showDialog: true,
+                heading: (preCheckHeading),
+                choice: false,
+                message:(preCheckMessages),
+                }
+            }
+            else{
+                (selectedScenario = clone(emptyScenario));
+                confirmAnalysisPreCheckAlertData.value = {
+                showDialog: true,
+                heading: (preCheckHeading),
+                choice: true,
+                message:(preCheckMessages),
+                }
+            }
+    }
+
+    function onConfirmAnalysisPreCheckAlertSubmit(submit: boolean) {
+        confirmAnalysisPreCheckAlertData.value = clone(emptyAlertPreChecksData);
+
+        selectedScenario = runAnalysisScenario;
+
+        if (submit && selectedScenarioId !== getBlankGuid()) {
+            runSimulationAction({
+                networkId: networkId,
+                scenarioId: selectedScenarioId,
+            }).then(() => (selectedScenario = clone(emptyScenario)));
+        }
+    }
+
 
     /**
      * Takes in a boolean parameter from the AppPopupModal to determine if a scenario's simulation should be executed
      * @param runScenarioSimulation Alert result
      */
-    onSubmitAlertResult(runScenarioSimulation: boolean) {
-        this.alertData = clone(emptyAlertData);
+    function onSubmitAlertResult(runScenarioSimulation: boolean) {
+        alertData.value = clone(emptyAlertData);
 
         if (runScenarioSimulation) {
-            this.runSimulationAction({
-                networkId: this.networkId,
-                scenarioId: this.selectedScenarioId,
+            runSimulationAction({
+                networkId: networkId,
+                scenarioId: selectedScenarioId,
             });
         }
     }
-}
+
 </script>
 
 <style>
@@ -454,7 +564,7 @@ export default class EditScenario extends Vue {
 }
 
 
-.primary--text .scenario-icon{
+.text-primary .scenario-icon{
     fill: #FFFFFF !important;
 }
 
@@ -462,7 +572,7 @@ export default class EditScenario extends Vue {
     fill: #999999 !important;
 }
 
-.primary--text .scenario-icon-stroke{
+.text-primary .scenario-icon-stroke{
     stroke: #FFFFFF !important;
 }
 

@@ -1,62 +1,63 @@
 <template>
     <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
-        <v-card elevation="5" outlined class="modal-pop-up-padding">
+        <v-card elevation="5" 
+         class="modal-pop-up-padding">
             <v-card-title>
+                <v-row justify="space-between">
                 <h3 class="dialog-header">
                     Clone scenario
                 </h3>
-                <v-spacer></v-spacer>
-                <v-btn @click="onSubmit(false)" icon>
+                <v-btn @click="onSubmit(false)" flat>
                     <i class="fas fa-times fa-2x"></i>
                 </v-btn>
+            </v-row>
             </v-card-title>
-
             <v-card-text>
               <v-select
                     :items="stateNetworks"
-                    label="Select a compatible network"
-                    item-text="name"
+                    label="Select a network"
+                    item-title="name"
                     v-model="networkMetaData"
+                    menu-icon=custom:GhdDownSvg
                     return-object
-                    v-if="hasCompatibleNetworks"
-                    v-on:change="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
-                    dense
-                    outline
+                    @update:modelValue="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
+                    density="compact"
+                    variant="outlined"
                 ></v-select>
                 <v-text-field
                     id="CloneScenarioDialog-scenarioName-textField"
                     label="Scenario name"
-                    outline
+                    variant="outlined"
+                    density="compact"
                     v-model="dialogData.scenario.name"
                 ></v-text-field>
                 <v-checkbox v-model="shared" label="Share with all?" />
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-space-between row>
-                    <v-btn
-                        id="CloneScenarioDialog-save-btn"
-                        :disabled="dialogData.scenario.name === '' || !isNetworkSelected"
-                        @click="onSubmit(true)"
-                        class="ara-blue-bg white--text"
-                    >
-                        Save
-                    </v-btn>
+                <v-row justify="center">
                     <v-btn
                         id="CloneScenarioDialog-cancel-btn"
                         @click="onSubmit(false)"
-                        class="ara-orange-bg white--text"
+                        class="ghd-button ghd-blue"
                         >Cancel</v-btn
                     >
-                </v-layout>
+                    <v-btn
+                        id="CloneScenarioDialog-save-btn"
+                        :disabled="dialogData.scenario.name === '' || !isNetworkSelected"
+                        variant="outlined"
+                        @click="onSubmit(true)"
+                        class="ghd-button ghd-blue"
+                    >
+                        Save
+                    </v-btn>
+                </v-row>
             </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
+<script lang="ts" setup>
+import { toRefs, computed, ref, watch } from 'vue'; 
 import { getUserName } from '@/shared/utils/get-user-info';
 import { User } from '@/shared/models/iAM/user';
 import {
@@ -69,64 +70,59 @@ import {
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { find, isNil, propEq, clone } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
-import {CloneScenarioDialogData, CloneSimulationDialogData} from '@/shared/models/modals/clone-scenario-dialog-data';
+import {CloneScenarioDialogData,CloneSimulationDialogData} from '@/shared/models/modals/clone-scenario-dialog-data';
+import { useStore } from 'vuex'; 
 
-@Component
-export default class CloneScenarioDialog extends Vue {
-    @Prop() dialogData: CloneSimulationDialogData;
+    let store = useStore(); 
+    const props = defineProps<{dialogData: CloneSimulationDialogData}>();
+    const emit = defineEmits(['submit']);
+    const { dialogData } = toRefs(props);
 
-    @State(state => state.userModule.users) stateUsers: User[];
-    @State(state => state.networkModule.networks) stateNetworks: Network[];
+    const stateUsers =  computed<User[]>(() => store.state.userModule.users);
+    const stateNetworks = computed<Network[]>(() => store.state.networkModule.networks);  
+    let shared =  ref<boolean>(false);
+    async function cloneScenarioWithDestinationNetworkAction(payload?:any): Promise<any>{await store.dispatch('cloneScenarioWithDestinationNetwork',payload)}
+    async function getCompatibleNetworksAction(payload?: any): Promise<any>{await store.dispatch('getCompatibleNetworks',payload)}
 
-    @Action("getNetworks") getNetworksAction: any;
-    @Action('cloneScenarioWithDestinationNetwork') cloneScenarioWithDestinationNetworkAction: any; 
+    let newScenario: CloneScenario = { ...emptyCloneScenario, id: getNewGuid() };
+    let selectedNetworkId: string = getBlankGuid();
+    let isNetworkSelected = ref(false);
+    let networkMetaData = ref<Network>({...emptyNetwork})
+    let selectedNetworkName: string;
+    let hasCompatibleNetworks: boolean = false;
 
-    newScenario: CloneScenario = { ...emptyCloneScenario, id: getNewGuid() };
-    shared: boolean = false;
-    selectedNetworkId: string = getBlankGuid();
-    isNetworkSelected: boolean = false;
-    networkMetaData: Network = {...emptyNetwork}
-    selectedNetworkName: string;
-    hasCompatibleNetworks: boolean = false;
+    watch(dialogData,()=> {
+        onModifyScenarioUserAccess();
+    });
 
-    @Watch('dialogData')
-    onDialogDataChanged() {
-        this.onModifyScenarioUserAccess();
-    }
+    watch(stateNetworks, ()=>  {
+        selectedNetworkId = props.dialogData.scenario.networkId;
+        selectedNetworkName = props.dialogData.scenario.networkName;
+         networkMetaData.value =  stateNetworks.value.find(_ => _.id == props.dialogData.scenario.networkId) ||  networkMetaData.value;
+         isNetworkSelected.value = true;
+        hasCompatibleNetworks = true;
+    });
 
-    @Watch('stateNetworks')
-    onstateNetworksChanged() {
+    watch(shared, ()=> {
+        onModifyScenarioUserAccess();
+    });
 
-        this.selectedNetworkId = this.dialogData.scenario.networkId;
-        this.selectedNetworkName = this.dialogData.scenario.networkName;
-        this.networkMetaData = this.stateNetworks.find(_ => _.id == this.dialogData.scenario.networkId) || this.networkMetaData;
-        this.isNetworkSelected = true;
-
-
-        this.hasCompatibleNetworks = true;
-    }
-
-    @Watch('shared')
-    onSetPublic() {
-        this.onModifyScenarioUserAccess();
-    }
-
-    selectedNetwork(networkName: string, networkId: string){
-      this.selectedNetworkId = networkId;
-      this.selectedNetworkName = networkName;
+    function selectedNetwork(networkName: string, networkId: string){
+      selectedNetworkId = networkId;
+      selectedNetworkName = networkName;
       if(networkId != '' && !isNil(networkId) && networkId != getBlankGuid()){
-        this.isNetworkSelected = true;
+         isNetworkSelected.value = true;
       }
       else{
-        this.isNetworkSelected = false;
+         isNetworkSelected.value = false;
       }
     }
 
-    onModifyScenarioUserAccess() {
-        if (this.dialogData.showDialog) {
+    function onModifyScenarioUserAccess() {
+        if (props.dialogData.showDialog) {
             const currentUser: User = find(
                 propEq('username', getUserName()),
-                this.stateUsers,
+                 stateUsers.value,
             ) as User;
             const owner: ScenarioUser = {
                 userId: currentUser.id,
@@ -135,14 +131,14 @@ export default class CloneScenarioDialog extends Vue {
                 isOwner: true,
             };
 
-            this.newScenario = {
-                ...this.dialogData.scenario,
-                destinationNetworkId: this.selectedNetworkId,
-                networkId: this.dialogData.scenario.networkId,
-                users: this.shared
+            newScenario = {
+                ...props.dialogData.scenario,
+                destinationNetworkId: selectedNetworkId,
+                networkId: props.dialogData.scenario.networkId,
+                users: shared
                     ? [
                           owner,
-                          ...this.stateUsers
+                          ... stateUsers.value
                               .filter(
                                   (user: User) =>
                                       user.username !== currentUser.username,
@@ -156,26 +152,26 @@ export default class CloneScenarioDialog extends Vue {
                       ]
                     : [owner]
             };
-            this.getNetworksAction({networkId: this.dialogData.scenario.networkId});
+
+            getCompatibleNetworksAction({networkId: props.dialogData.scenario.networkId});
         }
     }
 
-    onSubmit(submit: boolean) {
+    function onSubmit(submit: boolean) {
         if (submit) {
-
-            this.newScenario.destinationNetworkId = this.selectedNetworkId;
-            this.newScenario.networkId = this.dialogData.scenario.networkId;
-            this.newScenario.networkName = this.selectedNetworkName;      
-            this.newScenario.name = this.dialogData.scenario.name;
-            this.cloneScenarioWithDestinationNetworkAction(this.newScenario);
-            this.$emit('submit');
+            newScenario.destinationNetworkId = selectedNetworkId;
+            newScenario.networkId = props.dialogData.scenario.networkId
+            newScenario.networkName = selectedNetworkName;      
+            newScenario.name = props.dialogData.scenario.name;
+            cloneScenarioWithDestinationNetworkAction(newScenario);
+            emit('submit');
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
 
-        this.newScenario = { ...emptyCloneScenario, id: getNewGuid() };
-        this.shared = false;
-        this.hasCompatibleNetworks = false;
+        newScenario = { ...emptyCloneScenario, id: getNewGuid() };
+        shared = ref(false);
+        hasCompatibleNetworks = false;
     }
-}
+
 </script>

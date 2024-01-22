@@ -17,6 +17,8 @@ using Newtonsoft.Json;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Hubs;
 using System.Linq;
+using static BridgeCareCore.Security.SecurityConstants;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BridgeCareCore.Controllers
 {
@@ -264,6 +266,14 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo?.Name, HubConstant.BroadcastError, $"{AuthenticationError}::RevokeToken - {e.Message}");
                 throw;
             }
+        }
+
+        [HttpGet]
+        [Route("GetHasAdminAccess")]
+        [Authorize(Policy = Policy.AdminUser)]
+        public async Task<IActionResult> GetHasAdminAccess()
+        {
+            return Ok(true);
         }
 
         /// <summary>

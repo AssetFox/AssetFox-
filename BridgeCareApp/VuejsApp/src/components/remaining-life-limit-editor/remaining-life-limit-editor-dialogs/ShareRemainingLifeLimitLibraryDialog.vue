@@ -1,56 +1,78 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
+  <v-dialog max-width="600px" persistent v-model="dialogData.showDialog">
     <v-card>
-      <v-card-title>
-        <v-layout justify-center>
-          <h3>Remaining Life Limit Library Sharing</h3>
-        </v-layout>
-          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+      <v-card-title class="ghd-dialog-padding-top-title">
+        <v-row justify="space-between">
+          <h5>Remaining Life Limit Library Sharing</h5>
+          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
+        </v-row>
       </v-card-title>
       <v-card-text>
-        <v-data-table id="ShareRemainingLifeLimitLibraryDialog-table-vdatatable"
-                      :headers="remainingLifeLimitLibraryUserGridHeaders"
-                      :items="remainingLifeLimitLibraryUserGridRows"
-                      sort-icon=$vuetify.icons.ghd-table-sort
-                      :search="searchTerm">
-          <template slot="items" slot-scope="props">
-            <td>
-              {{ props.item.username }}
-            </td>
-            <td>
-              <v-checkbox id="ShareRemainingLifeLimitLibraryDialog-isShared-vcheckbox" label="Is Shared" v-model="props.item.isShared"
-                          @change="removeUserModifyAccess(props.item.id, props.item.isShared)"/>
-            </td>
-            <td>
-              <v-checkbox id="ShareRemainingLifeLimitLibraryDialog-canModify-vcheckbox" :disabled="!props.item.isShared" label="Can Modify" v-model="props.item.canModify"/>
-            </td>
+        <v-row>
+          <v-col>
+            <v-data-table-server id="ShareRemainingLifeLimitLibraryDialog-table-vdatatable"
+                          :headers="remainingLifeLimitLibraryUserGridHeaders"
+                          :items="remainingLifeLimitLibraryUserGridRows"
+                          :items-length="remainingLifeLimitLibraryUserGridRows.length"
+                          sort-asc-icon="custom:GhdTableSortAscSvg"
+                          sort-desc-icon="custom:GhdTableSortDescSvg"
+                          :search="searchTerm"
+                          :items-per-page="5"
+                          :items-per-page-options="[
+                            {value: 5, title: '5'},
+                            {value: 10, title: '10'},
+                            {value: 25, title: '25'},
+                          ]">
+          <template v-slot:headers="props">
+            <tr>
+              <th style="font-weight: bold;" v-for="header in remainingLifeLimitLibraryUserGridHeaders" :key="header.title">
+                  {{header.title}}
+              </th>
+            </tr>
           </template>
-          <v-alert :value="true"
-                   class="ara-orange-bg"
-                   icon="fas fa-exclamation"
-                   slot="no-results">
-            Your search for "{{ searchTerm }}" found no results.
-          </v-alert>
-        </v-data-table>
+              <template v-slot:item="props">
+                <tr>
+                <td>
+                  {{ props.item.username }}
+                </td>
+                <td>
+                  <v-checkbox id="ShareRemainingLifeLimitLibraryDialog-isShared-vcheckbox" v-model="props.item.isShared"
+                              @change="removeUserModifyAccess(props.item.id, props.item.isShared)"/>
+                </td>
+                <td>
+                  <v-checkbox id="ShareRemainingLifeLimitLibraryDialog-canModify-vcheckbox" :disabled="!props.item.isShared" v-model="props.item.canModify"/>
+                </td>
+              </tr>
+              </template>
+              <!-- <v-alert :model-value="true"
+                      class="ara-orange-bg"
+                      icon="fas fa-exclamation"
+                      slot="no-results">
+                Your search for "{{ searchTerm }}" found no results.
+              </v-alert> -->
+            </v-data-table-server>
+          </v-col>
+        </v-row>
       </v-card-text>
+
       <v-card-actions>
-        <v-layout row justify-center>
-          <v-btn id="ShareRemainingLifeLimitLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed>Cancel</v-btn>
-          <v-btn id="ShareRemainingLifeLimitLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
+        <v-row justify="center" class="ghd-dialog-padding-bottom-buttons">
+          <v-btn id="ShareRemainingLifeLimitLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-blue ghd-button" variant="text">
+            Cancel
+          </v-btn>
+          <v-btn id="ShareRemainingLifeLimitLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button" variant="outlined">
             Save
           </v-btn>
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {Action, State} from 'vuex-class';
+<script setup lang="ts">
+import { watch, ref, toRefs, computed } from 'vue';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {RemainingLifeLimitLibraryUser } from '@/shared/models/iAM/remaining-life-limit';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -58,38 +80,39 @@ import {User} from '@/shared/models/iAM/user';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getUserName} from '@/shared/utils/get-user-info';
 import {setItemPropertyValueInList} from '@/shared/utils/setter-utils';
-import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {RemainingLifeLimitLibraryUserGridRow, ShareRemainingLifeLimitLibraryDialogData } from '@/shared/models/modals/share-remaining-life-limit-data';
 import RemainingLifeLimitService from '@/services/remaining-life-limit.service';
 import { http2XX } from '@/shared/utils/http-utils';
+import { useStore } from 'vuex';
 
-@Component
-export default class ShareRemainingLifeLimitLibraryDialog extends Vue {
-  @Prop() dialogData: ShareRemainingLifeLimitLibraryDialogData;
+  const props = defineProps<{
+    dialogData: ShareRemainingLifeLimitLibraryDialogData
+  }>();
+  const { dialogData } = toRefs(props);
 
-  @State(state => state.userModule.users) stateUsers: User[];
+  const emit = defineEmits(['submit']);
+  let store = useStore();
+  const stateUsers  = computed<User[]>(()=>store.state.userModule.users);
 
-  remainingLifeLimitLibraryUserGridHeaders: DataTableHeader[] = [
-    {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
+  let remainingLifeLimitLibraryUserGridHeaders: any[] = [
+    {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Shared With', key: 'isShared', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Can Modify', key: 'canModify', align: 'left', sortable: true, class: '', width: ''}
   ];
-  remainingLifeLimitLibraryUserGridRows: RemainingLifeLimitLibraryUserGridRow[] = [];
-  currentUserAndOwner: RemainingLifeLimitLibraryUser[] = [];
-  searchTerm: string = '';
+  const remainingLifeLimitLibraryUserGridRows = ref<RemainingLifeLimitLibraryUserGridRow[]>([]);
+  let currentUserAndOwner = ref<RemainingLifeLimitLibraryUser[]>([]);
+  let searchTerm: string = '';
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    if (this.dialogData.showDialog) {
-      this.onSetGridData();
-      this.onSetUsersSharedWith();
+  watch(dialogData, () => {
+    if (dialogData.value.showDialog) {
+      onSetGridData();
+      onSetUsersSharedWith();
     }
-  }
+  });
 
-  onSetGridData() {
+  function onSetGridData() {
     const currentUser: string = getUserName();
-
-    this.remainingLifeLimitLibraryUserGridRows = this.stateUsers
+    remainingLifeLimitLibraryUserGridRows.value = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -99,10 +122,10 @@ export default class ShareRemainingLifeLimitLibraryDialog extends Vue {
         }));
   }
 
-    onSetUsersSharedWith() {
+  function onSetUsersSharedWith() {
         // Remaining Life Limit library users
         let remainingLifeLimitLibraryUsers: RemainingLifeLimitLibraryUser[] = [];
-        RemainingLifeLimitService.getRemainingLifeLimitLibraryUsers(this.dialogData.remainingLifeLimitLibrary.id).then(response => {
+        RemainingLifeLimitService.getRemainingLifeLimitLibraryUsers(dialogData.value.remainingLifeLimitLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];
@@ -131,18 +154,18 @@ export default class ShareRemainingLifeLimitLibraryDialog extends Vue {
                 const isCurrentUserOrOwner = (remainingLifeLimitLibraryUser: RemainingLifeLimitLibraryUser) => remainingLifeLimitLibraryUser.username === currentUser || remainingLifeLimitLibraryUser.isOwner;
                 const isNotCurrentUserOrOwner = (remainingLifeLimitLibraryUser: RemainingLifeLimitLibraryUser) => remainingLifeLimitLibraryUser.username !== currentUser && !remainingLifeLimitLibraryUser.isOwner;
 
-                this.currentUserAndOwner = filter(isCurrentUserOrOwner, remainingLifeLimitLibraryUsers) as RemainingLifeLimitLibraryUser[];
+                currentUserAndOwner.value = filter(isCurrentUserOrOwner, remainingLifeLimitLibraryUsers) as RemainingLifeLimitLibraryUser[];
                 const otherUsers: RemainingLifeLimitLibraryUser[] = filter(isNotCurrentUserOrOwner, remainingLifeLimitLibraryUsers) as RemainingLifeLimitLibraryUser[];
 
                 otherUsers.forEach((remainingLifeLimitLibraryUser: RemainingLifeLimitLibraryUser) => {
-                    if (any(propEq('id', remainingLifeLimitLibraryUser.userId), this.remainingLifeLimitLibraryUserGridRows)) {
+                    if (any(propEq('id', remainingLifeLimitLibraryUser.userId), remainingLifeLimitLibraryUserGridRows.value)) {
                         const remainingLifeLimitLibraryUserGridRow: RemainingLifeLimitLibraryUserGridRow = find(
-                            propEq('id', remainingLifeLimitLibraryUser.userId), this.remainingLifeLimitLibraryUserGridRows) as RemainingLifeLimitLibraryUserGridRow;
+                            propEq('id', remainingLifeLimitLibraryUser.userId), remainingLifeLimitLibraryUserGridRows.value) as RemainingLifeLimitLibraryUserGridRow;
 
-                        this.remainingLifeLimitLibraryUserGridRows = update(
-                            findIndex(propEq('id', remainingLifeLimitLibraryUser.userId), this.remainingLifeLimitLibraryUserGridRows),
+                        remainingLifeLimitLibraryUserGridRows.value = update(
+                            findIndex(propEq('id', remainingLifeLimitLibraryUser.userId), remainingLifeLimitLibraryUserGridRows.value),
                             { ...remainingLifeLimitLibraryUserGridRow, isShared: true, canModify: remainingLifeLimitLibraryUser.canModify },
-                            this.remainingLifeLimitLibraryUserGridRows
+                            remainingLifeLimitLibraryUserGridRows.value
                         );
                     }
                 });
@@ -150,26 +173,26 @@ export default class ShareRemainingLifeLimitLibraryDialog extends Vue {
         });
   }
 
-  removeUserModifyAccess(userId: string, isShared: boolean) {
+  function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      this.remainingLifeLimitLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), this.remainingLifeLimitLibraryUserGridRows),
-          'canModify', false, this.remainingLifeLimitLibraryUserGridRows);
+      remainingLifeLimitLibraryUserGridRows.value = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), remainingLifeLimitLibraryUserGridRows.value),
+          'canModify', false, remainingLifeLimitLibraryUserGridRows.value);
     }
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.getRemainingLifeLimitLibraryUsers());
+      emit('submit', getRemainingLifeLimitLibraryUsers());
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.remainingLifeLimitLibraryUserGridRows = [];
+    remainingLifeLimitLibraryUserGridRows.value = [];
   }
 
-  getRemainingLifeLimitLibraryUsers() {
-    const usersSharedWith: RemainingLifeLimitLibraryUser[] = this.remainingLifeLimitLibraryUserGridRows
+  function getRemainingLifeLimitLibraryUsers() {
+    const usersSharedWith: RemainingLifeLimitLibraryUser[] = remainingLifeLimitLibraryUserGridRows.value
         .filter((remainingLifeLimitLibraryUserGridRow: RemainingLifeLimitLibraryUserGridRow) => remainingLifeLimitLibraryUserGridRow.isShared)
         .map((remainingLifeLimitLibraryUserGridRow: RemainingLifeLimitLibraryUserGridRow) => ({
           userId: remainingLifeLimitLibraryUserGridRow.id,
@@ -178,9 +201,8 @@ export default class ShareRemainingLifeLimitLibraryDialog extends Vue {
           isOwner: false
         }));
 
-    return [...this.currentUserAndOwner, ...usersSharedWith];
+    return [...currentUserAndOwner.value, ...usersSharedWith];
   }
-}
 </script>
 
 <style>

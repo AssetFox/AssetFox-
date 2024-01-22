@@ -9,7 +9,7 @@ import { sortByProperty } from '@/shared/utils/sorter-utils';
 
 const state = {
   announcements: [] as Announcement[],
-  packageVersion: process.env.PACKAGE_VERSION || '0',
+  packageVersion: import.meta.env.PACKAGE_VERSION || '0',
 };
 
 const mutations = {
@@ -47,7 +47,7 @@ const actions = {
           const message: string = any(propEq('id', payload.announcement.id), state.announcements)
             ? 'Updated announcement' : 'Added announcement';
           commit('addedOrUpdatedAnnouncementMutator', payload.announcement);
-          dispatch('setSuccessMessage', { message: message });
+          dispatch('addSuccessNotification', { message: message });
         }
       });
   },
@@ -56,7 +56,7 @@ const actions = {
       .then((response: AxiosResponse) => {
         if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
           commit('deletedAnnouncementMutator', payload.deletedAnnouncementId);
-          dispatch('setSuccessMessage', { message: 'Deleted announcement' });
+          dispatch('addSuccessNotification', { message: 'Deleted announcement' });
         }
       });
   }

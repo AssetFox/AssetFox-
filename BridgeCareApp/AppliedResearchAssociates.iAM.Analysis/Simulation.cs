@@ -79,14 +79,10 @@ public sealed class Simulation : WeakEntity, IValidator
     {
         var results = new ValidationResultBag();
 
-        var treatmentsWithEmptyFeasibility = Treatments.Where(treatment => treatment.FeasibilityCriteria.All(criterion => criterion.ExpressionIsBlank)).ToList();
-        if (treatmentsWithEmptyFeasibility.Count != 1)
+        var potentialPassiveTreatments = Treatments.Where(treatment => treatment.IsPotentialPassiveTreatment).ToList();
+        if (potentialPassiveTreatments.Count != 1)
         {
-            results.Add(ValidationStatus.Error, $"There are {treatmentsWithEmptyFeasibility.Count} treatments with empty feasibility.", this, nameof(Treatments));
-        }
-        else if (DesignatedPassiveTreatment != null && DesignatedPassiveTreatment != treatmentsWithEmptyFeasibility[0])
-        {
-            results.Add(ValidationStatus.Error, "Designated passive treatment is not the single treatment with empty feasibility.", this, nameof(DesignatedPassiveTreatment));
+            results.Add(ValidationStatus.Error, $"There are {potentialPassiveTreatments.Count} potential passive treatments.", this, nameof(Treatments));
         }
 
         if (DesignatedPassiveTreatment == null)
@@ -115,6 +111,14 @@ public sealed class Simulation : WeakEntity, IValidator
         if (Treatments.Select(treatment => treatment.Name).Distinct().Count() < Treatments.Count)
         {
             results.Add(ValidationStatus.Error, "Multiple selectable treatments have the same name.", this, nameof(Treatments));
+        }
+
+        foreach (var project in CommittedProjects)
+        {
+            if (!Treatments.Contains(project.TemplateTreatment))
+            {
+                results.Add(ValidationStatus.Error, "Simulation does not contain this template treatment.", project, nameof(project.TemplateTreatment));
+            }
         }
 
         return results;

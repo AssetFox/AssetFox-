@@ -1,168 +1,108 @@
 <template>
-    <v-layout column class="Montserrat-font-family" justify-start>
-        <v-flex xs12>
-            <v-layout class="data-table" justify-left>
-                <v-flex xs12>
-                    <v-subheader>
-                        Available Reports
-                    </v-subheader>
+    <v-card height="800px" class="elevation-0 vcard-main-layout">
+    <v-row column class="Montserrat-font-family" justify-start>
+        <div style="padding: 10px;">
+            <v-subheader  class="ghd-md-gray ghd-control-label">
+                Available Reports
+            </v-subheader>
+        </div>
+        <v-col cols = "12">
+            <v-row class="data-table" justify-left>
+                <v-col>
                     <v-card class="elevation-0">
                         <v-data-table
                             id="ReportsAndOutputs-datatable"
                             :headers="reportsGridHeaders"
-                            :items="currentPage"                       
+                            :items="currentPage"      
+                            sort-asc-icon="custom:GhdTableSortAscSvg"
+                            sort-desc-icon="custom:GhdTableSortDescSvg"                 
                             :rows-per-page-items=[5,10,25]
-                            sort-icon=$vuetify.icons.ghd-table-sort
-
                             class="fixed-header ghd-table v-table__overflow"
                             item-key="id"
                         >
-                            <template slot="items" slot-scope="props">
+                            <template slot="items" slot-scope="props" v-slot:item="props">
+                                <tr>
                                 <td class="text-xs-left">
                                     <div>
                                         <span class='lg-txt'>{{props.item.name}}</span>
                                     </div>
                                 </td>
                                 <td class="text-xs-left">
-                                    <v-menu
-                                        min-height="500px"
-                                        min-width="500px"
-                                        right
-                                    >
-                                        <template slot="activator">
-                                            <v-btn v-if="props.item.name.includes('Summary')" class="ghd-blue" tooltip flat icon>
-                                                <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
-                                            </v-btn>
-                                        </template>
-                                        <v-card>
-                                            <v-card-text>
+                                    <v-btn v-if="props.item.name.includes('Summary')" class="ghd-blue" tooltip flat icon>
+                                                <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')" @click="showEditDialog">
+                                                <Dialog v-model:visible="editShow">
+                                                    <v-card>
                                                 <v-textarea
                                                     class="sm-txt Montserrat-font-family"
-                                                    :value=props.item.mergedExpression
+                                                    :value="props.item.mergedExpression"
                                                     full-width
                                                     no-resize
-                                                    outline
+                                                    variant="outlined"
                                                     readonly
                                                     rows="5"
                                                 />
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-menu>
+                                            </v-card>
+                                                </Dialog>
+
+                                            </v-btn>
                                     <v-btn v-if="props.item.name.includes('Summary')"
                                         @click="onShowCriterionEditorDialog(props.item.id)"
                                         class="ghd-blue"
-                                        icon
+                                        flat
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')">
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')">
                                     </v-btn>
                                 </td>
                                 <td class="text-xs-left">
                                     <v-btn
                                         @click="onGenerateReport(props.item.id, true)"
                                         class="ghd-blue"
-                                        icon
+                                        flat
                                     >
-                                        <img class="img-general" :src="require('@/assets/icons/attributes-dark.svg')"/>
+                                        <img class="img-general" :src="getUrl('assets/icons/attributes-dark.svg')"/>
 
                                     </v-btn>
                                     <v-btn
                                         @click="onDownloadReport(props.item.id)"
-                                        icon
+                                        flat
                                     >
-                                        <img class='img-general' :src="require('@/assets/icons/download.svg')"/>
+                                        <img class='img-general' :src="getUrl('assets/icons/download.svg')"/>
                                     </v-btn>
                                 </td>
+                            </tr>
                             </template>
-                            <template v-slot:body.append>
-                            </template>                               
                         </v-data-table>
                     </v-card>
-                </v-flex>
-            </v-layout>
-        </v-flex>
-        <v-flex>
-        <v-layout column>
-            <v-flex>
+                </v-col>
+            </v-row>
+        </v-col>
+        <v-col>
+        <v-row column>
+            <v-col>
                 <v-subheader class="ghd-md-gray ghd-control-label">
                     Diagnostics & Logging
                 </v-subheader>
-                <v-divider style="margin:0px;" />
-                <v-layout style="margin:0px;">
-                    <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" depressed>Simulation Log</v-btn>
-                </v-layout>
-            </v-flex>
+                <v-divider
+            :thickness="2"
+            class="border-opacity-100"
+        ></v-divider>
+                <v-row style="margin:5px;">
+                    <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" variant = "flat">Simulation Log</v-btn>
+                </v-row>
+            </v-col>
 
-        </v-layout>
-        </v-flex>
-        <!-- <v-layout align-center>
-            <v-flex xs4 class="ghd-constant-header">
-                <v-subheader class="ghd-md-gray ghd-control-label">Select a Report</v-subheader>
-                <v-select
-                    :items='reports'
-                    v-model='selectedReport'
-                    append-icon=$vuetify.icons.ghd-down
-                    outline
-                    class="ghd-select ghd-text-field ghd-text-field-border">
-                </v-select>
-            </v-flex>
-            <v-flex>
-                <v-btn 
-                    class="ghd-white-bg ghd-blue ghd-button-text ghd-button" 
-                    depressed
-                    @click="onGenerateReport(true)"
-                    :disabled="selectedReport === ''"
-                >Generate Report</v-btn>
-                <v-btn 
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                    @click="onDownloadReport()"
-                    outline
-                >Download Report</v-btn>
-            </v-flex>
-        </v-layout>
-        <v-layout style="margin:10px; padding-left:0px" column>
-            <v-layout justify-space-between align-center>
-                <v-subheader class="ghd-control-label ghd-md-gray">                             
-                    Report Criteria
-                </v-subheader>
-                <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
-                    <v-btn
-                        id="SummaryReport-criteriaEditor-btn"
-                        style="!important;"
-                        @click="
-                            onShowCriterionEditorDialog
-                        "
-                        class="edit-icon ghd-control-label"
-                        icon
-                    >
-                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
-                    </v-btn>
-                </v-flex>
-            </v-layout>
-            <v-layout>
-               <v-textarea
-                   id="SummaryReport-criteria-textArea"
-                   class="ghd-control-text ghd-control-border"
-                   style="padding-bottom: 0px; padding-right:30px; height: 90px;"
-                   no-resize
-                   outline
-                   readonly
-                   :rows=4
-                   v-model=mergedCriteriaExpression
-               >
-               </v-textarea>
-            </v-layout>
-        </v-layout> -->
+        </v-row>
+        </v-col>
         <GeneralCriterionEditorDialog
             :dialogData="criterionEditorDialogData"
             @submit="onCriterionEditorDialogSubmit"
         />
-    </v-layout>
+    </v-row>
+</v-card>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import { Action, State } from 'vuex-class';
-import Component from 'vue-class-component';
+<script setup lang='ts'>
+import { ref, onMounted, computed, watch } from 'vue';
 import { clone, update, find, findIndex, propEq } from 'ramda';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
@@ -174,143 +114,139 @@ import FileDownload from 'js-file-download';
 import {hasValue} from '@/shared/utils/has-value-util';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { SelectItem } from '@/shared/models/vue/select-item';
-import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { Report, emptyReport } from '@/shared/models/iAM/reports';
 import {
     InputValidationRules,
-    rules,
+    rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router'; 
+import Dialog from 'primevue/dialog';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import { getUrl } from '@/shared/utils/get-url';
 
-@Component({
-    components: { GeneralCriterionEditorDialog },
-})
-export default class ReportsAndOutputs extends Vue {
+    let store = useStore();
+    const router = useRouter(); 
+    const stateSimulationReportNames = computed<string[]>(() => store.state.adminDataModule.simulationReportNames);
+    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification',payload);} 
+    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification',payload);} 
+    async function getSimulationReportsAction(payload?: any): Promise<any> { await store.dispatch('getSimulationReports',payload);} 
 
-    @State(state => state.adminDataModule.simulationReportNames) stateSimulationReportNames: string[];
+    let editShow = ref<boolean>(false);
 
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('getSimulationReports') getSimulationReportsAction: any;
+    let simulationName: string;
+    let networkName: string = '';
+    let networkId: string = getBlankGuid();
+    let selectedScenarioId: string = getBlankGuid();
 
-    initializedBudgets: boolean = false;
+    let rules: InputValidationRules = clone(validationRules);
 
-    simulationName: string;
-    networkName: string = '';
-    networkId: string = getBlankGuid();
-    selectedScenarioId: string = getBlankGuid();
-
-    rules: InputValidationRules = clone(rules);
-
-    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
-        emptyGeneralCriterionEditorDialogData,
-    );
-    currentPage: Report[] = [];
-    reports: SelectItem[] = [];   
-    selectedReport: Report = emptyReport; 
-
-    reportsGridHeaders: DataTableHeader[] = [
+    const criterionEditorDialogData = ref<GeneralCriterionEditorDialogData>(clone(emptyGeneralCriterionEditorDialogData));
+    const currentPage = ref<Report[]>([]);
+    let selectedReport = ref<Report>(emptyReport); 
+    const reportsGridHeaders: any[] = [
         {
-            text: 'Name',
-            value: 'name',
+            title: 'Name',
+            key: 'name',
             align: 'left',
             sortable: true,
             class: '',
             width: '',
         },
         {
-            text: 'Criteria',
-            value: 'criterionLibrary',
+            title: 'Criteria',
+            key: 'criterionLibrary',
             align: 'left',
             sortable: false,
             class: '',
             width: '',
         },
         {
-            text: 'Actions',
-            value: '',
+            title: 'Actions',
+            key: 'actions',
             align: 'left',
             sortable: false,
             class: '',
             width: '',
         },
     ];
+    onMounted(() => {
 
-    mounted() {
-        this.getSimulationReportsAction().then(() => {
-            const reports: string[] = clone(this.stateSimulationReportNames)
-            this.reports = reports.map(rep => {
-                return {text: rep, value: rep}
-            })
-
-            this.stateSimulationReportNames.forEach(reportName => {
-                this.currentPage.push({
-                    id: getNewGuid(),
-                    name: reportName,
-                    mergedExpression: ""
-                });
-            });
-            // const newReport: Report = emptyReport;
-            // newReport.name = "Report 1";
-            // newReport.id = getBlankGuid();
-            // newReport.mergedExpression = "";
-            // this.currentPage.push(newReport);
-
-            if(reports.length > 0)
-                this.selectedReport = this.currentPage[0];// reports[0];
-        });
-    }
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            vm.selectedScenarioId = to.query.scenarioId;
-            vm.simulationName = to.query.scenarioName;
-            vm.networkName = to.query.networkName;
-            vm.networkId = to.query.networkId;
-            if (vm.selectedScenarioId === getBlankGuid()) {
+        selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
+        simulationName = router.currentRoute.value.query.scenarioName as string;
+        networkName = router.currentRoute.value.query.networkName as string;
+        networkId = router.currentRoute.value.query.networkId as string;
+        if (selectedScenarioId === getBlankGuid()) {
                 // set 'no selected scenario' error message, then redirect user to Scenarios UI
-                vm.addErrorNotificationAction({
+                addErrorNotificationAction({
                     message: 'Found no selected scenario for edit',
                 });
-                vm.$router.push('/Scenarios/');
+                router.push('/Scenarios/');
             }
-        });
-    }
-    onShowCriterionEditorDialog(reportId: string) {
 
-        this.selectedReport = find(
+        //selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
+        getSimulationReportsAction();
+        
+    });
+    watch(stateSimulationReportNames, () => {
+        stateSimulationReportNames.value.forEach(reportName => {
+            currentPage.value.push({
+                id: getNewGuid(),
+                name: reportName,
+                mergedExpression: ""
+            });
+        });
+        if(stateSimulationReportNames.value.length > 0)
+            selectedReport.value = currentPage.value[0];
+
+    });
+    const onRowSelect = (event:any) => {
+        selectedReport.value = {
+            id: event.data.id,
+            name: event.data.name,
+            mergedExpression: event.data.mergedExpression
+        };
+    };
+    function showEditDialog(): void {
+        editShow.value = !editShow.value;
+    }
+    function onShowCriterionEditorDialog(reportId: string) {
+        selectedReport.value = find(
             propEq('id', reportId),
-            this.currentPage,
+            currentPage.value,
         ) as Report;
 
-        this.criterionEditorDialogData = {
+        criterionEditorDialogData.value = {
             showDialog: true,
-            CriteriaExpression: this.selectedReport.mergedExpression,
+            CriteriaExpression: selectedReport.value.mergedExpression,
         };
     }
-    onCriterionEditorDialogSubmit(criterionexpression: string) {
-        this.criterionEditorDialogData = clone(
+    function onCriterionEditorDialogSubmit(criterionexpression: string) {
+        criterionEditorDialogData.value = clone(
             emptyGeneralCriterionEditorDialogData,
         );
-        this.currentPage = update(
+        currentPage.value = update(
             findIndex(
-                propEq('id', this.selectedReport.id), this.currentPage), { ...this.selectedReport, mergedExpression: criterionexpression}, this.currentPage,
+                propEq('id', selectedReport.value.id), currentPage.value), { ...selectedReport.value, mergedExpression: criterionexpression}, currentPage.value,
             );
     }
-    async onDownloadSimulationLog(download: boolean) {
+    async function onDownloadSimulationLog(download: boolean) {
         if (download) {            
             await ReportsService.downloadSimulationLog(
-                this.networkId,
-                this.selectedScenarioId,
+                networkId,
+                selectedScenarioId,
             ).then((response: AxiosResponse<any>) => {
                 if (hasValue(response, 'data')) {
-                    this.addSuccessNotificationAction({
+                    addSuccessNotificationAction({
                         message: 'Report downloaded',
                     });
                     FileDownload(
                         response.data,
-                        `Simulation Log ${this.simulationName}.txt`,
+                        `Simulation Log ${simulationName}.txt`,
                     );
                 } else {
-                    this.addErrorNotificationAction({
+                    addErrorNotificationAction({
                         message: 'Failed to download simulation log.',
                         longMessage:
                             'Failed to download simulation log. Please try generating and downloading the log again.',
@@ -319,28 +255,28 @@ export default class ReportsAndOutputs extends Vue {
             });
         } 
     }
-    async onGenerateReport(reportId: string, download: boolean) {
+    async function onGenerateReport(reportId: string, download: boolean) {
         if (download) {            
             // Get the selected report
-            this.selectedReport = find(
+            selectedReport.value = find(
                 propEq('id', reportId),
-                this.currentPage,
+                currentPage.value,
             ) as Report;
             // Generate report with selected one from table
             await ReportsService.generateReportWithCriteria(
-                this.selectedScenarioId, this.selectedReport.mergedExpression, this.selectedReport.name
+                selectedScenarioId, selectedReport.value.mergedExpression, selectedReport.value.name
             ).then((response: AxiosResponse<any>) => {
                 if (response.status == 200) {
                     if (hasValue(response, 'data')) {
                         const resultId: string = response.data as string;
-                        this.reportIndexID = resultId;
+                        //reportIndexID = resultId;
                     }
-                    this.addSuccessNotificationAction({
-                        message: this.selectedReport.name +  ' report generation started for ' + this.simulationName + '.',
+                    addSuccessNotificationAction({
+                        message: selectedReport.value.name +  ' report generation started for ' + simulationName + '.',
                     });
                 } else {
-                    this.addErrorNotificationAction({
-                        message: 'Failed to generate apricot for ' + this.simulationName + '.',
+                    addErrorNotificationAction({
+                        message: 'Failed to generate apricot for ' + simulationName + '.',
                         longMessage:
                             'Failed to generate the report or output. Make sure the scenario has been run',
                     });
@@ -349,20 +285,19 @@ export default class ReportsAndOutputs extends Vue {
         }
     }
 
-    async onDownloadReport(reportId: string) {        
-
-        this.selectedReport = find(
+    async function onDownloadReport(reportId: string) {        
+        selectedReport.value = find(
             propEq('id', reportId),
-            this.currentPage,
+            currentPage.value,
         ) as Report;
         await ReportsService.downloadReport(
-            this.selectedScenarioId, this.selectedReport.name
+            selectedScenarioId, selectedReport.value.name
         ).then((response: AxiosResponse<any>) => {
             if (hasValue(response, 'data')) {
                 const fileInfo: FileInfo = response.data as FileInfo;
                 FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
             } else {
-                this.addErrorNotificationAction({
+                addErrorNotificationAction({
                     message: 'Failed to download report.',
                     longMessage:
                         'Failed to download the report or output. Make sure the scenario has been run',
@@ -370,7 +305,7 @@ export default class ReportsAndOutputs extends Vue {
             }
         });
     }
-}
+
 </script>
 <style>
 </style>

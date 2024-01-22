@@ -1,50 +1,42 @@
 <template>
     <v-dialog
         persistent
-        fullscreen
         v-model="dialogData.showDialog"
-        class="criterion-library-editor-dialog"
+        class="criterion-library-editor-dialog" width="auto"
     >
         <v-card>
             <v-card-text>
-                <v-layout justify-center column>
+                <v-row>
                     <div>
-                        <v-layout justify-center>
-                            <v-flex xs10>
-                            <CriteriaEditor :criteriaEditorData="criteriaEditorData"
-                                            @submitCriteriaEditorResult="onSubmitCriteriaEditorResult"/>
-                            </v-flex>
-                        </v-layout>
+                      <CriteriaEditor :criteriaEditorData="criteriaEditorData"
+                                      @submitCriteriaEditorResult="onSubmitCriteriaEditorResult"/>
                     </div>
-                </v-layout>
+                </v-row>
             </v-card-text>
-            <v-card-actions>
-                <v-layout justify-center>
-                    <v-btn
-                        class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                        depressed
-                        @click="onSubmit(false)"
-                    >
-                        Cancel
-                    </v-btn>
-                    <v-btn
-                        :disabled="!canUpdateOrCreate"
-                        class="ghd-blue-bg ghd-white ghd-button-text"
-                        depressed
-                        @click="onSubmit(true)"
-                    >
-                        Save
-                    </v-btn>
-                </v-layout>
-            </v-card-actions>
+            <v-row justify="center" style="padding: 10px; margin: 0px;">
+                <v-btn
+                    class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
+                    flat
+                    style="margin-right: 5px;"
+                    @click="onSubmit(false)"
+                >
+                    Cancel
+                </v-btn>
+                <v-btn
+                    :disabled="!canUpdateOrCreate"
+                    class="ghd-blue-bg ghd-white ghd-button-text"
+                    flat
+                    style="margin-left: 5px;"                    
+                    @click="onSubmit(true)"
+                >
+                    Save
+                </v-btn>
+            </v-row>
         </v-card>
     </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
+<script setup lang="ts">
 import { GeneralCriterionEditorDialogData } from '../models/modals/general-criterion-editor-dialog-data';
 import {
   CriteriaEditorData,
@@ -53,84 +45,69 @@ import {
     emptyCriteriaEditorData,
     emptyCriterionLibrary,
 } from '@/shared/models/iAM/criteria';
-import { hasValue } from '@/shared/utils/has-value-util';
-import CriterionLibraryEditor from '@/components/criteria-editor/CriterionLibraryEditor.vue';
-import { getBlankGuid } from '@/shared/utils/uuid-utils';
-import { clone, isNil } from 'ramda';
-import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
-import Alert from '@/shared/modals/Alert.vue';
-import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
+import { isNil } from 'ramda';
 import CriteriaEditor from '../components/CriteriaEditor.vue';
+import { toRefs, ref, watch} from 'vue';
+import { useStore } from 'vuex';
 
-@Component({
-    components: { CriterionLibraryEditor, HasUnsavedChangesAlert: Alert, CriteriaEditor },
-})
-export default class GeneralCriterionEditorDialog extends Vue {
-    @Prop() dialogData: GeneralCriterionEditorDialogData;
-
-    @State(state => state.criterionModule.criterionLibraries)
-    stateCriterionLibraries: CriterionLibrary[];
-    @State(state => state.criterionModule.selectedCriterionLibrary)
-    stateSelectedCriterionLibrary: CriterionLibrary;
-    @State(state => state.criterionModule.selectedCriterionIsValid)
-    stateSelectedCriterionIsValid: boolean;
-
-    criteriaEditorData: CriteriaEditorData = {
+let store = useStore();
+const emit = defineEmits(['submit'])
+const props = defineProps<{
+    dialogData: GeneralCriterionEditorDialogData
+    }>()
+const { dialogData } = toRefs(props);
+const criteriaEditorData = ref<CriteriaEditorData>({
     ...emptyCriteriaEditorData,
     isLibraryContext: true
-  };
+  });
+const canUpdateOrCreate = ref<boolean>(false);
 
-  uuidNIL: string = getBlankGuid();
-  canUpdateOrCreate: boolean = false;
+let CriteriaExpressionToReturn: string | null = "";
 
-  CriteriaExpressionToReturn: string | null = "";
-
-  @Watch('dialogData')
-    onDialogDataChanged() {
-        const htmlTag: HTMLCollection = document.getElementsByTagName('html') as HTMLCollection;
-        const criteriaEditorCard: HTMLCollection = document.getElementsByClassName('criteria-editor-card') as HTMLCollection;
-
-        if (this.dialogData.showDialog) {    
-            this.criteriaEditorData = {
-                    ...this.criteriaEditorData,
-                    mergedCriteriaExpression: this.dialogData.CriteriaExpression,
+  watch(dialogData,()=> {
+        // const htmlTag: HTMLCollection = document.getElementsByTagName('html') as HTMLCollection;
+        // const criteriaEditorCard: HTMLCollection = document.getElementsByClassName('criteria-editor-card') as HTMLCollection;
+        if (dialogData.value.showDialog) {    
+            criteriaEditorData.value = {
+                    ...criteriaEditorData.value,
+                    mergedCriteriaExpression: dialogData.value.CriteriaExpression,
                     isLibraryContext: true
                 };
 
-            this.canUpdateOrCreate = false;
+            canUpdateOrCreate.value = false;
 
-            if (hasValue(htmlTag)) {
-                htmlTag[0].setAttribute('style', 'overflow:hidden;');
-            }
+            // if (hasValue(htmlTag)) {
+            //     htmlTag[0].setAttribute('style', 'overflow:hidden;');
+            // }
 
-            if (hasValue(criteriaEditorCard)) {
-                criteriaEditorCard[0].setAttribute('style', 'height:100%');
-            }
-            } else {
-            if (hasValue(htmlTag)) {
-                htmlTag[0].setAttribute('style', 'overflow:auto;');
-            }
+            // if (hasValue(criteriaEditorCard)) {
+            //     criteriaEditorCard[0].setAttribute('style', 'height:100%');
+            // }
+            // } else {
+            // if (hasValue(htmlTag)) {
+            //     htmlTag[0].setAttribute('style', 'overflow:auto;');
+            // }
         }
-    }
+    });
 
-    onSubmitCriteriaEditorResult(result: CriteriaEditorResult) {
-        this.canUpdateOrCreate = result.validated;
+    function onSubmitCriteriaEditorResult(result: CriteriaEditorResult) {
+        canUpdateOrCreate.value = result.validated;
 
         if (result.validated) {
-            this.CriteriaExpressionToReturn = result.criteria
+            CriteriaExpressionToReturn = result.criteria
         }
     }
 
-    onSubmit(submit: boolean) {
+    function onSubmit(submit: boolean) {
         if (submit) {
-            if (!isNil(this.CriteriaExpressionToReturn)) {
-                this.$emit('submit', this.CriteriaExpressionToReturn);
+            if (!isNil(CriteriaExpressionToReturn)) {
+                emit('submit', CriteriaExpressionToReturn);
             }
         } else {
-            this.$emit('submit', null);
+            dialogData.value.showDialog = false
+            emit('submit', null);
         }
     }
-}
 </script>
 
 <style>

@@ -50,8 +50,8 @@ const mutations = {
 };
 
 const actions = {
-    async getUserTokens({ commit }: any, code: string) {
-        await AuthenticationService.getUserTokens(code).then(
+    async getUserTokens({ commit }: any, payload: any) {
+        await AuthenticationService.getUserTokens(payload.code).then(
             (response: AxiosResponse) => {
                 const expirationInMilliseconds = moment().add(30, 'minutes');
                 if (
@@ -204,14 +204,20 @@ const actions = {
             );
         }
     },
-    async setAzureUserInfo({ commit, dispatch }: any, payload: any) {
-        if (payload.status) {
-            commit('hasRoleMutator', true);
-            commit('checkedForRoleMutator', true);
-            commit('adminAccessMutator', true);
-            commit('usernameMutator', payload.username);
-            commit('authenticatedMutator', true);
-            commit('simulationAccessMutator', false);
+    async setAzureUserInfo({ commit }: any, payload: any) {
+        if (payload.status) {            
+            await AuthenticationService.getHasAdminAccess().then((response: AxiosResponse) => {
+                let hasAdminAccess: boolean = false;
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                    hasAdminAccess = response.data as boolean;
+                }
+                    commit('hasRoleMutator', true);
+                    commit('checkedForRoleMutator', true);
+                    commit('adminAccessMutator', hasAdminAccess);
+                    commit('usernameMutator', payload.username);
+                    commit('authenticatedMutator', true);
+                    commit('simulationAccessMutator', false);
+            });
         } else {
             commit('hasRoleMutator', false);
             commit('checkedForRoleMutator', false);

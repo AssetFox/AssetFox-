@@ -70,7 +70,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
             var goalId = Guid.NewGuid();
             var goalId2 = Guid.NewGuid();
             var attributeName = TestAttributeNames.CulvDurationN;

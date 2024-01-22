@@ -1,75 +1,77 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
+  <v-dialog max-width="450px" persistent v-model ="dialogData.showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
-         <v-layout justify-space-between align-center>
+         <v-row justify="space-between" align="center">
             <div class="ghd-control-dialog-header">New Network</div>
-            <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
-              X
-            </v-btn>
-          </v-layout>
+          </v-row>
         </v-card-title>           
       <v-card-text class="ghd-dialog-box-padding-center">
-        <v-layout column>
-          <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
-          <v-text-field outline 
+        <v-row>
+          <v-col>
+            <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>      
+            <v-text-field variant="outlined" 
+
             id="AddNetworkDialog-NetworkName-vtextfield"
             v-model="networkName"
             class="ghd-text-field-border ghd-text-field"/>
-        </v-layout>
+          </v-col>
+          
+        </v-row>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
-        <v-layout justify-center row>
-          <v-btn id="AddNetworkDialog-Cancel-vbtn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' flat>Cancel</v-btn>
+        <v-row justify="center">
+          <v-btn id="AddNetworkDialog-Cancel-vbtn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button'   variant = "flat">Cancel</v-btn>
           <v-btn id="AddNetworkDialog-Save-vbtn" @click="onSubmit(true)"
-                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
+                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'  variant = "outlined">
             Save
           </v-btn>          
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+<script setup lang="ts">
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { clone } from 'ramda';
 import { AddNetworkDialogData } from '@/shared/models/modals/add-network-dialog-data';
+import { ref, Ref, watch } from 'vue';
+import { getNewGuid } from '@/shared/utils/uuid-utils';
 
-@Component
-export default class AddNetworkDialog extends Vue {
-  @Prop() dialogData: AddNetworkDialogData;
-
-  newNetwork: Network = clone(emptyNetwork);
-  rules: InputValidationRules = rules;
-  networkName: string = 'New Network';
+  const props = defineProps<{
+    dialogData: AddNetworkDialogData
+  }>()
+  const emit = defineEmits(['submit'])
 
 
-  @Watch('networkName')
-    onNetworkNameChanged() {
-        this.newNetwork.name = this.networkName;
+  let newNetwork = ref<Network>(clone(emptyNetwork));
+  let rules: InputValidationRules = validationRules;
+  let networkName = ref<string>('New Network');
+
+  watch(networkName, () =>  {
+      newNetwork.value.name = networkName.value;
+  })
+
+   watch(() => props.dialogData, () =>  {
+    newNetwork.value = {
+      ...newNetwork.value,
+      name: networkName.value,
     }
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    this.newNetwork = {
-      ...this.newNetwork,
-      name: this.networkName,
-    }
-    
-  }
+  })
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newNetwork);
+      newNetwork.value.name = networkName.value;
+      newNetwork.value.id = getNewGuid();
+      emit('submit', newNetwork.value);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newNetwork = clone(emptyNetwork);
-    this.dialogData.showDialog = false;
+    newNetwork.value = clone(emptyNetwork);
+    props.dialogData.showDialog = false;
   }
-}
+
 </script>

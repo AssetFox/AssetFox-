@@ -1,55 +1,62 @@
 <template>
-  <v-dialog max-width="500px" persistent v-model="dialogData.showDialog">
+  <v-dialog max-width="600px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
-        <v-layout justify-center>
+        <v-row justify="space-between" style="margin: 5px;">
           <h3>Treatment Library Sharing</h3>
-        </v-layout>
-          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
             X
           </v-btn>
+        </v-row>
       </v-card-title>
       <v-card-text>
         <v-data-table :headers="treatmentLibraryUserGridHeaders"
                       :items="treatmentLibraryUserGridRows"
-                      sort-icon=$vuetify.icons.ghd-table-sort
-                      :search="searchTerm">
-          <template slot="items" slot-scope="props">
+                      sort-asc-icon="custom:GhdTableSortAscSvg"
+                      sort-desc-icon="custom:GhdTableSortDescSvg"
+                      :search="searchTerm"
+                      :items-per-page="5"
+                      :items-per-page-options="[
+                        {value: 5, title: '5'},
+                        {value: 10, title: '10'},
+                        {value: 25, title: '25'},
+                    ]">
+          <template v-slot:headers="props">
+            <tr>
+              <th style="font-weight: bold;" v-for="header in treatmentLibraryUserGridHeaders" :key="header.title">
+                  {{header.title}}
+              </th>
+            </tr>
+          </template>
+          <template slot="items" slot-scope="props" v-slot:item="props">
+            <tr>
             <td>
               {{ props.item.username }}
             </td>
             <td>
-              <v-checkbox label="Is Shared" v-model="props.item.isShared"
+              <v-checkbox v-model="props.item.isShared"
                           @change="removeUserModifyAccess(props.item.id, props.item.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!props.item.isShared" label="Can Modify" v-model="props.item.canModify"/>
+              <v-checkbox :disabled="!props.item.isShared" v-model="props.item.canModify"/>
             </td>
+          </tr>
           </template>
-          <v-alert :value="true"
-                   class="ara-orange-bg"
-                   icon="fas fa-exclamation"
-                   slot="no-results">
-            Your search for "{{ searchTerm }}" found no results.
-          </v-alert>
         </v-data-table>
       </v-card-text>
-      <v-card-actions>
-        <v-layout row justify-center>
-          <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed>Cancel</v-btn>
+        <v-row justify="center" style="margin-bottom: 10px; margin-top: 10px;">
+          <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
           <v-btn @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
             Save
           </v-btn>
-        </v-layout>
-      </v-card-actions>
+        </v-row>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {Action, State} from 'vuex-class';
+<script lang="ts" setup>
+import { ref, toRefs, watch, computed } from 'vue';
+import { useStore } from 'vuex';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
 import {TreatmentLibraryUser } from '@/shared/models/iAM/treatment';
 import {LibraryUser } from '@/shared/models/iAM/user';
@@ -57,38 +64,36 @@ import {User} from '@/shared/models/iAM/user';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getUserName} from '@/shared/utils/get-user-info';
 import {setItemPropertyValueInList} from '@/shared/utils/setter-utils';
-import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {TreatmentLibraryUserGridRow, ShareTreatmentLibraryDialogData } from '@/shared/models/modals/share-treatment-library-dialog-data';
 import TreatmentService from '@/services/treatment.service';
 import { http2XX } from '@/shared/utils/http-utils';
 
-@Component
-export default class ShareTreatmentLibraryDialog extends Vue {
-  @Prop() dialogData: ShareTreatmentLibraryDialogData;
+    const props = defineProps<{dialogData: ShareTreatmentLibraryDialogData}>()
+    const { dialogData } = toRefs(props);
+    const emit = defineEmits(['submit'])
+    let store = useStore();
+    const stateUsers = computed<User[]>(() => store.state.userModule.users);
 
-  @State(state => state.userModule.users) stateUsers: User[];
-
-  treatmentLibraryUserGridHeaders: DataTableHeader[] = [
-    {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
-    {text: 'Can Modify', value: '', align: 'left', sortable: true, class: '', width: ''}
+  const treatmentLibraryUserGridHeaders: any[] = [
+    {title: 'Username', key: 'username', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Shared With', key: '', align: 'left', sortable: true, class: '', width: ''},
+    {title: 'Can Modify', key: '', align: 'left', sortable: true, class: '', width: ''}
   ];
-  treatmentLibraryUserGridRows: TreatmentLibraryUserGridRow[] = [];
-  currentUserAndOwner: TreatmentLibraryUser[] = [];
-  searchTerm: string = '';
+  const treatmentLibraryUserGridRows = ref<TreatmentLibraryUserGridRow[]>([]);
+  let currentUserAndOwner: TreatmentLibraryUser[] = [];
+  const searchTerm = ref<string>('');
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    if (this.dialogData.showDialog) {
-      this.onSetGridData();
-      this.onSetUsersSharedWith();
+  watch(dialogData, () => {
+    if (dialogData.value.showDialog) {
+      onSetGridData();
+      onSetUsersSharedWith();
     }
-  }
+  });
 
-  onSetGridData() {
+  function onSetGridData() {
     const currentUser: string = getUserName();
 
-    this.treatmentLibraryUserGridRows = this.stateUsers
+    treatmentLibraryUserGridRows.value = stateUsers.value
         .filter((user: User) => user.username !== currentUser)
         .map((user: User) => ({
           id: user.id,
@@ -98,10 +103,10 @@ export default class ShareTreatmentLibraryDialog extends Vue {
         }));
   }
 
-    onSetUsersSharedWith() {
+   function onSetUsersSharedWith() {
         //treatment library users
         let treatmentLibraryUsers: TreatmentLibraryUser[] = [];
-        TreatmentService.getTreatmentLibraryUsers(this.dialogData.treatmentLibrary.id).then(response => {
+        TreatmentService.getTreatmentLibraryUsers(props.dialogData.treatmentLibrary.id).then(response => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
             {
                 let libraryUsers = response.data as LibraryUser[];
@@ -130,18 +135,18 @@ export default class ShareTreatmentLibraryDialog extends Vue {
                 const isCurrentUserOrOwner = (treatmentLibraryUser: TreatmentLibraryUser) => treatmentLibraryUser.username === currentUser || treatmentLibraryUser.isOwner;
                 const isNotCurrentUserOrOwner = (treatmentLibraryUser: TreatmentLibraryUser) => treatmentLibraryUser.username !== currentUser && !treatmentLibraryUser.isOwner;
 
-                this.currentUserAndOwner = filter(isCurrentUserOrOwner, treatmentLibraryUsers) as TreatmentLibraryUser[];
+                currentUserAndOwner = filter(isCurrentUserOrOwner, treatmentLibraryUsers) as TreatmentLibraryUser[];
                 const otherUsers: TreatmentLibraryUser[] = filter(isNotCurrentUserOrOwner, treatmentLibraryUsers) as TreatmentLibraryUser[];
 
                 otherUsers.forEach((treatmentLibraryUser: TreatmentLibraryUser) => {
-                    if (any(propEq('id', treatmentLibraryUser.userId), this.treatmentLibraryUserGridRows)) {
+                    if (any(propEq('id', treatmentLibraryUser.userId), treatmentLibraryUserGridRows.value)) {
                         const treatmentLibraryUserGridRow: TreatmentLibraryUserGridRow = find(
-                            propEq('id', treatmentLibraryUser.userId), this.treatmentLibraryUserGridRows) as TreatmentLibraryUserGridRow;
+                            propEq('id', treatmentLibraryUser.userId), treatmentLibraryUserGridRows.value) as TreatmentLibraryUserGridRow;
 
-                        this.treatmentLibraryUserGridRows = update(
-                            findIndex(propEq('id', treatmentLibraryUser.userId), this.treatmentLibraryUserGridRows),
+                        treatmentLibraryUserGridRows.value = update(
+                            findIndex(propEq('id', treatmentLibraryUser.userId), treatmentLibraryUserGridRows.value),
                             { ...treatmentLibraryUserGridRow, isShared: true, canModify: treatmentLibraryUser.canModify },
-                            this.treatmentLibraryUserGridRows
+                            treatmentLibraryUserGridRows.value
                         );
                     }
                 });
@@ -149,26 +154,26 @@ export default class ShareTreatmentLibraryDialog extends Vue {
         });
   }
 
-  removeUserModifyAccess(userId: string, isShared: boolean) {
+  function removeUserModifyAccess(userId: string, isShared: boolean) {
     if (!isShared) {
-      this.treatmentLibraryUserGridRows = setItemPropertyValueInList(
-          findIndex(propEq('id', userId), this.treatmentLibraryUserGridRows),
-          'canModify', false, this.treatmentLibraryUserGridRows);
+      treatmentLibraryUserGridRows.value = setItemPropertyValueInList(
+          findIndex(propEq('id', userId), treatmentLibraryUserGridRows.value),
+          'canModify', false, treatmentLibraryUserGridRows.value);
     }
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.getTreatmentLibraryUsers());
+      emit('submit', getTreatmentLibraryUsers());
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.treatmentLibraryUserGridRows = [];
+    treatmentLibraryUserGridRows.value = [];
   }
 
-  getTreatmentLibraryUsers() {
-    const usersSharedWith: TreatmentLibraryUser[] = this.treatmentLibraryUserGridRows
+  function getTreatmentLibraryUsers() {
+    const usersSharedWith: TreatmentLibraryUser[] = treatmentLibraryUserGridRows.value
         .filter((treatmentLibraryUserGridRow: TreatmentLibraryUserGridRow) => treatmentLibraryUserGridRow.isShared)
         .map((treatmentLibraryUserGridRow: TreatmentLibraryUserGridRow) => ({
           userId: treatmentLibraryUserGridRow.id,
@@ -177,9 +182,9 @@ export default class ShareTreatmentLibraryDialog extends Vue {
           isOwner: false
         }));
 
-    return [...this.currentUserAndOwner, ...usersSharedWith];
+    return [...currentUserAndOwner, ...usersSharedWith];
   }
-}
+
 </script>
 
 <style>

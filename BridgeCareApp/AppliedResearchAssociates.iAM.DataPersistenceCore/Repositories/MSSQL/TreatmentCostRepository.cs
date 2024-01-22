@@ -23,52 +23,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
 
-        public void CreateScenarioTreatmentCosts(Dictionary<Guid, List<TreatmentCost>> treatmentCostsPerTreatmentId, string simulationName)
-        {
-            var costEntities = new List<ScenarioTreatmentCostEntity>();
-            var equationEntities = new List<EquationEntity>();
-            var equationJoinEntities = new List<ScenarioTreatmentCostEquationEntity>();
-            var criterionEntities = new List<CriterionLibraryEntity>();
-            var criterionJoinEntities = new List<CriterionLibraryScenarioTreatmentCostEntity>();
-
-            treatmentCostsPerTreatmentId.Keys.ForEach(treatmentId =>
-            {
-                costEntities.AddRange(treatmentCostsPerTreatmentId[treatmentId].Select(_ =>
-                {
-                    var costEntity = _.ToScenarioEntity(treatmentId);
-
-                    if (!_.Equation.ExpressionIsBlank)
-                    {
-                        var equationEntity = _.Equation.ToEntity();
-                        equationEntities.Add(equationEntity);
-                        equationJoinEntities.Add(new ScenarioTreatmentCostEquationEntity
-                        {
-                            ScenarioTreatmentCostId = _.Id, EquationId = equationEntity.Id
-                        });
-                    }
-
-                    if (!_.Criterion.ExpressionIsBlank)
-                    {
-                        var criterionEntity = _.Criterion.ToEntity("");
-                        criterionEntity.IsSingleUse = true;
-                        criterionEntities.Add(criterionEntity);
-                        criterionJoinEntities.Add(new CriterionLibraryScenarioTreatmentCostEntity
-                        {
-                            CriterionLibraryId = criterionEntity.Id, ScenarioTreatmentCostId = _.Id
-                        });
-                    }
-
-                    return costEntity;
-                }).ToList());
-            });
-
-            _unitOfWork.Context.AddAll(costEntities);
-            _unitOfWork.Context.AddAll(equationEntities);
-            _unitOfWork.Context.AddAll(equationJoinEntities);
-            _unitOfWork.Context.AddAll(criterionEntities);
-            _unitOfWork.Context.AddAll(criterionJoinEntities);
-        }
-
         public void UpsertOrDeleteTreatmentCosts(Dictionary<Guid, List<TreatmentCostDTO>> treatmentCostPerTreatmentId, Guid libraryId)
         {
             var treatmentCostEntities = treatmentCostPerTreatmentId
@@ -112,6 +66,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         });
                         return equation;
                     }).ToList();
+
+                // Delete any existing entries for related treatment costs               
+                _unitOfWork.Context.DeleteAll<TreatmentCostEquationEntity>(_ => existingEntityIds.Contains(_.TreatmentCostId));
+
                 _unitOfWork.Context.AddAll(equations, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(equationsJoins, _unitOfWork.UserEntity?.Id);
             }
@@ -141,6 +99,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         });
                         return criterion;
                     }).ToList();
+
+                // Delete any existing entries for related treatment costs               
+                _unitOfWork.Context.DeleteAll<CriterionLibraryTreatmentCostEntity>(_ => existingEntityIds.Contains(_.TreatmentCostId));
 
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
@@ -191,6 +152,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         });
                         return equationEntity;
                     }).ToList();
+
+                // Delete any existing entries for related treatment costs               
+                _unitOfWork.Context.DeleteAll<ScenarioTreatmentCostEquationEntity>(_ => existingEntityIds.Contains(_.ScenarioTreatmentCostId));
+
                 _unitOfWork.Context.AddAll(equations, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(equationsJoins, _unitOfWork.UserEntity?.Id);
             }
@@ -221,12 +186,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         return criterion;
                     }).ToList();
 
+                // Delete any existing entries for related treatment costs               
+                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentCostEntity>(_ => existingEntityIds.Contains(_.ScenarioTreatmentCostId));
+
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }
         }
 
-        public List<TreatmentCostDTO> GetTreatmentCostByScenariotreatmentId(Guid treatmentId)
+        public List<TreatmentCostDTO> GetTreatmentCostByScenarioTreatmentId(Guid treatmentId)
         {
             if (!_unitOfWork.Context.ScenarioSelectableTreatment.Any(_ => _.Id == treatmentId))
             {
@@ -234,6 +202,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return _unitOfWork.Context.ScenarioTreatmentCost.AsNoTracking()
+                .Where(_ => _.ScenarioSelectableTreatmentId == treatmentId)
                 .Include(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.ScenarioTreatmentCostEquationJoin)
@@ -250,6 +219,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return _unitOfWork.Context.TreatmentCost.AsNoTracking()
+                .Where(tc => tc.TreatmentId == treatmentId)
                 .Include(_ => _.CriterionLibraryTreatmentCostJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.TreatmentCostEquationJoin)

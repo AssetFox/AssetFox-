@@ -86,6 +86,8 @@ const mutations = {
         var index = findIndex(propEq('id', currUserFilter.userId), state.users);
         if (index != -1) {
             var data = state.users[index];
+            data.description = currUserFilter.description;
+            data.name= currUserFilter.name;
             data.hasInventoryAccess = false;
             state.users = update(index, data, state.users);
         }

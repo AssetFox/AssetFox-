@@ -1,420 +1,486 @@
+
 <template>
-    <v-layout column class="Montserrat-font-family">
-        <v-flex xs12>
-            <v-flex xs6 class="ghd-constant-header">
-                <v-layout>
-                    <v-layout column>
-                        <v-subheader class="ghd-md-gray ghd-control-label">Primary Network</v-subheader>
-                        <v-select id="AdminData-PrimaryNetwork-select" :items='selectPrimaryNetworkItems'
-                            outline  
-                            v-model='selectPrimaryNetworkItemValue'                         
-                            class="ghd-select ghd-text-field ghd-text-field-border">
-                        </v-select>                           
-                    </v-layout>
-                </v-layout>
-                <v-layout>
-                    <v-layout column>
-                        <v-subheader class="ghd-md-gray ghd-control-label">Raw Data Network</v-subheader>
-                        <v-select :items="selectRawDataNetworkItems"
-                            id="AdminData-rawDataNetwork-select" 
-                            outline
-                            v-model="selectRawdataNetworkItemValue"
-                            class="ghd-select ghd-text-field ghd-text-field-border">
-                        </v-select>
-                    </v-layout>
-                </v-layout>
-            </v-flex>
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-flex xs2>
+    <v-row class="Montserrat-font-family">
+        <v-col cols="12">
+            <v-col cols="6" class="ghd-constant-header">
+                <v-row style="margin-bottom: 20px;">
+                    <v-row >
+                        <v-col>
+                            <v-subheader class="ghd-md-gray ghd-control-label">Primary Network</v-subheader>
+                            <v-select :items="selectPrimaryNetworkItems"  id="AdminData-PrimaryNetwork-select"                       
+                                variant="outlined"
+                                item-title="text"  
+                                item-value="value"
+                                v-model="selectPrimaryNetworkItemValue"    
+                                menu-icon=custom:GhdDownSvg               
+                                class="ghd-select ghd-text-field ghd-text-field-border">
+                            </v-select>  
+                        </v-col>
+                                                 
+                    </v-row>
+                </v-row>
+                <v-row style="margin-bottom: 20px;">
+                    <v-row column>
+                        <v-col>
+                            <v-subheader  class="ghd-md-gray ghd-control-label">Raw Data Network</v-subheader>
+                            <v-select :items="selectRawDataNetworkItems"
+                                variant="outlined"
+                                item-title="text"
+                                menu-icon=custom:GhdDownSvg
+                                item-value="value"
+                                id="AdminData-rawDataNetwork-select" 
+                                v-model="selectRawdataNetworkItemValue"
+                                class="ghd-select ghd-text-field ghd-text-field-border">
+                            </v-select>
+                        </v-col>
+                        
+                    </v-row>
+                </v-row>
+            </v-col>
+            <v-col cols="8" class="ghd-constant-header">
+                <v-row style="margin-bottom: 5px;">
+                    <v-col cols="2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Key Field(s): </v-subheader> 
-                    </v-flex>
-                    <v-flex xs5>
+                    </v-col>
+                    <v-col cols="5" style="margin-top:5px">
                         <div id="AdminData-keyFields-div" class="ghd-md-gray ghd-control-label elipsisList">{{keyFieldsDelimited}}</div>  
-                    </v-flex>                        
-                    <v-btn style="margin-left: 20px !important" 
-                        id="AdminData-editKeyFields-btn" 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                    </v-col>                        
+                    <v-btn style="margin-left: 20px;margin-top:10px !important" 
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        id="AdminData-editKeyFields-btn"
                         @click="onEditKeyFieldsClick">
                         Edit
                     </v-btn>
-                </v-layout>
-            </v-flex>
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-flex xs2>
+                </v-row>
+            </v-col>
+            <v-col cols = "8" class="ghd-constant-header">
+                <v-row style="margin-bottom: 5px;">
+                    <v-col cols = "2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Raw Data Key Field(s): </v-subheader> 
-                    </v-flex>
-                    <v-flex xs5>
-                        <div id="AdminData-rawDataKeyFields-div" class="ghd-md-gray ghd-control-label elipsisList">{{rawDataKeyFieldsDelimited}}</div>  
-                    </v-flex>                        
-                    <v-btn style="margin-left: 20px !important" 
+                    </v-col>
+                    <v-col cols="5" style="margin-top: 5px;">
+                        <div class="ghd-md-gray ghd-control-label elipsisList" id="AdminData-rawDataKeyFields-div">{{rawDataKeyFieldsDelimited}}</div>  
+                    </v-col>                        
+                    <v-btn style="margin-left: 20px; margin-top:13px !important" 
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                         id="AdminData-editrawDataKeyFields-btn" 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                         @click="onEditRawDataKeyFieldsClick">
                         Edit
                     </v-btn>
-                </v-layout>
-            </v-flex>
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-flex xs2>
+                </v-row>
+            </v-col>
+            <v-col cols = "8" class="ghd-constant-header">
+                <v-row style="margin-bottom: 5px;">
+                    <v-col cols = "2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Inventory Report(s): </v-subheader> 
-                    </v-flex>
-                    <v-flex xs5>
+                    </v-col>
+                    <v-col cols="5">
                          <div id="AdminData-inventoryReports-div" class="ghd-md-gray ghd-control-label elipsisList">{{inventoryReportsDelimited}}</div> 
-                    </v-flex>                 
-                    <v-btn style="margin-left: 20px !important" 
+                    </v-col>                 
+                    <v-btn style="margin-left: 20px;margin-top:13px !important" 
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         id="AdminData-editInventoryReports-btn" 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        variant = "outlined"
                         @click="onEditInventoryReportsClick">
                         Edit
                     </v-btn>
-                </v-layout>
-            </v-flex>
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-flex xs2>
+                </v-row>
+            </v-col>
+            <v-col cols = "8" class="ghd-constant-header">
+                <v-row style="margin-bottom: 5px;">
+                    <v-col cols = "2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Simulation Report(s): </v-subheader> 
-                    </v-flex>
-                    <v-flex xs5>
+                    </v-col>
+                    <v-col cols="5">
                         <div id="AdminData-simulationReports-div" class="ghd-md-gray ghd-control-label elipsisList">{{simulationReportsDelimited}}</div> 
-                    </v-flex>                     
-                    <v-btn style="margin-left: 20px !important" 
+                    </v-col>                     
+                    <v-btn style="margin-left: 20px;margin-top:13px !important" 
                         id="AdminData-editSimulationReports-btn" 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                        variant = "outlined"
                         @click="onEditSimulationReportsClick">
                         Edit
                     </v-btn>
-                </v-layout>
-            </v-flex>            
-            <v-flex xs8 class="ghd-constant-header">
-                <v-layout>
-                    <v-flex xs2>
+                </v-row>
+            </v-col>            
+            <v-col cols = "8" class="ghd-constant-header">
+                <v-row>
+                    <v-col cols = "2">
                         <v-subheader class="ghd-md-gray ghd-control-label">Constraint Type: </v-subheader> 
-                    </v-flex>
-                    <v-flex xs5>
-                        <v-radio-group v-model="constraintTypeRadioGroup" row>
-                            <v-radio id="AdminData-constraintTypeOr-radio" class="admin-radio" label="OR" value="OR"></v-radio>
-                            <v-radio id="AdminData-constraintTypeAnd-radio" class="admin-radio" label="AND" value="AND"></v-radio>
-                        </v-radio-group>
-                    </v-flex>                     
-                </v-layout>
-            </v-flex>     
-        </v-flex>  
-        <v-flex xs12>
-            <v-layout justify-center>
-                <v-flex xs7>
-                    <v-btn style="margin-top: 5px !important;" 
+                    </v-col>
+                    <v-col cols="4">
+                        <input type ="radio" id="AdminData-constraintTypeOr-radio" v-model="constraintTypeRadioGroup" value ="OR"/>
+                        <label style="margin-right: 10px;">OR</label>
+                        <input type ="radio" id="AdminData-constraintTypeAnd-radio" v-model="constraintTypeRadioGroup" value ="AND"/>
+                        <label>AND</label>
+                    </v-col>                     
+                </v-row>
+            </v-col>     
+        </v-col>  
+        <v-col cols = "12">
+            <v-row justify-center>
+                <v-col cols="7">
+                    <v-btn style="margin-top: -30px !important;" 
                         id="AdminData-save-btn"
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                        @click="onSaveClick" :disabled='disableCrudButtons() || !hasUnsavedChanges'>
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        @click="onSaveClick" :disabled='!hasUnsavedChanges || !disableCrudButtons()' >
                         Save
                     </v-btn>
-                </v-flex>
-            </v-layout>
-        </v-flex>
+                </v-col>
+            </v-row>
+        </v-col>
         <EditAdminDataDialog :DialogData='editAdminDataDialogData'
                                      @submit='onSubmitEditAdminDataDialogResult' />
-    </v-layout>
+    </v-row>
 </template>
 
-<script lang='ts'>
+<script lang='ts' setup>
 
 import { SelectItem } from '@/shared/models/vue/select-item';
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import Vue, { computed, shallowRef, } from 'vue';
+
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import EditAdminDataDialog from './EditAdminDataDialog.vue';
 import {EditAdminDataDialogData, emptyEditAdminDataDialogData} from '@/shared/models/modals/edit-data-dialog-data';
 import { clone } from 'ramda';
-import { Watch } from 'vue-property-decorator';
+import Dropdown from 'primevue/dropdown';
 import { Network } from '@/shared/models/iAM/network';
-import { Action, State } from 'vuex-class';
 import { Attribute } from '@/shared/models/iAM/attribute';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { Console } from 'console';
 
+    let store = useStore();
+    let stateAvailableReportNames = computed<string[]>(()=>store.state.adminDataModule.availableReportNames);
+    let stateSimulationReportNames = computed<string[]>(()=>store.state.adminDataModule.simulationReportNames);
+    let stateInventoryReportNames = computed<string[]>(()=>store.state.adminDataModule.inventoryReportNames);
+    let statePrimaryNetwork = computed<string>(()=>store.state.adminDataModule.primaryNetwork);
+    let stateKeyFields = computed<string[]>(()=>store.state.adminDataModule.keyFields);
+    let stateRawDataKeyFields = computed<string[]>(()=>store.state.adminDataModule.rawDataKeyFields);
+    let stateRawdataNetwork = computed<string>(()=>store.state.adminDataModule.rawdataNetwork);
+    let stateConstraintType = computed<string>(()=>store.state.adminDataModule.constraintType);
+    let hasUnsavedChanges = computed<boolean>(()=>store.state.unsavedChangesFlagModule.hasUnsavedChanges) ;
+    let stateNetworks = computed<Network[]>(()=>store.state.networkModule.networks);
+    let stateAttributes = computed<Attribute[]>(()=>store.state.attributeModule.attributes);
 
-@Component({
-    components:{
-        EditAdminDataDialog
-    }  
-})
-export default class Data extends Vue {
-    @State(state => state.adminDataModule.availableReportNames) stateAvailableReportNames: string[];
-    @State(state => state.adminDataModule.simulationReportNames) stateSimulationReportNames: string[];
-    @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
-    @State(state => state.adminDataModule.primaryNetwork) statePrimaryNetwork: string;   
-    @State(state => state.adminDataModule.keyFields) stateKeyFields: string[];
-    @State(state => state.adminDataModule.rawDataKeyFields) stateRawDataKeyFields: string[];
-    @State(state => state.adminDataModule.rawdataNetwork) stateRawdataNetwork: string;
-    @State(state => state.adminDataModule.constraintType) stateConstraintType: string;
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
-    @State(state => state.networkModule.networks) stateNetworks: Network[];
-    @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
+    async function getAvailableReportsAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports',payload);}
+    async function getSimulationReportsAction(payload?: any): Promise<any> {await store.dispatch('getSimulationReports',payload);}
+    async function getInventoryReportsAction(payload?: any): Promise<any> {await store.dispatch('getInventoryReports',payload);}
+    async function getPrimaryNetworkAction(payload?: any): Promise<any> {await store.dispatch('getPrimaryNetwork',payload);}
+    async function getRawdataNetworkAction(payload?: any): Promise<any> {await store.dispatch('getRawdataNetwork',payload);}
+    async function getKeyFieldsAction(payload?: any): Promise<any> {await store.dispatch('getKeyFields',payload);}
+    async function getRawDataKeyFieldsAction(payload?: any): Promise<any> {await store.dispatch('getRawDataKeyFields',payload);}
+    async function getConstraintTypeAction(payload?: any): Promise<any> {await store.dispatch('getConstraintType',payload);}
+    async function setSimulationReportsAction(payload?: any): Promise<any> {await store.dispatch('setSimulationReports',payload);}
+    async function setInventoryReportsAction(payload?: any): Promise<any> {await store.dispatch('setInventoryReports',payload);}
+    async function setPrimaryNetworkAction(payload?: any): Promise<any> {await store.dispatch('setPrimaryNetwork',payload);}
+    async function setRawdataNetworkAction(payload?: any): Promise<any> {await store.dispatch('setRawdataNetwork',payload);}
+    async function setKeyFieldsAction(payload?: any): Promise<any> {await store.dispatch('setKeyFields',payload);}
+    async function setRawDataKeyFieldsAction(payload?: any): Promise<any> {await store.dispatch('setRawDataKeyFields',payload);}
+    async function setConstraintTypeAction(payload?: any): Promise<any> {await store.dispatch('setConstraintType',payload);}
+    async function getNetworks(payload?: any): Promise<any> {await store.dispatch('getNetworks',payload);}
+    async function getAttributes(payload?: any): Promise<any> {await store.dispatch('getAttributes',payload);}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges',payload);}
 
-    @Action('getAvailableReports') getAvailableReportsAction: any;
-    @Action('getSimulationReports') getSimulationReportsAction: any;
-    @Action('getInventoryReports') getInventoryReportsAction: any;
-    @Action('getPrimaryNetwork') getPrimaryNetworkAction: any;
-    @Action('getRawdataNetwork') getRawdataNetworkAction: any;
-    @Action('getKeyFields') getKeyFieldsAction: any;
-    @Action('getRawDataKeyFields') getRawDataKeyFieldsAction: any;
-    @Action('getConstraintType') getConstraintTypeAction: any;
-    @Action('setSimulationReports') setSimulationReportsAction: any;
-    @Action('setInventoryReports') setInventoryReportsAction: any;
-    @Action('setPrimaryNetwork') setPrimaryNetworkAction: any;
-    @Action('setRawdataNetwork') setRawdataNetworkAction: any;
-    @Action('setKeyFields') setKeyFieldsAction: any;
-    @Action('setRawDataKeyFields') setRawDataKeyFieldsAction: any;
-    @Action('setConstraintType') setConstraintTypeAction: any;
-    @Action('getNetworks') getNetworks: any;
-    @Action('getAttributes') getAttributes: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+    const selectPrimaryNetworkItems= ref<SelectItem[]>([]);
+    const selectRawDataNetworkItems=  ref<SelectItem[]> ([]);
+    const selectPrimaryNetworkItemValue =  ref<string>('');
+    const selectRawdataNetworkItemValue = ref<string>('');
 
-    selectPrimaryNetworkItems: SelectItem[] = [];
-    selectRawDataNetworkItems: SelectItem[] = [];
-    selectPrimaryNetworkItemValue: string | null = null;
-    selectRawdataNetworkItemValue: string | null = null;
+   
+    const editAdminDataDialogData= reactive<EditAdminDataDialogData>(emptyEditAdminDataDialogData);
+ 
 
-    editAdminDataDialogData: EditAdminDataDialogData = clone(emptyEditAdminDataDialogData)
+    let keyFields = reactive<string[]> ([]);
+    const keyFieldsForDialog = ref<string[]> ([]);
+    let simulationReports: string[] = [];
+    let inventoryReports: string[] = [];
+    let networks = reactive<Network[]>([]);
 
-    keyFields: string[] = [];
-    simulationReports: string[] = [];
-    inventoryReports: string[] = [];
-    networks: Network[] = [];
+    const selectedKeyFields= ref<string[]> ([]);
+    const selectedRawDataKeyFields= ref<string[]>([]);
+    let selectedAvailableReports:string[]=[];
+    const selectedSimulationReports =ref<string[]>([]);
+    const selectedInventoryReports= ref<string[]>([]);
+    const primaryNetwork = ref<string>('');
+    const rawdataNetwork= ref<string> ('');
 
-    selectedKeyFields: string[] = [];
-    selectedRawDataKeyFields: string[] = []
-    selectedAvailableReports: string[] = [];
-    selectedSimulationReports: string[] = [];
-    selectedInventoryReports: string[] = [];
-    primaryNetwork: string = '';
-    rawdataNetwork: string = '';
+    const keyFieldsDelimited= ref<string>('');
+    const rawDataKeyFieldsDelimited =ref<string>('');
+    const simulationReportsDelimited= ref<string>('');
+    const inventoryReportsDelimited=  ref<string>('');
 
-    keyFieldsDelimited: string = '';
-    rawDataKeyFieldsDelimited: string = '';
-    simulationReportsDelimited: string = '';
-    inventoryReportsDelimited: string = '';
+    let keyFieldsName: string  = 'KeyFields';
+    let rawDataKeyFieldsName: string = 'RawDataKeyFields';
+    let simulationReportsName: string = 'SimulationReports';
+    let inventoryReportsName: string = 'InventoryReports';
 
-    keyFieldsName: string  = 'KeyFields';
-    rawDataKeyFieldsName: string = 'RawDataKeyFields';
-    simulationReportsName: string = 'SimulationReports';
-    inventoryReportsName: string = 'InventoryReports';
+    let InputRules: InputValidationRules = rules;
 
-    rules: InputValidationRules = rules;
-
-    constraintTypeRadioGroup: string = '';
-
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
+    let constraintTypeRadioGroup = shallowRef<string>('');
+    created();
+    function created() {
+                 getPrimaryNetworkAction();
+                 getRawdataNetworkAction();
+                 getKeyFieldsAction();
+                 getRawDataKeyFieldsAction();
+                 getConstraintTypeAction();
+                onStateConstraintTypeChanged();
+                getAttributes();
+                getNetworks();
+                getAvailableReportsAction();
+                 getSimulationReportsAction();
+                getInventoryReportsAction();
+                
+        (() => {
+            
             (async () => { 
-                await vm.getAttributes();
-                await vm.getNetworks();
-                await vm.getAvailableReportsAction();                
-                await vm.getSimulationReportsAction();
-                await vm.getInventoryReportsAction();
-                await vm.getPrimaryNetworkAction();
-                await vm.getRawdataNetworkAction();
-                if(vm.selectPrimaryNetworkItemValue === null)
-                    vm.onStatePrimaryNetworkChanged();
-                if(vm.selectRawdataNetworkItemValue === null)
-                    vm.onStateRawdataNetworkChanged();
-                await vm.getKeyFieldsAction();
-                await vm.getRawDataKeyFieldsAction();
-                await vm.getConstraintTypeAction();
-                vm.onStateConstraintTypeChanged();
+                
+                 
+                 
             })();
             
         });
     }
-
-    beforeDestroy() {
-        this.setHasUnsavedChangesAction({ value: false });
-    }
-    //Watches
-    @Watch('stateNetworks')
-    onStateNetworksChanged(){
-        this.networks = clone(this.stateNetworks);
+    onBeforeUnmount(() => beforeDestroy());
+    function beforeDestroy() {
+        setHasUnsavedChangesAction({ value: false });
     }
 
-    @Watch('stateAttributes')
-    onStateAttributesChanged(){
-        this.keyFields = clone(this.stateAttributes).map(_ => _.name)
-    }
-
-    @Watch('stateSimulationReportNames')
-    onStateSimulationReportNamesChanged(){
-        this.selectedSimulationReports = clone(this.stateSimulationReportNames);
-    }
-    @Watch('stateAvailableReportNames')
-    onStateAvailableReportNamesChanged(){
-        this.selectedAvailableReports = clone(this.stateAvailableReportNames);
-        const reports: string[] = this.stateAvailableReportNames;
-        this.simulationReports = clone(reports);
-        this.inventoryReports = clone(reports);
-    }
-
-    @Watch('stateInventoryReportNames')
-    onStateInventoryReportNamesChanged(){
-        this.selectedInventoryReports = clone(this.stateInventoryReportNames);
-    }
-
-    @Watch('statePrimaryNetwork')
-    onStatePrimaryNetworkChanged(){
-        this.selectPrimaryNetworkItemValue = this.statePrimaryNetwork;
-    }
-    @Watch('stateRawdataNetwork')
-    onStateRawdataNetworkChanged() {
-        this.selectRawdataNetworkItemValue = this.stateRawdataNetwork;
-    }
-    @Watch('stateKeyFields')
-    onStateKeyFieldsChanged(){
-        this.selectedKeyFields = clone(this.stateKeyFields);
-    }
-
-    @Watch('stateRawDataKeyFields')
-    onStateRawDataKeyFieldsChanged(){
-        this.selectedRawDataKeyFields = clone(this.stateRawDataKeyFields);
-    }
-
-    @Watch('stateConstraintType')
-    onStateConstraintTypeChanged(){
-        this.constraintTypeRadioGroup = this.stateConstraintType
-    }
-
-    @Watch('networks')
-    onNetworksChanged(){
-        this.selectPrimaryNetworkItems = this.networks.map(_ => {
-            return {text: _.name, value: _.name}
+    //watchers
+    watch(stateNetworks, () => {
+        networks = clone(stateNetworks.value);
+        stateNetworks.value.forEach(_ => {
+            selectPrimaryNetworkItems.value.push({text:_.name,value:_.name})
+            selectRawDataNetworkItems.value.push({text:_.name,value:_.name})
         });
-        this.selectRawDataNetworkItems = this.networks.map(_ => {
-            return {text: _.name, value: _.name}
+    })
+    watch(stateAttributes,() => {
+        
+        keyFields = clone(stateAttributes.value).map(_ =>_.name) //.map(_ => _.name)
+        stateAttributes.value.forEach(function (value) {
+            keyFieldsForDialog.value.push(value.name);
         });
-    }
+    })
+    watch(stateSimulationReportNames,() => {
+        selectedSimulationReports.value = clone(stateSimulationReportNames.value);
+    })
+    watch(stateAvailableReportNames,() => 
+    {
+        selectedAvailableReports = clone(stateAvailableReportNames.value);
 
-    @Watch('selectedKeyFields')
-    onSelectedKeyFieldsChanged(){
-        this.keyFieldsDelimited = '';
-        this.keyFieldsDelimited = this.convertToDelimited(this.selectedKeyFields, ', ')
-        this.checkHasUnsaved();       
+        const reports = ref<string[]>([])
+        selectedAvailableReports.forEach(function(value){
+            reports.value.push(value);
+        });
+        
+        simulationReports = clone(reports.value);
+        inventoryReports = clone(reports.value);
+    })
+    watch(stateInventoryReportNames,() =>
+    {
+        selectedInventoryReports.value = clone(stateInventoryReportNames.value);
+    })
+    watch(statePrimaryNetwork,() => {
+        selectPrimaryNetworkItemValue.value = statePrimaryNetwork.value;
+    })
+    function onStatePrimaryNetworkChanged()
+    {
+        selectPrimaryNetworkItemValue.value = statePrimaryNetwork.value;
     }
-
-    @Watch('selectedRawDataKeyFields')
-    onSelectedRawDataKeyFieldsChanged(){
-        this.rawDataKeyFieldsDelimited = '';
-        this.rawDataKeyFieldsDelimited = this.convertToDelimited(this.selectedRawDataKeyFields, ', ')
-        this.checkHasUnsaved();       
+    watch(stateRawdataNetwork,() =>  {
+        selectRawdataNetworkItemValue.value = stateRawdataNetwork.value;
+    })
+    function  onStateRawdataNetworkChanged()
+    {
+        selectPrimaryNetworkItemValue.value = statePrimaryNetwork.value;
     }
-
-    @Watch('selectedSimulationReports')
-    onSelectedSimulationReportsChanged(){
-        this.simulationReportsDelimited = '';
-        this.simulationReportsDelimited = this.convertToDelimited(this.selectedSimulationReports, ', ')
-        this.checkHasUnsaved();       
+    watch(stateKeyFields,() => {
+        selectedKeyFields.value = clone(stateKeyFields.value);
+    })
+    watch(stateRawDataKeyFields,() =>{
+        selectedRawDataKeyFields.value = clone(stateRawDataKeyFields.value);
+    })
+    watch(stateConstraintType,() => {
+        constraintTypeRadioGroup.value = stateConstraintType.value
+    })
+    function onStateConstraintTypeChanged()
+    {
+        constraintTypeRadioGroup.value = stateConstraintType.value
     }
+    //watch(networks,() =>{
+      //  selectPrimaryNetworkItems = networks.map(_ => {
+       //     return {text: _.name, value: _.name}
+      //  });
+      //  selectRawDataNetworkItems = networks.map(_ => {
+      //      return {text: _.name, value: _.name}
+       // });
+    //})
+    watch(selectedKeyFields,() => {
+        keyFieldsDelimited.value = '';
+        keyFieldsDelimited.value = convertToDelimited(selectedKeyFields.value, ', ')
+        checkHasUnsaved();       
+    })
+    watch(selectedRawDataKeyFields,() => {
+        rawDataKeyFieldsDelimited.value = '';
+        rawDataKeyFieldsDelimited.value = convertToDelimited(selectedRawDataKeyFields.value, ', ')
+        checkHasUnsaved();       
+    })
+    watch(selectedSimulationReports,() => {
+        simulationReportsDelimited.value = '';
+        simulationReportsDelimited.value = convertToDelimited(selectedSimulationReports.value, ', ')
+        checkHasUnsaved();       
+    })
 
-    @Watch('selectedInventoryReports')
-    onSelectedInventoryReportsChanged(){
-        this.inventoryReportsDelimited = '';
-        this.inventoryReportsDelimited = this.convertToDelimited(this.selectedInventoryReports, ', ')
-        this.checkHasUnsaved();       
-    }
+    watch(selectedInventoryReports,() => {
+        inventoryReportsDelimited.value = '';
+        inventoryReportsDelimited.value = convertToDelimited(selectedInventoryReports.value, ', ')
+        checkHasUnsaved();       
+    })
 
-    @Watch('selectPrimaryNetworkItemValue')
-    onSelectPrimaryNetworkItemValueChanged(){
-        if(this.selectPrimaryNetworkItemValue === null)
-            this.primaryNetwork = ''
+    watch(selectPrimaryNetworkItemValue,() => {
+        if(selectPrimaryNetworkItemValue === null)
+            primaryNetwork.value = ''
         else
-            this.primaryNetwork = this.selectPrimaryNetworkItemValue;  
-        this.checkHasUnsaved();       
-    }
+            primaryNetwork.value = selectPrimaryNetworkItemValue.value;  
+        checkHasUnsaved();       
+    })
 
-    @Watch('selectRawdataNetworkItemValue')
-    onSelectRawdataNetworkItemValueChanged() {
-        if (this.selectRawdataNetworkItemValue === null) 
-            this.rawdataNetwork = '';
+    watch(selectRawdataNetworkItemValue,() =>  {
+        if (selectRawdataNetworkItemValue === null) 
+            rawdataNetwork.value = '';
         else 
-            this.rawdataNetwork = this.selectRawdataNetworkItemValue;
-        this.checkHasUnsaved();
-    }
+            rawdataNetwork.value = selectRawdataNetworkItemValue.value;
+        checkHasUnsaved();
+    })
 
-    @Watch('primaryNetwork')
-    onPrimaryNetworkChanged(){
-        this.checkHasUnsaved();       
-    }
+    watch(primaryNetwork,() => {
+        checkHasUnsaved();       
+    })
 
-    @Watch('constraintTypeRadioGroup')
-    onConstraintTypeRadioGroupChanged(){
-        this.checkHasUnsaved();
-    }
+    watch(constraintTypeRadioGroup,() => {
+        checkHasUnsaved();
+    })
+
     //Buttons
-    onSaveClick(){
+    function onSaveClick(){
+        
         (async () => {
-            await this.setPrimaryNetworkAction(this.primaryNetwork); 
-            await this.setRawdataNetworkAction(this.rawdataNetwork);
-            await this.setConstraintTypeAction(this.constraintTypeRadioGroup);
-            await this.setSimulationReportsAction(this.convertToDelimited(this.selectedSimulationReports, ','));
-            await this.setInventoryReportsAction(this.convertToDelimited(this.selectedInventoryReports, ','));
-            await this.setKeyFieldsAction(this.convertToDelimited(this.selectedKeyFields, ','));
-            await this.setRawDataKeyFieldsAction(this.convertToDelimited(this.selectedRawDataKeyFields, ','));                      
+            await setPrimaryNetworkAction(primaryNetwork.value); 
+            await setRawdataNetworkAction(rawdataNetwork.value);
+            await setConstraintTypeAction(constraintTypeRadioGroup.value);
+            await setSimulationReportsAction(convertToDelimited(selectedSimulationReports.value, ','));
+            await setInventoryReportsAction(convertToDelimited(selectedInventoryReports.value, ','));
+            await setKeyFieldsAction(convertToDelimited(selectedKeyFields.value, ','));
+            await setRawDataKeyFieldsAction(convertToDelimited(selectedRawDataKeyFields.value, ','));                      
         })();
     }
-
-    onEditKeyFieldsClick(){
-        this.editAdminDataDialogData.showDialog = true;
-        this.editAdminDataDialogData.selectedSettings = clone(this.selectedKeyFields);
-        this.editAdminDataDialogData.settingName = this.keyFieldsName;
-        this.editAdminDataDialogData.settingsList = clone(this.keyFields);
+    function onEditKeyFieldsClick(){
+        editAdminDataDialogData.selectedItem=''
+        editAdminDataDialogData.AddedItems = selectedKeyFields.value.map(str=>
+        {
+            return {value:str, networkType:''}
+        })
+        editAdminDataDialogData.selectedSettings = clone(selectedKeyFields.value);
+        editAdminDataDialogData.settingName = keyFieldsName;
+        editAdminDataDialogData.settingsList = clone(keyFieldsForDialog.value);
+        editAdminDataDialogData.showDialog = true;
     }
-    onEditRawDataKeyFieldsClick(){
-        this.editAdminDataDialogData.showDialog = true;
-        this.editAdminDataDialogData.selectedSettings = clone(this.selectedRawDataKeyFields);
-        this.editAdminDataDialogData.settingName = this.rawDataKeyFieldsName;
-        this.editAdminDataDialogData.settingsList = clone(this.keyFields);
+    function onEditRawDataKeyFieldsClick(){
+        editAdminDataDialogData.selectedItem=''
+        editAdminDataDialogData.AddedItems = selectedRawDataKeyFields.value.map(str=>
+        {
+            return {value:str, networkType:''}
+        })
+        editAdminDataDialogData.showDialog = true;
+        editAdminDataDialogData.selectedSettings = clone( selectedRawDataKeyFields.value);
+        editAdminDataDialogData.settingName =   rawDataKeyFieldsName;
+        editAdminDataDialogData.settingsList = clone(  keyFieldsForDialog.value);
     }
-    onEditInventoryReportsClick(){
-        this.editAdminDataDialogData.showDialog = true;
-        this.editAdminDataDialogData.selectedSettings = clone(this.selectedInventoryReports);
-        this.editAdminDataDialogData.settingName = this.inventoryReportsName;
-        this.editAdminDataDialogData.settingsList = clone(this.inventoryReports);
+    function onEditInventoryReportsClick(){
+        editAdminDataDialogData.selectedItem=''
+        editAdminDataDialogData.showDialog = true;
+        editAdminDataDialogData.selectedSettings = clone(  selectedInventoryReports.value);
+        editAdminDataDialogData.AddedItems = selectedInventoryReports.value.map(str=>
+        {
+            return {value:str, networkType:str.substring(str.length - 3)};
+        })
+        editAdminDataDialogData.settingName =   inventoryReportsName;
+        editAdminDataDialogData.settingsList = clone(inventoryReports);
     }
-    onEditSimulationReportsClick(){
-        this.editAdminDataDialogData.showDialog = true;
-        this.editAdminDataDialogData.selectedSettings = clone(this.selectedSimulationReports);
-        this.editAdminDataDialogData.settingName = this.simulationReportsName;
-        this.editAdminDataDialogData.settingsList = clone(this.simulationReports);
+    function onEditSimulationReportsClick(){
+        editAdminDataDialogData.selectedItem=''
+        editAdminDataDialogData.AddedItems = selectedSimulationReports.value.map(str=>
+        {
+            return {value:str, networkType:''}
+        })
+        editAdminDataDialogData.showDialog = true;
+        editAdminDataDialogData.selectedSettings = clone(  selectedSimulationReports.value);
+        editAdminDataDialogData.settingName =   simulationReportsName;
+        editAdminDataDialogData.settingsList = clone( simulationReports);
     }
-    onSubmitEditAdminDataDialogResult(selectedSettings: string[]){
+    function onSubmitEditAdminDataDialogResult(selectedSettings: string[]){
         if(selectedSettings !== null)
-            switch(this.editAdminDataDialogData.settingName){
-                case this.keyFieldsName:
-                    this.selectedKeyFields = clone(selectedSettings);
+
+            switch(  editAdminDataDialogData.settingName){
+                case keyFieldsName:
+                    keyFieldsDelimited.value=''
+                    selectedKeyFields.value=[];
+                    selectedSettings.forEach(function(value){
+                        selectedKeyFields.value.push(value);   
+                                     }     )     
+                    const temp = convertToDelimited(selectedKeyFields.value,',');
+                    keyFieldsDelimited.value = temp;              
                     break;
-                case this.rawDataKeyFieldsName:
-                    this.selectedRawDataKeyFields = clone(selectedSettings);
+                case   rawDataKeyFieldsName:
+                rawDataKeyFieldsDelimited.value=''
+                    selectedRawDataKeyFields.value=[];
+                    selectedSettings.forEach(function(value){
+                        selectedRawDataKeyFields.value.push(value);   
+                                     }     )     
+                    const delimited = convertToDelimited(selectedRawDataKeyFields.value,',');
+                    rawDataKeyFieldsDelimited.value = delimited; 
                     break;
-                case this.inventoryReportsName:
-                    this.selectedInventoryReports = clone(selectedSettings);
+                case   inventoryReportsName:
+                    inventoryReportsDelimited.value=''
+                    selectedInventoryReports.value=[];
+                    selectedSettings.forEach(function(value){
+                        selectedInventoryReports.value.push(value);   
+                                     }     )     
+                    const inventory = convertToDelimited(selectedInventoryReports.value,',');
+                    inventoryReportsDelimited.value = inventory; 
                     break;
-                case this.simulationReportsName:
-                    this.selectedSimulationReports = clone(selectedSettings);
+                case   simulationReportsName:
+                simulationReportsDelimited.value=''
+                selectedSimulationReports.value=[];
+                    selectedSettings.forEach(function(value){
+                        selectedSimulationReports.value.push(value);   
+                                     }     )     
+                    const simulation = convertToDelimited(selectedSimulationReports.value,',');
+                    simulationReportsDelimited.value = simulation;
                     break;
             }
 
-        this.editAdminDataDialogData = clone(emptyEditAdminDataDialogData);
+            editAdminDataDialogData.selectedSettings = [];
+            editAdminDataDialogData.settingName = clone(emptyEditAdminDataDialogData.settingName);
+            editAdminDataDialogData.settingsList = clone(emptyEditAdminDataDialogData.settingsList);
+            editAdminDataDialogData.showDialog = false;
+            editAdminDataDialogData.selectedItem ='';
     }
+
     //Subroutines
-    checkHasUnsaved(){
-        const hasChanged = hasUnsavedChangesCore('', this.selectedInventoryReports, this.stateInventoryReportNames) ||
-            hasUnsavedChangesCore('', this.selectedSimulationReports, this.stateSimulationReportNames) ||
-            hasUnsavedChangesCore('', this.selectedKeyFields, this.stateKeyFields) ||
-            hasUnsavedChangesCore('', this.selectedRawDataKeyFields, this.stateRawDataKeyFields) ||
-            this.primaryNetwork != this.statePrimaryNetwork || this.rawdataNetwork != this.stateRawdataNetwork ||
-            this.constraintTypeRadioGroup != this.stateConstraintType
-        this.setHasUnsavedChangesAction({ value: hasChanged });
+    function checkHasUnsaved(){
+        const hasChanged = hasUnsavedChangesCore('', selectedInventoryReports.value, stateInventoryReportNames.value) ||
+            hasUnsavedChangesCore('', selectedSimulationReports.value, stateSimulationReportNames.value) ||
+            hasUnsavedChangesCore('', selectedKeyFields.value, stateKeyFields.value) ||
+            hasUnsavedChangesCore('', selectedRawDataKeyFields.value, stateRawDataKeyFields.value) ||
+            primaryNetwork.value != statePrimaryNetwork.value || rawdataNetwork.value != stateRawdataNetwork.value ||
+            constraintTypeRadioGroup.value != stateConstraintType.value
+        setHasUnsavedChangesAction({ value: hasChanged });
     }
-    convertToDelimited(listToBeDelimited: string[], delimitValue: string){
+    function convertToDelimited(listToBeDelimited: string[], delimitValue: string){
         let delimitedList = '';
         for(let i = 0; i < listToBeDelimited.length; i++){
             delimitedList += listToBeDelimited[i];
@@ -425,17 +491,18 @@ export default class Data extends Vue {
 
         return delimitedList
     }
+    function disableCrudButtons() {
+        let allValid = rules['generalRules'].valueIsNotEmpty(selectedKeyFields.value) === true
+            && rules['generalRules'].valueIsNotEmpty(selectedInventoryReports.value) === true
+            && rules['generalRules'].valueIsNotEmpty(selectedSimulationReports.value) === true
+            && rules['generalRules'].valueIsNotEmpty(primaryNetwork.value) === true
+            && rules['generalRules'].valueIsNotEmpty(rawdataNetwork.value) === true
+            && rules['generalRules'].valueIsNotEmpty(constraintTypeRadioGroup.value) === true
 
-    disableCrudButtons() {
-        let allValid = this.rules['generalRules'].valueIsNotEmpty(this.selectedKeyFields) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedInventoryReports) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedSimulationReports) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.primaryNetwork.trim()) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.constraintTypeRadioGroup.trim()) === true
-
-        return !allValid;
+        return allValid;
     }
-}
+
+
 
 </script>
 

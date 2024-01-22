@@ -1,56 +1,45 @@
 <template>
-  <v-layout>
-    <v-dialog v-model="showDialog"
-              max-width="434px"
-              persistent>
+  <v-row>
+    <v-dialog v-model="showDialogComputed" max-width="434px" persistent>
       <v-card  height="411px" class="ghd-dialog">
         <v-card-title class="ghd-dialog">
-          <v-layout justify-left>
+          <v-row justify="start">
             <h3 class="ghd-dialog">Add New Deterioration Equation</h3>
-          </v-layout>
+          </v-row>
         </v-card-title>
-        <v-card-text class="ghd-dialog">
-          <v-layout column>
+        <v-card-text >
+          <v-row>
+            <v-col>
             <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>            
             <v-text-field
               id="CreatePerformanceCurveDialog-name-text"
               class="ghd-control-text ghd-control-border"
               v-model="newPerformanceCurve.name"
               :rules="[rules['generalRules'].valueIsNotEmpty]"
-              outline/>
+              variant="outlined"/>
             <v-subheader class="ghd-control-label ghd-md-gray">Select Attribute</v-subheader>            
             <v-select
               id="CreatePerformanceCurveDialog-attribute-select"
+              menu-icon=custom:GhdDownSvg
               class="ghd-select ghd-control-text ghd-control-border"
               v-model="newPerformanceCurve.attribute"
               :items="attributeSelectItems"
-              append-icon=$vuetify.icons.ghd-down
+              append-icon=ghd-down
               :rules="[rules['generalRules'].valueIsNotEmpty]"
-              outline
+              variant="outlined"
+              item-title="text"
+              item-value="value"
             >
-              <template v-slot:selection="{ item }">
-                <span class="ghd-control-text">{{ item.text }}</span>
-              </template>
-              <template v-slot:item="{ item }">
-                <v-list-item class="ghd-control-text" v-on="on" v-bind="attrs">
-                  <v-list-item-content>
-                    <v-list-item-title>
-                      <v-row no-gutters align="center">
-                      <span>{{ item.text }}</span>
-                      </v-row>
-                    </v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </template>
-            </v-select>                      
-          </v-layout>
+            </v-select>   
+            </v-col>                   
+          </v-row>
         </v-card-text>
         <v-card-actions>
-          <v-layout justify-center row>
+          <v-row justify="center" >
             <v-btn
               id="CreatePerformanceCurveDialog-cancel-button"
               class="ghd-white-bg ghd-blue ghd-button-text"
-              depressed
+              variant = "flat"
               @click="onSubmit(false)">
               Cancel
             </v-btn>
@@ -59,66 +48,69 @@
               :disabled="newPerformanceCurve.name === '' || newPerformanceCurve.attribute === ''"
               class="ghd-blue-bg ghd-white ghd-button-text"
               @click="onSubmit(true)"
-              depressed>
+              variant = "flat">
               Save
             </v-btn>
-          </v-layout>
+          </v-row>
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </v-layout>
+  </v-row>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {State} from 'vuex-class';
+<script lang="ts" setup>
+import Vue, { computed } from 'vue';
 import {emptyPerformanceCurve, PerformanceCurve} from '@/shared/models/iAM/performance';
 import {SelectItem} from '@/shared/models/vue/select-item';
 import {Attribute} from '@/shared/models/iAM/attribute';
 import {hasValue} from '@/shared/utils/has-value-util';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {clone} from 'ramda';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { on } from 'events';
 
-@Component
-export default class CreatePerformanceCurveDialog extends Vue {
-  @Prop() showDialog: boolean;
+let store = useStore();
+const emit = defineEmits(['submit'])
+const props = defineProps<{
+    showDialog: boolean
+    }>()
+    let showDialogComputed = computed(() => props.showDialog);
+    let stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributes);
+    let attributeSelectItems = ref<SelectItem[]>([]);
+    let newPerformanceCurve = ref<PerformanceCurve>({...emptyPerformanceCurve, id: getNewGuid()});
+    let rules: InputValidationRules = validationRules;
 
-  @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
-
-  attributeSelectItems: SelectItem[] = [];
-  newPerformanceCurve: PerformanceCurve = {...emptyPerformanceCurve, id: getNewGuid()};
-  rules: InputValidationRules = clone(rules);
-
-  mounted() {
-    if (hasValue(this.stateNumericAttributes)) {
-      this.setAttributeSelectItems();
+  onMounted(()=>mounted())
+  function mounted() {
+    if (hasValue(stateNumericAttributes.value)) {
+      setAttributeSelectItems();
     }
   }
 
-  @Watch('stateNumericAttributes')
-  onStateNumericAttributesChanged() {
-    if (hasValue(this.stateNumericAttributes)) {
-      this.setAttributeSelectItems();
+  watch(stateNumericAttributes,()=>onStateNumericAttributesChanged())
+  function onStateNumericAttributesChanged() {
+    if (hasValue(stateNumericAttributes.value)) {
+      setAttributeSelectItems();
     }
   }
 
-  setAttributeSelectItems() {
-    this.attributeSelectItems = this.stateNumericAttributes.map((attribute: Attribute) => ({
+  function setAttributeSelectItems() {
+    attributeSelectItems.value = stateNumericAttributes.value.map((attribute: Attribute) => ({
       text: attribute.name,
       value: attribute.name
     }));
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newPerformanceCurve);
+      emit('submit', newPerformanceCurve.value);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newPerformanceCurve = {...emptyPerformanceCurve, id: getNewGuid()};
+    newPerformanceCurve.value = {...emptyPerformanceCurve, id: getNewGuid()};
   }
-}
 </script>

@@ -1,243 +1,274 @@
 <template>
-    <v-layout column>
-        <v-flex xs12>
-        <v-layout justify-space-between>
-            <v-flex xs4 class="ghd-constant-header">
-                <v-layout column>
-                    <v-subheader class="ghd-md-gray ghd-control-label">Select a Deficient Condition Goal Library</v-subheader>
+    <v-card class="elevation-0 vcard-main-layout">
+    <v-row>
+        <v-col cols="12">
+            <v-row align="center" justify="space-between">
+                <v-col cols="auto">
+                    <div style="margin-bottom: 10px;">
+                        <v-subheader class="ghd-md-gray ghd-control-label">Select a Deficient Condition Goal Library</v-subheader>
+                    </div>
                     <v-select
                         id="DeficientConditionGoalEditor-librarySelect-vselect"
                         :items="librarySelectItems"
-                        append-icon=$vuetify.icons.ghd-down
-                        outline
+                        variant="outlined"
                         v-model="librarySelectItemValue"
+                        menu-icon=custom:GhdDownSvg
+                        item-title="text"
+                        item-value="value" 
+                        density="compact"
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
-                </v-layout>
-            </v-flex>
-            <v-flex xs4 class="ghd-constant-header">
-                <div style="padding-top: 15px !important">
+                </v-col>
+                <v-col cols="auto">
                     <v-btn v-if="hasScenario" 
-                        class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                        class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                         @click="importLibrary()"
-                        :disabled="importLibraryDisabled">
+                        :disabled="importLibraryDisabled"
+                        style="margin-right: 5px;"
+                    >
                         Import
                     </v-btn>
-                </div>
-                
-                <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 11px; padding-left: 10px">
-                    <div class="header-text-content owner-padding" style="padding-top: 7px;">
+                </v-col>
+                <v-col cols="auto">
+                    <v-row v-show="hasSelectedLibrary && ! hasScenario">
+                        <div v-if="!hasScenario && hasSelectedLibrary" class="header-text-content owner-padding" align="center"                        >
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
-                    </div>
-                    <v-divider class="owner-shared-divider" vertical
-                        v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
-                    </v-divider>
-                    <v-badge v-show="isShared" style="padding: 10px">
-                    <template v-slot: badge>
-                        <span>Shared</span>
-                        </template>
-                        </v-badge>
-                        <v-btn id="DeficientConditionGoalEditor-shareLibrary-vbtn" @click='onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                            v-show='!hasScenario'>
-                            Share Library
+                        </div>
+                        <v-btn 
+                            id="DeficientConditionGoalEditor-shareLibrary-vbtn" 
+                            @click='onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)' 
+                            class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-left: 10px"
+                            variant = "outlined"
+                            v-show='!hasScenario && hasSelectedLibrary'>
+                        Share Library
+                        </v-btn>
+                    </v-row>
+                </v-col>
+                <v-col cols = "auto">
+                    <v-btn id="DeficientConditionGoalEditor-createNewLibrary-vbtn" @click="onShowCreateDeficientConditionGoalLibraryDialog(false)"
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin: 5px;"
+                        v-show="!hasScenario"
+                        variant = "outlined">    
+                        Create New Library        
                     </v-btn>
-                </v-layout>
-            </v-flex>
-            <v-flex xs4 class="ghd-constant-header">
-                <v-layout align-end style="padding-top: 18px !important;">
-                    <v-spacer></v-spacer>
+                </v-col>
+        
+                <v-col cols="auto" >
+                    <!-- <v-btn v-if="hasScenario" 
+                            class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
+                            @click="importLibrary()"
+                            :disabled="importLibraryDisabled"
+                            style="margin-right: 5px;"
+                        >
+                            Import
+                        </v-btn> -->
                     <v-btn
                         id="DeficientConditionGoalEditor-addDeficientConditionGoal-vbtn"
                         @click="showCreateDeficientConditionGoalDialog = true"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show="hasSelectedLibrary || hasScenario"
-                        outline>
+                        variant = "outlined"
+                        style="margin-right: 5px;">
                         Add Deficient Condition Goal
-                    </v-btn>
-                    <v-btn id="DeficientConditionGoalEditor-createNewLibrary-vbtn" @click="onShowCreateDeficientConditionGoalLibraryDialog(false)"
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                        v-show="!hasScenario"
-                        outline>    
-                        Create New Library        
-                    </v-btn>
-                </v-layout>
-            </v-flex>
-                   
-        </v-layout>
-        </v-flex>
-        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
-            <div class="deficients-data-table">
-                <v-data-table
+                    </v-btn>          
+                </v-col>
+            </v-row>
+        </v-col>
+    </v-row>
+    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'>
+        <b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b>
+    </div>  
+        <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
+            <div>
+                <v-data-table-server
                     id="DeficientConditionGoalEditor-deficientConditionGoals-vdatatable"
                     :headers="deficientConditionGoalGridHeaders"
                     :items="currentPage"  
                     :pagination.sync="pagination"
                     :must-sort='true'
-                    :total-items="totalItems"
-                    :rows-per-page-items=[5,10,25]
-                    sort-icon=$vuetify.icons.ghd-table-sort
-                    class=" ghd-table v-table__overflow"
+                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                    sort-desc-icon="custom:GhdTableSortDescSvg"
+                    class="ghd-table v-table__overflow"
                     item-key="id"
-                    select-all
-                    v-model="selectedGridRows"
+                    show-select
+                    v-model="selectedGridRows"                
+                    :items-length="totalItems"
+                    :items-per-page-options="[
+                        {value: 5, title: '5'},
+                        {value: 10, title: '10'},
+                        {value: 25, title: '25'},
+                    ]"
+                    v-model:sort-by="pagination.sort"
+                    v-model:page="pagination.page"
+                    v-model:items-per-page="pagination.rowsPerPage"
+                    item-value="name"
+                    return-object
+                    @update:options="onPaginationChanged"
                 >
-                    <template slot="items" slot-scope="props">
+                    <template  v-slot:item="item">
+                        <tr>
                         <td>
                             <v-checkbox
                                 id="DeficientConditionGoalEditor-selectForDelete-vcheckbox"
                                 hide-details
                                 primary
-                                v-model="props.selected"
+                                density="compact"
+                                style="margin: 5px;"
+                                v-model="selectedGridRows" :value="item.item"
                             ></v-checkbox>
                         </td>
                         <td v-for="header in deficientConditionGoalGridHeaders">
                             <div>
-                                <v-edit-dialog v-if="header.value !== 'criterionLibrary' && header.value !== 'action'"
-                                    :return-value.sync="props.item[header.value]"
-                                    @save="onEditDeficientConditionGoalProperty(props.item,header.value,props.item[header.value])"
-                                    large
+                                <editDialog v-if="header.key !== 'criterionLibrary' && header.key !== 'action'"
+                                    v-model:return-value="item.item[header.key]"
+                                    @save="onEditDeficientConditionGoalProperty(item.item,header.key,item.item[header.key])"
+                                    size="large"
                                     lazy>
-                                    <v-text-field v-if="header.value !== 'allowedDeficientPercentage'"
+                                    <v-text-field v-if="header.key !== 'allowedDeficientPercentage'"
                                         readonly
                                         class="sm-txt"
-                                        :value="props.item[header.value]"
+                                        density="compact"
+                                        variant="underlined"
+                                        :model-value="item.item[header.key]"
                                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
-                                    <v-text-field v-if="header.value === 'allowedDeficientPercentage'"
+                                    <v-text-field v-if="header.key === 'allowedDeficientPercentage'"
                                         readonly
                                         class="sm-txt"
-                                        :value="props.item[header.value]"
+                                        density="compact"
+                                        variant="underlined"
+                                        :model-value="item.item[header.key]"
                                         :rules="[rules['generalRules'].valueIsNotEmpty,
-                                            rules['generalRules'].valueIsWithinRange(props.item[header.value],[0, 100])]"/>
+                                            rules['generalRules'].valueIsWithinRange(item.item[header.key],[0, 100])]"/>
 
-                                    <template slot="input">
-                                        <v-text-field v-if="header.value === 'name'"
+                                    <template v-slot:input>
+                                        <v-text-field v-if="header.key === 'name'"
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalName-vtextfield"
                                             label="Edit"
                                             single-line
-                                            v-model="props.item[header.value]"
+                                            variant="underlined"
+                                            v-model="item.item[header.key]"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
-                                        <v-select v-if="header.value === 'attribute'"
+                                        <v-select v-if="header.key === 'attribute'"
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalAttribute-vselect"
                                             :items="numericAttributeNames"
-                                            append-icon=$vuetify.icons.ghd-down
+                                            menu-icon=custom:GhdDownSvg
                                             label="Select an Attribute"
-                                            v-model="props.item[header.value]"
+                                            variant="outlined"
+                                            v-model="item.item[header.key]"
                                             :rules="[
                                                 rules['generalRules'].valueIsNotEmpty]">
                                         </v-select>
 
-                                        <v-text-field v-if="header.value === 'deficientLimit'"
+                                        <v-text-field v-if="header.key === 'deficientLimit'"
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalLimit-vtextfield"
                                             label="Edit"
                                             single-line
-                                            v-model="props.item[header.value]"
-                                            :mask="'##########'"
+                                            variant="underlined"
+                                            v-model="item.item[header.key]"
+                                            type="number"
+                                            v-maska:[limitMask]
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
-                                        <v-text-field v-if="header.value === 'allowedDeficientPercentage'"
+                                        <v-text-field v-if="header.key === 'allowedDeficientPercentage'"
                                             id="DeficientConditionGoalEditor-editDeficientConditionGoalPercentage-vtextfield"
                                             label="Edit"
                                             single-line
-                                            v-model.number="props.item[header.value]"
-                                            :mask="'###'"
+                                            variant="underlined"
+                                            v-model.number="item.item[header.key]"
+                                            v-maska:[percentMask]
                                             :rules="[
                                                 rules['generalRules'].valueIsNotEmpty,
                                                 rules['generalRules'].valueIsWithinRange(
-                                                    props.item[header.value],[0, 100])]"/>
+                                                    item.item[header.key],[0, 100])]"/>
                                     </template>
-                                </v-edit-dialog>
+                                </editDialog>
                                 
-                                <v-layout
-                                    v-if="header.value === 'criterionLibrary'"
-                                    align-center
-                                    style="flex-wrap:nowrap">
-                                    <v-menu
-                                        bottom
-                                        min-height="500px"
-                                        min-width="500px">
-                                        <template slot="activator">
+                                <v-row
+                                    v-if="header.key === 'criterionLibrary'">
+                                    <v-menu>
+                                        <template v-slot:activator>
                                             <v-text-field
                                                 readonly
                                                 class="sm-txt"
-                                                :value="props.item.criterionLibrary.mergedCriteriaExpression"/>
+                                                density="compact"
+                                                variant="underlined"
+                                                :model-value="item.item.criterionLibrary.mergedCriteriaExpression"/>
                                         </template>
-                                        <v-card>
-                                            <v-card-text>
-                                                <v-textarea
-                                                    :value="props.item.criterionLibrary.mergedCriteriaExpression"
-                                                    full-width
-                                                    no-resize
-                                                    outline
-                                                    readonly
-                                                    rows="5"/>
-                                            </v-card-text>
-                                        </v-card>
+                                            <v-textarea
+                                                :model-value="item.item.criterionLibrary.mergedCriteriaExpression"
+                                                no-resize
+                                                variant="outlined"
+                                                readonly
+                                                rows="3"/>
                                     </v-menu>
                                     <v-btn
                                         id="DeficientConditionGoalEditor-editDeficientConditionGoalCriteria-vbtn"
-                                        @click="onShowCriterionLibraryEditorDialog(props.item)"
+                                        @click="onShowCriterionLibraryEditorDialog(item.item)"
                                         class="ghd-blue"
-                                        icon>
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                        style="margin-top: 10px;"
+                                        flat>
+                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                     </v-btn>
-                                </v-layout>
-                                <div v-if="header.value === 'action'">
-                                    <v-btn id="DeficientConditionGoalEditor-deleteDeficientConditionGoal-vbtn" @click="onRemoveSelectedDeficientConditionGoal(props.item.id)"  class="ghd-blue" icon>
-                                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                </v-row>
+                                <div v-if="header.key === 'action'" style="margin-bottom: 10px;">
+                                    <v-btn id="DeficientConditionGoalEditor-deleteDeficientConditionGoal-vbtn" @click="onRemoveSelectedDeficientConditionGoal(item.item.id)"
+                                          class="ghd-blue" style="margin-top: 10px;" flat>
+                                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </div>                               
                             </div>
                         </td>
+                    </tr>
                     </template>
-                </v-data-table> 
-                <v-btn 
+                </v-data-table-server> 
+                <v-btn
                     id="DeficientConditionGoalEditor-deleteSelected-vbtn"
                     :disabled="selectedDeficientConditionGoalIds.length === 0"
                     @click="onRemoveSelectedDeficientConditionGoals"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                    flat>
+                    class='ghd-blue ghd-button'
+                    variant="text">
+
                     Delete Selected
-            </v-btn>              
+                </v-btn>              
             </div>
-           
-        </v-flex>
-        
-        <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
-            <v-layout justify-center>
-                <v-flex>
+        </v-col>
+        <v-col v-show="hasSelectedLibrary && !hasScenario">
+            <v-row justify-center>
+                <v-col>
                     <v-subheader class="ghd-subheader ">Description</v-subheader>
                     <v-textarea
                         class="ghd-text-field-border"
                         no-resize
-                        outline
+                        variant="outlined"
                         rows="4"
                         v-model="selectedDeficientConditionGoalLibrary.description"
-                        @input='checkHasUnsavedChanges()'
+                        @update:model-value="checkHasUnsavedChanges()"
                     >
                     </v-textarea>
-                </v-flex>
-            </v-layout>
-        </v-flex>
-        <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
-            <v-layout justify-center>
+                </v-col>
+            </v-row>
+        </v-col>
+        <v-col v-show="hasSelectedLibrary || hasScenario">
+            <v-row justify="center" style="padding-bottom: 40px;">
                 <v-btn
                     @click="onDiscardChanges"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="hasScenario"
+                    style="margin-right: 5px;"
                     :disabled="!hasUnsavedChanges"
-                    flat>
+                    variant = "text">
                     Cancel
                 </v-btn>
                 <v-btn
                     id="DeficientConditionGoalEditor-deleteLibrary-vbtn"
                     @click="onShowConfirmDeleteAlert"
                     class='ghd-blue ghd-button-text ghd-button'
+                    style="margin-right: 5px;"
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission"
-                    outline>
+                    variant = "text">
                     Delete Library
                 </v-btn>    
                 <v-btn
@@ -245,29 +276,32 @@
                     @click="onShowCreateDeficientConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     :disabled="disableCrudButtons()"
-                    outline>
+                    style="margin-right: 5px; margin-left: 5px;"
+                    variant = "outlined">
                     Create as New Library
                 </v-btn>
                 <v-btn
                     @click="onUpsertScenarioDeficientConditionGoals"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="hasScenario"
+                    style="margin-left: 5px;"
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges">
                     Save
                 </v-btn>
                 <v-btn
                     id="DeficientConditionGoalEditor-updateLibrary-vbtn"
                     @click="onUpsertDeficientConditionGoalLibrary"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario"
-                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges">
+                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
+                    style="margin-left: 5px;">
                     Update Library
                 </v-btn>               
                        
-            </v-layout>
-        </v-flex>
-
-        <ConfirmBeforeDeleteAlert
+            </v-row>
+        </v-col>
+</v-card>
+        <Alert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
         />
@@ -292,14 +326,12 @@
             :dialogData="criterionEditorDialogData"
             @submit="onEditDeficientConditionGoalCriterionLibrary"
         />
-    </v-layout>
+    <ConfirmDialog></ConfirmDialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Watch } from 'vue-property-decorator';
-import { Action, Getter, Mutation, State } from 'vuex-class';
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref, Ref, shallowReactive, ShallowRef, shallowRef, watch } from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
 import {
     DeficientConditionGoal,
     DeficientConditionGoalLibrary,
@@ -330,7 +362,7 @@ import Alert from '@/shared/modals/Alert.vue';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import {
     InputValidationRules,
-    rules,
+    rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
@@ -343,212 +375,184 @@ import DeficientConditionGoalService from '@/services/deficient-condition-goal.s
 import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
-import { isNullOrUndefined } from 'util';
 import { LibraryUser } from '@/shared/models/iAM/user';
 import { emptyShareDeficientConditionGoalLibraryDialogData, ShareDeficientConditionGoalLibraryDialogData } from '@/shared/models/modals/share-deficient-condition-goal-data';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { useConfirm } from 'primevue/useconfirm';
+import ConfirmDialog from 'primevue/confirmdialog';
+import { getUrl } from '@/shared/utils/get-url';
 
-@Component({
-    components: {
-        CreateDeficientConditionGoalLibraryDialog,
-        CreateDeficientConditionGoalDialog,
-        ShareDeficientConditionGoalLibraryDialog,
-        GeneralCriterionEditorDialog,
-        ConfirmBeforeDeleteAlert: Alert,
-    },
-})
-export default class DeficientConditionGoalEditor extends Vue {
-    @State(
-        state =>
-            state.deficientConditionGoalModule.deficientConditionGoalLibraries,
-    )
-    stateDeficientConditionGoalLibraries: DeficientConditionGoalLibrary[];
-    @State(
-        state =>
-            state.deficientConditionGoalModule
-                .selectedDeficientConditionGoalLibrary,
-    )
-    stateSelectedDeficientConditionGoalLibrary: DeficientConditionGoalLibrary;
-    @State(state => state.attributeModule.numericAttributeNames)
-    stateNumericAttributes: Attribute[];
-    @State(
-        state =>
-            state.deficientConditionGoalModule.scenarioDeficientConditionGoals,
-    )
-    stateScenarioDeficientConditionGoals: DeficientConditionGoal[];
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
-    hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.deficientConditionGoalModule.hasPermittedAccess) hasPermittedAccess: boolean;
-    @State(state => state.deficientConditionGoalModule.isSharedLibrary) isSharedLibrary: boolean;
-    @Action('getIsSharedDeficientConditionGoalLibrary') getIsSharedLibraryAction: any;
+    let store = useStore();
+    const confirm = useConfirm();
+    const $router = useRouter();
+    let stateDeficientConditionGoalLibraries = computed<DeficientConditionGoalLibrary[]>(() => store.state.deficientConditionGoalModule.deficientConditionGoalLibraries);
+    let stateSelectedDeficientConditionGoalLibrary = computed<DeficientConditionGoalLibrary>(() => store.state.deficientConditionGoalModule.selectedDeficientConditionGoalLibrary);
+    let stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributeNames);
+    let stateScenarioDeficientConditionGoals = computed<DeficientConditionGoal[]>(() => store.state.deficientConditionGoalModule.scenarioDeficientConditionGoals);
+    let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+    let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
+    let hasPermittedAccess = computed<boolean>(() => store.state.deficientConditionGoalModule.hasPermittedAccess);
+    let isSharedLibrary = computed<boolean>(() => store.state.deficientConditionGoalModule.isSharedLibrary);
 
-    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('getDeficientConditionGoalLibraries')
-    getDeficientConditionGoalLibrariesAction: any;
-    @Action('selectDeficientConditionGoalLibrary')
-    selectDeficientConditionGoalLibraryAction: any;
-    @Action('upsertDeficientConditionGoalLibrary')
-    upsertDeficientConditionGoalLibraryAction: any;
-    @Action('deleteDeficientConditionGoalLibrary')
-    deleteDeficientConditionGoalLibraryAction: any;
-    @Action('getAttributes') getAttributesAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('getScenarioDeficientConditionGoals')
-    getScenarioDeficientConditionGoalsAction: any;
-    @Action('upsertScenarioDeficientConditionGoals')
-    upsertScenarioDeficientConditionGoalsAction: any;
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
-    @Action('selectScenario') selectScenarioAction: any;
+    async function getNetworks(payload?: any): Promise<any> {await store.dispatch('getNetworks', payload);}
+    async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedDeficientConditionGoalLibrary', payload);}
+    async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess', payload);}
+    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+    async function getDeficientConditionGoalLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getDeficientConditionGoalLibraries', payload);}
+    async function selectDeficientConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectDeficientConditionGoalLibrary', payload);}
+    async function upsertDeficientConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertDeficientConditionGoalLibrary', payload);}
+    async function deleteDeficientConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteDeficientConditionGoalLibrary', payload);}
+    async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes', payload);}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+    async function getScenarioDeficientConditionGoalsAction(payload?: any): Promise<any> {await store.dispatch('getScenarioDeficientConditionGoals', payload);}
+    async function upsertScenarioDeficientConditionGoalsAction(payload?: any): Promise<any> {await store.dispatch('upsertScenarioDeficientConditionGoals', payload);}
+    async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification', payload);}
+    async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario', payload);}
+    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario', payload);}
+    
+    function addedOrUpdatedDeficientConditionGoalLibraryMutator(payload: any){store.commit('addedOrUpdatedDeficientConditionGoalLibraryMutator', payload);}
+    function selectedDeficientConditionGoalLibraryMutator(payload: any){store.commit('selectedDeficientConditionGoalLibraryMutator', payload);}
 
-    @Mutation('addedOrUpdatedDeficientConditionGoalLibraryMutator') addedOrUpdatedDeficientConditionGoalLibraryMutator: any;
-    @Mutation('selectedDeficientConditionGoalLibraryMutator') selectedDeficientConditionGoalLibraryMutator: any;
+    let getNumericAttributesGetter: any = store.getters.getNumericAttributes;
+    let getUserNameByIdGetter: any = store.getters.getUserNameById;
 
-    @Getter('getNumericAttributes') getNumericAttributesGetter: any;
-    @Getter('getUserNameById') getUserNameByIdGetter: any;
-
-    dateModified: string;
-    selectedScenarioId: string = getBlankGuid();
-    librarySelectItems: SelectItem[] = [];
-    selectedDeficientConditionGoalLibrary: DeficientConditionGoalLibrary = clone(
-        emptyDeficientConditionGoalLibrary,
-    );
-    hasSelectedLibrary: boolean = false;
-    deficientConditionGoalGridHeaders: DataTableHeader[] = [
+    const selectedScenarioId = ref<string>(getBlankGuid());
+    let librarySelectItems  = ref<SelectItem[]>([]);
+    const selectedDeficientConditionGoalLibrary = ref<DeficientConditionGoalLibrary>(clone(emptyDeficientConditionGoalLibrary));
+    let hasSelectedLibrary = ref(false);
+    let dateModified = ref<string>();
+    let deficientConditionGoalGridHeaders: any[] = [
         {
-            text: 'Name',
-            value: 'name',
-            align: 'left',
+            title: 'Name',
+            key: 'name',
+            align: 'start',
             sortable: false,
             class: '',
-            width: '15%',
+            width: '30%',
         },
         {
-            text: 'Attribute',
-            value: 'attribute',
+            title: 'Attribute',
+            key: 'attribute',
             align: 'left',
             sortable: false,
             class: '',
             width: '12%',
         },
         {
-            text: 'Deficient Limit',
-            value: 'deficientLimit',
+            title: 'Deficient Limit',
+            key: 'deficientLimit',
             align: 'left',
             sortable: false,
             class: '',
             width: '8%',
         },
         {
-            text: 'Allowed Deficient Percentage',
-            value: 'allowedDeficientPercentage',
+            title: 'Allowed Deficient Percentage',
+            key: 'allowedDeficientPercentage',
             align: 'left',
             sortable: false,
             class: '',
-            width: '11%',
+            width: '8%',
         },
         {
-            text: 'Criteria',
-            value: 'criterionLibrary',
+            title: 'Criteria',
+            key: 'criterionLibrary',
             align: 'left',
             sortable: false,
             class: '',
-            width: '40%',
+            width: '30%',
         },
         {
-            text: 'Action',
-            value: 'action',
+            title: 'Action',
+            key: 'action',
             align: 'left',
             sortable: false,
             class: '',
             width: '10%',
         }
     ];
-    numericAttributeNames: string[] = [];
-    selectedGridRows: DeficientConditionGoal[] = [];
-    selectedDeficientConditionGoalIds: string[] = [];
-    selectedDeficientConditionGoalForCriteriaEdit: DeficientConditionGoal = clone(
-        emptyDeficientConditionGoal,
-    );
-    showCreateDeficientConditionGoalDialog: boolean = false;
-    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
-        emptyGeneralCriterionEditorDialogData,
-    );
-    createDeficientConditionGoalLibraryDialogData: CreateDeficientConditionGoalLibraryDialogData = clone(
-        emptyCreateDeficientConditionGoalLibraryDialogData,
-    );
-    confirmDeleteAlertData: AlertData = clone(emptyAlertData);
-    rules: InputValidationRules = rules;
-    uuidNIL: string = getBlankGuid();
-    hasScenario: boolean = false;
-    currentUrl: string = window.location.href;
-    hasCreatedLibrary: boolean = false;
-    disableCrudButtonsResult: boolean = false;
-    hasLibraryEditPermission: boolean = false;
-    importLibraryDisabled: boolean = true;
-    scenarioHasCreatedNew: boolean = false;
+    let numericAttributeNames: string[] = [];
+    let selectedGridRows: ShallowRef<DeficientConditionGoal[]> = ref([]);
+    let selectedDeficientConditionGoalIds: string[] = [];
+    const selectedDeficientConditionGoalForCriteriaEdit = ref< DeficientConditionGoal >(clone(emptyDeficientConditionGoal));
+    const showCreateDeficientConditionGoalDialog = ref<boolean>(false);
+    const criterionEditorDialogData = ref< GeneralCriterionEditorDialogData >(clone(emptyGeneralCriterionEditorDialogData));
+    const createDeficientConditionGoalLibraryDialogData = ref<CreateDeficientConditionGoalLibraryDialogData>(clone(emptyCreateDeficientConditionGoalLibraryDialogData));
+    const confirmDeleteAlertData = ref<AlertData>(clone(emptyAlertData));
+    let rules: InputValidationRules = validationRules;
+    let uuidNIL: string = getBlankGuid();
+    let hasScenario = ref(false);
+    let currentUrl: string = window.location.href;
+    let hasCreatedLibrary: boolean = false;
+    let disableCrudButtonsResult: boolean = false;
+    let hasLibraryEditPermission: boolean = false;
+    let importLibraryDisabled = ref(true);
+    let scenarioHasCreatedNew: boolean = false;
 
-    addedRows: DeficientConditionGoal[] = [];
-    updatedRowsMap:Map<string, [DeficientConditionGoal, DeficientConditionGoal]> = new Map<string, [DeficientConditionGoal, DeficientConditionGoal]>();//0: original value | 1: updated value
-    deletionIds: string[] = [];
-    rowCache: DeficientConditionGoal[] = [];
-    gridSearchTerm = '';
-    currentSearch = '';
-    pagination: Pagination = clone(emptyPagination);
-    isPageInit = false;
-    totalItems = 0;
-    currentPage: DeficientConditionGoal[] = [];
-    initializing: boolean = true;
-    isShared: boolean = false;
+    const addedRows = ref<DeficientConditionGoal[]>([]);
+    let updatedRowsMap:Map<string, [DeficientConditionGoal, DeficientConditionGoal]> = new Map<string, [DeficientConditionGoal, DeficientConditionGoal]>();//0: original value | 1: updated value
+    let deletionIds: string[] = [];
+    let rowCache: DeficientConditionGoal[] = [];
+    let gridSearchTerm = '';
+    let currentSearch = '';
+    //let pagination: ShallowRef<Pagination> = shallowRef(clone(emptyPagination));
+    const pagination: Pagination = shallowReactive(clone(emptyPagination));
+    let isPageInit = false;
+    let totalItems = 0;
+    let currentPage: ShallowRef<DeficientConditionGoal[]> = shallowRef([]);
+    let initializing: boolean = true;
+    let isShared: boolean = false;
 
-    shareDeficientConditionGoalLibraryDialogData: ShareDeficientConditionGoalLibraryDialogData = clone(emptyShareDeficientConditionGoalLibraryDialogData);
+    const shareDeficientConditionGoalLibraryDialogData = ref<ShareDeficientConditionGoalLibraryDialogData>(clone(emptyShareDeficientConditionGoalLibraryDialogData));
 
-    unsavedDialogAllowed: boolean = true;
-    trueLibrarySelectItemValue: string | null = ''
-    librarySelectItemValueAllowedChanged: boolean = true;
-    librarySelectItemValue: string | null = null;
-    parentLibraryId: string = "";
-    parentLibraryName: string = "None";
-    scenarioLibraryIsModified: boolean = false;
-    loadedParentName: string = "";
-    loadedParentId: string = "";
-    libraryImported: boolean = false;
+    let unsavedDialogAllowed: boolean = true;
+    let trueLibrarySelectItemValue: string | null = ''
+    let librarySelectItemValueAllowedChanged: boolean = true;
+    let librarySelectItemValue: Ref<string | null> = ref(null);
+    let parentLibraryId: string = "";
+    let parentLibraryName: string = "None";
+    const scenarioLibraryIsModified = ref<boolean>(false);
+    let loadedParentName: string = "";
+    let loadedParentId: string = "";
+    let libraryImported: boolean = false;
 
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            vm.librarySelectItemValue = null;
-            vm.getDeficientConditionGoalLibrariesAction().then(() => {
-                vm.numericAttributeNames = getPropertyValues('name', vm.getNumericAttributesGetter);
-                vm.getHasPermittedAccessAction().then(() => {
-                    if (to.path.indexOf(ScenarioRoutePaths.DeficientConditionGoal) !== -1) {
-                        vm.selectedScenarioId = to.query.scenarioId;
+    const percentMask = { mask: '###' };
+    const limitMask = { mask: '##########' };
 
-                        if (vm.selectedScenarioId === vm.uuidNIL) {
-                            vm.addErrorNotificationAction({
-                                message: 'Found no selected scenario for edit',
-                            });
-                            vm.$router.push('/Scenarios/');
-                        }
+    created();
+    function created() {
+    }
+    onMounted(async () => {
+        librarySelectItemValue.value = null;
+        await getDeficientConditionGoalLibrariesAction()
+        numericAttributeNames = getPropertyValues('name', getNumericAttributesGetter);
+        await getHasPermittedAccessAction()
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.DeficientConditionGoal) !== -1) {
+            selectedScenarioId.value = $router.currentRoute.value.query.scenarioId as string;
 
-                        vm.hasScenario = true;
-                        vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                            vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
-                            vm.initializePages();
-                        });                                               
-                    }
-                });     
-            });       
-        });
+            if (selectedScenarioId.value === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Found no selected scenario for edit',
+                });
+                $router.push('/Scenarios/');
+            }
+
+            hasScenario.value = true;
+            await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId.value})       
+            selectScenarioAction({ scenarioId: selectedScenarioId.value });        
+            await initializePages();                                      
+        }
+                
+    });
+    onBeforeUnmount(() => beforeDestroy); 
+    function beforeDestroy() {
+        setHasUnsavedChangesAction({ value: false });
     }
 
-    beforeDestroy() {
-        this.setHasUnsavedChangesAction({ value: false });
-    }
-
-    @Watch('stateDeficientConditionGoalLibraries')
-    onStateDeficientConditionGoalLibrariesChanged() {
-        this.librarySelectItems = this.stateDeficientConditionGoalLibraries.map(
+    watch(stateDeficientConditionGoalLibraries, () => onStateDeficientConditionGoalLibrariesChanged())
+    function onStateDeficientConditionGoalLibrariesChanged() {
+        librarySelectItems.value = stateDeficientConditionGoalLibraries.value.map(
             (library: DeficientConditionGoalLibrary) => ({
                 text: library.name,
                 value: library.id,
@@ -558,349 +562,349 @@ export default class DeficientConditionGoalEditor extends Vue {
 
    //this is so that a user is asked wether or not to continue when switching libraries after they have made changes
     //but only when in libraries
-    @Watch('librarySelectItemValue')
-    onLibrarySelectItemValueChangedCheckUnsaved(){
-        if(this.hasScenario){
-            this.onSelectItemValueChanged();
-            this.unsavedDialogAllowed = false;
+    watch(librarySelectItemValue, () => onLibrarySelectItemValueChangedCheckUnsaved())
+    function onLibrarySelectItemValueChangedCheckUnsaved(){
+        if(hasScenario.value){
+            onSelectItemValueChanged();
+            unsavedDialogAllowed = false;
         }           
-        else if(this.librarySelectItemValueAllowedChanged) {
-            this.CheckUnsavedDialog(this.onSelectItemValueChanged, () => {
-                this.librarySelectItemValueAllowedChanged = false;
-                this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
+        else if(librarySelectItemValueAllowedChanged) {
+            CheckUnsavedDialog(onSelectItemValueChanged, () => {
+                librarySelectItemValueAllowedChanged = false;
+                librarySelectItemValue.value = trueLibrarySelectItemValue;               
             });
         }
-        this.librarySelectItemValueAllowedChanged = true;
-        this.librarySelectItems.forEach(library => {
-            if (library.value === this.librarySelectItemValue) {
-                this.parentLibraryName = library.text;
+        librarySelectItemValueAllowedChanged = true;
+        librarySelectItems.value.forEach(library => {
+            if (library.value === librarySelectItemValue.value) {
+                parentLibraryName = library.text;
             }
         });
     }
-    onSelectItemValueChanged() {
-        this.trueLibrarySelectItemValue = this.librarySelectItemValue
-        if(!this.hasScenario || isNil(this.librarySelectItemValue))
-            this.selectDeficientConditionGoalLibraryAction({
-                libraryId: this.librarySelectItemValue,
+
+    function onSelectItemValueChanged() {
+        trueLibrarySelectItemValue = librarySelectItemValue.value
+        if(!hasScenario.value || isNil(librarySelectItemValue.value))
+            selectDeficientConditionGoalLibraryAction({
+                libraryId: librarySelectItemValue.value,
             });
-        else if(!isNil(this.librarySelectItemValue) && !this.scenarioHasCreatedNew)
+        else if(!isNil(librarySelectItemValue.value) && !scenarioHasCreatedNew)
         {
-            this.importLibraryDisabled = false;
+            importLibraryDisabled.value = false;
         }
 
-        this.scenarioHasCreatedNew = false;
+        scenarioHasCreatedNew = false;
     }
 
-    @Watch('stateSelectedDeficientConditionGoalLibrary')
-    onStateSelectedDeficientConditionGoalLibraryChanged() {
-        this.selectedDeficientConditionGoalLibrary = clone(
-            this.stateSelectedDeficientConditionGoalLibrary,
+    watch(stateSelectedDeficientConditionGoalLibrary, () => onStateSelectedDeficientConditionGoalLibraryChanged())
+    function onStateSelectedDeficientConditionGoalLibraryChanged() {
+        selectedDeficientConditionGoalLibrary.value = clone(
+            stateSelectedDeficientConditionGoalLibrary.value,
         );
     }
 
-    @Watch('selectedDeficientConditionGoalLibrary')
-    onSelectedDeficientConditionGoalLibraryChanged() {
-        if (!isNullOrUndefined(this.selectedDeficientConditionGoalLibrary)) {
-            this.hasSelectedLibrary = this.selectedDeficientConditionGoalLibrary.id !== this.uuidNIL;
+    watch(selectedDeficientConditionGoalLibrary, () => onSelectedDeficientConditionGoalLibraryChanged())
+    function onSelectedDeficientConditionGoalLibraryChanged() {
+        if (!isNil(selectedDeficientConditionGoalLibrary.value)) {
+            hasSelectedLibrary.value = selectedDeficientConditionGoalLibrary.value.id !== uuidNIL;
             
         }
-        if (this.hasSelectedLibrary) {
-            this.checkLibraryEditPermission();
-            this.hasCreatedLibrary = false;
+        if (hasSelectedLibrary.value) {
+            checkLibraryEditPermission();
+            hasCreatedLibrary = false;
         }
 
-        this.clearChanges();
-        this.initializing = false;
-        if(this.hasSelectedLibrary)
-            this.onPaginationChanged();
+        clearChanges();
+        initializing = false;
+        if(hasSelectedLibrary.value)
+            onPaginationChanged();
         
-        this.checkHasUnsavedChanges();
+        checkHasUnsavedChanges();
     }
 
-    @Watch('selectedGridRows')
-    onSelectedDeficientRowsChanged() {
-        this.selectedDeficientConditionGoalIds = getPropertyValues('id', this.selectedGridRows,) as string[];
+    watch(selectedGridRows, () => onSelectedDeficientRowsChanged())
+    function onSelectedDeficientRowsChanged() {
+        selectedDeficientConditionGoalIds = getPropertyValues('id', selectedGridRows.value,) as string[];
     }
 
-    @Watch('stateNumericAttributes')
-    onStateNumericAttributesChanged() {
-        this.numericAttributeNames = getPropertyValues('name', this.stateNumericAttributes);
+    watch(stateNumericAttributes, () => onStateNumericAttributesChanged())
+    function onStateNumericAttributesChanged() {
+        numericAttributeNames = getPropertyValues('name', stateNumericAttributes.value);
     }
 
-    @Watch('stateScenarioDeficientConditionGoals')
-    onStateScenarioDeficientConditionGoalsChanged() {
-        if (this.hasScenario) {
-            this.currentPage = clone(this.stateScenarioDeficientConditionGoals);
+    watch(stateScenarioDeficientConditionGoals, () => onStateScenarioDeficientConditionGoalsChanged())
+    function onStateScenarioDeficientConditionGoalsChanged() {
+        if (hasScenario.value) {
+            currentPage.value = clone(stateScenarioDeficientConditionGoals.value);
         }
     }
 
-    @Watch('currentPage')
-    onCurrentPageChanged() {
-        this.librarySelectItems.forEach(library => {
-            if (library.value === this.parentLibraryId) {
-                this.parentLibraryName = library.text;
+    watch(currentPage, () => onCurrentPageChanged())
+    function onCurrentPageChanged() {
+        librarySelectItems.value.forEach(library => {
+            if (library.value === parentLibraryId) {
+                parentLibraryName = library.text;
             }
         });
     }
-    @Watch('isSharedLibrary')
-    onStateSharedAccessChanged() {
-        this.isShared = this.isSharedLibrary;
+
+    watch(isSharedLibrary, () => onStateSharedAccessChanged())
+    function onStateSharedAccessChanged() {
+        isShared = isSharedLibrary.value;
     }
 
-    @Watch('pagination')
-    async onPaginationChanged() {
-        if(this.initializing)
+    watch(pagination, () => onPaginationChanged())
+    async function onPaginationChanged() {
+        if(initializing)
             return;
-        this.checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = this.pagination;
+        checkHasUnsavedChanges();
+        const { sort, descending, page, rowsPerPage } = pagination;
         const request: PagingRequest<DeficientConditionGoal>= {
             page: page,
             rowsPerPage: rowsPerPage,
             syncModel: {
-                libraryId: this.librarySelectItemValue !== null && this.importLibraryDisabled ? this.librarySelectItemValue : null,
-                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                rowsForDeletion: this.deletionIds,
-                addedRows: this.addedRows,
-                isModified: this.scenarioLibraryIsModified
+                libraryId: librarySelectItemValue.value !== null && importLibraryDisabled.value ? librarySelectItemValue.value : null,
+                updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                rowsForDeletion: deletionIds,
+                addedRows: addedRows.value,
+                isModified: scenarioLibraryIsModified.value
             },           
-            sortColumn: sortBy,
-            isDescending: descending != null ? descending : false,
-            search: this.currentSearch
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
+            search: currentSearch
         };
-        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            await DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(this.selectedScenarioId, request).then(response => {
+        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId.value !== uuidNIL)
+            await DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(selectedScenarioId.value, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<DeficientConditionGoal>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
+                    totalItems = data.totalItems;
                 }
             });
-        else if(this.hasSelectedLibrary)
-            await DeficientConditionGoalService.getDeficientLibraryDate(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '').then(response => {
+        else if(hasSelectedLibrary.value)
+            await DeficientConditionGoalService.getDeficientLibraryDate(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '').then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
-                      this.dateModified = data.slice(0, 10);
+                      dateModified.value = data.slice(0, 10);
                    }
              }),    
-             await DeficientConditionGoalService.getLibraryDeficientConditionGoalPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+             await DeficientConditionGoalService.getLibraryDeficientConditionGoalPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<DeficientConditionGoal>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
-                    if (!isNullOrUndefined(this.selectedDeficientConditionGoalLibrary.id) ) {
-                        this.getIsSharedLibraryAction(this.selectedDeficientConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
+                    totalItems = data.totalItems;
+                    if (!isNil(selectedDeficientConditionGoalLibrary.value.id) ) {
+                        getIsSharedLibraryAction(selectedDeficientConditionGoalLibrary.value).then(() => isShared = isSharedLibrary.value);
                     }      
 
                 }
             });     
     }
 
-    importLibrary() {
-        this.setParentLibraryName(this.librarySelectItemValue ? this.librarySelectItemValue : "");
-        this.selectDeficientConditionGoalLibraryAction({
-            libraryId: this.librarySelectItemValue,
+    function importLibrary() {
+        setParentLibraryName(librarySelectItemValue.value ? librarySelectItemValue.value : "");
+        selectDeficientConditionGoalLibraryAction({
+            libraryId: librarySelectItemValue.value,
         });
-        this.importLibraryDisabled = true;
-        this.scenarioLibraryIsModified = false;
-        this.libraryImported = true;
+        importLibraryDisabled.value = true;
+        scenarioLibraryIsModified.value = false;
+        libraryImported = true;
 
     }
 
-    getOwnerUserName(): string {
-
-        if (!this.hasCreatedLibrary) {
-        return this.getUserNameByIdGetter(this.selectedDeficientConditionGoalLibrary.owner);
+    function getOwnerUserName(): string {
+        if (!hasCreatedLibrary) {
+        return getUserNameByIdGetter(selectedDeficientConditionGoalLibrary.value.owner);
         }
-        
         return getUserName();
     }
 
-    checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.hasAdminAccess || (this.hasPermittedAccess && this.checkUserIsLibraryOwner());
+    function checkLibraryEditPermission() {
+        hasLibraryEditPermission = hasAdminAccess.value || (hasPermittedAccess.value && checkUserIsLibraryOwner());
     }
 
-    checkUserIsLibraryOwner() {
-        return this.getUserNameByIdGetter(this.selectedDeficientConditionGoalLibrary.owner) == getUserName();
+    function checkUserIsLibraryOwner() {
+        return getUserNameByIdGetter(selectedDeficientConditionGoalLibrary.value.owner) == getUserName();
     }
 
-    onShowCreateDeficientConditionGoalLibraryDialog(createExistingLibraryAsNew: boolean) {
-        this.createDeficientConditionGoalLibraryDialogData = {
+    function onShowCreateDeficientConditionGoalLibraryDialog(createExistingLibraryAsNew: boolean) {
+        createDeficientConditionGoalLibraryDialogData.value = {
             showDialog: true,
             deficientConditionGoals: createExistingLibraryAsNew
-                ? this.currentPage
+                ? currentPage.value
                 : [],
         };
     }
 
-    onSubmitCreateDeficientConditionGoalLibraryDialogResult(library: DeficientConditionGoalLibrary,) {
-        this.createDeficientConditionGoalLibraryDialogData = clone(emptyCreateDeficientConditionGoalLibraryDialogData,);
+    function onSubmitCreateDeficientConditionGoalLibraryDialogResult(library: DeficientConditionGoalLibrary,) {
+        createDeficientConditionGoalLibraryDialogData.value = clone(emptyCreateDeficientConditionGoalLibraryDialogData,);
 
         if (!isNil(library)) {
             const upsertRequest: LibraryUpsertPagingRequest<DeficientConditionGoalLibrary, DeficientConditionGoal> = {
                 library: library,    
                 isNewLibrary: true,           
                  syncModel: {
-                    libraryId: library.deficientConditionGoals.length == 0 || !this.hasSelectedLibrary? null : this.selectedDeficientConditionGoalLibrary.id,
-                    rowsForDeletion: library.deficientConditionGoals.length == 0 ? [] : this.deletionIds,
-                    updateRows: library.deficientConditionGoals.length == 0 ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: library.deficientConditionGoals.length == 0 ? [] : this.addedRows,
+                    libraryId: library.deficientConditionGoals.length == 0 || !hasSelectedLibrary.value? null : selectedDeficientConditionGoalLibrary.value.id,
+                    rowsForDeletion: library.deficientConditionGoals.length == 0 ? [] : deletionIds,
+                    updateRows: library.deficientConditionGoals.length == 0 ? [] : Array.from(updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: library.deficientConditionGoals.length == 0 ? [] : addedRows.value,
                     isModified: false,
                  },
-                 scenarioId: this.hasScenario ? this.selectedScenarioId : null
+                 scenarioId: hasScenario.value ? selectedScenarioId.value : null
             }
             DeficientConditionGoalService.upsertDeficientConditionGoalLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    this.hasCreatedLibrary = true;
-                    this.librarySelectItemValue = library.id;
+                    hasCreatedLibrary = true;
+                    librarySelectItemValue.value = library.id;
                     
                     if(library.deficientConditionGoals.length == 0){
-                        this.clearChanges();
+                        clearChanges();
                     }
 
-                    if(this.hasScenario){
-                        this.scenarioHasCreatedNew = true;
-                        this.importLibraryDisabled = true;
+                    if(hasScenario.value){
+                        scenarioHasCreatedNew = true;
+                        importLibraryDisabled.value = true;
                     }
                     
-                    this.addedOrUpdatedDeficientConditionGoalLibraryMutator(library);
-                    this.selectedDeficientConditionGoalLibraryMutator(library.id);
-                    this.addSuccessNotificationAction({message:'Added deficient condition goal library'})
+                    addedOrUpdatedDeficientConditionGoalLibraryMutator(library);
+                    selectedDeficientConditionGoalLibraryMutator(library.id);
+                    addSuccessNotificationAction({message:'Added deficient condition goal library'})
                 }               
             })
         }
     }
 
-    onAddDeficientConditionGoal(newDeficientConditionGoal: DeficientConditionGoal) {
-        this.showCreateDeficientConditionGoalDialog = false;
+    function onAddDeficientConditionGoal(newDeficientConditionGoal: DeficientConditionGoal) {
+        showCreateDeficientConditionGoalDialog.value = false;
 
         if (!isNil(newDeficientConditionGoal)) {
-            this.addedRows.push(newDeficientConditionGoal);
-            this.onPaginationChanged()
+            addedRows.value.push(newDeficientConditionGoal);
+            onPaginationChanged()
         }
     }
 
-    onEditDeficientConditionGoalProperty(deficientConditionGoal: DeficientConditionGoal, property: string, value: any) {
-        this.onUpdateRow(deficientConditionGoal.id, clone(deficientConditionGoal))
-        this.onPaginationChanged();
+    function onEditDeficientConditionGoalProperty(deficientConditionGoal: DeficientConditionGoal, property: string, value: any) {
+        onUpdateRow(deficientConditionGoal.id, clone(deficientConditionGoal))
+        onPaginationChanged();
     }
 
-    onShowCriterionLibraryEditorDialog(deficientConditionGoal: DeficientConditionGoal,) {
-        this.selectedDeficientConditionGoalForCriteriaEdit = clone(
+    function onShowCriterionLibraryEditorDialog(deficientConditionGoal: DeficientConditionGoal,) {
+        selectedDeficientConditionGoalForCriteriaEdit.value = clone(
             deficientConditionGoal,
         );
 
-        this.criterionEditorDialogData = {
+        criterionEditorDialogData.value = {
             showDialog: true,
             CriteriaExpression: deficientConditionGoal.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onEditDeficientConditionGoalCriterionLibrary(criterionExpression: string,) {
-        this.criterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+    function onEditDeficientConditionGoalCriterionLibrary(criterionExpression: string,) {
+        criterionEditorDialogData.value = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionExpression) && this.selectedDeficientConditionGoalForCriteriaEdit.id !== this.uuidNIL) {
-            if(this.selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary.id === getBlankGuid())
-                this.selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary.id = getNewGuid();
-            this.onUpdateRow(this.selectedDeficientConditionGoalForCriteriaEdit.id,
-             { ...this.selectedDeficientConditionGoalForCriteriaEdit, 
-                criterionLibrary: {... this.selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression}})                
-            this.onPaginationChanged();
+        if (!isNil(criterionExpression) && selectedDeficientConditionGoalForCriteriaEdit.value.id !== uuidNIL) {
+            if(selectedDeficientConditionGoalForCriteriaEdit.value.criterionLibrary.id === getBlankGuid())
+                selectedDeficientConditionGoalForCriteriaEdit.value.criterionLibrary.id = getNewGuid();
+            onUpdateRow(selectedDeficientConditionGoalForCriteriaEdit.value.id,
+             { ...selectedDeficientConditionGoalForCriteriaEdit.value, 
+                criterionLibrary: {... selectedDeficientConditionGoalForCriteriaEdit.value.criterionLibrary, mergedCriteriaExpression: criterionExpression}})                
+            onPaginationChanged();
         }
 
-        this.selectedDeficientConditionGoalForCriteriaEdit = clone(
+        selectedDeficientConditionGoalForCriteriaEdit.value = clone(
             emptyDeficientConditionGoal,
         );
     }
 
-    onUpsertDeficientConditionGoalLibrary() {
+    function onUpsertDeficientConditionGoalLibrary() {
         const upsertRequest: LibraryUpsertPagingRequest<DeficientConditionGoalLibrary, DeficientConditionGoal> = {
-                library: this.selectedDeficientConditionGoalLibrary,
+                library: selectedDeficientConditionGoalLibrary.value,
                 isNewLibrary: false,
                 syncModel: {
-                libraryId: this.selectedDeficientConditionGoalLibrary.id === this.uuidNIL ? null : this.selectedDeficientConditionGoalLibrary.id,
-                rowsForDeletion: this.deletionIds,
-                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                addedRows: this.addedRows,
+                libraryId: selectedDeficientConditionGoalLibrary.value.id === uuidNIL ? null : selectedDeficientConditionGoalLibrary.value.id,
+                rowsForDeletion: deletionIds,
+                updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                addedRows: addedRows.value,
                 isModified: false
                 },
                 scenarioId: null
         }
         DeficientConditionGoalService.upsertDeficientConditionGoalLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges()
-                this.addedOrUpdatedDeficientConditionGoalLibraryMutator(this.selectedDeficientConditionGoalLibrary);
-                this.selectedDeficientConditionGoalLibraryMutator(this.selectedDeficientConditionGoalLibrary.id);
-                this.addSuccessNotificationAction({message: "Updated deficient condition goal library",});
+                clearChanges()
+                addedOrUpdatedDeficientConditionGoalLibraryMutator(selectedDeficientConditionGoalLibrary.value);
+                selectedDeficientConditionGoalLibraryMutator(selectedDeficientConditionGoalLibrary.value.id);
+                addSuccessNotificationAction({message: "Updated deficient condition goal library",});
             }
         });
     }
 
-    onUpsertScenarioDeficientConditionGoals() {
-        if (this.selectedDeficientConditionGoalLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.libraryImported === false) { this.scenarioLibraryIsModified = true; }
-        else { this.scenarioLibraryIsModified = false; }
+    function onUpsertScenarioDeficientConditionGoals() {
+        if (selectedDeficientConditionGoalLibrary.value.id === uuidNIL || hasUnsavedChanges.value && libraryImported === false) { scenarioLibraryIsModified.value = true; }
+        else { scenarioLibraryIsModified.value = false; }
 
         DeficientConditionGoalService.upsertScenarioDeficientConditionGoals({
-            libraryId: this.selectedDeficientConditionGoalLibrary.id === this.uuidNIL ? null : this.selectedDeficientConditionGoalLibrary.id,
-            rowsForDeletion: this.deletionIds,
-            updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-            addedRows: this.addedRows,
-            isModified: this.scenarioLibraryIsModified
-        }, this.selectedScenarioId).then((response: AxiosResponse) => {
+            libraryId: selectedDeficientConditionGoalLibrary.value.id === uuidNIL ? null : selectedDeficientConditionGoalLibrary.value.id,
+            rowsForDeletion: deletionIds,
+            updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+            addedRows: addedRows.value,
+            isModified: scenarioLibraryIsModified.value
+        }, selectedScenarioId.value).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
-                this.clearChanges();
-                this.librarySelectItemValue = null;
-                this.resetPage();
-                this.addSuccessNotificationAction({message: "Modified scenario's deficient condition goals"});
-                this.importLibraryDisabled = true;
-                this.libraryImported = false;
+                parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
+                clearChanges();
+                librarySelectItemValue.value = null;
+                resetPage();
+                addSuccessNotificationAction({message: "Modified scenario's deficient condition goals"});
+                importLibraryDisabled.value = true;
+                libraryImported = false;
             }           
         });
     }
 
-    onDiscardChanges() {
-        this.librarySelectItemValue = null;
+    function onDiscardChanges() {
+        librarySelectItemValue.value = null;
         setTimeout(() => {
-            if (this.hasScenario) {
-                this.clearChanges();
-                this.resetPage();
-                this.importLibraryDisabled = true;
+            if (hasScenario.value) {
+                clearChanges();
+                resetPage();
+                importLibraryDisabled.value = true;
             }
         });
-        this.parentLibraryName = this.loadedParentName;
-        this.parentLibraryId = this.loadedParentId;
+        parentLibraryName = loadedParentName;
+        parentLibraryId = loadedParentId;
     }
 
-    onRemoveSelectedDeficientConditionGoals() {
-        this.selectedDeficientConditionGoalIds.forEach(_ => {
-            this.removeRowLogic(_);
+    function onRemoveSelectedDeficientConditionGoals() {
+        selectedDeficientConditionGoalIds.forEach(_ => {
+            removeRowLogic(_);
         });
 
-        this.selectedDeficientConditionGoalIds = [];
-        this.onPaginationChanged();
+        selectedDeficientConditionGoalIds = [];
+        onPaginationChanged();
     }
 
-    onRemoveSelectedDeficientConditionGoal(id: string){
-        this.removeRowLogic(id);
-        this.onPaginationChanged();
+    function onRemoveSelectedDeficientConditionGoal(id: string){
+        removeRowLogic(id);
+        onPaginationChanged();
     }
 
-    removeRowLogic(id: string){
-        if(isNil(find(propEq('id', id), this.addedRows))){
-            this.deletionIds.push(id);
-            if(!isNil(this.updatedRowsMap.get(id)))
-                this.updatedRowsMap.delete(id)
+    function removeRowLogic(id: string){
+        if(isNil(find(propEq('id', id), addedRows.value))){
+            deletionIds.push(id);
+            if(!isNil(updatedRowsMap.get(id)))
+                updatedRowsMap.delete(id)
         }           
         else{          
-            this.addedRows = this.addedRows.filter((row) => row.id !== id)
+            addedRows.value = addedRows.value.filter((row) => row.id !== id)
         }  
     }
 
-    onShowConfirmDeleteAlert() {
-        this.confirmDeleteAlertData = {
+    function onShowConfirmDeleteAlert() {
+        confirmDeleteAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -908,118 +912,119 @@ export default class DeficientConditionGoalEditor extends Vue {
         };
     }
 
-    onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        this.confirmDeleteAlertData = clone(emptyAlertData);
+    function onSubmitConfirmDeleteAlertResult(submit: boolean) {
+        confirmDeleteAlertData.value = clone(emptyAlertData);
 
         if (submit) {
-            this.librarySelectItemValue = null;
-            this.deleteDeficientConditionGoalLibraryAction({
-                libraryId: this.selectedDeficientConditionGoalLibrary.id,
+            librarySelectItemValue.value = null;
+            deleteDeficientConditionGoalLibraryAction({
+                libraryId: selectedDeficientConditionGoalLibrary.value.id,
             });
         }
     }
 
-    disableCrudButtons() {
-        const rows = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
+    function disableCrudButtons() {
+        const rows = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rows.every(
             (deficientGoal: DeficientConditionGoal) => {
                 return (
-                    this.rules['generalRules'].valueIsNotEmpty(
+                    rules['generalRules'].valueIsNotEmpty(
                         deficientGoal.name,
                     ) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(
+                    rules['generalRules'].valueIsNotEmpty(
                         deficientGoal.attribute,
                     ) === true
                 );
             },
         );
 
-        if (this.hasSelectedLibrary) {
+        if (hasSelectedLibrary.value) {
             return !(
-                this.rules['generalRules'].valueIsNotEmpty(
-                    this.selectedDeficientConditionGoalLibrary.name,
+                rules['generalRules'].valueIsNotEmpty(
+                    selectedDeficientConditionGoalLibrary.value.name,
                 ) === true &&
                 dataIsValid
             );
         }
-        this.disableCrudButtonsResult = !dataIsValid;
+        disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
     }
 
     //paging
 
-    onUpdateRow(rowId: string, updatedRow: DeficientConditionGoal){
-        if(any(propEq('id', rowId), this.addedRows)){
-            const index = this.addedRows.findIndex(item => item.id == updatedRow.id)
-            this.addedRows[index] = updatedRow;
+    function onUpdateRow(rowId: string, updatedRow: DeficientConditionGoal){
+        if(any(propEq('id', rowId), addedRows.value)){
+            const index = addedRows.value.findIndex(item => item.id == updatedRow.id)
+            addedRows.value[index] = updatedRow;
             return;
         }
 
-        let mapEntry = this.updatedRowsMap.get(rowId)
+        let mapEntry = updatedRowsMap.get(rowId)
 
         if(isNil(mapEntry)){
-            const row = this.rowCache.find(r => r.id === rowId);
+            const row = rowCache.find(r => r.id === rowId);
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
-                this.updatedRowsMap.set(rowId, [row , updatedRow])
+                updatedRowsMap.set(rowId, [row , updatedRow])
         }
         else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
             mapEntry[1] = updatedRow;
         }
         else
-            this.updatedRowsMap.delete(rowId)
+            updatedRowsMap.delete(rowId)
 
-        this.checkHasUnsavedChanges();
+        checkHasUnsavedChanges();
     }
 
-    clearChanges(){
-        this.updatedRowsMap.clear();
-        this.addedRows = [];
-        this.deletionIds = [];
+    function clearChanges(){
+        updatedRowsMap.clear();
+        addedRows.value = [];
+        deletionIds = [];
     }
 
-    resetPage(){
-        this.pagination.page = 1;
-        this.onPaginationChanged();
+    function resetPage(){
+        pagination.page = 1;
+        onPaginationChanged();
     }
 
-    checkHasUnsavedChanges(){
+    function checkHasUnsavedChanges(){
+
         const hasUnsavedChanges: boolean = 
-            this.deletionIds.length > 0 || 
-            this.addedRows.length > 0 ||
-            this.updatedRowsMap.size > 0 || 
-            (this.hasScenario && this.hasSelectedLibrary) ||
-            (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.stateSelectedDeficientConditionGoalLibrary, this.selectedDeficientConditionGoalLibrary))
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+            deletionIds.length > 0 || 
+            addedRows.value.length > 0 ||
+            updatedRowsMap.size > 0 || 
+            (hasScenario.value && hasSelectedLibrary.value) ||
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedDeficientConditionGoalLibrary.value , stateSelectedDeficientConditionGoalLibrary.value))
+        setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    CheckUnsavedDialog(next: any, otherwise: any) {
-        if (this.hasUnsavedChanges && this.unsavedDialogAllowed) {
-            // @ts-ignore
-            Vue.dialog
-                .confirm(
-                    'You have unsaved changes. Are you sure you wish to continue?',
-                    { reverse: true },
-                )
-                .then(() => next())
-                .catch(() => otherwise())
+    function CheckUnsavedDialog(next: any, otherwise: any) {
+        if (hasUnsavedChanges.value && unsavedDialogAllowed) {
+
+            confirm.require({
+                message: "You have unsaved changes. Are you sure you wish to continue?",
+                acceptLabel: "Continue",
+                rejectLabel: "Close",
+                accept: ()=>next(),
+                reject: ()=>otherwise()
+            });
         } 
         else {
-            this.unsavedDialogAllowed = true;
+            unsavedDialogAllowed = true;
             next();
         }
     };
 
-    onShowShareDeficientConditionGoalLibraryDialog(deficientConditionGoalLibrary: DeficientConditionGoalLibrary) {
-        this.shareDeficientConditionGoalLibraryDialogData = {
+    function onShowShareDeficientConditionGoalLibraryDialog(deficientConditionGoalLibrary: DeficientConditionGoalLibrary) {
+        shareDeficientConditionGoalLibraryDialogData.value = {
             showDialog:true,
             deficientConditionGoalLibrary: clone(deficientConditionGoalLibrary)
         }
     }
 
-    onShareDeficientConditionGoalDialogSubmit(deficientConditionGoalLibraryUsers: DeficientConditionGoalLibraryUser[]) {
-        this.shareDeficientConditionGoalLibraryDialogData = clone(emptyShareDeficientConditionGoalLibraryDialogData);
+    function onShareDeficientConditionGoalDialogSubmit(deficientConditionGoalLibraryUsers: DeficientConditionGoalLibraryUser[]) {
+        shareDeficientConditionGoalLibraryDialogData.value = clone(emptyShareDeficientConditionGoalLibraryDialogData);
 
-                if (!isNil(deficientConditionGoalLibraryUsers) && this.selectedDeficientConditionGoalLibrary.id !== getBlankGuid())
+                if (!isNil(deficientConditionGoalLibraryUsers) && selectedDeficientConditionGoalLibrary.value.id !== getBlankGuid())
                 {
                     let libraryUserData: LibraryUser[] = [];
 
@@ -1041,34 +1046,34 @@ export default class DeficientConditionGoalEditor extends Vue {
                         //add library user to an array
                         libraryUserData.push(libraryUser);
                     });
-                    if (!isNullOrUndefined(this.selectedDeficientConditionGoalLibrary.id) ) {
-                        this.getIsSharedLibraryAction(this.selectedDeficientConditionGoalLibrary).then(this.isShared = this.isSharedLibrary);
+                    if (!isNil(selectedDeficientConditionGoalLibrary.value.id) ) {
+                        getIsSharedLibraryAction(selectedDeficientConditionGoalLibrary.value).then(() => isShared = isSharedLibrary.value);
                     }
                     //update budget library sharing
-                    DeficientConditionGoalService.upsertOrDeleteDeficientConditionGoalLibraryUsers(this.selectedDeficientConditionGoalLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+                    DeficientConditionGoalService.upsertOrDeleteDeficientConditionGoalLibraryUsers(selectedDeficientConditionGoalLibrary.value.id, libraryUserData).then((response: AxiosResponse) => {
                         if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
                         {
-                            this.resetPage();
+                            resetPage();
                         }
                     });
                 }
     }
 
-    setParentLibraryName(libraryId: string) {
+    function setParentLibraryName(libraryId: string) {
         if (libraryId === "None") {
-            this.parentLibraryName = "None";
+            parentLibraryName = "None";
             return;
         }
         let foundLibrary: DeficientConditionGoalLibrary = emptyDeficientConditionGoalLibrary;
-        this.stateDeficientConditionGoalLibraries.forEach(library => {
+        stateDeficientConditionGoalLibraries.value.forEach(library => {
             if (library.id === libraryId ) {
                 foundLibrary = clone(library);
             }
         });
-        this.parentLibraryId = foundLibrary.id;
-        this.parentLibraryName = foundLibrary.name;
+        parentLibraryId = foundLibrary.id;
+        parentLibraryName = foundLibrary.name;
     }
-    initializePages(){
+    async function initializePages(){
         const request: PagingRequest<DeficientConditionGoal>= {
             page: 1,
             rowsPerPage: 5,
@@ -1083,27 +1088,27 @@ export default class DeficientConditionGoalEditor extends Vue {
             isDescending: false,
             search: ''
         };
-        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(this.selectedScenarioId, request).then(response => {
-                this.initializing = false
+        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId.value !== uuidNIL)
+            await DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(selectedScenarioId.value, request).then(response => {
+                initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<DeficientConditionGoal>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
-                    this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
-                    this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";
-                    this.loadedParentName = this.parentLibraryName; //store original
-                    this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
+                    totalItems = data.totalItems;
+                    setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
+                    loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
+                    loadedParentName = parentLibraryName; //store original
+                    scenarioLibraryIsModified.value = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
                 }
             });
     }
-}
+
 </script>
 
 <style>
 .deficients-data-table {
-    height: 425px;
+    height: 340px;
     overflow-y: auto;
     overflow-x: hidden;
 }

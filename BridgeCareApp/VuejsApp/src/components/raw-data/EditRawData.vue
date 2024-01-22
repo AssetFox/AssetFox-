@@ -1,6 +1,6 @@
 <template>
-    <v-layout column>
-        <v-layout>
+    <v-row column>
+        <v-row>
             <v-card
                 class="mx-auto ghd-sidebar-raw-data"
                 height="100%"
@@ -10,39 +10,34 @@
                     Raw Data
                 </div>
                 <v-list class="ghd-navigation-list">
-                    <v-list-item-group
+                    <v-list-item
                         class="settings-list ghd-control-text"
                         :key="navigationTab.tabName"
                         v-for="navigationTab in visibleNavigationTabs()"
                     >
-                        <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
-                            <v-list-tile-action>
-                                <v-list-tile-icon class="sidebar-icon">
-                                    <AttributesSvg id="EditRawData-attributes-button" style="height: 38px; width: 34px"  class="raw-data-icon" v-if="navigationTab.tabName === 'Attributes'"/>    
-                                    <DataSourceSvg id="EditRawData-dataSource-button" style="height: 30px; width: 36px" class="raw-data-icon" v-if="navigationTab.tabName === 'DataSource'"/>
-                                    <NetworksSvg  id="EditRawData-networks-button" style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'Networks'"/>                            
-                                </v-list-tile-icon>
-                            </v-list-tile-action>
-                            <v-list-tile-content>
-                                <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>
-                            </v-list-tile-content>
-                        </v-list-tile>
-                    </v-list-item-group>
+                    <v-list-item id="EditScenario-tabs-vListTile" :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
+                            <template v-slot:prepend>
+                                <AttributesSvg id="EditRawData-attributes-button" style="height: 38px; width: 34px"  class="raw-data-icon"  v-if="navigationTab.tabName === 'Attributes'"/>    
+                                    <DataSourceSvg id="EditRawData-dataSource-button" style="height: 30px; width: 36px" class="raw-data-icon"  v-if="navigationTab.tabName === 'DataSource'"/>
+                                    <NetworksSvg  id="EditRawData-networks-button" style="height: 34px; width: 34px" class="raw-data-icon"  v-if="navigationTab.tabName === 'Networks'"/>                                                  
+                            </template>
+                            <v-list-item-title style="width: auto; padding-left: 5px;" v-text="navigationTab.tabName"></v-list-item-title>
+                        </v-list-item>
+                        
+                    </v-list-item>
                 </v-list>
             </v-card>
-            <v-flex xs12 class="ghd-content">
+            <v-col cols = "12" class="ghd-content">
                 <v-container fluid grid-list-xs style="padding-left:20px;padding-right:20px;">
                     <router-view></router-view>
                 </v-container>
-            </v-flex>
-        </v-layout>
-    </v-layout>
+            </v-col>
+        </v-row>
+    </v-row>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Action, State } from 'vuex-class';
+<script setup lang="ts">
+import Vue, { ref } from 'vue';
 import { any, clone, isNil, propEq } from 'ramda';
 import { Network } from '@/shared/models/iAM/network';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
@@ -50,17 +45,19 @@ import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import AttributesSvg from '@/shared/icons/AttributesSvg.vue';
 import DataSourceSvg from '@/shared/icons/DataSourceSvg.vue';
 import NetworksSvg from '@/shared/icons/NetworksSvg.vue';
+import { useStore } from 'vuex';
+import {useRouter} from 'vue-router'
+import router from '@/router';
 
-@Component({
-    components: { AttributesSvg, DataSourceSvg, NetworksSvg}
-})
-export default class EditRawData extends Vue {
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.authenticationModule.userId) userId: string;
 
-    networkId: string = getBlankGuid();
-    networkName: string = '';
-    navigationTabs: NavigationTab[] = [
+    let store = useStore();
+    let hasAdminAccess: boolean = store.state.authenticationModule.hasAdminAccess;
+    let userId: string = store.state.authenticationModule.userId;
+
+
+    let networkId: string = getBlankGuid();
+    let networkName: string = '';
+    let navigationTabs: NavigationTab[] = [
         {
             tabName: 'DataSource',
             tabIcon: "",
@@ -84,48 +81,54 @@ export default class EditRawData extends Vue {
         },
     ];
     
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-                vm.navigationTabs = vm.navigationTabs.map(
-                    (navTab: NavigationTab) => {
-                        const navigationTab = {
-                            ...navTab,
-                            navigation: {
-                                ...navTab.navigation,
-                                query: {
-                                },
-                            },
-                        };
+    beforeRouteEnter();
 
-                        if (navigationTab.tabName === 'DataSource' 
-                            || navigationTab.tabName === 'Networks' 
-                            || navigationTab.tabName === 'Attributes') {
-                            navigationTab['visible'] = vm.hasAdminAccess;
-                        }
-
-                        return navigationTab;
+    function beforeRouteEnter() {
+        navigationTabs = navigationTabs.map(
+            (navTab: NavigationTab) => {
+                const navigationTab = {
+                    ...navTab,
+                    navigation: {
+                        ...navTab.navigation,
+                        query: {
+                        },
                     },
-                );
+                };
 
-                // get the window href
-                const href = window.location.href;
-                // check each NavigationTab object to see if it has a matching navigation path with the href
-                const hasChildPath = any(
-                    (navigationTab: NavigationTab) =>
-                        href.indexOf(navigationTab.navigation.path) !== -1,
-                    vm.navigationTabs,
-                );
-        });
+                if (navigationTab.tabName === 'DataSource' 
+                    || navigationTab.tabName === 'Networks' 
+                    || navigationTab.tabName === 'Attributes') {
+                    navigationTab['visible'] = hasAdminAccess;
+                }
+
+                return navigationTab;
+            },
+        );
+
+        // get the window href
+        const href = window.location.href;
+        // check each NavigationTab object to see if it has a matching navigation path with the href
+        const hasChildPath = any(
+            (navigationTab: NavigationTab) =>
+                href.indexOf(navigationTab.navigation.path) !== -1,
+            navigationTabs,
+        );
+
+    }
+    
+    function onNavigate(route: any) {
+        if (router.currentRoute.value.path !== route.path) {
+            router.push(route).catch(() => {});
+        }
     }
 
-
-    visibleNavigationTabs() {
-        return this.navigationTabs.filter(
+    function visibleNavigationTabs() {
+        return navigationTabs.filter(
             navigationTab =>
                 navigationTab.visible === undefined || navigationTab.visible,
         );
     }
-}
+
 </script>
 
 <style>
@@ -161,7 +164,7 @@ export default class EditRawData extends Vue {
     padding-left: 20px !important;
 }
 
-.primary--text .selected-sidebar-icon .v-icon{
+.text-primary .selected-sidebar-icon .v-icon{
     visibility: visible !important;
 }
 
@@ -169,7 +172,7 @@ export default class EditRawData extends Vue {
     visibility: hidden !important;
 }
 
-.primary--text .raw-data-icon{
+.text-primary .raw-data-icon{
     stroke: #FFFFFF !important;
 }
 
@@ -181,7 +184,7 @@ export default class EditRawData extends Vue {
     fill: #FFFFFF;
 }
 
-.primary--text .raw-data-svg-fill {
+.text-primary .raw-data-svg-fill {
     fill: #2A578D;
 }
 </style>

@@ -7,8 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ITargetConditionGoalRepository
     {
-        void CreateTargetConditionGoals(List<TargetConditionGoal> targetConditionGoals, Guid simulationId);
-
         List<TargetConditionGoalLibraryDTO> GetTargetConditionGoalLibrariesWithTargetConditionGoals();
 
         List<TargetConditionGoalLibraryDTO> GetTargetConditionGoalLibrariesNoChildren();
@@ -34,9 +32,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<LibraryUserDTO> GetLibraryUsers(Guid targetConditionGoalLibraryId);
 
-        void AddLibraryIdToScenarioTargetConditionGoal(List<TargetConditionGoalDTO> targetConditionGoalDTOs, Guid? libraryId);
-
-        void AddModifiedToScenarioTargetConditionGoal(List<TargetConditionGoalDTO> targetConditionGoalDTOs, bool IsModified);
         void UpsertTargetConditionGoalLibraryGoalsAndPossiblyUser(TargetConditionGoalLibraryDTO dto, bool isNewLibrary, Guid ownerIdForNewLibrary);
     }
 }

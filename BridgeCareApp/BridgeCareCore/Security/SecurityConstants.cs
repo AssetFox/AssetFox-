@@ -74,6 +74,7 @@
             public const string ViewCommittedProjects = "ViewCommittedProjects";
             public const string UseGraphQL = "UseGraphQL";
             public const string ModifyAdminSiteSettings = "ModifyAdminSiteSettings";
+            public const string AdminUser = "AdminUser";
         }
 
         public static class Role

@@ -19,6 +19,7 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using BridgeCareCore.Services.General_Work_Queue.WorkItems;
+using BridgeCareCore.Services;
 
 namespace BridgeCareCore.Controllers
 {
@@ -147,7 +148,7 @@ namespace BridgeCareCore.Controllers
                     }
                     else
                     {
-                        var library = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == selectableTreatment.LibraryId);
+                        var library = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibaryNoChildren(selectableTreatment.LibraryId);
                         if (library != null) library.IsModified = selectableTreatment.IsModified;
                         result = library;
                     }                                         
@@ -357,7 +358,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 await Task.Factory.StartNew(() =>
-                {
+                {                    
                     var libraryAccess = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(upsertRequest.Library.Id, UserId);
                     if (libraryAccess.LibraryExists == upsertRequest.IsNewLibrary)
                     {
@@ -371,7 +372,7 @@ namespace BridgeCareCore.Controllers
                         _claimHelper.CheckUserLibraryModifyAuthorization(libraryAccess, UserId);
                         dto.Treatments = items;
                     }
-                    UnitOfWork.TreatmentLibraryUserRepo.UpsertTreatmentLibraryUser(dto, UserId);
+                    UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatmentLibraryTreatmentsAndPossiblyUsers(dto, upsertRequest.IsNewLibrary, UserId);
                 });
 
                 return Ok();
@@ -422,8 +423,8 @@ namespace BridgeCareCore.Controllers
                 {
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     var dtos = _treatmentPagingService.GetSyncedScenarioDataSet(simulationId, pagingSync);
-                    UnitOfWork.SelectableTreatmentRepo.AddLibraryIdToScenarioSelectableTreatments(dtos, pagingSync.LibraryId);
-                    UnitOfWork.SelectableTreatmentRepo.AddModifiedToScenarioSelectableTreatments(dtos, pagingSync.IsModified);
+                    TreatmentDtoListService.AddLibraryIdToScenarioSelectableTreatments(dtos, pagingSync.LibraryId);
+                    TreatmentDtoListService.AddModifiedToScenarioSelectableTreatments(dtos, pagingSync.IsModified);
                     UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
                 });
 
@@ -898,7 +899,7 @@ namespace BridgeCareCore.Controllers
         [HttpGet]
         [Route("DownloadTreatmentSupersedeRuleTemplate")]
         [Authorize]
-        // Note: Scenario settings and Libraries both places can consume same API
+        // Note: Scenario settings and Libraries will use same API
         public async Task<IActionResult> DownloadTreatmentSupersedeRuleTemplate()
         {
             try
@@ -967,7 +968,7 @@ namespace BridgeCareCore.Controllers
                     throw new ConstraintException("Treatment Supersede Rule file not found.");
                 }
 
-                if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("libraryId", out var id))
+                if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("libraryId", out var id) || id == Guid.Empty.ToString())
                 {
                     throw new ConstraintException("Request contained no library id.");
                 }

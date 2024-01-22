@@ -37,6 +37,11 @@
         /// <summary>
         /// The treatment is applied for reasons outside of condition or capcity
         /// </summary>
-        Other
+        Other,
+
+        ///<summary>
+        /// The treatment that is outside scope of scenario criteria
+        ///</summary>
+        WorkOutsideScope
     }
 }

@@ -1,151 +1,154 @@
 <template>
-  <v-layout>
+  <v-row>
     <v-dialog max-width="450px" persistent v-model="showDialog">
       <v-card>
         <v-card-title class="ghd-dialog-box-padding-top">
-         <v-layout justify-space-between align-center>
+         <v-row justify="space-between" align="center">
             <div class="ghd-control-dialog-header">Add New Deficient Condition Goal</div>
-            <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+            <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
             </v-btn>
-          </v-layout>
+          </v-row>
         </v-card-title>
         <v-card-text class="ghd-dialog-box-padding-center">
-          <v-layout column>
-            <v-flex>
+          <v-row>
+            <v-col>
               <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
               <v-text-field id="CreateDeficientConditionGoalDialog-name-vtextfield"
-                            outline v-model="newDeficientConditionGoal.name"
+                            variant="outlined" 
+                            v-model="newDeficientConditionGoal.name"
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                             class="ghd-text-field-border ghd-text-field"></v-text-field>
-            </v-flex>
-            <v-flex>
               <v-subheader class="ghd-md-gray ghd-control-label">Select Attribute</v-subheader>
               <v-select id="CreateDeficientConditionGoalDialog-attribute-vselect"
                         :items="numericAttributeNames"
-                        append-icon=$vuetify.icons.ghd-down
-                        outline
+                        menu-icon=custom:GhdDownSvg
+                        variant="outlined"
                         v-model="newDeficientConditionGoal.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-select ghd-text-field ghd-text-field-border">
               </v-select>
-            </v-flex>
-            <v-flex>
               <v-subheader class="ghd-md-gray ghd-control-label">Deficient Limit</v-subheader>
               <v-text-field id="CreateDeficientConditionGoalDialog-limit-vtextfield"
-                            outline
-                            v-model.number="newDeficientConditionGoal.deficientLimit" :mask="'##########'"
+                            variant="outlined"
+                            v-model.number="newDeficientConditionGoal.deficientLimit" v-maska:[limitMask]
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                             class="ghd-text-field-border ghd-text-field"></v-text-field>
-            </v-flex>
-            <v-flex>
               <v-subheader class="ghd-md-gray ghd-control-label">Allowed Deficient Percentage</v-subheader>
               <v-text-field id="CreateDeficientConditionGoalDialog-percentage-vtextfield"
-                            outline
+                            variant="outlined"
                             v-model.number="newDeficientConditionGoal.allowedDeficientPercentage"
-                            :mask="'###'"
+                            v-maska:[percentMask]
                             :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(newDeficientConditionGoal.allowedDeficientPercentage, [0, 100])]"
                             class="ghd-text-field-border ghd-text-field">
               </v-text-field>
-            </v-flex>
-          </v-layout>
+            </v-col>
+          </v-row>
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
-          <v-layout justify-center row>
-            <v-btn id="CreateDeficientConditionGoalDialog-cancel-vbtn" @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
+          <v-row justify="center">
+            <v-btn 
+              id="CreateDeficientConditionGoalDialog-cancel-vbtn" 
+              @click="onSubmit(false)" 
+              variant = "flat" 
+              class='ghd-blue ghd-button-text ghd-button'>
               Cancel
             </v-btn>
-            <v-btn id="CreateDeficientConditionGoalDialog-save-vbtn" :disabled="disableSubmitBtn()" @click="onSubmit(true)" 
-              outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+            <v-btn 
+              id="CreateDeficientConditionGoalDialog-save-vbtn" 
+              :disabled="disableSubmitBtn()" 
+              @click="onSubmit(true)" 
+              variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
               Save
             </v-btn>           
-          </v-layout>
+          </v-row>
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </v-layout>
+  </v-row>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {State} from 'vuex-class';
+<script setup lang="ts">
+import { onMounted, computed, watch, ref, toRefs } from 'vue';
 import {DeficientConditionGoal, emptyDeficientConditionGoal} from '@/shared/models/iAM/deficient-condition-goal';
 import {clone} from 'ramda';
 import {Attribute} from '@/shared/models/iAM/attribute';
 import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
+import { useStore } from 'vuex';
 
-@Component
-export default class CreateDeficientConditionGoalDialog extends Vue {
-  @Prop() showDialog: boolean;
-  @Prop() currentNumberOfDeficientConditionGoals: number;
+  let store = useStore();
+  const props = defineProps<{
+    currentNumberOfDeficientConditionGoals: number,
+    showDialog: boolean
+  }>()
+  const { showDialog, currentNumberOfDeficientConditionGoals } = toRefs(props);
+  const emit = defineEmits(['submit'])
 
-  @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
+  const stateNumericAttributes = computed<Attribute[]>(() =>store.state.attributeModule.numericAttributes);
 
-  newDeficientConditionGoal: DeficientConditionGoal = clone({...emptyDeficientConditionGoal, id: getNewGuid()});
-  numericAttributeNames: string[] = [];
-  rules: InputValidationRules = rules;
+  const newDeficientConditionGoal = ref<DeficientConditionGoal>(clone({...emptyDeficientConditionGoal, id: getNewGuid()}));
+  const numericAttributeNames = ref<string[]>([]);
+  let rules: InputValidationRules = validationRules;
 
-  mounted() {
-    this.setNumericAttributeNames();
-  }
+  const limitMask = { mask: '##########' };
+  const percentMask = { mask: '###' };
 
-  @Watch('stateNumericAttributes')
-  onStateNumericAttributesChanged() {
-    this.setNumericAttributeNames();
-  }
+  onMounted(() => {
+    setNumericAttributeNames();
+  });
 
-  @Watch('showDialog')
-  onShowDialogChanged() {
-    if (this.showDialog) {
-      this.setNewDeficientConditionGoalDefaultValues();
+  watch(stateNumericAttributes, () => {
+    setNumericAttributeNames();
+  });
+
+  watch(showDialog, () => {
+    if (showDialog) {
+      setNewDeficientConditionGoalDefaultValues();
     }
-  }
+  });
 
-  @Watch('currentNumberOfDeficientConditionGoals')
-  onCurrentNumberOfDeficientConditionGoalsChanged() {
-    if (this.showDialog) {
-      this.setNewDeficientConditionGoalDefaultValues();
+  watch(currentNumberOfDeficientConditionGoals, () => {
+    if (showDialog) {
+      setNewDeficientConditionGoalDefaultValues();
     }
-  }
+  });
 
-  setNewDeficientConditionGoalDefaultValues() {
-    this.newDeficientConditionGoal = {
-      ...this.newDeficientConditionGoal,
-      attribute: hasValue(this.numericAttributeNames) ? this.numericAttributeNames[0] : '',
-      name: `Unnamed Deficient Condition Goal ${this.currentNumberOfDeficientConditionGoals + 1}`,
-      deficientLimit: this.currentNumberOfDeficientConditionGoals > 0 ? this.currentNumberOfDeficientConditionGoals + 1 : 1
+  function setNewDeficientConditionGoalDefaultValues() {
+    newDeficientConditionGoal.value = {
+      ...newDeficientConditionGoal.value,
+      attribute: hasValue(numericAttributeNames.value) ? numericAttributeNames.value[0] : '',
+      name: `Unnamed Deficient Condition Goal ${props.currentNumberOfDeficientConditionGoals + 1}`,
+      deficientLimit: currentNumberOfDeficientConditionGoals.value > 0 ? currentNumberOfDeficientConditionGoals.value + 1 : 1
     };
   }
 
-  setNumericAttributeNames() {
-    if (hasValue(this.stateNumericAttributes)) {
-      this.numericAttributeNames = getPropertyValues('name', this.stateNumericAttributes);
+  function setNumericAttributeNames() {
+    if (hasValue(stateNumericAttributes)) {
+      numericAttributeNames.value = getPropertyValues('name', stateNumericAttributes.value);
 
-      if (this.showDialog) {
-        this.setNewDeficientConditionGoalDefaultValues();
+      if (showDialog) {
+        setNewDeficientConditionGoalDefaultValues();
       }
     }
   }
 
-  disableSubmitBtn() {
-    return !(this.rules['generalRules'].valueIsNotEmpty(this.newDeficientConditionGoal.name) === true &&
-        this.rules['generalRules'].valueIsNotEmpty(this.newDeficientConditionGoal.attribute) &&
-        this.rules['generalRules'].valueIsNotEmpty(this.newDeficientConditionGoal.deficientLimit) &&
-        this.rules['generalRules'].valueIsNotEmpty(this.newDeficientConditionGoal.allowedDeficientPercentage) &&
-        this.rules['generalRules'].valueIsWithinRange(this.newDeficientConditionGoal.allowedDeficientPercentage, [0, 100]));
+  function disableSubmitBtn() {
+    return !(rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.value.name) === true &&
+        rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.value.attribute) &&
+        rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.value.deficientLimit) &&
+        rules['generalRules'].valueIsNotEmpty(newDeficientConditionGoal.value.allowedDeficientPercentage) &&
+        rules['generalRules'].valueIsWithinRange(newDeficientConditionGoal.value.allowedDeficientPercentage, [0, 100]));
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newDeficientConditionGoal);
+      emit('submit', newDeficientConditionGoal.value);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newDeficientConditionGoal = {...emptyDeficientConditionGoal, id: getNewGuid()};
+    newDeficientConditionGoal.value = {...emptyDeficientConditionGoal, id: getNewGuid()};
   }
-}
 </script>

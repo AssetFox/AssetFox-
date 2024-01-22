@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.PortableExecutable;
-using System.Text;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 
@@ -44,7 +39,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
                 LocationKeys = new Dictionary<string, string>()
                 {
-                    { "ID", "46f5da89-5e65-4b8a-9b36-03d9af0302f7" },
+                    { "ID", Guid.NewGuid().ToString() },
                     { TestAttributeNames.CulvDurationN, "3"},
                     { TestAttributeNames.BrKey, "2" },
                     { TestAttributeNames.BmsId, "9876543" }

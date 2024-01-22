@@ -7,10 +7,17 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.PerformanceCurve
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class PerformanceCurveLibraryTestSetup
     {
+        public static PerformanceCurveLibraryDTO TestPerformanceCurveLibraryInDb(IUnitOfWork unitOfWork, Guid id)
+        {
+            var dto = PerformanceCurveLibraryDtos.Empty(id);
+            unitOfWork.PerformanceCurveRepo.UpsertPerformanceCurveLibrary(dto);
+            return dto;
+        }
+
         private static PerformanceCurveDTO CreatePerformanceCurveDto(string performanceCurveName)
         {
             return new PerformanceCurveDTO()

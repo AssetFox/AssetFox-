@@ -1,56 +1,56 @@
 <template>
-    <v-layout class='consequences-tab-content'>
-        <v-flex xs12>            
-            <div class='consequences-data-table'>
+    <v-row>
+        <v-col cols="12">            
+            <div style="margin-bottom: 10px;">
                 <v-data-table :headers='consequencesGridHeaders' :items='consequencesGridData'
                               id="ConsequencesTab-Consequences-vDataTable"
                               class='elevation-1 fixed-header v-table__overflow'
-                              sort-icon=$vuetify.icons.ghd-table-sort
+                              sort-asc-icon="custom:GhdTableSortAscSvg"
+                              sort-desc-icon="custom:GhdTableSortDescSvg"
                               hide-actions>
-                    <template slot='items' slot-scope='props'>
+                    <template slot='items' slot-scope='props' v-slot:item="props">
+                        <tr>
                         <td v-for='header in consequencesGridHeaders'>
-                            <v-edit-dialog
-                                v-if="header.value !== 'equation' && header.value !== 'criterionLibrary' && header.value !== ''"
-                                :return-value.sync='props.item[header.value]'
-                                @save='onEditConsequenceProperty(props.item, header.value, props.item[header.value])'
-                                large lazy persistent>
-                                <v-text-field v-if="header.value === 'attribute'" readonly single-line class='ghd-control-text-sm'
-                                              :value='props.item.attribute'
+                            <editDialog
+                                v-if="header.key !== 'equation' && header.key !== 'criterionLibrary' && header.key !== ''"
+                                v-model:return-value='props.item[header.key]'
+                                @save='onEditConsequenceProperty(props.item, header.key, props.item[header.key])'
+                                size="large" lazy persistent>
+                                <v-text-field v-if="header.key === 'attribute'" variant="underlined" readonly single-line class='ghd-control-text-sm'
+                                              :model-value='props.item.attribute'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                <v-text-field v-if="header.value === 'changeValue'" readonly single-line class='ghd-control-text-sm'
-                                              :value='props.item.changeValue'
+                                <v-text-field variant="underlined" v-if="header.key === 'changeValue'" readonly single-line class='ghd-control-text-sm'
+                                              :model-value='props.item.changeValue'
                                               :rules="[rules['treatmentRules'].hasChangeValueOrEquation(props.item.changeValue, props.item.equation.expression)]" />
-                                <template slot='input'>
-                                    <v-select v-if="header.value === 'attribute'" :items='attributeSelectItems'
-                                             append-icon=$vuetify.icons.ghd-down
-                                              label='Edit'
-                                              v-model='props.item.attribute'
-                                              :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                    <v-text-field v-if="header.value === 'changeValue'" label='Edit'
+                                <template v-slot:input>
+                                    <v-select v-if="header.key === 'attribute'" :items='attributeSelectItems'
+                                        item-title="text"
+                                        item-value="value"   
+                                        menu-icon=custom:GhdDownSvg
+                                        variant="underlined"
+                                        label='Edit'
+                                        v-model='props.item.attribute'
+                                        :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                    <v-text-field variant="underlined" v-if="header.key === 'changeValue'" label='Edit'
                                                   v-model='props.item.changeValue'
                                                   :rules="[rules['treatmentRules'].hasChangeValueOrEquation(props.item.changeValue, props.item.equation.expression)]" />
                                 </template>
-                            </v-edit-dialog>
+                            </editDialog>
 
                             <v-menu
-                                left
-                                min-height="500px"
-                                min-width="500px"
-                                v-show="header.value === 'equation'"
+                                location="left"
+                                v-if="header.key === 'equation'"
                             >
-                                <template slot="activator">
-                                    <v-btn 
-                                        id="TreatmentConsequencesTab-EquationView-btn"
-                                        class="ghd-blue" icon>
-                                        <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')"/>
+                                <template v-slot:activator="{ props }">
+                                    <v-btn v-bind="props" id="TreatmentConsequencesTab-EquationView-btn" class="ghd-blue" flat>
+                                        <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                     </v-btn>
                                 </template>
                                 <v-card>
                                     <v-card-text>
-                                        <v-textarea
+                                        <v-textarea id="TreatmentConsequencesTab-EquationView-textarea"
                                             class="sm-txt"
-                                            id="TreatmentConsequencesTab-EquationView-textarea"
-                                            :value="
+                                            :model-value="
                                                 props.item.equation.expression
                                             "
                                             full-width
@@ -58,24 +58,23 @@
                                             outline
                                             readonly
                                             rows="3"
+                                            style = "min-width: 500px;min-height: 205px;"
                                         />
                                     </v-card-text>
                                 </v-card>
                             </v-menu>     
-                             <v-btn id="TreatmentConsequencesTab-EquationEditorBtn" v-if="header.value === 'equation'" @click='onShowConsequenceEquationEditorDialog(props.item)' class='edit-icon'
+                             <v-btn variant="flat" id="TreatmentConsequencesTab-EquationEditorBtn" v-if="header.key === 'equation'" @click='onShowConsequenceEquationEditorDialog(props.item)' class='edit-icon'
                                     icon>
-                                <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                             </v-btn>                       
 
                             <v-menu
-                                left
-                                min-height="500px"
-                                min-width="500px"
-                                v-show="header.value === 'criterionLibrary'"
+                                location="left"
+                                v-if="header.key === 'criterionLibrary'"
                             >
-                                <template slot="activator">
-                                    <v-btn id="TreatmentConsequencesTab-CriteriaView-btn" class="ghd-blue" icon>
-                                        <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')"/>
+                                <template v-slot:activator="{ props }">
+                                    <v-btn v-bind="props" variant="flat" id="TreatmentConsequencesTab-CriteriaView-btn" class="ghd-blue" flat>
+                                        <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                     </v-btn>
                                 </template>
                                 <v-card>
@@ -83,7 +82,7 @@
                                         <v-textarea
                                             id="TreatmentConsequencesTab-CriteriaView-textarea"
                                             class="sm-txt"
-                                            :value="
+                                            :model-value="
                                                 props.item.criterionLibrary.mergedCriteriaExpression
                                             "
                                             full-width
@@ -91,44 +90,45 @@
                                             outline
                                             readonly
                                             rows="3"
+                                            style = "min-width: 500px;min-height: 205px;"
                                         />
                                     </v-card-text>
                                 </v-card>
                             </v-menu>
-                            <v-btn id="TreatmentConsequencesTab-CriteriaEditorBtn" v-if="header.value === 'criterionLibrary'" @click='onShowConsequenceCriterionEditorDialog(props.item)'
-                                    class='edit-icon' icon>
-                                <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                            <v-btn id="TreatmentConsequencesTab-CriteriaEditorBtn" v-if="header.key === 'criterionLibrary'" @click='onShowConsequenceCriterionEditorDialog(props.item)'
+                                    variant="flat" class='edit-icon' icon>
+                                <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                             </v-btn>
 
-                            <v-layout v-if="header.value === ''" align-start>
-                                <v-btn id="TreatmentConquencesTab-DeleteCostBtn" @click='onRemoveConsequence(props.item.id)' icon>
-                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                            <v-row v-if="header.key === ''" align="start">
+                                <v-btn variant="flat" id="TreatmentConquencesTab-DeleteCostBtn" @click='onRemoveConsequence(props.item.id)' icon>
+                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
-                            </v-layout>
+                            </v-row>
                         </td>
+                    </tr>
                     </template>
                 </v-data-table>
             </div>
             <v-btn id="TreatmentConsequencesTab-AddConsequenceBtn" @click='onAddConsequence' class='ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border ghd-text-padding'>Add Consequence</v-btn>
-        </v-flex>
+        </v-col>
 
-        <ConsequenceEquationEditorDialog :dialogData='consequenceEquationEditorDialogData'
+        <EquationEditorDialog :dialogData='consequenceEquationEditorDialogData'
                                          :isFromPerformanceCurveEditor=false
                                          @submit='onSubmitConsequenceEquationEditorDialogResult' />
 
         <GeneralCriterionEditorDialog :dialogData='consequenceCriterionEditorDialogData'
                                                  @submit='onSubmitConsequenceCriterionEditorDialogResult' />
-    </v-layout>
+    </v-row>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { State } from 'vuex-class';
-import { clone, isNil } from 'ramda';
+<script setup lang='ts'>
+import { ref, computed, shallowRef, watch, toRefs, onMounted } from 'vue';
+import editDialog from '@/shared/modals/Edit-Dialog.vue'
+import { any, clone, isNil } from 'ramda';
 import EquationEditorDialog from '../../../shared/modals/EquationEditorDialog.vue';
+import { useStore } from 'vuex';
 import { emptyConsequence, TreatmentConsequence } from '@/shared/models/iAM/treatment';
-import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import {
     emptyEquationEditorDialogData,
     EquationEditorDialogData,
@@ -144,113 +144,117 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import { getUrl } from '@/shared/utils/get-url';
 
-@Component({
-    components: {
-        GeneralCriterionEditorDialog,
-        ConsequenceEquationEditorDialog: EquationEditorDialog,
-    },
-})
-export default class ConsequencesTab extends Vue {
-    @Prop() selectedTreatmentConsequences: TreatmentConsequence[];
-    @Prop() rules: InputValidationRules;
-    @Prop() callFromScenario: boolean;
-    @Prop() callFromLibrary: boolean;
+const props = defineProps<{
+         selectedTreatmentConsequences: TreatmentConsequence[],
+         rules: InputValidationRules,
+         callFromScenario: boolean,
+         callFromLibrary: boolean  
+    }>(); 
+    const { selectedTreatmentConsequences, rules, callFromScenario, callFromLibrary } = toRefs(props);
+    const emit = defineEmits(['submit', 'onAddConsequence', 'onModifyConsequence', 'onRemoveConsequence'])
+    let store = useStore();
 
-    @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
+    const stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
+    
 
-    consequencesGridHeaders: DataTableHeader[] = [
-        { text: 'Attribute', value: 'attribute', align: 'left', sortable: false, class: '', width: '175px' },
-        { text: 'Change Value', value: 'changeValue', align: 'left', sortable: false, class: '', width: '125px' },
-        { text: 'Equation', value: 'equation', align: 'left', sortable: false, class: '', width: '125px' },
-        { text: 'Criteria', value: 'criterionLibrary', align: 'left', sortable: false, class: '', width: '125px' },
-        { text: 'Actions', value: '', align: 'left', sortable: false, class: '', width: '100px' },
+    const consequencesGridHeaders: any[] = [
+        { title: 'Attribute', key: 'attribute', align: 'left', sortable: false, class: '', width: '175px' },
+        { title: 'Change Value', key: 'changeValue', align: 'left', sortable: false, class: '', width: '125px' },
+        { title: 'Equation', key: 'equation', align: 'left', sortable: false, class: '', width: '125px' },
+        { title: 'Criteria', key: 'criterionLibrary', align: 'left', sortable: false, class: '', width: '125px' },
+        { title: 'Actions', key: '', align: 'left', sortable: false, class: '', width: '100px' },
     ];
-    consequencesGridData: TreatmentConsequence[] = [];
-    consequenceEquationEditorDialogData: EquationEditorDialogData = clone(emptyEquationEditorDialogData);
-    consequenceCriterionEditorDialogData: GeneralCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
-    selectedConsequenceForEquationOrCriteriaEdit: TreatmentConsequence = clone(emptyConsequence);
-    attributeSelectItems: SelectItem[] = [];
-    uuidNIL: string = getBlankGuid();
+    const consequencesGridData = ref<TreatmentConsequence[]>();
+    const consequenceEquationEditorDialogData = ref(clone(emptyEquationEditorDialogData));
+    const consequenceCriterionEditorDialogData = ref(clone(emptyGeneralCriterionEditorDialogData));
+    const selectedConsequenceForEquationOrCriteriaEdit = ref<TreatmentConsequence>(clone(emptyConsequence));
+    const attributeSelectItems = ref<SelectItem[]>([]);
+    let uuidNIL: string = getBlankGuid();
 
-    mounted() {
-        this.setAttributeSelectItems();
+   created();
+   function created() {
+        setAttributeSelectItems();
     }
 
-    @Watch('selectedTreatmentConsequences')
-    onSelectedTreatmentConsequencesChanged() {
-        this.consequencesGridData = clone(this.selectedTreatmentConsequences);
-    }
+    onMounted(() => {
+        if(props.selectedTreatmentConsequences.length > 0)
+        consequencesGridData.value = clone(props.selectedTreatmentConsequences);
+    })
 
-    @Watch('stateAttributes')
-    onStateAttributesChanged() {
-        this.setAttributeSelectItems();
-    }
+    watch(() => props.selectedTreatmentConsequences, () => {
+        consequencesGridData.value = clone(selectedTreatmentConsequences.value);
+    });
 
-    setAttributeSelectItems() {
-        if (hasValue(this.stateAttributes)) {
-            this.attributeSelectItems = this.stateAttributes.map((attribute: Attribute) => ({
+    watch(stateAttributes, () => {
+        setAttributeSelectItems();
+    });
+
+    function setAttributeSelectItems() {
+        if (hasValue(stateAttributes.value)) {
+            attributeSelectItems.value = stateAttributes.value.map((attribute: Attribute) => ({
                 text: attribute.name,
                 value: attribute.name,
             }));
         }
     }
 
-    onAddConsequence() {
+    function onAddConsequence() {
         const newConsequence: TreatmentConsequence = { ...emptyConsequence, id: getNewGuid() };
-        this.$emit('onAddConsequence', newConsequence);
+        emit('onAddConsequence', newConsequence);
     }
 
-    onEditConsequenceProperty(consequence: TreatmentConsequence, property: string, value: any) {
-        this.$emit('onModifyConsequence', setItemPropertyValue(property, value, consequence));
+    function onEditConsequenceProperty(consequence: TreatmentConsequence, property: string, value: any) {
+        emit('onModifyConsequence', setItemPropertyValue(property, value, consequence));
     }
 
-    onShowConsequenceEquationEditorDialog(consequence: TreatmentConsequence) {
-        this.selectedConsequenceForEquationOrCriteriaEdit = clone(consequence);
+    function onShowConsequenceEquationEditorDialog(consequence: TreatmentConsequence) {
+        selectedConsequenceForEquationOrCriteriaEdit.value = clone(consequence);
 
-        this.consequenceEquationEditorDialogData = {
+        consequenceEquationEditorDialogData.value = {
             showDialog: true,
             equation: clone(consequence.equation),
         };
     }
 
-    onSubmitConsequenceEquationEditorDialogResult(equation: Equation) {
-        this.consequenceEquationEditorDialogData = clone(emptyEquationEditorDialogData);
+    function onSubmitConsequenceEquationEditorDialogResult(equation: Equation) {
+        consequenceEquationEditorDialogData.value = clone(emptyEquationEditorDialogData);
 
-        if (!isNil(equation) && this.selectedConsequenceForEquationOrCriteriaEdit.id !== this.uuidNIL) {
-            this.$emit('onModifyConsequence', setItemPropertyValue('equation', equation, this.selectedConsequenceForEquationOrCriteriaEdit));
+        if (!isNil(equation) && selectedConsequenceForEquationOrCriteriaEdit.value.id !== uuidNIL) {
+            emit('onModifyConsequence', setItemPropertyValue('equation', equation, selectedConsequenceForEquationOrCriteriaEdit.value));
         }
 
-        this.selectedConsequenceForEquationOrCriteriaEdit = clone(emptyConsequence);
+        selectedConsequenceForEquationOrCriteriaEdit.value = clone(emptyConsequence);
     }
 
-    onShowConsequenceCriterionEditorDialog(consequence: TreatmentConsequence) {
-        this.selectedConsequenceForEquationOrCriteriaEdit = clone(consequence);
+    function onShowConsequenceCriterionEditorDialog(consequence: TreatmentConsequence) {
+        selectedConsequenceForEquationOrCriteriaEdit.value = clone(consequence);
 
-        this.consequenceCriterionEditorDialogData = {
+        consequenceCriterionEditorDialogData.value = {
             showDialog: true,
             CriteriaExpression: consequence.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onSubmitConsequenceCriterionEditorDialogResult(criterionExpression: string) {
-        this.consequenceCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+    function onSubmitConsequenceCriterionEditorDialogResult(criterionExpression: string) {
+        consequenceCriterionEditorDialogData.value = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionExpression) && this.selectedConsequenceForEquationOrCriteriaEdit.id !== this.uuidNIL) {
-            if(this.selectedConsequenceForEquationOrCriteriaEdit.criterionLibrary.id === getBlankGuid())
-                this.selectedConsequenceForEquationOrCriteriaEdit.criterionLibrary.id = getNewGuid();
-            this.$emit('onModifyConsequence', setItemPropertyValue('criterionLibrary', 
-            {...this.selectedConsequenceForEquationOrCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary, 
-            this.selectedConsequenceForEquationOrCriteriaEdit));
+        if (!isNil(criterionExpression) && selectedConsequenceForEquationOrCriteriaEdit.value.id !== uuidNIL) {
+            if(selectedConsequenceForEquationOrCriteriaEdit.value.criterionLibrary.id === getBlankGuid())
+                selectedConsequenceForEquationOrCriteriaEdit.value.criterionLibrary.id = getNewGuid();
+            emit('onModifyConsequence', setItemPropertyValue('criterionLibrary', 
+            {...selectedConsequenceForEquationOrCriteriaEdit.value.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary, 
+            selectedConsequenceForEquationOrCriteriaEdit.value));
         }
 
-        this.selectedConsequenceForEquationOrCriteriaEdit = clone(emptyConsequence);
+        selectedConsequenceForEquationOrCriteriaEdit.value = clone(emptyConsequence);
     }
 
-    onRemoveConsequence(consequenceId: string) {
-        this.$emit('onRemoveConsequence', consequenceId);
+    function onRemoveConsequence(consequenceId: string) {
+        emit('onRemoveConsequence', consequenceId);
     }
-}
+
 </script>
 
 <style>

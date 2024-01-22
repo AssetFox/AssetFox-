@@ -1,20 +1,21 @@
 <template>
-    <v-layout column>
-        <v-flex v-if="false">
-            <v-layout justify-center>
-                <v-flex xs3>
+    <v-row column>
+        <v-col v-if="false">
+            <v-row justify-center>
+                <v-col cols = "3">
                     <v-btn
                         @click="onShowCreateCriterionLibraryDialog(false)"
-                        class="ara-blue-bg white--text"
+                        class="ara-blue-bg text-white"
                     >
                         New Library
                     </v-btn>
                     <v-select
                         v-model="librarySelectItemValue"
+                        menu-icon=custom:GhdDownSvg
                         v-if="!hasSelectedCriterionLibrary"
                         :items="criterionLibrarySelectItems"
                         label="Select a Criteria Library"
-                        outline
+                        variant="outlined"
                     >
                     </v-select>
                     <v-text-field
@@ -22,9 +23,9 @@
                         v-model="selectedCriterionLibrary.name"
                         @change="canUpdateOrCreate = true"
                     >
-                        <template slot="append">
+                        <template v-slot:append-inner>
                             <v-btn
-                                @click="librarySelectItemValue = null"
+                                @click="librarySelectItemValue = ''"
                                 class="ara-orange"
                                 icon
                             >
@@ -42,26 +43,26 @@
                         label="Shared"
                         @change="canUpdateOrCreate = true"
                     />
-                </v-flex>
-            </v-layout>
-        </v-flex>
+                </v-col>
+            </v-row>
+        </v-col>
         <v-divider v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion" />
-        <v-flex v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion">
-            <v-layout justify-center>
-                <v-flex xs10>
+        <v-col v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion">
+            <v-row justify-center>
+                <v-col cols = "10">
                     <CriteriaEditor
                         :criteriaEditorData="criteriaEditorData"
                         @submitCriteriaEditorResult="
                             onSubmitCriteriaEditorResult
                         "
                     />
-                </v-flex>
-            </v-layout>
-        </v-flex>
+                </v-col>
+            </v-row>
+        </v-col>
         <v-divider v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion" />
-        <v-flex v-show="hasSelectedCriterionLibrary">
-            <v-layout justify-center>
-                <v-flex xs6>
+        <v-col v-show="hasSelectedCriterionLibrary">
+            <v-row justify-center>
+                <v-col xs6>
                     <v-textarea
                         v-model="selectedCriterionLibrary.description"
                         label="Description"
@@ -70,34 +71,34 @@
                         rows="4"
                     >
                     </v-textarea>
-                </v-flex>
-            </v-layout>
-        </v-flex>
-        <v-flex>
-            <v-layout justify-end row v-show="hasSelectedCriterionLibrary">
+                </v-col>
+            </v-row>
+        </v-col>
+        <v-col>
+            <v-row justify-end style="padding-bottom: 40px;" row v-show="hasSelectedCriterionLibrary">
                 <v-btn
                     @click="onUpsertCriterionLibrary(selectedCriterionLibrary)"
-                    class="ara-blue-bg white--text"
+                    class="ara-blue-bg text-white"
                     :disabled="!canUpdateOrCreate || !hasLibraryEditPermission"
                 >
                     Update Library
                 </v-btn>
                 <v-btn
                     @click="onShowCreateCriterionLibraryDialog(true)"
-                    class="ara-blue-bg white--text"
+                    class="ara-blue-bg text-white"
                     :disabled="!canUpdateOrCreate"
                 >
                     Create as New Library
                 </v-btn>
-                <v-btn outline
+                <v-btn variant = "outlined"
                     @click="onShowConfirmDeleteAlert"
-                    class="ara-orange-bg white--text"
+                    class="ara-orange-bg text-white"
                     :disabled="!hasLibraryEditPermission"
                 >
                     Delete Library
                 </v-btn>
-            </v-layout>
-        </v-flex>
+            </v-row>
+        </v-col>
 
         <CreateCriterionLibraryDialog
             :dialogData="createCriterionLibraryDialogData"
@@ -108,14 +109,12 @@
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
         />
-    </v-layout>
+    </v-row>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Action, State, Getter } from 'vuex-class';
-import { Prop, Watch } from 'vue-property-decorator';
+<script lang="ts" setup>
+import Vue, { shallowRef } from 'vue';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import CriteriaEditor from '@/shared/components/CriteriaEditor.vue';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import {
@@ -137,76 +136,98 @@ import {
 } from '@/shared/models/modals/create-criterion-library-dialog-data';
 import CreateCriterionLibraryDialog from '@/components/criteria-editor/criteria-editor-dialogs/CreateCriterionLibraryDialog.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
-import Alert from '@/shared/modals/Alert.vue';
+import ConfirmDeleteAlert from '@/shared/modals/Alert.vue';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { getUserName } from '@/shared/utils/get-user-info';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component({
-    components: {
-        ConfirmDeleteAlert: Alert,
-        CreateCriterionLibraryDialog,
-        CriteriaEditor,
-    },
-})
-export default class CriterionLibraryEditor extends Vue {
-    @Prop() dialogLibraryId: string;
-    @Prop() dialogIsFromScenario: boolean;
-    @Prop() dialogIsFromLibrary: boolean;
+    let dialogLibraryId = shallowRef<string>('');
+    let dialogIsFromScenario = shallowRef<boolean>();
+    let dialogIsFromLibrary: boolean;
+    let store = useStore();
 
-    @State(state => state.criterionModule.criterionLibraries)
-    stateCriterionLibraries: CriterionLibrary[];
-    @State(state => state.criterionModule.selectedCriterionLibrary)
-    stateSelectedCriterionLibrary: CriterionLibrary;
-    @State(state => state.criterionModule.scenarioRelatedCriteria)
-    scenarioRelatedCriteria: CriterionLibrary;
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.criterionModule.hasPermittedAccess) hasPermittedAccess: boolean;
-    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
-    @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
-    @Action('upsertCriterionLibrary') upsertCriterionLibraryAction: any;
-    @Action('selectCriterionLibrary') selectCriterionLibraryAction: any;
-    @Action('deleteCriterionLibrary') deleteCriterionLibraryAction: any;
-    @Action('setSelectedCriterionIsValid')
-    setSelectedCriterionIsValidAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('selectScenarioRelatedCriterion')
-    selectScenarioRelatedCriterionAction: any;
-    @Action('upsertSelectedScenarioRelatedCriterion')
-    upsertSelectedScenarioRelatedCriterionAction: any;
-    @Action('getSelectedCriterionLibrary') getSelectedCriterionLibraryAction: any;
+    let stateCriterionLibraries = ref<CriterionLibrary[]>(store.state.criterionModule.criterionLibraries)
+    let stateSelectedCriterionLibrary = ref<CriterionLibrary>(store.state.criterionModule.selectedCriterionLibrary)
+    let scenarioRelatedCriteria = ref<CriterionLibrary>(store.state.criterionModule.scenarioRelatedCriteria)
+    let hasAdminAccess = ref<boolean>(store.state.authenticationModule.hasAdminAccess)
+    let hasPermittedAccess = ref<boolean>(store.state.criterionModule.hasPermittedAccess)
 
-    @Getter('getUserNameById') getUserNameByIdGetter: any;
+    async function getHasPermittedAccessAction(payload?: any): Promise<any> {
+        await store.dispatch('getHasPermittedAccess');
+    }
 
-    hasSelectedCriterionLibrary: boolean = false;
-    criterionLibrarySelectItems: SelectItem[] = [];
-    librarySelectItemValue: string | null = null;
-    selectedCriterionLibrary: CriterionLibrary = clone(emptyCriterionLibrary);
-    criteriaEditorData: CriteriaEditorData = {
+    async function getCriterionLibrariesAction(payload?: any): Promise<any> {
+        await store.dispatch('getCriterionLibraries');
+    }
+
+    async function upsertCriterionLibraryAction(payload?: any): Promise<any> {
+        await store.dispatch('upsertCriterionLibrary');
+    }
+
+    async function selectCriterionLibraryAction(payload?: any): Promise<any> {
+        await store.dispatch('selectCriterionLibrary');
+    }
+
+    async function deleteCriterionLibraryAction(payload?: any): Promise<any> {
+        await store.dispatch('deleteCriterionLibrary');
+    }
+
+    async function setSelectedCriterionIsValidAction(payload?: any): Promise<any> {
+        await store.dispatch('setSelectedCriterionIsValid');
+    }
+
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {
+        await store.dispatch('setHasUnsavedChanges');
+    }
+
+    async function selectScenarioRelatedCriterionAction(payload?: any): Promise<any> {
+        await store.dispatch('selectScenarioRelatedCriterion');
+    }
+
+    async function upsertSelectedScenarioRelatedCriterionAction(payload?: any): Promise<any> {
+        await store.dispatch('upsertSelectedScenarioRelatedCriterion');
+    }
+
+    async function getSelectedCriterionLibraryAction(payload?: any): Promise<any> {
+        await store.dispatch('getSelectedCriterionLibrary');
+    }
+
+    async function getUserNameByIdGetter(payload?: any): Promise<any> {
+        await store.dispatch('getUserNameById');
+    }
+
+
+    let hasSelectedCriterionLibrary: boolean = false;
+    let criterionLibrarySelectItems: SelectItem[] = [];
+    let librarySelectItemValue = shallowRef<string>('');
+    let selectedCriterionLibrary: CriterionLibrary = clone(emptyCriterionLibrary);
+    let criteriaEditorData: CriteriaEditorData = {
         ...emptyCriteriaEditorData,
         isLibraryContext: true,
     };
-    isLibraryContext: boolean = true;
-    createCriterionLibraryDialogData: CreateCriterionLibraryDialogData = clone(
-        emptyCreateCriterionLibraryDialogData,
-    );
-    confirmDeleteAlertData: AlertData = clone(emptyAlertData);
-    canUpdateOrCreate: boolean = false;
-    uuidNIL: string = getBlankGuid();
-    callFromScenario: boolean = false;
-    callFromLibraryToEditCriterion: boolean = false;
-    criteriaForScenario: string | null = null;
-    selectedScenarioRelatedCriteria: CriterionLibrary = clone(
+    let isLibraryContext: boolean = true;
+    const props = defineProps<{createCriterionLibraryDialogData: CreateCriterionLibraryDialogData}>()
+    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    let canUpdateOrCreate = shallowRef<boolean>(false);
+    let uuidNIL: string = getBlankGuid();
+    let callFromScenario = shallowRef<boolean>();
+    let callFromLibraryToEditCriterion: boolean = false;
+    let criteriaForScenario = shallowRef<string>('');
+    let selectedScenarioRelatedCriteria: CriterionLibrary = clone(
         emptyCriterionLibrary,
     );
-    hasCreatedLibrary: boolean = false;
-    hasLibraryEditPermission: boolean = false;
+    let hasCreatedLibrary = shallowRef<boolean>(false);
+    let hasLibraryEditPermission = shallowRef<boolean>(false);
+    const emit = defineEmits(['submit'])    
+    const $router = useRouter();
 
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
+   created();
+   function created() {
+         ((vm: any) => {
             vm.getHasPermittedAccessAction();
-
-            if (to.path.indexOf('CriterionLibraryEditor/Library') !== -1) {
+            if ($router.currentRoute.value.path.indexOf('CriterionLibraryEditor/Library') !== -1) {
                 vm.librarySelectItemValue = null;
                 vm.getCriterionLibrariesAction();
             } else {
@@ -215,113 +236,119 @@ export default class CriterionLibraryEditor extends Vue {
         });
     }
 
-    beforeDestroy() {
-        if (this.isLibraryContext) {
-            this.setHasUnsavedChangesAction({ value: false });
+    onBeforeUnmount(() => beforeDestroy());
+    function beforeDestroy() {
+        if (isLibraryContext) {
+            setHasUnsavedChangesAction({ value: false });
         }
     }
 
-    @Watch('stateCriterionLibraries')
-    onStateCriterionLibrariesChanged() {
-        this.criterionLibrarySelectItems = this.stateCriterionLibraries
+
+    watch(stateCriterionLibraries, () => onStateCriterionLibrariesChanged)
+    function onStateCriterionLibrariesChanged() {
+        criterionLibrarySelectItems = stateCriterionLibraries.value
             .filter((lib: CriterionLibrary) => lib.isSingleUse == false)
             .map((library: CriterionLibrary) => ({
                 text: library.name,
                 value: library.id,
             }));
-        if (!this.isLibraryContext && hasValue(this.librarySelectItemValue)) {
-            this.getSelectedCriterionLibraryAction({
-                libraryId: this.librarySelectItemValue,
+        if (!isLibraryContext && hasValue(librarySelectItemValue)) {
+            getSelectedCriterionLibraryAction({
+                libraryId: librarySelectItemValue,
             });
         }
     }
 
-    @Watch('dialogLibraryId')
-    onDialogLibraryIdChanged() {
+    watch(dialogLibraryId, () => onDialogLibraryIdChanged) 
+    function onDialogLibraryIdChanged(){
         if (
-            (!this.dialogIsFromScenario && !this.dialogIsFromLibrary) ||
-            this.dialogLibraryId == this.uuidNIL
+            (!dialogIsFromScenario && !dialogIsFromLibrary) ||
+            dialogLibraryId.value == uuidNIL
         ) {
-            this.librarySelectItemValue = this.dialogLibraryId;
+            librarySelectItemValue = dialogLibraryId;
         }
     }
 
-    @Watch('librarySelectItemValue')
-    onLibrarySelectItemValueChanged() {
-        this.getSelectedCriterionLibraryAction({
-                libraryId: this.librarySelectItemValue,
+    watch(librarySelectItemValue, () => onLibrarySelectItemValueChanged) 
+    function onLibrarySelectItemValueChanged(){
+            getSelectedCriterionLibraryAction({
+                libraryId: librarySelectItemValue.value
             });
     }
 
-    @Watch('stateSelectedCriterionLibrary')
-    onStateSelectedCriterionLibraryChanged() {
-        this.canUpdateOrCreate = false;
-        this.selectedCriterionLibrary = clone(
-            this.stateSelectedCriterionLibrary,
+    watch(stateSelectedCriterionLibrary, () => onStateSelectedCriterionLibraryChanged)
+    function onStateSelectedCriterionLibraryChanged(){
+        canUpdateOrCreate.value = false;
+        selectedCriterionLibrary = clone(
+            stateSelectedCriterionLibrary.value
         );
     }
 
-    @Watch('scenarioRelatedCriteria')
-    onScenarioRelatedCriteria() {
-        this.criteriaForScenario = this.dialogLibraryId;
-        this.callFromScenario = this.dialogIsFromScenario;
-        this.callFromLibraryToEditCriterion = this.dialogIsFromLibrary;
-        this.selectedScenarioRelatedCriteria = clone(
-            this.scenarioRelatedCriteria,
+    watch(scenarioRelatedCriteria, onScenarioRelatedCriteria)
+    function onScenarioRelatedCriteria() {
+        criteriaForScenario = dialogLibraryId;
+        callFromScenario = dialogIsFromScenario;
+        callFromLibraryToEditCriterion = dialogIsFromLibrary;
+        selectedScenarioRelatedCriteria = clone(
+            scenarioRelatedCriteria.value
         );
-        this.criteriaEditorData = {
-            ...this.criteriaEditorData,
-            mergedCriteriaExpression: this.selectedScenarioRelatedCriteria
+        criteriaEditorData = {
+            ...criteriaEditorData,
+            mergedCriteriaExpression: selectedScenarioRelatedCriteria
                 .mergedCriteriaExpression,
         };
     }
 
-    @Watch('canUpdateOrCreate')
-    onCanUpdateOrCreateChanged() {}
+    watch(canUpdateOrCreate, () => onCanUpdateOrCreateChanged) 
+    function onCanUpdateOrCreateChanged(){
 
-    @Watch('selectedCriterionLibrary', {deep: true})
-    onSelectedCriterionLibraryChanged() {
-        this.hasSelectedCriterionLibrary =
-            this.selectedCriterionLibrary.id !== this.uuidNIL;
 
-        if (this.hasSelectedCriterionLibrary) {
-            this.checkLibraryEditPermission();
-            this.hasCreatedLibrary = false;
+    }
+
+    watch(selectedCriterionLibrary, () => onSelectedCriterionLibraryChanged)
+    function onSelectedCriterionLibraryChanged() {
+        hasSelectedCriterionLibrary =
+            selectedCriterionLibrary.id !== uuidNIL;
+
+        if (hasSelectedCriterionLibrary) {
+            checkLibraryEditPermission();
+            hasCreatedLibrary.value = false;
         }
 
         if (
-            (this.callFromScenario || this.dialogIsFromLibrary) &&
-            this.hasSelectedCriterionLibrary == false
+            (callFromScenario || dialogIsFromLibrary) &&
+            hasSelectedCriterionLibrary == false
         ) {
-            this.criteriaEditorData = {
-                ...this.criteriaEditorData,
-                mergedCriteriaExpression: this.selectedScenarioRelatedCriteria
+            criteriaEditorData = {
+                ...criteriaEditorData,
+                mergedCriteriaExpression: selectedScenarioRelatedCriteria
                     .mergedCriteriaExpression,
             };
         } else {
-            this.criteriaEditorData = {
-                ...this.criteriaEditorData,
-                mergedCriteriaExpression: this.selectedCriterionLibrary
+            criteriaEditorData = {
+                ...criteriaEditorData,
+                mergedCriteriaExpression: selectedCriterionLibrary
                     .mergedCriteriaExpression,
             };
         }
 
-        if (this.isLibraryContext) {
-            this.setHasUnsavedChangesAction({
+        if (isLibraryContext) {
+            setHasUnsavedChangesAction({
                 value: hasUnsavedChangesCore(
                     'criterion-library',
-                    this.selectedCriterionLibrary,
-                    this.stateSelectedCriterionLibrary,
+                    selectedCriterionLibrary,
+                    stateSelectedCriterionLibrary,
                 ),
             });
         } else {
-            this.$emit('submit', this.selectedCriterionLibrary);
+           emit('submit', selectedCriterionLibrary);
         }
     }
 
-    mounted() {
-        if (hasValue(this.stateCriterionLibraries)) {
-            this.criterionLibrarySelectItems = this.stateCriterionLibraries
+   onMounted(() => mounted());
+   function mounted() {
+        if (hasValue(stateCriterionLibraries)) {
+            criterionLibrarySelectItems = stateCriterionLibraries.value
             .filter((lib: CriterionLibrary) => lib.isSingleUse == false)
             .map((library: CriterionLibrary) => ({
                 text: library.name,
@@ -329,90 +356,86 @@ export default class CriterionLibraryEditor extends Vue {
             }));
 
             if (
-                (!this.isLibraryContext || !this.dialogIsFromLibrary) &&
-                hasValue(this.librarySelectItemValue)
+                (!isLibraryContext || !dialogIsFromLibrary) &&
+                hasValue(librarySelectItemValue)
             ) {
-                this.getSelectedCriterionLibraryAction({
-                    libraryId: this.librarySelectItemValue,
+                getSelectedCriterionLibraryAction({
+                    libraryId: librarySelectItemValue
             });
             }
         }
     }
 
-    checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.hasAdminAccess || (this.hasPermittedAccess && this.checkUserIsLibraryOwner());
+    function checkLibraryEditPermission() {
+        hasLibraryEditPermission = hasAdminAccess || (hasPermittedAccess && checkUserIsLibraryOwner());
     }
 
-    checkUserIsLibraryOwner() {
-        return this.getUserNameByIdGetter(this.selectedCriterionLibrary.owner) == getUserName();
+    async function checkUserIsLibraryOwner() {
+        return await getUserNameByIdGetter(selectedCriterionLibrary.owner) == getUserName();
     }
 
-    getOwnerUserName(): string {
+    async function getOwnerUserName(): Promise<string> {
 
-        if (!this.hasCreatedLibrary) {
-        return this.getUserNameByIdGetter(this.selectedCriterionLibrary.owner);
+        if (!hasCreatedLibrary) {
+        return await getUserNameByIdGetter(selectedCriterionLibrary.owner);
         }
         
         return getUserName();
     }
 
-    onShowCreateCriterionLibraryDialog(createAsNew: boolean) {
-        this.createCriterionLibraryDialogData = {
-            showDialog: true,
-            mergedCriteriaExpression: createAsNew
-                ? this.selectedCriterionLibrary.mergedCriteriaExpression != null
-                    ? this.selectedCriterionLibrary.mergedCriteriaExpression
+    function onShowCreateCriterionLibraryDialog(createAsNew: boolean) {
+
+        props.createCriterionLibraryDialogData.showDialog = true;
+        props.createCriterionLibraryDialogData.mergedCriteriaExpression = createAsNew ? selectedCriterionLibrary.mergedCriteriaExpression != null
+                    ? selectedCriterionLibrary.mergedCriteriaExpression
                     : ''
-                : '',
-        };
+                : '';
     }
 
-    onSubmitCriteriaEditorResult(result: CriteriaEditorResult) {
-        this.canUpdateOrCreate = result.validated;
+    function onSubmitCriteriaEditorResult(result: CriteriaEditorResult) {
+        canUpdateOrCreate.value = result.validated;
 
         if (result.validated) {
-            if (!this.dialogIsFromScenario && !this.dialogIsFromLibrary) {
-                this.selectedCriterionLibrary = {
-                    ...this.selectedCriterionLibrary,
+            if (!dialogIsFromScenario && !dialogIsFromLibrary) {
+                selectedCriterionLibrary = {
+                    ...selectedCriterionLibrary,
                     mergedCriteriaExpression: result.criteria!,
                 };
             } else {
-                this.selectedScenarioRelatedCriteria = {
-                    ...this.selectedScenarioRelatedCriteria,
+                selectedScenarioRelatedCriteria = {
+                    ...selectedScenarioRelatedCriteria,
                     mergedCriteriaExpression: result.criteria!,
                     isSingleUse: true,
                 };
-                this.upsertSelectedScenarioRelatedCriterionAction({
-                    library: this.selectedScenarioRelatedCriteria,
+                upsertSelectedScenarioRelatedCriterionAction({
+                    library: selectedScenarioRelatedCriteria,
                 });
             }
 
-            this.setSelectedCriterionIsValidAction({ isValid: true });
+            setSelectedCriterionIsValidAction({ isValid: true });
         } else {
-            this.setSelectedCriterionIsValidAction({ isValid: false });
+            setSelectedCriterionIsValidAction({ isValid: false });
         }
     }
 
-    onUpsertCriterionLibrary(criterionLibrary: CriterionLibrary) {
-        this.createCriterionLibraryDialogData = clone(
-            emptyCreateCriterionLibraryDialogData,
-        );
+    function onUpsertCriterionLibrary(criterionLibrary: CriterionLibrary) {
+        props.createCriterionLibraryDialogData.showDialog = clone(emptyCreateCriterionLibraryDialogData.showDialog);
 
         if (!isNil(criterionLibrary)) {
             // undefined dialogIsFromLibrary means, the call has come from none of the scenario related component
-            if(isNil(this.dialogIsFromLibrary) || this.dialogIsFromLibrary){
+            if(isNil(dialogIsFromLibrary) || dialogIsFromLibrary){
                 criterionLibrary.isSingleUse = false;
             }
-            this.upsertCriterionLibraryAction({
+            upsertCriterionLibraryAction({
                 library: criterionLibrary,
-            }).then(() => (this.librarySelectItemValue = criterionLibrary.id));
+            }).then(() => (librarySelectItemValue.value = criterionLibrary.id));
 
-            this.hasCreatedLibrary = true;
+            hasCreatedLibrary.value = true;
         }
     }
 
-    onShowConfirmDeleteAlert() {
-        this.confirmDeleteAlertData = {
+    function onShowConfirmDeleteAlert() {
+        confirmDeleteAlertData = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -420,14 +443,14 @@ export default class CriterionLibraryEditor extends Vue {
         };
     }
 
-    onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        this.confirmDeleteAlertData = clone(emptyAlertData);
+    function onSubmitConfirmDeleteAlertResult(submit: boolean) {
+        confirmDeleteAlertData = clone(emptyAlertData);
 
         if (submit) {
-            this.deleteCriterionLibraryAction({
-                libraryId: this.selectedCriterionLibrary.id,
-            }).then(() => (this.librarySelectItemValue = null));
+            deleteCriterionLibraryAction({
+                libraryId: selectedCriterionLibrary.id,
+            }).then(() => (librarySelectItemValue.value = ''));
         }
     }
-}
+
 </script>

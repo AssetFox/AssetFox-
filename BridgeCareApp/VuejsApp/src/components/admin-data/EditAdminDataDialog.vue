@@ -2,100 +2,122 @@
     <v-dialog max-width="600px" persistent v-model="DialogData.showDialog">
         <v-card>
             <v-card-title class="ghd-dialog-box-padding-top">
-            <v-layout justify-space-between align-center>
+            <v-row justify="space-between" align="center">
                 <div id="EditAdminDataDialog-header-div" class="ghd-control-dialog-header">Change {{DialogData.settingName}}</div>
-            </v-layout>
+            </v-row>
             </v-card-title>
             <v-card-text class="ghd-dialog-box-padding-center">
-                <v-layout>
-                    <v-select :items='settingItems'
+                <v-row>
+                    <v-select :items='DialogData.settingsList'
+                    variant="outlined"
+                    item-title="text"
+                    item-value="value"
+                    menu-icon=custom:GhdDownSvg
+                    v-model='DialogData.selectedItem'                         
                     id="EditAdminDataDialog-addNewItems-select"
-                    outline  
-                    v-model='settingSelectItemValue'                         
-                    class="ghd-select ghd-text-field ghd-text-field-border">
+                    class="ghd-select ghd-text-field ghd-text-field-border"
+                    density="compact">
                     </v-select>   
                     <v-btn style="margin-top: 2px !important; margin-left: 10px !important"
                     id="EditAdminDataDialog-addNewItems-btn"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                     @click="onAddClick"
                     :disabled='isAddDisabled()'>
                         Add
                     </v-btn>
-                </v-layout>
-                <v-list>
+                </v-row>
+                
+                <v-list style="overflow: hidden; max-height: 100%; ">
                     <v-list-tile
-                    v-for="setting in selectedSettings"
-                    :key="setting">
+                    v-for="setting in DialogData.AddedItems"
+                    :key="setting" >
+                    <v-row justify="end">
+                        <v-col cols = "21" >
                         <v-list-tile-content >
                             <v-list-tile-title id="EditAdminDataDialog-itemName-title" v-text="setting.value"></v-list-tile-title>
                         </v-list-tile-content>
-                        <v-radio-group v-if="DialogData.settingName == 'InventoryReports'" class="admin-radio" v-model="setting.networkType" row>
-                            <v-radio  id="EditAdminDataDialog-raw-radio" label="RAW" value="(R)"></v-radio>
-                            <v-radio  id="EditAdminDataDialog-primary-radio" label="PRIMARY" value="(P)"></v-radio>
-                        </v-radio-group>
-                        <v-btn id="EditAdminDataDialog-removeItem-btn" @click="onDeleteSettingClick(setting)"  class="ghd-blue" icon>
-                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                    </v-col>
+                    <v-col>
+                        <input type ="radio" v-if="DialogData.settingName == 'InventoryReports'" v-model="setting.networkType" value ="(R)"/>
+                        <label v-if="DialogData.settingName == 'InventoryReports'" style="margin-right: 10px;">RAW</label>
+                        <input type ="radio" id="EditAdminDataDialog-primary-radio" v-if="DialogData.settingName == 'InventoryReports'" v-model="setting.networkType" value ="(P)"/>
+                        <label v-if="DialogData.settingName == 'InventoryReports'">PRIMARY</label>
+                    </v-col>
+                        <v-btn @click="onDeleteSettingClick(setting)"  class="ghd-blue" flat>
+                            <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
+                    
+                        
+                    </v-row>
                     </v-list-tile>
                 </v-list>
             </v-card-text>
             <v-card-actions class="ghd-dialog-box-padding-bottom">
-            <v-layout justify-center row>
-                <v-btn id="EditAdminDataDialog-cancel-btn" @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
+            <v-row justify="center" row>
+                <v-btn id="EditAdminDataDialog-cancel-btn" @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
                 Cancel
                 </v-btn >
-                <v-btn  id="EditAdminDataDialog-save-btn" @click="onSubmit(true)" outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                <v-btn id="EditAdminDataDialog-save-btn" @click="onSubmit(true)" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                 Save
                 </v-btn>         
-            </v-layout>
+            </v-row>
             </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
+<script lang="ts" setup>
+import Vue, { shallowRef, toRefs } from 'vue';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
-import { EditAdminDataDialogData } from '@/shared/models/modals/edit-data-dialog-data';
-import { clone, isNil } from 'ramda';
+import { EditAdminDataDialogData, emptyEditAdminDataDialogData } from '@/shared/models/modals/edit-data-dialog-data';
+import { clone, empty, isNil } from 'ramda';
 import { SelectItem } from '@/shared/models/vue/select-item';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { AdminSelectItem } from '@/shared/models/vue/admin-select-item';
+import Dialog from 'primevue/dialog';
+import { getUrl } from '@/shared/utils/get-url';
 
-@Component
-export default class EditAdminDataDialog extends Vue {
-    @Prop() DialogData: EditAdminDataDialogData;
+    let InputRules: InputValidationRules = rules;
+     const props = defineProps<{
+        DialogData: EditAdminDataDialogData
+     }>()
+    
+    const selectedSettings=  ref<AdminSelectItem[]>([]);
+    const settingsList= ref<string[]>([]);
+    const settingItems=ref<SelectItem[]>([]);
+    const emit = defineEmits(['submit'])
+    const settingSelectItemValue =  ref<string>('');
+    const networkTypeSelected = ref<string>('')
+    let primarySuffix: string = "(P)"
+    let rawDataSuffix: string = "(R)"
+    let primaryType: string  = "PRIMARY"
+    let rawType: string = "RAW"
+    const { DialogData } = toRefs(props);
+    //watchers
+    watch(DialogData, () =>  {
         
-    rules: InputValidationRules = rules;
-
-    selectedSettings: {value:string, networkType:string}[] = [];
-    settingsList: string[] = [];
-    settingItems: SelectItem[] = [];
-    settingSelectItemValue: string | null = null;
-    primarySuffix: string = "(P)"
-    rawDataSuffix: string = "(R)"
-    primaryType: string  = "PRIMARY"
-    rawType: string = "RAW"
-
-    @Watch('DialogData', {deep:true})
-    onDialogDataChanged(){
-        this.selectedSettings = this.DialogData.selectedSettings.map(_ => {
+        
+       DialogData.value.AddedItems = DialogData.value.selectedSettings.map(_ => {
             let toReturn: {value: string, networkType: string} 
             let type = "";
             let value = "";
+            
             const suffix = _.substring(_.length - 3);
-            if(this.DialogData.settingName == "InventoryReports"){
-                if(suffix === this.primarySuffix){
-                    type = this.primarySuffix;
+            if(DialogData.value.settingName == "InventoryReports"){
+                if(suffix == primarySuffix){
+                    type = primarySuffix;
                     value = _.substring(0, _.length - 3);
                 }
-                else if(suffix === this.rawDataSuffix){
-                    type = this.rawDataSuffix;
+                else if(suffix === rawDataSuffix){
+                    type = rawDataSuffix;
                     value = _.substring(0, _.length - 3);
                 }
                 else{
                     value = _;
-                    type = this.primarySuffix;
+                    type = primarySuffix;
                 }
             }
             else
@@ -104,43 +126,41 @@ export default class EditAdminDataDialog extends Vue {
             toReturn = {value: value, networkType: type};
             return toReturn
         });
-        this.settingsList = clone(this.DialogData.settingsList);
-        this.settingSelectItemValue = null;
-    }
-
-    @Watch('settingsList')
-    onSettingsListChanged(){
-        this.settingItems = this.settingsList.map(_ => {
+        settingsList.value = clone(DialogData.value.settingsList);
+        
+    })
+    watch(settingsList,() => {
+        settingItems.value = settingsList.value.map(_ => {
             return {text: _, value: _}
         });
+    })
+    
+    function onDeleteSettingClick(setting:any){
+        DialogData.value.AddedItems = DialogData.value.AddedItems.filter(_ => _.value !== setting.value);
     }
-
-    onDeleteSettingClick(setting:any){
-        this.selectedSettings = this.selectedSettings.filter(_ => _.value !== setting.value);
-    }
-
-    onAddClick(){
-        if(!isNil(this.settingSelectItemValue)){
-            this.selectedSettings.push({value: this.settingSelectItemValue, 
-            networkType: this.DialogData.settingName === "InventoryReports" ? this.primarySuffix : ""})
+    function onAddClick(){
+        if(!isNil(DialogData.value.selectedItem)){
+            //DialogData.value.selectedSettings.push(settingSelectItemValue.value,DialogData.value.settingName === "InventoryReports" ? primarySuffix : "")
+            DialogData.value.AddedItems.push({value: DialogData.value.selectedItem, 
+            networkType: DialogData.value.settingName === "InventoryReports" ? primarySuffix : ""})
         }            
     }
 
-    isAddDisabled(){
-        if(!isNil(this.settingSelectItemValue)){
-            return !isNil(this.selectedSettings.find(_ => _.value === this.settingSelectItemValue!));
+    function isAddDisabled(){
+        if(!isNil(DialogData.value.selectedItem)){
+            return !isNil(DialogData.value.AddedItems.find(_ => _.value === DialogData.value.selectedItem!));
         }
         return true;
     }
 
-    onSubmit(submit: boolean) {
+    function onSubmit(submit: boolean) {
         if (submit) {
-        this.$emit('submit', this.selectedSettings.map(_ => _.value + _.networkType));
+        emit('submit', DialogData.value.AddedItems.map(_ => _.value + _.networkType));
         } else {
-        this.$emit('submit', null);
+        emit('submit', null);
         }
     }
-}
+
 </script>
 
 <style>

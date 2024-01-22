@@ -18,6 +18,10 @@ using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
+using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Treatment;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
 {
@@ -32,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         private ScenarioConditionalTreatmentConsequenceEntity _testScenarioTreatmentConsequence;
 
 
-        private void Setup()
+        private void SetupAttributesAndNetwork()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
@@ -187,7 +191,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void GetSimpleTreatmentsByLibraryId_EntitiesInDatabase_Gets()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             CreateLibraryTestData();
 
             // Act
@@ -203,8 +207,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void GetSimpleTreatmentsBySimulationId_EntitiesInDb_Gets()
         {
             // Arrange
-            Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            SetupAttributesAndNetwork();
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var budget = CreateScenarioTestData(simulation.Id);
 
             // Act
@@ -218,7 +222,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         [Fact]
         public void GetAllTreatmentLibrariesNoChildren_AtLeastOneLibraryInDb_Gets()
         {
-            Setup();
+            SetupAttributesAndNetwork();
             // Act
             var result = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibrariesNoChildren();
 
@@ -228,8 +232,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         [Fact]
         public void GetScenarioSelectableTreatments_SimulationInDb_DoesNotThrow()
         {
-            Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            SetupAttributesAndNetwork();
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             // Act
             var result = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation.Id);
         }
@@ -238,7 +242,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void GetTreatmentLibraryWithSingleTreatmentByTreatmentId_TreatmentInDb_Expected()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             CreateLibraryTestData();
 
             // Act
@@ -259,8 +263,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         [Fact]
         public void GetScenarioSelectableTreatmentById_TreatmentInDb_Expected()
         {
-            Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            SetupAttributesAndNetwork();
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var budget = CreateScenarioTestData(simulation.Id);
 
             // Act
@@ -283,7 +287,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void UpsertOrDeleteLibrary_ThenTreatments_DoesNotThrow()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             var dto = new TreatmentLibraryDTO
             {
                 Id = Guid.NewGuid(),
@@ -302,9 +306,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void UpsertOrDeleteScenarioTreatments_DoesNotThrow()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             var dtos = new List<TreatmentDTO>();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
 
             // Act
             TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulation.Id);
@@ -322,7 +326,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void GetAllTreatmentLibrariesNoChildren_EntitiesInDatabase_Deletes()
         {
             //Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             CreateLibraryTestData();
 
             // Act
@@ -335,8 +339,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void GetScenarioSelectableTreatments_EntitiesInDatabase_Gets()
         {
             // Arrange
-            Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            SetupAttributesAndNetwork();
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var budget = CreateScenarioTestData(simulation.Id);
 
             // Act
@@ -358,7 +362,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void UpsertOrDeleteTreatmentLibraryTreatmentsAndPossiblyUsers_LibraryAndTreatmentsInDb_Updates()
         {
             // WJWJWJ could be a good test to modify for the new repo method?
-            Setup();
+            SetupAttributesAndNetwork();
             CreateLibraryTestData();
 
             var dto = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibrariesNoChildren();
@@ -402,10 +406,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void UpsertOrDeleteScenarioSelectableTreatment_ValidInput_Succeeds()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             CreateScenarioTestData(simulation.Id);
             var scenarioBudget = new ScenarioBudgetEntity
             {
@@ -462,10 +466,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void UpsertOrDeleteSelectableTreatments_TwoConsequencesCollide_DbUnchanged()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             CreateScenarioTestData(simulation.Id);
 
             var scenarioBudget = new ScenarioBudgetEntity
@@ -533,7 +537,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
         public void DeleteTreatmentLibrary_EntitiesInDb_Deletes()
         {
             // Arrange
-            Setup();
+            SetupAttributesAndNetwork();
             CreateLibraryTestData();
 
             // Act
@@ -580,6 +584,163 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
             var result = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatmentByLibraryIdAndName(treatmentLibraryId, "wrongName");
 
             Assert.Null(result);
+        }
+
+        [Fact]
+        public void GetLibraryModifiedDate_Does()
+        {
+            var libraryId = Guid.NewGuid();
+            var before = DateTime.Now;
+
+            var library = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryId);
+
+            var after = DateTime.Now;
+            var modifiedDate = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetLibraryModifiedDate(libraryId);
+            DateTimeAssertions.Between(before, after, modifiedDate, TimeSpan.FromSeconds(1));
+        }
+
+        [Fact]
+        public void AddLibraryTreatments_Does()
+        {
+            var treatmentLibraryId = Guid.NewGuid();
+            var library = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists();
+            var treatments = new List<TreatmentDTO> { treatment };
+
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.AddLibraryTreatments(
+                treatments, treatmentLibraryId);
+
+            var treatmentsAfter = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(treatmentLibraryId);
+            var treatmentAfter = treatmentsAfter.Single();
+            ObjectAssertions.EquivalentExcluding(treatment, treatmentAfter, t => t.CriterionLibrary);
+        }
+
+        [Fact]
+        public void AddScenarioSelectableTreatment_Does()
+        {
+            SetupAttributesAndNetwork();
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, NetworkTestSetup.NetworkId);
+
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists();
+            var treatments = new List<TreatmentDTO> { treatment };
+
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.AddScenarioSelectableTreatment(treatments, simulation.Id);
+
+            var treatmentsAfter = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation.Id);
+            var treatmentAfter = treatmentsAfter.Single();
+            ObjectAssertions.EquivalentExcluding(treatment, treatmentAfter, t => t.CriterionLibrary, t => t.Budgets);
+        }
+
+        [Fact]
+        public void GetSingleTreatmentLibrary_LibraryInDb_Gets()
+        {
+            var treatmentLibraryId = Guid.NewGuid();
+            var library = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists();
+            var treatments = new List<TreatmentDTO> { treatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.AddLibraryTreatments(
+                treatments, treatmentLibraryId);
+
+            var libraryAfter = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
+            ObjectAssertions.EquivalentExcluding(library, libraryAfter, l => l.Owner, l => l.Treatments);
+            var treatmentAfter = libraryAfter.Treatments.Single();
+            ObjectAssertions.EquivalentExcluding(treatment, treatmentAfter, t => t.Budgets, t => t.CriterionLibrary);
+        }
+
+        [Fact]
+        public void GetSingleTreatmentLibaryNoChildren_LibraryInDb_Gets()
+        {
+            var treatmentLibraryId = Guid.NewGuid();
+            var library = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists();
+            var treatments = new List<TreatmentDTO> { treatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.AddLibraryTreatments(
+                treatments, treatmentLibraryId);
+
+            var libraryWithChildren = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
+            var libraryWithoutChildren = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibaryNoChildren(treatmentLibraryId);
+
+            Assert.Empty(libraryWithoutChildren.Treatments);
+            Assert.NotEmpty(libraryWithChildren.Treatments);
+            ObjectAssertions.EquivalentExcluding(libraryWithChildren, libraryWithoutChildren, l => l.Treatments);
+        }
+
+        [Fact]
+        public void ReplaceTreatmentLibrary_LibraryInDbWithTreatment_DeletesTreatment()
+        {
+            var treatmentLibraryId = Guid.NewGuid();
+            var library = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists();
+            var treatments = new List<TreatmentDTO> { treatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.AddLibraryTreatments(
+                treatments, treatmentLibraryId);
+            var replaceTreatmentList = new List<TreatmentDTO> { };
+
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.ReplaceTreatmentLibrary(treatmentLibraryId, replaceTreatmentList);
+
+            var libraryAfter = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
+            Assert.Empty(libraryAfter.Treatments);
+        }
+
+        [Fact]
+        public void DeleteTreatment_TreatmentInDb_Deletes()
+        {
+            var treatmentLibraryId = Guid.NewGuid();
+            var library = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            var treatment = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists();
+            var treatments = new List<TreatmentDTO> { treatment };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.AddLibraryTreatments(
+                treatments, treatmentLibraryId);
+            var libraryBefore = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
+
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteTreatment(treatment, treatmentLibraryId);
+
+            var libraryAfter = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
+            Assert.Single(libraryBefore.Treatments);
+            Assert.Empty(libraryAfter.Treatments);
+        }
+
+        [Fact]
+        public void DeleteScenarioSelectableTreatment_SimulationInDbWithTreatment_Deletes()
+        {
+            SetupAttributesAndNetwork();
+            var simulationId = Guid.NewGuid();
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, networkId: NetworkTestSetup.NetworkId);
+            var treatmentDto = TreatmentDtos.DtoWithEmptyCostsAndConsequencesLists();
+            var treatmentDtos = new List<TreatmentDTO> { treatmentDto };
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.AddScenarioSelectableTreatment(treatmentDtos, simulationId);
+            var simulationTreatmentsBefore = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+
+            TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatment(treatmentDto, simulationId);
+
+            var simulationTreatmentsAfter = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            Assert.Single(simulationTreatmentsBefore);
+            Assert.Empty(simulationTreatmentsAfter);
+        }
+
+        [Fact]
+        public async Task GetTreatmentLibrariesNoChildrenAccessibleToUser_LibraryInDbNotAccessibleToUser_IsNotInList()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var treatmentLibraryId = Guid.NewGuid();
+            var library = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+
+            var userLibraries = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibrariesNoChildrenAccessibleToUser(user.Id);
+
+            Assert.DoesNotContain(userLibraries, l => l.Id == treatmentLibraryId);
+        }
+
+        [Fact]
+        public async Task GetTreatmentLibrariesNoChildrenAccessibleToUser_LibraryInDbAccessibleToUser_IsInList()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var treatmentLibraryId = Guid.NewGuid();
+            var library = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
+            TreatmentLibraryUserTestSetup.SetUsersOfTreatmentLibrary(TestHelper.UnitOfWork, treatmentLibraryId, LibraryAccessLevel.Modify, user.Id);
+
+            var userLibraries = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibrariesNoChildrenAccessibleToUser(user.Id);
+
+            Assert.Contains(userLibraries, l => l.Id == treatmentLibraryId);
         }
     }
 }

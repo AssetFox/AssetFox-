@@ -1,14 +1,15 @@
 ﻿<template>
-    <v-dialog max-width="450px" persistent v-model="showDialog">
-        <v-card elevation="5" outlined class="modal-pop-up-padding">
+    <v-dialog max-width="450px" v-model="showDialogComputed">
+        <v-card elevation="5"  class="modal-pop-up-padding">
             <v-card-title>
+                <v-row justify="space-between">
                 <h3 class="dialog-header">
                     Create new scenario
-                </h3>
-                <v-spacer></v-spacer>
-                <v-btn @click="onSubmit(false)" icon>
+                </h3>                
+                <v-btn @click="onSubmit(false)" flat>
                     <i class="fas fa-times fa-2x"></i>
                 </v-btn>
+            </v-row>
             </v-card-title>
 
             <v-card-text>
@@ -16,47 +17,48 @@
                     id="CreateScenarioDialog-selectANetwork-select"
                     :items="stateNetworks"
                     label="Select a network"
-                    item-text="name"
+                    item-title="name"
+                    menu-icon=custom:GhdDownSvg
                     v-model="networkMetaData"
                     return-object
-                    v-on:change="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
-                    dense
-                    outline
+                    @update:modelValue="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
+                    density="default"
+                    variant="outlined"
                 ></v-select>
                 <v-text-field
                     id="CreateScenarioDialog-scenarioName-textField"
                     label="Scenario name"
-                    outline
+                    variant="outlined"
                     v-model="newScenario.name"
                 ></v-text-field>
                 <v-checkbox v-model="shared" label="Share with all?" />
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-space-between row>
+                <v-row justify-space-between row>
+                    <v-btn
+                    variant="text"
+                        id="CreateScenarioDialog-cancel-btn"
+                        @click="onSubmit(false)"
+                        class='ghd-white-bg ghd-blue ghd-button-text'
+                        >Cancel</v-btn
+                    >
                     <v-btn
                         id="CreateScenarioDialog-save-btn"
                         :disabled="newScenario.name === '' || !isNetworkSelected"
                         @click="onSubmit(true)"
-                        class="ara-blue-bg white--text"
+                        class="ghd-blue ghd-button-text"
+                        variant="outlined"
                     >
                         Save
                     </v-btn>
-                    <v-btn
-                        id="CreateScenarioDialog-cancel-btn"
-                        @click="onSubmit(false)"
-                        class="ara-orange-bg white--text"
-                        >Cancel</v-btn
-                    >
-                </v-layout>
+                </v-row>
             </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { State } from 'vuex-class';
+<script setup lang="ts">
+import { computed, ref, shallowReactive, watch } from 'vue'; 
 import { getUserName } from '@/shared/utils/get-user-info';
 import { User } from '@/shared/models/iAM/user';
 import {
@@ -67,47 +69,52 @@ import {
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { find, isNil, propEq } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
+import { useStore } from 'vuex'; 
+import { validate } from 'uuid';
 
-@Component
-export default class CreateScenarioDialog extends Vue {
-    @Prop() showDialog: boolean;
+  let store = useStore(); 
 
-    @State(state => state.userModule.users) stateUsers: User[];
-    @State(state => state.networkModule.networks) stateNetworks: Network[];
+  const props = defineProps<{showDialog: boolean}>();
+  const emit = defineEmits(['submit'])
+  let showDialogComputed = computed(() => props.showDialog);
 
-    newScenario: Scenario = { ...emptyScenario, id: getNewGuid() };
-    shared: boolean = false;
-    selectedNetworkId: string = getBlankGuid();
-    isNetworkSelected: boolean = false;
-    networkMetaData: Network = {...emptyNetwork}
-    selectedNetworkName: string;
+    const stateUsers = computed<User[]>(() => store.state.userModule.users);
+    let shared = ref<boolean>(false);
+    let stateNetworks = computed<Network[]>(() => store.state.networkModule.networks) ;
 
-    @Watch('showDialog')
-    onShowDialogChanged() {
-        this.onModifyScenarioUserAccess();
+    let newScenario = ref<Scenario>({ ...emptyScenario, id: getNewGuid() });
+
+    let selectedNetworkId = ref(getBlankGuid());
+    let isNetworkSelected = ref(false);
+    let networkMetaData = ref<Network>({...emptyNetwork})
+    let selectedNetworkName: string;
+
+    watch(() => props.showDialog,()=> onShowDialogChanged())
+    function onShowDialogChanged() {
+        onModifyScenarioUserAccess();
     }
 
-    @Watch('shared')
-    onSetPublic() {
-        this.onModifyScenarioUserAccess();
+    watch(shared, ()=> onSetPublic())
+    function onSetPublic() {
+        onModifyScenarioUserAccess();
     }
 
-    selectedNetwork(networkName: string, networkId: string){
-      this.selectedNetworkId = networkId;
-      this.selectedNetworkName = networkName;
+    function selectedNetwork(networkName: string, networkId: string){
+      selectedNetworkId.value = networkId;
+      selectedNetworkName = networkName;
       if(networkId != '' && !isNil(networkId) && networkId != getBlankGuid()){
-        this.isNetworkSelected = true;
+        isNetworkSelected.value = true;
       }
       else{
-        this.isNetworkSelected = false;
+        isNetworkSelected.value = false;
       }
     }
 
-    onModifyScenarioUserAccess() {
-        if (this.showDialog) {
+    function onModifyScenarioUserAccess() {
+        if (props.showDialog) {
             const currentUser: User = find(
                 propEq('username', getUserName()),
-                this.stateUsers,
+                stateUsers.value,
             ) as User;
             const owner: ScenarioUser = {
                 userId: currentUser.id,
@@ -116,13 +123,13 @@ export default class CreateScenarioDialog extends Vue {
                 isOwner: true,
             };
 
-            this.newScenario = {
-                ...this.newScenario,
-                networkId: this.selectedNetworkId,
-                users: this.shared
+            newScenario.value = {
+                ...newScenario.value,
+                networkId: selectedNetworkId.value,
+                users: shared
                     ? [
                           owner,
-                          ...this.stateUsers
+                          ...stateUsers.value
                               .filter(
                                   (user: User) =>
                                       user.username !== currentUser.username,
@@ -139,17 +146,17 @@ export default class CreateScenarioDialog extends Vue {
         }
     }
 
-    onSubmit(submit: boolean) {
+    function onSubmit(submit: boolean) {
         if (submit) {
-            this.newScenario.networkId = this.selectedNetworkId;
-            this.newScenario.networkName = this.selectedNetworkName;
-            this.$emit('submit', this.newScenario);
+            newScenario.value.networkId = selectedNetworkId.value;
+            newScenario.value.networkName = selectedNetworkName;
+            emit('submit', newScenario.value);
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
 
-        this.newScenario = { ...emptyScenario, id: getNewGuid() };
-        this.shared = false;
+        newScenario.value = { ...emptyScenario, id: getNewGuid() };
+        shared = ref(false);
     }
-}
+
 </script>

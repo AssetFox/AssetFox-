@@ -1,40 +1,42 @@
 <template>
     <v-container fluid grid-list-xl>
-        <v-layout>
-            <v-flex xs12>
-                <v-layout justify-center>
+        <v-row>
+            <v-col cols = "12">
+                <v-row justify="center">
                     <v-card class="logged-out-card">
                         <div class="bridgecare-logo-img-div">
-                            <v-img :src="require('@/assets/images/logos/Banner-logo.jpg')"
+                            <v-img :src="getUrl('assets/images/logos/Banner-logo.jpg')"
                                    class="bridgecare-logo-img">
                             </v-img>
                         </div>
-                        <v-card-title style="justify-content: center">
+                        <v-card-title style="justify-content: center; text-align: center">
                             <h3>Logged Out</h3>
                         </v-card-title>
                         <v-card-text style="justify-content: center; text-align: center">
                             <p>You have been logged out. Log back in to gain full access to the site.</p>
                         </v-card-text>
                     </v-card>
-                </v-layout>
-            </v-flex>
-        </v-layout>
+                </v-row>
+            </v-col>
+        </v-row>
     </v-container>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
     import Vue from 'vue';
-    import Component from 'vue-class-component';
-    import {State} from 'vuex-class';
     import { hasValue } from '@/shared/utils/has-value-util';
     import { SecurityTypes } from '@/shared/utils/security-types';
+    import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+    import { useStore } from 'vuex';
+    import { useRouter } from 'vue-router';
+import { getUrl } from '@/shared/utils/get-url';
 
-    @Component
-    export default class Logout extends Vue {
-        @State(state => state.authenticationModule.securityType) securityType: string;
-
-        mounted() {
-            if (this.securityType === SecurityTypes.esec) {
+    const $router = useRouter();
+    let store = useStore();
+    let securityType = ref<string>(store.state.authenticationModule.securityType);
+    onMounted(()=>mounted())
+    function mounted() {
+            if (securityType === SecurityTypes.esec) {
                 /*
                  * The /iAM/ pages of the penndot deployments fail to set the cookie until they have been refreshed.
                  */
@@ -43,7 +45,7 @@
                     window.location.reload();
                 }
 
-                if (!hasValue(this.$route.query.host)) {
+                if (!hasValue($router.currentRoute.value.query.host)) {
                     return;
                 }
                 /*
@@ -51,13 +53,12 @@
                  * modify browser cookies for penndot.gov. So, if the browser was sent here from another host, redirect back to the landing
                  * page of that host without the 'host' query string.
                  */
-                const host: string = this.$route.query.host as string;
+                const host: string = $router.currentRoute.value.query.host as string;
                 if (host !== window.location.host) {
                     window.location.href = 'http://' + host + '/iAM';
                 }
             }
         }
-    }
 </script>
 
 <style>

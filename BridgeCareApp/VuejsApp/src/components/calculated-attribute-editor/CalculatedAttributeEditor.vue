@@ -1,177 +1,201 @@
 <template>
-    <v-layout column>
-        <!-- top row -->
-        <v-flex xs12>
-            <v-layout justify-space-between>
-                <v-flex xs5 class="ghd-constant-header" style="margin-right: 10px">
-                    <v-layout column>
-                        <v-subheader class="ghd-md-gray ghd-control-label">Calculated Attribute</v-subheader>
+    <v-card class="elevation-0 vcard-main-layout">
+    <v-row>
+        <v-col cols = "12">
+            <v-row justify-space-between>
+                <v-col cols = "4" class="ghd-constant-header" style="margin-right: 10px; margin-left: 10px">
+                        <v-subheader class="ghd-control-label ghd-md-gray"><span>Calculated Attribute</span></v-subheader>
                         <v-select
                                   id="CalculatedAttribute-CalculatedAttribute-select"
                                   :items="librarySelectItems"
-                                  append-icon=$vuetify.icons.ghd-down
-                                  outline
+                                  append-icon="ghd-down"
+                                  variant="outlined"
+                                  menu-icon=custom:GhdDownSvg
                                   v-model="librarySelectItemValue"
-                                  class="ghd-select ghd-text-field ghd-text-field-border">
+                                  item-title="text" 
+                                    item-value="value" 
+                                  class="ghd-select ghd-text-field ghd-text-field-border"
+                                  density="compact">
                         </v-select>
                         <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
-                    </v-layout>
-                </v-flex>
-                <v-flex xs7 class="ghd-constant-header" style="margin-right: 10px">
-                    <v-layout align-end>
+                </v-col>
+                <v-spacer/>
+                <v-col cols = "6" class="ghd-constant-header" style="margin-right: 10px; margin-top: 15px">
+                    <v-row align-end>
                         <v-text-field
                                     id="CalculatedAttribute-search-textField"
-                                    prepend-inner-icon=$vuetify.icons.ghd-search
-                                    hide-details
-                                    lablel="Search"
-                                    placeholder="Search Calcultated Attribute"
+                                    prepend-inner-icon=custom:GhdSearchSvg                                                           
+                                    placeholder="Search Calculated Attribute"
                                     single-line
                                     v-model="gridSearchTerm"
-                                    outline
+                                    variant="outlined"
                                     clearable
                                     @click:clear="onClearClick()"
-                                    class="ghd-text-field-border ghd-text-field search-icon-general"
-                                    style="margin-top:20px !important">
+                                    style="margin-top:20px !important" density="compact">
                         </v-text-field>
-                        <v-btn id="CalculatedAttribute-search-btn" style="position: relative; top: 3px; margin-right: 1px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
-                        <v-btn id="CalculatedAttribute-createNewLibrary-btn"
-                            @click="onShowCreateCalculatedAttributeLibraryDialog(false)"
-                            class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                            outline
-                            v-show="!hasScenario"
-                            style="top: 2px !important; position: relative">
-                            Create New Library
-                        </v-btn>
-                    </v-layout>
-                </v-flex>
-            </v-layout>
-        </v-flex>
-        <v-flex xs6 class="ghd-constant-header" style="margin-bottom: 15px">
-            <v-layout v-if='hasSelectedLibrary && !hasScenario' align-center>
+                        <v-col cols = "auto" style="margin-top: 10px">                       
+                            <v-btn id="CalculatedAttribute-search-btn"  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                                variant = "outlined" @click="onSearchClick()">
+                                Search
+                            </v-btn>
+                            <v-btn id="CalculatedAttribute-createNewLibrary-btn"
+                                @click="onShowCreateCalculatedAttributeLibraryDialog(false)"
+                                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                                variant = "outlined"
+                                v-show="!hasScenario"
+                                style=" margin-left: 10px">
+                                Create New Library
+                            </v-btn>
+                        </v-col>
+                    </v-row>
+                </v-col>
+            </v-row>
+        </v-col>
+        <v-col cols = "6" class="ghd-constant-header" style="margin-left: 15px; margin-bottom: 15px">
+            <v-row v-if='hasSelectedLibrary && !hasScenario' align="center">
                 <div class="header-text-content owner-padding">
                      Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
                 </div>
-                <v-divider class="owner-shared-divider" inset vertical></v-divider>
-                <v-badge v-show="isShared" style="padding: 10px">
-                    <template v-slot:badge>
-                        <span>Shared</span>
-                    </template>
-                    </v-badge>
-                    <v-btn id="CalculatedAttribute-shareLibrary-btn" @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                v-show='!hasScenario'>
-                Share Library
-            </v-btn>
-        </v-layout>
-        </v-flex>
+                <!-- <v-divider class="owner-shared-divider" inset vertical></v-divider> -->
+                    <v-btn id="CalculatedAttribute-shareLibrary-btn" @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        style="margin-left: 10px" v-show='!hasScenario'>
+                    Share Library
+                    </v-btn>
+            </v-row>
+        </v-col>
         <!-- attributes and timing -->
-        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
-            <v-layout justify-space-between>
-                <v-flex xs6>
-                <v-layout column style="float:left; width: 100%">
-                    <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
+        <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
+            <v-row justify-space-between style="margin-top: 20px;">
+                <v-col cols = "6">
+                <v-row column style="float:left; width: 100%; margin-left: 10px">
                     <v-select
                         id="CalculatedAttribute-Attribute-select"   
+                        menu-icon=custom:GhdDownSvg
                         :items="attributeSelectItems"
-                        append-icon=$vuetify.icons.ghd-down
-                        outline
+                        append-icon=ghd-down
+                        label="Attribute"
+                        variant="outlined"
                         class="ghd-select ghd-text-field ghd-text-field-border"
-                        v-model="attributeSelectItemValue">
+                        item-title="text" 
+                        item-value="value" 
+                        v-model="attributeSelectItemValue"
+                        density="compact">
                     </v-select>
-                </v-layout>
-                <v-flex xs2>
-                </v-flex>
-                </v-flex>
-                <v-flex xs6>
-                <v-layout column style="float:right; width: 100%">
-                    <v-subheader class="ghd-md-gray ghd-control-label">Timing</v-subheader>
+                </v-row>
+                <v-col cols = "2">
+                </v-col>
+                </v-col>
+                <v-col cols = "6">
+                <v-row column style="float:right; width: 100%">
                     <v-select
+                        menu-icon=custom:GhdDownSvg
                         id="CalculatedAttribute-Timing-select"
                         :items="attributeTimingSelectItems"
-                        append-icon=$vuetify.icons.ghd-down
-                        outline
+                        label="Timing"
+                        append-icon=ghd-down
+                        variant="outlined"
                         v-model="attributeTimingSelectItemValue"
                         :disabled="!hasAdminAccess"
+                        item-title="text" 
+                        item-value="value" 
                         class="ghd-select ghd-text-field ghd-text-field-border"
-                        v-on:change="setTiming">
+                        @update:modelValue="setTiming($event)" density="compact">
                     </v-select>
-                </v-layout>
-                </v-flex>
-            </v-layout>
-        </v-flex>
+                </v-row>
+                </v-col>
+            </v-row>
+        </v-col>
         <!-- Default Equation -->
-        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
-            <v-layout justify-center>
-                <v-flex xs6>
-                    <v-layout column>
-                        <v-subheader class="ghd-md-gray ghd-control-label">Default Equation</v-subheader>
+        <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
+            <v-subheader style="margin-left: 450px" class="ghd-md-gray ghd-control-label">Default Equation</v-subheader>
+            <v-row justify-center>
+                <v-col cols = "8">
+                    <v-row column>
+                        <v-spacer></v-spacer>
                         <v-text-field
                             id="CalculatedAttribute-defaultEquation-textfield"
                             readonly
                             class="sm-txt"
+                            variant="underlined" 
                             v-model="defaultEquation.equation.expression"
                             :disabled="!hasAdminAccess">
-                            <template slot="append-outer">
+                            <template v-slot:append>
                                 <v-btn
                                     id="CalculatedAttribute-defaultEquationEditor-btn"
                                     @click="onShowEquationEditorDialogForDefaultEquation()"
                                     class="ghd-blue"
+                                    flat
                                     icon
                                     v-if="hasAdminAccess">
-                                    <img class='img-general img-shift' :src="require('@/assets/icons/edit.svg')"/>
+                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
-                    </v-layout>
-                </v-flex>
-            </v-layout>
-        </v-flex>
+                    </v-row>
+                </v-col>
+            </v-row>
+        </v-col>
         <!-- data table -->
-        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
-            <v-data-table
+        <v-col cols="12" v-show="hasSelectedLibrary || hasScenario">
+            <v-data-table-server
                 id="CalculatedAttribute-equation-table"    
                 :headers="calculatedAttributeGridHeaders"
                 :items="selectedGridItem"
                 :pagination.sync="pagination"
-                :total-items="totalItems"
-                :rows-per-page-items=[5,10,25]
                 class="v-table__overflow ghd-table"
-                sort-icon=$vuetify.icons.ghd-table-sort
-                item-key="calculatedAttributeLibraryEquationId">
-                <template slot="items" slot-scope="props">
+                sort-asc-icon="custom:GhdTableSortAscSvg"
+                sort-desc-icon="custom:GhdTableSortDescSvg"
+                item-key="calculatedAttributeLibraryEquationId"                            
+                :items-length="totalItems"
+                :items-per-page-options="[
+                    {value: 5, title: '5'},
+                    {value: 10, title: '10'},
+                    {value: 25, title: '25'},
+                ]"
+                v-model:sort-by="pagination.sort"
+                v-model:page="pagination.page"
+                v-model:items-per-page="pagination.rowsPerPage"
+                @update:options="onPaginationChanged"
+                >
+                <template slot="items" slot-scope="props" v-slot:item="props">
+                    <tr>
                     <td class="text-xs-center">
                         <v-text-field
                             id="CalculatedAttribute-equation-textfield"
                             readonly
                             class="sm-txt"
-                            :value="props.item.equation"
+                            variant="underlined"
+                            :model-value="props.item.equation"
                             :disabled="!hasAdminAccess">
-                            <template slot="append-outer">
+                            <template v-slot:append>
                                 <v-btn
                                     id="CalculatedAttribute-editEquation-btn"
                                     @click="onShowEquationEditorDialog(props.item.id)"
                                     class="ghd-blue"
+                                    flat
                                     icon
                                     v-if="hasAdminAccess">
-                                    <img class='img-general img-shift' :src="require('@/assets/icons/edit.svg')"/>
+                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
                     </td>
                     <td class="text-xs-center">
-                        <v-text-field
-                            id="CalculatedAttribute-EquationCriteria-textfield"
+                        <v-text-field id="CalculatedAttribute-EquationCriteria-textfield"
                             readonly
                             class="sm-txt"
-                            :value="props.item.criteriaExpression"
+                            variant="underlined"
+                            :model-value="props.item.criteriaExpression"
                             :disabled="!hasAdminAccess">
-                            <template slot="append-outer">
+                            <template v-slot:append>
                                 <v-btn
                                     id="CalculatedAttribute-changeEquationCriteria-btn"
                                     @click="onEditCalculatedAttributeCriterionLibrary(props.item.id)"
                                     class="ghd-blue"
+                                    flat
                                     icon
                                     v-if="hasAdminAccess">
-                                    <img class='img-general img-shift' :src="require('@/assets/icons/edit.svg')"/>
+                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -182,45 +206,47 @@
                             @click="
                                 onRemoveCalculatedAttribute(props.item.id)"
                             class="ghd-blue"
-                            icon
+                            flat
+                            style="margin-bottom: 20px;"
                             :disabled="!hasAdminAccess">
-                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                            <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </td>
+                    </tr>
                 </template>
-            </v-data-table>
+            </v-data-table-server>
             <v-btn
                 id="CalculatedAttribute-AddNewEquation-btn"
                 @click="onAddCriterionEquationSet()"
                 class='ghd-blue ghd-button'
-                outline
+                variant = "outlined"
                 v-if="hasAdminAccess"
                 :disabled="
                     attributeSelectItemValue == null ||
                     attributeSelectItemValue == ''">
                 Add New Equation
             </v-btn>
-        </v-flex>
+        </v-col>
         <!-- description -->
-        <v-flex v-show='hasSelectedLibrary && !hasScenario' xs12>
+        <v-col v-show='hasSelectedLibrary && !hasScenario' cols="12">
             <v-subheader class="ghd-subheader ">Description</v-subheader>
             <v-textarea
                 no-resize
-                outline
+                variant="outlined"
                 class="ghd-text-field-border"
                 rows="4"
                 v-model="selectedCalculatedAttributeLibrary.description"
-                @input='checkHasUnsavedChanges()'/>
-        </v-flex>
+                @update:model-value="checkHasUnsavedChanges()"/>
+        </v-col>
         <!-- buttons -->
-        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
-            <v-layout justify-center v-show='hasSelectedLibrary || hasScenario'>
+        <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
+            <v-row justify="center" style="padding-bottom: 40px;" v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn
                     :disabled="!hasUnsavedChanges"
                     v-if="hasAdminAccess && hasScenario"
                     @click="onDiscardChanges"
                     class='ghd-blue ghd-button-text ghd-button'
-                    flat
+                    variant = "text"
                     v-show="hasSelectedLibrary || hasScenario">
                     Cancel
                 </v-btn>
@@ -228,7 +254,7 @@
                 <v-btn id="CalculatedAttribute-deleteLibrary-btn"
                     @click="onShowConfirmDeleteAlert"
                     class='ghd-blue ghd-button-text ghd-button'
-                    flat
+                    variant = "flat"
                     v-show="!hasScenario"
                     :disabled="!hasSelectedLibrary">
                     Delete Library
@@ -237,28 +263,29 @@
                     :disabled="disableCrudButton()"
                     v-if="hasAdminAccess"
                     @click="onShowCreateCalculatedAttributeLibraryDialog(true)"
-                    outline
+                    variant = "outlined"
+                    style="margin-left: 10px; margin-right: 10px"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                     Create as New Library
                 </v-btn>
                 <v-btn id="CalculatedAttribute-updateLibrary-btn"
                     :disabled="disableCrudButton() || !hasUnsavedChanges"
                     @click="onUpsertCalculatedAttributeLibrary"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario">
                     Update Library
                 </v-btn>
                 <v-btn
                     @click="onUpsertScenarioCalculatedAttribute"
-                    class='ghd-blue-bg white--text ghd-button-text ghd-button'
+                    class='ghd-blue-bg text-white ghd-button-text ghd-button'
                     v-show="hasScenario && hasAdminAccess"
                     :disabled="disableCrudButton() || !hasUnsavedChanges">
                     Save
                 </v-btn> 
-            </v-layout>
-        </v-flex>
+            </v-row>
+        </v-col>
      
-        <ConfirmDeleteAlert
+        <Alert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
         />
@@ -276,18 +303,18 @@
         <EquationEditorDialog
             :dialogData="equationEditorDialogData"
             @submit="onSubmitEquationEditorDialogResult"
+            :isFromPerformanceCurveEditor="true"
         />
         <GeneralCriterionEditorDialog
             :dialogData="criterionEditorDialogData"
             @submit="onSubmitCriterionEditorDialogResult"
         />
-    </v-layout>
+        <ConfirmDialog></ConfirmDialog>
+    </v-row>
+</v-card>
 </template>
-<script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Watch } from 'vue-property-decorator';
-import { Action, State, Getter, Mutation } from 'vuex-class';
+<script lang="ts" setup>
+import { shallowReactive, shallowRef } from 'vue';
 import Alert from '@/shared/modals/Alert.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
 import CreateCalculatedAttributeLibraryDialog from './calculated-attribute-editor-dialogs/CreateCalculatedAttributeLibraryDialog.vue';
@@ -296,7 +323,7 @@ import ShareCalculatedAttributeLibraryDialog from '@/components/calculated-attri
 import { emptyShareCalculatedAttributeLibraryDialogData, ShareCalculatedAttributeLibraryDialogData } from '@/shared/models/modals/share-calculated-attribute-data';
 import {
     InputValidationRules,
-    rules,
+    rules as validationRules
 } from '@/shared/utils/input-validation-rules';
 import {
   any,
@@ -342,309 +369,310 @@ import { getUserName } from '@/shared/utils/get-user-info';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { CalculatedAttributeLibraryUpsertPagingRequestModel, CalculatedAttributePagingRequestModel, CalculatedAttributePagingSyncModel, calculcatedAttributePagingPageModel} from '@/shared/models/iAM/paging';
 import { mapToIndexSignature } from '@/shared/utils/conversion-utils';
+
 import CalculatedAttributeService from '@/services/calculated-attribute.service';
 import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
-import { isNullOrUndefined } from 'util';
 import { LibraryUser } from '@/shared/models/iAM/user';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { useConfirm } from 'primevue/useconfirm';
+import ConfirmDialog from 'primevue/confirmdialog';
+import mitt, { Emitter, EventType } from 'mitt';
+import { computed } from 'vue';
+import { getUrl } from '@/shared/utils/get-url';
+import { TimelineEmits } from 'primevue/timeline';
 
-@Component({
-    components: {
-        CreateCalculatedAttributeLibraryDialog,
-        CreateCalculatedAttributeDialog,
-        ShareCalculatedAttributeLibraryDialog,
-        EquationEditorDialog,
-        GeneralCriterionEditorDialog,
-        ConfirmDeleteAlert: Alert,
-    },
-})
-export default class CalculatedAttributeEditor extends Vue {
-    @State(state => state.calculatedAttributeModule.calculatedAttributeLibraries) stateCalculatedAttributeLibraries: CalculatedAttributeLibrary[];
-    @State(state =>state.calculatedAttributeModule.selectedCalculatedAttributeLibrary) stateSelectedCalculatedAttributeLibrary: CalculatedAttributeLibrary;
-    @State(state => state.calculatedAttributeModule.scenarioCalculatedAttributes) stateScenarioCalculatedAttributes: CalculatedAttribute[];
-    @State(state => state.calculatedAttributeModule.selectedLibraryCalculatedAttributes) stateSelectedLibraryCalculatedAttributes: CalculatedAttribute[];
-    @State(state => state.calculatedAttributeModule.calculatedAttributes) stateCalculatedAttributes: Attribute[];
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.calculatedAttributeModule.isSharedLibrary) isSharedLibrary: boolean;
-    @Action('getIsSharedCalculatedAttributeLibrary') getIsSharedLibraryAction: any;
-    @Action('upsertScenarioCalculatedAttribute')
-    upsertScenarioCalculatedAttributeAction: any;
-    @Action('deleteCalculatedAttributeLibrary')
-    deleteCalculatedAttributeLibraryAction: any;
-    @Action('getCalculatedAttributeLibraries')
-    getCalculatedAttributeLibrariesAction: any;
-    @Action('getScenarioCalculatedAttribute') getScenarioCalculatedAttributeAction: any;
-    @Action('getSelectedLibraryCalculatedAttributes') getSelectedLibraryCalculatedAttributesAction: any;
-    @Action('selectCalculatedAttributeLibrary')
-    selectCalculatedAttributeLibraryAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('getCalculatedAttributes') getCalculatedAttributesAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
-    @Action('selectScenario') selectScenarioAction: any;
+let store = useStore();
+const confirm = useConfirm();
+let stateCalculatedAttributeLibraries = computed<CalculatedAttributeLibrary[]>(() => store.state.calculatedAttributeModule.calculatedAttributeLibraries);
+const stateSelectedCalculatedAttributeLibrary = computed<CalculatedAttributeLibrary>(() => store.state.calculatedAttributeModule.selectedCalculatedAttributeLibrary);
+const stateScenarioCalculatedAttributes = computed<CalculatedAttribute[]>(() => store.state.calculatedAttributeModule.scenarioCalculatedAttributes);
+let stateSelectedLibraryCalculatedAttributes = computed<CalculatedAttribute[]>(() => store.state.calculatedAttributeModule.selectedLibraryCalculatedAttributes);
+let stateCalculatedAttributes = computed<Attribute[]>(() => store.state.calculatedAttributeModule.calculatedAttributes);
+const hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
+let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeModule.isSharedLibrary);
 
-    @Mutation('selectedCalculatedAttributeLibraryMutator') selectedCalculatedAttributeLibraryMutation: any;
-    @Mutation('calculatedAttributeLibraryMutator') calculatedAttributeLibraryMutateActions: any;
+    async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedCalculatedAttributeLibrary', payload);}
+    async function upsertScenarioCalculatedAttributeAction(payload?: any): Promise<any> {await store.dispatch('upsertScenarioCalculatedAttribute', payload);}
+    async function deleteCalculatedAttributeLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteCalculatedAttributeLibrary', payload);}
+    async function getCalculatedAttributeLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getCalculatedAttributeLibraries', payload);}
+    async function getScenarioCalculatedAttributeAction(payload?: any): Promise<any> {await store.dispatch('getScenarioCalculatedAttribute', payload);}
+    async function getSelectedLibraryCalculatedAttributesAction(payload?: any): Promise<any> {await store.dispatch('getSelectedLibraryCalculatedAttributes', payload);}
+    async function selectCalculatedAttributeLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectCalculatedAttributeLibrary', payload);}
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+    async function getCalculatedAttributesAction(payload?: any): Promise<any> {await store.dispatch('getCalculatedAttributes', payload);}
+    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+    async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification', payload);}
+    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario', payload);}
+    async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario', payload);}
+    function selectedCalculatedAttributeLibraryMutator(payload: any){store.commit('selectedCalculatedAttributeLibraryMutator', payload);}
+    function calculatedAttributeLibraryMutator(payload: any){store.commit('calculatedAttributeLibraryMutator', payload);}
+    let getUserNameByIdGetter: any = store.getters.getUserNameById;
 
-    @Getter('getUserNameById') getUserNameByIdGetter: any;
-
-    updatedCalcAttrMap:Map<string, [CalculatedAttribute, CalculatedAttribute]> = 
+    let updatedCalcAttrMap:Map<string, [CalculatedAttribute, CalculatedAttribute]> = 
         new Map<string, [CalculatedAttribute, CalculatedAttribute]>();//0: original value | 1: updated value
-    addedCalcAttr: CalculatedAttribute[] = [];
-    CalcAttrCache: CalculatedAttribute = emptyCalculatedAttribute;
-    pairsCache: CriterionAndEquationSet[] = [];
-    updatedPairsMaps:Map<string, [CriterionAndEquationSet, CriterionAndEquationSet]> = 
+    let addedCalcAttr: CalculatedAttribute[] = [];
+    let CalcAttrCache: CalculatedAttribute = emptyCalculatedAttribute;
+    let pairsCache: CriterionAndEquationSet[] = [];
+    let updatedPairsMaps:Map<string, [CriterionAndEquationSet, CriterionAndEquationSet]> = 
         new Map<string, [CriterionAndEquationSet, CriterionAndEquationSet]>();//0: original value | 1: updated value 
-    addedPairs: Map<string, CriterionAndEquationSet[]> = new  Map<string, CriterionAndEquationSet[]>();
-    deletionPairsIds: Map<string, string[]> = new Map<string, string[]>();
-    updatedPairs:  Map<string, CriterionAndEquationSet[]> = new  Map<string, CriterionAndEquationSet[]>();
-    defaultEquations: Map<string, CriterionAndEquationSet> = new Map<string, CriterionAndEquationSet>()
-    gridSearchTerm = '';
-    currentSearch = '';
-    pagination: Pagination = clone(emptyPagination);
-    isPageInit = false;
-    totalItems = 0;
-    currentPage: CalculatedAttribute = clone(emptyCalculatedAttribute);
-    initializing: boolean = true;
-    uuidNIL: string = getBlankGuid();
-    isShared: boolean = false;
-    modifiedDate: string;
+    let addedCalcPairs: Map<string, CriterionAndEquationSet[]> = new  Map<string, CriterionAndEquationSet[]>();
+    let deletionPairsIds: Map<string, string[]> = new Map<string, string[]>();
+    let updatedPairs:  Map<string, CriterionAndEquationSet[]> = new  Map<string, CriterionAndEquationSet[]>();
+    let defaultEquations = ref(new Map<string, CriterionAndEquationSet>()) 
+    let gridSearchTerm = ref('');
+    let currentSearch = ref('');
+    const pagination: Pagination = shallowReactive(clone(emptyPagination));
+    let isPageInit = false;
+    let totalItems = 0;
+    let currentPage: CalculatedAttribute = clone(emptyCalculatedAttribute);
+    let initializing: boolean = true;
+    let uuidNIL: string = getBlankGuid();
+    let isShared: boolean = false;
+    let modifiedDate = ref<string>('');
 
-    shareCalculatedAttributeLibraryDialogData: ShareCalculatedAttributeLibraryDialogData = clone(emptyShareCalculatedAttributeLibraryDialogData);
+    const shareCalculatedAttributeLibraryDialogData = ref<ShareCalculatedAttributeLibraryDialogData>(clone(emptyShareCalculatedAttributeLibraryDialogData));
 
-
-    defaultEquation: CriterionAndEquationSet = emptyCriterionAndEquationSet;
-    defaultEquationCache: CriterionAndEquationSet = emptyCriterionAndEquationSet;
-    defaultSelected: boolean = false;
-
-    hasSelectedLibrary: boolean = false;
-    isDefaultBool: boolean = true;//this exists because isDefault can't be tracked so this bool is tracked for the switch and is then synced with isDefault
-    hasScenario: boolean = false;
-    rules: InputValidationRules = clone(rules);
-    confirmDeleteAlertData: AlertData = clone(emptyAlertData);
-    showCreateCalculatedAttributeDialog = false;
-    hasSelectedCalculatedAttribute: boolean = false;
-    selectedCalculatedAttribute: CalculatedAttribute = clone(
+    let defaultEquation = ref(emptyCriterionAndEquationSet);
+    let defaultEquationCache = ref(emptyCriterionAndEquationSet);
+    const defaultSelected = ref(false);
+    let hasSelectedLibrary = ref<boolean>(false);
+    let isDefaultBool = shallowRef<boolean>(false); //this exists because isDefault can't be tracked so this bool is tracked for the switch and is then synced with isDefault
+    let hasScenario = ref<boolean>(false);
+    let rules: InputValidationRules = validationRules;
+    let confirmDeleteAlertData = ref(clone(emptyAlertData));
+   let showCreateCalculatedAttributeDialog = false;
+    let hasSelectedCalculatedAttribute: boolean = false;
+    let selectedCalculatedAttribute = ref<CalculatedAttribute>(clone(
         emptyCalculatedAttribute,
-    );
-    selectedScenarioId: string = getBlankGuid();
-    librarySelectItems: SelectItem[] = [];
+    ));
+    let selectedScenarioId: string = getBlankGuid();
+    let librarySelectItems = ref<SelectItem[]>([]);
 
-    librarySelectItemValue: string | null = '';
-    trueLibrarySelectItemValue: string | null = ''
-    librarySelectItemValueAllowedChanged: boolean = true;
+    let truelibrarySelectItemValue = ref<string|null>('');
+    let librarySelectItemValue = ref<string|null>(null);
+    
+    let librarySelectItemValueAllowedChanged: boolean = true;
 
-    unsavedDialogAllowed: boolean = true;
+    let unsavedDialogAllowed: boolean = true;
 
-    attributeSelectItems: SelectItem[] = [];
+    let attributeSelectItems: SelectItem[] = [];
 
-    attributeSelectItemValue: string | null = '';
-    trueAttributeSelectItemValue: string | null = '';
-    attributeSelectItemValueAllowedChanged: boolean = true;
+    let attributeSelectItemValue = shallowRef<string>('');
+    let trueAttributeSelectItemValue = shallowRef<string>('');
+    let attributeSelectItemValueAllowedChanged: boolean = true;
 
-    isAttributeSelectedItemValue: boolean = false;
-    isTimingSelectedItemValue: boolean = false;
-    attributeTimingSelectItems: SelectItem[] = [];
-    attributeTimingSelectItemValue: string | number | null = '';
-    currentCriteriaEquationSetSelectedId: string | null = '';
+    let isAttributeSelectedItemValue: boolean = false;
+    let isTimingSelectedItemValue: boolean = false;
+    let attributeTimingSelectItems = ref<SelectItem[]>([]);
+    let attributeTimingSelectItemValue= ref('');
+    let currentCriteriaEquationSetSelectedId: string | null = '';
 
-    selectedCalculatedAttributeLibrary: CalculatedAttributeLibrary = clone(
-        emptyCalculatedAttributeLibrary,
-    );
-    createCalculatedAttributeLibraryDialogData: CreateCalculatedAttributeLibraryDialogData = clone(
-        emptyCreateCalculatedAttributeLibraryDialogData,
-    );
-    equationEditorDialogData: EquationEditorDialogData = clone(
+    const selectedCalculatedAttributeLibrary = ref<CalculatedAttributeLibrary>(clone(emptyCalculatedAttributeLibrary));
+    let createCalculatedAttributeLibraryDialogData = ref<CreateCalculatedAttributeLibraryDialogData>(clone(emptyCreateCalculatedAttributeLibraryDialogData));
+    let equationEditorDialogData = ref<EquationEditorDialogData>(clone(
         emptyEquationEditorDialogData,
-    );
-    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+    ));
+    let criterionEditorDialogData = ref<GeneralCriterionEditorDialogData>(clone(
         emptyGeneralCriterionEditorDialogData,
-    );
-    calculatedAttributeGridData: CalculatedAttribute[] = [];
-    activeCalculatedAttributeId: string = getBlankGuid();
-    selectedGridItem: CalculatedAttributeGridModel[] = [];
-    selectedAttribute: CalculatedAttribute = clone(emptyCalculatedAttribute)
-    hasCreatedLibrary: boolean = false;
+    ));
+    let calculatedAttributeGridData = shallowRef<CalculatedAttribute[]>([]);
+    let activeCalculatedAttributeId: string = getBlankGuid();
+    let selectedGridItem  = shallowRef<CalculatedAttributeGridModel[]>([]);
+    let selectedAttribute: CalculatedAttribute = clone(emptyCalculatedAttribute)
+    let hasCreatedLibrary: boolean = false;
 
-    parentLibraryName: string = "None";
-    parentLibraryId: string = "";
-    scenarioLibraryIsModified: boolean = false;
-    loadedParentName: string = "";
-    loadedParentId: string = "";
-    newLibrarySelection: boolean = false;
+    let parentLibraryName: string = "None";
+    let parentLibraryId: string = "";
+    let scenarioLibraryIsModified: boolean = false;
+    let loadedParentName: string = "";
+    let loadedParentId: string = "";
+    let newLibrarySelection: boolean = false;
 
-    calculatedAttributeGridHeaders: DataTableHeader[] = [
+    let calculatedAttributeGridHeaders: any[] = [
         {
-            text: 'Equation',
-            value: 'equation',
+            title: 'Equation',
+            key: 'equation',
             align: 'left',
             sortable: true,
             class: '',
             width: '',
         },
         {
-            text: 'Criterion',
-            value: 'criteriaExpression',
+            title: 'Criterion',
+            key: 'criteriaExpression',
             align: 'left',
             sortable: true,
             class: '',
             width: '',
         },
         {
-            text: '',
-            value: '',
+            title: '',
+            key: '',
             align: 'left',
             sortable: false,
             class: '',
             width: '',
         },
     ];
+    
+    const $router = useRouter();
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
+    
+    onMounted(async ()=> {
+        librarySelectItemValue.value = '';
+        attributeSelectItemValue.value = '';
+        await getCalculatedAttributesAction()
+        await getCalculatedAttributeLibrariesAction()
+        setAttributeSelectItems()
+        setAttributeTimingSelectItems();
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CalculatedAttribute) !== -1) {
+            
+                selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
+            if (selectedScenarioId === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Unable to identify selected scenario.',
+                });
+                $router.push('/Scenarios/');
+            }
+            hasScenario.value = true;
+            await getScenarioCalculatedAttributeAction(selectedScenarioId)
+            await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})   
+            selectScenarioAction({ scenarioId: selectedScenarioId });        
+            
+        
+        }           
+    });
 
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            vm.librarySelectItemValue = null;
-            vm.attributeSelectItemValue = null;
-
-            vm.getCalculatedAttributesAction().then( () => {
-                vm.getCalculatedAttributeLibrariesAction().then(() => {
-                    vm.setAttributeSelectItems()
-                    vm.setAttributeTimingSelectItems();
-                    if (to.path.indexOf(ScenarioRoutePaths.CalculatedAttribute) !== -1) {
-                        vm.selectedScenarioId = to.query.scenarioId;
-
-                        if (vm.selectedScenarioId === vm.uuidNIL) {
-                            vm.addErrorNotificationAction({
-                                message: 'Unable to identify selected scenario.',
-                            });
-                            vm.$router.push('/Scenarios/');
-                        }
-
-                        vm.hasScenario = true;
-                        vm.getScenarioCalculatedAttributeAction(vm.selectedScenarioId).then(()=> {
-                            vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                                vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
-                            });
-                        });
-                    }
-                });                
-            });
-        });
-    }
-    beforeDestroy() {
-        this.calculatedAttributeGridData = [] as CalculatedAttribute[];
-        this.selectedAttribute = clone(emptyCalculatedAttribute);
+    onBeforeUnmount(()=>beforeDestroy())
+    function beforeDestroy() {
+        calculatedAttributeGridData.value = [] as CalculatedAttribute[];
+        selectedAttribute = clone(emptyCalculatedAttribute);
     }
 
     // Watchers
-    @Watch('pagination')
-    async onPaginationChanged() {
-        if(this.initializing)
+    async function onPaginationChanged() {
+        if( initializing)
             return;
-        this.checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = this.pagination;
+         checkHasUnsavedChanges();
+        const { sort, descending, page, rowsPerPage } =  pagination;
         const request: CalculatedAttributePagingRequestModel= {
             page: page,
             rowsPerPage: rowsPerPage,
             syncModel: {
-                libraryId: this.selectedCalculatedAttributeLibrary.id === this.uuidNIL ? null : this.selectedCalculatedAttributeLibrary.id,
-                updatedCalculatedAttributes: Array.from(this.updatedCalcAttrMap.values()).map(r => r[1]),
-                deletedPairs: mapToIndexSignature(this.deletionPairsIds),
-                updatedPairs: mapToIndexSignature( this.updatedPairs),
-                addedPairs: mapToIndexSignature(this.addedPairs),
-                addedCalculatedAttributes: this.addedCalcAttr,
-                defaultEquations: mapToIndexSignature(this.defaultEquations),
-                isModified: this.scenarioLibraryIsModified
+                libraryId:  selectedCalculatedAttributeLibrary.value.id ===  uuidNIL ? null :  selectedCalculatedAttributeLibrary.value.id,
+                updatedCalculatedAttributes: Array.from( updatedCalcAttrMap.values()).map(r => r[1]),
+                deletedPairs: mapToIndexSignature( deletionPairsIds),
+                updatedPairs: mapToIndexSignature(  updatedPairs),
+                addedPairs: mapToIndexSignature( addedCalcPairs),
+                addedCalculatedAttributes:  addedCalcAttr,
+                defaultEquations: mapToIndexSignature( defaultEquations.value),
+                isModified:  scenarioLibraryIsModified
             },           
-            sortColumn: sortBy === '' ? 'year' : sortBy,
-            isDescending: descending != null ? descending : false,
-            search: this.currentSearch,
-            attributeId: this.stateCalculatedAttributes.find(_ => _.name === this.selectedAttribute.attribute)!.id
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
+            search:  currentSearch.value,
+            attributeId:  stateCalculatedAttributes.value.find(_ => _.name ===  selectedAttribute.attribute)!.id
         };
-        if((!this.hasSelectedLibrary && this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
-           await CalculatedAttributeService.getScenarioCalculatedAttrbiutetPage(this.selectedScenarioId, request).then(response => {
+        if((! hasSelectedLibrary.value &&  hasScenario.value) &&  selectedScenarioId !==  uuidNIL){
+            CalculatedAttributeService.getScenarioCalculatedAttrbiutetPage( selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as calculcatedAttributePagingPageModel;
-                    this.currentPage.equations = data.items;
-                    this.currentPage.calculationTiming = data.calculationTiming
-                    this.pairsCache = this.currentPage.equations;
-                    this.totalItems = data.totalItems;
-                    this.defaultEquation = data.defaultEquation;
-                    this.selectedGridItem = this.calculatedAttributeGridModelConverter(this.currentPage)
+                     currentPage.equations = data.items;
+                     currentPage.calculationTiming = data.calculationTiming
+                     pairsCache =  currentPage.equations;
+                     totalItems = data.totalItems;
+                     defaultEquation.value = data.defaultEquation;
+                     selectedGridItem.value =  calculatedAttributeGridModelConverter( currentPage)
                 }
             });
         }            
-        else if(this.hasSelectedLibrary)
-        this.initializing = true;
-        await CalculatedAttributeService.getCalculatedLibraryModifiedDate(this.selectedCalculatedAttributeLibrary.id).then(response => {
+        else if(hasSelectedLibrary.value){
+            initializing = true;
+            await CalculatedAttributeService.getCalculatedLibraryModifiedDate(selectedCalculatedAttributeLibrary.value.id).then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
-                      this.modifiedDate = data.slice(0, 10);
+                      modifiedDate.value = data.slice(0, 10);
                    }
+                   initializing = false;
              });
 
-             await CalculatedAttributeService.getLibraryCalculatedAttributePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+             await CalculatedAttributeService.getLibraryCalculatedAttributePage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as calculcatedAttributePagingPageModel;
-                    this.currentPage.equations = data.items;
-                    this.currentPage.calculationTiming = data.calculationTiming
-                    this.pairsCache = this.currentPage.equations;
-                    this.totalItems = data.totalItems;
-                    this.defaultEquation = data.defaultEquation;
-                    this.selectedGridItem = this.calculatedAttributeGridModelConverter(this.currentPage);
-                    if (!isNullOrUndefined(this.selectedCalculatedAttributeLibrary.id) ) {
-                        this.getIsSharedLibraryAction(this.selectedCalculatedAttributeLibrary).then(this.isShared = this.isSharedLibrary);
+                     currentPage.equations = data.items;
+                     currentPage.calculationTiming = data.calculationTiming
+                     pairsCache =  currentPage.equations;
+                     totalItems = data.totalItems;
+                     defaultEquation.value = data.defaultEquation;
+                     selectedGridItem.value =  calculatedAttributeGridModelConverter( currentPage);
+                    if (!isNil( selectedCalculatedAttributeLibrary.value.id) ) {
+                         getIsSharedLibraryAction( selectedCalculatedAttributeLibrary.value).then(() => isShared = isSharedLibrary.value);
                     }
+                    initializing = false;
                 }
             });     
+        }
+        
+        
     }
 
-    @Watch('deletionPairsIds')
-    onDeletionPairsIdsChanged(){
-        this.checkHasUnsavedChanges();
+    watch(deletionPairsIds,()=> onDeletionPairsIdsChanged())
+    function onDeletionPairsIdsChanged(){
+        checkHasUnsavedChanges();
     }
 
-    @Watch('addedPairs', {deep: true})
-    onAddedPairsChanged(){
-        this.checkHasUnsavedChanges();
+    watch(addedCalcPairs,()=> onAddedPairsChanged())
+    function onAddedPairsChanged(){
+        checkHasUnsavedChanges();
     }
 
-    onSelectedAttributeChanged(){
-        this.selectedGridItem = this.calculatedAttributeGridModelConverter(this.currentPage)
+    function onSelectedAttributeChanged(){
+        selectedGridItem.value = calculatedAttributeGridModelConverter(currentPage)
     }
 
-    @Watch('isDefaultBool')
-    onIsDefaultBoolChanged(){
-        this.selectedCalculatedAttributeLibrary.isDefault = this.isDefaultBool;
-        this.checkHasUnsavedChanges()
+    watch(isDefaultBool,() => onIsDefaultBoolChanged())
+    function onIsDefaultBoolChanged(){
+        selectedCalculatedAttributeLibrary.value.isDefault = isDefaultBool.value;
+        checkHasUnsavedChanges()
     }
-    @Watch('stateCalculatedAttributes')
-    onStateCalculatedAttributesChanged() {
-        this.setAttributeSelectItems();
+    watch(stateCalculatedAttributes,()=>onStateCalculatedAttributesChanged())
+    function onStateCalculatedAttributesChanged() {
+        setAttributeSelectItems();
     }
-    @Watch('currentPage')
-    onCurrentPageChanged() {
+    watch(currentPage,() => onCurrentPageChanged())
+    function onCurrentPageChanged() {
         // Get parent name from library id
-        this.librarySelectItems.forEach(library => {
-            if (library.value === this.parentLibraryId) {
-                this.parentLibraryName = library.text;
+        librarySelectItems.value.forEach(library => {
+            if (library.value === parentLibraryId) {
+                parentLibraryName = library.text;
             }
         });
     }
-    setAttributeSelectItems() {
-        if (hasValue(this.stateCalculatedAttributes)) {
-            this.attributeSelectItems = this.stateCalculatedAttributes.map(
+    watch(currentPage,()=>{
+                // Get parent name from library id
+                librarySelectItems.value.forEach(library => {
+            if (library.value === parentLibraryId) {
+                parentLibraryName = library.text;
+            }
+        });
+    });
+    function setAttributeSelectItems() {
+        if (hasValue(stateCalculatedAttributes.value)) {
+            attributeSelectItems = stateCalculatedAttributes.value.map(
                 (attribute: Attribute) => ({
                     text: attribute.name,
                     value: attribute.name,
                 }),
             );
 
-            this.attributeSelectItems.forEach(_ => {
+            attributeSelectItems.forEach(_ => {
                 var tempItem: CalculatedAttribute = {
                     id: getNewGuid(),
                     attribute: _.text,
@@ -654,88 +682,88 @@ export default class CalculatedAttributeEditor extends Vue {
                     calculationTiming: Timing.OnDemand,
                     equations: [] as CriterionAndEquationSet[],
                 };
-                if (this.calculatedAttributeGridData == undefined) {
-                    this.calculatedAttributeGridData = [] as CalculatedAttribute[];
+                if (calculatedAttributeGridData.value == undefined) {
+                    calculatedAttributeGridData.value as CalculatedAttribute[];
                 }
-                this.calculatedAttributeGridData.push(tempItem);
+                calculatedAttributeGridData.value.push(tempItem);
             });
         }
     }
-    setAttributeTimingSelectItems() {
-        this.attributeTimingSelectItems = [
-            { text: 'Pre Deterioration', value: Timing.PreDeterioration },
-            { text: 'Post Deterioration', value: Timing.PostDeterioration },
-            { text: 'On Demand', value: Timing.OnDemand },
+    function setAttributeTimingSelectItems() {
+        attributeTimingSelectItems.value = [
+            { text: 'Pre Deterioration', value: Timing.PreDeterioration.toString() },
+            { text: 'Post Deterioration', value: Timing.PostDeterioration.toString()  },
+            { text: 'On Demand', value: Timing.OnDemand.toString()  },
         ];
     }
-    @Watch('stateCalculatedAttributeLibraries')
-    onStateCalculatedAttributeLibrariesChanged() {
-        this.librarySelectItems = this.stateCalculatedAttributeLibraries.map(
+    watch(stateCalculatedAttributeLibraries, onStateCalculatedAttributeLibrariesChanged)
+    function onStateCalculatedAttributeLibrariesChanged() {
+        librarySelectItems.value = stateCalculatedAttributeLibraries.value.map(
             (library: CalculatedAttributeLibrary) => ({
                 text: library.name,
                 value: library.id,
             }),
         );
     }
-    //this is so that a user is asked wether or not to continue when switching libraries after they have made changes
+    // is so that a user is asked wether or not to continue when switching libraries after they have made changes
     //but only when in libraries
-    @Watch('librarySelectItemValue')
-    onLibrarySelectItemValueChangedCheckUnsaved(){
-        this.defaultEquation.equation.expression = "";
-        if(this.hasScenario){
-            this.onLibrarySelectItemValueChanged();
-            this.unsavedDialogAllowed = false;
+    watch(librarySelectItemValue,() =>{
+        defaultEquation.value.equation.expression = "";
+        if(hasScenario.value){
+            onLibrarySelectItemValueChanged();
+            unsavedDialogAllowed = false;
         }           
-        else if(this.librarySelectItemValueAllowedChanged) {
-            this.CheckUnsavedDialog(this.onLibrarySelectItemValueChanged, () => {
-                this.librarySelectItemValueAllowedChanged = false;
-                this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
+        else if(librarySelectItemValueAllowedChanged) {
+            CheckUnsavedDialog(onLibrarySelectItemValueChanged, () => {
+                librarySelectItemValueAllowedChanged = false;
+                librarySelectItemValue.value = truelibrarySelectItemValue.value;               
             });
         }
-        this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
-        this.setParentLibraryName(this.parentLibraryId);
-        this.newLibrarySelection = true;
-        this.librarySelectItemValueAllowedChanged = true;
-    }
-    onLibrarySelectItemValueChanged() {
-        this.trueLibrarySelectItemValue = this.librarySelectItemValue;
-        this.selectCalculatedAttributeLibraryAction(
-            this.librarySelectItemValue,
+        parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
+        setParentLibraryName(parentLibraryId);
+        newLibrarySelection = true;
+        librarySelectItemValueAllowedChanged = true;
+    })
+    function onLibrarySelectItemValueChanged() {
+        truelibrarySelectItemValue.value = librarySelectItemValue.value;
+        selectCalculatedAttributeLibraryAction(
+            librarySelectItemValue.value,
         );
     }
 
-    //this is so that users are asked wether or not to continue when switching attributes after making changes
-    @Watch('attributeSelectItemValue')
-    onAttributeSelectItemValueChangedCheckUnsaved(){
-        if(this.attributeSelectItemValueAllowedChanged)
-            this.CheckUnsavedDialog(this.onAttributeSelectItemValueChanged, () => {
-                this.attributeSelectItemValueAllowedChanged = false;
-                this.attributeSelectItemValue = this.trueAttributeSelectItemValue;               
+    // is so that users are asked wether or not to continue when switching attributes after making changes
+    watch(attributeSelectItemValue,()=> onAttributeSelectItemValueChangedCheckUnsaved())
+    function onAttributeSelectItemValueChangedCheckUnsaved(){
+        if(attributeSelectItemValueAllowedChanged)
+            CheckUnsavedDialog(onAttributeSelectItemValueChanged, () => {
+                attributeSelectItemValueAllowedChanged = false;
+                attributeSelectItemValue.value = trueAttributeSelectItemValue.value;               
             })
-        this.attributeSelectItemValueAllowedChanged = true;
+        attributeSelectItemValueAllowedChanged = true;
     }
-    onAttributeSelectItemValueChanged() {
+
+    function onAttributeSelectItemValueChanged() {
         // selection change in calculated attribute multi select
-        this.clearChanges();
-        this.trueAttributeSelectItemValue = this.attributeSelectItemValue;
-        this.checkHasUnsavedChanges();
+        clearChanges();
+        trueAttributeSelectItemValue = attributeSelectItemValue;
+        checkHasUnsavedChanges();
         if (
-            isNil(this.attributeSelectItemValue) ||
-            this.attributeSelectItemValue == ''
+            isNil(attributeSelectItemValue) ||
+            attributeSelectItemValue.value == ''
         ) {
-            this.isAttributeSelectedItemValue = false;
-            this.isTimingSelectedItemValue = false;
-            this.selectedAttribute = clone(emptyCalculatedAttribute);
+            isAttributeSelectedItemValue = false;
+            isTimingSelectedItemValue = false;
+            selectedAttribute = clone(emptyCalculatedAttribute);
         } else {
-            this.isAttributeSelectedItemValue = true;
-            this.isTimingSelectedItemValue = true;
-            var item = this.calculatedAttributeGridData.find(
-                _ => _.attribute == this.attributeSelectItemValue,
+            isAttributeSelectedItemValue = true;
+            isTimingSelectedItemValue = true;
+            var item = calculatedAttributeGridData.value.find(
+                _ => _.attribute == attributeSelectItemValue.value,
             );
             if (item != undefined) {
-                this.activeCalculatedAttributeId = item.id;
-                this.selectedAttribute = item;               
-                this.initializePages();
+                activeCalculatedAttributeId = item.id;
+                selectedAttribute = item;               
+                initializePages();
             } else {
                 // if the selected Calculated attribute data is not present in the grid
                 // Add a new object for it. Because we cannot loop over a object, which is null
@@ -743,224 +771,238 @@ export default class CalculatedAttributeEditor extends Vue {
                     id: getNewGuid(),
                     libraryId: getNewGuid(),
                     isModified: false,
-                    attribute: this.attributeSelectItemValue,
-                    name: this.attributeSelectItemValue,
+                    attribute:  attributeSelectItemValue.value,
+                    name:  attributeSelectItemValue.value,
                     calculationTiming: Timing.OnDemand,
                     equations: [] as CriterionAndEquationSet[],
                 };
-                this.calculatedAttributeGridData.push(newAttributeObject);
-                this.activeCalculatedAttributeId = newAttributeObject.id;
-                this.selectedAttribute = newAttributeObject;
-                this.setTimingsMultiSelect(Timing.OnDemand);
-                this.addedCalcAttr.push(clone(newAttributeObject));
-                this.initializePages();
+                calculatedAttributeGridData.value.push(newAttributeObject);
+                activeCalculatedAttributeId = newAttributeObject.id;
+                selectedAttribute = newAttributeObject;
+                setTimingsMultiSelect(Timing.OnDemand);
+                addedCalcAttr.push(clone(newAttributeObject));
+                initializePages();
             }
         }
     }
-    @Watch('attributeTimingSelectItemValue')
-    onAttributeTimingSelectItemValue() {
+    watch(attributeTimingSelectItemValue, onAttributeTimingSelectItemValue)
+    function onAttributeTimingSelectItemValue() {
         // Change in timings select box
         if (
-            isNil(this.attributeTimingSelectItemValue) ||
-            this.attributeTimingSelectItemValue == ''
+            isNil(attributeTimingSelectItemValue.value) ||
+            attributeTimingSelectItemValue.value == ''
         ) {
-            this.isTimingSelectedItemValue = false;
+            isTimingSelectedItemValue = false;
         } else {
-            this.isTimingSelectedItemValue = true;
-            var localTiming = this.attributeTimingSelectItemValue as Timing;
-            var item = this.calculatedAttributeGridData.find(
-                _ => _.attribute == this.attributeSelectItemValue,
+            isTimingSelectedItemValue = true;
+            var localTiming = +attributeTimingSelectItemValue.value;
+            var item = calculatedAttributeGridData.value.find(
+                _ => _.attribute == attributeSelectItemValue.value,
             );
             if (item != undefined) {
-                this.CalcAttrCache = clone(item)
+                CalcAttrCache = clone(item)
                 item.calculationTiming = localTiming;
-                this.selectedAttribute = item;
-                this.onUpdateCalcAttr(item.id, clone(item))
-                this.onPaginationChanged();
+                selectedAttribute = item;
+                onUpdateCalcAttr(item.id, clone(item))
+                onPaginationChanged();
             }
         }
     }
 
-    @Watch('stateSelectedCalculatedAttributeLibrary')
-    onStateSelectedCalculatedAttributeLibraryChanged() {
-        this.selectedCalculatedAttributeLibrary = clone(
-            this.stateSelectedCalculatedAttributeLibrary,
-        );
-        this.isDefaultBool = this.selectedCalculatedAttributeLibrary.isDefault;
-    }
-    @Watch('stateScenarioCalculatedAttributes')
-    onStateScenarioCalculatedAttributeChanged() {
-        if (this.hasScenario) {
-            if (
-                !isNil(this.stateScenarioCalculatedAttributes) &&
-                this.stateScenarioCalculatedAttributes.length > 0
-            ) {
-                this.activeCalculatedAttributeId = this.stateScenarioCalculatedAttributes[0].id;
-            }
-            this.resetGridData();
-        }
-    }
-    @Watch('calculatedAttributeGridData', {deep: true})
-    onCalculatedAttributeGridDataChanged() {
-        if (this.hasAdminAccess) {
-            this.checkHasUnsavedChanges();
-        }
-    }
-    @Watch('selectedCalculatedAttributeLibrary')
-    onSelectedCalculatedAttributeLibraryChanged() {
+    watch(stateSelectedCalculatedAttributeLibrary,() => {
         
-        // change in library multiselect
+        selectedCalculatedAttributeLibrary.value = clone(stateSelectedCalculatedAttributeLibrary.value)
+
+        isDefaultBool.value = selectedCalculatedAttributeLibrary.value.isDefault;
+        onselectedCalculatedAttributeLibraryChanged();
+    })
+    watch(stateScenarioCalculatedAttributes,() =>{
+        if (hasScenario.value) {
+            if (!isNil(stateScenarioCalculatedAttributes.value) && stateScenarioCalculatedAttributes.value.length > 0) 
+            {
+                activeCalculatedAttributeId = stateScenarioCalculatedAttributes.value[0].id;
+            }
+            resetGridData();
+        }
+    })
+    watch(calculatedAttributeGridData,() => onCalculatedAttributeGridDataChanged())
+    function onCalculatedAttributeGridDataChanged() {
+        if (hasAdminAccess.value) {
+            checkHasUnsavedChanges();
+        }
+    }
+    watch(selectedCalculatedAttributeLibrary,() => onselectedCalculatedAttributeLibraryChanged())
+        function onselectedCalculatedAttributeLibraryChanged()
+        {
+                    // change in library multiselect
         if (
-            this.selectedCalculatedAttributeLibrary.id !== this.uuidNIL 
+            selectedCalculatedAttributeLibrary.value.id !== uuidNIL 
         ) {
-            this.hasSelectedLibrary = true;
+            hasSelectedLibrary.value = true;
         } 
         else {
-            this.hasSelectedLibrary = false;
+            hasSelectedLibrary.value = false;
         }
-
-        this.clearChanges();
-        if (this.hasScenario && this.hasSelectedLibrary) {
-            this.getSelectedLibraryCalculatedAttributesAction(this.selectedCalculatedAttributeLibrary.id).then(() =>{
+        
+        clearChanges();
+        if (hasScenario.value && hasSelectedLibrary.value) {
+            getSelectedLibraryCalculatedAttributesAction(selectedCalculatedAttributeLibrary.value.id).then(() =>{
                 // we need new ids for the object which is assigned to a scenario.
-                this.calculatedAttributeGridData = clone(
-                    this.stateSelectedLibraryCalculatedAttributes,
+                calculatedAttributeGridData.value = clone(
+                    stateSelectedLibraryCalculatedAttributes.value,
                 );
+                
                 // Set the default values in Calculated attribute multi select, if we have data in calculatedAttributeGridData           
                 if (
-                    this.calculatedAttributeGridData != undefined &&
-                    this.calculatedAttributeGridData.length > 0
+                    calculatedAttributeGridData.value != undefined &&
+                    calculatedAttributeGridData.value.length > 0
                 ) {
-                    this.setDefaultAttributeOnLoad(
-                        this.calculatedAttributeGridData[0],
+                    setDefaultAttributeOnLoad(
+                        calculatedAttributeGridData.value[0],
                     );
                 } 
                 else {
-                    this.isAttributeSelectedItemValue = false;
-                    this.selectedGridItem = [];
+                    isAttributeSelectedItemValue = false;
+                    selectedGridItem.value = [];
                 }
-                this.onCalculatedAttributeGridDataChanged();
+                onCalculatedAttributeGridDataChanged();
             })
 
             
-        } else if (this.hasScenario && !this.hasSelectedLibrary) {
+        } else if (hasScenario.value && !hasSelectedLibrary.value) {
             // If a user un select a Library, then reset the grid data from the scenario calculated attribute state
-            this.resetGridData();
-            this.onCalculatedAttributeGridDataChanged();
+            resetGridData();
+            onCalculatedAttributeGridDataChanged();
         } 
-        else if (!this.hasScenario && this.hasSelectedLibrary) {
+        else if (!hasScenario.value && hasSelectedLibrary.value) {
             // If a user is in Lirabry page
-            this.getSelectedLibraryCalculatedAttributesAction(this.selectedCalculatedAttributeLibrary.id).then(() =>{
-                this.calculatedAttributeGridData = clone(
-                    this.stateSelectedLibraryCalculatedAttributes,
+            getSelectedLibraryCalculatedAttributesAction(selectedCalculatedAttributeLibrary.value.id).then(() =>{
+                calculatedAttributeGridData.value = clone(
+                    stateSelectedLibraryCalculatedAttributes.value,
                 );
                 if (
-                    this.calculatedAttributeGridData != undefined &&
-                    this.calculatedAttributeGridData.length > 0
+                    calculatedAttributeGridData.value != undefined &&
+                    calculatedAttributeGridData.value.length > 0
                 ) {
-                    this.attributeSelectItemValue = clone(
-                        this.calculatedAttributeGridData[0].attribute,
+                    attributeSelectItemValue.value = clone(
+                        calculatedAttributeGridData.value[0].attribute,
                     );
-                    this.isAttributeSelectedItemValue = true;
+                    isAttributeSelectedItemValue = true;
 
-                    this.setTimingsMultiSelect(
-                        this.calculatedAttributeGridData[0].calculationTiming,
+                    setTimingsMultiSelect(
+                        calculatedAttributeGridData.value[0].calculationTiming,
                     );
-                    this.activeCalculatedAttributeId = this.calculatedAttributeGridData[0].id;
-                    this.selectedAttribute =
-                        this.calculatedAttributeGridData[0] != undefined
-                            ? this.calculatedAttributeGridData[0]
-                            : this.selectedCalculatedAttribute;
+                    activeCalculatedAttributeId = calculatedAttributeGridData.value[0].id;
+                    selectedAttribute =
+                        calculatedAttributeGridData.value[0] != undefined
+                            ? calculatedAttributeGridData.value[0]
+                            : selectedCalculatedAttribute.value;
                 } else {
-                    this.isAttributeSelectedItemValue = false;
-                    this.attributeSelectItemValue = null;
-                    this.attributeTimingSelectItemValue = null;
-                    this.isTimingSelectedItemValue = false;
-                    this.selectedGridItem = [];
+                    isAttributeSelectedItemValue = false;
+                    attributeSelectItemValue.value = '';
+                    attributeTimingSelectItemValue.value = '';
+                     isTimingSelectedItemValue = false;
+                     selectedGridItem.value = [];
                 }
-                this.onCalculatedAttributeGridDataChanged();
+                 onCalculatedAttributeGridDataChanged();
             })          
         }         
+        getModifiedDate();
     }
-    @Watch('isSharedLibrary')
-    onStateSharedAccessChanged() {
-        this.isShared = this.isSharedLibrary;
-        if (!isNullOrUndefined(this.selectCalculatedAttributeLibrary)) {
-            this.selectCalculatedAttributeLibrary.isShared = this.isShared;
-        } 
+    
+    watch(isSharedLibrary,()=> onStateSharedAccessChanged())
+    function onStateSharedAccessChanged() {
+         isShared =  isSharedLibrary.value;
+         if (!isNil( selectedCalculatedAttributeLibrary.value) ) {
+            selectCalculatedAttributeLibraryAction(selectedCalculatedAttributeLibrary.value).then(() => isShared = isSharedLibrary.value);
+                    }
+        //if (!isNullOrUndefined(selectedCalculatedAttributeLibrary)) {
+
+             //selectedCalculatedAttributeLibrary.isShared =  isShared;
+        //} 
     }
-    setTiming(selectedItem: number) {
-        this.setTimingsMultiSelect(selectedItem);
+    function setTiming(selectedItem: number) {
+         setTimingsMultiSelect(selectedItem);
     }
 
-    getOwnerUserName(): string {
-
-        if (!this.hasCreatedLibrary) {
-        return this.getUserNameByIdGetter(this.selectedCalculatedAttributeLibrary.owner);
-        }
-        
+    function getOwnerUserName(): string {
+        if (! hasCreatedLibrary) {
+        return  getUserNameByIdGetter( selectedCalculatedAttributeLibrary.value.owner);
+        }     
         return getUserName();
     }
+    function getModifiedDate(){
+        if(selectedCalculatedAttributeLibrary.value.id !== uuidNIL)
+        {
+            CalculatedAttributeService.getCalculatedLibraryModifiedDate(selectedCalculatedAttributeLibrary.value.id).then(response => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+                {
+                    var data = response.data as string;
+                    modifiedDate.value = data.slice(0, 10);
+                }
+            });
+        }   
+        return modifiedDate.value;
+    }
 
-    onUpsertScenarioCalculatedAttribute() {
-
-        if (this.selectedCalculatedAttributeLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.newLibrarySelection ===false) {this.scenarioLibraryIsModified = true;}
-        else { this.scenarioLibraryIsModified = false; }
+    function onUpsertScenarioCalculatedAttribute() {
+        if ( selectedCalculatedAttributeLibrary.value.id ===  uuidNIL ||  hasUnsavedChanges.value &&  newLibrarySelection ===false) { scenarioLibraryIsModified = true;}
+        else {  scenarioLibraryIsModified = false; }
 
         const syncModel: CalculatedAttributePagingSyncModel = {
-                libraryId: this.selectedCalculatedAttributeLibrary.id === this.uuidNIL ? null : this.selectedCalculatedAttributeLibrary.id,
-                updatedCalculatedAttributes: Array.from(this.updatedCalcAttrMap.values()).map(r => r[1]),
-                deletedPairs: mapToIndexSignature(this.deletionPairsIds),
-                updatedPairs: mapToIndexSignature( this.updatedPairs),
-                addedPairs: mapToIndexSignature(this.addedPairs) ,
-                addedCalculatedAttributes: this.addedCalcAttr,
-                defaultEquations: mapToIndexSignature(this.defaultEquations),
-                isModified: this.scenarioLibraryIsModified
+                libraryId:  selectedCalculatedAttributeLibrary.value.id ===  uuidNIL ? null :  selectedCalculatedAttributeLibrary.value.id,
+                updatedCalculatedAttributes: Array.from( updatedCalcAttrMap.values()).map(r => r[1]),
+                deletedPairs: mapToIndexSignature( deletionPairsIds),
+                updatedPairs: mapToIndexSignature(  updatedPairs),
+                addedPairs: mapToIndexSignature( addedCalcPairs) ,
+                addedCalculatedAttributes:  addedCalcAttr,
+                defaultEquations: mapToIndexSignature( defaultEquations.value),
+                isModified:  scenarioLibraryIsModified
         }
-        CalculatedAttributeService.upsertScenarioCalculatedAttribute(syncModel, this.selectedScenarioId).then(((response: AxiosResponse) => {
+        CalculatedAttributeService.upsertScenarioCalculatedAttribute(syncModel,  selectedScenarioId).then(((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
-                this.getScenarioCalculatedAttributeAction(this.selectedScenarioId);
-                this.clearChanges()
-                this.resetPage();
-                this.addSuccessNotificationAction({message: "Modified calculated attrbutes"});
-                this.librarySelectItemValue = null
+                 parentLibraryId =  librarySelectItemValue.value ?  librarySelectItemValue.value : "";
+                 getScenarioCalculatedAttributeAction( selectedScenarioId);
+                 clearChanges()
+                 resetPage();
+                 addSuccessNotificationAction({message: "Modified calculated attrbutes"});
+                 librarySelectItemValue.value = ''
             }   
         }))
     }
 
-    onUpsertCalculatedAttributeLibrary() {
+   function onUpsertCalculatedAttributeLibrary() {
         const syncModel: CalculatedAttributePagingSyncModel = {
-                libraryId: this.selectedCalculatedAttributeLibrary.id === this.uuidNIL ? null : this.selectedCalculatedAttributeLibrary.id,
-                updatedCalculatedAttributes: Array.from(this.updatedCalcAttrMap.values()).map(r => r[1]),
-                deletedPairs: mapToIndexSignature(this.deletionPairsIds),
-                updatedPairs: mapToIndexSignature( this.updatedPairs),
-                addedPairs: mapToIndexSignature(this.addedPairs),
-                addedCalculatedAttributes: this.addedCalcAttr,
-                defaultEquations: mapToIndexSignature(this.defaultEquations),
+                libraryId:  selectedCalculatedAttributeLibrary.value.id ===  uuidNIL ? null :  selectedCalculatedAttributeLibrary.value.id,
+                updatedCalculatedAttributes: Array.from( updatedCalcAttrMap.values()).map(r => r[1]),
+                deletedPairs: mapToIndexSignature( deletionPairsIds),
+                updatedPairs: mapToIndexSignature(  updatedPairs),
+                addedPairs: mapToIndexSignature( addedCalcPairs),
+                addedCalculatedAttributes:  addedCalcAttr,
+                defaultEquations: mapToIndexSignature( defaultEquations.value),
                 isModified: false
         }
         const request: CalculatedAttributeLibraryUpsertPagingRequestModel = {
             syncModel: syncModel,
             isNewLibrary: false,
-            library: this.selectedCalculatedAttributeLibrary,
+            library:  selectedCalculatedAttributeLibrary.value,
             scenarioId: null
         }
         CalculatedAttributeService.upsertCalculatedAttributeLibrary(request).then(((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges()
-                this.resetPage();
-                this.calculatedAttributeLibraryMutateActions(this.selectedCalculatedAttributeLibrary)
-                this.selectedCalculatedAttributeLibraryMutation(this.selectedCalculatedAttributeLibrary.id);
-                this.addSuccessNotificationAction({message: "Updated calculated attribute library",});
+                 clearChanges()
+                 resetPage();
+                 calculatedAttributeLibraryMutator( selectedCalculatedAttributeLibrary.value)
+                 selectedCalculatedAttributeLibraryMutator( selectedCalculatedAttributeLibrary.value.id);
+                 addSuccessNotificationAction({message: "Updated calculated attribute library",});
             }   
         }))
     }
-    onShowCreateCalculatedAttributeLibraryDialog(createAsNewLibrary: boolean) {
+    function onShowCreateCalculatedAttributeLibraryDialog(createAsNewLibrary: boolean) {
         var localCalculatedAttributes = [] as CalculatedAttribute[];
         if (createAsNewLibrary) {
             // if library is getting created from a scenario. Assign new Ids
-            localCalculatedAttributes = clone(this.calculatedAttributeGridData);
+            localCalculatedAttributes = clone( calculatedAttributeGridData.value);
             localCalculatedAttributes.forEach(val => {
                 val.id = getNewGuid();
                 val.equations.forEach(eq => {
@@ -973,71 +1015,71 @@ export default class CalculatedAttributeEditor extends Vue {
                 });
             });
         }
-        this.createCalculatedAttributeLibraryDialogData = {
+         createCalculatedAttributeLibraryDialogData.value = {
             showDialog: true,
             calculatedAttributes: createAsNewLibrary
                 ? localCalculatedAttributes
                 : ([] as CalculatedAttribute[]),
-            attributeSelectItems: this.attributeSelectItems,
+            attributeSelectItems:  attributeSelectItems,
         };
     }
-    onSubmitCreateCalculatedAttributeLibraryDialogResult(
+    function onSubmitCreateCalculatedAttributeLibraryDialogResult(
         calculatedAttributeLibrary: CalculatedAttributeLibrary,
     ) {
-        this.createCalculatedAttributeLibraryDialogData = clone(
+         createCalculatedAttributeLibraryDialogData.value = clone(
             emptyCreateCalculatedAttributeLibraryDialogData,
         );
 
         if (!isNil(calculatedAttributeLibrary)) {
             const syncModel: CalculatedAttributePagingSyncModel = {
-                libraryId: calculatedAttributeLibrary.calculatedAttributes.length === 0 || !this.hasSelectedLibrary ? null : this.selectedCalculatedAttributeLibrary.id,
-                updatedCalculatedAttributes: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? [] : Array.from(this.updatedCalcAttrMap.values()).map(r => r[1]),
-                deletedPairs: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature(this.deletionPairsIds),
-                updatedPairs: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature( this.updatedPairs),
-                addedPairs: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature(this.addedPairs),
-                addedCalculatedAttributes: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? [] : this.addedCalcAttr,
-                defaultEquations: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature(this.defaultEquations),
+                libraryId: calculatedAttributeLibrary.calculatedAttributes.length === 0 || ! hasSelectedLibrary.value ? null :  selectedCalculatedAttributeLibrary.value.id,
+                updatedCalculatedAttributes: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? [] : Array.from( updatedCalcAttrMap.values()).map(r => r[1]),
+                deletedPairs: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature( deletionPairsIds),
+                updatedPairs: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature(  updatedPairs),
+                addedPairs: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature( addedCalcPairs),
+                addedCalculatedAttributes: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? [] :  addedCalcAttr,
+                defaultEquations: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature( defaultEquations.value),
                 isModified: false
             }
             const request: CalculatedAttributeLibraryUpsertPagingRequestModel = {
                 syncModel: syncModel,
                 isNewLibrary: true,
                 library: calculatedAttributeLibrary,
-                scenarioId: this.hasScenario ? this.selectedScenarioId : null
+                scenarioId:  hasScenario.value ?  selectedScenarioId : null
             }
             CalculatedAttributeService.upsertCalculatedAttributeLibrary(request).then(((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    this.clearChanges()
-                    this.resetPage();
-                    this.calculatedAttributeLibraryMutateActions(calculatedAttributeLibrary);
-                    this.selectedCalculatedAttributeLibraryMutation(calculatedAttributeLibrary.id);
-                    this.addSuccessNotificationAction({message: "Updated calculated attribute library",});
-                    this.librarySelectItemValue = calculatedAttributeLibrary.id;
-                    this.hasCreatedLibrary = true;
+                     clearChanges()
+                     resetPage();
+                     calculatedAttributeLibraryMutator(calculatedAttributeLibrary);
+                     selectedCalculatedAttributeLibraryMutator(calculatedAttributeLibrary.id);
+                     addSuccessNotificationAction({message: "Updated calculated attribute library",});
+                     librarySelectItemValue.value = calculatedAttributeLibrary.id;
+                     hasCreatedLibrary = true;
                 }   
             }))          
         }
     }
-    onSubmitCreateCalculatedAttributeDialogResult(
+    function onSubmitCreateCalculatedAttributeDialogResult(
         newCalculatedAttribute: CalculatedAttribute[],
     ) {
-        this.showCreateCalculatedAttributeDialog = false;
+         showCreateCalculatedAttributeDialog = false;
 
         if (!isNil(newCalculatedAttribute)) {
-            this.calculatedAttributeGridData = clone(newCalculatedAttribute);
+             calculatedAttributeGridData.value = clone(newCalculatedAttribute);
         }
     }
 
-    disableCrudButton() {
-        if (this.calculatedAttributeGridData == undefined) {
+    function disableCrudButton() {
+        if ( calculatedAttributeGridData.value == undefined) {
             return false;
         }
 
-        if(this.defaultEquation.id === getBlankGuid() || this.defaultEquation.equation.expression.trim() === '')
+        if( defaultEquation.value.id === getBlankGuid() ||  defaultEquation.value.equation.expression.trim() === '')
             return true;   
 
-        var updatePairs = clone(this.updatedPairs.get(this.selectedAttribute.id));
-        var addedPairs = clone(this.addedPairs.get(this.selectedAttribute.id));
+        var updatePairs = clone( updatedPairs.get( selectedAttribute.id));
+        var addedPairs = clone(addedCalcPairs.get( selectedAttribute.id));
         var equations: CriterionAndEquationSet[] = [];
         if(!isNil(updatePairs))
             equations = updatePairs;
@@ -1057,58 +1099,58 @@ export default class CalculatedAttributeEditor extends Vue {
 
         return !dataIsValid;
     }
-    onShowConfirmDeleteAlert() {
-        this.confirmDeleteAlertData = {
+    function onShowConfirmDeleteAlert() {
+         confirmDeleteAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
             message: 'Are you sure you want to delete?',
         };
     }
-    onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        this.confirmDeleteAlertData = clone(emptyAlertData);
+    function onSubmitConfirmDeleteAlertResult(submit: boolean) {
+         confirmDeleteAlertData.value = clone(emptyAlertData);
 
         if (submit) {
-            this.librarySelectItemValue = null;
-            this.deleteCalculatedAttributeLibraryAction(
-                this.selectedCalculatedAttributeLibrary.id,
+             librarySelectItemValue.value = '';
+             deleteCalculatedAttributeLibraryAction(
+                 selectedCalculatedAttributeLibrary.value.id,
             );
         }
     }
-    onAddCriterionEquationSet() { 
+    function onAddCriterionEquationSet() { 
         var newSet = clone(emptyCriterionAndEquationSet);
         newSet.id = getNewGuid();
         newSet.criteriaLibrary.id = getNewGuid();
         newSet.equation.id = getNewGuid();
         newSet.criteriaLibrary.isSingleUse = true;
 
-        let pairs = this.addedPairs.get(this.selectedAttribute.id);
+        let pairs =  addedCalcPairs.get( selectedAttribute.id);
         if(!isNil(pairs)){
             pairs.push(newSet)
         }
         else
-            this.addedPairs.set(this.selectedAttribute.id, [newSet])
+             addedCalcPairs.set( selectedAttribute.id, [newSet])
         
-        if (this.selectedAttribute.equations == undefined) {
-            this.selectedAttribute.equations = [];
-            this.onSelectedAttributeChanged()
+        if ( selectedAttribute.equations == undefined) {
+             selectedAttribute.equations = [];
+             onSelectedAttributeChanged()
         }
-        this.selectedAttribute.equations.push(newSet);
-        this.calculatedAttributeGridData = update(
+         selectedAttribute.equations.push(newSet);
+         calculatedAttributeGridData.value = update(
             findIndex(
-                propEq('id', this.selectedAttribute.id),
-                this.calculatedAttributeGridData,
+                propEq('id',  selectedAttribute.id),
+                 calculatedAttributeGridData.value,
             ),
-            { ...this.selectedAttribute },
-            this.calculatedAttributeGridData,
+            { ... selectedAttribute },
+             calculatedAttributeGridData.value,
         );
-        this.onPaginationChanged();
+         onPaginationChanged();
     }
-    onEditCalculatedAttributeCriterionLibrary(criterionEquationSetId: string) {
-        var currentCriteria = clone(this.currentPage.equations.find(
+    function onEditCalculatedAttributeCriterionLibrary(criterionEquationSetId: string) {
+        var currentCriteria = clone( currentPage.equations.find(
             _ => _.id == criterionEquationSetId,
         )!);
-        this.currentCriteriaEquationSetSelectedId = criterionEquationSetId;
+         currentCriteriaEquationSetSelectedId = criterionEquationSetId;
         if (currentCriteria.criteriaLibrary.id == getBlankGuid()) {
             currentCriteria.criteriaLibrary = {
                 id: getNewGuid(),
@@ -1120,215 +1162,215 @@ export default class CalculatedAttributeEditor extends Vue {
             };
         }
         if (!isNil(currentCriteria)) {
-            this.hasSelectedCalculatedAttribute = true;
+             hasSelectedCalculatedAttribute = true;
 
-            this.criterionEditorDialogData = {
+             criterionEditorDialogData.value = {
                 showDialog: true,
                 CriteriaExpression: currentCriteria.criteriaLibrary.mergedCriteriaExpression,
             };
         }
     }
 
-    onSubmitCriterionEditorDialogResult(
+    function onSubmitCriterionEditorDialogResult(
         criterionExpression: string,
     ) {
-        this.criterionEditorDialogData = clone(
+         criterionEditorDialogData.value = clone(
             emptyGeneralCriterionEditorDialogData,
         );
 
-        var currItem = this.calculatedAttributeGridData.find(
-            _ => _.id == this.activeCalculatedAttributeId,
+        var currItem =  calculatedAttributeGridData.value.find(
+            _ => _.id ==  activeCalculatedAttributeId,
         )!;
-        if (!isNil(criterionExpression) && this.hasSelectedCalculatedAttribute) {
+        if (!isNil(criterionExpression) &&  hasSelectedCalculatedAttribute) {
 
             if(!isNil(currItem)){
-                var set = clone(this.currentPage.equations.find(_ => _.id === this.currentCriteriaEquationSetSelectedId));
+                var set = clone( currentPage.equations.find(_ => _.id ===  currentCriteriaEquationSetSelectedId));
                 if(!isNil(set)){
                     if(set.criteriaLibrary.id === getBlankGuid())
                         set.criteriaLibrary.id = getNewGuid();
                     set.criteriaLibrary.mergedCriteriaExpression = criterionExpression;
-                    this.onUpdatePair(set.id, set);
-                    this.onPaginationChanged();
+                     onUpdatePair(set.id, set);
+                     onPaginationChanged();
                 }
             }
-            this.onSelectedAttributeChanged();
+             onSelectedAttributeChanged();
         }
 
-        this.selectedCalculatedAttribute = clone(emptyCalculatedAttribute);
-        this.hasSelectedCalculatedAttribute = false;
+         selectedCalculatedAttribute.value = clone(emptyCalculatedAttribute);
+         hasSelectedCalculatedAttribute = false;
     }
-    onShowEquationEditorDialog(criterionEquationSetId: string) {
-        var currentEquation = clone(this.currentPage.equations.find(
+    function onShowEquationEditorDialog(criterionEquationSetId: string) {
+        var currentEquation = clone( currentPage.equations.find(
             _ => _.id == criterionEquationSetId,
         ));
-        this.currentCriteriaEquationSetSelectedId = criterionEquationSetId;
+         currentCriteriaEquationSetSelectedId = criterionEquationSetId;
         if (!isNil(currentEquation)) {
-            this.hasSelectedCalculatedAttribute = true;
+             hasSelectedCalculatedAttribute = true;
 
-            this.equationEditorDialogData = {
+             equationEditorDialogData.value = {
                 showDialog: true,
                 equation: currentEquation.equation,
             };
         }
     }
 
-    onShowEquationEditorDialogForDefaultEquation() {
-        this.defaultSelected = true;
-        this.equationEditorDialogData = {
+    function onShowEquationEditorDialogForDefaultEquation() {
+         defaultSelected.value = true;
+         equationEditorDialogData.value = {
             showDialog: true,
-            equation: this.defaultEquation.equation,
+            equation:  defaultEquation.value.equation,
         };
     }
-    onSubmitEquationEditorDialogResult(equation: Equation) {
-        this.equationEditorDialogData = clone(emptyEquationEditorDialogData);
+    function onSubmitEquationEditorDialogResult(equation: Equation) {
+         equationEditorDialogData.value = clone(emptyEquationEditorDialogData);
 
-        if (!isNil(equation) && this.hasSelectedCalculatedAttribute) {
-            var currItem = this.calculatedAttributeGridData.find(
-                _ => _.id == this.activeCalculatedAttributeId,
+        if (!isNil(equation) &&  hasSelectedCalculatedAttribute) {
+            var currItem =  calculatedAttributeGridData.value.find(
+                _ => _.id ==  activeCalculatedAttributeId,
             )!;
 
             if(!isNil(currItem)){
-                var pair = clone(this.currentPage.equations.find(_ => _.id == this.currentCriteriaEquationSetSelectedId));
+                var pair = clone( currentPage.equations.find(_ => _.id ==  currentCriteriaEquationSetSelectedId));
                 if(!isNil(pair)){
                     pair.equation.expression = equation.expression;
-                    this.onUpdatePair(pair.id, pair);
-                    this.onPaginationChanged();
+                     onUpdatePair(pair.id, pair);
+                     onPaginationChanged();
                 }
             }
-            this.onSelectedAttributeChanged();
+             onSelectedAttributeChanged();
         }
-        else if (!isNil(equation) && this.defaultSelected) {
+        else if (!isNil(equation) &&  defaultSelected) {
 
-            var defaultPair = this.defaultEquation;
+            var defaultPair =  defaultEquation.value;
             if(!isNil(defaultPair)){
                 defaultPair.equation.expression = equation.expression;
-                this.updatedDefaultEquation(defaultPair);
-                this.checkHasUnsavedChanges();
+                 updatedDefaultEquation(defaultPair);
+                 checkHasUnsavedChanges();
             }           
         }
-        this.selectedCalculatedAttribute = clone(emptyCalculatedAttribute);
-        this.hasSelectedCalculatedAttribute = false;
-        this.defaultSelected = false;
+         selectedCalculatedAttribute.value = clone(emptyCalculatedAttribute);
+         hasSelectedCalculatedAttribute = false;
+         defaultSelected.value = false;
     }
-    onRemoveCalculatedAttribute(criterionEquationSetId: string) {
-        var currItem = this.calculatedAttributeGridData.find(
-            _ => _.id == this.activeCalculatedAttributeId,
+    function onRemoveCalculatedAttribute(criterionEquationSetId: string) {
+        var currItem =  calculatedAttributeGridData.value.find(
+            _ => _.id ==  activeCalculatedAttributeId,
         );
         if(!isNil(currItem)){
-            var pair = clone(this.currentPage.equations.find(_ => _.id === criterionEquationSetId))
+            var pair = clone( currentPage.equations.find(_ => _.id === criterionEquationSetId))
             if(!isNil(pair)){
-                var addPairs = this.addedPairs.get(currItem.id);
-                var updatePairs = this.updatedPairs.get(currItem.id);
+                var addPairs =  addedCalcPairs.get(currItem.id);
+                var updatePairs =  updatedPairs.get(currItem.id);
                 if(!isNil(addPairs)){
                     if(!isNil(find(propEq('id', criterionEquationSetId), addPairs))){
                         addPairs = addPairs.filter(_ => _.id !== criterionEquationSetId);
-                        this.addedPairs.set(currItem.id, addPairs);
+                         addedCalcPairs.set(currItem.id, addPairs);
                     }                       
                     else{
-                        this.removePair(currItem.id, criterionEquationSetId);
+                         removePair(currItem.id, criterionEquationSetId);
                     }                  
                 }  
                 else if (!isNil(updatePairs)){
                     if(!isNil(find(propEq('id', criterionEquationSetId), updatePairs))){
                         updatePairs = updatePairs.filter(_ => _.id !== criterionEquationSetId);
-                        this.updatedPairs.set(currItem.id, updatePairs);
+                         updatedPairs.set(currItem.id, updatePairs);
                     }                       
-                    this.removePair(currItem.id, criterionEquationSetId);                        
+                     removePair(currItem.id, criterionEquationSetId);                        
                 }                 
                 else
-                    this.removePair(currItem.id, criterionEquationSetId);
-                this.onPaginationChanged();
+                     removePair(currItem.id, criterionEquationSetId);
+                 onPaginationChanged();
             }
         }
         
-        this.onSelectedAttributeChanged()
+         onSelectedAttributeChanged()
     }
 
-    removePair(calcAttriId:string, pairId: string){
-        var deletionPair = this.deletionPairsIds.get(calcAttriId);
+    function removePair(calcAttriId:string, pairId: string){
+        var deletionPair =  deletionPairsIds.get(calcAttriId);
         if(!isNil(deletionPair))
             deletionPair.push(pairId);
         else 
-            this.deletionPairsIds.set(calcAttriId, [pairId]);
+             deletionPairsIds.set(calcAttriId, [pairId]);
     }
-    onDiscardChanges() {
-        this.librarySelectItemValue = null;
-        this.selectedCalculatedAttributeLibrary = clone(
+    function onDiscardChanges() {
+         librarySelectItemValue.value = '';
+         selectedCalculatedAttributeLibrary.value = clone(
             emptyCalculatedAttributeLibrary,
         );
         setTimeout(() => {
-            if (this.hasScenario) {
-                this.resetGridData();
-                this.clearChanges();
-                this.resetPage();
+            if ( hasScenario.value) {
+                 resetGridData();
+                 clearChanges();
+                 resetPage();
             }
         });
-        this.parentLibraryName = this.loadedParentName;
-        this.parentLibraryId = this.loadedParentId;
+         parentLibraryName =  loadedParentName;
+         parentLibraryId =  loadedParentId;
     }
 
-    resetGridData() {
-        this.calculatedAttributeGridData = clone(
-            this.stateScenarioCalculatedAttributes,
+    function resetGridData() {
+         calculatedAttributeGridData.value = clone(
+             stateScenarioCalculatedAttributes.value,
         );
 
-        if (this.calculatedAttributeGridData != undefined) {
-            var currItem = this.calculatedAttributeGridData.find(
-                _ => _.id == this.activeCalculatedAttributeId,
+        if ( calculatedAttributeGridData.value != undefined) {
+            var currItem =  calculatedAttributeGridData.value.find(
+                _ => _.id ==  activeCalculatedAttributeId,
             )!;
 
             if (currItem != undefined) {
-                this.attributeSelectItemValue = clone(currItem.attribute);
-                this.isAttributeSelectedItemValue = true;
+                 attributeSelectItemValue.value = clone(currItem.attribute);
+                 isAttributeSelectedItemValue = true;
 
-                this.setTimingsMultiSelect(currItem.calculationTiming);
-                this.selectedAttribute = currItem;
+                 setTimingsMultiSelect(currItem.calculationTiming);
+                 selectedAttribute = currItem;
                 // Setting up default values for null object, because API is sending it as null.
-                this.selectedAttribute.equations.forEach(_ => {
+                 selectedAttribute.equations.forEach(_ => {
                     if (isNil(_.criteriaLibrary)) {
                         _.criteriaLibrary = clone(emptyCriterionLibrary);
                         _.criteriaLibrary.id = getNewGuid();
                         _.criteriaLibrary.isSingleUse = true;
                     }
                 });
-                this.onSelectedAttributeChanged();
-            } else if (this.calculatedAttributeGridData.length > 0) {
-                this.attributeSelectItemValue = this.calculatedAttributeGridData[0].attribute;
-                this.isAttributeSelectedItemValue = true;
-                this.setTimingsMultiSelect(
-                    this.calculatedAttributeGridData[0].calculationTiming,
+                 onSelectedAttributeChanged();
+            } else if ( calculatedAttributeGridData.value.length > 0) {
+                 attributeSelectItemValue.value =  calculatedAttributeGridData.value[0].attribute;
+                 isAttributeSelectedItemValue = true;
+                 setTimingsMultiSelect(
+                     calculatedAttributeGridData.value[0].calculationTiming,
                 );
             } else {
-                this.attributeSelectItemValue = null;
-                this.isAttributeSelectedItemValue = false;
+                 attributeSelectItemValue.value = '';
+                 isAttributeSelectedItemValue = false;
             }
         }
     }
-    setTimingsMultiSelect(selectedItem: number) {
+    function setTimingsMultiSelect(selectedItem: number) {
         if (selectedItem == undefined) {
             selectedItem = Timing.OnDemand;
         }
-        var localTiming = this.attributeTimingSelectItems.find(
+        var localTiming =  attributeTimingSelectItems.value.find(
             _ => _.value == selectedItem,
-        )!.text;
-        this.attributeTimingSelectItemValue = selectedItem;
-        this.isTimingSelectedItemValue = true;
+        )!.value;
+         attributeTimingSelectItemValue.value = localTiming as string;
+         isTimingSelectedItemValue = true;
     }
-    setDefaultAttributeOnLoad(localCalculatedAttribute: CalculatedAttribute) {
-        this.attributeSelectItemValue = clone(
+    function setDefaultAttributeOnLoad(localCalculatedAttribute: CalculatedAttribute) {
+         attributeSelectItemValue.value = clone(
             localCalculatedAttribute.attribute,
         );
-        this.isAttributeSelectedItemValue = true;
+         isAttributeSelectedItemValue = true;
 
-        this.setTimingsMultiSelect(localCalculatedAttribute.calculationTiming);
-        this.activeCalculatedAttributeId = localCalculatedAttribute.id;
-        this.selectedAttribute =
+         setTimingsMultiSelect(localCalculatedAttribute.calculationTiming);
+         activeCalculatedAttributeId = localCalculatedAttribute.id;
+         selectedAttribute =
             localCalculatedAttribute != undefined
                 ? localCalculatedAttribute
-                : this.selectedAttribute;
+                :  selectedAttribute;
     }
 
-    calculatedAttributeGridModelConverter(item: CalculatedAttribute): CalculatedAttributeGridModel[]{
+    function calculatedAttributeGridModelConverter(item: CalculatedAttribute): CalculatedAttributeGridModel[]{
         let toReturn: CalculatedAttributeGridModel[] = []
         if(!isNil(item.equations))
         {
@@ -1343,161 +1385,160 @@ export default class CalculatedAttributeEditor extends Vue {
         return toReturn
     }
 
-    onUpdateCalcAttr(rowId: string, updatedRow: CalculatedAttribute){
-        var addedrow = this.addedCalcAttr.find(_ => _.id === rowId);
+    function onUpdateCalcAttr(rowId: string, updatedRow: CalculatedAttribute){
+        
+        var addedrow =  addedCalcAttr.find(_ => _.id === rowId);
         if(!isNil(addedrow)){
             addedrow = updatedRow;
             return;
         }
             
-        let mapEntry = this.updatedCalcAttrMap.get(rowId)
+        let mapEntry =  updatedCalcAttrMap.get(rowId)
 
         if(isNil(mapEntry)){
-            const row = this.CalcAttrCache;
+            const row =  CalcAttrCache;
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row) && row.attribute === updatedRow.attribute)
-                this.updatedCalcAttrMap.set(rowId, [row , updatedRow])
+                 updatedCalcAttrMap.set(rowId, [row , updatedRow])
         }
         else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
             mapEntry[1] = updatedRow;
         }
         else
-            this.updatedCalcAttrMap.delete(rowId)
+             updatedCalcAttrMap.delete(rowId)
 
-        this.checkHasUnsavedChanges();
+         checkHasUnsavedChanges();
     }
 
-    onUpdatePair(rowId: string, updatedRow: CriterionAndEquationSet){
-        if(!isNil(this.addedPairs.get(this.selectedAttribute.id)))
-            if(any(propEq('id', rowId), this.addedPairs.get(this.selectedAttribute.id)!)){
-                let amounts = this.addedPairs.get(this.selectedAttribute.id)!
+    function onUpdatePair(rowId: string, updatedRow: CriterionAndEquationSet){
+        if(!isNil( addedCalcPairs.get( selectedAttribute.id)))
+            if(any(propEq('id', rowId),  addedCalcPairs.get( selectedAttribute.id)!)){
+                let amounts =  addedCalcPairs.get( selectedAttribute.id)!
                 amounts[amounts.findIndex(b => b.id == rowId)] = updatedRow;
                 return;
             }               
 
-        let mapEntry = this.updatedPairsMaps.get(rowId)
+        let mapEntry =  updatedPairsMaps.get(rowId)
 
         if(isNil(mapEntry)){
-            const row = this.pairsCache.find(r => r.id === rowId);
+            const row =  pairsCache.find(r => r.id === rowId);
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row)){
-                this.updatedPairsMaps.set(rowId, [row , updatedRow])
-                if(!isNil(this.updatedPairs.get(this.selectedAttribute.id)))
-                    this.updatedPairs.get(this.selectedAttribute.id)!.push(updatedRow)
+                 updatedPairsMaps.set(rowId, [row , updatedRow])
+                if(!isNil( updatedPairs.get( selectedAttribute.id)))
+                     updatedPairs.get( selectedAttribute.id)!.push(updatedRow)
                 else
-                    this.updatedPairs.set(this.selectedAttribute.id, [updatedRow])
+                     updatedPairs.set( selectedAttribute.id, [updatedRow])
             }               
         }
         else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
             mapEntry[1] = updatedRow;
-            let amounts = this.updatedPairs.get(this.selectedAttribute.id)
+            let amounts =  updatedPairs.get( selectedAttribute.id)
             if(!isNil(amounts))
                 amounts[amounts.findIndex(r => r.id == updatedRow.id)] = updatedRow
         }
         else{
-            let amounts = this.updatedPairs.get(this.selectedCalculatedAttribute.id)
+            let amounts =  updatedPairs.get( selectedCalculatedAttribute.value.id)
             if(!isNil(amounts))
                 amounts.splice(amounts.findIndex(r => r.id == updatedRow.id), 1)
         }
             
 
-        this.checkHasUnsavedChanges();
+         checkHasUnsavedChanges();
     }
 
-    updatedDefaultEquation(defaultEq: CriterionAndEquationSet){
+    function updatedDefaultEquation(defaultEq: CriterionAndEquationSet){
         if(!isNil(defaultEq)){
-            var mapEntry = this.defaultEquations.get(this.selectedAttribute.id)
+            var mapEntry =  defaultEquations.value.get( selectedAttribute.id)
             if(isNil(mapEntry)){
-                if(hasUnsavedChangesCore('', defaultEq, this.defaultEquationCache)){
-                    this.defaultEquation = clone(defaultEq);
-                    this.defaultEquations.set(this.selectedAttribute.id, clone(defaultEq));
+                if(hasUnsavedChangesCore('', defaultEq,  defaultEquationCache)){
+                     defaultEquation.value = clone(defaultEq);
+                     defaultEquations.value.set( selectedAttribute.id, clone(defaultEq));
                 }
             }               
             else{               
-                if(hasUnsavedChangesCore('', defaultEq, this.defaultEquationCache)){
-                    this.defaultEquation = clone(defaultEq);
+                if(hasUnsavedChangesCore('', defaultEq,  defaultEquationCache)){
+                     defaultEquation.value = clone(defaultEq);
                     mapEntry = clone(defaultEq);
                 }
             }
         }
     }
 
-    clearChanges(){
-        this.updatedPairs.clear();
-        this.updatedPairsMaps.clear();
-        this.addedPairs.clear();
-        this.deletionPairsIds.clear();
-        this.updatedCalcAttrMap.clear();
-        this.defaultEquations.clear();
-        if(this.addedCalcAttr.length > 0){
-            var addedIds = this.addedCalcAttr.map(_ => _.id);
-            this.calculatedAttributeGridData = this.calculatedAttributeGridData.filter(_ => !addedIds.includes(_.id))
-            this.addedCalcAttr = [];
+    function clearChanges(){
+         updatedPairs.clear();
+         updatedPairsMaps.clear();
+         addedCalcPairs.clear();
+         deletionPairsIds.clear();
+         updatedCalcAttrMap.clear();
+         defaultEquations.value.clear();
+        if( addedCalcAttr.length > 0){
+            var addedIds =  addedCalcAttr.map(_ => _.id);
+             calculatedAttributeGridData.value =  calculatedAttributeGridData.value.filter(_ => !addedIds.includes(_.id))
+             addedCalcAttr = [];
         }  
     }
 
-    resetPage(){
-        this.pagination.page = 1;
-        this.onPaginationChanged();
+    function resetPage(){
+         pagination.page = 1;
+         onPaginationChanged();
     }
 
-    checkHasUnsavedChanges(){
+    function checkHasUnsavedChanges(){       
         const hasUnsavedChanges: boolean = 
-            this.deletionPairsIds.size > 0 || 
-            this.addedPairs.size > 0 ||
-            this.updatedCalcAttrMap.size > 0 || 
-            this.updatedPairs.size > 0 || 
-            this.addedCalcAttr.length > 0 ||
-            this.defaultEquations.size > 0 ||
-            (this.hasScenario && this.hasSelectedLibrary) ||
-            (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.selectedCalculatedAttributeLibrary, this.stateSelectedCalculatedAttributeLibrary))
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+             deletionPairsIds.size > 0 || 
+             addedCalcPairs.size > 0 ||
+             updatedCalcAttrMap.size > 0 || 
+             updatedPairs.size > 0 || 
+             addedCalcAttr.length > 0 ||
+             defaultEquations.value.size > 0 ||
+            ( hasScenario.value &&  hasSelectedLibrary.value) ||
+            ( hasSelectedLibrary.value && hasUnsavedChangesCore('',  selectedCalculatedAttributeLibrary.value,  stateSelectedCalculatedAttributeLibrary.value))
+         setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    onSearchClick(){
-        this.currentSearch = this.gridSearchTerm;
-        this.resetPage();
+    function onSearchClick(){
+         currentSearch =  gridSearchTerm;
+         resetPage();
     }
 
-    onClearClick(){
-        this.gridSearchTerm = '';
-        this.onSearchClick();
+    function onClearClick(){
+         gridSearchTerm.value = '';
+         onSearchClick();
     }
 
-    CheckUnsavedDialog(next: any, otherwise: any) {
+    function CheckUnsavedDialog(next: any, otherwise: any) {
         const hasUnsavedChanges: boolean = 
-            this.deletionPairsIds.size > 0 || 
-            this.addedPairs.size > 0 ||
-            this.updatedCalcAttrMap.size > 0 || 
-            this.updatedPairs.size > 0 || 
-            this.addedCalcAttr.length > 0 ||
-            (this.hasSelectedLibrary && !this.hasScenario && hasUnsavedChangesCore('', this.selectedCalculatedAttributeLibrary, this.stateSelectedCalculatedAttributeLibrary))
-        if (hasUnsavedChanges && this.unsavedDialogAllowed) {
-            // @ts-ignore
-            Vue.dialog
-                .confirm(
-                    'You have unsaved changes. Are you sure you wish to continue?',
-                    { reverse: true },
-                )
-                .then(() => next())
-                .catch(() => otherwise())
+             deletionPairsIds.size > 0 || 
+             addedCalcPairs.size > 0 ||
+             updatedCalcAttrMap.size > 0 || 
+             updatedPairs.size > 0 || 
+             addedCalcAttr.length > 0
+        if (hasUnsavedChanges &&  unsavedDialogAllowed) {
 
+            confirm.require({
+                message: "You have unsaved changes. Are you sure you wish to continue?",
+                acceptLabel: "Continue",
+                rejectLabel: "Close",
+                accept: ()=>next(),
+                reject: ()=>otherwise()
+            });
         } 
         else {
-            this.unsavedDialogAllowed = true;
+             unsavedDialogAllowed = true;
             next();
         }
     };
 
-    onShowShareCalculatedAttributeLibraryDialog(calculatedAttributeLibrary: CalculatedAttributeLibrary) {
-        this.shareCalculatedAttributeLibraryDialogData = {
+    function onShowShareCalculatedAttributeLibraryDialog(calculatedAttributeLibrary: CalculatedAttributeLibrary) {
+         shareCalculatedAttributeLibraryDialogData.value = {
             showDialog:true,
             calculatedAttributeLibrary: clone(calculatedAttributeLibrary)
         }
     }
 
-    onShareCalculatedAttributeDialogSubmit(calculatedAttributeLibraryUsers: CalculatedAttributeLibraryUser[]) {
-        this.shareCalculatedAttributeLibraryDialogData = clone(emptyShareCalculatedAttributeLibraryDialogData);
+    function onShareCalculatedAttributeDialogSubmit(calculatedAttributeLibraryUsers: CalculatedAttributeLibraryUser[]) {
+         shareCalculatedAttributeLibraryDialogData.value = clone(emptyShareCalculatedAttributeLibraryDialogData);
 
-                if (!isNil(calculatedAttributeLibraryUsers) && this.selectedCalculatedAttributeLibrary.id !== getBlankGuid())
+                if (!isNil(calculatedAttributeLibraryUsers) &&  selectedCalculatedAttributeLibrary.value.id !== getBlankGuid())
                 {
                     let libraryUserData: LibraryUser[] = [];
 
@@ -1519,94 +1560,97 @@ export default class CalculatedAttributeEditor extends Vue {
                         //add library user to an array
                         libraryUserData.push(libraryUser);
                     });
-                    if (!isNullOrUndefined(this.selectedCalculatedAttributeLibrary.id) ) {
-                        this.getIsSharedLibraryAction(this.selectedCalculatedAttributeLibrary).then(this.isShared = this.isSharedLibrary);
+                    if (!isNil( selectedCalculatedAttributeLibrary.value.id) ) {
+                         getIsSharedLibraryAction( selectedCalculatedAttributeLibrary.value).then(()=>isShared = isSharedLibrary.value)
                     }
                     //update calculated attribute library sharing
-                    CalculatedAttributeService.upsertOrDeleteCalculatedAttributeLibraryUsers(this.selectedCalculatedAttributeLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+                    CalculatedAttributeService.upsertOrDeleteCalculatedAttributeLibraryUsers( selectedCalculatedAttributeLibrary.value.id, libraryUserData).then((response: AxiosResponse) => {
                         if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
                         {
-                            this.resetPage();
+                             resetPage();
                         }
                     });
                 }
     }
 
-    setParentLibraryName(libraryId: string) {
+    function setParentLibraryName(libraryId: string) {
         if (libraryId === "None") {
-            this.parentLibraryName = "None";
+             parentLibraryName = "None";
             return;
         }
         let foundLibrary: CalculatedAttributeLibrary = emptyCalculatedAttributeLibrary;
-        this.stateCalculatedAttributeLibraries.forEach(library => {
+         stateCalculatedAttributeLibraries.value.forEach(library => {
             if (library.id === libraryId ) {
                 foundLibrary = clone(library);
             }
         });
-        this.parentLibraryId = foundLibrary.id;
-        this.parentLibraryName = foundLibrary.name;
+         parentLibraryId = foundLibrary.id;
+         parentLibraryName = foundLibrary.name;
     }
 
-    initializePages(){
+    function initializePages(){
         const request: CalculatedAttributePagingRequestModel= {
             page: 1,
             rowsPerPage: 5,
             syncModel: {
-                libraryId: this.selectedCalculatedAttributeLibrary.id === this.uuidNIL ? null : this.selectedCalculatedAttributeLibrary.id,
-                updatedCalculatedAttributes: Array.from(this.updatedCalcAttrMap.values()).map(r => r[1]),
-                deletedPairs: mapToIndexSignature(this.deletionPairsIds),
-                updatedPairs: mapToIndexSignature( this.updatedPairs),
-                addedPairs: mapToIndexSignature(this.addedPairs),
-                addedCalculatedAttributes: this.addedCalcAttr,
-                defaultEquations: mapToIndexSignature(this.defaultEquations),
+                libraryId:  selectedCalculatedAttributeLibrary.value.id ===  uuidNIL ? null :  selectedCalculatedAttributeLibrary.value.id,
+                updatedCalculatedAttributes: Array.from( updatedCalcAttrMap.values()).map(r => r[1]),
+                deletedPairs: mapToIndexSignature( deletionPairsIds),
+                updatedPairs: mapToIndexSignature(  updatedPairs),
+                addedPairs: mapToIndexSignature( addedCalcPairs),
+                addedCalculatedAttributes:  addedCalcAttr,
+                defaultEquations: mapToIndexSignature( defaultEquations.value),
                 isModified: false
             },           
             sortColumn: '',
             isDescending: false,
             search: '',
-            attributeId: this.stateCalculatedAttributes.find(_ => _.name === this.selectedAttribute.attribute)!.id
+            attributeId:  stateCalculatedAttributes.value.find(_ => _.name ===  selectedAttribute.attribute)!.id
         };
         
-        if((!this.hasSelectedLibrary && this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
-            CalculatedAttributeService.getScenarioCalculatedAttrbiutetPage(this.selectedScenarioId, request).then(response => {
+        if((! hasSelectedLibrary.value &&  hasScenario.value) &&  selectedScenarioId !==  uuidNIL){
+            CalculatedAttributeService.getScenarioCalculatedAttrbiutetPage( selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as calculcatedAttributePagingPageModel;
-                    this.currentPage.equations = data.items;
-                    this.currentPage.calculationTiming = data.calculationTiming
-                    this.pairsCache = this.currentPage.equations;
-                    this.totalItems = data.totalItems;
-                    this.defaultEquation = data.defaultEquation;
-                    this.defaultEquationCache = clone(this.defaultEquation);
-                    this.selectedGridItem = this.calculatedAttributeGridModelConverter(this.currentPage)
-                    this.setTimingsMultiSelect(this.currentPage.calculationTiming);
+                     currentPage.equations = data.items;
+                     currentPage.calculationTiming = data.calculationTiming
+                     pairsCache =  currentPage.equations;
+                     totalItems = data.totalItems;
+                     defaultEquation.value = data.defaultEquation;
+                     defaultEquationCache = clone( defaultEquation);
+                     selectedGridItem.value =  calculatedAttributeGridModelConverter( currentPage)
+                     setTimingsMultiSelect( currentPage.calculationTiming);
 
-                    this.setParentLibraryName(data.libraryId);
-                    this.loadedParentId = data.libraryId;
-                    this.loadedParentName = this.parentLibraryName; //store original
-                    this.scenarioLibraryIsModified = data.isModified;
+                     setParentLibraryName(data.libraryId);
+                     loadedParentId = data.libraryId;
+                     loadedParentName =  parentLibraryName; //store original
+                     scenarioLibraryIsModified = data.isModified;
                 }
-                this.initializing = false;
+                 initializing = false;
             });
         }            
-        else if(this.hasSelectedLibrary)
-            CalculatedAttributeService.getLibraryCalculatedAttributePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+        else if( hasSelectedLibrary.value)
+            CalculatedAttributeService.getLibraryCalculatedAttributePage( librarySelectItemValue.value !== null ?  librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as calculcatedAttributePagingPageModel;
-                    this.currentPage.equations = data.items;
-                    this.currentPage.calculationTiming = data.calculationTiming
-                    this.pairsCache = this.currentPage.equations;
-                    this.totalItems = data.totalItems;
-                    this.defaultEquation = data.defaultEquation;
-                    this.defaultEquationCache = clone(this.defaultEquation);
-                    this.selectedGridItem = this.calculatedAttributeGridModelConverter(this.currentPage)
-                    this.setTimingsMultiSelect(this.currentPage.calculationTiming);
+                     currentPage.equations = data.items;
+                     currentPage.calculationTiming = data.calculationTiming
+                     pairsCache =  currentPage.equations;
+                     totalItems = data.totalItems;
+                     defaultEquation.value = data.defaultEquation;
+                     defaultEquationCache = clone( defaultEquation);
+                     selectedGridItem.value =  calculatedAttributeGridModelConverter( currentPage)
+                     setTimingsMultiSelect( currentPage.calculationTiming);
                 }
-                this.initializing = false;
+                 initializing = false;
             });
         else
-            this.initializing = false;
+             initializing = false;
     }
-}
+
+
+    
+    
 </script>
 <style>
 .sharing {

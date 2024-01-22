@@ -127,7 +127,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Arrange
             Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
 
             // Act
             var result = TestHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulation.Id);
@@ -209,7 +209,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Arrange
             Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             CreateScenarioTestData(simulation.Id);
 
             // Act
@@ -265,7 +265,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Arrange
             Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             CreateScenarioTestData(simulation.Id);
             _testScenarioBudgetPriority.BudgetPercentagePairs =
                 new List<BudgetPercentagePairEntity> { _testBudgetPercentagePair };

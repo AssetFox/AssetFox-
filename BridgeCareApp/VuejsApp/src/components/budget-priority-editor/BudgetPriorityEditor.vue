@@ -1,184 +1,208 @@
 <template>
-    <v-layout column class="Montserrat-font-family">
-        <v-flex xs12>
-            <v-layout justify-space-between row >              
-                <v-flex xs4 class="ghd-constant-header">
-                    <v-layout column>
-                        <v-subheader class="ghd-md-gray ghd-control-label">Select Budget Priority Library</v-subheader>
-                            <v-select id="BudgetPriorityEditor-library-vselect"
-                                :items='librarySelectItems' 
-                                append-icon=$vuetify.icons.ghd-down
-                                outline                           
-                                v-model='librarySelectItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
-                            </v-select>    
-                             <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>                       
-                    </v-layout>
-                </v-flex>
-                <v-flex xs4 class="ghd-constant-header">
-                    <v-layout row v-show='hasSelectedLibrary || hasScenario' class="shared-owner-flex-padding">
-                        <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content owner-padding">
+    <v-card class="elevation-0 vcard-main-layout">
+    <v-row>
+        <v-col cols="12">
+            <v-row align="center" justify="space-between">              
+                <v-col cols ="auto">   
+                    <div style="margin-bottom: 10px;">              
+                        <v-subheader class="ghd-md-gray ghd-control-label">Budget Priority Library</v-subheader>
+                    </div> 
+                    <v-select id="BudgetPriorityEditor-library-vselect"
+                        :items='librarySelectItems'  
+                        menu-icon=custom:GhdDownSvg                          
+                        item-title="text"
+                        item-value="value" 
+                        v-model='librarySelectItemValue'
+                        append-icon=ghd-down
+                        variant="outlined"
+                        density="compact"
+                        class="ghd-select ghd-text-field ghd-text-field-border">
+                    </v-select>    
+                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>                       
+                </v-col>
+                <v-col cols = "auto">
+                    <v-row v-show='hasSelectedLibrary || hasScenario'>
+                        <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content owner-padding" style="margin-top:6px;">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
-                        <v-divider class="owner-shared-divider" inset vertical
+                        <!-- <v-divider class="owner-shared-divider" vertical
                             v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
-                        </v-divider>
-                        <v-badge v-show="isShared" style="padding: 10px">
-                            <template v-slot: badge>
-                                <span>Shared</span>
-                            </template>
-                        </v-badge>
-                        <v-btn id="BudgetPriorityEditor-shareLibrary-vbtn" @click='onShowShareBudgetPriorityLibraryDialog(selectedBudgetPriorityLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        </v-divider> -->
+                        <v-btn id="BudgetPriorityEditor-shareLibrary-vbtn" @click='onShowShareBudgetPriorityLibraryDialog(selectedBudgetPriorityLibrary)'
+                             style="margin: 10px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                             v-show='!hasScenario'>
                             Share Library
                         </v-btn>
-                    </v-layout>                               
-                </v-flex>
-                <v-flex xs4 class="ghd-constant-header">
-                    <v-layout row align-end class="left-buttons-padding">
-                        <v-spacer></v-spacer>
-                        <v-btn id="BudgetPriorityEditor-addBudgetPriority-vbtn" @click='showCreateBudgetPriorityDialog = true' outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                    </v-row>                               
+                </v-col>
+                <v-col cols = "auto">
+                        <!-- <v-spacer></v-spacer> -->
+                        <v-btn id="BudgetPriorityEditor-addBudgetPriority-vbtn" @click='showCreateBudgetPriorityDialog = true' style="margin: 5px;" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show='hasSelectedLibrary || hasScenario'>Add Budget Priority</v-btn>
                         
-                        <v-btn id="BudgetPriorityEditor-createNewLibrary-vbtn" @click='onShowCreateBudgetPriorityLibraryDialog(false)' outline
+                        <v-btn id="BudgetPriorityEditor-createNewLibrary-vbtn" @click='onShowCreateBudgetPriorityLibraryDialog(false)' style="margin: 5px;" variant = "outlined"
                             v-show='!hasScenario' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' > 
                             Create New Library
                         </v-btn>
-                    </v-layout>
-                </v-flex>
-            </v-layout>
+                </v-col>
+            </v-row>
+        </v-col>
 
-        </v-flex>
-        <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>
-            <div class='priorities-data-table'>
-                <v-data-table :headers='budgetPriorityGridHeaders' 
-                              :items='budgetPriorityGridRows'
-                              :pagination.sync="pagination"
-                              :must-sort='true'
-                              :total-items="totalItems"
-                              :rows-per-page-items=[5,10,25]
-                              id = "BudgetPriority-priorities-vdatatable"
-                              class='v-table__overflow ghd-table' item-key='id' select-all
-                              sort-icon=$vuetify.icons.ghd-table-sort                              
-                              v-model='selectedBudgetPriorityGridRows' >
-                    <template slot='items' slot-scope='props'>
-                        <td>
-                            <v-checkbox id="BudgetPriorityEditor-deleteBudgetPriority-vcheckbox" hide-details primary v-model='props.selected'></v-checkbox>
-                        </td>
-                        <td v-for='header in budgetPriorityGridHeaders'>
-                            <div v-if="header.value === 'priorityLevel' || header.value === 'year'">
-                                <v-edit-dialog
-                                    :return-value.sync='props.item[header.value]'
-                                    @save='onEditBudgetPriority(props.item, header.value, props.item[header.value])'
-                                    large lazy>
-                                    <v-text-field v-if="header.value === 'priorityLevel'" readonly single-line
-                                                  class='sm-txt'
-                                                  :value='props.item[header.value]'
-                                                  :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                    <v-text-field v-else readonly single-line class='sm-txt'
-                                                  :value='props.item[header.value]' />
-                                    <template slot='input'>
-                                        <v-text-field v-if="header.value === 'priorityLevel'" label='Edit' single-line
-                                                      v-model.number='props.item[header.value]'
-                                                      :mask="'##########'"
-                                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotUnique(props.item[header.value], currentPriorityList)]" />
-                                        <v-text-field v-else label='Edit' single-line :mask="'####'"
-                                                      v-model.number='props.item[header.value]' />
-                                    </template>
-                                </v-edit-dialog>
-                            </div>
-                            <div v-else-if="header.value === 'criteria'">
-                                <v-layout align-center row style='flex-wrap:nowrap'>
-                                    <v-menu bottom min-height='500px' min-width='500px'>
-                                        <template slot='activator'>
-                                            <div v-if='stateScenarioSimpleBudgetDetails.length > 5'>
-                                                <v-btn class='ara-blue ghd-button-text' icon>
-                                                    <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')"/>
-                                                </v-btn>
-                                            </div>
-                                            <div v-else class='priority-criteria-output'>
-                                                <v-text-field readonly single-line class='sm-txt'
-                                                              :value='props.item.criteria' />
-                                            </div>
+        <v-col v-show='hasSelectedLibrary || hasScenario' cols="12">
+                <v-data-table-server 
+                    id = "BudgetPriority-priorities-vdatatable"
+                    :headers='budgetPriorityGridHeaders' 
+                    :items='budgetPriorityGridRows'
+                    :pagination.sync="pagination"
+                    :must-sort='true'
+                    :rows-per-page-items=[5,10,25]
+                    :items-length="totalItems"
+                    :items-per-page-options="[
+                        {value: 5, title: '5'},
+                        {value: 10, title: '10'},
+                        {value: 25, title: '25'},
+                    ]"
+                    item-key="id"
+                    show-select
+                    return-object 
+                    class='v-table__overflow ghd-table' :item-value="'id'"
+                    sort-asc-icon="custom:GhdTableSortAscSvg"
+                    sort-desc-icon="custom:GhdTableSortDescSvg"                           
+                    v-model='selectedBudgetPriorityGridRows'                                       
+                    v-model:sort-by="pagination.sort"
+                    v-model:page="pagination.page"
+                    v-model:items-per-page="pagination.rowsPerPage"
+                    @update:options="onPaginationChanged">
+
+                    <template v-slot:item="item">
+                        <tr>
+                            <td>
+                                <v-checkbox id="BudgetPriorityEditor-deleteBudgetPriority-vcheckbox" hide-details primary  v-model="selectedBudgetPriorityGridRows" :value="item.item"></v-checkbox>
+                            </td>
+                            <td v-for='header in budgetPriorityGridHeaders'>
+                                <div v-if="header.key === 'priorityLevel' || header.key === 'year'">
+                                    <editDialog
+                                        v-model:return-value='item.item[header.key]'
+                                        @save='onEditBudgetPriority(item.item, header.key, item.item[header.key])'
+                                        size="large" lazy>
+                                        <v-text-field v-if="header.key === 'priorityLevel'" readonly single-line
+                                            variant="underlined"
+                                            class='sm-txt'
+                                            :model-value="item.item[header.key]"
+                                            :rules="[rules['generalRules'].valueIsNotEmpty]" 
+                                            />
+                                        <v-text-field style="width: 75px;"
+                                            v-else readonly single-line class='sm-txt'
+                                            variant="underlined"
+                                            :model-value='item.item[header.key]' 
+                                        />
+                                        <template v-slot:input>
+                                            <v-text-field v-if="header.key === 'priorityLevel'" label='Edit' single-line
+                                                        v-model.number='item.item[header.key]'
+                                                        v-maska:[priorityMask]
+                                                        :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                                            <v-text-field v-else label='Edit' single-line v-maska:[generalMask]
+                                                        v-model.number='item.item[header.key]' />
                                         </template>
-                                        <v-card>
-                                            <v-card-text>
-                                                <v-textarea :value='props.item.criteria' full-width no-resize outline
-                                                            readonly rows='5' />
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-menu>
-                                    <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(props.item)' class='ghd-blue'
-                                           icon>
-                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                                    </editDialog>
+                                </div>
+                                <div v-else-if="header.key === 'criteria'">
+                                    <v-row>
+                                        <v-menu >
+                                            <template v-slot:activator="{ props }">
+                                                    <div style="display: flex; align-items: center;" v-if='stateScenarioSimpleBudgetDetails.length > 5'>
+                                                        <v-btn class='ara-blue ghd-button-text' v-bind="props" flat>
+                                                            <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
+                                                        </v-btn>
+                                                    </div>
+                                                    <div v-else class='priority-criteria-output' style="width: 1000px;">
+                                                        <v-text-field readonly single-line class='sm-txt' variant="underlined"
+                                                                    :model-value='item.item.criteria' />                                        
+                                                    </div>
+                                            </template>
+                                            <v-card>
+                                                <v-card-text>
+                                                    <v-textarea :model-value='item.item.criteria' full-width no-resize outline
+                                                                readonly rows='5' />
+                                                </v-card-text>
+                                            </v-card>
+                                        </v-menu>
+                                    </v-row>
+                                </div>
+                                <div v-else-if="header.title.endsWith('%')">
+                                    <editDialog
+                                        v-model:return-value='item.item[header.key]'
+                                        @save='onEditBudgetPercentagePair(item.item, header.key, item.item[header.key])'
+                                        size="large" lazy>
+                                        <v-text-field readonly single-line class='sm-txt' :model-value="item.item[header.key]" variant="underlined"
+                                                    :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.item[header.key], [0, 100])]" />
+                                        <template v-slot:input>
+                                            <v-text-field v-maska:[percentMask] label='Edit' single-line
+                                                        v-model="item.item[header.key]"
+                                                        :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(item.item[header.key], [0, 100])]" />
+                                        </template>
+                                    </editDialog>
+                                </div>
+                                <div v-else>
+                                    <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' flat>
+                                            <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                        </v-btn>
+                                    <v-btn  id="BudgetPriorityEditor-deleteBudgetPriority-btn" @click="onRemoveBudgetPriority(item.item.id)" flat>
+                                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
-                                </v-layout>
-                            </div>
-                            <div v-else-if="header.text.endsWith('%')">
-                                <v-edit-dialog
-                                    :return-value.sync='props.item[header.value]'
-                                    @save='onEditBudgetPercentagePair(props.item, header.value, props.item[header.value])'
-                                    large lazy>
-                                    <v-text-field readonly single-line class='sm-txt' :value='props.item[header.value]'
-                                                  :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [0, 100])]" />
-                                    <template slot='input'>
-                                        <v-text-field :mask="'###'" label='Edit' single-line
-                                                      v-model.number='props.item[header.value]'
-                                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [0, 100])]" />
-                                    </template>
-                                </v-edit-dialog>
-                            </div>
-                            <div v-else>
-                                <v-btn id="BudgetPriorityEditor-deleteBudgetPriority-btn" @click="onRemoveBudgetPriority(props.item.id)"  class="ghd-blue" icon>
-                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-                                </v-btn>
-                            </div>
-                        </td>
+                                </div>
+                            </td>
+                        </tr>
                     </template>
-                </v-data-table>
-                <v-btn :disabled='selectedBudgetPriorityIds.length === 0' @click='onRemoveBudgetPriorities'
-                    class='ghd-blue ghd-button' flat>
-                    Delete Selected
-                </v-btn>
-            </div>
-        </v-flex>
-        <v-flex v-show='hasSelectedLibrary && selectedScenarioId === uuidNIL'
-                xs12>
-            <v-layout justify-center>
-                <v-flex >
-                    <v-subheader class="ghd-subheader ">Description</v-subheader>
-                    <v-textarea no-resize outline rows='4' class="ghd-text-field-border"
-                                v-model='selectedBudgetPriorityLibrary.description'
-                                @input='checkHasUnsavedChanges()'>
-                    </v-textarea>
-                </v-flex>
-            </v-layout>
-        </v-flex>
-        <v-flex xs12>           
-            <v-layout justify-center row v-show='hasSelectedLibrary || hasScenario'>
-                <v-btn  flat @click='onDiscardChanges'
-                       v-show='hasScenario' :disabled='!hasUnsavedChanges' class='ghd-blue ghd-button-text ghd-button'>
+                </v-data-table-server>
+            <v-btn flat
+                :disabled='selectedBudgetPriorityIds.length === 0'
+                @click='onRemoveBudgetPriorities'
+                class='ghd-blue ghd-button'
+                variant="text">
+                Delete Selected
+            </v-btn>
+        </v-col>
+        <v-divider
+            :thickness="2"
+            class="border-opacity-100"
+        ></v-divider>
+        <v-col cols="12" v-show='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
+            <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
+            <v-textarea class="ghd-control-text ghd-control-border" variant="outlined" density="compact"
+                        v-model='selectedBudgetPriorityLibrary.description'
+                        @update:model-value="checkHasUnsavedChanges()">
+            </v-textarea>
+        </v-col>
+        <v-col cols = "12">   
+            <div v-if="!hasUniquePriorityLevels()" class="priorities-error">
+                Each item must have a unique priority level.
+            </div>        
+            <v-row style="padding-bottom: 40px;" justify="center" v-show='hasSelectedLibrary || hasScenario'>
+                <v-btn  variant = "flat" @click='onDiscardChanges'
+                       v-show='hasScenario' :disabled='!hasUnsavedChanges' style="margin: 5px;" class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
-                <v-btn id="BudgetPriorityEditor-createAsNewLibrary-vbtn" @click='onShowCreateBudgetPriorityLibraryDialog(true)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                <v-btn id="BudgetPriorityEditor-createAsNewLibrary-vbtn" @click='onShowCreateBudgetPriorityLibraryDialog(true)' style="margin: 5px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                        :disabled='disableCrudButtons()'>
                     Create as New Library
                 </v-btn>
                 <v-btn @click='onUpsertScenarioBudgetPriorities'
-                       class='ghd-blue-bg white--text ghd-button-text ghd-button'
+                       class='ghd-blue-bg text-white ghd-button-text ghd-button' style="margin: 5px;"
                        v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
                 </v-btn>
-                <v-btn id="BudgetPriorityEditor-deleteLibrary-vbtn"  @click='onShowConfirmDeleteAlert' outline
+                <v-btn id="BudgetPriorityEditor-deleteLibrary-vbtn"  @click='onShowConfirmDeleteAlert' variant = "outlined" style="margin: 5px;"
                        v-show='!hasScenario' :disabled='!hasSelectedLibrary' class='ghd-blue ghd-button-text ghd-button'>
                     Delete Library
                 </v-btn>             
                 <v-btn id="BudgetPriorityEditor-updateLibrary-vbtn" @click='onUpsertBudgetPriorityLibrary'
-                       class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                       class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button' style="margin: 5px;"
                        v-show='!hasScenario' :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
                     Update Library
                 </v-btn>
-            </v-layout>
-        </v-flex>
+            </v-row>
+        </v-col>
         <ShareBudgetPriorityLibraryDialog 
             :dialogData='shareBudgetPriorityLibraryDialogData' 
             @submit='onShareBudgetPriorityLibraryDialogSubmit'
@@ -192,331 +216,332 @@
 
         <GeneralCriterionEditorDialog :dialogData='criterionEditorDialogData'
                                       @submit='onSubmitCriterionLibraryEditorDialogResult' />
-    </v-layout>
+        <ConfirmDialog></ConfirmDialog>
+    </v-row>
+</v-card>
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Watch } from 'vue-property-decorator';
-import { Action, State, Getter, Mutation } from 'vuex-class';
-import {
-    BudgetPercentagePair,
-    BudgetPriority,
-    BudgetPriorityGridDatum,
-    BudgetPriorityLibrary,
-    BudgetPriorityLibraryUser,
-    emptyBudgetPriority,
-    emptyBudgetPriorityLibrary,
-    emptyBudgetPriorityLibraryUsers
-} from '@/shared/models/iAM/budget-priority';
-import CreatePriorityDialog
-    from '@/components/budget-priority-editor/budget-priority-editor-dialogs/CreateBudgetPriorityDialog.vue';
-import { any, clone, contains, find, findIndex, isNil, prepend, propEq, update } from 'ramda';
-import { DataTableHeader } from '@/shared/models/vue/data-table-header';
-import { hasValue } from '@/shared/utils/has-value-util';
-import { getPropertyValues } from '@/shared/utils/getter-utils';
-import { setItemPropertyValue } from '@/shared/utils/setter-utils';
-import { SelectItem } from '@/shared/models/vue/select-item';
-import {
-    CreateBudgetPriorityLibraryDialogData,
-    emptyCreateBudgetPriorityLibraryDialogData,
-} from '@/shared/models/modals/create-budget-priority-library-dialog-data';
-import {
-    ShareBudgetPriorityLibraryDialogData,
-    emptyShareBudgetPriorityLibraryDialogData
-} from '@/shared/models/modals/share-budget-priority-library-dialog-data';
-import ShareBudgetPriorityLibraryDialog from './budget-priority-editor-dialogs/ShareBudgetPriorityLibraryDialog.vue';
-import CreatePriorityLibraryDialog
-    from '@/components/budget-priority-editor/budget-priority-editor-dialogs/CreateBudgetPriorityLibraryDialog.vue';
-import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
-import Alert from '@/shared/modals/Alert.vue';
-import { hasUnsavedChangesCore, isEqual, sortNonObjectLists } from '@/shared/utils/has-unsaved-changes-helper';
-import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
-import { SimpleBudgetDetail } from '@/shared/models/iAM/investment';
-import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import { getAppliedLibraryId, hasAppliedLibrary } from '@/shared/utils/library-utils';
-import { CriterionLibrary } from '@/shared/models/iAM/criteria';
-import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
-import { getUserName } from '@/shared/utils/get-user-info';
-import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
-import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
-import BudgetPriorityService from '@/services/budget-priority.service';
-import { AxiosResponse } from 'axios';
-import { http2XX } from '@/shared/utils/http-utils';
-import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
-import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
-import { sortByProperty } from '../../shared/utils/sorter-utils';
-import {LibraryUser} from '@/shared/models/iAM/user'
-import { isNullOrUndefined } from 'util';
+<script setup lang='ts'>
+    import { ref, watch, shallowReactive, onBeforeUnmount, ShallowRef, shallowRef, computed } from 'vue';
+    import editDialog from '@/shared/modals/Edit-Dialog.vue'
+    import {
+        BudgetPercentagePair,
+        BudgetPriority,
+        BudgetPriorityGridDatum,
+        BudgetPriorityLibrary,
+        BudgetPriorityLibraryUser,
+        emptyBudgetPriority,
+        emptyBudgetPriorityLibrary,
+        emptyBudgetPriorityLibraryUsers
+    } from '@/shared/models/iAM/budget-priority';
+    import { any, clone, contains, find, findIndex, isNil, prepend, propEq, update } from 'ramda';
+        import { hasValue } from '@/shared/utils/has-value-util';
+    import { getPropertyValues } from '@/shared/utils/getter-utils';
+    import { setItemPropertyValue } from '@/shared/utils/setter-utils';
+    import { SelectItem } from '@/shared/models/vue/select-item';
+    import {
+        CreateBudgetPriorityLibraryDialogData,
+        emptyCreateBudgetPriorityLibraryDialogData,
+    } from '@/shared/models/modals/create-budget-priority-library-dialog-data';
+    import {
+        ShareBudgetPriorityLibraryDialogData,
+        emptyShareBudgetPriorityLibraryDialogData
+    } from '@/shared/models/modals/share-budget-priority-library-dialog-data';   
+    import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
+    import ConfirmDeleteAlert from '@/shared/modals/Alert.vue';
+    import { hasUnsavedChangesCore, isEqual, sortNonObjectLists } from '@/shared/utils/has-unsaved-changes-helper';
+    import { InputValidationRules, rules as validationRules } from '@/shared/utils/input-validation-rules';
+    import { SimpleBudgetDetail } from '@/shared/models/iAM/investment';
+    import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
+    import { getAppliedLibraryId, hasAppliedLibrary } from '@/shared/utils/library-utils';
+    import { CriterionLibrary } from '@/shared/models/iAM/criteria';
+    import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
+    import { getUserName } from '@/shared/utils/get-user-info';
+    import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
+    import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
+    import BudgetPriorityService from '@/services/budget-priority.service';
+    import { AxiosResponse } from 'axios';
+    import { http2XX } from '@/shared/utils/http-utils';
+    import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
+    import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+    import { sortByProperty } from '../../shared/utils/sorter-utils';
+    import {LibraryUser} from '@/shared/models/iAM/user'
+    import { useStore } from 'vuex';
+    import { useRouter } from 'vue-router';
+    import CreatePriorityDialog from '@/components/budget-priority-editor/budget-priority-editor-dialogs/CreateBudgetPriorityDialog.vue'
+    import CreatePriorityLibraryDialog  from '@/components/budget-priority-editor/budget-priority-editor-dialogs/CreateBudgetPriorityLibraryDialog.vue'
+    import ShareBudgetPriorityLibraryDialog  from '@/components/budget-priority-editor/budget-priority-editor-dialogs/ShareBudgetPriorityLibraryDialog.vue'
+    import { useConfirm } from 'primevue/useconfirm';
+    import ConfirmDialog from 'primevue/confirmdialog';
+import { getUrl } from '@/shared/utils/get-url';
+import { faL } from '@fortawesome/free-solid-svg-icons';
+import { vMaska } from "maska"
 
-const ObjectID = require('bson-objectid');
-
-@Component({
-    components: {
-        CreatePriorityLibraryDialog, CreatePriorityDialog, GeneralCriterionEditorDialog, ConfirmDeleteAlert: Alert, ShareBudgetPriorityLibraryDialog
-    },
-})
-export default class BudgetPriorityEditor extends Vue {
-    @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
-    @State(state => state.budgetPriorityModule.budgetPriorityLibraries) stateBudgetPriorityLibraries: BudgetPriorityLibrary[];
-    @State(state => state.budgetPriorityModule.selectedBudgetPriorityLibrary) stateSelectedBudgetPriorityLibrary: BudgetPriorityLibrary;
-    @State(state => state.budgetPriorityModule.scenarioBudgetPriorities) stateScenarioBudgetPriorities: BudgetPriority[];
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-    @State(state => state.budgetPriorityModule.hasPermittedAccess) hasPermittedAccess: boolean;
-    @State(state => state.budgetPriorityModule.isSharedLibrary) isSharedLibrary: boolean;
-    @Action('getIsSharedBudgetPriorityLibrary') getIsSharedLibraryAction: any;
-    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('getBudgetPriorityLibraries') getBudgetPriorityLibrariesAction: any;
-    @Action('selectBudgetPriorityLibrary') selectBudgetPriorityLibraryAction: any;
-    @Action('upsertBudgetPriorityLibrary') upsertBudgetPriorityLibraryAction: any;
-    @Action('deleteBudgetPriorityLibrary') deleteBudgetPriorityLibraryAction: any;
-    @Action('getScenarioSimpleBudgetDetails') getScenarioSimpleBudgetDetailsAction: any;
-    @Action('upsertScenarioBudgetPriorities') upsertScenarioBudgetPrioritiesAction: any;
-    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
-    @Action('selectScenario') selectScenarioAction: any;
-
-    @Getter('getUserNameById') getUserNameByIdGetter: any;
-    @Mutation('budgetPriorityLibraryMutator') budgetPriorityLibraryMutator: any;
-    @Mutation('selectedBudgetPriorityLibraryMutator') selectedBudgetPriorityLibraryMutator: any;
+    let store = useStore();
+    const confirm = useConfirm();
+    const $router = useRouter();
+    let stateScenarioSimpleBudgetDetails = computed<SimpleBudgetDetail[]>(() => store.state.investmentModule.scenarioSimpleBudgetDetails);
+    let stateBudgetPriorityLibraries = computed<BudgetPriorityLibrary[]>(() => store.state.budgetPriorityModule.budgetPriorityLibraries);
+    let stateSelectedBudgetPriorityLibrary = computed<BudgetPriorityLibrary>(() => store.state.budgetPriorityModule.selectedBudgetPriorityLibrary);
+    let stateScenarioBudgetPriorities = computed<BudgetPriority[]>(() => store.state.budgetPriorityModule.scenarioBudgetPriorities);
+    let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
+    let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
+    let hasPermittedAccess = computed<boolean>(() => store.state.budgetPriorityModule.hasPermittedAccess);
+    let isSharedLibrary = computed<boolean>(() => store.state.budgetPriorityModule.isSharedLibrary);
+    async function getIsSharedLibraryAction(payload?: any): Promise<any>{await store.dispatch('getIsSharedBudgetPriorityLibrary', payload)}
+    async function getHasPermittedAccessAction(payload?: any): Promise<any>{await store.dispatch('getHasPermittedAccess', payload)}
+    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification', payload) }
+    async function getBudgetPriorityLibrariesAction(payload?: any): Promise<any>{await store.dispatch('getBudgetPriorityLibraries', payload)}
+    async function selectBudgetPriorityLibraryAction(payload?: any): Promise<any>{await store.dispatch('selectBudgetPriorityLibrary', payload)}
+    async function upsertBudgetPriorityLibraryAction(payload?: any): Promise<any>{await store.dispatch('upsertBudgetPriorityLibrary', payload) }
+    async function deleteBudgetPriorityLibraryAction(payload?: any): Promise<any>{await store.dispatch('deleteBudgetPriorityLibrary', payload)}
+    async function getScenarioSimpleBudgetDetailsAction(payload?: any): Promise<any>{await store.dispatch('getScenarioSimpleBudgetDetails', payload)} 
+    async function upsertScenarioBudgetPrioritiesAction(payload?: any): Promise<any>{await store.dispatch('upsertScenarioBudgetPriorities', payload) }
+    async function setHasUnsavedChangesAction(payload?: any): Promise<any>{await store.dispatch('setHasUnsavedChanges', payload) }
+    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification', payload)}
+    async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>{await store.dispatch( 'getCurrentUserOrSharedScenario', payload)}
+    function selectScenarioAction(payload?: any): void { store.dispatch('selectScenario', payload)}
     
-    addedRows: BudgetPriority[] = [];
-    updatedRowsMap:Map<string, [BudgetPriority, BudgetPriority]> = new Map<string, [BudgetPriority, BudgetPriority]>();//0: original value | 1: updated value
-    deletionIds: string[] = [];
-    rowCache: BudgetPriority[] = [];
-    gridSearchTerm = '';
-    currentSearch = '';
-    pagination: Pagination = clone(emptyPagination);
-    isPageInit = false;
-    totalItems = 0;
-    currentPage: BudgetPriority[] = [];
-    initializing: boolean = true;
-    currentPriorityList: number[] = [];
+    let getUserNameByIdGetter: any = store.getters.getUserNameById;
+    function budgetPriorityLibraryMutator(payload: any){store.commit('budgetPriorityLibraryMutator', payload);}
+    function selectedBudgetPriorityLibraryMutator(payload: any){store.commit('selectedBudgetPriorityLibraryMutator', payload);}
+    
+    let addedRows: ShallowRef<BudgetPriority[]> = shallowRef([]);
+    let updatedRowsMap:Map<string, [BudgetPriority, BudgetPriority]> = new Map<string, [BudgetPriority, BudgetPriority]>();//0: original value | 1: updated value
+    let deletionIds: ShallowRef<string[]> = shallowRef([]);
+    let rowCache: BudgetPriority[] = [];
+    let gridSearchTerm = '';
+    let currentSearch = '';
+    //const pagination: ShallowRef<Pagination> = shallowRef(clone(emptyPagination));
+    const pagination: Pagination = shallowReactive(clone(emptyPagination));
 
-    unsavedDialogAllowed: boolean = true;
-    trueLibrarySelectItemValue: string | null = ''
-    librarySelectItemValueAllowedChanged: boolean = true;
-    librarySelectItemValue: string | null = null;
+    let isPageInit = false;
+    let totalItems = ref(0);
+    let currentPage: ShallowRef<BudgetPriority[]> = shallowRef([]);
+    let initializing: boolean = true;
+    let currentPriorityList: number[] = [];
 
-    selectedScenarioId: string = getBlankGuid();
-    hasSelectedLibrary: boolean = false;
-    librarySelectItems: SelectItem[] = [];
-    shareBudgetPriorityLibraryDialogData: ShareBudgetPriorityLibraryDialogData = clone(emptyShareBudgetPriorityLibraryDialogData);
-    isShared: boolean = false;
-    dateModified: string;
+    let unsavedDialogAllowed: boolean = true;
+    let trueLibrarySelectItemValue: string | null = '';
+    let librarySelectItemValueAllowedChanged: boolean = true;
+    let librarySelectItemValue = ref<string | null>(null);
 
-    selectedBudgetPriorityLibrary: BudgetPriorityLibrary = clone(emptyBudgetPriorityLibrary);
-    budgetPriorityGridRows: BudgetPriorityGridDatum[] = [];
-    actionHeader: DataTableHeader = { text: 'Action', value: '', align: 'left', sortable: false, class: '', width: ''}
-    budgetPriorityGridHeaders: DataTableHeader[] = [
-        { text: 'Priority', value: 'priorityLevel', align: 'left', sortable: true, class: '', width: '' },
-        { text: 'Year', value: 'year', align: 'left', sortable: false, class: '', width: '7%' },
-        { text: 'Criteria', value: 'criteria', align: 'left', sortable: false, class: '', width: '' },
-        this.actionHeader
+    let selectedScenarioId: string = getBlankGuid();
+    let hasSelectedLibrary = ref(false);
+    let librarySelectItems  = ref<SelectItem[]>([]);
+    let shareBudgetPriorityLibraryDialogData = ref<ShareBudgetPriorityLibraryDialogData>(clone(emptyShareBudgetPriorityLibraryDialogData));
+    let isShared = ref<boolean>(false);
+    let dateModified = ref<string>();
+
+    let selectedBudgetPriorityLibrary = shallowRef(clone(emptyBudgetPriorityLibrary));
+    let budgetPriorityGridRows = ref<BudgetPriorityGridDatum[]>([]);
+    let actionHeader: any = { title: 'Action', key: '', align: 'left', sortable: false, class: '', width: ''}
+    let budgetPriorityGridHeaders: any[] = [
+        { title: 'Priority', key: 'priorityLevel', align: 'left', sortable: true, class: '', width: '5%' },
+        { title: 'Year', key: 'year', align: 'left', sortable: false, class: '', width: '5%' },
+        { title: 'Criteria', key: 'criteria', align: 'left', sortable: false, class: '', width: '5%' },
+        actionHeader
     ];
-    selectedBudgetPriorityGridRows: BudgetPriorityGridDatum[] = [];
-    selectedBudgetPriorityIds: string[] = [];
-    selectedBudgetPriorityForCriteriaEdit: BudgetPriority = clone(emptyBudgetPriority);
-    showCreateBudgetPriorityDialog: boolean = false;
-    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
-    createBudgetPriorityLibraryDialogData: CreateBudgetPriorityLibraryDialogData = clone(emptyCreateBudgetPriorityLibraryDialogData);
-    confirmDeleteAlertData: AlertData = clone(emptyAlertData);
-    rules: InputValidationRules = rules;
-    uuidNIL: string = getBlankGuid();
-    hasScenario: boolean = false;  
-    disableCrudButtonsResult: boolean = false;
-    checkBoxChanged: boolean = false;
-    hasLibraryEditPermission: boolean = false;
-    hasCreatedLibrary: boolean = false;
-    parentLibraryName: string = "None";
-    parentLibraryId: string = "";
-    parentModifiedFlag: boolean = false;
-    scenarioLibraryIsModified: boolean = false;
-    loadedParentName: string = "";
-    loadedParentId: string = "";
-    newLibrarySelection: boolean = false;
+    let selectedBudgetPriorityGridRows = ref<BudgetPriorityGridDatum[]>([]);
+    let selectedBudgetPriorityIds: string[] = [];
+    let selectedBudgetPriorityForCriteriaEdit: BudgetPriority = clone(emptyBudgetPriority);
+    let showCreateBudgetPriorityDialog = ref<boolean>(false);
+    let criterionEditorDialogData = ref<GeneralCriterionEditorDialogData>(clone(emptyGeneralCriterionEditorDialogData));
+    let createBudgetPriorityLibraryDialogData = ref<CreateBudgetPriorityLibraryDialogData>(clone(emptyCreateBudgetPriorityLibraryDialogData));
+    let confirmDeleteAlertData = ref<AlertData>(clone(emptyAlertData));
+    let rules: InputValidationRules = validationRules;
+    let uuidNIL: string = getBlankGuid();
+    let hasScenario = ref(false);  
+    let disableCrudButtonsResult: boolean = false;
+    let checkBoxChanged: boolean = false;
+    let hasLibraryEditPermission: boolean = false;
+    let hasCreatedLibrary: boolean = false;
+    let parentLibraryName = ref<string>("None");
+    let parentLibraryId: string = "";
+    let parentModifiedFlag: boolean = false;
+    let scenarioLibraryIsModified = ref<boolean>(false);
+    let loadedParentName: string = "";
+    let loadedParentId: string = "";
+    let newLibrarySelection: boolean = false;
+    const priorityMask = { mask: '##########' };
+    const generalMask = { mask: '####' };
+    const percentMask = {mask: '###'};
+    created();
+    async function created() {
+        librarySelectItemValue.value = null;
+        await getBudgetPriorityLibrariesAction();
+        await getHasPermittedAccessAction();
 
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            vm.librarySelectItemValue = null;
-            vm.getBudgetPriorityLibrariesAction();
-            vm.getHasPermittedAccessAction();
+        if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.BudgetPriority) !== -1) {
+            selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
 
-            if (to.path.indexOf(ScenarioRoutePaths.BudgetPriority) !== -1) {
-                vm.selectedScenarioId = to.query.scenarioId;
-
-                if (vm.selectedScenarioId === vm.uuidNIL) {
-                    vm.addErrorNotificationAction({
-                        message: 'Found no selected scenario for edit',
-                    });
-                    vm.$router.push('/Scenarios/');
-                }
-                vm.hasScenario = true;
-                vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId }).then(() => {
-                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
-                        vm.initializePages();
-                    });                                        
-                });             
+            if (selectedScenarioId === uuidNIL) {
+                addErrorNotificationAction({
+                    message: 'Found no selected scenario for edit',
+                });
+                $router.push('/Scenarios/');
             }
-        });
+            hasScenario.value = true;
+            await getScenarioSimpleBudgetDetailsAction({ scenarioId: selectedScenarioId })
+            await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})
+            selectScenarioAction({ scenarioId: selectedScenarioId });        
+            await initializePages();             
+        }
     }
-
-    beforeDestroy() {
-        this.setHasUnsavedChangesAction({ value: false });
+    onBeforeUnmount(() => onBeforeUnmountFunc())
+    function onBeforeUnmountFunc() {
+        setHasUnsavedChangesAction({ value: false });
     }
-
-    @Watch('stateBudgetPriorityLibraries')
-    onStateBudgetPriorityLibrariesChanged() {
-        this.librarySelectItems = this.stateBudgetPriorityLibraries.map((library: BudgetPriorityLibrary) => ({
+    watch(stateBudgetPriorityLibraries, onStateBudgetPriorityLibrariesChanged)
+    function onStateBudgetPriorityLibrariesChanged() {
+        librarySelectItems.value = stateBudgetPriorityLibraries.value.map((library: BudgetPriorityLibrary) => ({
             text: library.name,
             value: library.id,
         }));
     }
     //this is so that a user is asked wether or not to continue when switching libraries after they have made changes
     //but only when in libraries
-    @Watch('librarySelectItemValue')
-    onLibrarySelectItemValueChangedCheckUnsaved(){
-        if(this.hasScenario){
-            this.onSelectItemValueChanged();
-            this.unsavedDialogAllowed = false;
+    watch(librarySelectItemValue, onLibrarySelectItemValueChangedCheckUnsaved)
+    function onLibrarySelectItemValueChangedCheckUnsaved(){
+        if(hasScenario.value){
+            onSelectItemValueChanged();
+            unsavedDialogAllowed = false;
         }           
-        else if(this.librarySelectItemValueAllowedChanged) {
-            this.CheckUnsavedDialog(this.onSelectItemValueChanged, () => {
-                this.librarySelectItemValueAllowedChanged = false;
-                this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
+        else if(librarySelectItemValueAllowedChanged) {
+            CheckUnsavedDialog(onSelectItemValueChanged, () => {
+                librarySelectItemValueAllowedChanged = false;
+                librarySelectItemValue.value = trueLibrarySelectItemValue;               
             });
         }
-        this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
-        this.newLibrarySelection = true;
-        this.librarySelectItemValueAllowedChanged = true;
-    }
-    onSelectItemValueChanged() {
-        this.trueLibrarySelectItemValue = this.librarySelectItemValue;
-        this.selectBudgetPriorityLibraryAction({ libraryId: this.librarySelectItemValue });
-    }
 
-    @Watch('stateSelectedBudgetPriorityLibrary')
-    onStateSelectedPriorityLibraryChanged() {
-        this.selectedBudgetPriorityLibrary = clone(this.stateSelectedBudgetPriorityLibrary);
+        parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
+        newLibrarySelection = true;
+        librarySelectItemValueAllowedChanged = true;
     }
+    function onSelectItemValueChanged() {
+        trueLibrarySelectItemValue = librarySelectItemValue.value;
+        selectBudgetPriorityLibraryAction({ libraryId: librarySelectItemValue.value });
+    }
+    watch(stateSelectedBudgetPriorityLibrary, onStateSelectedPriorityLibraryChanged)
+    function onStateSelectedPriorityLibraryChanged() {
+        selectedBudgetPriorityLibrary.value = clone(stateSelectedBudgetPriorityLibrary.value);
+    }
+    watch(selectedBudgetPriorityLibrary, onSelectedPriorityLibraryChanged)
+    function onSelectedPriorityLibraryChanged() {
+        hasSelectedLibrary.value = selectedBudgetPriorityLibrary.value.id !== uuidNIL;
 
-    @Watch('selectedBudgetPriorityLibrary')
-    onSelectedPriorityLibraryChanged() {
-        this.hasSelectedLibrary = this.selectedBudgetPriorityLibrary.id !== this.uuidNIL;
-
-        if (this.hasSelectedLibrary) {
-            this.checkLibraryEditPermission();
-            this.hasCreatedLibrary = false;
+        if (hasSelectedLibrary.value) {
+            checkLibraryEditPermission();
+            hasCreatedLibrary = false;
         }
-        this.updatedRowsMap.clear();
-        this.deletionIds = [];
-        this.addedRows = [];
-        this.initializing = false;
-        if(this.hasSelectedLibrary)
-            this.onPaginationChanged();//
+        updatedRowsMap.clear();
+        deletionIds.value = [];
+        addedRows.value = [];
+        initializing = false;
+        if(hasSelectedLibrary.value)
+            onPaginationChanged();
     }
-
-    @Watch('stateScenarioBudgetPriorities')
-    onStateScenarioBudgetPrioritiesChanged() {
-        if (this.hasScenario) {
-            this.onPaginationChanged();
+    watch(stateScenarioBudgetPriorities, onStateScenarioBudgetPrioritiesChanged)
+    function onStateScenarioBudgetPrioritiesChanged() {
+        if (hasScenario.value) {
+            onPaginationChanged();
         }
     }
 
-    @Watch('currentPage')
-    onBudgetPrioritiesChanged() {
-        this.setGridCriteriaColumnWidth();
-        this.setGridHeaders();
-        this.setGridData();
-        this.currentPage.forEach((item) => {
-            this.currentPriorityList.push(item.priorityLevel);
+    watch(currentPage, onBudgetPrioritiesChanged)
+    function onBudgetPrioritiesChanged() {
+        
+        setGridData();
+        currentPage.value.forEach((item) => {
+            currentPriorityList.push(item.priorityLevel);
         });
         // Get parent name from library id
-        this.librarySelectItems.forEach(library => {
-            if (library.value === this.parentLibraryId) {
-                this.parentLibraryName = library.text;
+        librarySelectItems.value.forEach(library => {
+            if (library.value === parentLibraryId) {
+                parentLibraryName.value = library.text;
             }
         });
     }
 
-    @Watch('selectedBudgetPriorityGridRows')
-    onSelectedPriorityRowsChanged() {
-        this.selectedBudgetPriorityIds = getPropertyValues('id', this.selectedBudgetPriorityGridRows) as string[];
-    }
-    @Watch('isSharedLibrary')
-    onStateSharedAccessChanged() {
-        this.isShared = this.isSharedLibrary;
+    watch(selectedBudgetPriorityGridRows, onSelectedPriorityRowsChanged)
+    function onSelectedPriorityRowsChanged() {
+        selectedBudgetPriorityIds = getPropertyValues('id', selectedBudgetPriorityGridRows.value) as string[];
     }
 
-    @Watch('pagination')
-    async onPaginationChanged() {
-        if(this.initializing)
+    watch(isSharedLibrary, onStateSharedAccessChanged)
+    function onStateSharedAccessChanged() {
+        isShared.value = isSharedLibrary.value;
+    }
+
+    watch(pagination, () => onPaginationChanged)
+    async function onPaginationChanged() {
+        if(initializing)
             return;
-        this.checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = this.pagination;
+        checkHasUnsavedChanges();
+        const { sort, descending, page, rowsPerPage } = pagination;
         const request: PagingRequest<BudgetPriority>= {
             page: page,
             rowsPerPage: rowsPerPage,
             syncModel: {
-                libraryId: this.librarySelectItemValue !== null ? this.librarySelectItemValue : null,
-                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                rowsForDeletion: this.deletionIds,
-                addedRows: this.addedRows,
-                isModified: this.scenarioLibraryIsModified
+                libraryId: librarySelectItemValue.value !== null ? librarySelectItemValue.value : null,
+                updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                rowsForDeletion: deletionIds.value,
+                addedRows: addedRows.value,
+                isModified: scenarioLibraryIsModified.value
             },           
-            sortColumn: sortBy,
-            isDescending: descending != null ? descending : false,
-            search: this.currentSearch
+            sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
+            isDescending: sort != null && !isNil(sort[0]) ? sort[0].order === 'desc' : false,
+            search: currentSearch
         };
-        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            await BudgetPriorityService.getScenarioBudgetPriorityPage(this.selectedScenarioId, request).then(response => {
+        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL)
+            BudgetPriorityService.getScenarioBudgetPriorityPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<BudgetPriority>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
-                    this.populateEmptyBudgetPercentagePairs(this.currentPage);
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
+                    totalItems.value = data.totalItems;
+                    populateEmptyBudgetPercentagePairs(currentPage.value);
                 }
             });
-        else if(this.hasSelectedLibrary)
-             await BudgetPriorityService.getBudgetPriorityLibraryDate(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '').then(response => {
+        else if(hasSelectedLibrary.value)
+             await BudgetPriorityService.getBudgetPriorityLibraryDate(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '').then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
                    {
                       var data = response.data as string;
-                      this.dateModified = data.slice(0, 10);
+                      dateModified.value = data.slice(0, 10);
                    }
              }),
-             await BudgetPriorityService.getLibraryBudgetPriorityPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+             await BudgetPriorityService.getLibraryBudgetPriorityPage(librarySelectItemValue.value !== null ? librarySelectItemValue.value : '', request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<BudgetPriority>;
-                    this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
+                    currentPage.value = data.items;
+                    rowCache = clone(currentPage.value)
+                    totalItems.value = data.totalItems;
 
-                    if (!isNullOrUndefined(this.selectedBudgetPriorityLibrary.id) ) {
-                        this.getIsSharedLibraryAction(this.selectedBudgetPriorityLibrary).then(this.isShared = this.isSharedLibrary);
+                    if (!isNil(selectedBudgetPriorityLibrary.value.id) ) {
+                        getIsSharedLibraryAction(selectedBudgetPriorityLibrary.value).then(() => isShared.value = isSharedLibrary.value);
                     }           
                 }
             });     
     }
 
-    @Watch('deletionIds')
-    onDeletionIdsChanged(){
-        this.checkHasUnsavedChanges();
+    watch(deletionIds, onDeletionIdsChanged)
+    function onDeletionIdsChanged(){
+        checkHasUnsavedChanges();
     }
 
-    @Watch('addedRows')
-    onAddedRowsChanged(){
-        this.checkHasUnsavedChanges();
+    watch(addedRows, onAddedRowsChanged)
+    function onAddedRowsChanged(){
+        checkHasUnsavedChanges();
     }
 
-    hasBudgetPercentagePairsThatMatchBudgets(budgetPriority: BudgetPriority) {
-        if (!hasValue(this.stateScenarioSimpleBudgetDetails)) {
+    watch(stateScenarioSimpleBudgetDetails, () => {
+        setGridCriteriaColumnWidth();
+        setGridHeaders();
+    })
+
+    function hasBudgetPercentagePairsThatMatchBudgets(budgetPriority: BudgetPriority) {
+        if (!hasValue(stateScenarioSimpleBudgetDetails.value)) {
             return true;
         }
 
@@ -525,11 +550,11 @@ export default class BudgetPriorityEditor extends Vue {
                 id: budgetPercentagePair.budgetId, name: budgetPercentagePair.budgetName,
             })) as SimpleBudgetDetail[];
 
-        return isEqual(sortNonObjectLists(simpleBudgetDetails), sortNonObjectLists(clone(this.stateScenarioSimpleBudgetDetails)));
+        return isEqual(sortNonObjectLists(simpleBudgetDetails), sortNonObjectLists(clone(stateScenarioSimpleBudgetDetails.value)));
     }
 
-    createNewBudgetPercentagePairsFromBudgets() {
-        return this.stateScenarioSimpleBudgetDetails.map((simpleBudgetDetail: SimpleBudgetDetail) => ({
+    function createNewBudgetPercentagePairsFromBudgets() {
+        return stateScenarioSimpleBudgetDetails.value.map((simpleBudgetDetail: SimpleBudgetDetail) => ({
             id: getNewGuid(),
             budgetId: simpleBudgetDetail.id,
             budgetName: simpleBudgetDetail.name,
@@ -537,11 +562,11 @@ export default class BudgetPriorityEditor extends Vue {
         })) as BudgetPercentagePair[];
     }
 
-    setGridCriteriaColumnWidth() {
+    function setGridCriteriaColumnWidth() {
         let criteriaColumnWidth = '75%';
 
-        if (this.hasScenario) {
-            switch (this.stateScenarioSimpleBudgetDetails.length) {
+        if (hasScenario.value) {
+            switch (stateScenarioSimpleBudgetDetails.value.length) {
                 case 0:
                     criteriaColumnWidth = '75%';
                     break;
@@ -560,37 +585,39 @@ export default class BudgetPriorityEditor extends Vue {
                 case 5:
                     criteriaColumnWidth = '25%';
                     break;
+                default:
+                    criteriaColumnWidth = '10%';
             }
         }
 
-        this.budgetPriorityGridHeaders[2].width = criteriaColumnWidth;
+        budgetPriorityGridHeaders[2].width = criteriaColumnWidth;
     }
 
-    setGridHeaders() {
-        if (this.hasScenario) {
-            const budgetNames: string[] = getPropertyValues('name', this.stateScenarioSimpleBudgetDetails) as string[];
+    function setGridHeaders() {
+        if (hasScenario.value) {
+            const budgetNames: string[] = getPropertyValues('name', stateScenarioSimpleBudgetDetails.value) as string[];
             if (hasValue(budgetNames)) {
-                const budgetHeaders: DataTableHeader[] = budgetNames.map((budgetName: string) => ({
-                    text: `${budgetName} %`,
-                    value: budgetName,
+                const budgetHeaders: any[] = budgetNames.map((budgetName: string) => ({
+                    title: `${budgetName} %`,
+                    key: budgetName,
                     align: 'left',
                     sortable: true,
                     class: '',
                     width: '',
                 }));
-                this.budgetPriorityGridHeaders = [
-                    this.budgetPriorityGridHeaders[0],
-                    this.budgetPriorityGridHeaders[1],
-                    this.budgetPriorityGridHeaders[2],
+                budgetPriorityGridHeaders = [
+                    budgetPriorityGridHeaders[0],
+                    budgetPriorityGridHeaders[1],
+                    budgetPriorityGridHeaders[2],
                     ...budgetHeaders,
-                    this.actionHeader
+                    actionHeader
                 ];
             }
         }
     }
 
-    setGridData() {
-        this.budgetPriorityGridRows = this.currentPage.map((budgetPriority: BudgetPriority) => {
+    function setGridData() {
+        budgetPriorityGridRows.value = currentPage.value.map((budgetPriority: BudgetPriority) => {
             const row: BudgetPriorityGridDatum = {
                 id: budgetPriority.id,
                 priorityLevel: budgetPriority.priorityLevel.toString(),
@@ -598,7 +625,7 @@ export default class BudgetPriorityEditor extends Vue {
                 criteria: budgetPriority.criterionLibrary.mergedCriteriaExpression != null ? budgetPriority.criterionLibrary.mergedCriteriaExpression : '',
             };
 
-            if (this.hasScenario && hasValue(budgetPriority.budgetPercentagePairs)) {
+            if (hasScenario.value && hasValue(budgetPriority.budgetPercentagePairs)) {
                 budgetPriority.budgetPercentagePairs.forEach((budgetPercentagePair: BudgetPercentagePair) => {
                     row[budgetPercentagePair.budgetName] = budgetPercentagePair.percentage.toString();
                 });
@@ -608,77 +635,77 @@ export default class BudgetPriorityEditor extends Vue {
         });
     }
 
-    getOwnerUserName(): string {
+    function getOwnerUserName(): string {
 
-        if (!this.hasCreatedLibrary) {
-        return this.getUserNameByIdGetter(this.selectedBudgetPriorityLibrary.owner);
+        if (!hasCreatedLibrary) {
+        return getUserNameByIdGetter(selectedBudgetPriorityLibrary.value.owner);
         }
         
         return getUserName();
     }
 
-    checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.hasAdminAccess || (this.hasPermittedAccess && this.checkUserIsLibraryOwner());
+    function checkLibraryEditPermission() {
+        hasLibraryEditPermission = hasAdminAccess.value || (hasPermittedAccess.value && checkUserIsLibraryOwner());
     }
 
-    checkUserIsLibraryOwner() {
-        return this.getUserNameByIdGetter(this.selectedBudgetPriorityLibrary.owner) == getUserName();
+    function checkUserIsLibraryOwner() {
+        return getUserNameByIdGetter(selectedBudgetPriorityLibrary.value.owner) == getUserName();
     }
 
-    onShowCreateBudgetPriorityLibraryDialog(createAsNewLibrary: boolean) {
-        this.createBudgetPriorityLibraryDialogData = {
+    function onShowCreateBudgetPriorityLibraryDialog(createAsNewLibrary: boolean) {     
+        createBudgetPriorityLibraryDialogData.value = {
             showDialog: true,
-            budgetPriorities: createAsNewLibrary ? this.currentPage : [],
+            budgetPriorities: createAsNewLibrary ? currentPage.value : [],
         };
     }
 
-    onSubmitCreateBudgetPriorityLibraryDialogResult(budgetPriorityLibrary: BudgetPriorityLibrary) {
-        this.createBudgetPriorityLibraryDialogData = clone(emptyCreateBudgetPriorityLibraryDialogData);
+    function onSubmitCreateBudgetPriorityLibraryDialogResult(budgetPriorityLibrary: BudgetPriorityLibrary) {
+        createBudgetPriorityLibraryDialogData.value = clone(emptyCreateBudgetPriorityLibraryDialogData);
         if (!isNil(budgetPriorityLibrary)) {
             const upsertRequest: LibraryUpsertPagingRequest<BudgetPriorityLibrary, BudgetPriority> = {
                 library: budgetPriorityLibrary,    
                 isNewLibrary: true,           
                 syncModel: {
-                    libraryId: budgetPriorityLibrary.budgetPriorities.length == 0 || !this.hasSelectedLibrary ? null : this.selectedBudgetPriorityLibrary.id,
-                    rowsForDeletion: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : this.deletionIds,
-                    updateRows: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : this.addedRows,
+                    libraryId: budgetPriorityLibrary.budgetPriorities.length == 0 || !hasSelectedLibrary.value ? null : selectedBudgetPriorityLibrary.value.id,
+                    rowsForDeletion: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : deletionIds.value,
+                    updateRows: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : Array.from(updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: budgetPriorityLibrary.budgetPriorities.length == 0 ? [] : addedRows.value,
                     isModified: false
                 },
-                scenarioId: this.hasScenario ? this.selectedScenarioId : null
+                scenarioId: hasScenario.value ? selectedScenarioId : null
             }
             BudgetPriorityService.upsertBudgetPriorityLibrary(upsertRequest).then(() => {
-                this.hasCreatedLibrary = true;
-                this.librarySelectItemValue = budgetPriorityLibrary.id;
+                hasCreatedLibrary = true;
+                librarySelectItemValue.value = budgetPriorityLibrary.id;
                 
                 if(budgetPriorityLibrary.budgetPriorities.length == 0){
-                    this.clearChanges();
+                    clearChanges();
                 }
 
-                this.budgetPriorityLibraryMutator(budgetPriorityLibrary);
-                this.selectedBudgetPriorityLibraryMutator(budgetPriorityLibrary.id);                
-                this.addSuccessNotificationAction({message:'Added budget priority library'})
+                budgetPriorityLibraryMutator(budgetPriorityLibrary);
+                selectedBudgetPriorityLibraryMutator(budgetPriorityLibrary.id);                
+                addSuccessNotificationAction({message:'Added budget priority library'})
             })
         }
     }
 
-    onAddBudgetPriority(newBudgetPriority: BudgetPriority) {
-        this.showCreateBudgetPriorityDialog = false;
+    function onAddBudgetPriority(newBudgetPriority: BudgetPriority) {
+        showCreateBudgetPriorityDialog.value = false;
 
         if (!isNil(newBudgetPriority)) {
-            if (this.hasScenario && hasValue(this.stateScenarioSimpleBudgetDetails)) {
-                newBudgetPriority.budgetPercentagePairs = this.createNewBudgetPercentagePairsFromBudgets();
+            if (hasScenario.value && hasValue(stateScenarioSimpleBudgetDetails)) {
+                newBudgetPriority.budgetPercentagePairs = createNewBudgetPercentagePairsFromBudgets();
             }
 
-            this.addedRows.push(newBudgetPriority);
-            this.onPaginationChanged()
+            addedRows.value.push(newBudgetPriority);
+            onPaginationChanged()
         }
     }
 
-    onEditBudgetPriority(budgetPriorityGridDatum: BudgetPriorityGridDatum, property: string, value: any) {
-        if (any(propEq('id', budgetPriorityGridDatum.id), this.currentPage)) {
+    function onEditBudgetPriority(budgetPriorityGridDatum: BudgetPriorityGridDatum, property: string, value: any) {
+        if (any(propEq('id', budgetPriorityGridDatum.id), currentPage.value)) {
             let budgetPriority: BudgetPriority = find(
-                propEq('id', budgetPriorityGridDatum.id), this.currentPage,
+                propEq('id', budgetPriorityGridDatum.id), currentPage.value,
             ) as BudgetPriority;
 
             if (property === 'year' && (!hasValue(value) || parseInt(value) === 0)) {
@@ -686,21 +713,21 @@ export default class BudgetPriorityEditor extends Vue {
             } else {
                 budgetPriority = setItemPropertyValue(property, value, budgetPriority) as BudgetPriority;
             }
-            this.onUpdateRow(budgetPriority.id, clone(budgetPriority))
-            this.onPaginationChanged();
+            onUpdateRow(budgetPriority.id, clone(budgetPriority))
+            onPaginationChanged();
         }
     }
 
-    onEditBudgetPercentagePair(budgetPriorityGridDatum: BudgetPriorityGridDatum, budgetName: string, percentage: number) {
+    function onEditBudgetPercentagePair(budgetPriorityGridDatum: BudgetPriorityGridDatum, budgetName: string, percentage: number) {
         const budgetPriority: BudgetPriority = find(
-            propEq('id', budgetPriorityGridDatum.id), this.currentPage,
+            propEq('id', budgetPriorityGridDatum.id), currentPage.value,
         ) as BudgetPriority;
 
         const budgetPercentagePair: BudgetPercentagePair = find(
             propEq('budgetName', budgetName), budgetPriority.budgetPercentagePairs,
         ) as BudgetPercentagePair;
 
-        this.onUpdateRow(budgetPriority.id, {
+        onUpdateRow(budgetPriority.id, {
                 ...budgetPriority, budgetPercentagePairs: update(
                     findIndex(propEq('id', budgetPercentagePair.id), budgetPriority.budgetPercentagePairs),
                     setItemPropertyValue('percentage', percentage, budgetPercentagePair) as BudgetPercentagePair,
@@ -708,127 +735,136 @@ export default class BudgetPriorityEditor extends Vue {
                 ),
             } as BudgetPriority)
 
-        this.onPaginationChanged();
+        onPaginationChanged();
     }
 
-    onShowCriterionLibraryEditorDialog(budgetPriorityGridDatum: BudgetPriorityGridDatum) {
-        this.selectedBudgetPriorityForCriteriaEdit = find(
-            propEq('id', budgetPriorityGridDatum.id), this.currentPage,
+    function onShowCriterionLibraryEditorDialog(budgetPriorityGridDatum: BudgetPriorityGridDatum) {
+        selectedBudgetPriorityForCriteriaEdit = find(
+            propEq('id', budgetPriorityGridDatum.id), currentPage.value,
         ) as BudgetPriority;
 
-        this.criterionEditorDialogData = {
+        criterionEditorDialogData.value = {
             showDialog: true,
-            CriteriaExpression: this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary.mergedCriteriaExpression,
+            CriteriaExpression: selectedBudgetPriorityForCriteriaEdit.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onSubmitCriterionLibraryEditorDialogResult(criterionExpression: string) {
-        this.criterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
+    function onSubmitCriterionLibraryEditorDialogResult(criterionExpression: string) {
+        criterionEditorDialogData.value = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionExpression) && this.selectedBudgetPriorityForCriteriaEdit.id !== this.uuidNIL) {
-            if(this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary.id === getBlankGuid())
-                this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary.id = getNewGuid();
-            this.onUpdateRow(this.selectedBudgetPriorityForCriteriaEdit.id, 
-            { ...this.selectedBudgetPriorityForCriteriaEdit, 
-            criterionLibrary: {...this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} })
+        if (!isNil(criterionExpression) && selectedBudgetPriorityForCriteriaEdit.id !== uuidNIL) {
+            if(selectedBudgetPriorityForCriteriaEdit.criterionLibrary.id === getBlankGuid())
+                selectedBudgetPriorityForCriteriaEdit.criterionLibrary.id = getNewGuid();
+            onUpdateRow(selectedBudgetPriorityForCriteriaEdit.id, 
+            { ...selectedBudgetPriorityForCriteriaEdit, 
+            criterionLibrary: {...selectedBudgetPriorityForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} })
 
-            this.onPaginationChanged();
+            onPaginationChanged();
         }
 
-        this.selectedBudgetPriorityForCriteriaEdit = clone(emptyBudgetPriority);
+        selectedBudgetPriorityForCriteriaEdit = clone(emptyBudgetPriority);
     }
 
-    onUpsertScenarioBudgetPriorities() {
-
-        if (this.selectedBudgetPriorityLibrary.id === this.uuidNIL || this.hasUnsavedChanges && this.newLibrarySelection ===false) {this.scenarioLibraryIsModified = true;}
-        else { this.scenarioLibraryIsModified = false; }
-
-        BudgetPriorityService.upsertScenarioBudgetPriorities({
-            libraryId: this.selectedBudgetPriorityLibrary.id === this.uuidNIL ? null : this.selectedBudgetPriorityLibrary.id,
-            rowsForDeletion: this.deletionIds,
-            updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-            addedRows: this.addedRows,
-            isModified: this.scenarioLibraryIsModified
-        }, this.selectedScenarioId).then((response: AxiosResponse) => {
-            if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.parentLibraryId = this.librarySelectItemValue ? this.librarySelectItemValue : "";
-                this.clearChanges();
-                this.librarySelectItemValue = null;
-                this.addSuccessNotificationAction({message: "Modified scenario's budget priorities"});
-                this.currentPage = sortByProperty("priorityLevel", this.currentPage);
-                this.onPaginationChanged();
-            }           
-        });
+    function hasUniquePriorityLevels() {
+        const levels = new Set();
+        for (let item of budgetPriorityGridRows.value) {
+            if (levels.has(item.priorityLevel)) {
+                return false;
+            }
+            levels.add(item.priorityLevel);
+        }
+        return true;
     }
 
-    onUpsertBudgetPriorityLibrary() {
+    async function onUpsertScenarioBudgetPriorities() {
+        if (selectedBudgetPriorityLibrary.value.id === uuidNIL || hasUnsavedChanges.value && newLibrarySelection ===false) {scenarioLibraryIsModified.value = true;}
+        else { scenarioLibraryIsModified.value = false; }
+
+        let response = await BudgetPriorityService.upsertScenarioBudgetPriorities({
+            libraryId: selectedBudgetPriorityLibrary.value.id === uuidNIL ? null : selectedBudgetPriorityLibrary.value.id,
+            rowsForDeletion: deletionIds.value,
+            updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+            addedRows: addedRows.value,
+            isModified: scenarioLibraryIsModified.value
+        }, selectedScenarioId)
+        if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+            parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
+            clearChanges();
+            librarySelectItemValue.value = null;
+            addSuccessNotificationAction({message: "Modified scenario's budget priorities"});
+            currentPage.value = sortByProperty("priorityLevel", currentPage.value);
+            await onPaginationChanged();
+        }           
+    }
+
+    function onUpsertBudgetPriorityLibrary() {
         const budgetPriorityLibrary: BudgetPriorityLibrary = {
-            ...clone(this.selectedBudgetPriorityLibrary),
-            budgetPriorities: clone(this.currentPage),
+            ...clone(selectedBudgetPriorityLibrary.value),
+            budgetPriorities: clone(currentPage.value),
         };
-        this.upsertBudgetPriorityLibraryAction(budgetPriorityLibrary);
+        upsertBudgetPriorityLibraryAction(budgetPriorityLibrary);
 
         const upsertRequest: LibraryUpsertPagingRequest<BudgetPriorityLibrary, BudgetPriority> = {
-                library: this.selectedBudgetPriorityLibrary,
+                library: selectedBudgetPriorityLibrary.value,
                 isNewLibrary: false,
                  syncModel: {
-                    libraryId: this.selectedBudgetPriorityLibrary.id === this.uuidNIL ? null : this.selectedBudgetPriorityLibrary.id,
-                    rowsForDeletion: this.deletionIds,
-                    updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: this.addedRows,
+                    libraryId: selectedBudgetPriorityLibrary.value.id === uuidNIL ? null : selectedBudgetPriorityLibrary.value.id,
+                    rowsForDeletion: deletionIds.value,
+                    updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: addedRows.value,
                     isModified: false
                  }
                  , scenarioId: null
         }
         BudgetPriorityService.upsertBudgetPriorityLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges()               
-                this.budgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary);
-                this.selectedBudgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary.id);                
-                this.addSuccessNotificationAction({message: "Updated budget priority library",});
+                clearChanges()               
+                budgetPriorityLibraryMutator(selectedBudgetPriorityLibrary.value);
+                selectedBudgetPriorityLibraryMutator(selectedBudgetPriorityLibrary.value.id);                
+                addSuccessNotificationAction({message: "Updated budget priority library",});
             }
         });
     }
 
-    onDiscardChanges() {
-        this.librarySelectItemValue = null;
+    function onDiscardChanges() {
+        librarySelectItemValue.value = null;
         setTimeout(() => {
-            if (this.hasScenario) {
-                this.clearChanges();
-                this.resetPage();
+            if (hasScenario.value) {
+                clearChanges();
+                resetPage();
             }
         });
-        this.parentLibraryName = this.loadedParentName;
-        this.parentLibraryId = this.loadedParentId;
+        parentLibraryName.value = loadedParentName;
+        parentLibraryId = loadedParentId;
     }
 
-    onRemoveBudgetPriorities() {
-        this.selectedBudgetPriorityIds.forEach(_ => {
-            this.removePriorityLogic(_);
+    function onRemoveBudgetPriorities() {
+        selectedBudgetPriorityIds.forEach(_ => {
+            removePriorityLogic(_);
         });
 
-        this.selectedBudgetPriorityIds = [];
-        this.onPaginationChanged();
+        selectedBudgetPriorityIds = [];
+        onPaginationChanged();
     }
 
-    onRemoveBudgetPriority(id: string){
-        this.removePriorityLogic(id)
-        this.onPaginationChanged();
+    function onRemoveBudgetPriority(id: string){
+        removePriorityLogic(id)
+        onPaginationChanged();
     }
 
-    removePriorityLogic(id: string){
-        if(isNil(find(propEq('id', id), this.addedRows))){
-            this.deletionIds.push(id);
-            if(!isNil(this.updatedRowsMap.get(id)))
-                this.updatedRowsMap.delete(id)
+    function removePriorityLogic(id: string){
+        if(isNil(find(propEq('id', id), addedRows.value))){
+            deletionIds.value.push(id);
+            if(!isNil(updatedRowsMap.get(id)))
+                updatedRowsMap.delete(id)
         }           
         else{          
-            this.addedRows = this.addedRows.filter((bp: BudgetPriority) => bp.id !== id)
+            addedRows.value = addedRows.value.filter((bp: BudgetPriority) => bp.id !== id)
         }  
     }
 
-    onShowConfirmDeleteAlert() {
-        this.confirmDeleteAlertData = {
+    function onShowConfirmDeleteAlert() {
+        confirmDeleteAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -836,109 +872,108 @@ export default class BudgetPriorityEditor extends Vue {
         };
     }
 
-    onSubmitConfirmDeleteAlertResult(submit: boolean) {
-        this.confirmDeleteAlertData = clone(emptyAlertData);
+    function onSubmitConfirmDeleteAlertResult(submit: boolean) {
+        confirmDeleteAlertData.value = clone(emptyAlertData);
 
         if (submit) {
-            this.deleteBudgetPriorityLibraryAction(this.selectedBudgetPriorityLibrary.id)
-                .then(() => this.librarySelectItemValue = null);
+            deleteBudgetPriorityLibraryAction(selectedBudgetPriorityLibrary.value.id)
+                .then(() => librarySelectItemValue.value = null);
         }
     }
 
-    disableCrudButtons() {
-        const rows = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
+    function disableCrudButtons() {
+        const rows = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const allDataIsValid: boolean = rows.every((budgetPriority: BudgetPriority) => {
-            const priorityIsValid = this.hasBudgetPercentagePairsThatMatchBudgets(budgetPriority);
-            const allSubDataIsValid: boolean = this.hasScenario
+            const priorityIsValid = hasBudgetPercentagePairsThatMatchBudgets(budgetPriority);
+            const allSubDataIsValid: boolean = hasScenario.value
                 ? budgetPriority.budgetPercentagePairs.every((budgetPercentagePair: BudgetPercentagePair) => {
                     return priorityIsValid &&
-                        this.rules['generalRules'].valueIsNotEmpty(budgetPercentagePair.percentage) &&
-                        this.rules['generalRules'].valueIsWithinRange(budgetPercentagePair.percentage, [0, 100]);
+                        rules['generalRules'].valueIsNotEmpty(budgetPercentagePair.percentage) &&
+                        rules['generalRules'].valueIsWithinRange(budgetPercentagePair.percentage, [0, 100]);
                 })
                 : true;
 
-            return this.rules['generalRules'].valueIsNotEmpty(budgetPriority.priorityLevel) === true && allSubDataIsValid;
+            return rules['generalRules'].valueIsNotEmpty(budgetPriority.priorityLevel) === true && allSubDataIsValid;
         })
 
-        if (this.hasSelectedLibrary) {
-            return !(this.rules['generalRules'].valueIsNotEmpty(this.selectedBudgetPriorityLibrary.name) === true && allDataIsValid);
+        if (hasSelectedLibrary.value) {
+            return !(rules['generalRules'].valueIsNotEmpty(selectedBudgetPriorityLibrary.value.name) === true && allDataIsValid);
         }
-        this.disableCrudButtonsResult = !allDataIsValid;
-        return !allDataIsValid;
+
+        disableCrudButtonsResult = !allDataIsValid && !hasUniquePriorityLevels();
+        return disableCrudButtonsResult;
     }
 
-    onUpdateRow(rowId: string, updatedRow: BudgetPriority){
-        if(any(propEq('id', rowId), this.addedRows)){
-            const index = this.addedRows.findIndex(item => item.id == updatedRow.id)
-            this.addedRows[index] = updatedRow;
+    function onUpdateRow(rowId: string, updatedRow: BudgetPriority){
+        if(any(propEq('id', rowId), addedRows.value)){
+            const index = addedRows.value.findIndex(item => item.id == updatedRow.id)
+            addedRows.value[index] = updatedRow;
             return;
         }
 
-        let mapEntry = this.updatedRowsMap.get(rowId)
+        let mapEntry = updatedRowsMap.get(rowId)
 
         if(isNil(mapEntry)){
-            const row = this.rowCache.find(r => r.id === rowId);
+            const row = rowCache.find(r => r.id === rowId);
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
-                this.updatedRowsMap.set(rowId, [row , updatedRow])
+                updatedRowsMap.set(rowId, [row , updatedRow])
         }
         else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
             mapEntry[1] = updatedRow;
         }
         else
-            this.updatedRowsMap.delete(rowId)
+            updatedRowsMap.delete(rowId)
 
-        this.checkHasUnsavedChanges();
+        checkHasUnsavedChanges();
     }
 
-    clearChanges(){
-        this.updatedRowsMap.clear();
-        this.addedRows = [];
-        this.deletionIds = [];
+    function clearChanges(){
+        updatedRowsMap.clear();
+        addedRows.value = [];
+        deletionIds.value = [];
     }
 
-    resetPage(){
-        this.pagination.page = 1;
-        this.onPaginationChanged();
+    function resetPage(){
+        pagination.page = 1;
+        onPaginationChanged();
     }
 
-    checkHasUnsavedChanges(){
+    function checkHasUnsavedChanges(){
         const hasUnsavedChanges: boolean = 
-            this.deletionIds.length > 0 || 
-            this.addedRows.length > 0 ||
-            this.updatedRowsMap.size > 0 || 
-            (this.hasScenario && this.hasSelectedLibrary) ||
-            (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.selectedBudgetPriorityLibrary, this.stateSelectedBudgetPriorityLibrary))
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+            deletionIds.value.length > 0 || 
+            addedRows.value.length > 0 ||
+            updatedRowsMap.size > 0 || 
+            (hasScenario.value && hasSelectedLibrary.value) ||
+            (hasSelectedLibrary.value && hasUnsavedChangesCore('', selectedBudgetPriorityLibrary.value, stateSelectedBudgetPriorityLibrary.value))
+        setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    CheckUnsavedDialog(next: any, otherwise: any) {
-        if (this.hasUnsavedChanges && this.unsavedDialogAllowed) {
-            // @ts-ignore
-            Vue.dialog
-                .confirm(
-                    'You have unsaved changes. Are you sure you wish to continue?',
-                    { reverse: true },
-                )
-                .then(() => next())
-                .catch(() => otherwise())
-
-        } 
+    function CheckUnsavedDialog(next: any, otherwise: any) {
+        if (hasUnsavedChanges.value && unsavedDialogAllowed) {
+            confirm.require({
+                message: "You have unsaved changes. Are you sure you wish to continue?",
+                acceptLabel: "Continue",
+                rejectLabel: "Close",
+                accept: ()=>next(),
+                reject: ()=>otherwise()
+            });
+         } 
         else {
-            this.unsavedDialogAllowed = true;
+            unsavedDialogAllowed = true;
             next();
         }
     };
-    onShowShareBudgetPriorityLibraryDialog(budgetPriorityLibrary: BudgetPriorityLibrary) {
-        this.shareBudgetPriorityLibraryDialogData = {
+    function onShowShareBudgetPriorityLibraryDialog(budgetPriorityLibrary: BudgetPriorityLibrary) {
+        shareBudgetPriorityLibraryDialogData.value = {
             showDialog:true,
             budgetPriorityLibrary: clone(budgetPriorityLibrary)
         }
     }
 
-    onShareBudgetPriorityLibraryDialogSubmit(budgetPriorityLibraryUsers: BudgetPriorityLibraryUser[]) {
-            this.shareBudgetPriorityLibraryDialogData = clone(emptyShareBudgetPriorityLibraryDialogData);
+    function onShareBudgetPriorityLibraryDialogSubmit(budgetPriorityLibraryUsers: BudgetPriorityLibraryUser[]) {
+            shareBudgetPriorityLibraryDialogData.value = clone(emptyShareBudgetPriorityLibraryDialogData);
 
-            if (!isNil(budgetPriorityLibraryUsers) && this.selectedBudgetPriorityLibrary.id !== getBlankGuid())
+            if (!isNil(budgetPriorityLibraryUsers) && selectedBudgetPriorityLibrary.value.id !== getBlankGuid())
             {
                 let libraryUserData: LibraryUser[] = [];
 
@@ -961,44 +996,44 @@ export default class BudgetPriorityEditor extends Vue {
                     libraryUserData.push(libraryUser);
                 });
 
-                if (!isNullOrUndefined(this.selectedBudgetPriorityLibrary.id) ) {
-                            this.getIsSharedLibraryAction(this.selectedBudgetPriorityLibrary).then(this.isShared = this.isSharedLibrary);
+                if (!isNil(selectedBudgetPriorityLibrary.value.id) ) {
+                            getIsSharedLibraryAction(selectedBudgetPriorityLibrary.value).then(() => isShared.value = isSharedLibrary.value);
                 }
                 //update budget library sharing
-                BudgetPriorityService.upsertOrDeleteBudgetPriorityLibraryUsers(this.selectedBudgetPriorityLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+                BudgetPriorityService.upsertOrDeleteBudgetPriorityLibraryUsers(selectedBudgetPriorityLibrary.value.id, libraryUserData).then((response: AxiosResponse) => {
                     if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
                     {
-                        this.resetPage();
+                        resetPage();
                     }
             });
         }
     }
-    setParentLibraryName(libraryId: string) {
+    function setParentLibraryName(libraryId: string) {
         if (libraryId === "None") {
-            this.parentLibraryName = "None";
+            parentLibraryName.value = "None";
             return;
         }
         let foundLibrary: BudgetPriorityLibrary = emptyBudgetPriorityLibrary;
-        this.stateBudgetPriorityLibraries.forEach(library => {
+        stateBudgetPriorityLibraries.value.forEach(library => {
             if (library.id === libraryId ) {
                 foundLibrary = clone(library);
             }
         });
-        this.parentLibraryId = foundLibrary.id;
-        this.parentLibraryName = foundLibrary.name;
+        parentLibraryId = foundLibrary.id;
+        parentLibraryName.value = foundLibrary.name;
     }
-    populateEmptyBudgetPercentagePairs(budgetPriorites: BudgetPriority[]) {
+    function populateEmptyBudgetPercentagePairs(budgetPriorites: BudgetPriority[]) {
         budgetPriorites.forEach(item => {
             if (item.budgetPercentagePairs.length === 0) {
-                item.budgetPercentagePairs = this.createNewBudgetPercentagePairsFromBudgets();
+                item.budgetPercentagePairs = createNewBudgetPercentagePairsFromBudgets();
             }
         });
     }
-    initializePages(){
-        const { sortBy, descending, page, rowsPerPage } = this.pagination;
+    async function initializePages(){
+        const { sort, descending, page, rowsPerPage } = pagination;
         const request: PagingRequest<BudgetPriority>= {
-            page: page,
-            rowsPerPage: rowsPerPage,
+            page: 1,
+            rowsPerPage: 5,
             syncModel: {
                 libraryId: null,
                 updateRows: [],
@@ -1006,28 +1041,27 @@ export default class BudgetPriorityEditor extends Vue {
                 addedRows: [],
                 isModified: false,
             },           
-            sortColumn: sortBy,
-            isDescending: descending != null ? descending : false,
+            sortColumn: '',
+            isDescending: false,
             search: ''
         };
-        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            BudgetPriorityService.getScenarioBudgetPriorityPage(this.selectedScenarioId, request).then(response => {
-                this.initializing = false
+        if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL)
+            await BudgetPriorityService.getScenarioBudgetPriorityPage(selectedScenarioId, request).then(response => {
+                initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<BudgetPriority>;
-                    this.currentPage = sortByProperty("priorityLevel", data.items);
-                    this.rowCache = clone(this.currentPage)
-                    this.totalItems = data.totalItems;
+                    currentPage.value = sortByProperty("priorityLevel", data.items);
+                    rowCache = clone(currentPage.value)
+                    totalItems.value = data.totalItems;
 
-                    this.populateEmptyBudgetPercentagePairs(this.currentPage);
+                    populateEmptyBudgetPercentagePairs(currentPage.value);
                 }
-                this.setParentLibraryName(this.currentPage.length > 0 ? this.currentPage[0].libraryId : "None");
-                this.loadedParentId = this.currentPage.length > 0 ? this.currentPage[0].libraryId : "";
-                this.loadedParentName = this.parentLibraryName; //store original
-                this.scenarioLibraryIsModified = this.currentPage.length > 0 ? this.currentPage[0].isModified : false;
+                setParentLibraryName(currentPage.value.length > 0 ? currentPage.value[0].libraryId : "None");
+                loadedParentId = currentPage.value.length > 0 ? currentPage.value[0].libraryId : "";
+                loadedParentName = parentLibraryName.value; //store original
+                scenarioLibraryIsModified.value = currentPage.value.length > 0 ? currentPage.value[0].isModified : false;
             });
     }
-}
 </script>
 
 <style>
@@ -1037,11 +1071,16 @@ export default class BudgetPriorityEditor extends Vue {
     overflow-x: hidden;
 }
 
+.priorities-error {
+    color: red;
+    text-align: center;
+    margin-bottom: 10px;
+    margin-top: -15px;
+}
+
 .priorities-data-table .v-menu--inline, .priority-criteria-output {
     width: 100%;
 }
-
-
 
 .row-padding{
     padding-top: 0px;

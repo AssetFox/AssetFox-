@@ -1,128 +1,159 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="showDialog">
+  <v-dialog max-width="45%" v-model="showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-padding-top-title">
-        <v-layout justify-start>
+        <v-row justify="space-between">
           <div class="dialog-header"><h5>Add New Target Condition Goal</h5></div>
-        </v-layout>
-                <v-btn @click="onSubmit(false)" icon>
-                    <i class="fas fa-times fa-2x"></i>
-        </v-btn>
+          <v-btn @click="onSubmit(false)" flat>
+            <i class="fas fa-times fa-2x"></i>
+          </v-btn>
+        </v-row>
       </v-card-title>
       <v-card-text class="ghd-dialog-text-field-padding">
-        <v-layout column>
+        <v-row column>
+          <v-col>
           <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
-          <v-text-field id="CreateTargetConditionGoalDialog-name-vtextfield"
-                        outline v-model="newTargetConditionGoal.name"
-                        class="ghd-control-text ghd-control-border"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+          <v-text-field 
+            id="CreateTargetConditionGoalDialog-name-vtextfield"
+            variant="outlined" 
+            v-model="newTargetConditionGoal.name"
+            class="ghd-control-text ghd-control-border"
+            density="compact"
+            :rules="[rules['generalRules'].valueIsNotEmpty]"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Select Attribute</v-subheader>
           <v-select id="CreateTargetConditionGoalDialog-attribute-vselect"
                     :items="numericAttributeNames"
-                    append-icon=$vuetify.icons.ghd-down
+                    menu-icon=custom:GhdDownSvg
+                    density="compact"
                     class="ghd-select ghd-control-text ghd-text-field ghd-text-field-border"
-                    outline v-model="newTargetConditionGoal.attribute"
+                    variant="outlined" v-model="newTargetConditionGoal.attribute"
                     :rules="[rules['generalRules'].valueIsNotEmpty]"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Year</v-subheader>
-          <v-text-field id="CreateTargetConditionGoalDialog-year-vtextfield" :mask="'####'" class="ghd-control-text ghd-control-border" outline v-model.number="newTargetConditionGoal.year"/>
+          <v-text-field 
+            id="CreateTargetConditionGoalDialog-year-vtextfield" 
+            v-maska:[yearMask]
+            class="ghd-control-text ghd-control-border" 
+            variant="outlined"
+            density="compact" 
+            v-model.number="newTargetConditionGoal.year"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Target</v-subheader>
-          <v-text-field id="CreateTargetConditionGoalDialog-target-vtextfield" outline :mask="'##########'" v-model.number="newTargetConditionGoal.target"
-                        class="ghd-control-text ghd-control-border"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-        </v-layout>
+          <v-text-field 
+            id="CreateTargetConditionGoalDialog-target-vtextfield" 
+            variant="outlined"
+            density="compact"
+            v-maska:[mask]
+            v-model.number="newTargetConditionGoal.target"
+            class="ghd-control-text ghd-control-border"
+            :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+          </v-col>
+        </v-row>
       </v-card-text>
-      <v-card-actions class="py-0">
-        <v-layout justify-center row class="ghd-dialog-padding-bottom-buttons">
-          <v-btn id="CreateTargetConditionGoalDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue" outline>
+      <v-card-actions style="margin-left: 10px; padding-left: 10px;">
+        <v-row justify="center" class="ghd-dialog-padding-bottom-buttons">
+          <v-btn 
+            id="CreateTargetConditionGoalDialog-cancel-vbtn" 
+            @click="onSubmit(false)" 
+            class="ghd-white-bg ghd-blue" 
+            variant = "outlined"
+            rounded="0">
             Cancel
           </v-btn>
-          <v-btn id="CreateTargetConditionGoalDialog-save-vbtn" :disabled="disableSubmitButton()" @click="onSubmit(true)" class="ghd-white-bg ghd-blue" outline>
+          <v-btn 
+            id="CreateTargetConditionGoalDialog-save-vbtn" 
+            :disabled="disableSubmitButton()" 
+            @click="onSubmit(true)" 
+            class="ghd-white-bg ghd-blue" 
+            variant = "outlined"
+            rounded="0">
             Save
           </v-btn>
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {State} from 'vuex-class';
+<script setup lang="ts">
+import { ref, onMounted, computed, watch, toRefs } from 'vue';
+
 import {emptyTargetConditionGoal, TargetConditionGoal} from '@/shared/models/iAM/target-condition-goal';
 import {Attribute} from '@/shared/models/iAM/attribute';
 import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules,} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {isEqual} from '@/shared/utils/has-unsaved-changes-helper';
+import { useStore } from 'vuex';
 
-@Component
-export default class CreateTargetConditionGoalDialog extends Vue {
-  @Prop() showDialog: boolean;
-  @Prop() currentNumberOfTargetConditionGoals: number;
+  const props = defineProps<{
+          showDialog: boolean,
+          currentNumberOfTargetConditionGoals:number
+        }>();
+        
+  const { showDialog, currentNumberOfTargetConditionGoals } = toRefs(props);
 
-  @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
+  let store = useStore();
+  const emit = defineEmits(['submit'])
+  const stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributes);
 
-  newTargetConditionGoal: TargetConditionGoal = {...emptyTargetConditionGoal, id: getNewGuid()};
-  numericAttributeNames: string[] = [];
-  rules: InputValidationRules = rules;
+  let newTargetConditionGoal = ref<TargetConditionGoal>({...emptyTargetConditionGoal, id: getNewGuid()});
+  const numericAttributeNames = ref<string[]>([]);
+  const rules = ref<InputValidationRules>(validationRules);
 
-  mounted() {
-    this.setNumericAttributeNames();
-  }
+  const mask = { mask: '##########' };
+  const yearMask = { mask: '##########' };
 
-  @Watch('stateNumericAttributes')
-  onStateNumericAttributesChanged() {
-    this.setNumericAttributeNames();
-  }
+  onMounted(() => {
+    setNumericAttributeNames();
+  });
 
-  @Watch('numericAttributeNames')
-  onNumericAttributeNamesChanged() {
-    this.setNewTargetConditionGoalDefaultValues();
-  }
+  watch(stateNumericAttributes,()=> {
+    setNumericAttributeNames();
+  });
 
-  @Watch('showDialog')
-  onShowDialogChanged() {
-    this.setNewTargetConditionGoalDefaultValues();
-  }
+  watch(numericAttributeNames,()=> {
+    setNewTargetConditionGoalDefaultValues();
+  });
 
-  @Watch('currentNumberOfTargetConditionGoals')
-  onCurrentNumberOfDeficientConditionGoalsChanged() {
-    this.setNewTargetConditionGoalDefaultValues();
-  }
+  watch(showDialog,()=> {
+    setNewTargetConditionGoalDefaultValues();
+  });
 
-  setNewTargetConditionGoalDefaultValues() {
-    if (this.showDialog) {
-      this.newTargetConditionGoal = {
-        ...this.newTargetConditionGoal,
-        attribute: hasValue(this.numericAttributeNames) ? this.numericAttributeNames[0] : '',
-        name: `Unnamed Target Condition Goal ${this.currentNumberOfTargetConditionGoals + 1}`,
-        target: this.currentNumberOfTargetConditionGoals > 0 ? this.currentNumberOfTargetConditionGoals + 1 : 1
+  watch(currentNumberOfTargetConditionGoals,()=> {
+    setNewTargetConditionGoalDefaultValues();
+  });
+
+  function setNewTargetConditionGoalDefaultValues() {
+    if (showDialog) {
+      newTargetConditionGoal.value = {
+        ...newTargetConditionGoal.value,
+        attribute: hasValue(numericAttributeNames.value) ? numericAttributeNames.value[0] : '',
+        name: `Unnamed Target Condition Goal ${props.currentNumberOfTargetConditionGoals + 1}`,
+        target: props.currentNumberOfTargetConditionGoals > 0 ? props.currentNumberOfTargetConditionGoals + 1 : 1
       };
     }
   }
 
-  setNumericAttributeNames() {
-    if (hasValue(this.stateNumericAttributes) && !isEqual(this.numericAttributeNames, this.stateNumericAttributes)) {
-      this.numericAttributeNames = getPropertyValues('name', this.stateNumericAttributes);
+  function setNumericAttributeNames() {
+    if (hasValue(stateNumericAttributes) && !isEqual(numericAttributeNames.value, stateNumericAttributes)) {
+      numericAttributeNames.value = getPropertyValues('name', stateNumericAttributes.value);
     }
   }
 
-  disableSubmitButton() {
-    return !(this.rules['generalRules'].valueIsNotEmpty(this.newTargetConditionGoal.attribute) === true &&
-        this.rules['generalRules'].valueIsNotEmpty(this.newTargetConditionGoal.target) === true &&
-        this.rules['generalRules'].valueIsNotEmpty(this.newTargetConditionGoal.name) === true);
+  function disableSubmitButton() {
+    return !(rules.value['generalRules'].valueIsNotEmpty(newTargetConditionGoal.value.attribute) === true &&
+        rules.value['generalRules'].valueIsNotEmpty(newTargetConditionGoal.value.target) === true &&
+        rules.value['generalRules'].valueIsNotEmpty(newTargetConditionGoal.value.name) === true);
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newTargetConditionGoal);
+      emit('submit', newTargetConditionGoal.value);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newTargetConditionGoal = {...emptyTargetConditionGoal, id: getNewGuid()};
+    newTargetConditionGoal.value = {...emptyTargetConditionGoal, id: getNewGuid()};
   }
-}
+
 </script>

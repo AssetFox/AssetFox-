@@ -1,68 +1,85 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
+  <v-dialog width="50%" persistent v-model="dialogData.showDialog">
     <v-card>
-      <v-card-title class="ghd-dialog-box-padding-top">
-         <v-layout justify-space-between align-center>
-            <div class="ghd-control-dialog-header">New Investment Library</div>
-            <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+      <v-card-title class="ghd-dialog-padding-top-title">
+         <v-row justify="space-between">
+            <div class="ghd-control-dialog-header"><h5>New Investment Library</h5></div>
+            <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
               X
             </v-btn>
-          </v-layout>
-        </v-card-title>           
+          </v-row>
+        </v-card-title>     
+
       <v-card-text class="ghd-dialog-box-padding-center">
-        <v-layout column>
-          <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
-          <v-text-field id="CreateBudgetLibraryDialog-name-textField"
-                        outline v-model="newBudgetLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].nameIsNotUnique(newBudgetLibrary.name, libraryNames)]"
-                        class="ghd-text-field-border ghd-text-field"/>
-          <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
-          <v-textarea id="CreateBudgetLibraryDialog-description-textArea"
-                      no-resize outline rows="3"
-                      v-model="newBudgetLibrary.description"
-                      class="ghd-text-field-border">
-          </v-textarea>
-        </v-layout>
+        <v-row>
+          <v-col>
+            <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
+            <v-text-field id="CreateBudgetLibraryDialog-name-textField"
+                          v-model="newBudgetLibrary.name"
+                          :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].nameIsNotUnique(newBudgetLibrary.name, libraryNames)]"
+                          class="ghd-text-field-border ghd-text-field" variant="outlined" density="compact"
+                      />
+          
+            <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>        
+            <v-textarea id="CreateBudgetLibraryDialog-description-textArea"
+                        no-resize
+                        rows="5"
+                        v-model="newBudgetLibrary.description"
+                        class="ghd-control-text ghd-control-border" variant="outlined" 
+                        >
+            </v-textarea>
+        </v-col>
+        </v-row>
       </v-card-text>
+
       <v-card-actions class="ghd-dialog-box-padding-bottom">
-        <v-layout justify-center row>
-          <v-btn id="CreateBudgetLibraryDialog-cancel-btn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' outline>Cancel</v-btn>
+        <v-row justify="center">   
+          <v-btn id="CreateBudgetLibraryDialog-cancel-btn" @click="onSubmit(false)"
+                 class='ghd-blue ghd-button-text ghd-button' variant="outlined">
+            Cancel
+          </v-btn>
           <v-btn id="CreateBudgetLibraryDialog-save-btn" :disabled="canDisableSave()" @click="onSubmit(true)"
-                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
+                 class='ghd-blue ghd-button-text ghd-button' variant="outlined">
             Save
-          </v-btn>          
-        </v-layout>
+          </v-btn>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Vue from 'vue';
 import {contains} from 'ramda';
-import {Getter} from 'vuex-class';
-import {Component, Prop, Watch} from 'vue-property-decorator';
 import {CreateBudgetLibraryDialogData} from '@/shared/models/modals/create-budget-library-dialog-data';
 import {Budget, BudgetAmount, BudgetLibrary, emptyBudgetLibrary} from '@/shared/models/iAM/investment';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { getUserName } from '@/shared/utils/get-user-info';
+import { ref, computed, toRefs, watch } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class CreateBudgetLibraryDialog extends Vue {
-  @Prop() dialogData: CreateBudgetLibraryDialogData;
-  @Prop() libraryNames: string[];
-  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+let store = useStore();
 
-  newBudgetLibrary: BudgetLibrary = {...emptyBudgetLibrary, id: getNewGuid()};
-  rules: InputValidationRules = rules;
+const props = defineProps<{
+          dialogData:CreateBudgetLibraryDialogData,
+          libraryNames: string[];
+        }>();
+const { dialogData } = toRefs(props);
+// let showDialogComputed = computed(() => props.dialogData.showDialog);;
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
+const emit = defineEmits(['submit'])
+let getIdByUserNameGetter: any = store.getters.getIdByUserName
+let newBudgetLibrary = ref<BudgetLibrary>({...emptyBudgetLibrary, id: getNewGuid()});
+let rules: InputValidationRules = validationRules;
+
+watch(()=> props.dialogData,()=> {
+  
     let currentUser: string = getUserName();
-    this.newBudgetLibrary = {
-      ...this.newBudgetLibrary,
-      budgets: this.dialogData.budgets.map((budget: Budget) => ({
+    newBudgetLibrary.value = {
+      ...newBudgetLibrary.value,
+      budgets: props.dialogData.budgets.map((budget: Budget) => ({
         ...budget,
         id: getNewGuid(),
         budgetAmounts: budget.budgetAmounts.map((budgetAmount: BudgetAmount) => ({
@@ -70,23 +87,22 @@ export default class CreateBudgetLibraryDialog extends Vue {
           id: getNewGuid()
         }))
       })),
-      owner: this.getIdByUserNameGetter(currentUser)
+      owner: getIdByUserNameGetter(currentUser)
     };
-  }
-  canDisableSave() : boolean {
+  });
+
+  function canDisableSave() : boolean {
     let check: boolean = false;
-    if (this.newBudgetLibrary.name === '') return true;
-    if (contains(this.newBudgetLibrary.name, this.libraryNames)) return true;
+    if (newBudgetLibrary.value.name === '') return true;
+    if (contains(newBudgetLibrary.value.name, props.libraryNames)) return true;
     return  check;
   }
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newBudgetLibrary);
+      emit('submit', newBudgetLibrary.value);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
-
-    this.newBudgetLibrary = {...emptyBudgetLibrary, id: getNewGuid()};
+    newBudgetLibrary.value = {...emptyBudgetLibrary, id: getNewGuid()};
   }
-}
 </script>

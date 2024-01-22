@@ -1,154 +1,189 @@
-<template>  
+<template> 
+     <div v-if="stateInventoryReportNames.length > 1" style="width: 300px; margin-left:650px">
+        <v-autocomplete
+            v-model="inventoryReportName" 
+            :items="stateInventoryReportNames"
+            variant="outlined"
+            density="compact"
+            class="ghd-select ghd-text-field ghd-text-field-border">
+        </v-autocomplete>
+     </div>
     <v-layout>
-        <v-flex xs12>
-            <v-layout justify-space-between row>
-                <v-subheader v-if="stateInventoryReportNames.length > 1" class="ghd-select ghd-text-field ghd-text-field-border">
-                    <v-select id="Inventory-reportSelection-select"
-                        v-model="inventoryReportName" 
-                        :items="stateInventoryReportNames"
-                        class="ghd-select ghd-text-field ghd-text-field-border">
-                    </v-select>
-                </v-subheader>
-           </v-layout>
-            <v-layout justify-space-between row>
-                <v-spacer></v-spacer>
-                <v-layout>
+        <v-row>
+            <v-row justify="space-between"></v-row>
+            <v-row justify="space-between">
+                <v-row style="display: flex; align-items: center; justify-content: center">
                     <div class="flex xs4" v-for="(key, index) in inventoryDetails">
-                        <v-autocomplete id="Inventory-dropdowns-autocomplete" :items="keyAttributeValues[index]" @change="onSelectInventoryItem(index)" item-text="identifier" item-value="identifier"
-                                        :label="`Select by ${key} Key`" outline
-                                        v-model="selectedKeys[index]"
-                                        :disabled = "isDisabled(index)">
-                            <template slot="item" slot-scope="data">
-                                <template v-if="typeof data.item !== 'object'">
-                                    <v-list-tile-content v-text="data.item"></v-list-tile-content>
-                                </template>
-                                <template v-else>
-                                    <v-list-tile-content>
-                                        <v-list-tile-title v-html="data.item.identifier"></v-list-tile-title>
-                                    </v-list-tile-content>
-                                </template>
-                            </template>
-                        </v-autocomplete>
+                        <v-autocomplete
+                        style="margin-top: 50px; width: 250px; margin-right: 20px"
+                        class="ghd-select ghd-text-field ghd-text-field-border ghd-button-text"
+                        :items="reactiveData[index]"
+                        v-model="selectedInventoryIndex[index]"
+                        :label="`Select by ${key}`"
+                        :disabled="isDisabled(index)"
+                        variant="outlined"
+                        density="compact"
+                        ></v-autocomplete>
                     </div>
-                </v-layout>
+                </v-row>
                 <v-spacer></v-spacer>
-                    <v-btn id="Inventory-resetKeyFields-btn" style="padding-top: 15px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                    outline 
+                    <v-btn style="margin-right: 75px; margin-top: 40px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                    variant ="outlined" 
                     @click="resetDropdowns()">
                     Reset Key Fields
                     </v-btn>
-           </v-layout>
+           </v-row>
             <v-divider></v-divider>
-            <div id="Inventory-report-div" class="container" v-html="sanitizedHTML"></div>
-        </v-flex>
+        </v-row>
     </v-layout>
+    <div style="margin: auto; margin-top: 25px; display: flex; align-items: center; justify-content: center" v-html="staticHTMLForInventory"></div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
     import Vue from 'vue';
-    import {Component, Watch} from 'vue-property-decorator';
-    import {Action, State} from 'vuex-class';
     import {QueryResponse, InventoryParam, emptyInventoryParam, InventoryItem, KeyProperty} from '@/shared/models/iAM/inventory';
     import {clone, empty, find, forEach, propEq} from 'ramda';
     import InventoryService from '@/services/inventory.service'
+    import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref, computed} from 'vue';
+    import { useStore } from 'vuex';
+    import { useRouter } from 'vue-router';
+    import { coreAxiosInstance } from '@/shared/utils/axios-instance';
 
-    @Component
-    export default class Inventory extends Vue {
-        @State(state => state.inventoryModule.inventoryItems) inventoryItems: InventoryItem[];
-        @State(state => state.inventoryModule.staticHTMLForInventory) staticHTMLForInventory: any;
-        @State(state => state.inventoryModule.querySet) querySet: InventoryParam[];
-        @State(state => state.adminDataModule.keyFields) stateKeyFields: string[];
-        @State(state => state.adminDataModule.rawDataKeyFields) stateRawDataKeyFields: string[];
-        @State(state => state.adminDataModule.inventoryReportNames) stateInventoryReportNames: string[];
-        @State(state => state.adminDataModule.constraintType) stateConstraintType: string;
+    let store = useStore();
+    const emit = defineEmits(['submit'])
+    const inventoryItems = computed<InventoryItem[]>(()=>store.state.inventoryModule.inventoryItems);
+    const staticHTMLForInventory = computed<any>(()=>store.state.inventoryModule.staticHTMLForInventory);
+    const querySet = computed<InventoryParam[]>(()=>store.state.inventoryModule.querySet);
+    const stateKeyFields = computed<string[]>(()=>store.state.adminDataModule.keyFields);
+    const stateRawDataKeyFields = computed<string[]>(()=>store.state.adminDataModule.rawDataKeyFields);
+    const stateInventoryReportNames = computed<string[]>(()=>store.state.adminDataModule.inventoryReportNames);
+    const stateConstraintType = computed<string>(()=>store.state.adminDataModule.constraintType);
+    
+    async function getInventoryAction(payload?: any): Promise<any> {await store.dispatch('getInventory',payload);}
+    async function getStaticInventoryHTMLAction(payload?: any): Promise<any> {await store.dispatch('getStaticInventoryHTML',payload);}
+    async function getInventoryReportsAction(payload?: any): Promise<any> {await store.dispatch('getInventoryReports',payload);}
+    async function getKeyFieldsAction(payload?: any): Promise<any> {await store.dispatch('getKeyFields', payload);}
+    async function getConstraintTypeAction(payload?: any): Promise<any> {await store.dispatch('getConstraintType',payload);}
+    async function getQueryAction(payload?: any): Promise<any> {await store.dispatch('getQuery',payload);}
+    async function getRawDataKeyFieldsAction(payload?: any): Promise<any> {await store.dispatch('getRawDataKeyFields',payload);}
+    async function getKeyPropertiesAction(payload?: any): Promise<any> {await store.dispatch('getKeyFields',payload);}
+        
+    
+    const keyAttributeValues = ref<string[][]>([]);
+    const reactiveData: Ref<[string[], string[]]> = ref([[], []]);
+    let inventoryItem: any[][] = [];
+
+    let selectedKeys: string[] = [];
+
+    const selectedInventoryIndex = ref([]);
+
+    let htmlResponse = ref();
+
+    let queryLength: number;
+    let reactValue: any[] = [];
+
+    const inventoryDetails = ref<string[]>([]);
+    let constraintDetails: string = '';
+    let lastThreeLetters: string = '';
+    let reportType: string = '';
+
+    let queryValue: any;
+    let querySelectedData: string[] = [];
+
+    let inventorySelectListsWorker: any = null;
+
+    let inventoryData: any  = null;
+    let sanitizedHTML: any = null;
+    let inventoryReportName: string = '';
+
+    const beforeRouteLeave = () => {
+    // Reset staticHTMLForInventory when leaving the route
+    store.state.inventoryModule.staticHTMLForInventory = null; // Set to null or an initial value
+    }
 
 
-        @Action('getInventory') getInventoryAction: any;
-        @Action('getStaticInventoryHTML') getStaticInventoryHTMLAction: any; 
-        @Action('setIsBusy') setIsBusyAction: any;
-        @Action('getInventoryReports') getInventoryReportsAction: any;
-        @Action('getKeyFields') getKeyFieldsAction: any;
-        @Action('getConstraintType') getConstraintTypeAction: any;
-        @Action('getQuery') getQueryAction: any;
-        @Action('getRawDataKeyFields') getRawDataKeyFieldsAction: any;
-
-        keyAttributeValues: string[][] = [];
-
-        inventoryItem: any[][] = [];
-
-        selectedKeys: string[] = [];
-
-        inventoryDetails: string[] = [];
-        constraintDetails: string = '';
-        lastThreeLetters: string = '';
-        reportType: string = '';
-
-        queryValue: any;
-        querySelectedData: string[] = [];
-
-        inventorySelectListsWorker: any = null;
-
-        inventoryData: any  = null;
-        sanitizedHTML: any = null;
-  
-        inventoryReportName: string = '';
+    const InventoryStateKeys = computed<InventoryItem[]>(()=> store.state.inventoryModule.inventoryItems)
 
         /**
          * Calls the setInventorySelectLists function to set both inventory type select lists
          */
-        @Watch('inventoryItems')
-        async onInventoryItemsChanged() {
-            this.keyAttributeValues = await this.setupSelectLists();
-            console.log(this.keyAttributeValues);
-        }
+        watch(inventoryItems,async ()=>{
+            keyAttributeValues.value = await setupSelectLists();
+        });
 
-        @Watch('staticHTMLForInventory')
-        onStaticHTMLForInventory(){
-            this.sanitizedHTML = this.$sanitize(this.staticHTMLForInventory);
-        }
-        
-        @Watch('stateKeyFields')
-        onStateKeyFieldsChanged(){
-            if(this.reportType === 'P') {
-                this.inventoryDetails = clone(this.stateKeyFields);
-                this.inventoryDetails.forEach(_ => this.selectedKeys.push(""));
-
-                this.getInventoryAction(this.inventoryDetails);
+        watch(selectedInventoryIndex, (newValues: any, oldValues) => {
+            let index: number;
+            if(reactValue[0] != newValues[0] && newValues[0] != undefined){
+                reactValue[0] = newValues[0];
+                index = 0;
             }
-        }
+            else
+            {
+                reactValue[1] = newValues[1];
+                index = 1;
+            }
+            onSelectInventoryItem(index);
+        }, { deep: true });
 
-        @Watch('stateRawDataKeyFields')
-        onStateRawKeyFieldsChanged(){
-            if(this.reportType === 'R') {
-                this.inventoryDetails = clone(this.stateRawDataKeyFields);
+        watch(InventoryStateKeys, ()=>{
+            InventoryStateKeys.value.forEach(element => {
+                keyAttributeValues.value.push(element.keyProperties)
+            });
 
-                this.inventoryDetails.forEach(_ => this.selectedKeys.push(""));
-                this.getInventoryAction([this.inventoryDetails[0]]);
-            } 
+            for(let i = 0; i < keyAttributeValues.value.length; i++)
+            {
+                let j = 0;
+                reactiveData.value[0].push(keyAttributeValues.value[i][j])
+            }
 
-        }
+            for(let i = 0; i < keyAttributeValues.value.length; i++)
+            {
+                let j = 1;
+                reactiveData.value[1].push(keyAttributeValues.value[i][j])
+            }
 
-        @Watch('stateInventoryReportNames')
-        onStateInventoryReportNamesChanged(){
-            if(this.stateInventoryReportNames.length > 0)
-                this.inventoryReportName = this.stateInventoryReportNames[0]
+        })
+
+        watch(staticHTMLForInventory,()=>{
+           // sanitizedHTML = $sanitize(staticHTMLForInventory.value);
+        })
+
+        watch(stateInventoryReportNames,()=>{
+            if(stateInventoryReportNames.value.length > 0)
+                inventoryReportName = stateInventoryReportNames.value[0]
             
-            this.lastThreeLetters = this.inventoryReportName.slice(-3);
-            this.reportType = this.lastThreeLetters[1];
-        }
+            lastThreeLetters = inventoryReportName.slice(-3);
+            reportType = lastThreeLetters[1];
+        });
+        
+        watch(stateKeyFields,()=>{
+            if(reportType === 'P') {
+                inventoryDetails.value = clone(stateKeyFields.value);
+                inventoryDetails.value.forEach(_ => selectedKeys.push(""));
 
-        @Watch('stateConstraintType')
-        onStateConstraintTypeChanged(){
-            this.constraintDetails = this.stateConstraintType;
-        }
+                getInventoryAction(inventoryDetails.value);
+            }
+        });
 
-        @Watch('querySet')
-        onQuerySetChanged(){
-                this.keyAttributeValues = [];
-                for(let i = 0; i < this.inventoryDetails.length; i++) 
+        watch(stateRawDataKeyFields,()=>{
+            if(reportType === 'R') {
+                inventoryDetails.value = clone(stateRawDataKeyFields.value);
+
+                inventoryDetails.value.forEach(_ => selectedKeys.push(""));
+                getInventoryAction([inventoryDetails.value[0]]);
+            } 
+        });
+
+        watch(stateConstraintType,()=>{
+            constraintDetails = stateConstraintType.value;
+        });
+
+        watch(querySet,()=>{
+            reactiveData.value = [[],[]];
+                for(let i = 0; i < inventoryDetails.value.length; i++) 
                 {
-                    this.queryValue = this.querySet[i].values;
-                    this.queryValue.sort((a: string | number, b: string | number) => 
+                    queryValue = querySet.value[i].values;
+                    queryValue.sort((a: string | number, b: string | number) => 
                     {
                         if (typeof a === "number" && typeof b === "number") {
                             return a - b; // Sort numbers in descending order
@@ -158,112 +193,99 @@
                             return 0; // Preserve the original order if the data types are different
                         }
                     });
-                    this.keyAttributeValues[i] = this.queryValue;
+                    reactiveData.value[i] = queryValue;
                 }
-        }
-
+        });
         /**
          * Vue component has been mounted
          */
-        mounted() {
+        onMounted(() => {
             (async () => { 
-                await this.getConstraintTypeAction();
-                await this.getInventoryReportsAction();
-                await this.getKeyFieldsAction(); 
-                await this.getRawDataKeyFieldsAction();
-                this.onStateConstraintTypeChanged();
+                await getConstraintTypeAction();
+                await getInventoryReportsAction();
+                await getKeyFieldsAction(); 
+                await getRawDataKeyFieldsAction();
+                await getConstraintTypeAction();
             })();
+        })
+
+        onBeforeUnmount(() => {
+            const router = useRouter();
+            router.beforeEach(beforeRouteLeave);
+        });
+
+        created();
+        function created() {
+            initializeLists();
         }
 
-        created() {
-            this.initializeLists();
-        }
-
-        async setupSelectLists() {
-            this.querySelectedData = [];
+        async function setupSelectLists() {
+            querySelectedData = [];
             const data: any = {
-                inventoryItems: this.inventoryItems,
-                inventoryDetails: this.inventoryDetails
+                inventoryItems: inventoryItems,
+                inventoryDetails: inventoryDetails.value
             };
             let toReturn: string[][] = [];
-            let result = await this.inventorySelectListsWorker.postMessage('setInventorySelectLists', [data])  
-                for(let i = 0; i < this.inventoryDetails.length; i++){
-                    toReturn[i] = clone(result.keys[i]);
-                }
-            return toReturn;                  
+            var keyProperties = data.inventoryDetails;
+             const response = await InventoryService.getInventory(keyProperties);
+               keyAttributeValues.value = response.data;
+               response.data.forEach((element: string[]) => {
+                    toReturn.push(element);
+                });
+
+            return toReturn; 
+                  
+        }
+        
+        async function initializeLists() {
         }
 
-        initializeLists() {
-                this.inventorySelectListsWorker = this.$worker.create(
-                    [
-                        {
-                            message: 'setInventorySelectLists', func: (data: any) => {
-                                if (data) {
-                                    
-                                    const inventoryItems = data.inventoryItems;
-
-                                    const keys: any[][] = []
-                                    inventoryItems.forEach((item: InventoryItem, index: number) => {
-                                        if (index === 0) { 
-                                            for(let i = 0; i < data.inventoryDetails.length; i++){
-                                                keys.push([])
-                                                keys[i].push({header: `${data.inventoryDetails[i]}'s`})
-                                            }
-                                        }                           
-                                        
-                                        for(let i = 0; i < data.inventoryDetails.length; i++){
-                                            keys[i].push({
-                                                identifier: item.keyProperties[i],
-                                                group: data.inventoryDetails[i]
-                                            })
-                                        }
-                                    });
-                            
-                                    return {keys: keys};
-                                }
-                                return  {keys: []};
-                            }
-                        }
-                    ]
-                );
-    }
-
-        async resetDropdowns() {
-            this.keyAttributeValues = [];
+        async function resetDropdowns() {
+            selectedInventoryIndex.value = [];
+            reactiveData.value = [[],[]];
             //Reset selected key fields
-            this.selectedKeys.forEach((value: string, index: number, array: string[]) => {
-                this.selectedKeys[index] = '';
+            selectedInventoryIndex.value.forEach((value: string, index: number, array: string[]) => {
+                selectedKeys[index] = '';
             })
-            this.selectedKeys[0] = "";
-            this.keyAttributeValues = await this.setupSelectLists();
+            selectedInventoryIndex.value = [];
+            selectedKeys[0] = "";
+            keyAttributeValues.value = await setupSelectLists();
+
+            clearForm();
         }
 
-        onSelectInventoryItem(index: number){
-            if(this.constraintDetails == 'OR')
+        function clearForm() {
+            store.state.inventoryModule.staticHTMLForInventory = null;
+        }
+
+        function onSelectInventoryItem(index: number){
+            constraintDetails = stateConstraintType.value;
+            if(constraintDetails == 'OR')
             {
-                this.HandleSelectedItems(index);
+                HandleSelectedItems(index);
             }
-            else if(this.constraintDetails == 'AND') {
+            else if(constraintDetails == 'AND') {
                 let selectedCounter = 0;
                 //Get the first user selected key field and it's selection and put it in a dictionary
-                this.QueryAccess();
+                QueryAccess();
 
                 //Check if any dropdowns are empty
-                for(let i = 0; i < this.inventoryDetails.length; i++) {
-                    if(this.selectedKeys[i] !== '') {
+                for(let i = 0; i < inventoryDetails.value.length; i++) {
+                    if(selectedInventoryIndex.value[i]) {
                         selectedCounter++;
                     }
                 }
                 
-                if(selectedCounter === this.inventoryDetails.length)
+                if(selectedCounter === inventoryDetails.value.length)
                 {
-                    this.HandleSelectedItems(index);
+                    HandleSelectedItems(index);
                  }
             }       
         }
 
-        HandleSelectedItems(index: number) {
-            let key = this.selectedKeys[index];
+         function HandleSelectedItems(index: number) {
+            selectedKeys = selectedInventoryIndex.value;
+            let key = selectedInventoryIndex.value[index];
                 let data: InventoryParam = {
                 keyProperties: {},
                 values: function (values: any): unknown {
@@ -271,62 +293,62 @@
                 }
                 };
 
-                for(let i = 0; i < this.inventoryDetails.length; i++){
+            if(reportType === 'P')
+            {
+                for(let i = 0; i < inventoryDetails.value.length; i++){
                     if(i === index){
                         data.keyProperties[i] = key;
                         continue;
                     }
-                    if(this.constraintDetails == 'OR'){
-                    let inventoryItem = this.inventoryItems.filter(function(item: { keyProperties: string | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0];
+                    let inventoryItem = inventoryItems.value.filter(function(item: { keyProperties: string | any[]; }){if(item.keyProperties.indexOf(key) !== -1) return item;})[0]; 
                     let otherKeyValue = inventoryItem.keyProperties[i]; 
-                    this.selectedKeys[i] = otherKeyValue;
+                    selectedKeys[i] = otherKeyValue;
                     data.keyProperties[i] = otherKeyValue;
-                    }
                 }
+            }
+
                  //Create a dictionary of the selected key fields
                 let dictionary: Record<string, string> = {};
 
-                for(let i = 0; i < this.inventoryDetails.length; i++) {
-                    let dictNames: any = this.inventoryDetails[i];
-                    let dictValues: any = this.selectedKeys[i];
+                for(let i = 0; i < inventoryDetails.value.length; i++) {
+                    let dictNames: any = inventoryDetails.value[i];
+                    let dictValues: any = selectedKeys[i];
                     dictionary[dictNames] = dictValues;                     
                 }
 
                 //Set the data equal to the dictionary
                 data.keyProperties = dictionary;
 
-                this.getStaticInventoryHTMLAction({reportType: this.inventoryReportName, filterData: data.keyProperties}); 
+                 getStaticInventoryHTMLAction({reportType: inventoryReportName, filterData: data.keyProperties}); 
         }
 
-        QueryAccess() {
+        function QueryAccess() {
              //Get the first user selected key field and it's selection and put it in a dictionary
 
-            if(this.querySelectedData.length === 0 || this.querySelectedData.length === 2) 
+            if(querySelectedData.length === 0 || querySelectedData.length === 2) 
             {
-                for(let i = 0; i < this.inventoryDetails.length - 1; i++) 
+                for(let i = 0; i < selectedInventoryIndex.value.length; i++) 
                     {
-                        if(this.selectedKeys[i] !== '') 
+                        if(selectedInventoryIndex.value[i] !== '') 
                         {
-                            if(!this.querySelectedData.includes(this.inventoryDetails[i]) && !this.querySelectedData.includes(this.selectedKeys[i]))
+                            if(!querySelectedData.includes(inventoryDetails.value[i]) && !querySelectedData.includes(selectedInventoryIndex.value[i]))
                             {
-                                this.querySelectedData.push(this.inventoryDetails[i]);
-                                this.querySelectedData.push(this.selectedKeys[i]);
+                                querySelectedData.push(inventoryDetails.value[i]);
+                                querySelectedData.push(selectedInventoryIndex.value[i]);
                             }
                         }
                     }
-                    //Send to backend to recieve dropdown lists for the other key fields                     
-                    this.getQueryAction({querySet: this.querySelectedData});           
+                    //Send to back end to recieve dropdown lists for the other key fields                     
+                    getQueryAction({querySet: querySelectedData});           
             }
         }
 
-        isDisabled(index: number) {
-            if(this.querySelectedData.length < index * 2 && this.constraintDetails == "AND") {
+        function isDisabled(index: number) {
+            if(querySelectedData.length < index * 2 && constraintDetails == "AND") {
                 return true;
             }
             return false;
         }
-    }
-
 </script>
 
 <style>

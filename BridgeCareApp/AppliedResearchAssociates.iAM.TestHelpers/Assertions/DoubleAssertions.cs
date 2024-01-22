@@ -14,5 +14,11 @@ namespace AppliedResearchAssociates.iAM.TestHelpers
             var difference = Math.Abs(expected - actual);
             Assert.True(difference <= tolerance);
         }
+
+        public static void Between(double lowerBound, int upperBound, double actual)
+        {
+            Assert.True(lowerBound <= actual);
+            Assert.True(actual <= upperBound);
+        }
     }
 }

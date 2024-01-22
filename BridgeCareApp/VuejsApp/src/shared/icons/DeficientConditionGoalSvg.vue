@@ -1,5 +1,5 @@
 <template>
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_81_2555)">
 <path d="M15.6667 16.0001H0.333333C0.149333 16.0001 0 15.8508 0 15.6668C0 15.4828 0.149333 15.3335 0.333333 15.3335H15.6667C15.8507 15.3335 16 15.4828 16 15.6668C16 15.8508 15.8507 16.0001 15.6667 16.0001Z"/>
 <path d="M15.0001 16.0001H11.6667C11.4827 16.0001 11.3334 15.8508 11.3334 15.6668V12.0001C11.3334 11.6328 11.6327 11.3335 12.0001 11.3335H14.6667C15.0341 11.3335 15.3334 11.6328 15.3334 12.0001V15.6668C15.3334 15.8508 15.1841 16.0001 15.0001 16.0001ZM12.0001 15.3335H14.6667V12.0001H12.0001V15.3335Z" />
@@ -17,15 +17,7 @@
 
 </template>
 
-<script lang='ts'>
-import Vue from 'vue';
-import Component from 'vue-class-component';
-@Component({
-
-})
-export default class DeficientConditionGoalSvg extends Vue {
-    
-}
+<script setup lang='ts'>
 </script>
 
 <style >

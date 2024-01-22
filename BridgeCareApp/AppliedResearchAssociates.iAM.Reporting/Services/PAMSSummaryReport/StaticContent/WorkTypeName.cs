@@ -12,6 +12,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Sta
             TreatmentCategory.Replacement => "Replacement",
             TreatmentCategory.Maintenance => "Maintenance",
             TreatmentCategory.Other => "Other",
+            TreatmentCategory.WorkOutsideScope=> "Work Outside Scope/Jurisdiction",
             _ => name.ToString(),
         };
     }

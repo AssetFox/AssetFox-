@@ -2,94 +2,106 @@
     <v-dialog v-model="dialogData.showDialog" max-width="450px" persistent>
         <v-card>
             <v-card-title class="ghd-dialog-box-padding-top">
-                <v-layout justify-space-between align-center >
+                <v-row justify-space-between align-center >
                     <div class="ghd-control-dialog-header">New Calculated Attribute Library</div>
-                    <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+                    <v-spacer></v-spacer>
+                    <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
                         X
                     </v-btn>
-                </v-layout>
+                </v-row>
             </v-card-title>
             <v-card-text class="ghd-dialog-box-padding-center">
-                <v-layout column>
+                <v-row>
                     <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
+                </v-row>
+                <v-row>
                     <v-text-field id="CreateCalculatedAttributeLibraryDialog-name-textfield"
                         v-model="newCalculatedAttributeLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        outline
+                        :rules="rules['generalRules'].valueIsNotEmpty"
+                        variant="outlined"
                         class="ghd-text-field-border ghd-text-field"/>
+                </v-row>
+                <v-row>
                     <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
+                </v-row>
+                <v-row>
                     <v-textarea id="CreateCalculatedAttributeLibraryDialog-description-textfield"
                         v-model="newCalculatedAttributeLibrary.description"
                         no-resize
-                        outline
+                        variant="outlined"
                         rows="3"
                         class="ghd-text-field-border"/>
-                </v-layout>
+                </v-row>
             </v-card-text>
             <v-card-actions class="ghd-dialog-box-padding-bottom">
-                <v-layout justify-center>
+                <v-spacer></v-spacer>
                     <v-btn id="CreateCalculatedAttributeLibraryDialog-cancel-btn"
-                        outline 
+                    variant = "outlined" 
                         class='ghd-blue ghd-button-text ghd-button'
                         @click="onSubmit(false)">
                         Cancel
                     </v-btn>
                     <v-btn id="CreateCalculatedAttributeLibraryDialog-save-btn"
                         :disabled="newCalculatedAttributeLibrary.name === ''"
-                        outline 
+                        variant = "outlined" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         @click="onSubmit(true)">
                         Save
                     </v-btn> 
-                </v-layout>
+                    <v-spacer></v-spacer>
             </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
+<script lang="ts" setup>
+import Vue, { computed } from 'vue';
 import {
     InputValidationRules,
-    rules,
+    rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
 import { clone } from 'ramda';
 import { getNewGuid } from '@/shared/utils/uuid-utils';
-import { CreateCalculatedAttributeLibraryDialogData } from '@/shared/models/modals/create-calculated-attribute-library-dialog-data';
+import { CreateCalculatedAttributeLibraryDialogData, emptyCreateCalculatedAttributeLibraryDialogData } from '@/shared/models/modals/create-calculated-attribute-library-dialog-data';
 import {
     CalculatedAttributeLibrary,
     emptyCalculatedAttributeLibrary,
 } from '@/shared/models/iAM/calculated-attribute';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref, toRefs} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class CreateCalculatedAttributeLibraryDialog extends Vue {
-    @Prop() dialogData: CreateCalculatedAttributeLibraryDialogData;
+const emit = defineEmits(['submit'])
+const props = defineProps<{
 
-    newCalculatedAttributeLibrary: CalculatedAttributeLibrary = {
+    dialogData: CreateCalculatedAttributeLibraryDialogData
+
+}>()
+const {dialogData} = toRefs(props);
+const newCalculatedAttributeLibrary = ref<CalculatedAttributeLibrary>({
         ...emptyCalculatedAttributeLibrary,
         id: getNewGuid(),
-    };
-    rules: InputValidationRules = clone(rules);
-
-    @Watch('dialogData')
-    onDialogDataChanged() {
-        this.newCalculatedAttributeLibrary = {
-            ...this.newCalculatedAttributeLibrary,
-            calculatedAttributes: this.dialogData.calculatedAttributes,
+    })
+    let rules: InputValidationRules = validationRules;
+    
+    watch(dialogData,() =>{
+        newCalculatedAttributeLibrary.value = {
+            ...newCalculatedAttributeLibrary.value,
+            calculatedAttributes: dialogData.value.calculatedAttributes,
         };
-    }
-    onSubmit(submit: boolean) {
+    });
+    function onSubmit(submit: boolean) {
         if (submit) {
-            this.$emit('submit', this.newCalculatedAttributeLibrary);
+            emit('submit', newCalculatedAttributeLibrary.value);
         } else {
-            this.$emit('submit', null);
+            emit('submit', null);
         }
 
-        this.newCalculatedAttributeLibrary = {
+        newCalculatedAttributeLibrary.value = {
             ...emptyCalculatedAttributeLibrary,
             id: getNewGuid(),
         };
     }
-}
+    
+
 </script>

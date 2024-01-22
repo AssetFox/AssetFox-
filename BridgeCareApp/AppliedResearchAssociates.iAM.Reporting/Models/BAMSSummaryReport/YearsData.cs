@@ -11,6 +11,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport
         public string Treatment { get; set; }
 
         public TreatmentCategory TreatmentCategory { get; set; }
+
         public AssetCategories AssetType { get; set; }
 
         public string ProjectSource { get; set; }

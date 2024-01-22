@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CalculatedAttribute;
@@ -29,13 +22,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         List<AttributeEntity> attributes,
             string networkKeyAttribute, BaseEntityProperties baseEntityProperties)
         {
-            var analysisMethod = AnalysisMethodMapper.ToEntityWithBenefit(dto.AnalysisMethod, dto.Id, attributes, baseEntityProperties:baseEntityProperties);
-            if (CriterionLibraryValidityChecker.IsValid(dto.AnalysisMethod.CriterionLibrary))
+            var analysisMethodDto = dto.AnalysisMethod;
+            var attributeId = attributes.FirstOrDefault(_ => _.Name.Equals(analysisMethodDto.Attribute))?.Id;
+            var analysisMethod = AnalysisMethodMapper.ToEntityWithBenefit(analysisMethodDto, dto.Id, attributes, attributeId, baseEntityProperties: baseEntityProperties);
+            if (CriterionLibraryValidityChecker.IsValid(analysisMethodDto.CriterionLibrary))
             {
-                var analysisMethodCriterionLibraryEntity = CriterionMapper.ToSingleUseEntity(dto.AnalysisMethod.CriterionLibrary, baseEntityProperties);
+                var analysisMethodCriterionLibraryEntity = CriterionMapper.ToSingleUseEntity(analysisMethodDto.CriterionLibrary, baseEntityProperties);
                 var analysisMethodJoin = new CriterionLibraryAnalysisMethodEntity
                 {
-                    AnalysisMethodId = dto.AnalysisMethod.Id,
+                    AnalysisMethodId = analysisMethodDto.Id,
                     CriterionLibrary = analysisMethodCriterionLibraryEntity,
                 };
                 BaseEntityPropertySetter.SetBaseEntityProperties(analysisMethodJoin, baseEntityProperties);

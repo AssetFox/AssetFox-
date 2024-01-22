@@ -1,83 +1,79 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
+  <v-dialog max-width="450px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
-         <v-layout justify-space-between align-center>
+         <v-row justify-space-between align-center>
             <div class="ghd-control-dialog-header">New Data Source</div>
-            <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
-              X
-            </v-btn>
-          </v-layout>
+          </v-row>
         </v-card-title>           
       <v-card-text class="ghd-dialog-box-padding-center">
-        <v-layout column>
-          <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
-          <v-text-field outline id="CreateDataSourceDialog-Name-vtextField"
+        <v-row column>
+          <v-text-field label="Name" outline id="CreateDataSourceDialog-Name-vtextField"
             v-model="datasourceName"
             class="ghd-text-field-border ghd-text-field"/>
-        </v-layout>
+        </v-row>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
-        <v-layout justify-center row>
-          <v-btn id="CreateDataSourceDialog-Cancel-vbtn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' flat>Cancel</v-btn>
+        <v-row justify-center row>
+          <v-btn id="CreateDataSourceDialog-Cancel-vbtn" @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-right:auto; margin-left:auto;" variant = "flat">Cancel</v-btn>
           <v-btn id="CreateDataSourceDialog-Save-vbtn" @click="onSubmit(true)"
-                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
+                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-right:auto; margin-left:auto;" variant = "outlined">
             Save
           </v-btn>          
-        </v-layout>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+<script setup lang="ts">
+import Vue, { computed, ref, Ref, shallowRef, ShallowRef, watch } from 'vue';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { Datasource, emptyDatasource, DSSQL } from '../../../shared/models/iAM/data-source';
 import { CreateDataSourceDialogData} from '@/shared/models/modals/data-source-dialog-data'
-import { Getter } from 'vuex-class';
 import { getUserName } from '@/shared/utils/get-user-info';
+import { useStore } from 'vuex';
+import { clone } from 'ramda';
 
-@Component
-export default class CreateDataSourceDialog extends Vue {
-  @Prop() dialogData: CreateDataSourceDialogData;
-  
-  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+  let store = useStore();
+  let getIdByUserNameGetter = store.getters.getIdByUserName ;
 
-  newDataSource: Datasource = emptyDatasource;
-  rules: InputValidationRules = rules;
-  datasourceName: string = 'New Data Source';
+  const props = defineProps<{
+    dialogData: CreateDataSourceDialogData
+  }>()
+  let showDialogComputed = computed(() => props.dialogData.showDialog);
+  const emit = defineEmits(['submit'])
 
+   const newDataSource = ref<Datasource>(emptyDatasource);
+  let rules: InputValidationRules = validationRules;
+  let datasourceName = ref<string>('New Data Source');
 
-  @Watch('datasourceName')
-    onDataSourceNameChanged() {
-        this.newDataSource.name = this.datasourceName;
-    }
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    this.newDataSource = {
+  watch(datasourceName, () => { 
+      newDataSource.value.name = datasourceName.value;
+  })
+
+  watch(() => props.dialogData, () => {  
+    newDataSource.value = {
         id: getNewGuid(),
-        createdBy: this.getIdByUserNameGetter(getUserName()),
-        name: this.datasourceName,
+        createdBy: getIdByUserNameGetter(getUserName()),
+        name: datasourceName.value,
         type: DSSQL,
         connectionString: '',
-        dateColumn: '',
+        dateColumn: '', 
         locationColumn: '',
         secure: false
     };
-  }
+  })
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newDataSource);
+      emit('submit', newDataSource.value);
     } else {
-      this.$emit('submit', null);
+      emit('submit', null);
     }
 
-    this.newDataSource = emptyDatasource;
-    this.dialogData.showDialog = false;
+    props.dialogData.showDialog = false;
   }
-}
+
 </script>

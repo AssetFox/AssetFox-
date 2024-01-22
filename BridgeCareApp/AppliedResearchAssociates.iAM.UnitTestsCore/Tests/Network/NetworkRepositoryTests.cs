@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var assets = new List<MaintainableAsset> { asset };
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, assets, networkId, keyAttributeId);
             var simulationId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(
+            var simulation = SimulationTestSetup.ModelForEntityInDb(
                 TestHelper.UnitOfWork, simulationId, "simulation should be deleted", user.Id, networkId);
             var networksBefore = await TestHelper.UnitOfWork.NetworkRepo.Networks();
             var networkBefore = networksBefore.Single(n => n.Id == networkId);

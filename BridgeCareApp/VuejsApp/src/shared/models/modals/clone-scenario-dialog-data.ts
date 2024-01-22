@@ -4,11 +4,6 @@ export interface CloneScenarioDialogData {
     showDialog: boolean;
     scenario: Scenario;
 }
-
-export const emptyCloneScenarioDialogData: CloneScenarioDialogData = {
-    showDialog: false,
-    scenario: emptyScenario
-}
 export interface CloneSimulationDialogData {
     showDialog: boolean;
     scenario: CloneScenario;
@@ -17,4 +12,12 @@ export interface CloneSimulationDialogData {
 export const emptyCloneSimulationDialogData: CloneSimulationDialogData = {
     showDialog: false,
     scenario: emptyCloneScenario
-};
+}
+export const emptyCloneScenarioDialogData: CloneScenarioDialogData = {
+    showDialog: false,
+    scenario: emptyScenario
+}
+export interface CloneSimulationDialogData {
+    showDialog: boolean;
+    scenario: CloneScenario;
+}

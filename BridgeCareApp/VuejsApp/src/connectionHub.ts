@@ -7,17 +7,18 @@ import { SimulationAnalysisDetail } from '@/shared/models/iAM/simulation-analysi
 import { SimulationReportDetail } from '@/shared/models/iAM/simulation-report-detail';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 import { hasValue } from '@/shared/utils/has-value-util';
-
 import has = Reflect.has;
 import { getUserName } from '@/shared/utils/get-user-info';
 import { queuedWorkStatusUpdate } from './shared/models/iAM/queuedWorkStatusUpdate';
 import { importCompletion } from './shared/models/iAM/ImportCompletion';
+import mitt from 'mitt';
+import { WorkType } from './shared/models/iAM/scenario';
 
 export default {
-    install(Vue: any) {
+    install: (app: any, options: any) => {
         const connection = new HubConnectionBuilder()
             .withUrl(
-                `${process.env.VUE_APP_BRIDGECARE_CORE_URL}/bridgecarehub/`,
+                `${import.meta.env.VITE_APP_BRIDGECARE_CORE_URL}/bridgecarehub/`,
                 {
                     transport: HttpTransportType.LongPolling,
                 },
@@ -25,13 +26,12 @@ export default {
             .configureLogging(LogLevel.Information)
             .build();
 
-        const statusHub = new Vue();
-        Vue.prototype.$statusHub = statusHub;
+        const emitter = mitt()
 
         connection.on(
             Hub.BroadcastType.BroadcastAssignDataStatus,
             (networkRollupDetail: NetworkRollupDetail, percentage) => {
-                statusHub.$emit(
+                emitter.emit(
                     Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
                     { networkRollupDetail, percentage },
                 );
@@ -41,7 +41,7 @@ export default {
         connection.on(
             Hub.BroadcastType.BroadcastReportGenerationStatus,
             (simulationReportDetail: SimulationReportDetail) => {
-                statusHub.$emit(
+                emitter.emit(
                     Hub.BroadcastEventType
                         .BroadcastReportGenerationStatusEvent,
                     { simulationReportDetail },
@@ -50,7 +50,7 @@ export default {
         );
 
         connection.on(Hub.BroadcastType.BroadcastDataMigration, status => {
-            statusHub.$emit(
+            emitter.emit(
                 Hub.BroadcastEventType.BroadcastDataMigrationEvent,
                 { status },
             );
@@ -59,7 +59,7 @@ export default {
         connection.on(
             Hub.BroadcastType.BroadcastScenarioStatusUpdate,
             (status, scenarioId) => {
-                statusHub.$emit(
+                emitter.emit(
                     Hub.BroadcastEventType.BroadcastScenarioStatusUpdateEvent,
                     { status, scenarioId },
                 );
@@ -69,7 +69,7 @@ export default {
         connection.on(
             Hub.BroadcastType.BroadcastSimulationAnalysisDetail,
             (simulationAnalysisDetail: SimulationAnalysisDetail) => {
-                statusHub.$emit(
+                emitter.emit(
                     Hub.BroadcastEventType
                         .BroadcastSimulationAnalysisDetailEvent,
                     {simulationAnalysisDetail},
@@ -78,59 +78,65 @@ export default {
         );
 
         connection.on(Hub.BroadcastType.BroadcastWorkQueueUpdate, workId => {
-            statusHub.$emit(Hub.BroadcastEventType.BroadcastWorkQueueUpdateEvent, {
+            emitter.emit(Hub.BroadcastEventType.BroadcastWorkQueueUpdateEvent, {
                 workId,
             });
         });
 
         connection.on(Hub.BroadcastType.BroadcastFastWorkQueueUpdate, workId => {
-            statusHub.$emit(Hub.BroadcastEventType.BroadcastFastWorkQueueUpdateEvent, {
+            emitter.emit(Hub.BroadcastEventType.BroadcastFastWorkQueueUpdateEvent, {
                 workId,
             });
         });
 
         connection.on(Hub.BroadcastType.BroadcastWorkQueueStatusUpdate, (queueItem: queuedWorkStatusUpdate) => {
-            statusHub.$emit(Hub.BroadcastEventType.BroadcastWorkQueueStatusUpdateEvent, {
+            emitter.emit(Hub.BroadcastEventType.BroadcastWorkQueueStatusUpdateEvent, {
                 queueItem,
             });
         });   
         
         connection.on(Hub.BroadcastType.BroadcastFastWorkQueueStatusUpdate, (queueItem: queuedWorkStatusUpdate) => {
-            statusHub.$emit(Hub.BroadcastEventType.BroadcastFastWorkQueueStatusUpdateEvent, {
+            emitter.emit(Hub.BroadcastEventType.BroadcastFastWorkQueueStatusUpdateEvent, {
                 queueItem,
             });
         });
 
         connection.on(Hub.BroadcastType.BroadcastImportCompletion, (importComp: importCompletion) => {
-            statusHub.$emit(Hub.BroadcastEventType.BroadcastImportCompletionEvent, {
+            emitter.emit(Hub.BroadcastEventType.BroadcastImportCompletionEvent, {
                 importComp,
             });
         });
 
+        connection.on(Hub.BroadcastType.BroadcastSimulationDeletionCompletion, (workType: WorkType) => {
+            emitter.emit(Hub.BroadcastEventType.BroadcastSimulationDeletionCompletionEvent, {
+                workType
+            });
+        });
+
         connection.on(Hub.BroadcastType.BroadcastError, error => {
-            statusHub.$emit(Hub.BroadcastEventType.BroadcastErrorEvent, {
+            emitter.emit(Hub.BroadcastEventType.BroadcastErrorEvent, {
                 error,
             });
         });
 
         connection.on(Hub.BroadcastType.BroadcastWarning, warning => {
-            statusHub.$emit(Hub.BroadcastEventType.BroadcastWarningEvent, {
+            emitter.emit(Hub.BroadcastEventType.BroadcastWarningEvent, {
                 warning,
             });
         });
 
         connection.on(Hub.BroadcastType.BroadcastInfo, info => {
-            statusHub.$emit(Hub.BroadcastEventType.BroadcastInfoEvent, {
+            emitter.emit(Hub.BroadcastEventType.BroadcastInfoEvent, {
                 info,
             });
         });
         
         connection.on(Hub.BroadcastType.BroadcastTaskCompleted, task => {
-            statusHub.$emit(Hub.BroadcastEventType.BroadcastTaskCompletedEvent, {
+            emitter.emit(Hub.BroadcastEventType.BroadcastTaskCompletedEvent, {
                 task,
             });
         });
-
+        app.provide('emitter', emitter);
         let startedPromise: any | null = null;
 
         function start() {
@@ -181,7 +187,8 @@ export const Hub = {
         BroadcastWorkQueueStatusUpdate: 'BroadcastWorkQueueStatusUpdate',
         BroadcastFastWorkQueueUpdate: 'BroadcastFastWorkQueueUpdate',
         BroadcastFastWorkQueueStatusUpdate: 'BroadcastFastWorkQueueStatusUpdate',
-        BroadcastImportCompletion: 'BroadcastImportCompletion',        
+        BroadcastImportCompletion: 'BroadcastImportCompletion',   
+        BroadcastSimulationDeletionCompletion: 'BroadcastSimulationDeletionCompletion'     
     },
     BroadcastEventType: {
         BroadcastErrorEvent: 'BroadcastErrorEvent',
@@ -202,5 +209,6 @@ export const Hub = {
         BroadcastFastWorkQueueUpdateEvent: 'BroadcastFastWorkQueueUpdateEvent',
         BroadcastFastWorkQueueStatusUpdateEvent: 'BroadcastFastWorkQueueStatusUpdateEvent',        
         BroadcastImportCompletionEvent: 'BroadcastImportCompletionEvent',
+        BroadcastSimulationDeletionCompletionEvent: 'BroadcastSimulationDeletionCompletionEvent'
     },
 };

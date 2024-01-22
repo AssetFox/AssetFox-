@@ -470,7 +470,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
 
                 _unitOfWork.Context.UpdateAll(outputJsons);
-                _unitOfWork.Commit();
             });
         }
 

@@ -65,7 +65,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             }
             unitOfWork.Context.UpdateRange(assetEntities2);
             unitOfWork.Context.SaveChanges();
-            var simulation = SimulationTestSetup.CreateSimulation(unitOfWork, networkId: networkId);
+            var simulation = SimulationTestSetup.ModelForEntityInDb(unitOfWork, networkId: networkId);
             var attributes = new List<Attribute>();
             foreach (var numericAttributeName in numericAttributeNames)
             {

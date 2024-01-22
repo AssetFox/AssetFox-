@@ -1,13 +1,13 @@
 <template>
-  <v-dialog max-width="200px" persistent v-model="showDialog">
+  <v-dialog max-width="200px" persistent v-model="showDialogComputed">
     <v-card>
       <v-card-title>
-        <v-layout justify-center>
+        <v-row justify-center>
           <h3>Set Number of Years to Delete</h3>
-        </v-layout>
+        </v-row>
       </v-card-title>
       <v-card-text>
-        <v-text-field type="number" :mask="'##########'" label="Edit" single-line
+        <v-text-field type="number" v-maska:[mask] label="Edit" single-line
           v-model.number="range"
           :min="1"
           :max="maxRange"
@@ -15,40 +15,43 @@
         <label>{{rangeLabel}}</label>
       </v-card-text>
       <v-card-actions>
-        <v-btn :disabled="range === 0 || range > maxRange" @click="onSubmit(true)" class="ara-blue-bg white--text">Save</v-btn>
-        <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
+        <v-btn :disabled="range === 0 || range > maxRange" @click="onSubmit(true)" class="ara-blue-bg text-white">Save</v-btn>
+        <v-btn @click="onSubmit(false)" class="ara-orange-bg text-white">Cancel</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop} from 'vue-property-decorator';
-import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+<script lang="ts" setup >
+import Vue, { computed } from 'vue';
+import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component
-export default class SetRangeForDeletingBudgetYearsDialog extends Vue {
-  @Prop() showDialog: boolean;
-  @Prop() endYear : number;  
-  @Prop() maxRange : number;  
+const emit = defineEmits(['submit'])
+const props = defineProps<{
+  showDialog: boolean,
+  endYear: number,
+  maxRange : number
+}>()
+let showDialogComputed = computed(() => props.showDialog);
+let range : number =1;
+let rules: InputValidationRules = validationRules;
+const mask = { mask: '##########' };
 
-  range: number = 1;
-
-  rules: InputValidationRules = rules;
-
-  get rangeLabel() {
-    return 'Year Range: ' + (this.range <= 1 ? this.endYear : (this.endYear - this.range + 1) + '-' + this.endYear);
+function rangeLabel() {
+    return 'Year Range: ' + (range <= 1 ? props.endYear : (props.endYear - range + 1) + '-' + props.endYear);
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.range);
+      emit('submit', range);
     } else {
-      this.$emit('submit', 0);
+      emit('submit', 0);
     }
 
-    this.range = 1;
+    range = 1;
   }
-}
+
 </script>

@@ -13,6 +13,7 @@ using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services;
 using BridgeCareCore.Services.General_Work_Queue.WorkItems;
 using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -217,8 +218,8 @@ namespace BridgeCareCore.Controllers
                 {
                     var dtos = _performanceCurvePagingService.GetSyncedScenarioDataSet(simulationId, pagingSync);                   
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    UnitOfWork.PerformanceCurveRepo.AddLibraryIdToScenarioPerformanceCurve(dtos, pagingSync.LibraryId);
-                    UnitOfWork.PerformanceCurveRepo.AddModifiedToScenarioPerformanceCurve(dtos, pagingSync.IsModified);
+                    PerformanceCurveDtoListService.AddLibraryIdToScenarioPerformanceCurves(dtos, pagingSync.LibraryId);
+                    PerformanceCurveDtoListService.AddModifiedToScenarioPerformanceCurve(dtos, pagingSync.IsModified);
                     UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(dtos, simulationId);
                 });
 

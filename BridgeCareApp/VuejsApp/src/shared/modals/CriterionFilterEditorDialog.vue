@@ -1,41 +1,41 @@
 <template>
-  <v-dialog persistent fullscreen v-model="dialogData.showDialog" class="criterion-library-editor-dialog">
+  <v-dialog persistent
+        v-model="dialogData.showDialog"
+        class="criterion-library-editor-dialog">
     <v-card>
       <v-card-text>
-        <v-layout justify-center column>
-          <div>
-            <v-layout justify-center>
-        <v-flex xs10>
-          <CriteriaEditor :criteriaEditorData="criteriaEditorData"
-                          @submitCriteriaEditorResult="onSubmitCriteriaEditorResult"/>
-        </v-flex>
-      </v-layout>
-          </div>
-        </v-layout>
-      </v-card-text>
-      <v-card-actions>
-        <v-layout justify-space-between row>
-            <v-btn
-                 class="ara-blue-bg white--text"
-                 @click="onBeforeSubmit(true)">
-            Save
-          </v-btn>
-          <v-btn class="ara-orange-bg white--text"
-                 @click="onSubmit(false)">
-            Cancel
-          </v-btn>
-        </v-layout>
-      </v-card-actions>
+                <v-row >
+                    <div>
+                      <CriteriaEditor :criteriaEditorData="criteriaEditorData"
+                                      @submitCriteriaEditorResult="onSubmitCriteriaEditorResult"/>
+                    </div>
+                </v-row>
+            </v-card-text>
+            <v-row justify="center" style="padding: 10px; margin: 0px;">
+                <v-btn
+                    class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
+                    flat
+                    style="margin-right: 5px;"
+                    @click="onBeforeSubmit(false)"
+                >
+                    Cancel
+                </v-btn>
+                <v-btn
+                    class="ghd-blue-bg ghd-white ghd-button-text"
+                    flat
+                    style="margin-left: 5px;"                    
+                    @click="onSubmit(true)"
+                >
+                    Save
+                </v-btn>
+            </v-row>
     </v-card>
-
     <HasUnsavedChangesAlert :dialogData="hasUnsavedChangesAlertData" @submit="onCloseHasUnsavedChangesAlert"/>
   </v-dialog>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import {Component, Prop, Watch} from 'vue-property-decorator';
-import {Action} from 'vuex-class';
+<script lang="ts" setup>
+import Vue, { computed, toRefs } from 'vue';
 import {CriterionFilterEditorDialogData} from '../models/modals/criterion-filter-editor-dialog-data';
 import {hasValue} from '@/shared/utils/has-value-util';
 import CriterionLibraryEditor from '@/components/criteria-editor/CriterionLibraryEditor.vue';
@@ -50,80 +50,73 @@ import {
   emptyCriteriaEditorData
 } from '@/shared/models/iAM/criteria';
 import { UserCriteriaFilter } from '../models/iAM/user-criteria-filter';
+import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
-@Component({
-  components: {CriterionLibraryEditor, HasUnsavedChangesAlert: Alert, CriteriaEditor}
-})
-export default class CriterionFilterEditorDialog extends Vue {
-  @Prop() dialogData: CriterionFilterEditorDialogData;
+let store = useStore();
+const emit = defineEmits(['submitCriteriaEditorDialogResult'])
+const props = defineProps<{
+  dialogData: CriterionFilterEditorDialogData
+    }>()
+    const { dialogData } = toRefs(props);
+let showDialogComputed = computed(() => props.dialogData.showDialog);
+async function getAvailableReportsAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports');}
 
-  @Action('updateUserCriteriaFilter') updateUserCriteriaFilterAction: any;
+  let uuidNIL: string = getBlankGuid();
+  let hasUnsavedChanges: boolean = false;
+  let hasUnsavedChangesAlertData: AlertData = clone(emptyAlertData);
 
-  uuidNIL: string = getBlankGuid();
-  hasUnsavedChanges: boolean = false;
-  hasUnsavedChangesAlertData: AlertData = clone(emptyAlertData);
+  let resultForParentComponent: UserCriteriaFilter;
 
-  resultForParentComponent: UserCriteriaFilter;
-
-   criteriaEditorData: CriteriaEditorData = {
+   let criteriaEditorData: CriteriaEditorData = {
     ...emptyCriteriaEditorData,
     isLibraryContext: true
   };
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
+  watch(dialogData,()=> {
     const htmlTag: HTMLCollection = document.getElementsByTagName('html') as HTMLCollection;
     const criteriaEditorCard: HTMLCollection = document.getElementsByClassName('criteria-editor-card') as HTMLCollection;
 
-    if (this.dialogData.showDialog) {
+    if (dialogData.value.showDialog) {
     
-    this.criteriaEditorData = {
-        ...this.criteriaEditorData,
-        mergedCriteriaExpression: this.dialogData.criteria,
+    criteriaEditorData = {
+        ...criteriaEditorData,
+        mergedCriteriaExpression: dialogData.value.criteria,
         isLibraryContext: true
         };
 
-      if (hasValue(htmlTag)) {
-        htmlTag[0].setAttribute('style', 'overflow:hidden;');
-      }
-
-      if (hasValue(criteriaEditorCard)) {
-        criteriaEditorCard[0].setAttribute('style', 'height:100%');
-      }
-    } else {
-      if (hasValue(htmlTag)) {
-        htmlTag[0].setAttribute('style', 'overflow:auto;');
-      }
+      
     }
-  }
+  })
 
-    onSubmitCriteriaEditorResult(result: CriteriaEditorResult) {
-        this.canUpdateOrCreate = result.validated;
+    function onSubmitCriteriaEditorResult(result: CriteriaEditorResult) {
+        const canUpdateOrCreate = result.validated;
 
         if (result.validated) {
 
-        var tempL : UserCriteriaFilter = {userId : this.dialogData.userId, 
-                userName: this.dialogData.userName, 
-                description: this.dialogData.description,
+        var tempL : UserCriteriaFilter = {userId : props.dialogData.userId, 
+                userName: props.dialogData.userName, 
+                description: props.dialogData.description,
                 hasAccess: true, 
-                name: this.dialogData.name,
+                name: props.dialogData.name,
                 hasCriteria: true, 
                 criteria: result.criteria, 
-                criteriaId: this.dialogData.criteriaId}; 
-        this.resultForParentComponent = tempL;
+                criteriaId: props.dialogData.criteriaId}; 
+        resultForParentComponent = tempL;
         }
     }
     
-  onBeforeSubmit(submit: boolean) {
-    if (this.hasUnsavedChanges) {
-      this.onShowHasUnsavedChangesAlert();
+  function onBeforeSubmit(submit: boolean) {
+    if (hasUnsavedChanges) {
+      onShowHasUnsavedChangesAlert();
     } else {
-      this.onSubmit(submit);
+      onSubmit(submit);
     }
   }
 
-  onShowHasUnsavedChangesAlert() {
-    this.hasUnsavedChangesAlertData = {
+  function onShowHasUnsavedChangesAlert() {
+    hasUnsavedChangesAlertData = {
       showDialog: true,
         heading: 'Unsaved Changes',
         message: 'The selected criterion library has unsaved changes. Click "Update Library" or "Create as New Library" to save changes.',
@@ -131,20 +124,19 @@ export default class CriterionFilterEditorDialog extends Vue {
     };
   }
 
-  onCloseHasUnsavedChangesAlert() {
-    this.hasUnsavedChangesAlertData = clone(emptyAlertData);
+  function onCloseHasUnsavedChangesAlert() {
+    hasUnsavedChangesAlertData = clone(emptyAlertData);
   }
 
-  onSubmit(submit: boolean) {
+  function onSubmit(submit: boolean) {
     if (submit) {
-      this.dialogData.showDialog = false;
-      this.$emit('submitCriteriaEditorDialogResult', this.resultForParentComponent);
+      props.dialogData.showDialog = false;
+      emit('submitCriteriaEditorDialogResult', resultForParentComponent);
     } else {
-      this.dialogData.showDialog = false;
-      this.$emit('submitCriteriaEditorDialogResult', null);
+      props.dialogData.showDialog = false;
+      emit('submitCriteriaEditorDialogResult', null);
     }
   }
-}
 </script>
 
 <style>

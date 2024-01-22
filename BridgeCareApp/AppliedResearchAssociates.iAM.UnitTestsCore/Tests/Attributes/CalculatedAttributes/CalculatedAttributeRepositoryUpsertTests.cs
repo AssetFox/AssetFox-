@@ -85,7 +85,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.Calculate
             Setup();
 
             Guid scenarioId = Guid.NewGuid();
-            var scenario = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, scenarioId);
+            var scenario = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, scenarioId);
 
             Guid calcAttrId = Guid.NewGuid();
             var calcAttr = CalculatedAttributeTestSetup.TestCalculatedAttributeInScenarioInDb(TestHelper.UnitOfWork, scenarioId, calcAttrId, TestAttributeNames.ActionType);
@@ -116,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.Calculate
 
             Guid scenarioId = Guid.NewGuid();
 
-            var scenario = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, scenarioId);
+            var scenario = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, scenarioId);
 
             Guid calcAttrId = Guid.NewGuid();
             var calcAttr = CalculatedAttributeTestSetup.TestCalculatedAttributeInScenarioInDb(TestHelper.UnitOfWork, scenarioId, calcAttrId, TestAttributeNames.ActionType);

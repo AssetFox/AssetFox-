@@ -53,6 +53,8 @@ public sealed class SelectableTreatment : Treatment
 
     public bool ForCommittedProjectsOnly { get; set; }
 
+    public bool IsPotentialPassiveTreatment => !ForCommittedProjectsOnly && FeasibilityCriteria.All(criterion => criterion.ExpressionIsBlank);
+
     public override Dictionary<NumberAttribute, double> PerformanceCurveAdjustmentFactors { get; } = new();
 
     public ICollection<TreatmentScheduling> Schedulings { get; } = new SetWithoutNulls<TreatmentScheduling>();
@@ -78,6 +80,11 @@ public sealed class SelectableTreatment : Treatment
         if (!Simulation.Treatments.Contains(this))
         {
             throw new InvalidOperationException("Simulation does not contain this treatment.");
+        }
+
+        if (!IsPotentialPassiveTreatment)
+        {
+            throw new InvalidOperationException("This treatment is not a potential passive treatment.");
         }
 
         Simulation.DesignatedPassiveTreatment = this;

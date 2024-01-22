@@ -119,13 +119,13 @@ const actions = {
         const accountDetails: msal.Account = await state.app.getAccount();
         if (hasValue(accountDetails.name)) {
             localStorage.setItem('LoggedInUser', accountDetails.name);
-            dispatch('setAzureUserInfo', {
+           await dispatch('setAzureUserInfo', {
                 status: true,
                 username: accountDetails.name,
             });
         } else {
             localStorage.removeItem('LoggedInUser');
-            dispatch('setAzureUserInfo', {
+           await dispatch('setAzureUserInfo', {
                 status: false,
                 username: '',
             });

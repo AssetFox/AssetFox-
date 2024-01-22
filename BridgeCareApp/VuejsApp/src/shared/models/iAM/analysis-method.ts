@@ -32,7 +32,6 @@ export interface AnalysisMethod {
     shouldApplyMultipleFeasibleCosts: boolean;
     shouldDeteriorateDuringCashFlow: boolean;
     shouldUseExtraFundsAcrossBudgets: boolean;
-    shouldAllowMultipleTreatments: boolean
     attribute: string;
     benefit: Benefit;
     criterionLibrary: CriterionLibrary;
@@ -52,7 +51,6 @@ export const emptyAnalysisMethod: AnalysisMethod = {
     shouldApplyMultipleFeasibleCosts: false,
     shouldDeteriorateDuringCashFlow: false,
     shouldUseExtraFundsAcrossBudgets: false,
-    shouldAllowMultipleTreatments: false,
     attribute: '',
     benefit: clone(emptyBenefit),
     criterionLibrary: clone(emptyCriterionLibrary)

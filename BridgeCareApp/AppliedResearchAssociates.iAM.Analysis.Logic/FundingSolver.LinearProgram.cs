@@ -1,4 +1,5 @@
 ﻿using Google.OrTools.LinearSolver;
+using static System.Math;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Logic;
 
@@ -68,7 +69,7 @@ partial record FundingSolver
                     }
                 }
 
-                spendingConstraint.SetUb((double)amount);
+                spendingConstraint.SetUb((double)Max(0, amount));
             }
 
             // Create treatment funding constraints.
@@ -96,7 +97,7 @@ partial record FundingSolver
                         var amount = spendingConstraint.Ub();
                         var cost = fundingConstraint.Ub();
 
-                        var maximumAllocation = Math.Min(amount, cost);
+                        var maximumAllocation = Min(amount, cost);
                         var allocationVariable = solver.MakeNumVar(
                             0,
                             maximumAllocation,

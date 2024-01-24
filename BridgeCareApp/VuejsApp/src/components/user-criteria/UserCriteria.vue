@@ -65,7 +65,8 @@
               <tr>
                   <th
                     v-for="header in userCriteriaGridHeaders"
-                    :key="header"
+                    :key="header.title"
+                    @click="onSort(header.key)"
                   >
                     <span style='cursor: pointer'>
                       {{ header.title }}
@@ -319,9 +320,14 @@ watch(stateUsers,()=>onUserCriteriaChanged())
     };
   }
 
-  function onSort(sortBy: string, sortDesc: any) {
+  function onSort(sortBy: string) {
     sortKey = sortBy;
-    sortOrder = sortDesc ? 'desc' : 'asc';
+    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    filteredUsersCriteriaFilter.value.sort((a, b) => {
+      if (a[sortKey] < b[sortKey]) return sortOrder === 'asc' ? -1 : 1;
+      if (a[sortKey] > b[sortKey]) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
   }
 
   function onSubmitCriteria(userCriteriaFilter: UserCriteriaFilter) {

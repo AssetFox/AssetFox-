@@ -88,10 +88,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, brKey, year.Year, section);
 
             // Budget levels
-            var budgetsAtDecisionTime =
-                section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment)?.FundingCalculationInput?.CurrentBudgetsToSpend ??
-                section.TreatmentConsiderations.FirstOrDefault()?.FundingCalculationInput?.CurrentBudgetsToSpend ??
-                new List<FundingCalculationInput.Budget>();
+            var budgetsAtDecisionTime = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment)?.FundingCalculationInput?.CurrentBudgetsToSpend.Where(_ => _.Year == year.Year).ToList() ??
+              section.TreatmentConsiderations.FirstOrDefault()?.FundingCalculationInput?.CurrentBudgetsToSpend.Where(_ => _.Year == year.Year).ToList() ??
+                new();
 
             var budgetLevels = new List<decimal>();
             if (budgetsAtDecisionTime.Count > 0)

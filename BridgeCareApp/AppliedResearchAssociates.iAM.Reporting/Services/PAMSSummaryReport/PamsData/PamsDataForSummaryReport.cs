@@ -395,15 +395,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     {
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, section.ProjectSource); //Project Pick
                     }
-
-                    //var treatmentConsiderations = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == section.AppliedTreatment);
-                    //BudgetUsageDetail budgetUsage = null;
-
-                    //foreach (var item in treatmentConsiderations)
-                    //{
-                    //    budgetUsage = item.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCovered);
-                    //}
-                    // TODO test
+                    
                     var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
                     var allocation = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == sectionData.Year).FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
 

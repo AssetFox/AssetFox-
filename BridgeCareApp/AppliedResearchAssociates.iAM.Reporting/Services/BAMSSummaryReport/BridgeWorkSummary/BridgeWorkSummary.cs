@@ -130,21 +130,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                         appliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                     {
-                        var commitedCost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                        var committedCost = section.TreatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount) ?? 0);
                         if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
                         {
-                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (commitedCost, 1, section.ProjectSource, treatmentCategory));
+                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (committedCost, 1, section.ProjectSource, treatmentCategory));
                         }
                         else
                         {
                             var currentRecord = yearlyCostCommittedProj[yearData.Year][appliedTreatment];
-                            var treatmentCost = currentRecord.treatmentCost + commitedCost;  
+                            var treatmentCost = currentRecord.treatmentCost + committedCost;  
                             var bridgeCount = currentRecord.bridgeCount + 1;  
                             var projectSource = currentRecord.projectSource;
                             yearlyCostCommittedProj[yearData.Year][appliedTreatment] = (treatmentCost, bridgeCount, projectSource, treatmentCategory);
                         }
                  
-                        costPerBPNPerYear[yearData.Year][busPlanNetwork] += commitedCost;
+                        costPerBPNPerYear[yearData.Year][busPlanNetwork] += committedCost;
 
                         // Adding count for completed committed project
                         if (!countForCompletedCommittedProject[yearData.Year].ContainsKey(appliedTreatment))
@@ -169,7 +169,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                     var cost = section.TreatmentConsiderations.
                                 Where(_ => _.TreatmentName?.ToLower() != BAMSConstants.NoTreatment && _.TreatmentName == appliedTreatment)
-                                .Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                                .Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount) ?? 0);
                     PopulateWorkedOnCostAndCount(yearData.Year, section, costAndCountPerTreatmentPerYear, cost);
 
                     PopulateCompletedProjectCount(yearData.Year, section, countForCompletedProject);

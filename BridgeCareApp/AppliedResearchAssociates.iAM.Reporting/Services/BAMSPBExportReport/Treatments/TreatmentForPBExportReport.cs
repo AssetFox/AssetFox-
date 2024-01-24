@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.Reporting.Common;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
 using OfficeOpenXml;
+using static AppliedResearchAssociates.iAM.Analysis.Engine.FundingCalculationOutput;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Treatments
 {
@@ -143,7 +144,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             if (!string.IsNullOrEmpty(bmsID) && !string.IsNullOrWhiteSpace(bmsID)) { bmsID = bmsID.PadLeft(14, '0'); } // chaeck and add padding to BMSID
 
                             //get budget usages
-                            var cost = Math.Round(assetDetailObject.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost)), 0); // Rounded cost to whole number based on comments from Jeff Davis
+                            var cost = Math.Round(assetDetailObject.TreatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount) ?? 0), 0); // Rounded cost to whole number based on comments from Jeff Davis
                             var appliedTreatment = assetDetailObject.AppliedTreatment ?? "";
 
                             SelectableTreatment treatment = null;
@@ -158,19 +159,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             var treatmentConsiderations = assetDetailObject.TreatmentConsiderations?.FindAll(_ => _.TreatmentName == appliedTreatment);
                             if (treatmentConsiderations?.Count == 1) { treatmentConsiderationDetail = treatmentConsiderations.First(); }
 
-                            var budgetUsages = new List<BudgetUsageDetail>();
-                            foreach (var item in treatmentConsiderations) {
-                                var budgetUsagesFiltered = item.BudgetUsages.Where(_ => _.Status == BudgetUsageStatus.CostCovered).ToList();
-                                if (budgetUsagesFiltered?.Any() == true) { budgetUsages.AddRange(budgetUsagesFiltered); }
+                            //get budget usages
+                            var allocations = new List<Allocation>();
+                            var allocationMatrices = treatmentConsiderations.Select(_ => _.FundingCalculationOutput?.AllocationMatrix).ToList();
+                            foreach (var allocationMatrix in allocationMatrices)
+                            {
+                                allocations.AddRange(allocationMatrix);
                             }
 
                             //check budget usages
                             var budgetName = "";
-                            if (budgetUsages?.Any() == true && cost > 0)
+                            if (allocationMatrices?.Any() == true && cost > 0)
                             {
-                                if (budgetUsages.Count == 1) //single budget
+                                var budgetNames = allocations.Select(_ => _.BudgetName).Distinct().ToList();
+                                if (allocationMatrices.Count == 1 && budgetNames.Count() == 1) //single budget
                                 {
-                                    budgetName = budgetUsages.First().BudgetName ?? ""; // Budget
+                                    budgetName = budgetNames.First() ?? ""; // Budget
                                     if (string.IsNullOrEmpty(budgetName) || string.IsNullOrWhiteSpace(budgetName))
                                     {
                                         budgetName = BAMSConstants.Unspecified_Budget;
@@ -180,12 +184,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                                 {
                                     //check for multi year budget
                                     var allowFundingFromMultipleBudgets = simulationObject?.AnalysisMethod?.AllowFundingFromMultipleBudgets ?? false;
-                                    if (allowFundingFromMultipleBudgets == true || budgetUsages.Count > 1)
+                                    if (allowFundingFromMultipleBudgets == true || budgetNames.Count > 1)
                                     {
-                                        foreach (var budgetUsage in budgetUsages)
+                                        foreach (var allocationBudgetName in budgetNames)
                                         {
-                                            var multiYearBudgetCost = budgetUsage.CoveredCost;
-                                            var multiYearBudgetName = budgetUsage.BudgetName ?? ""; // Budget;
+                                            var multiYearBudgetCost = allocations.Where(_ => _.BudgetName == allocationBudgetName).Sum(_ => _.AllocatedAmount);
+                                            var multiYearBudgetName = allocationBudgetName ?? ""; // Budget;
                                             if (string.IsNullOrEmpty(multiYearBudgetName) || string.IsNullOrWhiteSpace(multiYearBudgetName))
                                             {
                                                 multiYearBudgetName = BAMSConstants.Unspecified_Budget;
@@ -203,7 +207,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                                                     multiYearBudgetName += " (" + budgetAmountAbbrName + ")";
                                                 }
 
-                                                if (string.IsNullOrEmpty(budgetName) || string.IsNullOrWhiteSpace(budgetName))
+                                                if (string.IsNullOrEmpty(allocationBudgetName) || string.IsNullOrWhiteSpace(allocationBudgetName))
                                                 {
                                                     budgetName = multiYearBudgetName;
                                                 }

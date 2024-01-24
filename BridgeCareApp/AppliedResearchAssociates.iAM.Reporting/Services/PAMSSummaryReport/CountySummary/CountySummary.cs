@@ -143,7 +143,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
                             //get cost
                             if(assetDetailList?.Any() == true)
                             {
-                                sumOfCoveredCost = assetDetailList.Sum(s => s.TreatmentConsiderations.Sum(s => s.BudgetUsages.Sum(b => b.CoveredCost)));
+                                sumOfCoveredCost = assetDetailList.Sum(s => s.TreatmentConsiderations.Sum(s => s.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount) ?? 0));
                             }
                         }
 

@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
     public static class DistrictTotalsExcelModels
     {
         private static decimal TotalCost(AssetDetail section)
-            => section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+            => section.TreatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount) ?? 0);
 
         internal static IExcelModel DistrictTableContent(
             SimulationYearDetail year,

@@ -784,20 +784,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         {
                             foreach (var consideration in section.TreatmentConsiderations)
                             {
-                                foreach (var budgetUsage in consideration.BudgetUsages.Where(bu => bu.BudgetName.Equals(workSummaryByBudgetModel.BudgetName, StringComparison.OrdinalIgnoreCase)))
+                                foreach (var budgetUsage in consideration.FundingCalculationOutput?.AllocationMatrix.Where(bu => bu.BudgetName.Equals(workSummaryByBudgetModel.BudgetName, StringComparison.OrdinalIgnoreCase)))
                                 {
                                     if (Enum.TryParse<ProjectSourceDTO>(section.ProjectSource, true, out var projectSource))
                                     {
                                         switch (projectSource)
                                         {
                                         case ProjectSourceDTO.Committed:
-                                            mpmsBudgetTotal += (decimal)budgetUsage.CoveredCost;
+                                            mpmsBudgetTotal += (decimal)budgetUsage.AllocatedAmount;
                                             break;
                                         case ProjectSourceDTO.Maintenance:
-                                            sapBudgetTotal += (decimal)budgetUsage.CoveredCost;
+                                            sapBudgetTotal += (decimal)budgetUsage.AllocatedAmount;
                                             break;
                                         case ProjectSourceDTO.ProjectBuilder:
-                                            projectBuilderBudgetTotal += (decimal)budgetUsage.CoveredCost;
+                                            projectBuilderBudgetTotal += (decimal)budgetUsage.AllocatedAmount;
                                             break;
                                         }
                                     }
@@ -1358,20 +1358,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         {
                             foreach (var consideration in section.TreatmentConsiderations)
                             {
-                                foreach (var budgetUsage in consideration.BudgetUsages.Where(bu => bu.BudgetName.Equals(workSummaryByBudgetModel.BudgetName, StringComparison.OrdinalIgnoreCase)))
+                                foreach (var budgetUsage in consideration.FundingCalculationOutput?.AllocationMatrix.Where(bu => bu.BudgetName.Equals(workSummaryByBudgetModel.BudgetName, StringComparison.OrdinalIgnoreCase)))
                                 {
                                     if (Enum.TryParse<ProjectSourceDTO>(section.ProjectSource, true, out var projectSource))
                                     {
                                         switch (projectSource)
                                         {
                                         case ProjectSourceDTO.Committed:
-                                            mpmsBudgetTotal += Convert.ToDecimal(budgetUsage.CoveredCost);
+                                            mpmsBudgetTotal += Convert.ToDecimal(budgetUsage.AllocatedAmount);
                                             break;
                                         case ProjectSourceDTO.Maintenance:
-                                            sapBudgetTotal += Convert.ToDecimal(budgetUsage.CoveredCost);
+                                            sapBudgetTotal += Convert.ToDecimal(budgetUsage.AllocatedAmount);
                                             break;
                                         case ProjectSourceDTO.ProjectBuilder:
-                                            projectBuilderBudgetTotal += Convert.ToDecimal(budgetUsage.CoveredCost);
+                                            projectBuilderBudgetTotal += Convert.ToDecimal(budgetUsage.AllocatedAmount);
                                             break;
                                         }
                                     }

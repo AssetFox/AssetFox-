@@ -146,12 +146,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
                 });
 
             var treatmentName = treatmentOption?.TreatmentName ?? treatmentConsideration.TreatmentName;
-            var treatmentCost = treatmentOption?.Cost ?? (double) treatmentConsideration.BudgetUsages.Sum(usage => usage.CoveredCost);
+            var treatmentCost = treatmentOption?.Cost ??
+                                (double)(treatmentConsideration.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount) ?? 0);
 
+            // TODO: Is this correct?
             var budget = section.TreatmentConsiderations
-                .Where(c => c.TreatmentName == treatmentName)
-                .FirstOrDefault(c => c.BudgetUsages.Any(b => b.Status is BudgetUsageStatus.CostCovered))
-                ?.BudgetUsages?.First(b => b.Status is BudgetUsageStatus.CostCovered);
+                .FirstOrDefault(c => c.TreatmentName == treatmentName)
+                .FundingCalculationOutput?.AllocationMatrix.FirstOrDefault(_ => _.TreatmentName == treatmentName);
 
             var budgetName = budget?.BudgetName ?? string.Empty;
 

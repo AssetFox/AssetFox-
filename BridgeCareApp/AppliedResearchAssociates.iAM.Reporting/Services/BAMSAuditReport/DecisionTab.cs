@@ -144,8 +144,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                     .ToList()
                     ?? new();
 
-                decisionsTreatment.BudgetsUsed = string.Join(", ", budgetsUsed); // currently this will be single value
-
+                decisionsTreatment.BudgetsUsed = string.Join(", ", budgetsUsed);
                 // [REVIEW] Simulation output no longer provides "budget usage status" values.
                 decisionsTreatment.BudgetUsageStatuses = string.Join(", ", budgetsUsed);
 

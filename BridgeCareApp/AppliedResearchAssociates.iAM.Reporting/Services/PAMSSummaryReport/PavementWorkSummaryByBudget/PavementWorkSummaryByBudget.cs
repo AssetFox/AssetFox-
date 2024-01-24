@@ -137,9 +137,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         {
                             var committedTreatment = section.TreatmentConsiderations;
                             var budgetAmount = (double)committedTreatment.Sum(_ =>
-                                _.BudgetUsages
+                                _.FundingCalculationOutput?.AllocationMatrix
                                     .Where(b => b.BudgetName == summaryModel.BudgetName)
-                                    .Sum(bu => bu.CoveredCost));
+                                    .Sum(bu => bu.AllocatedAmount));
                             var category = TreatmentCategory.Other;
                             if (WorkTypeMap.Map.ContainsKey(section.AppliedTreatment))
                             {
@@ -160,9 +160,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         else if (section.TreatmentCause != TreatmentCause.NoSelection)
                         {
                             var treatmentConsideration = section.TreatmentConsiderations;
-                            var budgetAmount = (double)treatmentConsideration.Sum(_ => _.BudgetUsages
+                            var budgetAmount = (double)treatmentConsideration.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix
                                 .Where(b => b.BudgetName == summaryModel.BudgetName)
-                                .Sum(bu => bu.CoveredCost));
+                                .Sum(bu => bu.AllocatedAmount));
                             var treatmentData = selectableTreatments.FirstOrDefault(_ => _.Name == section.AppliedTreatment);
                             summaryModel.YearlyData.Add(new YearsData
                             {
@@ -194,13 +194,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             {
                 foreach (var section in yearData.Assets)
                 {
-                    if (section.TreatmentConsiderations.Any(tc => tc.BudgetUsages.Any(bu => bu.BudgetName == summaryModel.BudgetName)))
+                    if (section.TreatmentConsiderations.Any(tc => tc.FundingCalculationOutput != null && tc.FundingCalculationOutput.AllocationMatrix.Any(bu => bu.BudgetName == summaryModel.BudgetName)))
                     {
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                             section.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment)
                         {
                             var committedCost = section.TreatmentConsiderations.Sum(_ =>
-                                _.BudgetUsages.Where(b => b.BudgetName == summaryModel.BudgetName).Sum(bu => bu.CoveredCost));
+                                _.FundingCalculationOutput?.AllocationMatrix.Where(b => b.BudgetName == summaryModel.BudgetName).Sum(bu => bu.AllocatedAmount)) ?? 0;
                             var appliedTreatment = section.AppliedTreatment;
                             var treatmentCategory = treatmentCategoryLookup[appliedTreatment];
 

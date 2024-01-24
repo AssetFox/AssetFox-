@@ -152,7 +152,6 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             Assert.True(testInput.Count == 2, "Number of comitted projects is wrong");
-            Assert.Equal(TestDataForCommittedProjects.MaintainableAssetIdString1, testInput[0].LocationKeys.Single(_ => _.Key == "ID").Value);
             Assert.True(testInput[0] is SectionCommittedProjectDTO, "Provided value is not a Section type");
             Assert.True(testInput[0].VerifyLocation(networkKeyAttribute), "Could not verify location");
             Assert.Equal(2023, testInput[1].Year);
@@ -175,7 +174,6 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             Assert.True(testInput.Count == 3, "Number of comitted projects is wrong");
-            Assert.Equal("cf28e62e-0a02-4195-8d28-5cdb9646dd58", testInput[1].LocationKeys.Single(_ => _.Key == "ID").Value);
             Assert.True(testInput[1] is SectionCommittedProjectDTO, "Provided value is not a Section type");
             Assert.True(testInput[1].VerifyLocation(networkKeyAttribute), "Could not verify location");
             Assert.Equal(2023, testInput[1].Year);

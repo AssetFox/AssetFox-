@@ -211,7 +211,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             ScenarioBudgetId = scenarioBudgetId,
             LocationKeys = new Dictionary<string, string>()
                 {
-                    { "ID", MaintainableAssetIdString2 },
+                    { "ID", Guid.NewGuid().ToString() },
                     { TestAttributeNames.CulvDurationN, "Y" },
                     { TestAttributeNames.BrKey, "2" },
                     { TestAttributeNames.BmsId, "9876543" }

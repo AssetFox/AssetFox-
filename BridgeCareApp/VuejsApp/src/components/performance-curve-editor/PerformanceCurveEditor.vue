@@ -1030,7 +1030,6 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 currentPage.value,
             );
         }
-
         selectedPerformanceCurve = clone(emptyPerformanceCurve);
         hasSelectedPerformanceCurve = false;
     }
@@ -1302,9 +1301,6 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function onUpdateRow(rowId: string, updatedRow: PerformanceCurve){
-        if(any(propEq('id', rowId), addedRows.value))
-            return;
-
         let mapEntry = updatedRowsMap.get(rowId)
 
         if(isNil(mapEntry)){

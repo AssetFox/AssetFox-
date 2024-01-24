@@ -114,6 +114,9 @@
                                                         <v-btn class='ara-blue ghd-button-text' v-bind="props" flat>
                                                             <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                                         </v-btn>
+                                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' flat>
+                                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                                    </v-btn>
                                                     </div>
                                                     <div v-else class='priority-criteria-output' style="width: 1000px;">
                                                         <v-text-field readonly single-line class='sm-txt' variant="underlined"
@@ -144,10 +147,7 @@
                                     </editDialog>
                                 </div>
                                 <div v-else>
-                                    <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' flat>
-                                            <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
-                                        </v-btn>
-                                    <v-btn  id="BudgetPriorityEditor-deleteBudgetPriority-btn" @click="onRemoveBudgetPriority(item.item.id)" flat>
+                                    <v-btn style="padding-bottom: 5px;" id="BudgetPriorityEditor-deleteBudgetPriority-btn" @click="onRemoveBudgetPriority(item.item.id)" flat>
                                         <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </div>

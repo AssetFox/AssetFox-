@@ -125,12 +125,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
                 var budgetPriorityLevel = treatmentConsideration != null && treatmentConsideration.BudgetPriorityLevel != null ? treatmentConsideration.BudgetPriorityLevel.Value.ToString() : string.Empty;
 
-                // [REVIEW] As written, this query includes cash flow funding of future years.
-                // It may need a 'Where' filter.
+                // AllocationMatrix includes cash flow funding of future years.                
                 decisionsTreatment.AmountSpent =
                     treatmentConsideration
                     ?.FundingCalculationOutput
-                    ?.AllocationMatrix
+                    ?.AllocationMatrix.
+                    Where(_ => _.Year == year.Year)
                     .Sum(_ => _.AllocatedAmount)
                     ?? 0;
 
@@ -138,14 +138,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                     treatmentConsideration
                     ?.FundingCalculationOutput
                     ?.AllocationMatrix
-                    .Where(_ => _.AllocatedAmount > 0)
+                    .Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year)
                     .Select(_ => _.BudgetName)
                     .Distinct()
                     .ToList()
                     ?? new();
 
                 decisionsTreatment.BudgetsUsed = string.Join(", ", budgetsUsed);
-                // [REVIEW] Simulation output no longer provides "budget usage status" values.
+                // TODO [REVIEW] Simulation output no longer provides "budget usage status" values.
                 decisionsTreatment.BudgetUsageStatuses = string.Join(", ", budgetsUsed);
 
                 decisionsTreatment.BudgetPriorityLevel = budgetPriorityLevel;

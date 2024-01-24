@@ -74,7 +74,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     {
                         var treatmentConsiderations = section.TreatmentConsiderations;
                         var budgetAmount = (double)treatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.
-                                            Where(_ => _.BudgetName == summaryData.Budget).Sum(_ => _.AllocatedAmount) ?? 0);
+                                            Where(_ => _.BudgetName == summaryData.Budget && _.Year == yearData.Year).Sum(_ => _.AllocatedAmount) ?? 0);
 
                         var bpnName = _reportHelper.CheckAndGetValue<string>(section?.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&

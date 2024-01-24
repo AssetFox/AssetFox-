@@ -147,12 +147,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
 
             var treatmentName = treatmentOption?.TreatmentName ?? treatmentConsideration.TreatmentName;
             var treatmentCost = treatmentOption?.Cost ??
-                                (double)(treatmentConsideration.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount) ?? 0);
+                                (double)(treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_=>_.Year == year).Sum(b => b.AllocatedAmount) ?? 0);
 
             // TODO: Is this correct?
             var budget = section.TreatmentConsiderations
                 .FirstOrDefault(c => c.TreatmentName == treatmentName)
-                .FundingCalculationOutput?.AllocationMatrix.FirstOrDefault(_ => _.TreatmentName == treatmentName);
+                .FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == year).FirstOrDefault(_ => _.TreatmentName == treatmentName);
 
             var budgetName = budget?.BudgetName ?? string.Empty;
 

@@ -144,7 +144,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             if (!string.IsNullOrEmpty(bmsID) && !string.IsNullOrWhiteSpace(bmsID)) { bmsID = bmsID.PadLeft(14, '0'); } // chaeck and add padding to BMSID
 
                             //get budget usages
-                            var cost = Math.Round(assetDetailObject.TreatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount) ?? 0), 0); // Rounded cost to whole number based on comments from Jeff Davis
+                            var cost = Math.Round(assetDetailObject.TreatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearObject.Year).Sum(b => b.AllocatedAmount) ?? 0), 0); // Rounded cost to whole number based on comments from Jeff Davis
                             var appliedTreatment = assetDetailObject.AppliedTreatment ?? "";
 
                             SelectableTreatment treatment = null;
@@ -161,7 +161,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
 
                             //get budget usages
                             var allocations = new List<Allocation>();
-                            var allocationMatrices = treatmentConsiderations.Select(_ => _.FundingCalculationOutput?.AllocationMatrix).ToList();
+                            var allocationMatrices = treatmentConsiderations.Select(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearObject.Year)).ToList();
                             foreach (var allocationMatrix in allocationMatrices)
                             {
                                 allocations.AddRange(allocationMatrix);

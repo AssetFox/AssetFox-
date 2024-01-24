@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml.Style;
 
@@ -319,7 +320,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
                     // Work done and cost for the given year
                     var treatmentDone = section.AppliedTreatment.ToLower() == PAMSConstants.NoTreatment ? "--" : section.AppliedTreatment;
-                    var sumCoveredCost = section.TreatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount));
+                    var sumCoveredCost = section.TreatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearlySectionData.Year).Sum(b => b.AllocatedAmount));
 
                     worksheet.Cells[row, column].Value = treatmentDone;
                     worksheet.Cells[row, column + 1].Value = sumCoveredCost;
@@ -404,7 +405,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     //}
                     // TODO test
                     var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
-                    var allocation = treatmentConsideration.FundingCalculationOutput?.AllocationMatrix.Find(_ => _.TreatmentName == section.AppliedTreatment);
+                    var allocation = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == sectionData.Year).FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
 
                     var budgetName = allocation?.BudgetName ?? "";
 
@@ -412,7 +413,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     worksheet.Cells[row, ++column].Value = section.AppliedTreatment; // Project
                     var columnForAppliedTreatment = column;
 
-                    var cost = treatmentConsideration.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.BudgetName == budgetName).Sum(_ => _.AllocatedAmount);
+                    var cost = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.BudgetName == budgetName && _.Year == sectionData.Year).Sum(_ => _.AllocatedAmount);
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks

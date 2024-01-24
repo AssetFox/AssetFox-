@@ -118,8 +118,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
                 decisionsTreatment.Selected = isCashFlowProject ? PAMSAuditReportConstants.CashFlow : (section.AppliedTreatment == treatment ? PAMSAuditReportConstants.Yes : PAMSAuditReportConstants.No);
                 var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
-                decisionsTreatment.AmountSpent = treatmentConsideration != null ? treatmentConsideration.FundingCalculationOutput?.AllocationMatrix.Sum(_ => _.AllocatedAmount) : 0;
-                var budgetsUsed = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix?.Where(_ => _.AllocatedAmount > 0).Select(_ => _.BudgetName).Distinct().ToList() ?? new();
+                decisionsTreatment.AmountSpent = treatmentConsideration != null ? treatmentConsideration.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == year.Year).Sum(_ => _.AllocatedAmount) : 0;
+                var budgetsUsed = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix?.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year).Select(_ => _.BudgetName).Distinct().ToList() ?? new();
                 var budgetsUsedValue = budgetsUsed != null && budgetsUsed.Any() ? string.Join(", ", budgetsUsed) : string.Empty;
                 decisionsTreatment.BudgetsUsed = budgetsUsedValue;
 

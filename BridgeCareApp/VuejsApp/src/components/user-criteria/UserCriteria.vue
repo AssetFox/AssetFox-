@@ -54,7 +54,7 @@
         <div>
           <v-data-table id="UserCriteria-users-datatable"
             :header='userCriteriaGridHeaders'
-            :items='assignedUsersCriteriaFilter'
+            :items='filteredUsersCriteriaFilter'
             :rows-per-page-items=[5,10,25]
             item-key="userId"
             class='elevation-1'
@@ -187,16 +187,19 @@ const instance = getCurrentInstance();
 let edit = ref<boolean>(false)
 const emit = defineEmits(['submit'])
 
-    function filteredUsersCriteriaFilter() {
-    if (loading || !search) {
-      return assignedUsersCriteriaFilter;
-    }
-    const lowerCaseSearch = search.toLowerCase();
-    
-    return assignedUsersCriteriaFilter.value.filter((item: { [s: string]: any; } | ArrayLike<unknown>) => {
-      return Object.values(item).some(val => String(val).toLowerCase().includes(lowerCaseSearch));
-    });
+let search = ref('');
+
+const filteredUsersCriteriaFilter = computed(() => {
+  if (loading || !search.value || search.value.trim() === '') {
+    return assignedUsersCriteriaFilter.value;
   }
+
+  const lowerCaseSearch = search.value.toLowerCase();
+
+  return assignedUsersCriteriaFilter.value.filter((item: { [s: string]: any; } | ArrayLike<unknown>) => {
+    return Object.values(item).some(val => String(val).toLowerCase().includes(lowerCaseSearch));
+  });
+})
   
   let stateUsers = computed<User[]>(()=>store.state.userModule.users);
   let stateUsersCriteriaFilter = computed<UserCriteriaFilter[]>(()=>store.state.userModule.usersCriteriaFilter);
@@ -229,7 +232,7 @@ const emit = defineEmits(['submit'])
   let descriptionValue: string = '';
   let sortKey: string = "userName";
   let sortOrder: string = "asc";
-  let search: string = '';
+  // let search: string = '';
   let loading: boolean = true;
   const $forceUpdate = inject('$forceUpdate') as any
   created();
@@ -317,9 +320,9 @@ watch(stateUsers,()=>onUserCriteriaChanged())
   }
 
   function onSort(sortBy: string, sortDesc: any) {
-  sortKey = sortBy;
-  sortOrder = sortDesc ? 'desc' : 'asc';
-}
+    sortKey = sortBy;
+    sortOrder = sortDesc ? 'desc' : 'asc';
+  }
 
   function onSubmitCriteria(userCriteriaFilter: UserCriteriaFilter) {
     criteriaFilterEditorDialogData.value = { ...emptyCriterionFilterEditorDialogData };
@@ -337,20 +340,20 @@ watch(stateUsers,()=>onUserCriteriaChanged())
   }
 
   function updateName(userCriteriaFilter: UserCriteriaFilter) {
-  const updatedUserCriteriaFilter = {
-    ...userCriteriaFilter,
-    name: userCriteriaFilter.name
+    const updatedUserCriteriaFilter = {
+      ...userCriteriaFilter,
+      name: userCriteriaFilter.name
+    }
+    updateUserCriteriaFilterAction({ userCriteriaFilter: updatedUserCriteriaFilter })
   }
-  updateUserCriteriaFilterAction({ userCriteriaFilter: updatedUserCriteriaFilter })
-}
 
   function updateDescription(userCriteriaFilter: UserCriteriaFilter) {
-  const updatedUserCriteriaFilter = {
-    ...userCriteriaFilter,
-    description: userCriteriaFilter.description,
-  };
-  updateUserCriteriaFilterAction({ userCriteriaFilter: updatedUserCriteriaFilter });
-}
+    const updatedUserCriteriaFilter = {
+      ...userCriteriaFilter,
+      description: userCriteriaFilter.description,
+    };
+    updateUserCriteriaFilterAction({ userCriteriaFilter: updatedUserCriteriaFilter });
+  }
 
   function onRevokeAccess(targetUser: UserCriteriaFilter) {
     const userCriteriaFilter = {
@@ -400,7 +403,6 @@ watch(stateUsers,()=>onUserCriteriaChanged())
     }
     beforeDeleteAlertData.value.showDialog=false;
   }
-
 </script>
 
 <style>

@@ -122,31 +122,13 @@ public static partial class Funding
                 nameof(allocationIsAllowedPerBudgetAndTreatment));
         }
 
-        if (!settings.UnlimitedSpending)
-        {
-            for (var y = 0; y < amountPerBudgetPerYear.Length; ++y)
-            {
-                var amountPerBudget = amountPerBudgetPerYear[y];
-                for (var b = 0; b < amountPerBudget.Length; ++b)
-                {
-                    var amount = amountPerBudget[b];
-                    if (amount < 0)
-                    {
-                        throw new ArgumentException(
-                            $"Year [{y}] budget [{b}] amount [{amount}] is negative.",
-                            nameof(amountPerBudgetPerYear));
-                    }
-                }
-            }
-        }
-
         for (var t = 0; t < costPerTreatment.Length; ++t)
         {
             var cost = costPerTreatment[t];
-            if (cost < 0)
+            if (cost <= 0)
             {
                 throw new ArgumentException(
-                    $"Treatment [{t}] cost [{cost}] is negative.",
+                    $"Treatment [{t}] cost [{cost}] is non-positive.",
                     nameof(costPerTreatment));
             }
         }

@@ -108,7 +108,8 @@ partial record FundingSolver
                     var costCoefficients = getCostCoefficients(allocationVariables);
                     var spendingConstraintExpression = LinearExpr.WeightedSum(allocationVariables, costCoefficients);
 
-                    _ = model.AddLinearConstraint(spendingConstraintExpression, 0, amount.ToCpModelMoneyInteger());
+                    var ub = amount > 0 ? amount.ToCpModelMoneyInteger() : 0;
+                    _ = model.AddLinearConstraint(spendingConstraintExpression, 0, ub);
                 }
 
                 for (var t = 0; t < NumberOfTreatments; ++t)

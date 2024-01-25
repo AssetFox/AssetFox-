@@ -54,4 +54,69 @@ public sealed class TreatmentConsiderationDetail
     ///     The treatment being considered.
     /// </summary>
     public string TreatmentName { get; }
+
+    public BudgetUsageStatus GetBudgetUsageStatus(int year, string budget, string treatment)
+    {
+        // The output allocations should always have positive amounts. If zero amounts are allowed,
+        // this logic needs to be adjusted.
+
+        if (FundingCalculationOutput.AllocationMatrix.Any(a => a.AllocatedAmount <= 0))
+        {
+            throw new Exception("Output allocations include non-positive amounts.");
+        }
+
+        if (FundingCalculationInput == null && FundingCalculationOutput != null)
+        {
+            // It was a committed project (automatically funded).
+
+            var allocation = FundingCalculationOutput.AllocationMatrix.SingleOrDefault(
+                a => (a.Year, a.BudgetName, a.TreatmentName) == (year, budget, treatment));
+
+            return allocation != null ? BudgetUsageStatus.CostCovered : BudgetUsageStatus.NotUsable;
+        }
+        else if (FundingCalculationInput != null && FundingCalculationOutput == null)
+        {
+            // It couldn't be funded.
+
+            var exclusion = FundingCalculationInput.ExclusionsMatrix.SingleOrDefault(
+                e => (e.BudgetName, e.TreatmentName) == (budget, treatment));
+
+            return exclusion?.Reason switch
+            {
+                FundingCalculationInput.ExclusionReason.TreatmentSettings => BudgetUsageStatus.NotUsable,
+                FundingCalculationInput.ExclusionReason.BudgetConditions => BudgetUsageStatus.ConditionNotMet,
+                null => BudgetUsageStatus.CostNotCovered,
+                _ => BudgetUsageStatus.Undefined
+            };
+        }
+        else if (FundingCalculationInput != null && FundingCalculationOutput != null)
+        {
+            // It was funded.
+
+            var allocation = FundingCalculationOutput.AllocationMatrix.SingleOrDefault(
+                a => (a.Year, a.BudgetName, a.TreatmentName) == (year, budget, treatment));
+
+            if (allocation != null)
+            {
+                return BudgetUsageStatus.CostCovered;
+            }
+
+            var exclusion = FundingCalculationInput.ExclusionsMatrix.SingleOrDefault(
+                e => (e.BudgetName, e.TreatmentName) == (budget, treatment));
+
+            return exclusion?.Reason switch
+            {
+                FundingCalculationInput.ExclusionReason.TreatmentSettings => BudgetUsageStatus.NotUsable,
+                FundingCalculationInput.ExclusionReason.BudgetConditions => BudgetUsageStatus.ConditionNotMet,
+                null => BudgetUsageStatus.NotNeeded,
+                _ => BudgetUsageStatus.Undefined
+            };
+        }
+        else
+        {
+            // Something isn't right.
+
+            throw new Exception("Treatment consideration detail is missing both input and output for funding calculation.");
+        }
+    }
 }

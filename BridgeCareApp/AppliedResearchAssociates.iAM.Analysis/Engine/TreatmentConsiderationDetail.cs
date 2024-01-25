@@ -104,36 +104,13 @@ public sealed class TreatmentConsiderationDetail
             var exclusion = FundingCalculationInput.ExclusionsMatrix.SingleOrDefault(
                 e => (e.BudgetName, e.TreatmentName) == (budget, treatment));
 
-            switch (exclusion?.Reason)
+            return exclusion?.Reason switch
             {
-            case FundingCalculationInput.ExclusionReason.TreatmentSettings:
-                return BudgetUsageStatus.NotUsable;
-
-            case FundingCalculationInput.ExclusionReason.BudgetConditions:
-                return BudgetUsageStatus.ConditionNotMet;
-
-            case null:
-                var allocatingBudgets = FundingCalculationOutput.AllocationMatrix
-                    .Where(a => (a.Year, a.TreatmentName) == (year, treatment))
-                    .Select(a => a.BudgetName)
-                    .ToHashSet();
-
-                var indexOfLastAllocatingBudget = FundingCalculationInput.CurrentBudgetsToSpend
-                    .FindLastIndex(b => allocatingBudgets.Contains(b.Name));
-
-                var indexOfQueryBudget = FundingCalculationInput.CurrentBudgetsToSpend
-                    .FindIndex(b => b.Name == budget);
-
-                return
-                    indexOfQueryBudget < indexOfLastAllocatingBudget
-                    ? BudgetUsageStatus.CostNotCovered :
-                    indexOfQueryBudget > indexOfLastAllocatingBudget
-                    ? BudgetUsageStatus.NotNeeded :
-                    throw new Exception("Query budget is the last allocating budget but did not have an allocation.");
-
-            default:
-                return BudgetUsageStatus.Undefined;
-            }
+                FundingCalculationInput.ExclusionReason.TreatmentSettings => BudgetUsageStatus.NotUsable,
+                FundingCalculationInput.ExclusionReason.BudgetConditions => BudgetUsageStatus.ConditionNotMet,
+                null => BudgetUsageStatus.NotNeeded,
+                _ => BudgetUsageStatus.Undefined
+            };
         }
         else
         {

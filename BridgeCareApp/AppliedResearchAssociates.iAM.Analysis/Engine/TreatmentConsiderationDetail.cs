@@ -70,7 +70,7 @@ public sealed class TreatmentConsiderationDetail
             // It was a committed project (automatically funded).
 
             var allocation = FundingCalculationOutput.AllocationMatrix.SingleOrDefault(
-                a => a.Year == year && a.BudgetName == budget && a.TreatmentName == treatment);
+                a => (a.Year, a.BudgetName, a.TreatmentName) == (year, budget, treatment));
 
             return allocation != null ? BudgetUsageStatus.CostCovered : BudgetUsageStatus.NotUsable;
         }
@@ -79,7 +79,7 @@ public sealed class TreatmentConsiderationDetail
             // It couldn't be funded.
 
             var exclusion = FundingCalculationInput.ExclusionsMatrix.SingleOrDefault(
-                e => e.BudgetName == budget && e.TreatmentName == treatment);
+                e => (e.BudgetName, e.TreatmentName) == (budget, treatment));
 
             return exclusion?.Reason switch
             {
@@ -94,7 +94,7 @@ public sealed class TreatmentConsiderationDetail
             // It was funded.
 
             var allocation = FundingCalculationOutput.AllocationMatrix.SingleOrDefault(
-                a => a.Year == year && a.BudgetName == budget && a.TreatmentName == treatment);
+                a => (a.Year, a.BudgetName, a.TreatmentName) == (year, budget, treatment));
 
             if (allocation != null)
             {
@@ -102,7 +102,7 @@ public sealed class TreatmentConsiderationDetail
             }
 
             var exclusion = FundingCalculationInput.ExclusionsMatrix.SingleOrDefault(
-                e => e.BudgetName == budget && e.TreatmentName == treatment);
+                e => (e.BudgetName, e.TreatmentName) == (budget, treatment));
 
             switch (exclusion?.Reason)
             {

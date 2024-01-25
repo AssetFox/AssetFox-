@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 SpendingStrategy = domain.SpendingStrategy,
                 ShouldApplyMultipleFeasibleCosts = domain.ShouldApplyMultipleFeasibleCosts,
                 ShouldDeteriorateDuringCashFlow = domain.ShouldDeteriorateDuringCashFlow,
-                ShouldUseExtraFundsAcrossBudgets = domain.AllowFundingFromMultipleBudgets
+                ShouldUseExtraFundsAcrossBudgets = domain.AllowFundingFromMultipleBudgets,
             };
 
         public static void FillSimulationAnalysisMethod(this AnalysisMethodEntity entity, Simulation simulation, string userCriteria)
@@ -68,6 +68,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             entity.Simulation.RemainingLifeLimits
                 .ForEach(_ => _.CreateRemainingLifeLimit(simulation));
+
+            simulation.ShouldBundleFeasibleTreatments = entity.shouldAllowMultipleTreatments;
         }
 
         public static AnalysisMethodEntity ToEntity(this AnalysisMethodDTO dto, Guid simulationId, Guid? attributeId = null, BaseEntityProperties baseEntityProperties = null)
@@ -82,6 +84,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShouldApplyMultipleFeasibleCosts = dto.ShouldApplyMultipleFeasibleCosts,
                 ShouldDeteriorateDuringCashFlow = dto.ShouldDeteriorateDuringCashFlow,
                 ShouldUseExtraFundsAcrossBudgets = dto.ShouldUseExtraFundsAcrossBudgets,
+                shouldAllowMultipleTreatments = dto.shouldAllowMultipleTreatments,
                 AttributeId = attributeId,
 
             };            
@@ -113,6 +116,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 SpendingStrategy = entity.SpendingStrategy,
                 ShouldApplyMultipleFeasibleCosts = entity.ShouldApplyMultipleFeasibleCosts,
                 ShouldDeteriorateDuringCashFlow = entity.ShouldDeteriorateDuringCashFlow,
+                shouldAllowMultipleTreatments = entity.shouldAllowMultipleTreatments,
                 ShouldUseExtraFundsAcrossBudgets = entity.ShouldUseExtraFundsAcrossBudgets,
                 Attribute = entity.Attribute?.Name ?? string.Empty,
                 Benefit = entity.Benefit?.ToDto() ?? new BenefitDTO(),

@@ -81,7 +81,7 @@ public sealed class TreatmentConsiderationDetail
             var exclusion = FundingCalculationInput.ExclusionsMatrix.SingleOrDefault(
                 e => e.BudgetName == budget && e.TreatmentName == treatment);
 
-            return exclusion.Reason switch
+            return exclusion?.Reason switch
             {
                 FundingCalculationInput.ExclusionReason.TreatmentSettings => BudgetUsageStatus.NotUsable,
                 FundingCalculationInput.ExclusionReason.BudgetConditions => BudgetUsageStatus.ConditionNotMet,

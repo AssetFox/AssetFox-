@@ -372,7 +372,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var poorOnOffColumnStart = (outputResults.Years.Count * 2) + column + 3;
             var index = 1; // to track the initial section from rest of the years
 
-            var isInitialYear = true;
+            var isInitialYear = true;            
             foreach (var yearlySectionData in outputResults.Years)
             {
                 _poorOnOffCount.Add(yearlySectionData.Year, (on: 0, off: 0));
@@ -389,6 +389,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                     //get unique key (brkey) to compare
                     section_BRKEY = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
+                    var firstYearSection = outputResults.Years.First().Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY);
 
                     if (!_bpnPoorOnPerYear.ContainsKey(yearlySectionData.Year))
                     {
@@ -446,7 +447,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         yearlySectionData.Year, index, worksheet, row, column);
 
                     // Work done in a year                                        
-                    var appliedTreatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    var appliedTreatmentConsideration = firstYearSection.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
                     var cost = appliedTreatmentConsideration == null ? 0 : Math.Round(appliedTreatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearlySectionData.Year).Sum(b => b.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis                    
                     var workCell = worksheet.Cells[row, column];
                     if (abbreviatedTreatmentNames.ContainsKey(section.AppliedTreatment))
@@ -584,6 +585,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                     //get unique key (brkey) to compare
                     var section_BRKEY = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
+                    var firstYearSection = outputResults.Years.First().Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY);
 
                     AssetDetail prevYearSection = null;
                     if (!isInitialYear)
@@ -604,7 +606,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
 
                     var recommendedTreatment = section.AppliedTreatment ?? ""; // Recommended Treatment 
-                    var treatmentConsiderations = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == recommendedTreatment);
+                    var treatmentConsiderations = firstYearSection.TreatmentConsiderations.FindAll(_ => _.TreatmentName == recommendedTreatment);
                     var cost = Math.Round(treatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == sectionData.Year).Sum(_ => _.AllocatedAmount) ?? 0), 0); // Rounded cost to whole number based on comments from Jeff Davis
 
                     //get budget usages

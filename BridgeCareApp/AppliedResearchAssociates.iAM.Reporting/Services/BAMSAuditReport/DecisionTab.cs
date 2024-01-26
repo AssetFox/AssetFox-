@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 {
@@ -65,6 +66,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 FillInitialDataInWorksheet(decisionsWorksheet, decisionDataModel, currentAttributes, familyId, currentCell.Row, 1);
 
                 var yearZeroRow = currentCell.Row++;
+                var firstYearSection = years.First().Assets.FirstOrDefault(_ => CheckGetValue(_.ValuePerNumericAttribute, "BRKEY_") == brKey);
                 foreach (var year in years)
                 {
                     var section = year.Assets.FirstOrDefault(_ => CheckGetValue(_.ValuePerNumericAttribute, "BRKEY_") == brKey);
@@ -74,7 +76,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                     }
 
                     // Generate data model                    
-                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, brKey, year, section);
+                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, brKey, year, section, firstYearSection);
 
                     // Fill in excel
                     currentCell = FillDataInWorksheet(decisionsWorksheet, decisionsDataModel, budgets.Count, currentAttributes, familyId, currentCell);
@@ -83,7 +85,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             }
         }
 
-        private DecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, double brKey, SimulationYearDetail year, AssetDetail section)
+        private DecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, double brKey, SimulationYearDetail year, AssetDetail section, AssetDetail firstYearSection)
         {
             var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, brKey, year.Year, section);
 
@@ -121,33 +123,28 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
                 decisionsTreatment.Benefit = treatmentOption != null ? decisionsTreatment.BCRatio * decisionsTreatment.Cost : 0;
                 decisionsTreatment.Selected = isCashFlowProject ? BAMSAuditReportConstants.CashFlow : (section.AppliedTreatment == treatment ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No);
-                var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
-                var budgetPriorityLevel = treatmentConsideration != null && treatmentConsideration.BudgetPriorityLevel != null ? treatmentConsideration.BudgetPriorityLevel.Value.ToString() : string.Empty;
 
-                // AllocationMatrix includes cash flow funding of future years.                
-                decisionsTreatment.AmountSpent =
-                    treatmentConsideration
-                    ?.FundingCalculationOutput
-                    ?.AllocationMatrix.
-                    Where(_ => _.Year == year.Year)
-                    .Sum(_ => _.AllocatedAmount)
-                    ?? 0;
-
-                var budgetsUsed =
-                    treatmentConsideration
-                    ?.FundingCalculationOutput
-                    ?.AllocationMatrix
-                    .Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year)
-                    .Select(_ => _.BudgetName)
-                    .Distinct()
-                    .ToList()
-                    ?? new();
-
+                var treatmentConsideration = firstYearSection.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);               
+                // AllocationMatrix includes cash flow funding of future years.
+                var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
+                var amountSpent = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.
+                                                Where(_ => _.Year == year.Year).Sum(_ => _.AllocatedAmount)
+                                                ?? 0;
+                decisionsTreatment.AmountSpent = amountSpent;
+                                
+                var budgetsUsed = allocationMatrix.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year)
+                                .Select(_ => _.BudgetName).Distinct().ToList()
+                                ?? new();
                 decisionsTreatment.BudgetsUsed = string.Join(", ", budgetsUsed);
-                // TODO [REVIEW] Simulation output no longer provides "budget usage status" values.
-                decisionsTreatment.BudgetUsageStatuses = string.Join(", ", budgetsUsed);
 
+                var budgetStatuses = allocationMatrix.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year)
+                                    .Select(_ => treatmentConsideration.GetBudgetUsageStatus(_.Year, _.BudgetName, _.TreatmentName).ToString()).Distinct().ToList()
+                                    ?? new();
+                decisionsTreatment.BudgetUsageStatuses = string.Join(", ", budgetStatuses);
+
+                var budgetPriorityLevel = treatmentConsideration?.BudgetPriorityLevel != null ? treatmentConsideration.BudgetPriorityLevel.Value.ToString() : string.Empty;
                 decisionsTreatment.BudgetPriorityLevel = budgetPriorityLevel;
+
                 decisionsTreatments.Add(decisionsTreatment);
             }
             decisionDataModel.DecisionsTreatments = decisionsTreatments;

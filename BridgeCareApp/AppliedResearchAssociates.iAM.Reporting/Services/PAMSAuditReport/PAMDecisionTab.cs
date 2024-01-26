@@ -65,6 +65,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 FillInitialDataInWorksheet(decisionsWorksheet, PAMSdecisionDataModel, currentAttributes, currentCell.Row, 1);
 
                 var yearZeroRow = currentCell.Row++;
+                var firstYearSection = years.First().Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == CRS);
                 foreach (var year in years)
                 {
                     var section = year.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == CRS);
@@ -74,7 +75,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                     }
 
                     // Generate data model                    
-                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, CRS, year, section);
+                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, CRS, year, section, firstYearSection);
 
                     // Fill in excel
                     currentCell = FillDataInWorksheet(decisionsWorksheet, decisionsDataModel, budgets.Count, currentAttributes, currentCell);
@@ -83,7 +84,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             }
         }
 
-        private PAMSDecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, string brKey, SimulationYearDetail year, AssetDetail section)
+        private PAMSDecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, string brKey, SimulationYearDetail year, AssetDetail section, AssetDetail firstYearSection)
         {
             var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, brKey, year.Year, section);
 
@@ -118,14 +119,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 decisionsTreatment.Cost = treatmentOption != null ? treatmentOption.Cost : 0;
                 decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
                 decisionsTreatment.Selected = isCashFlowProject ? PAMSAuditReportConstants.CashFlow : (section.AppliedTreatment == treatment ? PAMSAuditReportConstants.Yes : PAMSAuditReportConstants.No);
-                var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
-                decisionsTreatment.AmountSpent = treatmentConsideration != null ? treatmentConsideration.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == year.Year).Sum(_ => _.AllocatedAmount) : 0;
-                var budgetsUsed = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix?.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year).Select(_ => _.BudgetName).Distinct().ToList() ?? new();
-                var budgetsUsedValue = budgetsUsed != null && budgetsUsed.Any() ? string.Join(", ", budgetsUsed) : string.Empty;
-                decisionsTreatment.BudgetsUsed = budgetsUsedValue;
 
-                // [REVIEW] Simulation output no longer provides "budget usage status" values.
-                decisionsTreatment.BudgetUsageStatuses = treatmentConsideration == null ? string.Empty : string.Join(", ", budgetsUsed);
+                var treatmentConsideration = firstYearSection.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
+                // AllocationMatrix includes cash flow funding of future years.
+                var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
+                var amountSpent = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.
+                                                Where(_ => _.Year == year.Year).Sum(_ => _.AllocatedAmount)
+                                                ?? 0;
+                decisionsTreatment.AmountSpent = amountSpent;
+
+                var budgetsUsed = allocationMatrix.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year)
+                                .Select(_ => _.BudgetName).Distinct().ToList()
+                                ?? new();
+                decisionsTreatment.BudgetsUsed = string.Join(", ", budgetsUsed);
+
+                var budgetStatuses = allocationMatrix.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year)
+                                    .Select(_ => treatmentConsideration.GetBudgetUsageStatus(_.Year, _.BudgetName, _.TreatmentName).ToString()).Distinct().ToList()
+                                    ?? new();
+                decisionsTreatment.BudgetUsageStatuses = string.Join(", ", budgetStatuses);
 
                 decisionsTreatments.Add(decisionsTreatment);
             }

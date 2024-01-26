@@ -72,8 +72,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     var assets = yearData.Assets.Where(_ => _.TreatmentCause != TreatmentCause.NoSelection);
                     foreach (var section in assets)
                     {
-                        var treatmentConsiderations = section.TreatmentConsiderations;
-                        var budgetAmount = (double)treatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.
+                        var section_BRKEY = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
+                        var firstYearSection = reportOutputData.Years.First().Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY);
+                        var treatmentConsiderations = firstYearSection.TreatmentConsiderations;
+                        var budgetAmount = (double)treatmentConsiderations.Where(_ => _.TreatmentName == section.AppliedTreatment) // TODO is it correct?
+                                            .Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.
                                             Where(_ => _.BudgetName == summaryData.Budget && _.Year == yearData.Year).Sum(_ => _.AllocatedAmount) ?? 0);
 
                         var bpnName = _reportHelper.CheckAndGetValue<string>(section?.ValuePerTextAttribute, "BUS_PLAN_NETWORK");

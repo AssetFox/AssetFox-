@@ -117,6 +117,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 countForCompletedCommittedProject.Add(yearData.Year, new Dictionary<string, int>());
                 foreach (var section in yearData.Assets)
                 {
+                    var section_BRKEY = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
+                    var firstYearSection = reportOutputData.Years.First().Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY);
+
                     //get business plan network
                     var busPlanNetwork = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
 
@@ -130,7 +133,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                         appliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                     {
-                        var committedCost = section.TreatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearData.Year).Sum(b => b.AllocatedAmount) ?? 0);
+                        var committedCost = firstYearSection.TreatmentConsiderations.Where(_ => _.TreatmentName == appliedTreatment) // TODO is it correct?
+                                            .Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearData.Year)
+                                            .Sum(b => b.AllocatedAmount) ?? 0);
                         if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
                         {
                             yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (committedCost, 1, section.ProjectSource, treatmentCategory));
@@ -167,7 +172,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
                     //[TODO] - ask Jake regarding cash flow project. It won't have anything in the TreartmentOptions barring 1st year
 
-                    var cost = section.TreatmentConsiderations.
+                    var cost = firstYearSection.TreatmentConsiderations.
                                 Where(_ => _.TreatmentName?.ToLower() != BAMSConstants.NoTreatment && _.TreatmentName == appliedTreatment)
                                 .Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearData.Year).Sum(b => b.AllocatedAmount) ?? 0);
                     PopulateWorkedOnCostAndCount(yearData.Year, section, costAndCountPerTreatmentPerYear, cost);

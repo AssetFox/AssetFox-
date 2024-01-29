@@ -967,17 +967,20 @@ public sealed class SimulationRunner
 
         Action scheduleCashFlowEvents = null;
 
-        var applicableCashFlowRules =
-            Simulation.InvestmentPlan.CashFlowRules
-            .Where(rule => rule.Criterion.EvaluateOrDefault(assetContext));
-
-        foreach (var cashFlowRule in applicableCashFlowRules)
+        foreach (var cashFlowRule in Simulation.InvestmentPlan.CashFlowRules)
         {
             var cashFlowConsideration = treatmentConsideration.CashFlowConsiderations.GetAdd(new(cashFlowRule.Name));
 
-            cashFlowConsideration.ReasonAgainstCashFlow = scheduleCashFlowEvents is null
-                ? handleCashFlowRule(cashFlowRule, cashFlowConsideration)
-                : ReasonAgainstCashFlow.NotNeeded;
+            if (cashFlowRule.Criterion.EvaluateOrDefault(assetContext))
+            {
+                cashFlowConsideration.ReasonAgainstCashFlow = scheduleCashFlowEvents is null
+                    ? handleCashFlowRule(cashFlowRule, cashFlowConsideration)
+                    : ReasonAgainstCashFlow.NotNeeded;
+            }
+            else
+            {
+                cashFlowConsideration.ReasonAgainstCashFlow = ReasonAgainstCashFlow.ConditionNotMet;
+            }
         }
 
         if (scheduleCashFlowEvents is not null)

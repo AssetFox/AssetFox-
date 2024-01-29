@@ -49,4 +49,9 @@ public enum ReasonAgainstCashFlow
     ///     Indicates a selected cash flow rule.
     /// </summary>
     None,
+
+    /// <summary>
+    ///     Indicates a cash flow rule whose condition was not met.
+    /// </summary>
+    ConditionNotMet,
 }

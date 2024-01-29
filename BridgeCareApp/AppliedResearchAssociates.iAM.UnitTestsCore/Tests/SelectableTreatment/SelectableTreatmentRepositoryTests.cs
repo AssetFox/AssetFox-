@@ -22,6 +22,7 @@ using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Treatment;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using System.Data;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
 {
@@ -525,7 +526,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
                 .GetScenarioSelectableTreatments(simulation.Id);
 
             // Act
-            var exception = Assert.ThrowsAny<Exception>(() => TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dto, simulation.Id));
+            var exception = Assert.Throws<RowNotInTableException>(() => TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dto, simulation.Id));
 
             // Assert
             var treatmentsAfter = TestHelper.UnitOfWork.SelectableTreatmentRepo

@@ -39,14 +39,14 @@
 
 <script setup lang='ts'>
 import { ref, toRefs, watch, shallowRef, computed, onMounted } from 'vue';
-import { clone, contains } from 'ramda';
+import { clone, contains, isNil } from 'ramda';
 import { SimpleBudgetDetail } from '@/shared/models/iAM/investment';
 import { useStore } from 'vuex';
 
 import { isEqual } from '@/shared/utils/has-unsaved-changes-helper';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
 
-    const emit = defineEmits(['submit', 'onModifyBudget'])
+    const emit = defineEmits(['submit', 'onModifyBudgets'])
     let store = useStore();
     
     const stateScenarioSimpleBudgetDetails = computed<SimpleBudgetDetail[]>(() => store.state.investmentModule.scenarioSimpleBudgetDetails);
@@ -67,7 +67,7 @@ import { getPropertyValues } from '@/shared/utils/getter-utils';
     onMounted(() => {  
         if(stateScenarioSimpleBudgetDetails.value.length > 0){
             budgets.value = clone(stateScenarioSimpleBudgetDetails.value);
-            selectedBudgets.value = clone(budgets.value);
+            selectedBudgets.value = getSelectedBudgets();
         }   
         onSelectedTreatmentBudgetsChanged();
     })
@@ -80,24 +80,27 @@ import { getPropertyValues } from '@/shared/utils/getter-utils';
 
     function onSelectedTreatmentBudgetsChanged(){
         if ((props.addTreatment || props.fromLibrary) && !initializedBudgets) {        
-            selectedBudgets.value = budgets.value;
+            selectedBudgets.value = getSelectedBudgets();
             initializedBudgets = true;
         } else {
-            selectedBudgets.value = budgets.value!
-                .filter((simpleBudgetDetail: SimpleBudgetDetail) => contains(simpleBudgetDetail.id));
+            selectedBudgets.value = getSelectedBudgets();
         }
     }
 
     watch(selectedBudgets, () => { 
         const selectedBudgetIds: string[] = getPropertyValues('id', selectedBudgets.value!) as string[];
         if (!isEqual(props.selectedTreatmentBudgets, selectedBudgetIds)) {
-            emit('onModifyBudget', selectedBudgets.value);
+            emit('onModifyBudgets', selectedBudgets.value);
         }
     });
 
     watch(budgets, () => { 
-        selectedBudgets.value = clone(budgets.value);
+        selectedBudgets.value = getSelectedBudgets();
     });
+
+    function getSelectedBudgets(){
+        return clone(budgets.value.filter(_ => !isNil(props.selectedTreatmentBudgets.find(__ => __ === _.id))))
+    }
 
 </script>
 

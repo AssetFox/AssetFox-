@@ -285,7 +285,7 @@
             </v-row>
         </v-col>
      
-        <ConfirmDeleteAlert
+        <Alert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
         />
@@ -445,7 +445,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     let isDefaultBool = shallowRef<boolean>(false); //this exists because isDefault can't be tracked so this bool is tracked for the switch and is then synced with isDefault
     let hasScenario = ref<boolean>(false);
     let rules: InputValidationRules = validationRules;
-    let confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    let confirmDeleteAlertData = ref(clone(emptyAlertData));
    let showCreateCalculatedAttributeDialog = false;
     let hasSelectedCalculatedAttribute: boolean = false;
     let selectedCalculatedAttribute = ref<CalculatedAttribute>(clone(
@@ -1100,7 +1100,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         return !dataIsValid;
     }
     function onShowConfirmDeleteAlert() {
-         confirmDeleteAlertData = {
+         confirmDeleteAlertData.value = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
@@ -1108,7 +1108,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         };
     }
     function onSubmitConfirmDeleteAlertResult(submit: boolean) {
-         confirmDeleteAlertData = clone(emptyAlertData);
+         confirmDeleteAlertData.value = clone(emptyAlertData);
 
         if (submit) {
              librarySelectItemValue.value = '';

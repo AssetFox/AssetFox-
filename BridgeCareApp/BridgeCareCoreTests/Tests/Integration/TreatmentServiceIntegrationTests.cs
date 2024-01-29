@@ -42,7 +42,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var dataAsString = fileInfo.FileData;
             var bytes = Convert.FromBase64String(dataAsString);
             var stream = new MemoryStream(bytes);
-            File.WriteAllBytes("zzzzz.xlsx", bytes);
+        //    File.WriteAllBytes("zzzzz.xlsx", bytes);
             var excelPackage = new ExcelPackage(stream);
             var userCriteria = new UserCriteriaDTO();
             TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteTreatment(treatment, libraryId);
@@ -96,7 +96,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var dataAsString = fileInfo.FileData;
             var bytes = Convert.FromBase64String(dataAsString);
             var stream = new MemoryStream(bytes);
-            File.WriteAllBytes("zzzzz.xlsx", bytes);
+      //      File.WriteAllBytes("zzzzz.xlsx", bytes);
             var excelPackage = new ExcelPackage(stream);
             var userCriteria = new UserCriteriaDTO();
             TestHelper.UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatment(treatment, simulationId);

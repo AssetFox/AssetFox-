@@ -120,7 +120,7 @@ namespace BridgeCareCoreTests.Tests
             treatementLibraryUserRepo.SetupGetLibraryAccess(libraryRequest.Library.Id, libraryExists);
             pagingService.Setup(ts => ts.GetSyncedLibraryDataset(It.IsAny<LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>>())).Returns(new List<TreatmentDTO>()); // correct? Merge build error here.
             var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
-            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork, pagingService);
             // Act
             var result = await controller.UpsertTreatmentLibrary(libraryRequest);
 
@@ -282,7 +282,7 @@ namespace BridgeCareCoreTests.Tests
             var libraryExists = LibraryAccessModels.LibraryExistsWithUsers(user.Id, libraryUser);
             treatmentLibraryRepo.SetupGetLibraryAccess(libraryId, libraryExists);
             var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
-            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork, pagingService);
 
             // Act
             var result = await controller.UpsertTreatmentLibrary(libraryRequest);

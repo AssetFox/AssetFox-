@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             //ScenarioBudgetId = ScenarioBudgetDTOs().Single(_ => _.Name == "Interstate").Id,
             LocationKeys = new Dictionary<string, string>()
                 {
-                    { "ID", TestDataForCommittedProjects.MaintainableAssetIdString2 },
+                    { "ID", Guid.NewGuid().ToString() },
                     { TestAttributeNames.CulvDurationN, "3"},
                     { TestAttributeNames.BrKey, "2" },
                     { TestAttributeNames.BmsId, "9876543" }

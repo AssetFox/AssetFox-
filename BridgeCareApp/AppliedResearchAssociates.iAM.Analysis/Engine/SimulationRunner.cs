@@ -150,7 +150,10 @@ public sealed class SimulationRunner
         ConditionsPerBudget = Simulation.InvestmentPlan.BudgetConditions.ToLookup(budgetCondition => budgetCondition.Budget);
         CurvesPerAttribute = Simulation.PerformanceCurves.ToLookup(curve => curve.Attribute);
         NumberAttributeByName = Simulation.Network.Explorer.NumberAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
-        SortedDistributionRulesPerCashFlowRule = Simulation.InvestmentPlan.CashFlowRules.ToDictionary(_ => _, rule => rule.DistributionRules.ToSortedDictionary(distributionRule => distributionRule.CostCeiling ?? decimal.MaxValue));
+
+        SortedDistributionRulesPerCashFlowRule = Simulation.InvestmentPlan.CashFlowRules.ToDictionary(
+            _ => _,
+            rule => rule.DistributionRules.ToSortedDictionary(distributionRule => distributionRule.CostCeiling ?? decimal.MaxValue));
 
         foreach (var treatment in Simulation.Treatments)
         {
@@ -966,18 +969,23 @@ public sealed class SimulationRunner
         // First, attempt any applicable cash flows.
 
         Action scheduleCashFlowEvents = null;
+        bool oneYearDistributionRuleHasBeenSelected = false;
 
-        var applicableCashFlowRules =
-            Simulation.InvestmentPlan.CashFlowRules
-            .Where(rule => rule.Criterion.EvaluateOrDefault(assetContext));
-
-        foreach (var cashFlowRule in applicableCashFlowRules)
+        foreach (var cashFlowRule in Simulation.InvestmentPlan.CashFlowRules)
         {
             var cashFlowConsideration = treatmentConsideration.CashFlowConsiderations.GetAdd(new(cashFlowRule.Name));
 
-            cashFlowConsideration.ReasonAgainstCashFlow = scheduleCashFlowEvents is null
-                ? handleCashFlowRule(cashFlowRule, cashFlowConsideration)
-                : ReasonAgainstCashFlow.NotNeeded;
+            if (cashFlowRule.Criterion.EvaluateOrDefault(assetContext))
+            {
+                cashFlowConsideration.ReasonAgainstCashFlow =
+                    scheduleCashFlowEvents is null && !oneYearDistributionRuleHasBeenSelected
+                    ? handleCashFlowRule(cashFlowRule, cashFlowConsideration)
+                    : ReasonAgainstCashFlow.NotNeeded;
+            }
+            else
+            {
+                cashFlowConsideration.ReasonAgainstCashFlow = ReasonAgainstCashFlow.ConditionNotMet;
+            }
         }
 
         if (scheduleCashFlowEvents is not null)
@@ -1035,7 +1043,8 @@ public sealed class SimulationRunner
 
             if (distributionRule.YearlyPercentages.Count == 1)
             {
-                return ReasonAgainstCashFlow.ApplicableDistributionRuleIsForOnlyOneYear;
+                oneYearDistributionRuleHasBeenSelected = true;
+                return ReasonAgainstCashFlow.None;
             }
 
             var lastYearOfCashFlow = year + distributionRule.YearlyPercentages.Count - 1;

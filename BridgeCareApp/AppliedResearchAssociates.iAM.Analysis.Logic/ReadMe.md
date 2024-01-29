@@ -52,8 +52,8 @@ $$
 
 $$
 \begin{align*}
-    M(b) &= \text{optimized maximal total spending from budget $b \in B_\text{max}$} \\
-    B_\text{max} &= \text{set of budgets for which $M$ is defined} \\
+    T_\text{opt}(b) &= \text{optimized maximal total spending from budget $b \in B_\text{opt}$} \\
+    B_\text{opt} &= \text{set of budgets for which $T_\text{opt}$ is defined} \\
 \end{align*}
 $$
 
@@ -97,21 +97,26 @@ $$
         \sum_t & & a(b,t,y) & \le & & A(b,y) & \text{otherwise} \\
     \end{cases} \\
     \\
-    \forall\ b \in B_\text{max} &: T(b) \ge M(b)
+    \forall\ b \in B_\text{opt} &: T(b) \ge T_\text{opt}(b)
 \end{align*}
 $$
 
 ### 2.3. Objective
 
 $$
-\max_x\ \{ T(b')\ |\ b' = \argmin_{b\ \notin\ B_\text{max}} I(b) \}
+\max_x\ \{ T(b')\ |\ b' = \argmin_{b\ \notin\ B_\text{opt}} I(b) \}
 $$
 
 ## 3. Procedure
 
-1. Define $B_\text{max} \colonequals \empty$.
-2. Build or update the problem definition w.r.t. $B_\text{max}$.
+1. Define $B_\text{opt} \colonequals \empty$.
+2. Build or update the problem definition w.r.t. $B_\text{opt}$.
 3. Maximize the objective value $T(b')$.
-4. Add $b'$ to $B_\text{max}$.
-5. Define $M(b') \colonequals T(b')$.
-6. If $\exists\ b \notin B_\text{max}$, then go to 2, else stop.
+4. Add $b'$ to $B_\text{opt}$.
+5. For each $b' \in B_\text{opt}$, (re-)define $T_\text{opt}(b') \colonequals T(b')$.
+   - Redefinition of $T_\text{opt}$ is helpful because, in the general case, it
+     is possible that previous maximizations were not globally optimal. If the
+     current maximization adjusts previously optimized values for the better
+     (with the constraints ensuring that they can't get worse), then this step
+     captures those beneficial adjustments.
+6. If $\exists\ b \notin B_\text{opt}$, then go to 2, else stop.

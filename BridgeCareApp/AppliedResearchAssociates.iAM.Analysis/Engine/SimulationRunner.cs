@@ -966,6 +966,7 @@ public sealed class SimulationRunner
         // First, attempt any applicable cash flows.
 
         Action scheduleCashFlowEvents = null;
+        bool oneYearDistributionRuleHasBeenSelected = false;
 
         foreach (var cashFlowRule in Simulation.InvestmentPlan.CashFlowRules)
         {
@@ -973,7 +974,8 @@ public sealed class SimulationRunner
 
             if (cashFlowRule.Criterion.EvaluateOrDefault(assetContext))
             {
-                cashFlowConsideration.ReasonAgainstCashFlow = scheduleCashFlowEvents is null
+                cashFlowConsideration.ReasonAgainstCashFlow =
+                    scheduleCashFlowEvents is null && !oneYearDistributionRuleHasBeenSelected
                     ? handleCashFlowRule(cashFlowRule, cashFlowConsideration)
                     : ReasonAgainstCashFlow.NotNeeded;
             }
@@ -1038,7 +1040,8 @@ public sealed class SimulationRunner
 
             if (distributionRule.YearlyPercentages.Count == 1)
             {
-                return ReasonAgainstCashFlow.ApplicableDistributionRuleIsForOnlyOneYear;
+                oneYearDistributionRuleHasBeenSelected = true;
+                return ReasonAgainstCashFlow.None;
             }
 
             var lastYearOfCashFlow = year + distributionRule.YearlyPercentages.Count - 1;

@@ -1051,9 +1051,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         }
     }
 
-    function onSubmitCriterionEditorDialogResult(
-        criterionExpression: string,
-    ) {
+    function onSubmitCriterionEditorDialogResult(criterionExpression: string) {
         criterionEditorDialogData.value = clone(
             emptyGeneralCriterionEditorDialogData,
         );
@@ -1302,8 +1300,11 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     }
 
     function onUpdateRow(rowId: string, updatedRow: PerformanceCurve){
-        if(any(propEq('id', rowId), addedRows.value))
+        if(any(propEq('id', rowId), addedRows.value)){
+            const index = addedRows.value.findIndex(item => item.id == updatedRow.id)
+            addedRows.value[index] = updatedRow;
             return;
+        }
 
         let mapEntry = updatedRowsMap.get(rowId)
 

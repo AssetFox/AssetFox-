@@ -54,7 +54,7 @@
         <div>
           <v-data-table id="UserCriteria-users-datatable"
             :header='userCriteriaGridHeaders'
-            :items='assignedUsersCriteriaFilter'
+            :items='filteredUsersCriteriaFilter'
             :rows-per-page-items=[5,10,25]
             item-key="userId"
             class='elevation-1'
@@ -65,7 +65,8 @@
               <tr>
                   <th
                     v-for="header in userCriteriaGridHeaders"
-                    :key="header"
+                    :key="header.title"
+                    @click="onSort(header.key)"
                   >
                     <span style='cursor: pointer'>
                       {{ header.title }}
@@ -133,8 +134,9 @@
                   </template>
                   <v-card style="top: -60px;" >
                     <v-card-text>
-                      <v-text-field id="UserCriteria-editUserName-textfield" variant="underlined" v-model='item.name' label='Edit Name' single-line @click.stop />
-                      <v-btn id="UserCriteria-updateUserName-btn" @click='updateName(item)'>Update</v-btn>
+                      <v-text-field id="UserCriteria-editUserName-textfield" variant="underlined" v-model='tempName' label='Edit Name' single-line @click.stop />
+                      <v-btn id="UserCriteria-updateUserName-btn" @click='updateName(item)' class="mr-2">Update</v-btn>
+                      <v-btn id="UserCriteria-cancelUserName-btn" @click='cancelNameEdit'>Cancel</v-btn>
                     </v-card-text>
                   </v-card>
                 </v-menu>
@@ -146,8 +148,9 @@
                   </template>
                   <v-card style="top: -60px;">
                     <v-card-text>
-                      <v-text-field id="UserCriteria-editUserDescription-textfield" variant="underlined" v-model='item.description' label='Edit Description' single-line @click.stop />
-                      <v-btn id="UserCriteria-updateUserDescription-btn" @click='updateDescription(item)'>Update</v-btn>
+                      <v-text-field id="UserCriteria-editUserDescription-textfield" variant="underlined" v-model='tempDescription' label='Edit Description' single-line @click.stop />
+                      <v-btn id="UserCriteria-updateUserDescription-btn" @click='updateDescription(item)' class="mr-2">Update</v-btn>
+                      <v-btn id="UserCriteria-cancelUpdateDescription-btn" @click='cancelDescriptionEdit'>Cancel</v-btn>
                     </v-card-text>
                   </v-card>
                 </v-menu>
@@ -187,16 +190,19 @@ const instance = getCurrentInstance();
 let edit = ref<boolean>(false)
 const emit = defineEmits(['submit'])
 
-    function filteredUsersCriteriaFilter() {
-    if (loading || !search) {
-      return assignedUsersCriteriaFilter;
-    }
-    const lowerCaseSearch = search.toLowerCase();
-    
-    return assignedUsersCriteriaFilter.value.filter((item: { [s: string]: any; } | ArrayLike<unknown>) => {
-      return Object.values(item).some(val => String(val).toLowerCase().includes(lowerCaseSearch));
-    });
+let search = ref('');
+
+const filteredUsersCriteriaFilter = computed(() => {
+  if (loading || !search.value || search.value.trim() === '') {
+    return assignedUsersCriteriaFilter.value;
   }
+
+  const lowerCaseSearch = search.value.toLowerCase();
+
+  return assignedUsersCriteriaFilter.value.filter((item: { [s: string]: any; } | ArrayLike<unknown>) => {
+    return Object.values(item).some(val => String(val).toLowerCase().includes(lowerCaseSearch));
+  });
+})
   
   let stateUsers = computed<User[]>(()=>store.state.userModule.users);
   let stateUsersCriteriaFilter = computed<UserCriteriaFilter[]>(()=>store.state.userModule.usersCriteriaFilter);
@@ -226,10 +232,12 @@ const emit = defineEmits(['submit'])
   let selectedUser: UserCriteriaFilter = { ...emptyUserCriteriaFilter };
   let uuidNIL: string = getBlankGuid();
   let nameValue: string = '';
+  let tempName = ref('');
   let descriptionValue: string = '';
+  let tempDescription = ref('');
   let sortKey: string = "userName";
   let sortOrder: string = "asc";
-  let search: string = '';
+  // let search: string = '';
   let loading: boolean = true;
   const $forceUpdate = inject('$forceUpdate') as any
   created();
@@ -301,6 +309,8 @@ watch(stateUsers,()=>onUserCriteriaChanged())
 
   function onEditCriteria(userFilter: UserCriteriaFilter) {
     selectedUser = userFilter;
+    tempDescription.value = userFilter.description;
+    tempName.value = userFilter.name;
     var currentUser = stateUsers.value.filter((user: User) => user.id == userFilter.userId)[0];
 
     criteriaFilterEditorDialogData.value = {
@@ -316,10 +326,15 @@ watch(stateUsers,()=>onUserCriteriaChanged())
     };
   }
 
-  function onSort(sortBy: string, sortDesc: any) {
-  sortKey = sortBy;
-  sortOrder = sortDesc ? 'desc' : 'asc';
-}
+  function onSort(sortBy: string) {
+    sortKey = sortBy;
+    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    filteredUsersCriteriaFilter.value.sort((a, b) => {
+      if (a[sortKey] < b[sortKey]) return sortOrder === 'asc' ? -1 : 1;
+      if (a[sortKey] > b[sortKey]) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
 
   function onSubmitCriteria(userCriteriaFilter: UserCriteriaFilter) {
     criteriaFilterEditorDialogData.value = { ...emptyCriterionFilterEditorDialogData };
@@ -337,20 +352,30 @@ watch(stateUsers,()=>onUserCriteriaChanged())
   }
 
   function updateName(userCriteriaFilter: UserCriteriaFilter) {
-  const updatedUserCriteriaFilter = {
-    ...userCriteriaFilter,
-    name: userCriteriaFilter.name
+    userCriteriaFilter.name = tempName.value;
+    const updatedUserCriteriaFilter = {
+      ...userCriteriaFilter,
+      name: userCriteriaFilter.name
+    }
+    updateUserCriteriaFilterAction({ userCriteriaFilter: updatedUserCriteriaFilter })
   }
-  updateUserCriteriaFilterAction({ userCriteriaFilter: updatedUserCriteriaFilter })
-}
+
+  function cancelNameEdit() {
+    tempName.value = '';
+  }
 
   function updateDescription(userCriteriaFilter: UserCriteriaFilter) {
-  const updatedUserCriteriaFilter = {
-    ...userCriteriaFilter,
-    description: userCriteriaFilter.description,
-  };
-  updateUserCriteriaFilterAction({ userCriteriaFilter: updatedUserCriteriaFilter });
-}
+    userCriteriaFilter.description = tempDescription.value
+    const updatedUserCriteriaFilter = {
+      ...userCriteriaFilter,
+      description: userCriteriaFilter.description,
+    };
+    updateUserCriteriaFilterAction({ userCriteriaFilter: updatedUserCriteriaFilter });
+  }
+
+  function cancelDescriptionEdit() {
+    tempDescription.value = '';
+  }
 
   function onRevokeAccess(targetUser: UserCriteriaFilter) {
     const userCriteriaFilter = {
@@ -400,7 +425,6 @@ watch(stateUsers,()=>onUserCriteriaChanged())
     }
     beforeDeleteAlertData.value.showDialog=false;
   }
-
 </script>
 
 <style>

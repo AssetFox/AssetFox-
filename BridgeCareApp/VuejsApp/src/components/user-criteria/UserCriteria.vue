@@ -134,8 +134,9 @@
                   </template>
                   <v-card style="top: -60px;" >
                     <v-card-text>
-                      <v-text-field id="UserCriteria-editUserName-textfield" variant="underlined" v-model='item.name' label='Edit Name' single-line @click.stop />
+                      <v-text-field id="UserCriteria-editUserName-textfield" variant="underlined" v-model='tempName' label='Edit Name' single-line @click.stop />
                       <v-btn id="UserCriteria-updateUserName-btn" @click='updateName(item)'>Update</v-btn>
+                      <v-btn id="UserCriteria-cancelUserName-btn" @click='cancelNameEdit'>Cancel</v-btn>
                     </v-card-text>
                   </v-card>
                 </v-menu>
@@ -147,8 +148,9 @@
                   </template>
                   <v-card style="top: -60px;">
                     <v-card-text>
-                      <v-text-field id="UserCriteria-editUserDescription-textfield" variant="underlined" v-model='item.description' label='Edit Description' single-line @click.stop />
+                      <v-text-field id="UserCriteria-editUserDescription-textfield" variant="underlined" v-model='tempDescription' label='Edit Description' single-line @click.stop />
                       <v-btn id="UserCriteria-updateUserDescription-btn" @click='updateDescription(item)'>Update</v-btn>
+                      <v-btn id="UserCriteria-cancelUpdateDescription-btn" @click='cancelDescriptionEdit'>Cancel</v-btn>
                     </v-card-text>
                   </v-card>
                 </v-menu>
@@ -230,7 +232,9 @@ const filteredUsersCriteriaFilter = computed(() => {
   let selectedUser: UserCriteriaFilter = { ...emptyUserCriteriaFilter };
   let uuidNIL: string = getBlankGuid();
   let nameValue: string = '';
+  let tempName = ref('');
   let descriptionValue: string = '';
+  let tempDescription = ref('');
   let sortKey: string = "userName";
   let sortOrder: string = "asc";
   // let search: string = '';
@@ -305,6 +309,8 @@ watch(stateUsers,()=>onUserCriteriaChanged())
 
   function onEditCriteria(userFilter: UserCriteriaFilter) {
     selectedUser = userFilter;
+    tempDescription.value = userFilter.description;
+    tempName.value = userFilter.name;
     var currentUser = stateUsers.value.filter((user: User) => user.id == userFilter.userId)[0];
 
     criteriaFilterEditorDialogData.value = {
@@ -346,6 +352,7 @@ watch(stateUsers,()=>onUserCriteriaChanged())
   }
 
   function updateName(userCriteriaFilter: UserCriteriaFilter) {
+    userCriteriaFilter.name = tempName.value;
     const updatedUserCriteriaFilter = {
       ...userCriteriaFilter,
       name: userCriteriaFilter.name
@@ -353,12 +360,21 @@ watch(stateUsers,()=>onUserCriteriaChanged())
     updateUserCriteriaFilterAction({ userCriteriaFilter: updatedUserCriteriaFilter })
   }
 
+  function cancelNameEdit() {
+    tempName.value = '';
+  }
+
   function updateDescription(userCriteriaFilter: UserCriteriaFilter) {
+    userCriteriaFilter.description = tempDescription.value
     const updatedUserCriteriaFilter = {
       ...userCriteriaFilter,
       description: userCriteriaFilter.description,
     };
     updateUserCriteriaFilterAction({ userCriteriaFilter: updatedUserCriteriaFilter });
+  }
+
+  function cancelDescriptionEdit() {
+    tempDescription.value = '';
   }
 
   function onRevokeAccess(targetUser: UserCriteriaFilter) {

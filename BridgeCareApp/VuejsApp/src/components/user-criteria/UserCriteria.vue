@@ -135,7 +135,7 @@
                   <v-card style="top: -60px;" >
                     <v-card-text>
                       <v-text-field id="UserCriteria-editUserName-textfield" variant="underlined" v-model='tempName' label='Edit Name' single-line @click.stop />
-                      <v-btn id="UserCriteria-updateUserName-btn" @click='updateName(item)'>Update</v-btn>
+                      <v-btn id="UserCriteria-updateUserName-btn" @click='updateName(item)' class="mr-2">Update</v-btn>
                       <v-btn id="UserCriteria-cancelUserName-btn" @click='cancelNameEdit'>Cancel</v-btn>
                     </v-card-text>
                   </v-card>
@@ -149,7 +149,7 @@
                   <v-card style="top: -60px;">
                     <v-card-text>
                       <v-text-field id="UserCriteria-editUserDescription-textfield" variant="underlined" v-model='tempDescription' label='Edit Description' single-line @click.stop />
-                      <v-btn id="UserCriteria-updateUserDescription-btn" @click='updateDescription(item)'>Update</v-btn>
+                      <v-btn id="UserCriteria-updateUserDescription-btn" @click='updateDescription(item)' class="mr-2">Update</v-btn>
                       <v-btn id="UserCriteria-cancelUpdateDescription-btn" @click='cancelDescriptionEdit'>Cancel</v-btn>
                     </v-card-text>
                   </v-card>

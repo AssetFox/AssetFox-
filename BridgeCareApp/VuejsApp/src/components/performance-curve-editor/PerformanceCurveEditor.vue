@@ -1030,7 +1030,6 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 currentPage.value,
             );
         }
-
         selectedPerformanceCurve = clone(emptyPerformanceCurve);
         hasSelectedPerformanceCurve = false;
     }

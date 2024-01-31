@@ -26,7 +26,8 @@ public enum ReasonAgainstCashFlow
     /// <summary>
     ///     Indicates a cash flow rule whose applicable distribution rule is for only one year.
     ///     <em>This kind of distribution used to be automatically rejected. It is no longer
-    ///     automatically rejected.</em>
+    ///     automatically rejected. The funding is simply handled as it would be for a typical
+    ///     1-year selection without cash flow.</em>
     /// </summary>
     [Obsolete("One-year distributions are no longer automatically rejected.")]
     ApplicableDistributionRuleIsForOnlyOneYear,

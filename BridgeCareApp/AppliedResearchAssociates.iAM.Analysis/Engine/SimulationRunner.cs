@@ -546,7 +546,7 @@ public sealed class SimulationRunner
 
                             if (costCoverage == CostCoverage.Full)
                             {
-                                workingContext.EventSchedule.Add(year, option.CandidateTreatment);
+                                _ = workingContext.EventSchedule.TryAdd(year, option.CandidateTreatment);
                                 workingContext.ApplyTreatment(option.CandidateTreatment, year);
 
                                 if (ConditionGoalsAreMet(year))
@@ -969,7 +969,7 @@ public sealed class SimulationRunner
         // First, attempt any applicable cash flows.
 
         Action scheduleCashFlowEvents = null;
-        bool oneYearDistributionRuleHasBeenSelected = false;
+        var oneYearCashFlowIsBeingUsed = false;
 
         foreach (var cashFlowRule in Simulation.InvestmentPlan.CashFlowRules)
         {
@@ -977,8 +977,7 @@ public sealed class SimulationRunner
 
             if (cashFlowRule.Criterion.EvaluateOrDefault(assetContext))
             {
-                cashFlowConsideration.ReasonAgainstCashFlow =
-                    scheduleCashFlowEvents is null && !oneYearDistributionRuleHasBeenSelected
+                cashFlowConsideration.ReasonAgainstCashFlow = scheduleCashFlowEvents is null
                     ? handleCashFlowRule(cashFlowRule, cashFlowConsideration)
                     : ReasonAgainstCashFlow.NotNeeded;
             }
@@ -991,7 +990,7 @@ public sealed class SimulationRunner
         if (scheduleCashFlowEvents is not null)
         {
             scheduleCashFlowEvents();
-            return CostCoverage.CashFlow;
+            return oneYearCashFlowIsBeingUsed ? CostCoverage.Full : CostCoverage.CashFlow;
         }
 
         // At this point, no cash flow could be used. So try to pay the normal way.
@@ -1039,12 +1038,6 @@ public sealed class SimulationRunner
             if (distributionRule is null)
             {
                 return ReasonAgainstCashFlow.NoApplicableDistributionRule;
-            }
-
-            if (distributionRule.YearlyPercentages.Count == 1)
-            {
-                oneYearDistributionRuleHasBeenSelected = true;
-                return ReasonAgainstCashFlow.None;
             }
 
             var lastYearOfCashFlow = year + distributionRule.YearlyPercentages.Count - 1;
@@ -1138,6 +1131,11 @@ public sealed class SimulationRunner
                     assetContext.EventSchedule.Add(year + yearOffset, yearProgress);
                 }
             };
+
+            if (distributionRule.YearlyPercentages.Count == 1)
+            {
+                oneYearCashFlowIsBeingUsed = true;
+            }
 
             return ReasonAgainstCashFlow.None;
         }

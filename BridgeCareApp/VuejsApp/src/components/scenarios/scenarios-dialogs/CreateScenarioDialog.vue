@@ -126,7 +126,7 @@ import { validate } from 'uuid';
             newScenario.value = {
                 ...newScenario.value,
                 networkId: selectedNetworkId.value,
-                users: shared
+                users: shared.value
                     ? [
                           owner,
                           ...stateUsers.value

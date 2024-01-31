@@ -99,7 +99,6 @@
                                 class="ghd-checkbox"
                                 color="#2A578D"
                                 label="Allow Multi Budget Funding"
-                                :disabled="!hasAdminAccess"
                                 v-model="analysisMethod.shouldUseExtraFundsAcrossBudgets"
                                 @update:model-value='onSetAnalysisMethodProperty("shouldUseExtraFundsAcrossBudgets",$event)'/>
                         </v-col>

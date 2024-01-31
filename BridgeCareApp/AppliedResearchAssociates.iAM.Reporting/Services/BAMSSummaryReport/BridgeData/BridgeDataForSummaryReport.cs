@@ -372,19 +372,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var isInitialYear = true;
 
             Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new Dictionary<double, List<TreatmentConsiderationDetail>>();
-            var years = outputResults.Years; // TODO check reports if same then keep these changes else revert...
-
-            //foreach (var asset in outputResults.InitialAssetSummaries)
-            //{
-            //    var brKey = _reportHelper.CheckAndGetValue<double>(asset.ValuePerNumericAttribute, "BRKEY_");
-            //    var fundingCFYear = years.FirstOrDefault(_ => _.Assets.Any(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == brKey && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment));
-            //    if (fundingCFYear != null)
-            //    {
-            //        var fundingSection = fundingCFYear?.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == brKey && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment);
-            //        keyCashFlowFundingDetails.Add(brKey, fundingSection?.TreatmentConsiderations ?? new());
-            //    }
-            //}
-
             foreach (var yearlySectionData in outputResults.Years)
             {
                 _poorOnOffCount.Add(yearlySectionData.Year, (on: 0, off: 0));
@@ -458,20 +445,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         yearlySectionData.Year, index, worksheet, row, column);
 
                     // Work done in a year
-                    // Build keyCashFlowFundingDetails
-                    if (section.TreatmentStatus != TreatmentStatus.Applied)
+                    // Build keyCashFlowFundingDetails                    
+                    if(section.TreatmentStatus != TreatmentStatus.Applied)
                     {
                         var fundingSection = yearlySectionData.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment);
                         if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(section_BRKEY))
                         {
                             keyCashFlowFundingDetails.Add(section_BRKEY, fundingSection?.TreatmentConsiderations ?? new());
                         }
-                    }
+                    }                    
 
-                    // If TreatmentStatus Applied it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied ? section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY];
+                    // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
+                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                  section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY];
                     var appliedTreatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
-                    var cost = appliedTreatmentConsideration == null ? 0 : Math.Round(appliedTreatmentConsideration.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearlySectionData.Year).Sum(b => b.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis                    
+                    var cost = appliedTreatmentConsideration == null ? 0 : Math.Round(appliedTreatmentConsideration.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearlySectionData.Year)?.Sum(b => b.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis                    
                     var workCell = worksheet.Cells[row, column];
                     if (abbreviatedTreatmentNames.ContainsKey(section.AppliedTreatment))
                     {

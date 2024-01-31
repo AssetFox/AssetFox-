@@ -64,7 +64,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             var committedTreatments = new HashSet<string>();
-            var map = WorkTypeMap.Map;            
+            var map = WorkTypeMap.Map;
+            Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new Dictionary<double, List<TreatmentConsiderationDetail>>();
             foreach (var summaryData in workSummaryByBudgetData)
             {
                 foreach (var yearData in reportOutputData.Years)
@@ -73,9 +74,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     foreach (var section in assets)
                     {
                         var section_BRKEY = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
-                        var firstYearSection = reportOutputData.Years.First().Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY);
-                        var treatmentConsiderations = firstYearSection.TreatmentConsiderations;
-                        var budgetAmount = (double)treatmentConsiderations.Where(_ => _.TreatmentName == section.AppliedTreatment) // TODO is it correct?
+
+                        // Build keyCashFlowFundingDetails
+                        if (section.TreatmentStatus != TreatmentStatus.Applied)
+                        {
+                            var fundingSection = yearData.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment);
+                            if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(section_BRKEY))
+                            {
+                                keyCashFlowFundingDetails.Add(section_BRKEY, fundingSection?.TreatmentConsiderations ?? new());
+                            }
+                        }
+
+                        // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
+                        var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                      section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY];
+                        var budgetAmount = (double)treatmentConsiderations.Where(_ => _.TreatmentName == section.AppliedTreatment)
                                             .Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.
                                             Where(_ => _.BudgetName == summaryData.Budget && _.Year == yearData.Year).Sum(_ => _.AllocatedAmount) ?? 0);
 

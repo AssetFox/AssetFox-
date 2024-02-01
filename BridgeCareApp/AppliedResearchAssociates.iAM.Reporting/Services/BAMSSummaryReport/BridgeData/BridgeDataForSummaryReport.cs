@@ -371,7 +371,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var index = 1; // to track the initial section from rest of the years
             var isInitialYear = true;
 
-            Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new Dictionary<double, List<TreatmentConsiderationDetail>>();
+            Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
             foreach (var yearlySectionData in outputResults.Years)
             {
                 _poorOnOffCount.Add(yearlySectionData.Year, (on: 0, off: 0));

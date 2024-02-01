@@ -315,6 +315,8 @@ public sealed class SimulationRunner
 
     internal IReadOnlyDictionary<string, NumberAttribute> NumberAttributeByName { get; private set; }
 
+    internal Func<TreatmentOption, double> ObjectiveFunction { get; private set; }
+
     internal double GetInflationFactor(int year) => Simulation.InvestmentPlan.GetInflationFactor(year);
 
     internal void ReportProgress(ProgressStatus progressStatus, double percentComplete = 0, int? year = null) => OnProgress(new ProgressEventArgs(progressStatus, percentComplete, year));
@@ -348,8 +350,6 @@ public sealed class SimulationRunner
     private IReadOnlyCollection<ConditionActual> DeficientConditionActuals = Array.Empty<ConditionActual>();
 
     private SimulationMessageBuilder MessageBuilder;
-
-    private Func<TreatmentOption, double> ObjectiveFunction;
 
     private ICollection<AssetContext> AssetContexts;
 
@@ -568,16 +568,29 @@ public sealed class SimulationRunner
     private IReadOnlyCollection<TreatmentOption> GetBeneficialTreatmentOptionsInOptimalOrder(IEnumerable<AssetContext> contexts, int year)
     {
         var treatmentOptionsBag = new ConcurrentBag<TreatmentOption>();
-        void addTreatmentOptions(AssetContext context)
+
+        InParallel(contexts, addTreatmentOptionsToBag);
+
+        var treatmentOptions = treatmentOptionsBag.OrderByDescending(option => option.WeightedObjectiveValue).ToArray();
+
+        treatmentOptionsBag.Clear();
+        treatmentOptionsBag = null;
+
+        return treatmentOptions;
+
+        // --- local functions ---
+
+        void addTreatmentOptionsToBag(AssetContext context)
         {
+            context.Detail.SpatialWeightForOptions = context.GetSpatialWeight();
+
             if (context.YearIsWithinShadowForAnyTreatment(year))
             {
-                var rejections = ActiveTreatments.Select(treatment => new TreatmentRejectionDetail(
-                    treatment.Name,
-                    TreatmentRejectionReason.WithinShadowForAnyTreatment,
-                    getBenefitImprovement(context, treatment)));
+                foreach (var treatment in ActiveTreatments)
+                {
+                    addRejection(context, treatment, TreatmentRejectionReason.WithinShadowForAnyTreatment);
+                }
 
-                context.Detail.TreatmentRejections.AddRange(rejections);
                 return;
             }
 
@@ -590,21 +603,14 @@ public sealed class SimulationRunner
                 {
                     if (convertedCost < Simulation.InvestmentPlan.MinimumProjectCostLimit)
                     {
-                        context.Detail.TreatmentRejections.Add(new(
-                            treatment.Name,
-                            TreatmentRejectionReason.CostIsBelowMinimumProjectCostLimit,
-                            getBenefitImprovement(context, treatment)));
-
+                        addRejection(context, treatment, TreatmentRejectionReason.CostIsBelowMinimumProjectCostLimit);
                         return true;
                     }
 
                     return false;
                 }
 
-                context.Detail.TreatmentRejections.Add(new(
-                    treatment.Name,
-                    TreatmentRejectionReason.InvalidCost,
-                    getBenefitImprovement(context, treatment)));
+                addRejection(context, treatment, TreatmentRejectionReason.InvalidCost);
 
                 var messageBuilder = SimulationLogMessageBuilders.InvalidTreatmentCost(
                     context.Asset,
@@ -631,102 +637,117 @@ public sealed class SimulationRunner
                     year,
                     remainingLifeCalculatorFactories);
 
+                List<TreatmentOption> optionsToBundle;
+                Action<TreatmentOption> addOption;
+                if (Simulation.ShouldBundleFeasibleTreatments)
+                {
+                    optionsToBundle = new();
+                    addOption = optionsToBundle.Add;
+                }
+                else
+                {
+                    optionsToBundle = null;
+                    addOption = treatmentOptionsBag.Add;
+                }
+
                 foreach (var treatment in feasibleTreatments)
+                {
+                    evaluateTreatmentOutlook(treatment, addOption);
+                }
+
+                if (Simulation.ShouldBundleFeasibleTreatments)
+                {
+                    if (optionsToBundle.Count == 1)
+                    {
+                        treatmentOptionsBag.Add(optionsToBundle[0]);
+                    }
+                    else if (optionsToBundle.Count > 1)
+                    {
+                        var bundle = new TreatmentBundle(optionsToBundle.Select(option => option.CandidateTreatment));
+                        evaluateTreatmentOutlook(bundle, treatmentOptionsBag.Add);
+                    }
+                }
+
+                void evaluateTreatmentOutlook(Treatment treatment, Action<TreatmentOption> acceptOption)
                 {
                     var outlook = new TreatmentOutlook(this, context, treatment, year, remainingLifeCalculatorFactories);
                     var option = outlook.GetOptionRelativeToBaseline(baselineOutlook);
-                    treatmentOptionsBag.Add(option);
 
-                    context.Detail.TreatmentOptions.Add(option.Detail);
+                    if (option.WeightedObjectiveValue > 0)
+                    {
+                        context.Detail.TreatmentOptions.Add(option.Detail);
+                        acceptOption(option);
+                    }
+                    else
+                    {
+                        addRejection(context, treatment, TreatmentRejectionReason.NonPositiveObjectiveValue);
+                    }
                 }
-            }
-
-            HashSet<Treatment> getFeasibleTreatments(AssetContext context, int year)
-            {
-                var treatments = ActiveTreatments.ToHashSet();
-
-                _ = treatments.RemoveWhere(treatment =>
-                {
-                    var isRejected = context.YearIsWithinShadowForSameTreatment(year, treatment);
-                    if (isRejected)
-                    {
-                        context.Detail.TreatmentRejections.Add(new(
-                            treatment.Name,
-                            TreatmentRejectionReason.WithinShadowForSameTreatment,
-                            getBenefitImprovement(context, treatment)));
-                    }
-
-                    return isRejected;
-                });
-
-                _ = treatments.RemoveWhere(treatment =>
-                {
-                    var isFeasible = treatment.IsFeasible(context);
-                    if (!isFeasible)
-                    {
-                        context.Detail.TreatmentRejections.Add(new(
-                            treatment.Name,
-                            TreatmentRejectionReason.NotFeasible,
-                            getBenefitImprovement(context, treatment)));
-                    }
-
-                    return !isFeasible;
-                });
-
-                var supersededTreatmentsQuery =
-                    from treatment in treatments
-                    from supersedeRule in treatment.SupersedeRules
-                    where supersedeRule.Criterion.EvaluateOrDefault(context)
-                    select supersedeRule.Treatment;
-
-                var supersededTreatments = supersededTreatmentsQuery.ToHashSet();
-
-                _ = treatments.RemoveWhere(treatment =>
-                {
-                    var isSuperseded = supersededTreatments.Contains(treatment);
-                    if (isSuperseded)
-                    {
-                        context.Detail.TreatmentRejections.Add(new(
-                            treatment.Name,
-                            TreatmentRejectionReason.Superseded,
-                            getBenefitImprovement(context, treatment)));
-                    }
-
-                    return isSuperseded;
-                });
-
-                if (treatments.Count > 1 && Simulation.ShouldBundleFeasibleTreatments)
-                {
-                    var bundle = new TreatmentBundle(treatments);
-                    return new() { bundle };
-                }
-
-                return treatments.ToHashSet<Treatment>();
-            }
-
-            static double getBenefitImprovement(AssetContext context, Treatment treatment)
-            {
-                var copyOfContext = new AssetContext(context);
-                var beforeTreatment = copyOfContext.GetBenefitData();
-                copyOfContext.ApplyTreatmentConsequences(treatment);
-                var afterTreatment = copyOfContext.GetBenefitData();
-                return afterTreatment.lruBenefit - beforeTreatment.lruBenefit;
             }
         }
 
-        InParallel(contexts, addTreatmentOptions);
+        HashSet<Treatment> getFeasibleTreatments(AssetContext context, int year)
+        {
+            var treatments = ActiveTreatments.ToHashSet();
 
-        var treatmentOptions = treatmentOptionsBag
-            .Select(option => (option, value: ObjectiveFunction(option)))
-            .Where(_ => _.value > 0)
-            .OrderByDescending(_ => _.value * _.option.Context.GetSpatialWeight())
-            .Select(_ => _.option)
-            .ToArray();
+            _ = treatments.RemoveWhere(treatment =>
+            {
+                var isRejected = context.YearIsWithinShadowForSameTreatment(year, treatment);
+                if (isRejected)
+                {
+                    addRejection(context, treatment, TreatmentRejectionReason.WithinShadowForSameTreatment);
+                }
 
-        treatmentOptionsBag.Clear();
-        treatmentOptionsBag = null;
+                return isRejected;
+            });
 
-        return treatmentOptions;
+            _ = treatments.RemoveWhere(treatment =>
+            {
+                var isFeasible = treatment.IsFeasible(context);
+                if (!isFeasible)
+                {
+                    addRejection(context, treatment, TreatmentRejectionReason.NotFeasible);
+                }
+
+                return !isFeasible;
+            });
+
+            var supersededTreatmentsQuery =
+                from treatment in treatments
+                from supersedeRule in treatment.SupersedeRules
+                where supersedeRule.Criterion.EvaluateOrDefault(context)
+                select supersedeRule.Treatment;
+
+            var supersededTreatments = supersededTreatmentsQuery.ToHashSet();
+
+            _ = treatments.RemoveWhere(treatment =>
+            {
+                var isSuperseded = supersededTreatments.Contains(treatment);
+                if (isSuperseded)
+                {
+                    addRejection(context, treatment, TreatmentRejectionReason.Superseded);
+                }
+
+                return isSuperseded;
+            });
+
+            return treatments.ToHashSet<Treatment>();
+        }
+
+        static void addRejection(AssetContext context, Treatment treatment, TreatmentRejectionReason rejectionReason)
+        {
+            var conditionChange = getConditionChange(context, treatment);
+            context.Detail.TreatmentRejections.Add(new(treatment.Name, rejectionReason, conditionChange));
+        }
+
+        static double getConditionChange(AssetContext context, Treatment treatment)
+        {
+            var copyOfContext = new AssetContext(context);
+            var beforeTreatment = copyOfContext.GetBenefitData();
+            copyOfContext.ApplyTreatmentConsequences(treatment);
+            var afterTreatment = copyOfContext.GetBenefitData();
+            return afterTreatment.lruBenefit - beforeTreatment.lruBenefit;
+        }
     }
 
     private IReadOnlyCollection<ConditionActual> GetDeficientConditionActuals()

@@ -8,7 +8,12 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 /// </summary>
 public sealed class TreatmentOptionDetail
 {
-    public TreatmentOptionDetail(string treatmentName, double cost, double benefit, double? remainingLife, double conditionChange)
+    public TreatmentOptionDetail(
+        string treatmentName,
+        double cost,
+        double benefit,
+        double? remainingLife,
+        double conditionChange)
     {
         if (string.IsNullOrWhiteSpace(treatmentName))
         {
@@ -23,8 +28,8 @@ public sealed class TreatmentOptionDetail
     }
 
     /// <summary>
-    ///     The benefit of applying this treatment as calculated by the difference between the do
-    ///     nothing option and the resulting value of the benefit attribute if the treatment was applied.
+    ///     The benefit of applying this treatment as calculated by the difference between the
+    ///     do-nothing option and the resulting value of the benefit attribute if the treatment was applied.
     /// </summary>
     public double Benefit { get; }
 
@@ -39,7 +44,7 @@ public sealed class TreatmentOptionDetail
     public double Cost { get; }
 
     /// <summary>
-    ///     The remaining lift of the asset if the treatment is applied.
+    ///     The remaining life of the asset if the treatment is applied.
     /// </summary>
     public double? RemainingLife { get; }
 

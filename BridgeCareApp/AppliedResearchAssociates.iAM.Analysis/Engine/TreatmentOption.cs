@@ -12,6 +12,11 @@ internal sealed class TreatmentOption
         Benefit = benefit;
         RemainingLife = remainingLife;
         ConditionChange = conditionChange;
+
+        var unweightedObjectiveValue = context.SimulationRunner.ObjectiveFunction(this);
+        var spatialWeight = context.Detail.SpatialWeightForOptions ?? double.NaN;
+
+        WeightedObjectiveValue = unweightedObjectiveValue * spatialWeight;
     }
 
     public double Benefit { get; }
@@ -24,7 +29,9 @@ internal sealed class TreatmentOption
 
     public double Cost { get; }
 
-    public TreatmentOptionDetail Detail => new TreatmentOptionDetail(CandidateTreatment.Name, Cost, Benefit, RemainingLife, ConditionChange);
+    public TreatmentOptionDetail Detail => new(CandidateTreatment.Name, Cost, Benefit, RemainingLife, ConditionChange);
 
     public double? RemainingLife { get; }
+
+    public double WeightedObjectiveValue { get; }
 }

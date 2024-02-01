@@ -570,21 +570,25 @@ const tab = ref<any>(null);
     function onParseRawSubCriteria() {
         activeTab = 'tree-view';
         resetSubCriteriaValidationProperties();
-        //TODO
-        //const parsedRawSubCriteria = parseCriteriaString(selectedRawSubCriteriaClause);
-        const parsedRawSubCriteria = convertCriteriaExpressionToCriteriaObject(
-            selectedRawSubCriteriaClause.value,
-            addErrorNotificationAction,
-        );
-        if (parsedRawSubCriteria && selectedRawSubCriteriaClause.value != '') {
-            selectedSubCriteriaClause.value = parsedRawSubCriteria;
-            if (!hasValue(selectedSubCriteriaClause.value.logicalOperator)) {
-                selectedSubCriteriaClause.value.logicalOperator = 'OR';
-            }
-        } else {
-            invalidSubCriteriaMessage.value =
-                'The raw criteria string is invalid';
+        selectedSubCriteriaClause.value = null;
+        setTimeout(() => {
+             //TODO
+            //const parsedRawSubCriteria = parseCriteriaString(selectedRawSubCriteriaClause);
+            const parsedRawSubCriteria = convertCriteriaExpressionToCriteriaObject(
+                selectedRawSubCriteriaClause.value,
+                addErrorNotificationAction,
+            );
+            if (parsedRawSubCriteria && selectedRawSubCriteriaClause.value != '') {
+                selectedSubCriteriaClause.value = parsedRawSubCriteria;
+                if (!hasValue(selectedSubCriteriaClause.value.logicalOperator)) {
+                    selectedSubCriteriaClause.value.logicalOperator = 'OR';
+                }
+            } else {
+                invalidSubCriteriaMessage.value =
+                    'The raw criteria string is invalid';
         }
+        })
+       
     }
 
     function onParseSubCriteriaJson() {

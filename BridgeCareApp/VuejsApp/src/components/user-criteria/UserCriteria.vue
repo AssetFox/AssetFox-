@@ -218,8 +218,8 @@ const filteredUsersCriteriaFilter = computed(() => {
     { title: 'User', align: 'left', sortable: true, key: 'userName' },
     { title: 'Criteria Filter', sortable: true, key: 'criteria' },
     { title: '', align: 'right', sortable: false, key: 'actions' },
-    { title: 'Name', align: 'Left', sortable: false, key: 'name' },
-    { title: 'Description', align: 'Left', sortable: false, key: 'description' }
+    { title: 'Name', align: 'Left', sortable: true, key: 'name' },
+    { title: 'Description', align: 'Left', sortable: true, key: 'description' }
   ];
 
   let unassignedUsers: User[]=[];

@@ -412,7 +412,14 @@ const tab = ref<any>(null);
         subCriteriaClauses.value = [];
         subCriterias = [];
         if (hasValue(mainCriteria) && hasValue(mainCriteria.children)) {          
-            mainCriteria.children!.forEach((criteriaType: CriteriaType) => {
+            if(mainCriteria.children!.every(_ => _.type === 'query-builder-rule') || mainCriteria.logicalOperator === 'AND')
+            {
+                let criteriaType: CriteriaType = {
+                    id: getNewGuid(),
+                    type: "query-builder-group",
+                    query: {children: clone(mainCriteria.children), logicalOperator: mainCriteria.logicalOperator}
+                }
+
                 const clause: string = convertCriteriaTypeObjectToCriteriaExpression(
                     criteriaType,
                 );
@@ -420,7 +427,17 @@ const tab = ref<any>(null);
                     subCriteriaClauses.value.push(clause);
                     subCriterias.push(clone(criteriaType))
                 }
-            });
+            }
+            else
+                mainCriteria.children!.forEach((criteriaType: CriteriaType) => {
+                    const clause: string = convertCriteriaTypeObjectToCriteriaExpression(
+                        criteriaType,
+                    );
+                    if (hasValue(clause)) {
+                        subCriteriaClauses.value.push(clause);
+                        subCriterias.push(clone(criteriaType))
+                    }
+                });
         }
     }
 

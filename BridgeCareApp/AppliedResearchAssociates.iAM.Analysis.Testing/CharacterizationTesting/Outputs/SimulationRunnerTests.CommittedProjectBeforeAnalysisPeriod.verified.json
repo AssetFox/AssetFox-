@@ -27,6 +27,7 @@
         {
           "ProjectSource": null,
           "AppliedTreatment": "Forget about it",
+          "SpatialWeightForOptions": 1,
           "TreatmentCause": "NoSelection",
           "TreatmentConsiderations": [],
           "TreatmentFundingIgnoresSpendingLimit": false,

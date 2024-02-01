@@ -20,6 +20,7 @@
         {
           "ProjectSource": null,
           "AppliedTreatment": "Bundle[Lovecraftian Horror #1|Lovecraftian Horror #2]",
+          "SpatialWeightForOptions": null,
           "TreatmentCause": "CommittedProject",
           "TreatmentConsiderations": [
             {

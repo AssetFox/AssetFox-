@@ -33,7 +33,7 @@ public sealed class AssetDetail : AssetSummaryDetail
     ///     This asset's spatial weight that adjusts the unweighted objective value of a treatment
     ///     option to determine overall consideration order among all assets' treatment options.
     /// </summary>
-    public double? SpatialWeightForOptionOrdering { get; set; }
+    public double? SpatialWeightForOrderingOptions { get; set; }
 
     /// <summary>
     ///     Reason the treatment was applied.
@@ -75,7 +75,7 @@ public sealed class AssetDetail : AssetSummaryDetail
         ProjectSource = original.ProjectSource;
 
         AppliedTreatment = original.AppliedTreatment;
-        SpatialWeightForOptionOrdering = original.SpatialWeightForOptionOrdering;
+        SpatialWeightForOrderingOptions = original.SpatialWeightForOrderingOptions;
         TreatmentCause = original.TreatmentCause;
         TreatmentStatus = original.TreatmentStatus;
         TreatmentFundingIgnoresSpendingLimit = original.TreatmentFundingIgnoresSpendingLimit;

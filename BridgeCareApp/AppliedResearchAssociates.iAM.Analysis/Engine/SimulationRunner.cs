@@ -582,7 +582,7 @@ public sealed class SimulationRunner
 
         void addTreatmentOptionsToBag(AssetContext context)
         {
-            context.Detail.SpatialWeightForOptionOrdering = context.GetSpatialWeight();
+            context.Detail.SpatialWeightForOrderingOptions = context.GetSpatialWeight();
 
             if (context.YearIsWithinShadowForAnyTreatment(year))
             {

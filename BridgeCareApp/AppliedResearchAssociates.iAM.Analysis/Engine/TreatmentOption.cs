@@ -14,7 +14,7 @@ internal sealed class TreatmentOption
         ConditionChange = conditionChange;
 
         var unweightedObjectiveValue = context.SimulationRunner.ObjectiveFunction(this);
-        var spatialWeight = context.Detail.SpatialWeightForOptions ?? double.NaN;
+        var spatialWeight = context.Detail.SpatialWeightForOptionOrdering ?? double.NaN;
 
         WeightedObjectiveValue = unweightedObjectiveValue * spatialWeight;
     }

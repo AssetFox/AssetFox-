@@ -8,9 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport;
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
-using Microsoft.VisualBasic;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
@@ -37,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
         }
 
         private void FillDynamicDataInWorkSheet(SimulationOutput simulationOutput, ExcelWorksheet treatmentsWorksheet, CurrentCell currentCell, Guid simulationId, Guid networkId, IReadOnlyCollection<SelectableTreatment> treatments, List<MaintainableAsset> networkMaintainableAssets)
-        {   
+        {
             foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
             {
                 var assetId = initialAssetSummary.AssetId;
@@ -56,7 +54,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
 
                     // Fill in excel
                     currentCell = FillDataInWorksheet(treatmentsWorksheet, treatmentDataModel, currentCell);
-                }                
+                }
             }
             ExcelHelper.ApplyBorder(treatmentsWorksheet.Cells[1, 1, currentCell.Row - 1, currentCell.Column]);
         }
@@ -151,10 +149,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             // TODO remove infinity condition once fix is available for such edge cases
             treatmentDataModel.RemainingLife = treatmentOption != null && treatmentOption.RemainingLife?.ToString() != "-∞" ? treatmentOption.RemainingLife : 0;
 
+            // Build keyCashFlowFundingDetails
             var crs = CheckGetTextValue(section.ValuePerTextAttribute, "CRS");
             if (section.TreatmentStatus != TreatmentStatus.Applied)
             {
-                var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(section.ValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment);
+                var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(section.ValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment);
                 if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
                 {
                     keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());

@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSAuditReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
@@ -54,6 +55,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
 
         private void FillDynamicDataInWorkSheet(SimulationOutput simulationOutput, HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, ExcelWorksheet decisionsWorksheet, CurrentCell currentCell)
         {
+            Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
             foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
             {
                 var CRS = _reportHelper.CheckAndGetValue<string>(initialAssetSummary.ValuePerTextAttribute, "CRS");
@@ -64,8 +66,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 var PAMSdecisionDataModel = GetInitialDecisionDataModel(currentAttributes, CRS, years.FirstOrDefault().Year - 1, initialAssetSummary);
                 FillInitialDataInWorksheet(decisionsWorksheet, PAMSdecisionDataModel, currentAttributes, currentCell.Row, 1);
 
-                var yearZeroRow = currentCell.Row++;
-                var firstYearSection = years.First().Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == CRS);
+                var yearZeroRow = currentCell.Row++;                
                 foreach (var year in years)
                 {
                     var section = year.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == CRS);
@@ -74,8 +75,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                         continue;
                     }
 
+                    // Build keyCashFlowFundingDetails
+                    var crs = CheckGetTextValue(section.ValuePerTextAttribute, "CRS");
+                    if (section.TreatmentStatus != TreatmentStatus.Applied)
+                    {
+                        var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(section.ValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment);
+                        if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
+                        {
+                            keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
+                        }
+                    }
+
                     // Generate data model                    
-                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, CRS, year, section, firstYearSection);
+                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, CRS, year, section, keyCashFlowFundingDetails);
 
                     // Fill in excel
                     currentCell = FillDataInWorksheet(decisionsWorksheet, decisionsDataModel, budgets.Count, currentAttributes, currentCell);
@@ -84,7 +96,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             }
         }
 
-        private PAMSDecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, string brKey, SimulationYearDetail year, AssetDetail section, AssetDetail firstYearSection)
+        private PAMSDecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, string brKey, SimulationYearDetail year, AssetDetail section, Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails)
         {
             var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, brKey, year.Year, section);
 
@@ -120,7 +132,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
                 decisionsTreatment.Selected = isCashFlowProject ? PAMSAuditReportConstants.CashFlow : (section.AppliedTreatment == treatment ? PAMSAuditReportConstants.Yes : PAMSAuditReportConstants.No);
 
-                var treatmentConsideration = firstYearSection.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
+                // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
+                var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                              section.TreatmentConsiderations : keyCashFlowFundingDetails[brKey];
+                var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
                 // AllocationMatrix includes cash flow funding of future years.
                 var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
                 var amountSpent = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.

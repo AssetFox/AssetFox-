@@ -8,6 +8,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSPBExport;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
+using Microsoft.VisualBasic;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
@@ -39,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             {
                 var assetId = initialAssetSummary.AssetId;
                 var years = simulationOutput.Years.OrderBy(yr => yr.Year);
-
+                Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
                 foreach (var year in years)
                 {
                     var section = year.Assets.FirstOrDefault(_ => _.AssetId == assetId);
@@ -49,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
                     }
 
                     // Generate data model                    
-                    var treatmentDataModel = GenerateTreatmentDataModel(assetId, year, section, simulationId, networkId, treatments, networkMaintainableAssets);
+                    var treatmentDataModel = GenerateTreatmentDataModel(assetId, year, section, simulationId, networkId, treatments, networkMaintainableAssets, keyCashFlowFundingDetails);
 
                     // Fill in excel
                     currentCell = FillDataInWorksheet(treatmentsWorksheet, treatmentDataModel, currentCell);
@@ -104,7 +107,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
 
         private static void SetDecimalFormat(ExcelRange cell) => ExcelHelper.SetCustomFormat(cell, ExcelHelperCellFormat.DecimalPrecision3);
 
-        private TreatmentDataModel GenerateTreatmentDataModel(Guid assetId, SimulationYearDetail year, AssetDetail section, Guid simulationId, Guid networkId, IReadOnlyCollection<SelectableTreatment> treatments, List<MaintainableAsset> networkMaintainableAssets)
+        private TreatmentDataModel GenerateTreatmentDataModel(Guid assetId, SimulationYearDetail year, AssetDetail section, Guid simulationId, Guid networkId, IReadOnlyCollection<SelectableTreatment> treatments, List<MaintainableAsset> networkMaintainableAssets, Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails)
         {
             var appliedTreatment = section.AppliedTreatment;
             TreatmentDataModel treatmentDataModel = new TreatmentDataModel
@@ -147,7 +150,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             treatmentDataModel.Benefit = treatmentOption != null ? treatmentOption.Benefit : 0;
             // TODO remove infinity condition once fix is available for such edge cases
             treatmentDataModel.RemainingLife = treatmentOption != null && treatmentOption.RemainingLife?.ToString() != "-∞" ? treatmentOption.RemainingLife : 0;
-            var treatmentConsideration = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == appliedTreatment);
+
+            var crs = CheckGetTextValue(section.ValuePerTextAttribute, "CRS");
+            if (section.TreatmentStatus != TreatmentStatus.Applied)
+            {
+                var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(section.ValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment);
+                if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
+                {
+                    keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
+                }
+            }
+
+            // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
+            var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                          section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
+            var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == appliedTreatment);
             treatmentDataModel.PriorityLevel = treatmentConsideration?.BudgetPriorityLevel;
 
             treatmentDataModel.TreatmentFundingIgnoresSpendingLimit = section.TreatmentFundingIgnoresSpendingLimit ? 1 : 0;

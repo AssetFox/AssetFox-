@@ -8,8 +8,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 {
@@ -55,6 +55,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
 
         private void FillDynamicDataInWorkSheet(SimulationOutput simulationOutput, HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, ExcelWorksheet decisionsWorksheet, CurrentCell currentCell)
         {
+            Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
+
             foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
             {
                 var brKey = CheckGetValue(initialAssetSummary.ValuePerNumericAttribute, "BRKEY_");
@@ -75,8 +77,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                         continue;
                     }
 
+                    if(brKey == 4565) { }
+
+                    // Build keyCashFlowFundingDetails                    
+                    if (section.TreatmentStatus != TreatmentStatus.Applied)
+                    {
+                        var fundingSection = year.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == brKey && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment);
+                        if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(brKey))
+                        {
+                            keyCashFlowFundingDetails.Add(brKey, fundingSection?.TreatmentConsiderations ?? new());
+                        }
+                    }
+
                     // Generate data model                    
-                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, brKey, year, section, firstYearSection);
+                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, brKey, year, section, keyCashFlowFundingDetails);
 
                     // Fill in excel
                     currentCell = FillDataInWorksheet(decisionsWorksheet, decisionsDataModel, budgets.Count, currentAttributes, familyId, currentCell);
@@ -85,7 +99,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             }
         }
 
-        private DecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, double brKey, SimulationYearDetail year, AssetDetail section, AssetDetail firstYearSection)
+        private DecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, double brKey, SimulationYearDetail year, AssetDetail section, Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails)
         {
             var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, brKey, year.Year, section);
 
@@ -108,23 +122,28 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             }
             decisionDataModel.BudgetLevels = budgetLevels;
 
+            if(brKey == 4565) { }
+
             // Treatments
             var isCashFlowProject = section.TreatmentCause == TreatmentCause.CashFlowProject;
             var decisionsTreatments = new List<DecisionTreatment>();
             foreach (var treatment in treatments)
             {
                 var decisionsTreatment = new DecisionTreatment();
-                var treatmentRejection = section.TreatmentRejections.FirstOrDefault(_ => _.TreatmentName == treatment);
-                decisionsTreatment.Feasible = isCashFlowProject ? "-" : (treatmentRejection == null ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No);
+                var treatmentRejection = section.TreatmentRejections.FirstOrDefault(_ => _.TreatmentName == treatment);                
                 var currentCIImprovement = Convert.ToDouble(decisionDataModel.CurrentAttributesValues.Last());                
                 var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == treatment);
+                decisionsTreatment.Feasible = isCashFlowProject ? "-" : (treatmentOption != null ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No);
                 decisionsTreatment.CIImprovement = treatmentOption?.ConditionChange;
                 decisionsTreatment.Cost = treatmentOption != null ? treatmentOption.Cost : 0;
                 decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
                 decisionsTreatment.Benefit = treatmentOption != null ? decisionsTreatment.BCRatio * decisionsTreatment.Cost : 0;
                 decisionsTreatment.Selected = isCashFlowProject ? BAMSAuditReportConstants.CashFlow : (section.AppliedTreatment == treatment ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No);
 
-                var treatmentConsideration = firstYearSection.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);               
+                // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
+                var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                              section.TreatmentConsiderations : keyCashFlowFundingDetails[brKey];
+                var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);               
                 // AllocationMatrix includes cash flow funding of future years.
                 var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
                 var amountSpent = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.

@@ -1365,13 +1365,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                         switch (projectSource)
                                         {
                                         case ProjectSourceDTO.Committed:
-                                            mpmsBudgetTotal += Convert.ToDecimal(budgetUsage.AllocatedAmount);
+                                            mpmsBudgetTotal += budgetUsage.AllocatedAmount;
                                             break;
                                         case ProjectSourceDTO.Maintenance:
-                                            sapBudgetTotal += Convert.ToDecimal(budgetUsage.AllocatedAmount);
+                                            sapBudgetTotal += budgetUsage.AllocatedAmount;
                                             break;
                                         case ProjectSourceDTO.ProjectBuilder:
-                                            projectBuilderBudgetTotal += Convert.ToDecimal(budgetUsage.AllocatedAmount);
+                                            projectBuilderBudgetTotal += budgetUsage.AllocatedAmount;
                                             break;
                                         }
                                     }

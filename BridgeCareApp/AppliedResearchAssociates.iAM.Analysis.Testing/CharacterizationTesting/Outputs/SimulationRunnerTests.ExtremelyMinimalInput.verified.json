@@ -20,6 +20,7 @@
         {
           "ProjectSource": null,
           "AppliedTreatment": "Eldritch wizardry",
+          "SpatialWeightForOrderingOptions": 1,
           "TreatmentCause": "SelectedTreatment",
           "TreatmentConsiderations": [
             {

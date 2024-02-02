@@ -1,5 +1,17 @@
 # Funding optimization <!-- omit in toc -->
 
+When deciding the general case of how to fund multiple treatments from multiple
+budgets, we use mathematical optimization. For certain input conditions, we can
+use a linear program to guarantee global optimality of the solution. Otherwise,
+we have to use a constraint program, which does not generally guarantee an
+optimal or even feasible solution. However, the structure of this particular
+problem is relatively simple, so constraint programming remains an appropriate
+and valuable tool.
+
+For some degenerate input conditions (e.g. unlimited spending, one budget, one
+treatment without carryover), we don't need to use mathematical optimization. In
+those cases, simple greedy algorithms produce optimal solutions.
+
 - [1. Input](#1-input)
   - [1.1. Given](#11-given)
   - [1.2. Derived](#12-derived)

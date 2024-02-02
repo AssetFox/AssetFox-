@@ -39,7 +39,7 @@
                             Proceed
                         </v-btn>
                     </v-row>
-                    <v-row justify-center v-if="!dialogDataPreChecks.choice">
+                    <v-row v-if="!dialogDataPreChecks.choice" style="padding-left: 35px">
                         <v-btn @click="onSubmit(false)" class="ara-blue-bg text-white">
                             OK
                         </v-btn>

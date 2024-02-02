@@ -77,8 +77,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                         continue;
                     }
 
-                    if(brKey == 4565) { }
-
                     // Build keyCashFlowFundingDetails                    
                     if (section.TreatmentStatus != TreatmentStatus.Applied)
                     {
@@ -121,8 +119,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 }
             }
             decisionDataModel.BudgetLevels = budgetLevels;
-
-            if(brKey == 4565) { }
 
             // Treatments
             var isCashFlowProject = section.TreatmentCause == TreatmentCause.CashFlowProject;

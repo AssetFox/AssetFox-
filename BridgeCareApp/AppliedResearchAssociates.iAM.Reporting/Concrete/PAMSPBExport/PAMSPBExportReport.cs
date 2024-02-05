@@ -167,6 +167,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var attributeDTOs = _unitOfWork.AttributeRepo.GetAttributes();
             var requiredAttributeIds = GetRequiredAttributeIds(attributeDTOs);
             var attributeDatumDTOs = _unitOfWork.AttributeDatumRepo.GetAllInNetwork(networkMaintainableAssetIds, requiredAttributeIds);
+            //Include treatments in simulation
+            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
 
             // Report
             using var excelPackage = new ExcelPackage(new FileInfo("PAMSPBExportReportData.xlsx"));

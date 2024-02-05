@@ -17,8 +17,9 @@ structures.
 Currently, the `DataTransfer` sub-namespace is geared only toward persistence of
 data explicitly used within the analysis engine. There are some properties on
 the current analysis input data structures that are not used within the analysis
-engine but are instead used elsewhere, e.g. by the reporting module. Such
-properties are currently not included on the types defined under `DataTransfer`.
+engine but are instead used elsewhere, e.g. by the reporting module. **Such
+properties are specifically and explicitly REQUIRED TO BE EXCLUDED from the
+types defined under `DataTransfer`.**
 
 **The `DataTransfer` types are not intended to provide persistence capability
 for anything other than the iAM analysis.** That being said, the `DataTransfer`

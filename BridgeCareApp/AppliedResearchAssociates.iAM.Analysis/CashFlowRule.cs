@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Analysis;
@@ -15,6 +16,7 @@ public sealed class CashFlowRule : WeakEntity, IValidator
     public string Name { get; set; }
 
     public string ShortDescription => Name;
+
     public ValidatorBag Subvalidators => new ValidatorBag { Criterion, DistributionRules };
 
     public ValidationResultBag GetDirectValidationResults()
@@ -29,6 +31,11 @@ public sealed class CashFlowRule : WeakEntity, IValidator
         if (DistributionRules.Count == 0)
         {
             results.Add(ValidationStatus.Error, "There are no distribution rules.", this, nameof(DistributionRules));
+        }
+
+        if (DistributionRules.GroupBy(rule => rule.CostCeiling).Any(group => group.Count() > 1))
+        {
+            results.Add(ValidationStatus.Error, "There are two or more distribution rules with the same cost ceiling.", this, nameof(DistributionRules));
         }
 
         return results;

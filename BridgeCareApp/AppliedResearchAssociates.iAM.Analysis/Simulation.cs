@@ -46,10 +46,16 @@ public sealed class Simulation : WeakEntity, IValidator
     public string ShortDescription => Name;
 
     /// <summary>
+    ///     Whether to always consider and apply all feasible treatments together, as a single
+    ///     "bundle" of treatments. This option exists to support a PAMS requirement.
+    /// </summary>
+    public bool ShouldBundleFeasibleTreatments { get; set; } = DefaultSettings.ShouldBundleFeasibleTreatments;
+
+    /// <summary>
     ///     Whether to always pre-apply the passive treatment just after deterioration. This
     ///     feature exists in order to provide v1-compatible analysis behavior.
     /// </summary>
-    public bool ShouldPreapplyPassiveTreatment { get; set; } = true;
+    public bool ShouldPreapplyPassiveTreatment { get; set; } = DefaultSettings.ShouldPreapplyPassiveTreatment;
 
     public ValidatorBag Subvalidators => new() { AnalysisMethod, CommittedProjects, InvestmentPlan, PerformanceCurves, Treatments };
 
@@ -115,22 +121,6 @@ public sealed class Simulation : WeakEntity, IValidator
             }
         }
 
-        if (CommittedProjects.Select(project => (project.Asset, project.Year)).Distinct().Count() < CommittedProjects.Count)
-        {
-            results.Add(ValidationStatus.Error, "Multiple projects are committed to the same asset in the same year.", this, nameof(CommittedProjects));
-        }
-        else if (InvestmentPlan.GetAllValidationResults(new List<string>()).All(result => result.Status != ValidationStatus.Error))
-        {
-            try
-            {
-                _ = GetBudgetContextsWithCostAllocationsForCommittedProjects();
-            }
-            catch (SimulationException e)
-            {
-                results.Add(ValidationStatus.Error, "At least one committed project cannot be funded: " + e.Message, this, nameof(CommittedProjects));
-            }
-        }
-
         return results;
     }
 
@@ -182,4 +172,11 @@ public sealed class Simulation : WeakEntity, IValidator
     private readonly List<PerformanceCurve> _PerformanceCurves = new();
     private readonly WeakReference<SimulationOutput> _Results = new(null);
     private readonly List<SelectableTreatment> _Treatments = new();
+
+    public static class DefaultSettings
+    {
+        public static bool ShouldBundleFeasibleTreatments { get; set; } = false;
+
+        public static bool ShouldPreapplyPassiveTreatment { get; set; } = true;
+    }
 }

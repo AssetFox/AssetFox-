@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.Reporting.Models;
 using MoreLinq;
 using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using static System.Collections.Specialized.BitVector32;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment
 {
@@ -146,17 +147,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
                 });
 
             var treatmentName = treatmentOption?.TreatmentName ?? treatmentConsideration.TreatmentName;
-            var treatmentCost = treatmentOption?.Cost ?? (double) treatmentConsideration.BudgetUsages.Sum(usage => usage.CoveredCost);
+            var treatmentCost = treatmentOption?.Cost ??
+                                (double)(treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_=>_.Year == year).Sum(b => b.AllocatedAmount) ?? 0);
 
-            var budget = section.TreatmentConsiderations
-                .Where(c => c.TreatmentName == treatmentName)
-                .FirstOrDefault(c => c.BudgetUsages.Any(b => b.Status is BudgetUsageStatus.CostCovered))
-                ?.BudgetUsages?.First(b => b.Status is BudgetUsageStatus.CostCovered);
-
-            var budgetName = budget?.BudgetName ?? string.Empty;
+            var budgetsUsed = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix
+                            .Where(_ => _.Year == year && _.TreatmentName == treatmentName && _.AllocatedAmount > 0)
+                            .Select(_ => _.BudgetName).Distinct().ToList()
+                            ?? new();
+            var budgetNames = budgetsUsed.Count > 0 ? string.Join(", ", budgetsUsed) : string.Empty;
 
             // Budget
-            worksheet.Cells[row, columnNo++].Value = budgetName;
+            worksheet.Cells[row, columnNo++].Value = budgetNames;
 
             // Treatment
             worksheet.Cells[row, columnNo++].Value = treatmentName;
@@ -282,6 +283,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
             var treatmentsPerSection = new SortedDictionary<int, List<FundedTreatmentReportInfo>>();
             var yearCountPerTreatment = new Dictionary<int, int>();
             var validFacilityIds = new List<int>();
+            Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new Dictionary<double, List<TreatmentConsiderationDetail>>();
             foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
             {
                 var treatedSections = year.Assets
@@ -295,15 +297,29 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
                 {
                     var id = Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(asset.ValuePerNumericAttribute, "BRKEY_"));
                     var treatmentOption = asset.TreatmentOptions.FirstOrDefault(o => o.TreatmentName == asset.AppliedTreatment);
-                    var treatmentConsideration = asset.TreatmentConsiderations.FirstOrDefault(c => c.TreatmentName == asset.AppliedTreatment);
+
+                    // Build keyCashFlowFundingDetails
+                    if (asset.TreatmentStatus != TreatmentStatus.Applied)
+                    {
+                        var fundingSection = year.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == id && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment);
+                        if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(id))
+                        {
+                            keyCashFlowFundingDetails.Add(id, fundingSection?.TreatmentConsiderations ?? new());
+                        }
+                    }
+
+                    // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
+                    var treatmentConsiderations = asset.TreatmentStatus == TreatmentStatus.Applied && asset.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                  asset.TreatmentConsiderations : keyCashFlowFundingDetails[id];
+                    var treatmentConsideration = treatmentConsiderations.FirstOrDefault(c => c.TreatmentName == asset.AppliedTreatment);
 
                     var isCashFlowed = asset.TreatmentCause == TreatmentCause.CashFlowProject ||
-                        asset.TreatmentConsiderations.Any(consideration =>
+                        treatmentConsiderations.Any(consideration =>
                             consideration.TreatmentName == asset.AppliedTreatment &&
                             consideration.CashFlowConsiderations.Any(cashFlow =>
-                                cashFlow.ReasonAgainstCashFlow is ReasonAgainstCashFlow.None or ReasonAgainstCashFlow.LastYearOfCashFlowIsOutsideOfAnalysisPeriod));
+                                cashFlow.ReasonAgainstCashFlow is ReasonAgainstCashFlow.None));
 
-                    var exceedsLastYear = isCashFlowed && asset.TreatmentConsiderations.Any(c => c.TreatmentName == asset.AppliedTreatment
+                    var exceedsLastYear = isCashFlowed && treatmentConsiderations.Any(c => c.TreatmentName == asset.AppliedTreatment
                         && c.CashFlowConsiderations.Any(flow => flow.ReasonAgainstCashFlow is ReasonAgainstCashFlow.LastYearOfCashFlowIsOutsideOfAnalysisPeriod));
 
                     if (treatmentsPerSection.ContainsKey(id))

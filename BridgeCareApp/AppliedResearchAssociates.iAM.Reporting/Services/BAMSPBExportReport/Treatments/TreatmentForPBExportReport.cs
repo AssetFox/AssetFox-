@@ -10,6 +10,8 @@ using AppliedResearchAssociates.iAM.Reporting.Common;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
 using OfficeOpenXml;
+using static System.Collections.Specialized.BitVector32;
+using static AppliedResearchAssociates.iAM.Analysis.Engine.FundingCalculationOutput;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Treatments
 {
@@ -123,6 +125,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
 
             if (reportOutputData?.Years?.Any() == true)
             {
+                Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
                 foreach (var yearObject in reportOutputData.Years)
                 {
                     //filter assets for no treatment records
@@ -138,12 +141,25 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                         foreach (var assetDetailObject in filteredAssetDetails)
                         {
                             rowNo++; columnNo = 1;
-
+                            var brKey = _reportHelper.CheckAndGetValue<double>(assetDetailObject.ValuePerNumericAttribute, "BRKEY_");
                             var bmsID = _reportHelper.CheckAndGetValue<string>(assetDetailObject.ValuePerTextAttribute, "BMSID"); //BMSID
                             if (!string.IsNullOrEmpty(bmsID) && !string.IsNullOrWhiteSpace(bmsID)) { bmsID = bmsID.PadLeft(14, '0'); } // chaeck and add padding to BMSID
 
+                            // Build keyCashFlowFundingDetails                    
+                            if (assetDetailObject.TreatmentStatus != TreatmentStatus.Applied)
+                            {
+                                var fundingSection = yearObject.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == brKey && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment);
+                                if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(brKey))
+                                {
+                                    keyCashFlowFundingDetails.Add(brKey, fundingSection?.TreatmentConsiderations ?? new());
+                                }
+                            }
+
                             //get budget usages
-                            var cost = Math.Round(assetDetailObject.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost)), 0); // Rounded cost to whole number based on comments from Jeff Davis
+                            // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
+                            var treatmentConsiderations = assetDetailObject.TreatmentStatus == TreatmentStatus.Applied && assetDetailObject.TreatmentCause != TreatmentCause.CashFlowProject ? assetDetailObject.TreatmentConsiderations : keyCashFlowFundingDetails[brKey];
+                            var appliedTreatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == assetDetailObject.AppliedTreatment);
+                            var cost = appliedTreatmentConsideration == null ? 0 : Math.Round(appliedTreatmentConsideration.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearObject.Year)?.Sum(b => b.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis
                             var appliedTreatment = assetDetailObject.AppliedTreatment ?? "";
 
                             SelectableTreatment treatment = null;
@@ -155,22 +171,28 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             if(treatmentOptions?.Count == 1) { treatmentOptionDetail = treatmentOptions.First(); }
 
                             TreatmentConsiderationDetail treatmentConsiderationDetail = null;
-                            var treatmentConsiderations = assetDetailObject.TreatmentConsiderations?.FindAll(_ => _.TreatmentName == appliedTreatment);
-                            if (treatmentConsiderations?.Count == 1) { treatmentConsiderationDetail = treatmentConsiderations.First(); }
+                            var treatmentConsiderations_ = treatmentConsiderations?.FindAll(_ => _.TreatmentName == appliedTreatment);
+                            if (treatmentConsiderations?.Count == 1) { treatmentConsiderationDetail = treatmentConsiderations_.First(); }
 
-                            var budgetUsages = new List<BudgetUsageDetail>();
-                            foreach (var item in treatmentConsiderations) {
-                                var budgetUsagesFiltered = item.BudgetUsages.Where(_ => _.Status == BudgetUsageStatus.CostCovered).ToList();
-                                if (budgetUsagesFiltered?.Any() == true) { budgetUsages.AddRange(budgetUsagesFiltered); }
+                            //get budget usages
+                            var allocations = new List<Allocation>();
+                            var allocationMatrices = treatmentConsiderations.Select(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearObject.Year)).ToList() ?? new();
+                            foreach (var allocationMatrix in allocationMatrices)
+                            {
+                                if (allocationMatrix != null && allocationMatrix.Any())
+                                {
+                                    allocations.AddRange(allocationMatrix);
+                                }
                             }
 
                             //check budget usages
                             var budgetName = "";
-                            if (budgetUsages?.Any() == true && cost > 0)
+                            if (allocationMatrices?.Any() == true && cost > 0)
                             {
-                                if (budgetUsages.Count == 1) //single budget
+                                var budgetNames = allocations.Select(_ => _.BudgetName).Distinct().ToList();
+                                if (allocationMatrices.Count == 1 && budgetNames.Count() == 1) //single budget
                                 {
-                                    budgetName = budgetUsages.First().BudgetName ?? ""; // Budget
+                                    budgetName = budgetNames.First() ?? ""; // Budget
                                     if (string.IsNullOrEmpty(budgetName) || string.IsNullOrWhiteSpace(budgetName))
                                     {
                                         budgetName = BAMSConstants.Unspecified_Budget;
@@ -180,12 +202,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                                 {
                                     //check for multi year budget
                                     var allowFundingFromMultipleBudgets = simulationObject?.AnalysisMethod?.AllowFundingFromMultipleBudgets ?? false;
-                                    if (allowFundingFromMultipleBudgets == true || budgetUsages.Count > 1)
+                                    if (allowFundingFromMultipleBudgets == true || budgetNames.Count > 1)
                                     {
-                                        foreach (var budgetUsage in budgetUsages)
+                                        foreach (var allocationBudgetName in budgetNames)
                                         {
-                                            var multiYearBudgetCost = budgetUsage.CoveredCost;
-                                            var multiYearBudgetName = budgetUsage.BudgetName ?? ""; // Budget;
+                                            var multiYearBudgetCost = allocations.Where(_ => _.BudgetName == allocationBudgetName).Sum(_ => _.AllocatedAmount);
+                                            var multiYearBudgetName = allocationBudgetName ?? ""; // Budget;
                                             if (string.IsNullOrEmpty(multiYearBudgetName) || string.IsNullOrWhiteSpace(multiYearBudgetName))
                                             {
                                                 multiYearBudgetName = BAMSConstants.Unspecified_Budget;
@@ -203,7 +225,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                                                     multiYearBudgetName += " (" + budgetAmountAbbrName + ")";
                                                 }
 
-                                                if (string.IsNullOrEmpty(budgetName) || string.IsNullOrWhiteSpace(budgetName))
+                                                if (string.IsNullOrEmpty(allocationBudgetName) || string.IsNullOrWhiteSpace(allocationBudgetName))
                                                 {
                                                     budgetName = multiYearBudgetName;
                                                 }

@@ -5,7 +5,10 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml.Style;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData
@@ -293,6 +296,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             if (outputResults.Years.Count > 0) { workDoneData = new List<int>(new int[outputResults.Years[0].Assets.Count]); }
 
             var isInitialYear = true;
+            Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
             foreach (var yearlySectionData in outputResults.Years)
             {
                 row = initialRow;
@@ -317,8 +321,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     }
 
                     // Work done and cost for the given year
+                    // Build keyCashFlowFundingDetails
+                    var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
+                    if (section.TreatmentStatus != TreatmentStatus.Applied)
+                    {
+                        var fundingSection = yearlySectionData.Assets.FirstOrDefault(_ => _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment);
+                        if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
+                        {
+                            keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
+                        }
+                    }
+
                     var treatmentDone = section.AppliedTreatment.ToLower() == PAMSConstants.NoTreatment ? "--" : section.AppliedTreatment;
-                    var sumCoveredCost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                    // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
+                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                  section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
+                    var sumCoveredCost = treatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearlySectionData.Year).Sum(b => b.AllocatedAmount));
 
                     worksheet.Cells[row, column].Value = treatmentDone;
                     worksheet.Cells[row, column + 1].Value = sumCoveredCost;
@@ -375,6 +393,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     column = currentCell.Column;
                     column = AddSimulationYearData(worksheet, row, column, null, section);
                     var initialColumnForShade = column;
+                    var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
 
                     AssetDetail prevYearSection = null;
                     if (!isInitialYear)
@@ -394,21 +413,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, section.ProjectSource); //Project Pick
                     }
 
-                    var treatmentConsiderations = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == section.AppliedTreatment);
-                    BudgetUsageDetail budgetUsage = null;
+                    // If TreatmentStatus Applied it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
+                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied ? section.TreatmentConsiderations : keyCashFlowFundingDetails[crs] ?? new();
+                    var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    var allocation = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == sectionData.Year).FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
 
-                    foreach (var item in treatmentConsiderations)
-                    {
-                        budgetUsage = item.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCovered);
-                    }
-
-                    var budgetName = budgetUsage == null ? "" : budgetUsage.BudgetName;
+                    var budgetName = allocation?.BudgetName ?? "";
 
                     worksheet.Cells[row, ++column].Value = budgetName; // Budget
                     worksheet.Cells[row, ++column].Value = section.AppliedTreatment; // Project
                     var columnForAppliedTreatment = column;
 
-                    var cost = treatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                    var cost = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.BudgetName == budgetName && _.Year == sectionData.Year).Sum(_ => _.AllocatedAmount);
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks

@@ -111,7 +111,7 @@ public sealed class Simulation : WeakEntity, IValidator
         {
             if (!Treatments.Contains(project.TemplateTreatment))
             {
-                results.Add(ValidationStatus.Error, "Simulation does not contain this template treatment.", project, nameof(project.TemplateTreatment));
+                results.Add(ValidationStatus.Error, "Simulation contains a treatment that is not found within the treatment list.", project, nameof(project.TemplateTreatment));
             }
         }
 

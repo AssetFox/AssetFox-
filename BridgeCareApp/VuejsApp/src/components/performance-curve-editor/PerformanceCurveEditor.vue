@@ -548,7 +548,7 @@ let stateScenarioPerformanceCurves = computed<PerformanceCurveLibrary[]>(() => s
 let stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributes);
 let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
 let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
-let currentUserCriteriaFilter = computed<UserCriteriaFilter>(() => store.state.userModule.currentUserCriteriaFilter);
+let currentUserCriteriaFilter = ref<UserCriteriaFilter>(store.state.userModule.currentUserCriteriaFilter);
 let hasPermittedAccess = computed<boolean>(() => store.state.performanceCurveModule.hasPermittedAccess);
 let isSharedLibrary = computed<boolean>(() => store.state.performanceCurveModule.isSharedLibrary);
 
@@ -562,7 +562,7 @@ async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await st
 async function updatePerformanceCurveCriterionLibrariesAction(payload?: any): Promise<any> {await store.dispatch('updatePerformanceCurvesCriterionLibraries', payload);}
 async function upsertOrDeletePerformanceCurveLibraryUsersAction(payload?: any): Promise<any> {await store.dispatch('upsertOrDeletePerformanceCurveLibraryUsers', payload);}
 async function importScenarioPerformanceCurvesFileAction(payload?: any): Promise<any> {await store.dispatch('importScenarioPerformanceCurvesFile', payload);}
-async function importLibraryPerformanceCurvesFileAction(payload?: any): Promise<any> {await store.dispatch('importLibraryPerformanceCurvesFileAction', payload);}
+async function importLibraryPerformanceCurvesFileAction(payload?: any): Promise<any> {await store.dispatch('importLibraryPerformanceCurvesFile', payload);}
 async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification', payload);}
 async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario', payload);}
 async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario', payload);}

@@ -7,8 +7,6 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml.Style;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData
@@ -85,7 +83,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
         }
 
 
-        public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData)
+        public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, bool shouldBundleFeasibleTreatments)
         {
             // Add data to excel.
             reportOutputData.Years.ForEach(_ => _simulationYears.Add(_.Year));
@@ -98,7 +96,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             }
 
             FillData(worksheet, reportOutputData, currentCell);
-            FillDynamicData(worksheet, reportOutputData, currentCell);
+            FillDynamicData(worksheet, reportOutputData, currentCell, shouldBundleFeasibleTreatments);
             worksheet.Cells.AutoFitColumns();
 
             const double minimumColumnWidth = 15;
@@ -283,7 +281,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             currentCell.Row = rowNo; currentCell.Column = columnNo;
         }
 
-        private void FillDynamicData(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell)
+        private void FillDynamicData(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell, bool shouldBundleFeasibleTreatments)
         {
             //initial row to populate data.
             const int initialRow = 4;
@@ -331,12 +329,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                             keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
                         }
                     }
-
-                    var treatmentDone = section.AppliedTreatment.ToLower() == PAMSConstants.NoTreatment ? "--" : section.AppliedTreatment;
+                                        
                     // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
                     var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
                                                   section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
                     var sumCoveredCost = treatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearlySectionData.Year).Sum(b => b.AllocatedAmount));
+                    var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    var treatmentName = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
+                    var treatmentDone = section.AppliedTreatment.ToLower() == PAMSConstants.NoTreatment ? "--" : section.AppliedTreatment;
 
                     worksheet.Cells[row, column].Value = treatmentDone;
                     worksheet.Cells[row, column + 1].Value = sumCoveredCost;
@@ -416,15 +416,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     // If TreatmentStatus Applied it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
                     var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied ? section.TreatmentConsiderations : keyCashFlowFundingDetails[crs] ?? new();
                     var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
-                    var allocation = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == sectionData.Year).FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == sectionData.Year);                   
 
-                    var budgetName = allocation?.BudgetName ?? "";
-
+                    var budgetNames = allocationMatrix?.Where(_ => _.Year == sectionData.Year).Select(_ => _.BudgetName).Distinct().ToList() ?? new();
+                    var budgetName = string.Join(",", budgetNames);
                     worksheet.Cells[row, ++column].Value = budgetName; // Budget
-                    worksheet.Cells[row, ++column].Value = section.AppliedTreatment; // Project
+                    var project = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
+                    worksheet.Cells[row, ++column].Value = project;
                     var columnForAppliedTreatment = column;
 
-                    var cost = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.BudgetName == budgetName && _.Year == sectionData.Year).Sum(_ => _.AllocatedAmount);
+                    var cost = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == sectionData.Year).Sum(_ => _.AllocatedAmount);
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
@@ -467,7 +468,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
             return column;
         }
-
 
         private void TrackInitialYearDataForParametersTAB(AssetSummaryDetail initialSection)
         {

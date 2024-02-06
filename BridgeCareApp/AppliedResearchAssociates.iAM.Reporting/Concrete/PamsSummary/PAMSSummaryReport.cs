@@ -228,7 +228,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
             var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
-            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
+            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatmentsForReport(simulation);
             _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
 
             var yearlyBudgetAmount = new Dictionary<string, Budget>();
@@ -246,7 +246,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             //get treatment category lookup
             var treatmentCategoryLookup = new Dictionary<string, string>();
-            var treatmentList = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            var treatmentList = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatmentsWithCriterionLibrary(simulationId);
             if (treatmentList?.Any() == true)
             {
 
@@ -295,8 +295,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             reportDetailDto.Status = $"Creating Pams Data TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            var worksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PAMSData_Tab);
-            var workSummaryModel = _pamsDataForSummaryReport.Fill(worksheet, reportOutputData);
+            var worksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PAMSData_Tab);            
+            var workSummaryModel = _pamsDataForSummaryReport.Fill(worksheet, reportOutputData, simulation.ShouldBundleFeasibleTreatments);
 
             checkCancelled(cancellationToken, simulationId);
             //Filling up parameters tab

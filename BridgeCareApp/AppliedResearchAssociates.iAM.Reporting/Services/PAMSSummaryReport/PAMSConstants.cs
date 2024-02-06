@@ -84,5 +84,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
         public const string Fair = "Fair";
         public const string Good = "Good";        
         public const string Excellent = "Excellent";
+
+        public const string Bundled = "Bundled";
     }
 }

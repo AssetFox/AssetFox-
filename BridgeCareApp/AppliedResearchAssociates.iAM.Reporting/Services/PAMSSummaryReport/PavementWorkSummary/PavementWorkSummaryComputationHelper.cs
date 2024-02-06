@@ -95,9 +95,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     PopulateTreatmentCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentPerYear);
                     PopulateTreatmentGroupCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentGroupPerYear);
                     var appliedTreatment = section.AppliedTreatment;
-                    var treatmentCategory = treatmentCategoryLookup[appliedTreatment];
+                    var treatmentCategory = section.AppliedTreatment.Contains("Bundle") ? PAMSConstants.Bundled : treatmentCategoryLookup[appliedTreatment];
                     if (section.TreatmentCause == TreatmentCause.CommittedProject &&
-                        appliedTreatment.ToLower() != BAMSConstants.NoTreatment)
+                        appliedTreatment.ToLower() != PAMSConstants.NoTreatment)
                     {
                         var commitedCost = section.TreatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearData.Year).Sum(b => b.AllocatedAmount) ?? 0);
 

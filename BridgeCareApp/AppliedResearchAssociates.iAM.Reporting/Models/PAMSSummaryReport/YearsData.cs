@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport
         public int Year { get; set; }
 
         public string TreatmentName { get; set; }
-        public TreatmentCategory TreatmentCategory { get; set; }
+        public string TreatmentCategory { get; set; }
         public AssetCategories AssetType { get; set; }
         public int SurfaceId { get; set; }
         public string ProjectSource { get; set; }

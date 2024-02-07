@@ -12,6 +12,7 @@ const state = {
     stringAttributes: [] as Attribute[],
     numericAttributes: [] as Attribute[],
     attributesSelectValues: [] as AttributeSelectValues[],
+    checkedSelectAttributes: [] as string[],
     attributeDataSourceTypes: [] as string[],
     aggregationRules: [] as RuleDefinition[],
     aggregationRulesForType: [] as string[]
@@ -64,6 +65,9 @@ const mutations = {
     attributesSelectValuesMutator(state: any, attributesSelectValues: AttributeSelectValues[]) {
         state.attributesSelectValues = [...state.attributesSelectValues, ...attributesSelectValues];
     },
+    checkedSelectAttributeMutator(state: any, checkedSelectAttributes: string[]) {
+        state.checkedSelectAttributes = [...state.checkedSelectAttributes, ...checkedSelectAttributes];
+    },
     attributeAggregationRulesMutator(state: any, aggregationRules: RuleDefinition[]) {
         state.aggregationRules = clone(aggregationRules);
     },
@@ -108,6 +112,7 @@ const actions = {
                     });
 
                     commit('attributesSelectValuesMutator', attributesSelectValues);
+                    commit('checkedSelectAttributeMutator', payload.attributeNames);
 
                     if (hasValue(warningMessages)) {
                     dispatch('addWarningNotification', {

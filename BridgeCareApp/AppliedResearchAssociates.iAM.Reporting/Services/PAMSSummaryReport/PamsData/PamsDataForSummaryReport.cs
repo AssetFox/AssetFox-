@@ -6,7 +6,9 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
+using MathNet.Numerics.Random;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.Style;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData
@@ -316,27 +318,28 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                             .Assets.FirstOrDefault(_ => _.AssetName == section.AssetName);
                         previousYearCause = prevYearSection.TreatmentCause;
                         previousYearTreatment = prevYearSection.AppliedTreatment;
-                    }
+                    }                    
 
                     // Work done and cost for the given year
                     // Build keyCashFlowFundingDetails
                     var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
+
                     if (section.TreatmentStatus != TreatmentStatus.Applied)
                     {
-                        var fundingSection = yearlySectionData.Assets.FirstOrDefault(_ => _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment);
+                        var fundingSection = yearlySectionData.Assets.FirstOrDefault(_ => _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment && _.AppliedTreatment == section.AppliedTreatment);
                         if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
                         {
                             keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
                         }
                     }
-                                        
+
                     // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
                     var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
                                                   section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
-                    var sumCoveredCost = treatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearlySectionData.Year).Sum(b => b.AllocatedAmount));
-                    var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    var sumCoveredCost = treatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount));
+                    var treatmentConsideration = treatmentConsiderations.FirstOrDefault();// _ => _.TreatmentName == section.AppliedTreatment);
                     var treatmentName = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
-                    var treatmentDone = section.AppliedTreatment.ToLower() == PAMSConstants.NoTreatment ? "--" : section.AppliedTreatment;
+                    var treatmentDone = section.AppliedTreatment.ToLower() == PAMSConstants.NoTreatment ? "--" : treatmentName;
 
                     worksheet.Cells[row, column].Value = treatmentDone;
                     worksheet.Cells[row, column + 1].Value = sumCoveredCost;
@@ -348,6 +351,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                             ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.LightGray);
                         }
                     }
+
+                    if (section.TreatmentCause == TreatmentCause.CashFlowProject)
+                    {
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, column, row, column + 1], Color.FromArgb(255, 0, 0));
+
+                        // Color the previous year project also
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, column - 2, row, column - 1], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, column - 2, row, column - 1], Color.FromArgb(255, 0, 0));
+                    }
+
                     ExcelHelper.ApplyLeftBorder(worksheet.Cells[row, column]);
                     ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column + 1]);
                     row++;
@@ -406,7 +420,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     {
                         var cashFlowMap = MappingContent.GetCashFlowProjectPick(section.TreatmentCause, prevYearSection);
                         worksheet.Cells[row, ++column].Value = cashFlowMap.currentPick; //Project Pick
-                        worksheet.Cells[row, column - 16].Value = cashFlowMap.previousPick; //Project Pick previous year
+                        worksheet.Cells[row, column - 10].Value = cashFlowMap.previousPick; //Project Pick previous year
                     }
                     else
                     {
@@ -414,18 +428,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     }
 
                     // If TreatmentStatus Applied it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied ? section.TreatmentConsiderations : keyCashFlowFundingDetails[crs] ?? new();
-                    var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
-                    var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == sectionData.Year);                   
+                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                  section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
 
-                    var budgetNames = allocationMatrix?.Where(_ => _.Year == sectionData.Year).Select(_ => _.BudgetName).Distinct().ToList() ?? new();
+                    var treatmentConsideration = treatmentConsiderations.FirstOrDefault();// _ => _.TreatmentName == section.AppliedTreatment);
+                    var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix;                   
+
+                    var budgetNames = allocationMatrix?.Select(_ => _.BudgetName).Distinct().ToList() ?? new();
                     var budgetName = string.Join(",", budgetNames);
                     worksheet.Cells[row, ++column].Value = budgetName; // Budget
                     var project = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
                     worksheet.Cells[row, ++column].Value = project;
                     var columnForAppliedTreatment = column;
 
-                    var cost = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == sectionData.Year).Sum(_ => _.AllocatedAmount);
+                    var cost = allocationMatrix?.Sum(_ => _.AllocatedAmount);
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
@@ -441,8 +457,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                         ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment], Color.FromArgb(255, 0, 0));
 
                         // Color the previous year project also
-                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment - 16], Color.FromArgb(0, 255, 0));
-                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment - 16], Color.FromArgb(255, 0, 0));
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment - 10], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment - 10], Color.FromArgb(255, 0, 0));
                     }
 
                     column = column + 1;

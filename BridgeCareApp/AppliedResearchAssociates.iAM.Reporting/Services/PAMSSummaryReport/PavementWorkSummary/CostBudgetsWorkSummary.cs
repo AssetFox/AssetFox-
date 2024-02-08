@@ -353,7 +353,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         }
                         workTypeConcrete[treatment.Category][yearlyValues.Key] += cost;
                     }
-                    //}
                 }
                 worksheet.Cells[row, column].Value = ConcreteTotalCost;
                 concreteTotalRow = row;
@@ -432,7 +431,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             out int totalSpendingRow
             )
         {
-            var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement, TreatmentCategory.WorkOutsideScope };
+            var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement, TreatmentCategory.WorkOutsideScope, TreatmentCategory.Bundled };
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "Work Type Totals", "Total (all years)");
 
@@ -535,6 +534,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells[startRow + 4, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 4, column + 2].Value = "Percentage spent on WORK OUTSIDE SCOPE/JURISDICTION";
 
+            // TODO : should we hide this based on setting?
+            worksheet.Cells[startRow + 5, column + 1].Style.Numberformat.Format = "#0.00%";
+            worksheet.Cells[startRow + 5, column + 2].Value = "Percentage spent on BUNDLED";
+
             row += 2;
             worksheet.Cells[row, 1].Value = "Total PAMS Budget";
             column = fromColumn;
@@ -565,7 +568,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     out int totalSpendingRow,
                     WorkSummaryByBudgetModel workSummaryByBudgetModel)
         {
-            var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement, TreatmentCategory.WorkOutsideScope };
+            var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement, TreatmentCategory.WorkOutsideScope, TreatmentCategory.Bundled };
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "Work Type Totals", "Total (all years)");
 
@@ -666,6 +669,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             worksheet.Cells[startRow + 4, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 4, column + 2].Value = "Percentage spent on WORK OUTSIDE SCOPE/JURISDICTION";
+
+            // TODO : should we hide this based on setting?
+            worksheet.Cells[startRow + 5, column + 1].Style.Numberformat.Format = "#0.00%";
+            worksheet.Cells[startRow + 5, column + 2].Value = "Percentage spent on BUNDLED";
 
             row += 2;
             worksheet.Cells[row, 1].Value = "Total PAMS Budget";  

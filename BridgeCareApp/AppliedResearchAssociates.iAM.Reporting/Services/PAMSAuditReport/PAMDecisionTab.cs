@@ -79,7 +79,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                     var crs = CheckGetTextValue(section.ValuePerTextAttribute, "CRS");
                     if (section.TreatmentStatus != TreatmentStatus.Applied)
                     {
-                        var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(section.ValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment);
+                        var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(section.ValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment && _.AppliedTreatment == section.AppliedTreatment);
                         if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
                         {
                             keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
@@ -135,7 +135,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
                 var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
                                               section.TreatmentConsiderations : keyCashFlowFundingDetails[brKey];
-                var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == treatment);
+                var treatmentConsideration = treatmentConsiderations.FirstOrDefault();// _ => _.TreatmentName == treatment);
                 // AllocationMatrix includes cash flow funding of future years.
                 var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
                 var amountSpent = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.

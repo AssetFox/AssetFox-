@@ -153,7 +153,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             var crs = CheckGetTextValue(section.ValuePerTextAttribute, "CRS");
             if (section.TreatmentStatus != TreatmentStatus.Applied)
             {
-                var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(section.ValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment);
+                var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(section.ValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment && _.AppliedTreatment == section.AppliedTreatment);
                 if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
                 {
                     keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
@@ -163,7 +163,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
             var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
                                           section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
-            var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == appliedTreatment);
+            var treatmentConsideration = treatmentConsiderations.FirstOrDefault();// => _.TreatmentName == appliedTreatment);
             treatmentDataModel.PriorityLevel = treatmentConsideration?.BudgetPriorityLevel;
 
             treatmentDataModel.TreatmentFundingIgnoresSpendingLimit = section.TreatmentFundingIgnoresSpendingLimit ? 1 : 0;

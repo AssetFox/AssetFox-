@@ -19,6 +19,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSAuditReport
     public class PAMSDecisionAggregated
     {
         public string Feasible { get; set; }
+        public string IncludedBundles { get; set; }
 
         public double? CIImprovement { get; set; }
 

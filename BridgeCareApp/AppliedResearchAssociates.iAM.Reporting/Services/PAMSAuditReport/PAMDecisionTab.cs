@@ -170,8 +170,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
                 var aggregatedTreatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
                                               section.TreatmentConsiderations : keyCashFlowFundingDetails[brKey];
+                var includedBundles = aggregatedTreatmentConsiderations[0].TreatmentName;
                 var aggregatedTreatmentString = aggregatedTreatmentConsiderations.ToString();
-                var aggregatedTreatmentConsideration = aggregatedTreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == aggregatedTreatmentString);
+                var aggregatedTreatmentConsideration = aggregatedTreatmentConsiderations.FirstOrDefault();
 
                 // AllocationMatrix includes cash flow funding of future years.
                 var aggregatedAllocationMatrix = aggregatedTreatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
@@ -190,6 +191,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                     }
                 }
                 var aggregatedTreatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == aggregatedTreatmentName);
+                decisionsAggregate.IncludedBundles = includedBundles;
                 decisionsAggregate.CIImprovement = aggregatedTreatmentOption?.ConditionChange;
                 decisionsAggregate.Cost = aggregatedTreatmentOption != null ? aggregatedTreatmentOption.Cost : 0;
                 decisionsAggregate.BCRatio = aggregatedTreatmentOption != null ? aggregatedTreatmentOption.Benefit / aggregatedTreatmentOption.Cost : 0;
@@ -286,6 +288,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 {
                     ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
                     decisionsWorksheet.Cells[row, column++].Value = decisionAggregate.Feasible;
+                    SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
+                    decisionsWorksheet.Cells[row, column++].Value = decisionAggregate.IncludedBundles;
                     SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
                     decisionsWorksheet.Cells[row, column++].Value = decisionAggregate.CIImprovement;
                     SetAccountingFormat(decisionsWorksheet.Cells[row, column]);
@@ -421,7 +425,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             var aggregatedColumn = column;
             worksheet.Cells[headerRow1, aggregatedColumn].Value = "Aggregated";
             // Fixed treatment headers for row 2 per treatment
-            var treatmentHeaders = GetTreatmentsHeaders();
+            var treatmentHeaders = GetAggregatedTreatmentsHeaders();
             bool fillColor = false;
             // Dynamic headers for row 1 based on simulation treatments
             foreach (var aggregated in aggregatedString)
@@ -478,6 +482,23 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 "Budget Usage Status(es)"
             };
         }
+
+        private static List<string> GetAggregatedTreatmentsHeaders()
+        {
+            return new List<string>
+            {
+                "Feasible?",
+                "Included Treatments",
+                "CI\r\nImprovement",
+                "Cost",
+                "B/C\r\nRatio",
+                "Selected?",
+                "Amount\r\nSpent",
+                "Budget(s)\r\nUsed",
+                "Budget Usage Status(es)"
+            };
+        }
+
 
         public static void PerformPostAutofitAdjustments(ExcelWorksheet worksheet, List<int> columnNumbersBudgetsUsed)
         {

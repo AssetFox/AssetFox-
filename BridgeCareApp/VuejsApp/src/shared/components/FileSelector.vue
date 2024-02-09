@@ -86,7 +86,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
 
     watch(file,()=>{        
         files.value = hasValue(file.value) ? [file.value as File] : [];                                   
-        emit('submit', file.value);
+        emit('submit', file.value, applyNoTreatment.value);
         (<HTMLInputElement>document.getElementById('file-select')!).value = '';
     });
 

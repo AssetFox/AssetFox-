@@ -37,7 +37,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             IReadOnlyCollection<SelectableTreatment> selectableTreatments,
             ICollection<CommittedProject> committedProjects,
             Dictionary<string, string> treatmentCategoryLookup,
-            List<DTOs.Abstract.BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
+            List<DTOs.Abstract.BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
+            bool shouldBundleFeasibleTreatments)
         {
             var workSummaryByBudgetModels = CreateWorkSummaryByBudgetModels(reportOutputData);
             var committedTreatments = new HashSet<string>();            
@@ -124,7 +125,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     workTypeTotals,                    
                     budgetSummaryModel,
                     reportOutputData,
-                    committedProjectsForWorkOutsideScope);
+                    committedProjectsForWorkOutsideScope,
+                    shouldBundleFeasibleTreatments);
 
                 // Finally, advance for next budget label
                 currentCell.Row++;

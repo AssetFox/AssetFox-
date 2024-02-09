@@ -309,7 +309,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var pamsWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummary_Tab);
             var committedProjectsForWorkOutsideScope = committedProjectList;
-            var chartRowModel = _pavementWorkSummary.Fill(pamsWorkSummaryWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments, simulation.CommittedProjects, treatmentCategoryLookup, committedProjectsForWorkOutsideScope);
+            var chartRowModel = _pavementWorkSummary.Fill(pamsWorkSummaryWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments, simulation.CommittedProjects, treatmentCategoryLookup, committedProjectsForWorkOutsideScope, simulation.ShouldBundleFeasibleTreatments);
 
             checkCancelled(cancellationToken, simulationId);
             //// Pavement Work Summary By Budget TAB
@@ -317,7 +317,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var pavementWorkSummaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummaryByBudget_Tab);
-            _pavementWorkSummaryByBudget.Fill(pavementWorkSummaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, yearlyCostCommittedProj, simulation.Treatments, simulation.CommittedProjects, treatmentCategoryLookup, committedProjectsForWorkOutsideScope);
+            _pavementWorkSummaryByBudget.Fill(pavementWorkSummaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, yearlyCostCommittedProj, simulation.Treatments, simulation.CommittedProjects, treatmentCategoryLookup, committedProjectsForWorkOutsideScope, simulation.ShouldBundleFeasibleTreatments);
 
             checkCancelled(cancellationToken, simulationId);
             // Unfunded Pavement Projects TAB

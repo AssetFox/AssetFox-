@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         private Dictionary<int, decimal> TotalCommittedSpent = new Dictionary<int, decimal>();
         private Dictionary<int, decimal> TotalSAPSpent = new Dictionary<int, decimal>();
         private Dictionary<int, decimal> TotalProjectBuilderSpent = new Dictionary<int, decimal>();
-        
+        private bool ShouldBundleFeasibleTreatments;
         private int TotalSpentRow = 0;
 
         public CostBudgetsWorkSummary()
@@ -42,8 +42,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             List<(string TreatmentName, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments,
             Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals,
             ICollection<CommittedProject> committedProjects,
-            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
+            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
+            bool shouldBundleFeasibleTreatments)
         {
+            ShouldBundleFeasibleTreatments = shouldBundleFeasibleTreatments;
             FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfSAPWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfProjectBuilderWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
@@ -86,8 +88,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals,
             WorkSummaryByBudgetModel workSummaryByBudgetModel,
             SimulationOutput reportOutputData,
-            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
-        {            
+            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, bool shouldBundleFeasibleTreatments)
+        {
+            ShouldBundleFeasibleTreatments = shouldBundleFeasibleTreatments;
             FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfSAPWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfProjectBuilderWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
@@ -140,7 +143,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             // filling in the treatments in the excel TAB
             _pavementWorkSummaryCommon.SetPavementTreatmentExcelString(worksheet, simulationTreatments, ref row, ref column);
-
+            // Bundled Treatments
+            if (ShouldBundleFeasibleTreatments)
+            {
+                worksheet.Cells[row++, column].Value = PAMSConstants.BundledTreatments;
+            }
             worksheet.Cells[row++, column].Value = PAMSConstants.AsphaltTotal;
             column++;
             var fromColumn = column + 1;
@@ -175,6 +182,41 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         workTypeFullDepthAsphalt[treatment.Category][yearlyValues.Key] += cost;
                     }
                 }
+
+                if (ShouldBundleFeasibleTreatments)
+                {
+                    decimal bundledCost = 0;
+                    foreach (var yearlyValue in yearlyValues.Value)
+                    {
+                        var treatment = yearlyValue.Key;
+                        if (treatment.Contains("Bundle") && treatment.ToLower().Contains((char)PavementTreatmentHelper.TreatmentGroupCategory.Bituminous))
+                        {
+                            var category = TreatmentCategory.Bundled;
+                            decimal cost = 0;
+                            cost = (yearlyValue.Value.treatmentCost - yearlyValue.Value.compositeTreatmentCost);
+                            bundledCost += cost;
+                            asphaltTotalCost += cost;
+
+                            if (!workTypeFullDepthAsphalt.ContainsKey(category))
+                            {
+                                workTypeFullDepthAsphalt.Add(category, new SortedDictionary<int, decimal>()
+                            {
+                                { yearlyValues.Key, cost }
+                            });
+                            }
+                            else
+                            {
+                                if (!workTypeFullDepthAsphalt[category].ContainsKey(yearlyValues.Key))
+                                {
+                                    workTypeFullDepthAsphalt[category].Add(yearlyValues.Key, 0);
+                                }
+                                workTypeFullDepthAsphalt[category][yearlyValues.Key] += cost;
+                            }
+                        }
+                    }
+                    worksheet.Cells[row++, column].Value = bundledCost;
+                }
+                
                 worksheet.Cells[row, column].Value = asphaltTotalCost;
                 asphaltTotalRow = row;
                 TotalAsphaltSpent.Add(yearlyValues.Key, asphaltTotalCost);
@@ -230,7 +272,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             // filling in the treatments in the excel TAB
             _pavementWorkSummaryCommon.SetPavementTreatmentExcelString(worksheet, simulationTreatments, ref row, ref column);
-
+            // Bundled Treatments
+            if (ShouldBundleFeasibleTreatments)
+            {
+                worksheet.Cells[row++, column].Value = PAMSConstants.BundledTreatments;
+            }
             worksheet.Cells[row++, column].Value = PAMSConstants.CompositeTotal;
             column++;
             var fromColumn = column + 1;
@@ -264,8 +310,42 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         }
                         workTypeComposite[treatment.Category][yearlyValues.Key] += cost;
                     }
-                    //}
                 }
+
+                if (ShouldBundleFeasibleTreatments)
+                {
+                    decimal bundledCost = 0;
+                    foreach (var yearlyValue in yearlyValues.Value)
+                    {
+                        var treatment = yearlyValue.Key;
+                        if (treatment.Contains("Bundle") && treatment.ToLower().Contains((char)PavementTreatmentHelper.TreatmentGroupCategory.Bituminous))
+                        {
+                            var category = TreatmentCategory.Bundled;
+                            decimal cost = 0;
+                            cost = yearlyValue.Value.compositeTreatmentCost;
+                            bundledCost += cost;
+                            CompositeTotalCost += cost;
+
+                            if (!workTypeComposite.ContainsKey(category))
+                            {
+                                workTypeComposite.Add(category, new SortedDictionary<int, decimal>()
+                            {
+                                { yearlyValues.Key, cost }
+                            });
+                            }
+                            else
+                            {
+                                if (!workTypeComposite[category].ContainsKey(yearlyValues.Key))
+                                {
+                                    workTypeComposite[category].Add(yearlyValues.Key, 0);
+                                }
+                                workTypeComposite[category][yearlyValues.Key] += cost;
+                            }
+                        }
+                    }
+                    worksheet.Cells[row++, column].Value = bundledCost;
+                }
+                
                 worksheet.Cells[row, column].Value = CompositeTotalCost;
                 compositeTotalRow = row;
                 TotalCompositeSpent.Add(yearlyValues.Key, CompositeTotalCost);
@@ -318,7 +398,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             // filling in the treatments in the excel TAB
             _pavementWorkSummaryCommon.SetPavementTreatmentExcelString(worksheet, simulationTreatments, ref row, ref column);
-
+            // Bundled Treatments
+            if (ShouldBundleFeasibleTreatments)
+            {
+                worksheet.Cells[row++, column].Value = PAMSConstants.BundledTreatments;
+            }
             worksheet.Cells[row++, column].Value = PAMSConstants.ConcreteTotal;
             column++;
             var fromColumn = column + 1;
@@ -354,6 +438,41 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         workTypeConcrete[treatment.Category][yearlyValues.Key] += cost;
                     }
                 }
+
+                if (ShouldBundleFeasibleTreatments)
+                {
+                    decimal bundledCost = 0;
+                    foreach (var yearlyValue in yearlyValues.Value)
+                    {
+                        var treatment = yearlyValue.Key;
+                        if (treatment.Contains("Bundle") && treatment.ToLower().Contains((char)PavementTreatmentHelper.TreatmentGroupCategory.Concrete))
+                        {
+                            var category = TreatmentCategory.Bundled;
+                            decimal cost = 0;
+                            cost = yearlyValue.Value.treatmentCost;
+                            bundledCost += cost;
+                            ConcreteTotalCost += cost;
+
+                            if (!workTypeConcrete.ContainsKey(category))
+                            {
+                                workTypeConcrete.Add(category, new SortedDictionary<int, decimal>()
+                            {
+                                { yearlyValues.Key, cost }
+                            });
+                            }
+                            else
+                            {
+                                if (!workTypeConcrete[category].ContainsKey(yearlyValues.Key))
+                                {
+                                    workTypeConcrete[category].Add(yearlyValues.Key, 0);
+                                }
+                                workTypeConcrete[category][yearlyValues.Key] += cost;
+                            }
+                        }
+                    }
+                    worksheet.Cells[row++, column].Value = bundledCost;
+                }
+
                 worksheet.Cells[row, column].Value = ConcreteTotalCost;
                 concreteTotalRow = row;
                 TotalConcreteSpent.Add(yearlyValues.Key, ConcreteTotalCost);

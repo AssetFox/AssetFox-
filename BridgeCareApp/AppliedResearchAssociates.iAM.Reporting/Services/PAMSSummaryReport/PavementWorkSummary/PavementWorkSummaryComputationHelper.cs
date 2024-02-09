@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
+using NetTopologySuite.Algorithm;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using static System.Collections.Specialized.BitVector32;
 
@@ -91,8 +92,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>();
                 foreach (var section in yearData.Assets)
                 {
-                    if (section.AppliedTreatment.Contains("Bundle")) { } // TODO remove later
-
                     var cost = section.TreatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount) ?? 0);
                     PopulateTreatmentCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentPerYear);
                     PopulateTreatmentGroupCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentGroupPerYear);
@@ -280,6 +279,36 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         value.treatmentCost += cost;
                         value.length += length;
                         workTypeTotals[treatment.Category][yearlyValues.Key] = value;
+                    }
+                }
+
+                foreach(var yearlyValue in yearlyValues.Value)
+                {
+                    var treatment = yearlyValue.Key;
+                    if (treatment.Contains("Bundle"))
+                    {
+                        var category = TreatmentCategory.Bundled;                        
+                        decimal cost = yearlyValue.Value.treatmentCost;
+                        int length = yearlyValue.Value.length;
+
+                        if (!workTypeTotals.ContainsKey(category))
+                        {
+                            workTypeTotals.Add(category, new SortedDictionary<int, (decimal treatmentCost, int length)>()
+                            {
+                                { yearlyValues.Key, (cost, length) }
+                            });
+                        }
+                        else
+                        {
+                            if (!workTypeTotals[category].ContainsKey(yearlyValues.Key))
+                            {
+                                workTypeTotals[category].Add(yearlyValues.Key, (0, 0));
+                            }
+                            var value = workTypeTotals[category][yearlyValues.Key];
+                            value.treatmentCost += cost;
+                            value.length += length;
+                            workTypeTotals[category][yearlyValues.Key] = value;
+                        }
                     }
                 }
             }

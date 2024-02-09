@@ -6,9 +6,7 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
-using MathNet.Numerics.Random;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.Style;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData
@@ -337,7 +335,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
                                                   section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
                     var sumCoveredCost = treatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount));
-                    var treatmentConsideration = treatmentConsiderations.FirstOrDefault();// _ => _.TreatmentName == section.AppliedTreatment);
+                    var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                 treatmentConsiderations.FirstOrDefault() :
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
                     var treatmentName = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
                     var treatmentDone = section.AppliedTreatment.ToLower() == PAMSConstants.NoTreatment ? "--" : treatmentName;
 
@@ -431,7 +431,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
                                                   section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
 
-                    var treatmentConsideration = treatmentConsiderations.FirstOrDefault();// _ => _.TreatmentName == section.AppliedTreatment);
+                    var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                 treatmentConsiderations.FirstOrDefault() :
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
                     var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix;                   
 
                     var budgetNames = allocationMatrix?.Select(_ => _.BudgetName).Distinct().ToList() ?? new();

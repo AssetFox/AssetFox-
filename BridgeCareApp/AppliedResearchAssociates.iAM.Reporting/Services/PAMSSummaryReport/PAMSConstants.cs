@@ -86,5 +86,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
         public const string Excellent = "Excellent";
 
         public const string Bundled = "Bundled";
+        public const string BundledTreatments = "Bundled Treatments";
     }
 }

@@ -6,21 +6,7 @@
                 <div class="conjunction-and-messages-container" >
                     <v-row :class="{'justify-space-between': !criteriaEditorData.isLibraryContext,
                         'justify-start':criteriaEditorData.isLibraryContext}">
-                        <v-col cols = "4">
-                            <v-row style="padding: 20px;">
-                                <v-select
-                                    menu-icon=custom:GhdDownSvg
-                                    :items="conjunctionSelectListItems"
-                                    class="ghd-control-border ghd-control-text ghd-select"
-                                    v-model="selectedConjunction"
-                                    item-title="text"
-                                    item-value="value"
-                                    density="compact"
-                                    variant="outlined"
-                                >
-                                </v-select>
-                            </v-row>
-                        </v-col>
+
                         <div style="padding:20px">
                             <v-btn
                                 id="CriteriaEditor-addSubCriteria-btn"
@@ -43,6 +29,7 @@
                             full-width
                             no-resize
                             readonly
+                            hide-details
                             rows="3">
                             <template v-slot:append>
                                 <v-btn id="CriteriaEditor-removeSubCriteria-btn"
@@ -53,6 +40,8 @@
                                 </v-btn>
                             </template>
                         </v-textarea>
+                        <div style="margin: 5px;" v-if="index != subCriteriaClauses.length -1">OR</div>
+                        
                     </div>
                 </v-card-text>
                 <v-card-actions :class="{'validation-actions':criteriaEditorData.isLibraryContext,}">
@@ -256,16 +245,11 @@ const tab = ref<any>(null);
     const invalidCriteriaMessage = ref<string | null>(null);
     const validSubCriteriaMessage = ref<string | null>(null);
     const invalidSubCriteriaMessage = ref<string | null>(null);
-    const conjunctionSelectListItems = ref<SelectItem[]>([
-        { text: 'OR', value: 'OR' },
-        { text: 'AND', value: 'AND' },
-    ]);
-    const selectedConjunction = ref<string>('OR');
     const subCriteriaClauses= ref<string[]>([]);
     let subCriterias:CriteriaType[] = []
 
     const selectedSubCriteriaClauseIndex = ref<number>(-1);
-    const selectedSubCriteriaClause= ref<Criteria |null>(null);
+    let selectedSubCriteriaClause= ref<Criteria |null>(null);
     const selectedRawSubCriteriaClause = ref<string>('');
     let activeTab = 'tree-view';
     const checkOutput = ref<boolean>(false);
@@ -278,7 +262,6 @@ const tab = ref<any>(null);
             addErrorNotificationAction,
         ) as Criteria;
 
-        selectedConjunction.value = mainCriteria.logicalOperator;
         setSubCriteriaClauses(mainCriteria);
 
         if (hasValue(stateAttributes)) {
@@ -325,9 +308,7 @@ const tab = ref<any>(null);
                 mainCriteria.logicalOperator = 'OR';
             }
 
-            selectedConjunction.value = mainCriteria.logicalOperator;
-
-             const andArray = criteriaEditorData.value.mergedCriteriaExpression ? criteriaEditorData.value.mergedCriteriaExpression.split(' AND ') : [];
+            const andArray = criteriaEditorData.value.mergedCriteriaExpression ? criteriaEditorData.value.mergedCriteriaExpression.split(' AND ') : [];
             const orArray  = criteriaEditorData.value.mergedCriteriaExpression ? criteriaEditorData.value.mergedCriteriaExpression.split(' OR ') : [];
 
             setSubCriteriaClauses(mainCriteria);
@@ -411,20 +392,6 @@ const tab = ref<any>(null);
         }
     }
 
-    function getClassForTextarea(index: number) {
-        if (isAndConjunction()) {
-            return {
-                'textarea-focused': selectedSubCriteriaClauseIndex.value === -1,
-                'clause-textarea': selectedSubCriteriaClauseIndex.value !== -1
-            };
-        } else {
-            return {
-                'textarea-focused': index === selectedSubCriteriaClauseIndex.value,
-                'clause-textarea': index !== selectedSubCriteriaClauseIndex.value
-            };
-        }
-    }
-
     function getValueForTextarea(index: number) {
         return subCriteriaClauses.value[index];
     }
@@ -445,7 +412,14 @@ const tab = ref<any>(null);
         subCriteriaClauses.value = [];
         subCriterias = [];
         if (hasValue(mainCriteria) && hasValue(mainCriteria.children)) {          
-            mainCriteria.children!.forEach((criteriaType: CriteriaType) => {
+            if(mainCriteria.children!.every(_ => _.type === 'query-builder-rule') || mainCriteria.logicalOperator === 'AND')
+            {
+                let criteriaType: CriteriaType = {
+                    id: getNewGuid(),
+                    type: "query-builder-group",
+                    query: {children: clone(mainCriteria.children), logicalOperator: mainCriteria.logicalOperator}
+                }
+
                 const clause: string = convertCriteriaTypeObjectToCriteriaExpression(
                     criteriaType,
                 );
@@ -453,7 +427,17 @@ const tab = ref<any>(null);
                     subCriteriaClauses.value.push(clause);
                     subCriterias.push(clone(criteriaType))
                 }
-            });
+            }
+            else
+                mainCriteria.children!.forEach((criteriaType: CriteriaType) => {
+                    const clause: string = convertCriteriaTypeObjectToCriteriaExpression(
+                        criteriaType,
+                    );
+                    if (hasValue(clause)) {
+                        subCriteriaClauses.value.push(clause);
+                        subCriterias.push(clone(criteriaType))
+                    }
+                });
         }
     }
 
@@ -586,21 +570,25 @@ const tab = ref<any>(null);
     function onParseRawSubCriteria() {
         activeTab = 'tree-view';
         resetSubCriteriaValidationProperties();
-        //TODO
-        //const parsedRawSubCriteria = parseCriteriaString(selectedRawSubCriteriaClause);
-        const parsedRawSubCriteria = convertCriteriaExpressionToCriteriaObject(
-            selectedRawSubCriteriaClause.value,
-            addErrorNotificationAction,
-        );
-        if (parsedRawSubCriteria && selectedRawSubCriteriaClause.value != '') {
-            selectedSubCriteriaClause.value = parsedRawSubCriteria;
-            if (!hasValue(selectedSubCriteriaClause.value.logicalOperator)) {
-                selectedSubCriteriaClause.value.logicalOperator = 'OR';
-            }
-        } else {
-            invalidSubCriteriaMessage.value =
-                'The raw criteria string is invalid';
+        selectedSubCriteriaClause.value = null;
+        setTimeout(() => {
+             //TODO
+            //const parsedRawSubCriteria = parseCriteriaString(selectedRawSubCriteriaClause);
+            const parsedRawSubCriteria = convertCriteriaExpressionToCriteriaObject(
+                selectedRawSubCriteriaClause.value,
+                addErrorNotificationAction,
+            );
+            if (parsedRawSubCriteria && selectedRawSubCriteriaClause.value != '') {
+                selectedSubCriteriaClause.value = parsedRawSubCriteria;
+                if (!hasValue(selectedSubCriteriaClause.value.logicalOperator)) {
+                    selectedSubCriteriaClause.value.logicalOperator = 'OR';
+                }
+            } else {
+                invalidSubCriteriaMessage.value =
+                    'The raw criteria string is invalid';
         }
+        })
+       
     }
 
     function onParseSubCriteriaJson() {
@@ -826,7 +814,6 @@ const tab = ref<any>(null);
                 getMainCriteria(),
             );
             if (parsedCriteria) {
-                selectedConjunction.value = 'OR';
                 emit(
                     'submitCriteriaEditorResult',
                     parsedCriteria.join(''),
@@ -835,7 +822,6 @@ const tab = ref<any>(null);
                 invalidCriteriaMessage.value = 'Unable to parse the criteria';
             }
         } else {
-            selectedConjunction.value = 'OR';
             emit('submitCriteriaEditorResult', null);
         }
     }
@@ -892,7 +878,7 @@ const tab = ref<any>(null);
 
         if (hasValue(filteredSubCriteria)) {
             return {
-                logicalOperator: selectedConjunction.value,
+                logicalOperator: 'OR',
                 children: subCriteriaClauses.value
                     .filter(
                         (subCriteriaClause: string) =>

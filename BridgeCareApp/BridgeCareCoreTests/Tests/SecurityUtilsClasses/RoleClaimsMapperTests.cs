@@ -28,7 +28,7 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             Assert.IsType<List<string>>(result);
-            Assert.Equal(65, result.Count);
+            Assert.Equal(66, result.Count);
         }
 
         [Fact]

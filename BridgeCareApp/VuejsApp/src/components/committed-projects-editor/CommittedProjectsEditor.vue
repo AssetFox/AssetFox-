@@ -277,6 +277,9 @@
                 @click="OnSaveClick" :disabled='!hasUnsavedChanges || disableCrudButtons()' class="ghd-blue-bg ghd-white ghd-button">Save</v-btn>    
             </v-row>
         </v-col> 
+        <v-row justify="center">
+            <p v-if="importedProjectTreatmentBoolean" style="color: red;">The imported treatment is not found in the list of treatments. Please select a new treatment or add this treatment to run a scenario.</p>
+        </v-row>
         <v-col cols = "8" style="border:1px solid #999999 !important;" v-if="selectedCommittedProject !== ''">
             <v-row column>
                 <v-col cols = "12">
@@ -366,6 +369,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
     const projectSourceOptions = ref< string [] >([]);
     const budgetSelectItems = ref< SelectItem[] >([]);
     const categorySelectItems = ref<SelectItem[]>([]);
+    let importedProjectTreatmentName = ref<string>("");
+    let importedProjectTreatmentBoolean = ref(false);
     let categories: string[] = [];
     let scenarioId: string = getBlankGuid();
     let networkId: string = getBlankGuid();
@@ -582,7 +587,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
             if(!isNil(response.data)){
                     templateSelectItems.value = response.data;
             }
-        });            
+        });   
+        onPaginationChanged();         
     });
     onBeforeUnmount(() => beforeDestroy())
     function beforeDestroy() {
@@ -668,7 +674,10 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     async function onPaginationChanged() {
         if(isRunning)
+        {
+            console.log(treatmentSelectItems.value);
             return;
+        }
         isRunning = true
         checkHasUnsavedChanges();
         const { sort, descending, page, rowsPerPage } = projectPagination;
@@ -696,7 +705,19 @@ import ConfirmDialog from 'primevue/confirmdialog';
                     rowCache.value = clone(sectionCommittedProjects.value)
                     totalItems.value = data.totalItems;
                     const row = data.items.find(scp => scp.id == selectedCommittedProject.value);
-
+                    for(let i = 0; i < data.items.length; i++)
+                    {
+                        importedProjectTreatmentName.value = data.items[i].treatment;
+                        if(!treatmentSelectItems.value.includes(importedProjectTreatmentName.value))
+                        {
+                            importedProjectTreatmentBoolean.value = true;
+                            break;
+                        }
+                        else
+                        {
+                            importedProjectTreatmentBoolean.value = false;
+                        }
+                    }
                     if(isNil(row)) {
                         selectedCommittedProject.value = '';
                     }
@@ -1259,7 +1280,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
             onPaginationChanged().then(() => {
                 setAlertMessageAction('');
             })
-        }        
+        } 
+        console.log();
     }
 
     async function fetchTreatmentLibrary(simulationId: string) {

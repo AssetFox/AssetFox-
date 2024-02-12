@@ -12,7 +12,7 @@
                     </v-row>
                 </v-card-title>
                 <div style='height: 500px; max-width:900px; margin-top:20px;' class="ghd-dialog-box-padding-center">
-                    <div style='max-height: 450px; overflow-y:auto;'>
+                    <div style='max-height: 435px; overflow-y:auto;'>
                         <v-data-table-server
                                   id="EditBudgetsDialog-budgets-dataTable"
                                   :headers='editBudgetsDialogGridHeaders'
@@ -36,12 +36,19 @@
                                 />
                             </td>
                             <td>
-                                <v-btn class="ghd-blue" flat>
-                                    <v-icon title="up" @click="swapItemOrder(props.item, 'up')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-up
-                                    </v-icon>
-                                    <v-icon title="down" @click="swapItemOrder(props.item, 'down')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-down
-                                    </v-icon>
-                                </v-btn>
+                                <v-row>
+                                    <v-col>
+                                        <v-btn class="ghd-blue" @click="swapItemOrder(props.item, 'up')" @mousedown="setCurrentOrder(props.item)" flat>
+                                            <v-icon title="up"> fas fa-chevron-up
+                                            </v-icon>
+                                        </v-btn>
+                                        <v-btn class="ghd-blue" @click="swapItemOrder(props.item, 'down')" @mousedown="setCurrentOrder(props.item)" flat>
+                                            <v-icon title="down"> fas fa-chevron-down
+                                            </v-icon>
+                                        </v-btn>
+                                    </v-col>
+                                </v-row>
+                                
                             </td>
                             <td>
                                 <editDialog id="EditBudgetsDialog-budget-editDialog"
@@ -320,7 +327,6 @@ watch(dialogData,() => {
         return b1.budgetOrder - b2.budgetOrder;
     }
     function swapItemOrder(item:Budget, direction: string) {
-        
         if (isNil(direction) || isNil(item)) return;
 
         if (direction.toLowerCase() === Up) {    
@@ -400,5 +406,9 @@ watch(dialogData,() => {
     width: 45px;
     justify-content: center;
     padding: 5px;
+}
+
+.v-table__wrapper{
+    overflow: hidden;
 }
 </style>

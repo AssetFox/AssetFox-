@@ -178,19 +178,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             )
         {
             var year = yearsData.Year;
-            // TODO bundled
             var treatmentGroup = PavementTreatmentHelper.GetTreatmentGroup(yearsData.TreatmentName);
             int segmentLength = 0;
 
             if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(treatmentGroup))
             {
-                costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, ((decimal)yearsData.Amount, (int)segmentLength));
+                costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, ((decimal)yearsData.Amount, (int)segmentLength.FeetToMiles()));
             }
             else
             {
                 var values = costAndLengthPerTreatmentPerYear[year][treatmentGroup];
                 values.treatmentCost += (decimal) yearsData.Amount;
-                values.length += (int)segmentLength;
+                values.length += (int)segmentLength.FeetToMiles();
                 costAndLengthPerTreatmentPerYear[year][treatmentGroup] = values;
             }
         }
@@ -207,7 +206,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var surfaceId = section.ValuePerNumericAttribute["SURFACEID"];
             if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(section.AppliedTreatment))
             {
-                costAndLengthPerTreatmentPerYear[year].Add(section.AppliedTreatment, (cost, surfaceId == 62 ? cost : 0, (int)segmentLength));
+                costAndLengthPerTreatmentPerYear[year].Add(section.AppliedTreatment, (cost, surfaceId == 62 ? cost : 0, (int)segmentLength.FeetToMiles()));
             }
             else
             {
@@ -215,7 +214,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 values.treatmentCost += cost;
                 if (surfaceId == 62)
                     values.compositeTreatmentCost += cost;
-                values.length += (int)segmentLength;
+                values.length += (int)segmentLength.FeetToMiles();
                 costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment] = values;
             }
         }
@@ -233,13 +232,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(treatmentGroup))
             {
-                costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, (cost, (int)segmentLength));
+                costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, (cost, (int)segmentLength.FeetToMiles()));
             }
             else
             {
                 var values = costAndLengthPerTreatmentPerYear[year][treatmentGroup];
                 values.treatmentCost += cost;
-                values.length += (int)segmentLength;
+                values.length += (int)segmentLength.FeetToMiles();
                 costAndLengthPerTreatmentPerYear[year][treatmentGroup] = values;
             }
         }

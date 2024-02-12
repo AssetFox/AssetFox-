@@ -169,8 +169,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                             }
                             category = section.AppliedTreatment.Contains("Bundle") ? TreatmentCategory.Bundled : category;
 
-                            if (section.AppliedTreatment.Contains("Bundle")) { } // TODO remove later
-
                             summaryModel.YearlyData.Add(new YearsData
                             {
                                 Year = yearData.Year,

@@ -269,7 +269,7 @@ namespace BridgeCareCore.Services
             var worksheet = excelPackage.Workbook.Worksheets[0];
 
             // Extract the names of the consequence headers and link them to their associated attribute IDs
-            var headers = worksheet.Cells.GroupBy(cell => cell.Start.Row).First().Select(_ => _.GetValue<string>())
+            var headers = worksheet.Cells.GroupBy(cell => cell.Start.Row).First().Select(_ => _.GetValue<string>()).Where(x => x != null)
                 .ToList();
             var consequenceAttributeNames = headers.Skip(_keyFields.Count + InitialHeaders.Count).ToList();
             var attributeIdsPerAttributeName = GetAttributeIdsPerAttributeName(consequenceAttributeNames.Distinct().ToList());

@@ -324,13 +324,14 @@ namespace BridgeCareCore.Services
             }
 
             // Create the output lookup
-            var projectsPerLocationIdentifierAndYearTuple = new Dictionary<(string, int), SectionCommittedProjectDTO>();
+            var projectsPerLocationIdentifierYearAndTreatmentTuple = new Dictionary<(string, int, string), SectionCommittedProjectDTO>();
 
             // Read in the data by row
             for (var row = 2; row <= end.Row; row++)
             {
                 // Get the project year for this work
                 var projectYear = worksheet.GetCellValue<int>(row, _keyFields.Count + 2);  // Assumes that InitialHeaders stays constant
+                var treatment = worksheet.GetCellValue<string>(row, _keyFields.Count + 1);  // Assumes that InitialHeaders stays constant
 
                 //Get project source 
                 var projectSourceValue = worksheet.Cells[row, projectSourceIndex].Text;
@@ -407,27 +408,26 @@ namespace BridgeCareCore.Services
                 if (newImportFile) { incrementCount = 2; }
 
                 // Add to the list of projects
-                projectsPerLocationIdentifierAndYearTuple.Add((locationIdentifier, projectYear), project);
+                projectsPerLocationIdentifierYearAndTreatmentTuple.Add((locationIdentifier, projectYear, treatment), project);
             }
 
             // Apply required no treatment entries if required by the user
-            if (applyNoTreatment && projectsPerLocationIdentifierAndYearTuple.Keys.Any(_ =>
+            if (applyNoTreatment && projectsPerLocationIdentifierYearAndTreatmentTuple.Keys.Any(_ =>
                 _.Item2 > investmentPlan.FirstYearOfAnalysisPeriod))
             {
                 // Loop through committed projects that do not start in the initial year
                 // (Projects in the initial year do not require No Treatment variables)
-                var locationIdentifierAndYearTuples = projectsPerLocationIdentifierAndYearTuple.Keys
+                var locationIdentifierAndYearTuples = projectsPerLocationIdentifierYearAndTreatmentTuple.Keys
                     .Where(_ => _.Item2 > investmentPlan.FirstYearOfAnalysisPeriod).ToList();
-                locationIdentifierAndYearTuples.ForEach(locationIdentifierAndYearTuple =>
+                locationIdentifierAndYearTuples.ForEach(locationIdentifierYearAndTreatmentTuple =>
                 {
-                    var project = projectsPerLocationIdentifierAndYearTuple[locationIdentifierAndYearTuple];
+                    var project = projectsPerLocationIdentifierYearAndTreatmentTuple[locationIdentifierYearAndTreatmentTuple];
 
                     // Add no treatment projects for each year from the first year of the analysis to the year
                     // prior to the committed project
                     var year = investmentPlan.FirstYearOfAnalysisPeriod;
                     while (year < project.Year &&
-                           !projectsPerLocationIdentifierAndYearTuple.ContainsKey((locationIdentifierAndYearTuple.Item1,
-                               year)))
+                           !projectsPerLocationIdentifierYearAndTreatmentTuple.Keys.Any(_ => _.Item1 == locationIdentifierYearAndTreatmentTuple.Item1 && _.Item2 == year))
                     {
                         var noTreatmentProjectId = Guid.NewGuid();
                         var noTreatmentProject = new SectionCommittedProjectDTO
@@ -435,7 +435,7 @@ namespace BridgeCareCore.Services
                             Id = noTreatmentProjectId,
                             SimulationId = project.SimulationId,
                             ScenarioBudgetId = null,
-                            LocationKeys = project.LocationKeys,
+                            LocationKeys = new Dictionary<string, string>(),
                             Treatment = NoTreatment,
                             Year = year,
                             ProjectSource = project.ProjectSource,
@@ -443,8 +443,11 @@ namespace BridgeCareCore.Services
                             ShadowForSameTreatment = 0,
                             Cost = 0,
                         };
+                        noTreatmentProject.LocationKeys = project.LocationKeys.ToDictionary(entry => entry.Key,entry => entry.Value);
+                        noTreatmentProject.LocationKeys["ID"] = Guid.NewGuid().ToString();
 
-                        projectsPerLocationIdentifierAndYearTuple.Add((locationIdentifierAndYearTuple.Item1, year),
+
+                        projectsPerLocationIdentifierYearAndTreatmentTuple.Add((locationIdentifierYearAndTreatmentTuple.Item1, year, NoTreatment),
                             noTreatmentProject);
 
                         year++;
@@ -452,7 +455,7 @@ namespace BridgeCareCore.Services
                 });
             }
 
-            return projectsPerLocationIdentifierAndYearTuple.Values.ToList();
+            return projectsPerLocationIdentifierYearAndTreatmentTuple.Values.ToList();
         }
 
         public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)

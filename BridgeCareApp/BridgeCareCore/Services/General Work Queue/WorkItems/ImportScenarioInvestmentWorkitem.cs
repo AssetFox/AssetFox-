@@ -60,7 +60,8 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastImportCompletion, new ImportCompletionDTO()
             {
                 Id = Metadata.DomainId,
-                WorkType = Metadata.WorkType
+                WorkType = Metadata.WorkType,
+                AreBudgetsOverWritten = OverwriteBudgets
             });
         }
 

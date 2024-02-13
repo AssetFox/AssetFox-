@@ -25,16 +25,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void Fill(ExcelWorksheet treatmentsWorksheet, SimulationOutput simulationOutput, Guid simulationId, Guid networkId, IReadOnlyCollection<SelectableTreatment> treatments, List<MaintainableAsset> networkMaintainableAssets)
+        public void Fill(ExcelWorksheet treatmentsWorksheet, SimulationOutput simulationOutput, Guid simulationId, Guid networkId, IReadOnlyCollection<SelectableTreatment> treatments, List<MaintainableAsset> networkMaintainableAssets, bool shouldBundleFeasibleTreatments)
         {
             var currentCell = AddHeadersCells(treatmentsWorksheet);
 
-            FillDynamicDataInWorkSheet(simulationOutput, treatmentsWorksheet, currentCell, simulationId, networkId, treatments, networkMaintainableAssets);            
+            FillDynamicDataInWorkSheet(simulationOutput, treatmentsWorksheet, currentCell, simulationId, networkId, treatments, networkMaintainableAssets, shouldBundleFeasibleTreatments);            
             treatmentsWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
             treatmentsWorksheet.Cells.AutoFitColumns();
         }
 
-        private void FillDynamicDataInWorkSheet(SimulationOutput simulationOutput, ExcelWorksheet treatmentsWorksheet, CurrentCell currentCell, Guid simulationId, Guid networkId, IReadOnlyCollection<SelectableTreatment> treatments, List<MaintainableAsset> networkMaintainableAssets)
+        private void FillDynamicDataInWorkSheet(SimulationOutput simulationOutput, ExcelWorksheet treatmentsWorksheet, CurrentCell currentCell, Guid simulationId, Guid networkId, IReadOnlyCollection<SelectableTreatment> treatments, List<MaintainableAsset> networkMaintainableAssets, bool shouldBundleFeasibleTreatments)
         {
             foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
             {
@@ -50,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
                     }
 
                     // Generate data model                    
-                    var treatmentDataModel = GenerateTreatmentDataModel(assetId, year, section, simulationId, networkId, treatments, networkMaintainableAssets, keyCashFlowFundingDetails);
+                    var treatmentDataModel = GenerateTreatmentDataModel(assetId, year, section, simulationId, networkId, treatments, networkMaintainableAssets, keyCashFlowFundingDetails, shouldBundleFeasibleTreatments);
 
                     // Fill in excel
                     currentCell = FillDataInWorksheet(treatmentsWorksheet, treatmentDataModel, currentCell);
@@ -105,7 +105,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
 
         private static void SetDecimalFormat(ExcelRange cell) => ExcelHelper.SetCustomFormat(cell, ExcelHelperCellFormat.DecimalPrecision3);
 
-        private TreatmentDataModel GenerateTreatmentDataModel(Guid assetId, SimulationYearDetail year, AssetDetail section, Guid simulationId, Guid networkId, IReadOnlyCollection<SelectableTreatment> treatments, List<MaintainableAsset> networkMaintainableAssets, Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails)
+        private TreatmentDataModel GenerateTreatmentDataModel(Guid assetId, SimulationYearDetail year, AssetDetail section, Guid simulationId, Guid networkId, IReadOnlyCollection<SelectableTreatment> treatments, List<MaintainableAsset> networkMaintainableAssets, Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails, bool shouldBundleFeasibleTreatments)
         {
             var appliedTreatment = section.AppliedTreatment;
             TreatmentDataModel treatmentDataModel = new TreatmentDataModel
@@ -163,15 +163,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
             var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
                                           section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
-            var treatmentConsideration = treatmentConsiderations.FirstOrDefault();// => _.TreatmentName == appliedTreatment);
-            treatmentDataModel.PriorityLevel = treatmentConsideration?.BudgetPriorityLevel;
+            var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                         treatmentConsiderations.FirstOrDefault() :
+                                         treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
 
+            treatmentDataModel.PriorityLevel = treatmentConsideration?.BudgetPriorityLevel;
             treatmentDataModel.TreatmentFundingIgnoresSpendingLimit = section.TreatmentFundingIgnoresSpendingLimit ? 1 : 0;
             treatmentDataModel.TreatmentCause = section.TreatmentCause.ToString();
             treatmentDataModel.TreatmentStatus = section.TreatmentStatus.ToString();
-            var budgetName = treatmentConsideration != null ? treatmentConsideration.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == year.Year).OrderByDescending(_ => _.AllocatedAmount).FirstOrDefault()?.BudgetName : string.Empty;
-            treatmentDataModel.Budget = budgetName;
-            treatmentDataModel.Category = treatments.FirstOrDefault(_ => _.Name == appliedTreatment)?.Category.ToString();
+          
+            var budgetsUsed = treatmentConsideration.FundingCalculationOutput?.AllocationMatrix?.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year).Select(_ =>
+                              _.BudgetName).Distinct().ToList() ?? new();
+            treatmentDataModel.Budget = string.Join(", ", budgetsUsed);
+            treatmentDataModel.Category = shouldBundleFeasibleTreatments && appliedTreatment.Contains("Bundle") ? PAMSConstants.Bundled : treatments.FirstOrDefault(_ => _.Name == appliedTreatment)?.Category.ToString();
 
             // Consequences
             var treatmentAttributeValues = new List<double>();

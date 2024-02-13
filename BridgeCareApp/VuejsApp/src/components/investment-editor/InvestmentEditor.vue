@@ -95,7 +95,6 @@
                               color="#2A578D"
                               class="ghd-checkbox"
                               label="Allow Funding Carryover"
-                              :disabled="!hasAdminAccess"
                               v-model="investmentPlan.shouldAccumulateUnusedBudgetAmounts"
                               @update:model-value='onEditInvestmentPlan("shouldAccumulateUnusedBudgetAmounts", $event)' />
                 </v-col>

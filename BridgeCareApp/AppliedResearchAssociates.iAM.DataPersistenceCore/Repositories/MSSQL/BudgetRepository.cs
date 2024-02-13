@@ -326,6 +326,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 committedProjects.ForEach(_ => _.ScenarioBudgetId = null);
                 _unitOfWork.Context.UpdateAll(committedProjects);
             }
+
+            _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
+                    _.ScenarioSelectableTreatment.SimulationId == simulationId && !entityIds.Contains(_.ScenarioBudgetId));
             
             _unitOfWork.Context.DeleteAll<ScenarioBudgetEntity>(_ =>
                 _.SimulationId == simulationId && !entityIds.Contains(_.Id));

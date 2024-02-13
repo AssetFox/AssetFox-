@@ -364,17 +364,21 @@ import { setItemPropertyValue } from '@/shared/utils/setter-utils';
         selectedAttribute.value = clone(stateSelectedAttribute.value);
     }
 
-    function saveAttribute(){
+    async function saveAttribute(){
         let isInsert = false;
+        let selectAttr = clone(selectedAttribute.value);
         if(selectedAttribute.value.id === getBlankGuid()){
-            selectedAttribute.value.id = getNewGuid();
+            selectAttr.id = getNewGuid();
             isInsert = true;
         }
             
-        upsertAttributeAction(selectedAttribute.value)
+        await upsertAttributeAction(selectAttr)
+        if(!isNil(stateAttributes.value.find(_ => _.id === selectAttr.id))){
+            selectedAttribute.value.id = selectAttr.id
+            if(isInsert)
+                selectAttributeItemValue.value = selectedAttribute.value.id;
+        }
         
-        if(isInsert)
-            selectAttributeItemValue.value = selectedAttribute.value.id;
     }
 
     function disableCrudButtons() {

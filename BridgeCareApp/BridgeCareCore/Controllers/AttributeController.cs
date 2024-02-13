@@ -5,8 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Controllers.BaseController;
@@ -114,6 +116,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var convertedAttributes = attributeDTOs.Select(AttributeService.ConvertAllAttribute).ToList();
+                convertedAttributes.ForEach(_ => checkAttributeNameValidity(_));
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributes);
@@ -147,6 +150,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var convertedAttributeDto = AttributeService.ConvertAllAttribute(attributeDto);
+                checkAttributeNameValidity(convertedAttributeDto);
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributeDto);
@@ -158,6 +162,14 @@ namespace BridgeCareCore.Controllers
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttribute {attributeDto.Name} - {e.Message}");
                 throw;
+            }
+        }
+
+        private void checkAttributeNameValidity(AttributeDTO attr)
+        {
+            if (attr.Name == null || !AppliedResearchAssociates.iAM.Analysis.Attribute.NamePattern.IsMatch(attr.Name))
+            {
+                throw new MalformedInputException($"Invalid name {attr.Name}. A valid attribute name must be alphanumeric and have no spaces");
             }
         }
 

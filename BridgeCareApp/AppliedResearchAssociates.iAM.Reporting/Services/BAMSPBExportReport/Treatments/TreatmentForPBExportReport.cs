@@ -148,7 +148,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             // Build keyCashFlowFundingDetails                    
                             if (assetDetailObject.TreatmentStatus != TreatmentStatus.Applied)
                             {
-                                var fundingSection = yearObject.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == brKey && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment);
+                                var fundingSection = yearObject.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == brKey && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment && _.AppliedTreatment == assetDetailObject.AppliedTreatment);
                                 if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(brKey))
                                 {
                                     keyCashFlowFundingDetails.Add(brKey, fundingSection?.TreatmentConsiderations ?? new());
@@ -158,7 +158,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             //get budget usages
                             // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
                             var treatmentConsiderations = assetDetailObject.TreatmentStatus == TreatmentStatus.Applied && assetDetailObject.TreatmentCause != TreatmentCause.CashFlowProject ? assetDetailObject.TreatmentConsiderations : keyCashFlowFundingDetails[brKey];
-                            var appliedTreatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == assetDetailObject.AppliedTreatment);
+                            var appliedTreatmentConsideration = treatmentConsiderations.FirstOrDefault();// _ => _.TreatmentName == assetDetailObject.AppliedTreatment);
                             var cost = appliedTreatmentConsideration == null ? 0 : Math.Round(appliedTreatmentConsideration.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearObject.Year)?.Sum(b => b.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis
                             var appliedTreatment = assetDetailObject.AppliedTreatment ?? "";
 

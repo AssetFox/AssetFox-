@@ -959,6 +959,39 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
 
+        public void GetScenarioSelectableTreatmentsForReport(Simulation simulation)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
+            {
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
+            }
+
+            if (!_unitOfWork.Context.ScenarioSelectableTreatment.Any(_ => _.SimulationId == simulation.Id))
+            {
+                return;
+            }
+
+            var treatments = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
+                .Where(_ => _.SimulationId == simulation.Id)
+                .Include(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
+                .ThenInclude(_ => _.ScenarioBudget)
+                .ThenInclude(_ => _.ScenarioBudgetAmounts)
+                .Include(_ => _.ScenarioTreatmentCosts)
+                .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.ScenarioTreatmentCosts)
+                .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .ToList();
+
+            var simpleTreatments = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
+                .Where(_ => _.SimulationId == simulation.Id).ToList();
+
+            treatments.ForEach(_ => _.CreateSelectableTreatment(simulation, simpleTreatments));
+        }
+
         private List<LibraryUserDTO> GetAccessForUser(Guid treatmentLibraryId, Guid userId)
         {
             var dtos = _unitOfWork.Context.TreatmentLibraryUser
@@ -968,7 +1001,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return dtos;
         }
 
-        private List<TreatmentDTO> GetScenarioSelectableTreatmentsWithCriterionLibrary(Guid simulationId)
+        public List<TreatmentDTO> GetScenarioSelectableTreatmentsWithCriterionLibrary(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {

@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Sta
                 {"Rehabilitation", TreatmentCategory.Rehabilitation },
                 { "Replacement", TreatmentCategory.Replacement },
                 { "Maintenance", TreatmentCategory.Maintenance },
-                { "Other", TreatmentCategory.Other }
+                { "Other", TreatmentCategory.Other },
             };
     }
 }

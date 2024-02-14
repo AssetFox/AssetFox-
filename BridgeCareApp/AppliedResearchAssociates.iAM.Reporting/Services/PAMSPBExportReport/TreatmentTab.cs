@@ -165,14 +165,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
                                           section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
             var treatmentConsideration = shouldBundleFeasibleTreatments ?
                                          treatmentConsiderations.FirstOrDefault() :
-                                         treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                                         treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);         
 
             treatmentDataModel.PriorityLevel = treatmentConsideration?.BudgetPriorityLevel;
             treatmentDataModel.TreatmentFundingIgnoresSpendingLimit = section.TreatmentFundingIgnoresSpendingLimit ? 1 : 0;
             treatmentDataModel.TreatmentCause = section.TreatmentCause.ToString();
             treatmentDataModel.TreatmentStatus = section.TreatmentStatus.ToString();
           
-            var budgetsUsed = treatmentConsideration.FundingCalculationOutput?.AllocationMatrix?.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year).Select(_ =>
+            var budgetsUsed = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix?.Where(_ => _.AllocatedAmount > 0).Select(_ =>
                               _.BudgetName).Distinct().ToList() ?? new();
             treatmentDataModel.Budget = string.Join(", ", budgetsUsed);
             treatmentDataModel.Category = shouldBundleFeasibleTreatments && appliedTreatment.Contains("Bundle") ? PAMSConstants.Bundled : treatments.FirstOrDefault(_ => _.Name == appliedTreatment)?.Category.ToString();

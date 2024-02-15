@@ -42,6 +42,11 @@
         ///<summary>
         /// The treatment that is outside scope of scenario criteria
         ///</summary>
-        WorkOutsideScope
+        WorkOutsideScope,
+
+        /// <summary>
+        /// Bundled treatments
+        /// </summary>
+        Bundled
     }
 }

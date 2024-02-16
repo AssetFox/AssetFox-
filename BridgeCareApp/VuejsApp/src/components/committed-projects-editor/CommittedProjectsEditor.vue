@@ -553,6 +553,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             categorySelectItems.value.push({text: cat, value: i})     
             i++   
         });
+        await getTreatmentLibrariesAction();
         await fetchTreatmentLibrary(scenarioId);
         hasScenario = true;
         await getNetworksAction();
@@ -573,7 +574,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
         });
         await getScenarioSimpleBudgetDetailsAction({scenarioId: scenarioId});
         await getAttributesAction();
-        await getTreatmentLibrariesAction();
+        
         await getCurrentUserOrSharedScenarioAction({simulationId: scenarioId});
         await selectScenarioAction({ scenarioId: scenarioId });
         await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: scenarioId, workType: WorkType.ImportCommittedProject}).then(response => {
@@ -583,7 +584,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
         });
         await initializePages();
         if (scenarioId !== undefined) {  
-            // await fetchTreatmentLibrary(scenarioId); Uncomment if it is really needed.
             await fetchProjectSources();
         }
 
@@ -645,8 +645,10 @@ import ConfirmDialog from 'primevue/confirmdialog';
             (treatment: SimpleTreatment) => (treatment.name)
         );
     };
+
     watch(selectedStateTreatmentLibrary, () => {
     });
+
     watch(stateScenarioSimpleBudgetDetails, () => {
         budgetSelectItems.value = stateScenarioSimpleBudgetDetails.value.map(
             (budget: SimpleBudgetDetail) => ({

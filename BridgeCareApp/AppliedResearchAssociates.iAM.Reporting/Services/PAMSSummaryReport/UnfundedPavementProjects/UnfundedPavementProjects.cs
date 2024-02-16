@@ -50,8 +50,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
             int headerRowIndex = 1; var headersRow = GetHeadersRow();
             for (int column = 0; column < headersRow.Count; column++)
             {
-                worksheet.Cells[headerRowIndex, column + 1].Style.WrapText = true;
-                worksheet.Cells[headerRowIndex, column + 1].Value = headersRow[column];                
+                var headerCell = worksheet.Cells[headerRowIndex, column + 1];
+                headerCell.Value = headersRow[column];
+                headerCell.Style.WrapText = true;
                 ExcelHelper.MergeCells(worksheet, headerRowIndex, column + 1, headerRowIndex + 1, column + 1);
             }
             
@@ -63,8 +64,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
                 autoFilterCells.AutoFilter = true;
             }
 
+            worksheet.DefaultColWidth = 13;
             worksheet.Row(headerRowIndex).Height = 40;
-            worksheet.Cells.Style.WrapText = false;
 
             return currentCell;
         }

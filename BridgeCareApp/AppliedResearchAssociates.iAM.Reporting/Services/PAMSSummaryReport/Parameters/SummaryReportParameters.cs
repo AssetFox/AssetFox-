@@ -310,9 +310,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Par
             var investmentGrid = new SortedDictionary<int, Dictionary<string, decimal?>>();
             var startYear = simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
 
-            var sortedBudgets = simulation.InvestmentPlan.Budgets.OrderBy(b => b.Name);
 
-            foreach (var budgets in sortedBudgets)
+            foreach (var budgets in simulation.InvestmentPlan.Budgets)
             {
                 var i = 0;
                 foreach (var item in budgets.YearlyAmounts)
@@ -337,6 +336,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Par
                     i++;
                 }
             }
+
+            var sortedInvestmentGrid = new SortedDictionary<int, Dictionary<string, decimal?>>();
+            foreach (var item in investmentGrid)
+            {
+                sortedInvestmentGrid[item.Key] = item.Value.OrderBy(_ => _.Key).ToDictionary(_ => _.Key, _ => _.Value);
+            }
+            investmentGrid = sortedInvestmentGrid;
 
             var firstRow = true;
             foreach (var item in investmentGrid)
@@ -388,7 +394,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Par
             ExcelHelper.MergeCells(worksheet, startingRowInvestment + 3, 2, startingRowInvestment + 3, 5);
             var cells = worksheet.Cells[startingRowInvestment + 3, 1, startingRowInvestment + 3, 2];
             ExcelHelper.ApplyStyle(cells);
-            foreach (var item in simulation.InvestmentPlan.BudgetConditions)
+
+            var sortedBudgetConditions = simulation.InvestmentPlan.BudgetConditions.OrderBy(_ => _.Budget.Name).ToList();
+
+            foreach (var item in sortedBudgetConditions)
             {
                 worksheet.Cells[startingRowInvestment + 4, 1].Value = item.Budget.Name;
                 worksheet.Cells[startingRowInvestment + 4, 2].Value = item.Criterion.Expression;

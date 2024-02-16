@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             TreatmentCategory.Preservation => "Preservation",
             TreatmentCategory.CapacityAdding => "Capacity Adding",
             TreatmentCategory.Rehabilitation => "Rehabilitation",
-            TreatmentCategory.Replacement => "Replacement",
+            TreatmentCategory.Reconstruction => "Reconstruction",
             TreatmentCategory.Maintenance => "Maintenance",
             TreatmentCategory.Other => "Other",
             TreatmentCategory.WorkOutsideScope => "Work Outside Scope/Jurisdiction",

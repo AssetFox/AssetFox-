@@ -554,7 +554,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             out int totalSpendingRow
             )
         {
-            var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement, TreatmentCategory.WorkOutsideScope, TreatmentCategory.Bundled };
+            var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Reconstruction, TreatmentCategory.WorkOutsideScope, TreatmentCategory.Bundled };
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "Work Type Totals", "Total (all years)");
 
@@ -652,7 +652,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells[startRow + 2, column + 2].Value = "Percentage spent on REHABILITATION";
 
             worksheet.Cells[startRow + 3, column + 1].Style.Numberformat.Format = "#0.00%";
-            worksheet.Cells[startRow + 3, column + 2].Value = "Percentage spent on REPLACEMENT";
+            worksheet.Cells[startRow + 3, column + 2].Value = "Percentage spent on RECONSTRUCTION";
 
             worksheet.Cells[startRow + 4, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 4, column + 2].Value = "Percentage spent on WORK OUTSIDE SCOPE/JURISDICTION";
@@ -691,7 +691,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     out int totalSpendingRow,
                     WorkSummaryByBudgetModel workSummaryByBudgetModel)
         {
-            var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement, TreatmentCategory.WorkOutsideScope, TreatmentCategory.Bundled };
+            var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Reconstruction, TreatmentCategory.WorkOutsideScope, TreatmentCategory.Bundled };
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "Work Type Totals", "Total (all years)");
 
@@ -788,7 +788,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells[startRow + 2, column + 2].Value = "Percentage spent on REHABILITATION";
 
             worksheet.Cells[startRow + 3, column + 1].Style.Numberformat.Format = "#0.00%";
-            worksheet.Cells[startRow + 3, column + 2].Value = "Percentage spent on REPLACEMENT";
+            worksheet.Cells[startRow + 3, column + 2].Value = "Percentage spent on RECONSTRUCTION";
 
             worksheet.Cells[startRow + 4, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 4, column + 2].Value = "Percentage spent on WORK OUTSIDE SCOPE/JURISDICTION";

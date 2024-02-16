@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Sta
                 {"Preservation", TreatmentCategory.Preservation },
                 { "Capacity Adding", TreatmentCategory.CapacityAdding },
                 {"Rehabilitation", TreatmentCategory.Rehabilitation },
-                { "Replacement", TreatmentCategory.Replacement },
+                { "Reconstruction", TreatmentCategory.Reconstruction },
                 { "Maintenance", TreatmentCategory.Maintenance },
                 { "Other", TreatmentCategory.Other },
             };

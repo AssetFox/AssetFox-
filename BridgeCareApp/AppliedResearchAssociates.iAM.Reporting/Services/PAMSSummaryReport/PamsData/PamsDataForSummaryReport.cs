@@ -45,20 +45,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 "CNTY NO",
                 "Route",                
 
-                "Length",
-                "Width",
-                "Pavement Depth",
+                "Length(ft)",
+                "Width(ft)",
+                "Pavement Depth(in)",
                 "Direction",
                 "Lanes",
                 "FamilyID",
                 "MPO/ RPO",
 
-                "Surface",
+                "Surface Type",
                 "BPN",
 
                 "Year Built",
                 "Year Last Resurface",
-                "Year Last  Structural overlay",
+                "Year Last  Structural Overlay",
 
                 "ADT",
                 "Truck %",
@@ -259,8 +259,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SEGMENT_LENGTH");
                 worksheet.Cells[rowNo, columnNo].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "WIDTH");
+                ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo++], ExcelHelperCellFormat.Number);
+                worksheet.Cells[rowNo, columnNo].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "DEPTH");
                 ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo++], ExcelHelperCellFormat.DecimalPrecision2);
-                worksheet.Cells[rowNo, columnNo++].Value = ""; // _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "DEPTH");
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DIRECTION");
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LANES");

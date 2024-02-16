@@ -309,7 +309,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Par
             var nextBudget = 0;
             var investmentGrid = new SortedDictionary<int, Dictionary<string, decimal?>>();
             var startYear = simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
-            foreach (var budgets in simulation.InvestmentPlan.Budgets)
+
+            var sortedBudgets = simulation.InvestmentPlan.Budgets.OrderBy(b => b.Name);
+
+            foreach (var budgets in sortedBudgets)
             {
                 var i = 0;
                 foreach (var item in budgets.YearlyAmounts)

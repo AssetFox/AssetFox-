@@ -293,7 +293,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            return _unitOfWork.Context.ScenarioBudget
+            var budgets = _unitOfWork.Context.ScenarioBudget
                 .AsNoTracking()
                 .AsSplitQuery()
                 .Where(_ => _.SimulationId == simulationId)
@@ -302,6 +302,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Select(_ => _.ToDto())
                 .ToList();
+            return budgets.OrderBy(_ => _.BudgetOrder).ToList();
         }
 
         public void UpsertOrDeleteScenarioBudgets(List<BudgetDTO> budgets, Guid simulationId)

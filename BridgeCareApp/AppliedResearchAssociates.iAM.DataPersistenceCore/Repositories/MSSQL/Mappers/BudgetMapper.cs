@@ -28,6 +28,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = dto.Id,
                 SimulationId = simulationId,
                 Name = dto.Name,
+                BudgetOrder = dto.BudgetOrder,
                 ScenarioBudgetAmounts = dto.BudgetAmounts.Select(_ => _.ToScenarioEntity(dto.Id, baseEntityProperties)).ToList()
             };
             var criterionLibraryDto = dto.CriterionLibrary;

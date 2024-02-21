@@ -311,20 +311,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var locations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
 
             // Determine the committed projects that exist
-            var allProvidedEntityIds = committedProjectEntities.Select(_ => _.Id).ToList();
-            var allExistingCommittedProjectIds = new List<Guid>();
  
             var groupedCpByYearTreatAsset = projects.GroupBy(_ => _.Year.ToString() + _.Treatment + _.LocationKeys[keyAttrDict[_.SimulationId]]).ToList();
             if(groupedCpByYearTreatAsset.Count < projects.Count)
             {
                 throw new Exception("Multiple committed projects cannot have the same year, treatment, and asset");
-            }
-            foreach (var simulation in simulationIds)
-            {
-                var simulationProjects = _unitOfWork.Context.CommittedProject
-                    .Where(_ => _.SimulationId == simulation && allProvidedEntityIds.Contains(_.Id))
-                    .Select(_ => _.Id);
-                allExistingCommittedProjectIds.AddRange(simulationProjects);
             }
             _unitOfWork.AsTransaction(() =>
             {                

@@ -962,14 +962,14 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
             }
             PerformanceCurveService.UpsertPerformanceCurveLibrary(upsertRequest).then(() => {
                 hasCreatedLibrary = true;
-                librarySelectItemValue.value = performanceCurveLibrary.id;
+                if(!hasScenario.value)
+                    librarySelectItemValue.value = performanceCurveLibrary.id;
                 
                 if(performanceCurveLibrary.performanceCurves.length == 0){
                     clearChanges();
                 }
 
                 performanceCurveLibraryMutator(performanceCurveLibrary);
-                selectedPerformanceCurveLibraryMutator(performanceCurveLibrary.id);
                 addSuccessNotificationAction({message:'Added deterioration model library'})
             })
         }

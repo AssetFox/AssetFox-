@@ -1038,8 +1038,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 }
                     pagination.page = 1;
                     budgetLibraryMutator(budgetLibrary); // mutation actions
-                    librarySelectItemValue.value = budgetLibrary.id;
-                    // selectedBudgetLibraryMutator(budgetLibrary.id);
+                    if(!hasScenario.value)
+                        librarySelectItemValue.value = budgetLibrary.id;
                     addSuccessNotificationAction({ message: 'Added budget library' })
                 }
             })

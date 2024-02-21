@@ -33,7 +33,7 @@
             >
             </v-select>
         </v-col>
-        <v-col class="ghd-blue ghd-button-text ghd-text-padding" style="border-style: solid;border-width: 2px; border-color: lightgray;margin-right: 5px;margin-bottom: 50px;">Treatments<br>
+        <v-col class="ghd-blue ghd-button-text ghd-text-padding" v-if='hasSelectedLibrary' style="border-style: solid;border-width: 2px; border-color: lightgray;margin-right: 5px;margin-bottom: 50px;">Treatments<br>
             <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
                 variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'
@@ -53,7 +53,7 @@
                     Upload
             </v-btn>
         </v-col>        
-        <v-col class="ghd-blue ghd-button-text ghd-text-padding" style="border-style: solid;border-width: 2px; border-color: lightgray;margin-bottom: 50px;">Supersede<br>
+        <v-col class="ghd-blue ghd-button-text ghd-text-padding" v-if='hasSelectedLibrary' style="border-style: solid;border-width: 2px; border-color: lightgray;margin-bottom: 50px;">Supersede<br>
             <v-btn :disabled='false' @click='OnDownloadSupersedeTemplateClick()'
                 variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'

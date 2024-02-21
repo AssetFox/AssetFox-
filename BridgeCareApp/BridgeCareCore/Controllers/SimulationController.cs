@@ -239,12 +239,15 @@ namespace BridgeCareCore.Controllers
                 var result = await Task.Factory.StartNew(() =>
                 {
                     _claimHelper.CheckUserSimulationModifyAuthorization(dto.ScenarioId, UserId);
-                    var isCompatible = _completeSimulationCloningService.CheckCompatibleNetworkAttributes(dto);
-                    if (!isCompatible)
+                    if (dto.DestinationNetworkId != dto.NetworkId)
                     {
-                        //Provide error message when networks are not compatible
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::CloneSimulation - destination network is not compatible.");
-                        return null;
+                        var isCompatible = _completeSimulationCloningService.CheckCompatibleNetworkAttributes(dto);
+                        if (!isCompatible)
+                        {
+                            //Provide error message when networks are not compatible
+                            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::CloneSimulation - destination network is not compatible.");
+                            return null;
+                        }
                     }
                     var cloneResult = _completeSimulationCloningService.Clone(dto);
                     return cloneResult;

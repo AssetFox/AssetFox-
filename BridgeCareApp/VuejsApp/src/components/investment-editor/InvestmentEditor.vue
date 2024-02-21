@@ -305,8 +305,9 @@
 
         <EditBudgetsDialog :dialogData='editBudgetsDialogData' @submit='onSubmitEditBudgetsDialogResult' />
 
-        <ImportExportInvestmentBudgetsDialog :showDialog='showImportExportInvestmentBudgetsDialog'
-                                             @submit='onSubmitImportExportInvestmentBudgetsDialogResult' />
+        <ImportExportInvestmentBudgetsDialog :showDialog='showImportExportInvestmentBudgetsDialog' :show-success-dialog="showSuccessImportDialog"
+                                             @submit='onSubmitImportExportInvestmentBudgetsDialogResult' 
+                                             @submit-success-import="onSuccessImportSubmit"/>
     </v-row>
 </v-card>
     <ConfirmDialog></ConfirmDialog>
@@ -480,6 +481,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let uuidNIL: string = getBlankGuid();
     let rules: InputValidationRules = validationRules;
     let showImportExportInvestmentBudgetsDialog = ref<boolean>(false);
+    let showSuccessImportDialog = ref<boolean>(false);
     let hasScenario = ref<boolean>(false);
     let hasInvestmentPlanForScenario = ref<boolean>(false);
     let hasCreatedLibrary: boolean = false;
@@ -1036,8 +1038,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 }
                     pagination.page = 1;
                     budgetLibraryMutator(budgetLibrary); // mutation actions
-                    librarySelectItemValue.value = budgetLibrary.id;
-                    // selectedBudgetLibraryMutator(budgetLibrary.id);
+                    if(!hasScenario.value)
+                        librarySelectItemValue.value = budgetLibrary.id;
                     addSuccessNotificationAction({ message: 'Added budget library' })
                 }
             })
@@ -1300,6 +1302,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
             }
         }
+    }
+
+    function onSuccessImportSubmit(isSuccess: boolean){
+        showSuccessImportDialog.value = isSuccess;
     }
 
     function defaultOnEditBudgetYearValue(value: number | null) {
@@ -1614,6 +1620,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             initializePages().then(async () => {
                 setAlertMessageAction('');
                 isSuccessfulImportMutator(true);
+                if(importComp.areBudgetsOverWritten)
+                    showSuccessImportDialog.value = true;
                 await getBudgetLibrariesAction()
                 if(hasScenario.value){                
                     investmentPlanMutator(investmentPlan.value);

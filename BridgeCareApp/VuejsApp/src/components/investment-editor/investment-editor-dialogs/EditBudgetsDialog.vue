@@ -23,7 +23,7 @@
                                   hide-actions
                                   item-key='id'
                                   v-model='selectedGridRows'                              
-                                  class="ghd-table">
+                                  class="ghd-table hide_table_scroll">
                                   <template #bottom></template>
                         <template slot='items' slot-scope='props' v-slot:item="props">
                          <tr>  
@@ -408,7 +408,7 @@ watch(dialogData,() => {
     padding: 5px;
 }
 
-.v-table__wrapper{
+.hide_table_scroll .v-table__wrapper{
     overflow: hidden;
 }
 </style>

@@ -1052,9 +1052,9 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                      clearChanges()
                      resetPage();
                      calculatedAttributeLibraryMutator(calculatedAttributeLibrary);
-                     selectedCalculatedAttributeLibraryMutator(calculatedAttributeLibrary.id);
                      addSuccessNotificationAction({message: "Updated calculated attribute library",});
-                     librarySelectItemValue.value = calculatedAttributeLibrary.id;
+                     if(!hasScenario.value)
+                        librarySelectItemValue.value = calculatedAttributeLibrary.id;
                      hasCreatedLibrary = true;
                 }   
             }))          

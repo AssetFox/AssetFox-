@@ -29,7 +29,8 @@ namespace BridgeCareCore.Services
               Id = Guid.NewGuid(),
               IsModified = treatment.IsModified,
               PerformanceFactors = treatment.PerformanceFactors,
-              SupersedeRules = new List<TreatmentSupersedeRuleDTO>()
+              SupersedeRules = new List<TreatmentSupersedeRuleDTO>(),
+              IsUnselectable = treatment.IsUnselectable,
             }; 
             return clone;
         }

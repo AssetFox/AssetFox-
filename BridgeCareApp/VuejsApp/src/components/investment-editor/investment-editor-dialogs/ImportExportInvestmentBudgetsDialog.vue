@@ -27,7 +27,7 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
-        <v-dialog max-width='400px' persistent v-model='isSuccessfulImport'>
+        <v-dialog max-width='450px' persistent v-model='showSuccessDialog'>
             <v-card>
                 <v-card-title class="title-padding">
                     <v-row justify="center">
@@ -35,8 +35,8 @@
                     </v-row>
                 </v-card-title>
                 <v-card-actions class="bottom-portion-padding">
-                    <v-row justify-space-between row>
-                        <v-btn @click="flipVisible()" variant = "outlined" class="ghd-blue ghd-button-text">Ok</v-btn>
+                    <v-row justify="center">
+                        <v-btn @click="successSubmit()" variant = "outlined" class="ghd-blue ghd-button-text">Ok</v-btn>
                     </v-row>
                 </v-card-actions>
                 
@@ -55,22 +55,25 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
 let store = useStore();
-const emit = defineEmits(['submit'])
+const emit = defineEmits(['submit', 'submitSuccessImport'])
 const props = defineProps<{
-    showDialog: boolean
+    showDialog: boolean,
+    showSuccessDialog: boolean
     }>()
-const { showDialog } = toRefs(props);
+const { showDialog, showSuccessDialog } = toRefs(props);
 
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('getAvailableReports');}
-function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImportMutator');}
+function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImportMutator', payload);}
 let isSuccessfulImport = computed<boolean>(() => store.state.investmentModule.isSuccessfulImport);
+const stateIsSuccessfuImport = computed<boolean>(() => store.state.investmentModule.isSuccessfulImport);
+const hasAdminAccess = computed<boolean>(()=> (store.state.authenticationModule.hasAdminAccess)); 
 
 let investmentBudgetsFile = ref<File | null>(null);
 let overwriteBudgets = ref(true);
 let closed = ref<boolean>(false);
 
-    function flipVisible(){
-        isSuccessfulImportMutator(!isSuccessfulImport.value)
+    function successSubmit(){    
+        emit('submitSuccessImport', false)
     }
 
     watch(()=>props.showDialog,() => {

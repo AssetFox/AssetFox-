@@ -758,7 +758,8 @@ import { getUrl } from '@/shared/utils/get-url';
             DeficientConditionGoalService.upsertDeficientConditionGoalLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     hasCreatedLibrary = true;
-                    librarySelectItemValue.value = library.id;
+                    if(!hasScenario.value)
+                        librarySelectItemValue.value = library.id;
                     
                     if(library.deficientConditionGoals.length == 0){
                         clearChanges();
@@ -770,7 +771,6 @@ import { getUrl } from '@/shared/utils/get-url';
                     }
                     
                     addedOrUpdatedDeficientConditionGoalLibraryMutator(library);
-                    selectedDeficientConditionGoalLibraryMutator(library.id);
                     addSuccessNotificationAction({message:'Added deficient condition goal library'})
                 }               
             })

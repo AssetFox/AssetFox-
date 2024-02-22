@@ -174,11 +174,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         {
             var asset = simulation.Network.Assets.Single(_ => _.Id == maintainableAssetId);
 
-            // Check for "colliding" CPs (a group of 2 or more CPs with the same asset-year). If CPs
-            // collide and at most one of the CPs is an active treatment, remove (duplicate) passive
-            // treatments. If more than one colliding CP is an active treatment, that's an error.
+            /* Allow multiple committed projects for the same asset in the same year, enforcing uniqueness based on treatment.
+                Projects can share the same asset and year as long as they involve different treatments. Adding a new project with 
+                a treatment already existing for the same asset and year results in an error, ensuring diversity in treatment 
+                strategies without duplication for any asset within a single year. */
 
-            void throwError_MultipleCommittedProjects(Exception innerException)
+            void throwError_DuplicateTreatmentProjects(Exception innerException, string treatmentName)
             {
                 string assetLabel;
                 if (keyPropertyNames is null)
@@ -192,7 +193,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     assetLabel = string.Join(", ", keyProperties);
                 }
 
-                throw new InvalidOperationException($"Asset ({assetLabel}) has multiple committed projects in year {entity.Year}.", innerException);
+                throw new InvalidOperationException($"Asset ({assetLabel}) has duplicate treatments in year {entity.Year}.", innerException);
             }
 
             try
@@ -202,12 +203,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     .Where(cp => (cp.Asset.Id, cp.Year) == (asset.Id, entity.Year))
                     .ToList();
 
-                var projectToAddHasActiveTreatment = entity.Name != noTreatmentEntity.Name;
-                var projectWithActiveTreatmentAlreadyExists = existingCommittedProjectsForThisAssetYear.Any(cp => cp.Name != noTreatmentEntity.Name);
+                var projectToAddTreatmentName = entity.Name;
+                // Check if a project with the same treatment name already exists for the asset and year.
+                var projectWithActiveTreatmentAlreadyExists = existingCommittedProjectsForThisAssetYear.Any(cp => cp.Name == projectToAddTreatmentName);
 
-                if (projectToAddHasActiveTreatment && projectWithActiveTreatmentAlreadyExists)
+                if (projectWithActiveTreatmentAlreadyExists)
                 {
-                    throwError_MultipleCommittedProjects(null);
+                    throwError_DuplicateTreatmentProjects(null, projectToAddTreatmentName);
                 }
 
                 var mainProject =
@@ -221,7 +223,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
             catch (InvalidOperationException e)
             {
-                throwError_MultipleCommittedProjects(e);
+                throwError_DuplicateTreatmentProjects(e, entity.Name);
             }
 
             var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, entity.Year));

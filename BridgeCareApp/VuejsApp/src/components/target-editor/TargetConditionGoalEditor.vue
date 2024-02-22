@@ -704,7 +704,8 @@ import { getUrl } from '@/shared/utils/get-url';
             TargetConditionGoalService.upsertTargetConditionGoalLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     hasCreatedLibrary = true;
-                    librarySelectItemValue.value = library.id;
+                    if(!hasScenario.value)
+                        librarySelectItemValue.value = library.id;
                     
                     if(library.targetConditionGoals.length == 0){
                         clearChanges();

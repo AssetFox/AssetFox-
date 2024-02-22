@@ -655,18 +655,17 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
             CashFlowService.upsertCashFlowRuleLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     hasCreatedLibrary = true;
-                    librarySelectItemValue.value = cashFlowRuleLibrary.id;
                     
                     if(cashFlowRuleLibrary.cashFlowRules.length == 0){
                         clearChanges();
                     }
-
+                    cashFlowRuleLibraryMutator(cashFlowRuleLibrary);
                     if(hasScenario.value){
                         scenarioHasCreatedNew = true;
                         importLibraryDisabled = true;
-                    }
-                    cashFlowRuleLibraryMutator(cashFlowRuleLibrary);
-                    selectedCashFlowRuleLibraryMutator(cashFlowRuleLibrary.id);
+                    }                   
+                    else
+                        librarySelectItemValue.value = cashFlowRuleLibrary.id;
                     addSuccessNotificationAction({message:'Added cash flow rule library'})
                 }               
             });

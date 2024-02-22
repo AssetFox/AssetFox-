@@ -648,14 +648,14 @@ import { getUrl } from '@/shared/utils/get-url';
             RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     hasCreatedLibrary.value = true;
-                    librarySelectItemValue.value = library.id;
+                    if(!hasScenario.value)
+                        librarySelectItemValue.value = library.id;
                     
                     if(library.remainingLifeLimits.length == 0){
                         clearChanges();
                     }
 
                     addedOrUpdatedRemainingLifeLimselectListItemsrefitLibraryMutator(library);
-                    selectedRemainingLifeLimitLibraryMutator(library.id);
                     addSuccessNotificationAction({message:'Added remaining life limit library'})
                 }               
             })

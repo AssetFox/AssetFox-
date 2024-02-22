@@ -698,6 +698,7 @@ import {
     emptyQueuedWork,
     QueuedWork,
     WorkType,
+CloneScenario,
 } from '@/shared/models/iAM/scenario';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AlertData, AlertDataWithButtons, AlertPreChecksData, emptyAlertData, emptyAlertDataWithButtons, emptyAlertPreChecksData } from '@/shared/models/modals/alert-data';
@@ -788,6 +789,7 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
     async function getSharedScenariosPageAction(payload?: any): Promise<any>{await store.dispatch('getSharedScenariosPage', payload)}
     async function createScenarioAction(payload?: any): Promise<any>{await store.dispatch('createScenario', payload)}
     async function cloneScenarioAction(payload?: any): Promise<any>{await store.dispatch('cloneScenario', payload)}
+    async function cloneScenarioWithDestinationNetworkAction(payload?:any): Promise<any>{await store.dispatch('cloneScenarioWithDestinationNetwork',payload)}
 
     async function updateScenarioAction(payload?: any): Promise<any>{await store.dispatch('updateScenario', payload)}
     async function deleteScenarioAction(payload?: any): Promise<any>{await store.dispatch('deleteScenario', payload)}
@@ -1761,7 +1763,7 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
             cloneScenarioAction({
                 scenarioId: selectedScenario.id,
             }).then(() => {
-                selectedScenario = clone(emptyScenario)
+                selectedScenario = clone(emptyScenario)               
                 if(tab.value == '0')
                     onUserScenariosPagination();
                 else
@@ -1770,15 +1772,11 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
         }
     }
 
-    function onCloneScenarioDialogSubmit(scenario: Scenario) {
+    function onCloneScenarioDialogSubmit(scenario: CloneScenario) {
         cloneScenarioDialogData.value = clone(emptyCloneScenarioDialogData);
 
         if (!isNil(scenario)) {
-            cloneScenarioAction({
-                scenarioId: scenario.id,
-                networkId: scenario.networkId,
-                scenarioName: scenario.name
-            }).then(() => {
+            cloneScenarioWithDestinationNetworkAction(scenario).then(() => {
                 selectedScenario = clone(emptyScenario)
                 onScenariosPagination();
             });
@@ -1948,8 +1946,9 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
     }
 
     function importCompleted(data: any){
-        var workType = data as WorkType
-        if(workType == WorkType.DeleteSimulation){
+        
+        var workType = data.workType as WorkType
+        if(workType  === WorkType.DeleteSimulation ){
             onScenariosPagination()
         }        
     }

@@ -199,7 +199,9 @@
                            
                             <div v-if="header.key !== 'year' && header.key !== 'action'">
                                 <editDialog :return-value.sync='item.item.values[header.key]'
-                                    @save='onEditBudgetYearValue(item.item.year, header.key, item.item.values[header.key])'
+                                    @click='defaultOnEditBudgetYearValue(item.item.values[header.key])'
+                                    @save='onEditBudgetYearValue(item.item.year, header.key, editValue)'
+                                    @cancel='onEditBudgetYearValue(item.item.year, header.key, item.item.values[header.key])'                                    
                                     size="large" lazy>
                                     <currencyTextbox readonly single-line class='sm-txt'
                                         variant="underlined"
@@ -207,7 +209,8 @@
                                         :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     <template v-slot:input>
                                         <currencyTextbox label='Edit' single-line
-                                            v-model.number='item.item.values[header.key]'                                             
+                                        @click='defaultOnEditBudgetYearValue(item.item.values[header.key])'
+                                            v-model.number='editValue'                                           
                                             :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                     </template>
                                 </editDialog>
@@ -302,8 +305,9 @@
 
         <EditBudgetsDialog :dialogData='editBudgetsDialogData' @submit='onSubmitEditBudgetsDialogResult' />
 
-        <ImportExportInvestmentBudgetsDialog :showDialog='showImportExportInvestmentBudgetsDialog'
-                                             @submit='onSubmitImportExportInvestmentBudgetsDialogResult' />
+        <ImportExportInvestmentBudgetsDialog :showDialog='showImportExportInvestmentBudgetsDialog' :show-success-dialog="showSuccessImportDialog"
+                                             @submit='onSubmitImportExportInvestmentBudgetsDialogResult' 
+                                             @submit-success-import="onSuccessImportSubmit"/>
     </v-row>
 </v-card>
     <ConfirmDialog></ConfirmDialog>
@@ -477,6 +481,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let uuidNIL: string = getBlankGuid();
     let rules: InputValidationRules = validationRules;
     let showImportExportInvestmentBudgetsDialog = ref<boolean>(false);
+    let showSuccessImportDialog = ref<boolean>(false);
     let hasScenario = ref<boolean>(false);
     let hasInvestmentPlanForScenario = ref<boolean>(false);
     let hasCreatedLibrary: boolean = false;
@@ -491,6 +496,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let loadedParentName: string = "";
     let loadedParentId: string = "";
     let newLibrarySelection: boolean = false;
+
+    let editValue = ref<number | null>(0);
 
     let originalFirstYear: number = 0
     let firstYearOfAnalysisPeriodShift = shallowRef<number>(0);
@@ -1031,8 +1038,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 }
                     pagination.page = 1;
                     budgetLibraryMutator(budgetLibrary); // mutation actions
-                    librarySelectItemValue.value = budgetLibrary.id;
-                    // selectedBudgetLibraryMutator(budgetLibrary.id);
+                    if(!hasScenario.value)
+                        librarySelectItemValue.value = budgetLibrary.id;
                     addSuccessNotificationAction({ message: 'Added budget library' })
                 }
             })
@@ -1295,6 +1302,14 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
             }
         }
+    }
+
+    function onSuccessImportSubmit(isSuccess: boolean){
+        showSuccessImportDialog.value = isSuccess;
+    }
+
+    function defaultOnEditBudgetYearValue(value: number | null) {
+        editValue.value = value !== null ? value : 0;
     }
 
     function onEditBudgetYearValue(year: number, budgetName: string, value: number) {//check out
@@ -1605,6 +1620,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             initializePages().then(async () => {
                 setAlertMessageAction('');
                 isSuccessfulImportMutator(true);
+                if(importComp.areBudgetsOverWritten)
+                    showSuccessImportDialog.value = true;
                 await getBudgetLibrariesAction()
                 if(hasScenario.value){                
                     investmentPlanMutator(investmentPlan.value);

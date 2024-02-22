@@ -676,14 +676,14 @@ import { vMaska } from "maska"
             }
             BudgetPriorityService.upsertBudgetPriorityLibrary(upsertRequest).then(() => {
                 hasCreatedLibrary = true;
-                librarySelectItemValue.value = budgetPriorityLibrary.id;
+                if(!hasScenario.value)
+                    librarySelectItemValue.value = budgetPriorityLibrary.id;
                 
                 if(budgetPriorityLibrary.budgetPriorities.length == 0){
                     clearChanges();
                 }
 
-                budgetPriorityLibraryMutator(budgetPriorityLibrary);
-                selectedBudgetPriorityLibraryMutator(budgetPriorityLibrary.id);                
+                budgetPriorityLibraryMutator(budgetPriorityLibrary);            
                 addSuccessNotificationAction({message:'Added budget priority library'})
             })
         }

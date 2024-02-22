@@ -123,6 +123,7 @@
                                             variant="underlined"
                                             v-model="item.item[header.key]"
                                             :rules="[inputRules['generalRules'].valueIsNotEmpty]"
+                                            :style="getTreatmentStyle(item.item[header.key])"
                                             @update:model-value="onEditCommittedProjectProperty(item.item,header.key,item.item[header.key])">
                                         </v-select>
                                         <v-select
@@ -278,7 +279,7 @@
             </v-row>
         </v-col> 
         <v-row justify="center">
-            <p v-if="importedProjectTreatmentBoolean" style="color: red;">The imported treatment is not found in the list of treatments. Please select a new treatment or add this treatment to run a scenario.</p>
+            <p v-if="importedProjectTreatmentBoolean" style="color: red; padding-bottom: 20px;">The following treatments have not been found in the treatment list: {{ missingTreatments.join(', ') }}</p>
         </v-row>
         <v-col cols = "8" style="border:1px solid #999999 !important;" v-if="selectedCommittedProject !== ''">
             <v-row column>
@@ -372,6 +373,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
     let importedProjectTreatmentName = ref<string>("");
     let importedProjectTreatmentBoolean = ref(false);
     let categories: string[] = [];
+    const missingTreatments = ref< string[] >([]);
+    const missingTreatmentsValue = ref< string[] >([]);
+    let allImportedTreatments;
     let scenarioId: string = getBlankGuid();
     let networkId: string = getBlankGuid();
     let inputRules: InputValidationRules = rules;
@@ -549,6 +553,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             categorySelectItems.value.push({text: cat, value: i})     
             i++   
         });
+        await getTreatmentLibrariesAction();
         await fetchTreatmentLibrary(scenarioId);
         hasScenario = true;
         await getNetworksAction();
@@ -569,7 +574,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
         });
         await getScenarioSimpleBudgetDetailsAction({scenarioId: scenarioId});
         await getAttributesAction();
-        await getTreatmentLibrariesAction();
+        
         await getCurrentUserOrSharedScenarioAction({simulationId: scenarioId});
         await selectScenarioAction({ scenarioId: scenarioId });
         await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: scenarioId, workType: WorkType.ImportCommittedProject}).then(response => {
@@ -579,7 +584,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
         });
         await initializePages();
         if (scenarioId !== undefined) {  
-            // await fetchTreatmentLibrary(scenarioId); Uncomment if it is really needed.
             await fetchProjectSources();
         }
 
@@ -641,8 +645,10 @@ import ConfirmDialog from 'primevue/confirmdialog';
             (treatment: SimpleTreatment) => (treatment.name)
         );
     };
+
     watch(selectedStateTreatmentLibrary, () => {
     });
+
     watch(stateScenarioSimpleBudgetDetails, () => {
         budgetSelectItems.value = stateScenarioSimpleBudgetDetails.value.map(
             (budget: SimpleBudgetDetail) => ({
@@ -675,9 +681,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
     async function onPaginationChanged() {
         if(isRunning)
         {
-            console.log(treatmentSelectItems.value);
             return;
         }
+        missingTreatments.value = [];
         isRunning = true
         checkHasUnsavedChanges();
         const { sort, descending, page, rowsPerPage } = projectPagination;
@@ -705,19 +711,50 @@ import ConfirmDialog from 'primevue/confirmdialog';
                     rowCache.value = clone(sectionCommittedProjects.value)
                     totalItems.value = data.totalItems;
                     const row = data.items.find(scp => scp.id == selectedCommittedProject.value);
+                    allImportedTreatments = data.items;
+
+                    //Check to see if any imported treatments are missing from the treatment list
                     for(let i = 0; i < data.items.length; i++)
                     {
+                        selectedCommittedProject.value;
                         importedProjectTreatmentName.value = data.items[i].treatment;
                         if(!treatmentSelectItems.value.includes(importedProjectTreatmentName.value))
                         {
                             importedProjectTreatmentBoolean.value = true;
-                            break;
+                            missingTreatments.value.push(importedProjectTreatmentName.value);
                         }
-                        else
+                    }
+
+                    //If there are mmissing treatments sort them with the missing at the top
+                    if(missingTreatments.value.length === 0)
                         {
                             importedProjectTreatmentBoolean.value = false;
                         }
-                    }
+                        else
+                        {
+                            missingTreatmentsValue.value = missingTreatments.value;
+
+                            const n = data.items.length;
+
+                            for (let i = 0; i < n - 1; i++) {
+                                for (let j = 0; j < n - i - 1; j++) {
+                                    const treatmentA = allImportedTreatments[j].treatment;
+                                    const treatmentB = allImportedTreatments[j + 1].treatment;
+
+                                    const isInMissingTreatmentsA = missingTreatments.value.includes(treatmentA);
+                                    const isInMissingTreatmentsB = missingTreatments.value.includes(treatmentB);
+
+                                    if (!isInMissingTreatmentsA && isInMissingTreatmentsB) {
+                                    const temp = allImportedTreatments[j];
+                                    allImportedTreatments[j] = allImportedTreatments[j + 1];
+                                    allImportedTreatments[j + 1] = temp;
+                                    }
+                                }
+                            }
+                            data.items = allImportedTreatments;
+                        }
+
+
                     if(isNil(row)) {
                         selectedCommittedProject.value = '';
                     }
@@ -1281,7 +1318,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 setAlertMessageAction('');
             })
         } 
-        console.log();
     }
 
     async function fetchTreatmentLibrary(simulationId: string) {
@@ -1318,6 +1354,12 @@ import ConfirmDialog from 'primevue/confirmdialog';
             })         
         } 
     }   
+
+    //Add red boxesa round missing treatments
+    const getTreatmentStyle = (treatment: string) => {
+    const isInMissingTreatments = missingTreatmentsValue.value.includes(treatment);
+    return isInMissingTreatments ? { border: '1px solid red', padding: '3px' } : {};
+    };
 
     async function initializePages(){
         const request: PagingRequest<SectionCommittedProject>= {

@@ -278,6 +278,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
             }
 
+            var keyAttrDict = new Dictionary<Guid, string>();
+            simulationIds.ForEach(_ =>
+            {
+                keyAttrDict[_] = GetNetworkKeyAttribute(_);
+            });
+
             // Test for existing budget
             var budgetIds = _unitOfWork.Context.ScenarioBudget.AsNoTracking()
                 .Where(_ => simulationIds.Contains(_.SimulationId))
@@ -299,20 +305,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var committedProjectEntities = projects.Select(p =>
                 {
                     AssignIdWhenNull(p);
-                    return p.ToEntity(attributes, GetNetworkKeyAttribute(p.SimulationId));
+                    return p.ToEntity(attributes, keyAttrDict[p.SimulationId]);
                 }).ToList();
 
             var locations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
 
             // Determine the committed projects that exist
-            var allProvidedEntityIds = committedProjectEntities.Select(_ => _.Id).ToList();
-            var allExistingCommittedProjectIds = new List<Guid>();
-            foreach (var simulation in simulationIds)
+ 
+            var groupedCpByYearTreatAsset = projects.GroupBy(_ => _.Year.ToString() + _.Treatment + _.LocationKeys[keyAttrDict[_.SimulationId]]).ToList();
+            if(groupedCpByYearTreatAsset.Count < projects.Count)
             {
-                var simulationProjects = _unitOfWork.Context.CommittedProject
-                    .Where(_ => _.SimulationId == simulation && allProvidedEntityIds.Contains(_.Id))
-                    .Select(_ => _.Id);
-                allExistingCommittedProjectIds.AddRange(simulationProjects);
+                throw new Exception("Multiple committed projects cannot have the same year, treatment, and asset");
             }
             _unitOfWork.AsTransaction(() =>
             {                

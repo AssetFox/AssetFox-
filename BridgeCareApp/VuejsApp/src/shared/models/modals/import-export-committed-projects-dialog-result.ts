@@ -2,5 +2,4 @@ import { ImportExportFilesDialogResult } from '@/shared/models/modals/import-exp
 
 export interface ImportExportCommittedProjectsDialogResult
     extends ImportExportFilesDialogResult {
-    applyNoTreatment: boolean;
 }

@@ -15,7 +15,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
 {
-    public record ImportCommittedProjectWorkItem(Guid SimulationId, ExcelPackage ExcelPackage, string Filename, bool ApplyNoTreatment, string UserId, string SimulationName) : IWorkSpecification<WorkQueueMetadata>
+    public record ImportCommittedProjectWorkItem(Guid SimulationId, ExcelPackage ExcelPackage, string Filename, string UserId, string SimulationName) : IWorkSpecification<WorkQueueMetadata>
 
     {
         public string WorkId => WorkQueueWorkIdFactory.CreateId(SimulationId, WorkType.ImportCommittedProject);
@@ -37,7 +37,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _committedProjectService = scope.ServiceProvider.GetRequiredService<ICommittedProjectService>();
             var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
-            _committedProjectService.ImportCommittedProjectFiles(SimulationId, ExcelPackage, Filename, ApplyNoTreatment, cancellationToken, _queueLogger);       
+            _committedProjectService.ImportCommittedProjectFiles(SimulationId, ExcelPackage, Filename, cancellationToken, _queueLogger);       
         }
 
         public void OnFault(IServiceProvider serviceProvider, string errorMessage)

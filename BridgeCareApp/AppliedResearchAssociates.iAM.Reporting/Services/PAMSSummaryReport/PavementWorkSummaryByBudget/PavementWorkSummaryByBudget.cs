@@ -181,7 +181,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                             });
                             committedTreatments.Add(section.AppliedTreatment);
                         }
-                        else if (section.TreatmentCause != TreatmentCause.NoSelection)
+                        else
                         {
                             // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
                             var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?

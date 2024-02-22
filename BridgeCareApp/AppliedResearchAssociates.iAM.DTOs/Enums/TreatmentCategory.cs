@@ -26,7 +26,7 @@
         /// <summary>
         /// The treatment will replace the exisiting asset
         /// </summary>
-        Replacement,
+        Reconstruction,
 
         /// <summary>
         /// Treatment is low-cost and usually applied according to a timed scehdule as opposed

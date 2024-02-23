@@ -295,7 +295,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (badBudgets.Any())
             {
                 var budgetList = new StringBuilder();
-                badBudgets.ForEach(budget => budgetList.Append(budget.ToString() + ", "));
+                badBudgets.ForEach(budget => budgetList.Append(budget.Id.ToString() + ", "));
                 throw new RowNotInTableException($"Unable to find the following budget IDs in its matching simulation: {budgetList}");
             }
 

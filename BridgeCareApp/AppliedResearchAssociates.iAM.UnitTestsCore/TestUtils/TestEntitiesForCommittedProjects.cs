@@ -236,6 +236,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 {
                     Id = TestDataForCommittedProjects.NetworkId,
                     Name = TestDataForCommittedProjects.NetworkName,
+                    KeyAttributeId = Guid.Parse("c31ea5bb-3d48-45bb-a68f-01ee75f17f0c"),
                     MaintainableAssets = MaintainableAssetEntities
                 },
                 CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>(),

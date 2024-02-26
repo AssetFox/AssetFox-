@@ -118,9 +118,12 @@
                                                         <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                                     </v-btn>
                                                     </div>
-                                                    <div v-else class='priority-criteria-output' style="width: 1000px;">
+                                                    <div style="display: flex; align-items: center;" v-else class='priority-criteria-output' >
                                                         <v-text-field readonly single-line class='sm-txt' variant="underlined"
-                                                                    :model-value='item.item.criteria' />                                        
+                                                                    :model-value='item.item.criteria' />   
+                                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' flat>
+                                                            <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>   
+                                                        </v-btn>                                  
                                                     </div>
                                             </template>
                                             <v-card>
@@ -339,7 +342,7 @@ import { vMaska } from "maska"
     let budgetPriorityGridHeaders: any[] = [
         { title: 'Priority', key: 'priorityLevel', align: 'left', sortable: true, class: '', width: '5%' },
         { title: 'Year', key: 'year', align: 'left', sortable: false, class: '', width: '5%' },
-        { title: 'Criteria', key: 'criteria', align: 'left', sortable: false, class: '', width: '5%' },
+        { title: 'Criteria', key: 'criteria', align: 'left', sortable: false, class: ''},
         actionHeader
     ];
     let selectedBudgetPriorityGridRows = ref<BudgetPriorityGridDatum[]>([]);

@@ -199,7 +199,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             Assert.Empty(committedProjects2);
 
             //second act
-            service.ImportCommittedProjectFiles(simulationId, excelPackage, fileInfo.FileName, true);
+            service.ImportCommittedProjectFiles(simulationId, excelPackage, fileInfo.FileName);
             var committedProjects3 = TestHelper.UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
             var id1 = committedProjects1[0].LocationKeys["ID"];
             var id3 = committedProjects3[0].LocationKeys["ID"];
@@ -304,7 +304,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             Assert.Empty(committedProjects2);
 
             //second act
-            service.ImportCommittedProjectFiles(simulationId, excelPackage, fileInfo.FileName, true);
+            service.ImportCommittedProjectFiles(simulationId, excelPackage, fileInfo.FileName);
             var committedProjects3 = TestHelper.UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
             var id1 = committedProjects1[0].LocationKeys["ID"];
             var id3 = committedProjects3[0].LocationKeys["ID"];

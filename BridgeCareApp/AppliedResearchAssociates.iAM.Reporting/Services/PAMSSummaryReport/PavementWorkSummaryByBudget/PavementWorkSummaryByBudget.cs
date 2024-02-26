@@ -184,15 +184,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         else
                         {
                             // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                            var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                                          section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
+                            var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause !=
+                                                          TreatmentCause.CashFlowProject ? section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
                             var budgetAmount = (double)treatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix
                                 .Where(b => b.BudgetName == summaryModel.BudgetName)
                                 .Sum(bu => bu.AllocatedAmount));
                             var treatmentData = selectableTreatments.FirstOrDefault(_ => _.Name == section.AppliedTreatment);
                             var category = section.AppliedTreatment.Contains("Bundle") ? TreatmentCategory.Bundled : treatmentData.Category;
-
-                            if (section.AppliedTreatment.Contains("Bundle")) { } // TODO remove later
 
                             var assetCategory = treatmentData != null ? (AssetCategories)treatmentData.AssetCategory : AssetCategories.Bridge; // TODO for Bundled
                             summaryModel.YearlyData.Add(new YearsData

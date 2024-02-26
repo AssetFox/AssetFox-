@@ -86,5 +86,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         public const string Work = "Work";
         public const string Yes = "Y";
         public const string No = "N";
+
+        public const string Bundled = "Bundled";
+        public const string BundledTreatments = "Bundled Treatments";
     }
 }

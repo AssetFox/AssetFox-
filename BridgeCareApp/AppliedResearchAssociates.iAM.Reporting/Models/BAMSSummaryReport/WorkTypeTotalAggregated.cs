@@ -12,5 +12,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport
         public Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> WorkTypeTotalSAP;
         public Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> WorkTypeTotalProjectBuilder;
         public Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> WorkTypeTotalWorkOutsideScope;
+        public Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> Bundled;
     }
 }

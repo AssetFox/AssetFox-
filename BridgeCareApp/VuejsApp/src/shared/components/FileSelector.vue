@@ -8,18 +8,12 @@
     </v-row>    
     <v-row justify="start">     
         <v-col cols="10">
-            <v-switch
-                color="#2A578D"
-                v-show="useTreatment"
-                label="No Treatment"
-                class="ghd-control-label ghd-md-gray Montserrat-font-family my-2"
-                v-model="applyNoTreatment"
-            />
         </v-col>
-    </v-row>
-    <div>
-        <input @update:model-value="onSelect($event.target.files)" id="file-select" type="file" hidden />
+        <div>
+        <input @change="onSelect($event.target.files)" id="file-select" type="file"  hidden/>
     </div>
+    </v-row>
+    
     <v-divider/>
     <div style="margin: 10px;">
         <v-data-table-virtual :headers="tableHeaders"
@@ -67,7 +61,6 @@ const { useTreatment, closed } = toRefs(props);
 
 async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
 
-    const applyNoTreatment = ref<boolean>(true);
     const fileSelect = ref<HTMLInputElement>({} as HTMLInputElement);
     let tableHeaders: any[] = [
         {title: 'Name', key: 'name', align: 'left', sortable: false, class: '', width: '50%'},
@@ -86,7 +79,7 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
 
     watch(file,()=>{        
         files.value = hasValue(file.value) ? [file.value as File] : [];                                   
-        emit('submit', file.value, applyNoTreatment.value);
+        emit('submit', file.value);
         (<HTMLInputElement>document.getElementById('file-select')!).value = '';
     });
 
@@ -97,10 +90,6 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
             fileSelect.value.value = '';
             (<HTMLInputElement>document.getElementById('file-select')!).value = '';
         }
-    });
-
-    watch(applyNoTreatment,()=>{
-        emit('treatment', applyNoTreatment.value);
     });
     
     onMounted(() => {

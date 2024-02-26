@@ -358,7 +358,6 @@ import ScenarioService from '@/services/scenario.service';
                 if (hasValue(result.file)) {
                     CommittedProjectsService.importCommittedProjects(
                         result.file,
-                        result.applyNoTreatment,
                         selectedScenarioId,
                     ).then((response: AxiosResponse) => {
                         if (

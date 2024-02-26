@@ -962,7 +962,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
             if (hasValue(result.file)) {
                 CommittedProjectsService.importCommittedProjects(
                     result.file,
-                    result.applyNoTreatment,
                     scenarioId,
                     ).then((response: any) =>{
                         setAlertMessageAction("Committed project import has been added to the work queue");                        

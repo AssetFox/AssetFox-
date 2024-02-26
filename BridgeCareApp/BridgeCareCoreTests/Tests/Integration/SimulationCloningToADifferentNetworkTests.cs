@@ -685,10 +685,11 @@ namespace BridgeCareCoreTests.Tests.Integration
             var locationIdentifier = RandomStrings.WithPrefix("Location");
             var location = Locations.Section(locationIdentifier);
             var maintainableAsset = new MaintainableAsset(assetId, destinationNetworkId, location, "[Deck_Area]");
+            var maintainableAssetLocationId = Guid.NewGuid();
             var maintainableAssetEntity = maintainableAsset.ToEntity(destinationNetworkId);
             var maintainableAssetLocation = new MaintainableAssetLocationEntity()
             {
-                Id = Guid.Parse("75b07f98-e168-438f-84b6-fcc57b3e3d8f"),
+                Id = maintainableAssetLocationId,
                 LocationIdentifier = "2",
                 Discriminator = DataPersistenceConstants.SectionLocation,
             };

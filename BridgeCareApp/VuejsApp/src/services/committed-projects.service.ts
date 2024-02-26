@@ -74,13 +74,11 @@ export default class CommittedProjectsService {
     }
     static importCommittedProjects(
         file: File,
-        applyNoTreatment: boolean,
         selectedScenarioId: string,
     ): AxiosPromise {
         let formData = new FormData();
 
         formData.append('file', file);
-        formData.append('applyNoTreatment', applyNoTreatment ? '1' : '0');
         formData.append('simulationId', selectedScenarioId);
 
         return coreAxiosInstance.post(

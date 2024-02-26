@@ -10,7 +10,7 @@
                         </v-btn>
 
                         <div style="margin: 40px;">
-                        <CommittedProjectsFileSelector :closed='closed' useTreatment='true' @treatment='onTreatmentChanged' @submit='onSubmitFileSelectorFile' />
+                        <CommittedProjectsFileSelector :closed='closed' useTreatment='true' @submit='onSubmitFileSelectorFile' />
                         </div>                    
                     </v-row>
                     <v-row justify="center" style="margin: 5px;width: 100%;">
@@ -50,7 +50,6 @@ import { useStore } from 'vuex';
     async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification',payload); }
 
     const committedProjectsFile = ref< File | null > ( null );
-    const applyNoTreatment = ref<boolean>(true);
     const closed = ref<boolean>(false);
 
     watch(showDialog, () => {
@@ -65,9 +64,8 @@ import { useStore } from 'vuex';
     /**
      * FileSelector submit event handler
      */
-    function onSubmitFileSelectorFile(file: File, treatment: boolean) {
+    function onSubmitFileSelectorFile(file: File) {
         committedProjectsFile.value = hasValue(file) ? clone(file) : null;
-        applyNoTreatment.value = treatment;
     }
 
     /**
@@ -77,7 +75,6 @@ import { useStore } from 'vuex';
         if (submit) {
             //todo: get rid of is export portion
             const result: ImportExportCommittedProjectsDialogResult = {
-                applyNoTreatment: applyNoTreatment.value,
                 file: committedProjectsFile.value as File,
                 isExport: isExport,
             };
@@ -85,12 +82,6 @@ import { useStore } from 'vuex';
         } else {
             emit('submit', null);
         }
-    }
-    /**
-     * Apply no treatment event handler
-     */
-    function onTreatmentChanged(treatment: boolean) {
-        applyNoTreatment.value = treatment;
     }
     /**
      * Dialog delete event handler

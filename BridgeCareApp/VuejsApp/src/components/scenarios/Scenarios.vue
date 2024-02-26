@@ -2013,7 +2013,6 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
                 if (hasValue(result.file)) {
                     CommittedProjectsService.importCommittedProjects(
                         result.file,
-                        result.applyNoTreatment,
                         selectedScenarioId,
                     ).then((response: AxiosResponse) => {
                         if (

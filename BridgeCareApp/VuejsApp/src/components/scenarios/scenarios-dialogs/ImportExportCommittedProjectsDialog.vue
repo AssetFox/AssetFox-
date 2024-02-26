@@ -52,7 +52,6 @@ import { getUrl } from '@/shared/utils/get-url';
     async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification', payload)}
 
     const committedProjectsFile = ref<File | null>(null);
-    const applyNoTreatment = ref< boolean >(true);
     const closed = ref< boolean >(false);
 
     watch(showDialog,()=> {
@@ -69,7 +68,6 @@ import { getUrl } from '@/shared/utils/get-url';
      */
     function onSubmitFileSelectorFile(file: File, treatment: boolean) {
         committedProjectsFile.value = hasValue(file) ? clone(file) : null;
-        applyNoTreatment.value = treatment;
     }
 
     /**
@@ -78,7 +76,6 @@ import { getUrl } from '@/shared/utils/get-url';
     function onSubmit(submit: boolean, isExport: boolean = false) {
         if (submit) {
             const result: ImportExportCommittedProjectsDialogResult = {
-                applyNoTreatment: applyNoTreatment.value,
                 file: committedProjectsFile.value as File,
                 isExport: isExport,
             };
@@ -86,12 +83,6 @@ import { getUrl } from '@/shared/utils/get-url';
         } else {
             emit('submit', null);
         }
-    }
-    /**
-     * Apply no treatment event handler
-     */
-    function onTreatmentChanged(treatment: boolean) {
-        applyNoTreatment.value = treatment;
     }
     /**
      * Dialog delete event handler

@@ -75,11 +75,15 @@ namespace BridgeCareCore.Services
             var baseEntityProperties = new BaseEntityProperties { CreatedBy = ownerId, LastModifiedBy = ownerId };
             var ownerName = _unitOfWork.CurrentUser?.Username;
             var cloneSimulation = CompleteSimulationCloner.Clone(sourceSimulation, dto, ownerId, ownerName);
-            //If the destination Network is different than the current network, change the network id to the destination id
-            if (dto.DestinationNetworkId != dto.NetworkId)
-            {
-                cloneSimulation.NetworkId = dto.DestinationNetworkId;
-            }
+            //Make sure the destination Network Id is not empty
+            if (dto.DestinationNetworkId != Guid.Empty)
+                {
+                   //If the destination Network is different than the current network, change the network id to the destination id
+                   if (dto.DestinationNetworkId != dto.NetworkId)
+                    {
+                        cloneSimulation.NetworkId = dto.DestinationNetworkId;
+                    }
+                }
 
             // save it
             var keyAttribute = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(dto.NetworkId);           

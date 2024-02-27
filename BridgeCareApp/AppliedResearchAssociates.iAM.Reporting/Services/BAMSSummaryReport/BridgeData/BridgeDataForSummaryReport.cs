@@ -626,11 +626,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
                     else
                     {
-                        worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, section.ProjectSource);
-                    }                    
+                        worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause);
+                    }
 
                     // If TreatmentStatus Applied it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?                             section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY] ?? new();
+                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                  section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY] ?? new();
                     var treatmentConsideration = shouldBundleFeasibleTreatments ?
                                                  treatmentConsiderations.FirstOrDefault() :
                                                  treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
@@ -655,7 +656,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     if (allocationMatrix?.Any() == true && cost > 0)
                     {
                         var budgetNames = allocationMatrix.Select(_ => _.BudgetName).Distinct().ToList();
-                        if (allocationMatrix.Count == 1 && budgetNames.Count == 1) //single budget
+                        if (budgetNames.Count == 1) //single budget
                         {
                             budgetName = budgetNames.First() ?? ""; // Budget
                             if (string.IsNullOrEmpty(budgetName) || string.IsNullOrWhiteSpace(budgetName))
@@ -709,14 +710,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column], ExcelFormatStrings.CurrencyWithoutCents);
-
+                    
                     if (!string.IsNullOrEmpty(recommendedTreatment) && !string.IsNullOrWhiteSpace(recommendedTreatment) && treatmentCategoryLookup.ContainsKey(recommendedTreatment))
                     {
                         worksheet.Cells[row, ++column].Value = treatmentCategoryLookup[recommendedTreatment]?.ToString(); // FHWA Work Type
                     }
                     else
                     {
-                        worksheet.Cells[row, ++column].Value = ""; // FHWA Work Type
+                        worksheet.Cells[row, ++column].Value = recommendedTreatment.Contains("Bundle") ? BAMSConstants.Bundled : ""; // FHWA Work Type
                     }
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
 

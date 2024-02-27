@@ -98,19 +98,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                             section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                         {
-                            var category = TreatmentCategory.Other;
-                            var categoryKey = treatmentCategoryLookup[section.AppliedTreatment];
-                            if (section.AppliedTreatment.Contains("Bundle"))
-                            {
-                                category = TreatmentCategory.Bundled;
-                            }
-                            else
-                            {
-                                if (map.ContainsKey(categoryKey))
-                                {
-                                    category = map[categoryKey];
-                                }
-                            }
+                            var category = section.AppliedTreatment.Contains("Bundle") ?
+                                           TreatmentCategory.Bundled :
+                                           (map.ContainsKey(treatmentCategoryLookup[section.AppliedTreatment]) ? map[treatmentCategoryLookup[section.AppliedTreatment]] : TreatmentCategory.Other);
+
                             summaryData.YearlyData.Add(new YearsData
                             {
                                 Year = yearData.Year,
@@ -214,10 +205,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 var rowTrackerForColoring = firstContentRow;
                 for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
                 {
-                    //if (workType == TreatmentCategory.Bundled && !shouldBundleFeasibleTreatments)
-                    //{
-                    //    continue;
-                    //}
                     var rowIndex = firstContentRow + (int)workType;
                     worksheet.Cells[rowIndex, 1].Value = workType.ToSpreadsheetString();
                     worksheet.Cells[rowIndex, 3, rowIndex, simulationYears.Count + 2].Value = 0.0;

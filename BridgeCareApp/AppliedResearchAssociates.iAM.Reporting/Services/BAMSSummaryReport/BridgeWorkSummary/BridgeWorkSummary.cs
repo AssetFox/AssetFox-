@@ -139,8 +139,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
 
                     // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                                  section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY];
+                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause !=
+                                                  TreatmentCause.CashFlowProject ? section.TreatmentConsiderations :
+                                                  keyCashFlowFundingDetails[section_BRKEY];
                     var treatmentConsideration = shouldBundleFeasibleTreatments ?
                                                         treatmentConsiderations.FirstOrDefault() :
                                                         treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
@@ -180,10 +181,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         }
 
                         // Remove from committedProjectsForWorkOutsideScope
-                        var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Treatment == appliedTreatment && _.Year == yearData.Year);
+                        var toRemove = committedProjectsForWorkOutsideScope.Where(_ => appliedTreatment.Contains(_.Treatment)); // Bundled has many treatment names under AppliedTreatment
                         if (toRemove != null)
                         {
-                            committedProjectsForWorkOutsideScope.Remove(toRemove);
+                            committedProjectsForWorkOutsideScope.RemoveAll(_ => toRemove.Contains(_));
                         }
 
                         continue;
@@ -224,6 +225,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             // if applied treatment is other than No Treatment
             else
             {
+                //TODO handle bundled and check if not committedproject, check other places..
                 if (!costAndCountPerTreatmentPerYear[year].ContainsKey(section.AppliedTreatment))
                 {
                     costAndCountPerTreatmentPerYear[year].Add(section.AppliedTreatment, (cost, 1));

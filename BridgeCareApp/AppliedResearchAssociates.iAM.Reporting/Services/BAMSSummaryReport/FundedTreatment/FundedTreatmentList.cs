@@ -8,7 +8,6 @@ using AppliedResearchAssociates.iAM.Reporting.Models;
 using MoreLinq;
 using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using static System.Collections.Specialized.BitVector32;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment
 {
@@ -141,17 +140,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
                 {
                     TreatmentCause.SelectedTreatment => "BAMS Pick",
                     TreatmentCause.ScheduledTreatment => "BAMS Pick",
-                    TreatmentCause.CommittedProject => "MPMS Pick",
+                    TreatmentCause.CommittedProject => "Committed",
                     TreatmentCause.CashFlowProject => "BAMS Pick CFB",
                     _ => throw new InvalidOperationException("Asset in funded treatment list has no treatment.")
                 });
 
             var treatmentName = treatmentOption?.TreatmentName ?? treatmentConsideration.TreatmentName;
             var treatmentCost = treatmentOption?.Cost ??
-                                (double)(treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_=>_.Year == year).Sum(b => b.AllocatedAmount) ?? 0);
+                                (double)(treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.
+                                Sum(b => b.AllocatedAmount) ?? 0);
 
             var budgetsUsed = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix
-                            .Where(_ => _.Year == year && _.TreatmentName == treatmentName && _.AllocatedAmount > 0)
+                            .Where(_ => treatmentName.Contains(_.TreatmentName) && _.AllocatedAmount > 0)
                             .Select(_ => _.BudgetName).Distinct().ToList()
                             ?? new();
             var budgetNames = budgetsUsed.Count > 0 ? string.Join(", ", budgetsUsed) : string.Empty;

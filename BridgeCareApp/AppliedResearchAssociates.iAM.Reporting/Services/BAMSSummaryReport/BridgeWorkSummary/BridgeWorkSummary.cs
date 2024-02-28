@@ -9,7 +9,6 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
-using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -157,7 +156,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         var committedCost = cost;
                         if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
                         {
-                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (committedCost, 1, section.ProjectSource, treatmentCategory));
+                            var projectSource = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment))?.ProjectSource.ToString();
+                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (committedCost, 1, projectSource, treatmentCategory));
                         }
                         else
                         {
@@ -224,18 +224,23 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
             // if applied treatment is other than No Treatment
             else
-            {
-                //TODO handle bundled and check if not committedproject, check other places..
-                if (!costAndCountPerTreatmentPerYear[year].ContainsKey(section.AppliedTreatment))
+            {                
+                var appliedTreatment = section.AppliedTreatment;
+                if (appliedTreatment.Contains("Bundle"))
                 {
-                    costAndCountPerTreatmentPerYear[year].Add(section.AppliedTreatment, (cost, 1));
+                    //TODO test bundled
+                    appliedTreatment = BAMSConstants.Bundled;
+                }
+                if (!costAndCountPerTreatmentPerYear[year].ContainsKey(appliedTreatment))
+                {
+                    costAndCountPerTreatmentPerYear[year].Add(appliedTreatment, (cost, 1));
                 }
                 else
                 {
-                    var values = costAndCountPerTreatmentPerYear[year][section.AppliedTreatment];
+                    var values = costAndCountPerTreatmentPerYear[year][appliedTreatment];
                     values.treatmentCost += cost;
                     values.bridgeCount += 1;
-                    costAndCountPerTreatmentPerYear[year][section.AppliedTreatment] = values;
+                    costAndCountPerTreatmentPerYear[year][appliedTreatment] = values;
                 }
             }
         }
@@ -258,13 +263,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
             else
             {
-                if (!countForCompletedProject[year].ContainsKey(section.AppliedTreatment))
+                var appliedTreatment = section.AppliedTreatment;
+                if (appliedTreatment.Contains("Bundle"))
+                {
+                    //TODO test bundled
+                    appliedTreatment = BAMSConstants.Bundled;
+                }
+                if (!countForCompletedProject[year].ContainsKey(appliedTreatment))
                 {
                     countForCompletedProject[year].Add(section.AppliedTreatment, 1);
                 }
                 else
                 {
-                    countForCompletedProject[year][section.AppliedTreatment] += 1;
+                    countForCompletedProject[year][appliedTreatment] += 1;
                 }
             }
         }

@@ -29,6 +29,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         public const string CombineNHSNonNHSConditionByBridgeCount = "Combine NHS and Non-NHS Condition By Bridge Count";
         public const string CombineNHSNonNHSConditionByDeckArea = "Combine NHS and Non-NHS Without Committed Projects\nCombine NHS and Non-NHS Without Committed Projects\nCondition By Deck Area";
         public const string CommittedTotal = "Committed Total";
+        public const string SAPTotal = "SAP Total";
+        public const string ProjectBuilderTotal = "Project Builder Total";
         public const string CulvDurationN = "CULV_DURATION_N";
         public const string Culvert = "culvert";
         public const string CulvertBridgeType = "C";

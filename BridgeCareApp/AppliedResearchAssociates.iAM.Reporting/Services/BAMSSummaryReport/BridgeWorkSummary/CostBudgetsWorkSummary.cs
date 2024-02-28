@@ -174,11 +174,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var firstContentRow = currentCell.Row;
             for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
             {
-                //if (workType == TreatmentCategory.Bundled && !shouldBundleFeasibleTreatments)
-                //{
-                //    continue;
-                //}
-
                 var rowIndex = firstContentRow + (int)workType;
                 worksheet.Cells[rowIndex, 1].Value = workType.ToSpreadsheetString();
 
@@ -388,7 +383,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var committedTotalRow = 0;
 
             var uniqueTreatments = new Dictionary<string, int>();
-            var costForTreatments = new Dictionary<string, decimal>();
+            //var costForTreatments = new Dictionary<string, decimal>();
             var map = WorkTypeMap.Map;
             // filling in the committed treatments in the excel TAB
             foreach (var yearlyItem in yearlyCostCommittedProj)
@@ -403,17 +398,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     {
                         if (!uniqueTreatments.ContainsKey(dataValue.treatmentCategory))
                         {
-                            uniqueTreatments.Add(dataValue.treatmentCategory, currentCell.Row);
-                            worksheet.Cells[row++, column].Value = dataValue.treatmentCategory;
+                            var key = data.Key.Contains("Bundle") ? data.Key : dataValue.treatmentCategory;
+                            uniqueTreatments.Add(key, currentCell.Row);
+                            worksheet.Cells[row++, column].Value = key;
                             var cellToEnterCost = yearlyItem.Key - startYear;
-                            worksheet.Cells[uniqueTreatments[dataValue.treatmentCategory], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
-                            costForTreatments.Add(dataValue.treatmentCategory, dataValue.treatmentCost);
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
+                            //costForTreatments.Add(key, dataValue.treatmentCost);
                             currentCell.Row += 1;
                         }
                         else
                         {
+                            var key = data.Key.Contains("Bundle") ? data.Key : dataValue.treatmentCategory;
                             var cellToEnterCost = yearlyItem.Key - startYear;
-                            worksheet.Cells[uniqueTreatments[dataValue.treatmentCategory], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
                         }
                         committedTotalCost += dataValue.treatmentCost;
 
@@ -481,7 +478,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var sapTotalRow = 0;
 
             var uniqueTreatments = new Dictionary<string, int>();
-            var costForTreatments = new Dictionary<string, decimal>();
+            //var costForTreatments = new Dictionary<string, decimal>();
             var map = WorkTypeMap.Map;
 
             foreach (var yearlyItem in yearlyCostSAPProj)
@@ -502,7 +499,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             var cellToEnterCost = yearlyItem.Key - startYear;
                             worksheet.Cells[uniqueTreatments[dataValue.treatmentCategory], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
 
-                            costForTreatments.Add(dataValue.treatmentCategory, dataValue.treatmentCost);
+                            //costForTreatments.Add(dataValue.treatmentCategory, dataValue.treatmentCost);
                             currentCell.Row += 1;
                         }
                         else
@@ -533,7 +530,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             column = currentCell.Column;
-            worksheet.Cells[currentCell.Row, column].Value = "SAP Total"; 
+            worksheet.Cells[currentCell.Row, column].Value = BAMSConstants.SAPTotal; 
             column++;
             var fromColumn = column + 1;
 
@@ -584,7 +581,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var projectBuilderTotalRow = 0;
 
             var uniqueTreatments = new Dictionary<string, int>();
-            var costForTreatments = new Dictionary<string, decimal>();
+            //var costForTreatments = new Dictionary<string, decimal>();
             var map = WorkTypeMap.Map;
 
             foreach (var yearlyItem in yearlyCostProjectBuilderProj)
@@ -605,7 +602,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             var cellToEnterCost = yearlyItem.Key - startYear + 2;
                             worksheet.Cells[uniqueTreatments[dataValue.treatmentCategory], column + cellToEnterCost].Value = dataValue.treatmentCost;
 
-                            costForTreatments.Add(dataValue.treatmentCategory, dataValue.treatmentCost);
+                            //costForTreatments.Add(dataValue.treatmentCategory, dataValue.treatmentCost);
                             currentCell.Row += 1;
                         }
                         else
@@ -636,7 +633,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             column = currentCell.Column;
-            worksheet.Cells[currentCell.Row, column].Value = "Project Builder Total"; 
+            worksheet.Cells[currentCell.Row, column].Value = BAMSConstants.ProjectBuilderTotal; 
             column++;
             var fromColumn = column + 1;
 

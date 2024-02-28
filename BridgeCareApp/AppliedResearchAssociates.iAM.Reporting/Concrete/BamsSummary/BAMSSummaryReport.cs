@@ -334,6 +334,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             // Pull best guess on committed project treatment categories here
+            var committedProjectsForWorkOutsideScope = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
             var committedProjectList = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
             var treatmentsToAdd = committedProjectList.Select(_ => _.Treatment).Where(_ => !treatmentCategoryLookup.ContainsKey(_));
             foreach (var newTreatment in treatmentsToAdd)
@@ -407,7 +408,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             // Bridge work summary TAB            
             var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
-            var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments, treatmentCategoryLookup, committedProjectList, simulation.ShouldBundleFeasibleTreatments);
+            var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments, treatmentCategoryLookup, committedProjectsForWorkOutsideScope, simulation.ShouldBundleFeasibleTreatments);
 
             checkCancelled(cancellationToken, simulationId);
             reportDetailDto.Status = $"Creating Bridge Work Summary by Budget TAB";
@@ -416,7 +417,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             // Bridge work summary by Budget TAB            
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
-            _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments, treatmentCategoryLookup, committedProjectList, simulation.ShouldBundleFeasibleTreatments);
+            _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments, treatmentCategoryLookup, committedProjectList, committedProjectsForWorkOutsideScope, simulation.ShouldBundleFeasibleTreatments);
             checkCancelled(cancellationToken, simulationId);
             reportDetailDto.Status = $"Creating District County Totals TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);

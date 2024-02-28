@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public bool IsComplete { get; private set; }
         public string Status { get; private set; }
         public string Criteria { get; set; }
-        private PAMSParameters _failedQuery = new PAMSParameters { County = "unknown", Routenum = 0, Segment = 0 };
+        private PAMSParameters _failedQuery = new PAMSParameters { County = "unknown", SR = 0, CRS = "0" };
 
         private List<SegmentAttributeDatum> _sectionData;
         private InventoryParameters sectionIds;
@@ -94,7 +94,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _sectionData = GetAsset(sectionIds);
             if (Errors.Count > 0) return; // Errors occured in the GetAsset method
 
-            var crspieces = _sectionData.FirstOrDefault(_ => _.Name == "CRS_Data").Value.Split(new[] { '_' }, 4);
+            var crspieces = _sectionData.FirstOrDefault(_ => _.Name == "CRS").Value.Split(new[] { '_' }, 4);
             var routeArray = crspieces[3].Split(new[] { '-' }, 2);
             _sectionData.Add(new SegmentAttributeDatum("FROMSEGMENT", routeArray[0]));
             _sectionData.Add(new SegmentAttributeDatum("TOSEGMENT", routeArray[1]));
@@ -152,12 +152,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             try
             {
                 queryDictionary.Add(allAttributes.Single(_ => _.Name == "COUNTY"), keyProperties.County);
-                queryDictionary.Add(allAttributes.Single(_ => _.Name == "SR"), keyProperties.Routenum.ToString());
-                queryDictionary.Add(allAttributes.Single(_ => _.Name == "Segment"), keyProperties.Segment.ToString());
+                queryDictionary.Add(allAttributes.Single(_ => _.Name == "SR"), keyProperties.SR.ToString());
+                queryDictionary.Add(allAttributes.Single(_ => _.Name == "Segment"), keyProperties.CRS.ToString());
             }
             catch
             {
-                var errorMessage = $"Unable to find the segment in the database (County: {keyProperties.County}, Route: {keyProperties.Routenum}, Segment: {keyProperties.Segment}";
+                var errorMessage = $"Unable to find the segment in the database (County: {keyProperties.County}, Route: {keyProperties.SR}, Segment: {keyProperties.CRS}";
                 Errors.Add(errorMessage);
                 return new List<SegmentAttributeDatum>();
                 //throw new RowNotInTableException(errorMessage);
@@ -208,7 +208,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             {
                 returnstr = "";
             }
-            else if (returnVal.Value == null)
+            else if (returnVal == null || returnVal.Value == null)
             {
                 returnstr = DEFAULT_VALUE;
             }

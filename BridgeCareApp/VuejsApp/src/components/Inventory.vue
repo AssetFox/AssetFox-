@@ -142,6 +142,9 @@
                 reactiveData.value[1].push(keyAttributeValues.value[i][j])
             }
 
+            //Remove duplicates from the County's
+            const noDupes = new Set(keyAttributeValues.value.map(element => element[0]));
+            reactiveData.value[0] = Array.from(noDupes);
         })
 
         watch(staticHTMLForInventory,()=>{
@@ -251,10 +254,6 @@
             selectedKeys[0] = "";
             keyAttributeValues.value = await setupSelectLists();
 
-            clearForm();
-        }
-
-        function clearForm() {
             store.state.inventoryModule.staticHTMLForInventory = null;
         }
 
@@ -293,7 +292,7 @@
                 }
                 };
 
-            if(reportType === 'P')
+            if(constraintDetails == "OR")
             {
                 for(let i = 0; i < inventoryDetails.value.length; i++){
                     if(i === index){
@@ -319,7 +318,10 @@
                 //Set the data equal to the dictionary
                 data.keyProperties = dictionary;
 
-                 getStaticInventoryHTMLAction({reportType: inventoryReportName, filterData: data.keyProperties}); 
+                if(selectedKeys.length == inventoryDetails.value.length)
+                {
+                    getStaticInventoryHTMLAction({reportType: inventoryReportName, filterData: data.keyProperties}); 
+                }
         }
 
         function QueryAccess() {

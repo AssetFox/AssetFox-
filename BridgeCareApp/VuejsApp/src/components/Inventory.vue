@@ -1,5 +1,5 @@
 <template> 
-     <div v-if="stateInventoryReportNames.length > 1" style="width: 300px; margin-left:650px">
+     <div v-if="stateInventoryReportNames.length > 1" style="width: 300px; margin-left:900px">
         <v-autocomplete
             v-model="inventoryReportName" 
             :items="stateInventoryReportNames"
@@ -251,10 +251,10 @@
                 selectedKeys[index] = '';
             })
             selectedInventoryIndex.value = [];
+            store.state.inventoryModule.staticHTMLForInventory = null;
             selectedKeys[0] = "";
             keyAttributeValues.value = await setupSelectLists();
 
-            store.state.inventoryModule.staticHTMLForInventory = null;
         }
 
         function onSelectInventoryItem(index: number){

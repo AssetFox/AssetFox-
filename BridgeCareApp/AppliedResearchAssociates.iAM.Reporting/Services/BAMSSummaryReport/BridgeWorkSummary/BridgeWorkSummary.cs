@@ -40,7 +40,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
             List<int> simulationYears, WorkSummaryModel workSummaryModel, Dictionary<string, Budget> yearlyBudgetAmount,
-            IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, bool shouldBundleFeasibleTreatments)
+            IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup,
+            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, bool shouldBundleFeasibleTreatments)
         {
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
@@ -98,13 +99,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         #region Private methods
 
         private void FillDataToUseInExcel(
-     SimulationOutput reportOutputData, Dictionary<int, Dictionary<string, decimal>> costPerBPNPerYear,
-     Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costAndCountPerTreatmentPerYear,
-     Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
-     Dictionary<int, Dictionary<string, int>> countForCompletedProject,
-     Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject,
-     Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
-     bool shouldBundleFeasibleTreatments)
+         SimulationOutput reportOutputData, Dictionary<int, Dictionary<string, decimal>> costPerBPNPerYear,
+         Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costAndCountPerTreatmentPerYear,
+         Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
+         Dictionary<int, Dictionary<string, int>> countForCompletedProject,
+         Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject,
+         Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
+         bool shouldBundleFeasibleTreatments)
         {
             var isInitialYear = true;
             Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
@@ -145,7 +146,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                                         treatmentConsiderations.FirstOrDefault() :
                                                         treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
                     var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
-                    var treatmentCategory = section.AppliedTreatment.Contains("Bundle") ? BAMSConstants.Bundled : treatmentCategoryLookup[appliedTreatment];
+                    var treatmentCategory = appliedTreatment.Contains("Bundle") ? BAMSConstants.Bundled : treatmentCategoryLookup[appliedTreatment];
                     var cost = treatmentConsiderations.
                                 Where(_ => _.TreatmentName?.ToLower() != BAMSConstants.NoTreatment && _.TreatmentName == appliedTreatment).
                                 Sum(_ => _.FundingCalculationOutput?.AllocationMatrix?.
@@ -228,7 +229,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 var appliedTreatment = section.AppliedTreatment;
                 if (appliedTreatment.Contains("Bundle"))
                 {
-                    //TODO test bundled
                     appliedTreatment = BAMSConstants.Bundled;
                 }
                 if (!costAndCountPerTreatmentPerYear[year].ContainsKey(appliedTreatment))
@@ -265,8 +265,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 var appliedTreatment = section.AppliedTreatment;
                 if (appliedTreatment.Contains("Bundle"))
-                {
-                    //TODO test bundled
+                {                    
                     appliedTreatment = BAMSConstants.Bundled;
                 }
                 if (!countForCompletedProject[year].ContainsKey(appliedTreatment))

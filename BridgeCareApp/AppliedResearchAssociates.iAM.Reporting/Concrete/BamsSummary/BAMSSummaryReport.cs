@@ -381,10 +381,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var fundedTreatmentWorksheet = excelPackage.Workbook.Worksheets.Add("Funded Treatment List");
             _fundedTreatmentList.Fill(fundedTreatmentWorksheet, reportOutputData, simulation.ShouldBundleFeasibleTreatments);
 
-            // unfunded tab will be uncommented and redone in a future release
-
             checkCancelled(cancellationToken, simulationId);
-            //// Unfunded Treatment - Final List TAB
+            // Unfunded Treatment - Final List TAB
             reportDetailDto.Status = $"Creating Unfunded Treatment - Final List TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
@@ -393,7 +391,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unfundedTreatmentFinalList.Fill(unfundedTreatmentFinalListWorksheet, reportOutputData);
 
             checkCancelled(cancellationToken, simulationId);
-            //// Unfunded Treatment - Time TAB
+            // Unfunded Treatment - Time TAB
             reportDetailDto.Status = $"Creating Unfunded Treatment - Time TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);

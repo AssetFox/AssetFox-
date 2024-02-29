@@ -86,7 +86,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         }
 
                         // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                        // TODO check cnt of treatmentConsiderations 
                         var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause !=
                                                       TreatmentCause.CashFlowProject ? section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY];
                         var treatmentConsideration = shouldBundleFeasibleTreatments ?
@@ -119,8 +118,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             committedTreatments.Add(appliedTreatment);
                             continue;
                         }
-                                                  
-                        var treatmentData = selectableTreatments.FirstOrDefault(_ => _.Name == appliedTreatment);
+
+                        var treatmentData = appliedTreatment.Contains("Bundle") ?
+                                            selectableTreatments.FirstOrDefault(_ => appliedTreatment.Contains(_.Name)) :
+                                            selectableTreatments.FirstOrDefault(_ => _.Name == appliedTreatment);
                         summaryData.YearlyData.Add(new YearsData
                         {
                             Year = yearData.Year,

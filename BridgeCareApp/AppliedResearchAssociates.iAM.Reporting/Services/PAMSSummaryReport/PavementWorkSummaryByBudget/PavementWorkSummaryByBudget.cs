@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var workSummaryByBudgetModels = CreateWorkSummaryByBudgetModels(reportOutputData);
             var committedTreatments = new HashSet<string>();            
 
-            SetupBudgetModelsAndCommittedTreatments(reportOutputData, selectableTreatments, workSummaryByBudgetModels, committedTreatments);
+            SetupBudgetModelsAndCommittedTreatments(reportOutputData, selectableTreatments, workSummaryByBudgetModels, committedTreatments, shouldBundleFeasibleTreatments);
 
             var simulationTreatments = new List<(string Name, AssetCategories AssetType, TreatmentCategory Category)>();
             foreach (var item in selectableTreatments)
@@ -134,7 +134,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells.AutoFitColumns();
         }
 
-        private void SetupBudgetModelsAndCommittedTreatments(SimulationOutput reportOutputData, IReadOnlyCollection<SelectableTreatment> selectableTreatments, List<WorkSummaryByBudgetModel> workSummaryByBudgetModels, HashSet<string> committedTreatments)
+        private void SetupBudgetModelsAndCommittedTreatments(SimulationOutput reportOutputData, IReadOnlyCollection<SelectableTreatment> selectableTreatments, List<WorkSummaryByBudgetModel> workSummaryByBudgetModels, HashSet<string> committedTreatments, bool shouldBundleFeasibleTreatments)
         {
             foreach (var summaryModel in workSummaryByBudgetModels)
             {                
@@ -186,13 +186,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                             // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
                             var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause !=
                                                           TreatmentCause.CashFlowProject ? section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
-                            var budgetAmount = (double)treatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix
-                                .Where(b => b.BudgetName == summaryModel.BudgetName)
-                                .Sum(bu => bu.AllocatedAmount));
-                            var treatmentData = selectableTreatments.FirstOrDefault(_ => _.Name == section.AppliedTreatment);
+                            var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                        treatmentConsiderations.FirstOrDefault() :
+                                                        treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                            var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
+                            var budgetAmount = (double)treatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.
+                                               Where(b => b.BudgetName == summaryModel.BudgetName).
+                                               Sum(bu => bu.AllocatedAmount) ?? 0);
+                            var treatmentData = appliedTreatment.Contains("Bundle") ?
+                                                selectableTreatments.FirstOrDefault(_ => appliedTreatment.Contains(_.Name)) :
+                                                selectableTreatments.FirstOrDefault(_ => _.Name == appliedTreatment);
                             var category = section.AppliedTreatment.Contains("Bundle") ? TreatmentCategory.Bundled : treatmentData.Category;
-
-                            var assetCategory = treatmentData != null ? (AssetCategories)treatmentData.AssetCategory : AssetCategories.Bridge; // TODO for Bundled
+                            var assetCategory = (AssetCategories)treatmentData.AssetCategory;
                             summaryModel.YearlyData.Add(new YearsData
                             {
                                 Year = yearData.Year,

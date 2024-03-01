@@ -180,7 +180,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _workQueueService.GetFastQueuedWorkByDomainIdAndWorkType(request.DomainId, request.WorkType));
+                var result = await Task.Factory.StartNew(() => _workQueueService.GetQueuedWorkByDomainIdAndWorkType(request.DomainId, request.WorkType));
                 return Ok(result);
             }
             catch (Exception e)

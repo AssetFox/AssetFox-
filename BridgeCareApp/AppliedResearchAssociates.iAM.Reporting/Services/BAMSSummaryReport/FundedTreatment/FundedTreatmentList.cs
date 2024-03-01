@@ -8,7 +8,6 @@ using AppliedResearchAssociates.iAM.Reporting.Models;
 using MoreLinq;
 using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using static System.Collections.Specialized.BitVector32;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment
 {
@@ -25,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void Fill(ExcelWorksheet fundedTreatmentWorksheet, SimulationOutput simulationOutput)
+        public void Fill(ExcelWorksheet fundedTreatmentWorksheet, SimulationOutput simulationOutput, bool shouldBundleFeasibleTreatments)
         {
             var currentCell = AddHeadersCells(fundedTreatmentWorksheet);
             
@@ -38,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
 
             fundedTreatmentWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
 
-            AddDynamicDataCells(fundedTreatmentWorksheet, simulationOutput, currentCell);
+            AddDynamicDataCells(fundedTreatmentWorksheet, simulationOutput, currentCell, shouldBundleFeasibleTreatments);
             fundedTreatmentWorksheet.Calculate();
 
             fundedTreatmentWorksheet.Cells.AutoFitColumns();
@@ -141,17 +140,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
                 {
                     TreatmentCause.SelectedTreatment => "BAMS Pick",
                     TreatmentCause.ScheduledTreatment => "BAMS Pick",
-                    TreatmentCause.CommittedProject => "MPMS Pick",
+                    TreatmentCause.CommittedProject => "Committed",
                     TreatmentCause.CashFlowProject => "BAMS Pick CFB",
                     _ => throw new InvalidOperationException("Asset in funded treatment list has no treatment.")
                 });
 
             var treatmentName = treatmentOption?.TreatmentName ?? treatmentConsideration.TreatmentName;
             var treatmentCost = treatmentOption?.Cost ??
-                                (double)(treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.Where(_=>_.Year == year).Sum(b => b.AllocatedAmount) ?? 0);
+                                (double)(treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.
+                                Sum(b => b.AllocatedAmount) ?? 0);
 
             var budgetsUsed = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix
-                            .Where(_ => _.Year == year && _.TreatmentName == treatmentName && _.AllocatedAmount > 0)
+                            .Where(_ => treatmentName.Contains(_.TreatmentName) && _.AllocatedAmount > 0)
                             .Select(_ => _.BudgetName).Distinct().ToList()
                             ?? new();
             var budgetNames = budgetsUsed.Count > 0 ? string.Join(", ", budgetsUsed) : string.Empty;
@@ -277,7 +277,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
             public bool IsAnalysisLengthExceeded { get; set; } = false;
         }
 
-        private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput simulationOutput, CurrentCell currentCell)
+        private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput simulationOutput, CurrentCell currentCell, bool shouldBundleFeasibleTreatments)
         {
             // facilityId, year, section, treatment
             var treatmentsPerSection = new SortedDictionary<int, List<FundedTreatmentReportInfo>>();
@@ -311,7 +311,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
                     // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
                     var treatmentConsiderations = asset.TreatmentStatus == TreatmentStatus.Applied && asset.TreatmentCause != TreatmentCause.CashFlowProject ?
                                                   asset.TreatmentConsiderations : keyCashFlowFundingDetails[id];
-                var treatmentConsideration = treatmentConsiderations.FirstOrDefault();// c => c.TreatmentName == asset.AppliedTreatment);
+                var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                             treatmentConsiderations.FirstOrDefault() :
+                                             treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == asset.AppliedTreatment);
 
                     var isCashFlowed = asset.TreatmentCause == TreatmentCause.CashFlowProject ||
                         treatmentConsiderations.Any(consideration =>

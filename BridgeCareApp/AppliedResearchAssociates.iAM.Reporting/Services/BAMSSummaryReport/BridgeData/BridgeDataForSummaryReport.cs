@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
         public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData
-            , Dictionary<string, string> treatmentCategoryLookup, bool allowFundingFromMultipleBudgets)
+            , Dictionary<string, string> treatmentCategoryLookup, bool allowFundingFromMultipleBudgets, bool shouldBundleFeasibleTreatments)
         {
             //set default width
             worksheet.DefaultColWidth = 13;
@@ -66,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             AddBridgeDataModelsCells(worksheet, reportOutputData, currentCell);
-            AddDynamicDataCells(worksheet, reportOutputData, currentCell, treatmentCategoryLookup, allowFundingFromMultipleBudgets);
+            AddDynamicDataCells(worksheet, reportOutputData, currentCell, treatmentCategoryLookup, allowFundingFromMultipleBudgets, shouldBundleFeasibleTreatments);
 
             //autofit columns
             worksheet.Cells.AutoFitColumns();
@@ -345,7 +345,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             return column;
         }
 
-        private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell, Dictionary<string, string> treatmentCategoryLookup, bool allowFundingFromMultipleBudgets)
+        private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell, Dictionary<string, string> treatmentCategoryLookup, bool allowFundingFromMultipleBudgets, bool shouldBundleFeasibleTreatments)
         {
             var initialRow = 6;
             var row = initialRow; // Data starts here
@@ -458,8 +458,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
                     var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
                                                   section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY];
-                    var appliedTreatmentConsideration = treatmentConsiderations.FirstOrDefault();// _ => _.TreatmentName == section.AppliedTreatment);
-                    var cost = appliedTreatmentConsideration == null ? 0 : Math.Round(appliedTreatmentConsideration.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearlySectionData.Year)?.Sum(b => b.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis                    
+                    var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                        treatmentConsiderations.FirstOrDefault() :
+                                                        treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
+                    var cost = treatmentConsideration == null ? 0 :
+                               Math.Round(treatmentConsideration.FundingCalculationOutput?.AllocationMatrix?.Sum(b => b.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis                    
                     var workCell = worksheet.Cells[row, column];
                     if (abbreviatedTreatmentNames.ContainsKey(section.AppliedTreatment))
                     {
@@ -533,6 +537,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         }
                         ExcelHelper.ApplyColor(worksheet.Cells[row, poorOnOffColumnStart], Color.LightGray);
                     }
+
+                    if (section.TreatmentCause == TreatmentCause.CashFlowProject)
+                    {
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, column, row, column + 1], Color.FromArgb(255, 0, 0));
+
+                        // Color the previous year project also
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, column - 2, row, column - 1], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, column - 2, row, column - 1], Color.FromArgb(255, 0, 0));
+                    }
+
                     ExcelHelper.ApplyLeftBorder(worksheet.Cells[row, column]);
                     ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column + 1]);
                     row++;
@@ -611,32 +626,25 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
                     else
                     {
-                        worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, section.ProjectSource);
+                        worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause);
                     }
-
-                    var recommendedTreatment = section.AppliedTreatment ?? ""; // Recommended Treatment
 
                     // If TreatmentStatus Applied it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied ? section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY] ?? new();
-                    var cost = Math.Round(treatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == sectionData.Year)?.Sum(_ => _.AllocatedAmount) ?? 0), 0); // Rounded cost to whole number based on comments from Jeff Davis
-
-                    //get budget usages
-                    var allocations = new List<Allocation>();
-                    var allocationMatrices = treatmentConsiderations.Select(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == sectionData.Year)).ToList() ?? new();
-                    foreach (var allocationMatrix in allocationMatrices)
-                    {
-                        if (allocationMatrix != null && allocationMatrix.Any())
-                        {
-                            allocations.AddRange(allocationMatrix);
-                        }
-                    }
+                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                  section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY] ?? new();
+                    var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                 treatmentConsiderations.FirstOrDefault() :
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
+                    var cost = Math.Round(allocationMatrix?.Sum(_ => _.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis
+                    var recommendedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment; // Recommended Treatment
 
                     //check budget usages
                     var budgetName = "";
-                    if (allocationMatrices?.Any() == true && cost > 0)
+                    if (allocationMatrix?.Any() == true && cost > 0)
                     {
-                        var budgetNames = allocations.Select(_ => _.BudgetName).Distinct().ToList();
-                        if (allocationMatrices.Count == 1 && budgetNames.Count() == 1) //single budget
+                        var budgetNames = allocationMatrix.Select(_ => _.BudgetName).Distinct().ToList();
+                        if (budgetNames.Count == 1) //single budget
                         {
                             budgetName = budgetNames.First() ?? ""; // Budget
                             if (string.IsNullOrEmpty(budgetName) || string.IsNullOrWhiteSpace(budgetName))
@@ -651,7 +659,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             {
                                 foreach (var allocationBudgetName in budgetNames)
                                 {
-                                    var multiYearBudgetCost = allocations.Where(_ => _.BudgetName == allocationBudgetName).Sum(_ => _.AllocatedAmount);
+                                    var multiYearBudgetCost = allocationMatrix.Where(_ => _.BudgetName == allocationBudgetName).Sum(_ => _.AllocatedAmount);
                                     var multiYearBudgetName = allocationBudgetName ?? ""; // Budget;
                                     if (string.IsNullOrEmpty(multiYearBudgetName) || string.IsNullOrWhiteSpace(multiYearBudgetName))
                                     {
@@ -690,14 +698,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column], ExcelFormatStrings.CurrencyWithoutCents);
-
+                    
                     if (!string.IsNullOrEmpty(recommendedTreatment) && !string.IsNullOrWhiteSpace(recommendedTreatment) && treatmentCategoryLookup.ContainsKey(recommendedTreatment))
                     {
                         worksheet.Cells[row, ++column].Value = treatmentCategoryLookup[recommendedTreatment]?.ToString(); // FHWA Work Type
                     }
                     else
                     {
-                        worksheet.Cells[row, ++column].Value = ""; // FHWA Work Type
+                        worksheet.Cells[row, ++column].Value = recommendedTreatment.Contains("Bundle") ? BAMSConstants.Bundled : ""; // FHWA Work Type
                     }
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
 

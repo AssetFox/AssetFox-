@@ -639,18 +639,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     var cost = Math.Round(allocationMatrix?.Sum(_ => _.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis
                     var recommendedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment; // Recommended Treatment
 
-                    // TODO remove below if no need!!
-                    ////get budget usages
-                    //var allocations = new List<Allocation>();
-                    //var allocationMatrices = treatmentConsiderations.Select(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == sectionData.Year)).ToList() ?? new();
-                    //foreach (var allocationMatrix in allocationMatrices)
-                    //{
-                    //    if (allocationMatrix != null && allocationMatrix.Any())
-                    //    {
-                    //        allocations.AddRange(allocationMatrix);
-                    //    }
-                    //}
-
                     //check budget usages
                     var budgetName = "";
                     if (allocationMatrix?.Any() == true && cost > 0)

@@ -173,7 +173,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
                 var aggregatedTreatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
                                               section.TreatmentConsiderations : keyCashFlowFundingDetails[brKey];
-                var includedBundles = aggregatedTreatmentConsiderations[0].TreatmentName;
+                var includedBundles = aggregatedTreatmentConsiderations.FirstOrDefault()?.TreatmentName;
                 var aggregatedTreatmentString = aggregatedTreatmentConsiderations.ToString();
                 var aggregatedTreatmentConsideration = aggregatedTreatmentConsiderations.FirstOrDefault();
 

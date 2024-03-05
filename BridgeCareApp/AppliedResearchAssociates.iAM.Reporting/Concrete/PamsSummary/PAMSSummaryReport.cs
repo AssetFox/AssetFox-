@@ -297,7 +297,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var worksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PAMSData_Tab);            
-            var workSummaryModel = _pamsDataForSummaryReport.Fill(worksheet, reportOutputData, simulation.ShouldBundleFeasibleTreatments);
+            var workSummaryModel = _pamsDataForSummaryReport.Fill(worksheet, reportOutputData, simulation.ShouldBundleFeasibleTreatments, committedProjectList);
 
             checkCancelled(cancellationToken, simulationId);
             //Filling up parameters tab

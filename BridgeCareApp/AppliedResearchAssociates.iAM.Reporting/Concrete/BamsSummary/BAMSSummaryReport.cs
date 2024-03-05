@@ -362,7 +362,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var bridgeDataWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.BridgeData);
             var allowFundingFromMultipleBudgets = simulation?.AnalysisMethod?.AllowFundingFromMultipleBudgets ?? false;
-            var workSummaryModel = _bridgeDataForSummaryReport.Fill(bridgeDataWorksheet, reportOutputData, treatmentCategoryLookup, allowFundingFromMultipleBudgets, simulation.ShouldBundleFeasibleTreatments);
+            var workSummaryModel = _bridgeDataForSummaryReport.Fill(bridgeDataWorksheet, reportOutputData, treatmentCategoryLookup, allowFundingFromMultipleBudgets, simulation.ShouldBundleFeasibleTreatments, committedProjectList);
             checkCancelled(cancellationToken, simulationId);
             // Fill Simulation parameters TAB
             reportDetailDto.Status = $"Creating Parameters TAB";

@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Common;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using static AppliedResearchAssociates.iAM.Analysis.Engine.FundingCalculationOutput;
@@ -43,7 +44,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
         public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData
-            , Dictionary<string, string> treatmentCategoryLookup, bool allowFundingFromMultipleBudgets, bool shouldBundleFeasibleTreatments)
+            , Dictionary<string, string> treatmentCategoryLookup, bool allowFundingFromMultipleBudgets, bool shouldBundleFeasibleTreatments, List<DTOs.Abstract.BaseCommittedProjectDTO> committedProjectList)
         {
             //set default width
             worksheet.DefaultColWidth = 13;
@@ -66,7 +67,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             AddBridgeDataModelsCells(worksheet, reportOutputData, currentCell);
-            AddDynamicDataCells(worksheet, reportOutputData, currentCell, treatmentCategoryLookup, allowFundingFromMultipleBudgets, shouldBundleFeasibleTreatments);
+            AddDynamicDataCells(worksheet, reportOutputData, currentCell, treatmentCategoryLookup, allowFundingFromMultipleBudgets, shouldBundleFeasibleTreatments, committedProjectList);
 
             //autofit columns
             worksheet.Cells.AutoFitColumns();
@@ -345,7 +346,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             return column;
         }
 
-        private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell, Dictionary<string, string> treatmentCategoryLookup, bool allowFundingFromMultipleBudgets, bool shouldBundleFeasibleTreatments)
+        private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell, Dictionary<string, string> treatmentCategoryLookup, bool allowFundingFromMultipleBudgets, bool shouldBundleFeasibleTreatments, List<DTOs.Abstract.BaseCommittedProjectDTO> committedProjectList)
         {
             var initialRow = 6;
             var row = initialRow; // Data starts here
@@ -626,7 +627,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
                     else
                     {
-                        worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause);
+                        var projectSource = committedProjectList.FirstOrDefault(_ => section.AppliedTreatment.Contains(_.Treatment))?.ProjectSource.ToString() ?? string.Empty;
+                        worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, projectSource);
                     }
 
                     // If TreatmentStatus Applied it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict

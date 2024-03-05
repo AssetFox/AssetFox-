@@ -7,6 +7,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models
 
         public int SR { get; set; }
 
-        public string CRS { get; set; }
+        public string Segment { get; set; }
     }
 }

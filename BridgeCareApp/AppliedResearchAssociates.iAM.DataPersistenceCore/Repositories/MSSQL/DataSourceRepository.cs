@@ -94,7 +94,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             List<List<int>> indices = new();
             foreach (KeyValuePair<AttributeDTO, string> kvp in dictionary)
             {
-                if(kvp.Key.Command == "SEG") { kvp.Key.Command = "CRS_DATA"; }
                 List<int> ints = new();
                 foreach (var column in worksheet.Columns)
                     for (int i = 1; i < column.Entries.Count; i++)

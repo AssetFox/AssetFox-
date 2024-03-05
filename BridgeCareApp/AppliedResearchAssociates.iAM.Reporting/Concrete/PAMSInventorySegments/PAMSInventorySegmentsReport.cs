@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public bool IsComplete { get; private set; }
         public string Status { get; private set; }
         public string Criteria { get; set; }
-        private PAMSParameters _failedQuery = new PAMSParameters { County = "unknown", SR = 0, CRS = "0" };
+        private PAMSParameters _failedQuery = new PAMSParameters { County = "unknown", SR = 0, Segment = "0" };
 
         private List<SegmentAttributeDatum> _sectionData;
         private InventoryParameters sectionIds;
@@ -153,11 +153,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
             {
                 queryDictionary.Add(allAttributes.Single(_ => _.Name == "COUNTY"), keyProperties.County);
                 queryDictionary.Add(allAttributes.Single(_ => _.Name == "SR"), keyProperties.SR.ToString());
-                queryDictionary.Add(allAttributes.Single(_ => _.Name == "Segment"), keyProperties.CRS.ToString());
+                queryDictionary.Add(allAttributes.Single(_ => _.Name == "Segment"), keyProperties.Segment.ToString());
             }
             catch
             {
-                var errorMessage = $"Unable to find the segment in the database (County: {keyProperties.County}, Route: {keyProperties.SR}, Segment: {keyProperties.CRS}";
+                var errorMessage = $"Unable to find the segment in the database (County: {keyProperties.County}, Route: {keyProperties.Segment}, Segment: {keyProperties.CRS}";
                 Errors.Add(errorMessage);
                 return new List<SegmentAttributeDatum>();
                 //throw new RowNotInTableException(errorMessage);

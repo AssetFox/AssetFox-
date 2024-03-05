@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
@@ -79,8 +77,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
             case TreatmentCause.ScheduledTreatment:
             case TreatmentCause.SelectedTreatment:
                 return "PAMS Pick";
-            case TreatmentCause.CommittedProject:                
-                return "Committed";
+            case TreatmentCause.CommittedProject:
+                return string.IsNullOrEmpty(projectSource) ? "Committed" : projectSource;
             default:
                 return treatmentCause.ToString();
             }

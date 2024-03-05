@@ -112,7 +112,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
             }
         }
 
-        public static string GetNonCashFlowProjectPick(TreatmentCause treatmentCause)
+        public static string GetNonCashFlowProjectPick(TreatmentCause treatmentCause, string projectSource)
         {
             switch (treatmentCause)
             {
@@ -120,8 +120,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
             case TreatmentCause.ScheduledTreatment:
             case TreatmentCause.SelectedTreatment:
                 return "BAMS Pick";
-            case TreatmentCause.CommittedProject:                
-                return "Committed";
+            case TreatmentCause.CommittedProject:
+                return string.IsNullOrEmpty(projectSource) ? "Committed" : projectSource;
             default:
                 return treatmentCause.ToString();
             }

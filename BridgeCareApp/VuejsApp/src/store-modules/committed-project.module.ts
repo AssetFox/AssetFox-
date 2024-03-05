@@ -107,8 +107,7 @@ const actions = {
     async importCommittedProjects( { commit, dispatch }: any,payload: any,){
         await CommittedProjectsService.importCommittedProjects(
             payload.file,
-            payload.applyNoTreatment,
-            payload.selectedScenarioId,
+            payload.selectedScenarioId
         ).then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
                 //todo more needs to be done here

@@ -249,7 +249,7 @@ namespace BridgeCareCore.Services
          * Creates CommittedProjectDTO data for Committed Project Import
          */
         private List<SectionCommittedProjectDTO> CreateSectionCommittedProjectsForImport(Guid simulationId,
-            ExcelPackage excelPackage, string filename, bool applyNoTreatment)
+            ExcelPackage excelPackage, string filename)
         {
             // First, get the simulation
             var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -411,54 +411,10 @@ namespace BridgeCareCore.Services
                 projectsPerLocationIdentifierYearAndTreatmentTuple.Add((locationIdentifier, projectYear, treatment), project);
             }
 
-            // Apply required no treatment entries if required by the user
-            if (applyNoTreatment && projectsPerLocationIdentifierYearAndTreatmentTuple.Keys.Any(_ =>
-                _.Item2 > investmentPlan.FirstYearOfAnalysisPeriod))
-            {
-                // Loop through committed projects that do not start in the initial year
-                // (Projects in the initial year do not require No Treatment variables)
-                var locationIdentifierAndYearTuples = projectsPerLocationIdentifierYearAndTreatmentTuple.Keys
-                    .Where(_ => _.Item2 > investmentPlan.FirstYearOfAnalysisPeriod).ToList();
-                locationIdentifierAndYearTuples.ForEach(locationIdentifierYearAndTreatmentTuple =>
-                {
-                    var project = projectsPerLocationIdentifierYearAndTreatmentTuple[locationIdentifierYearAndTreatmentTuple];
-
-                    // Add no treatment projects for each year from the first year of the analysis to the year
-                    // prior to the committed project
-                    var year = investmentPlan.FirstYearOfAnalysisPeriod;
-                    while (year < project.Year &&
-                           !projectsPerLocationIdentifierYearAndTreatmentTuple.Keys.Any(_ => _.Item1 == locationIdentifierYearAndTreatmentTuple.Item1 && _.Item2 == year))
-                    {
-                        var noTreatmentProjectId = Guid.NewGuid();
-                        var noTreatmentProject = new SectionCommittedProjectDTO
-                        {
-                            Id = noTreatmentProjectId,
-                            SimulationId = project.SimulationId,
-                            ScenarioBudgetId = null,
-                            LocationKeys = new Dictionary<string, string>(),
-                            Treatment = NoTreatment,
-                            Year = year,
-                            ProjectSource = project.ProjectSource,
-                            ShadowForAnyTreatment = 0,
-                            ShadowForSameTreatment = 0,
-                            Cost = 0,
-                        };
-                        noTreatmentProject.LocationKeys = project.LocationKeys.ToDictionary(entry => entry.Key,entry => entry.Value);
-                        noTreatmentProject.LocationKeys["ID"] = Guid.NewGuid().ToString();
-
-
-                        projectsPerLocationIdentifierYearAndTreatmentTuple.Add((locationIdentifierYearAndTreatmentTuple.Item1, year, NoTreatment),
-                            noTreatmentProject);
-
-                        year++;
-                    }
-                });
-            }
-
             return projectsPerLocationIdentifierYearAndTreatmentTuple.Values.ToList();
         }
 
-        public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
+        public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
             queueLog ??= new DoNothingWorkQueueLog();
             _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
@@ -469,7 +425,7 @@ namespace BridgeCareCore.Services
                 return;
             queueLog.UpdateWorkQueueStatus("Creating Committed Projects");
             var committedProjectDTOs =
-              CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, applyNoTreatment);
+              CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename);
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return;
             queueLog.UpdateWorkQueueStatus("Deleting Old Committed Projects");

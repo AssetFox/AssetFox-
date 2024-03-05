@@ -76,19 +76,13 @@ namespace BridgeCareCore.Controllers
                 var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
                 var filename = ContextAccessor.HttpContext.Request.Form.Files[0].FileName;
 
-                var applyNoTreatment = false;
-                if (ContextAccessor.HttpContext.Request.Form.ContainsKey("applyNoTreatment"))
-                {
-                    applyNoTreatment = ContextAccessor.HttpContext.Request.Form["applyNoTreatment"].ToString() == "1";
-                }
-
                 var siulationName = "";
                 await Task.Factory.StartNew(() =>
                 {
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     siulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
                 });
-                ImportCommittedProjectWorkItem workItem = new ImportCommittedProjectWorkItem(simulationId, excelPackage, filename,applyNoTreatment, UserInfo.Name, siulationName);
+                ImportCommittedProjectWorkItem workItem = new ImportCommittedProjectWorkItem(simulationId, excelPackage, filename, UserInfo.Name, siulationName);
                 var analysisHandle = _generalWorkQueueService.CreateAndRunInFastQueue(workItem);
 
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastFastWorkQueueUpdate, simulationId.ToString());

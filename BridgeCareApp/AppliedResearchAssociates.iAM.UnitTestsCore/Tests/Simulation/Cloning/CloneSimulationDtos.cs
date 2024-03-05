@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationCloning
                 Id = Guid.NewGuid(),
                 NetworkId = networkId,
                 ScenarioId = sourceSimulationId,
-                ScenarioName = newSimulationName
+                ScenarioName = newSimulationName,
             };
             return dto;
         }

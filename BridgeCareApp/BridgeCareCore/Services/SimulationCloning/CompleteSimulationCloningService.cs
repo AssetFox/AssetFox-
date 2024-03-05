@@ -91,7 +91,7 @@ namespace BridgeCareCore.Services
             var scenarioAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetAttributeIdsByNetworkId(dto.NetworkId);
             var destinationScenarioAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetAttributeIdsByNetworkId(dto.DestinationNetworkId);
 
-            if (destinationScenarioAttributes.Any(c => !scenarioAttributes.Contains(c)) && destinationScenarioAttributes.Count > 0 || destinationScenarioAttributes.Count() == 0)
+            if (scenarioAttributes.Any(c => !destinationScenarioAttributes.Contains(c)) && scenarioAttributes.Count > 0 || destinationScenarioAttributes.Count == 0)
             {
                 return false;
             }

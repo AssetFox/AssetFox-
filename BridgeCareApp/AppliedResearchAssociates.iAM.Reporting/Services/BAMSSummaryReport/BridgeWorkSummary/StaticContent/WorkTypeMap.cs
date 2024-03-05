@@ -1,6 +1,5 @@
 ﻿
 using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
@@ -17,7 +16,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 { "Reconstruction", TreatmentCategory.Reconstruction },
                 { "Maintenance", TreatmentCategory.Maintenance },
                 { "Other", TreatmentCategory.Other },
-                { "Work Outside Scope/Jurisdiction", TreatmentCategory.WorkOutsideScope }
+                { "Work Outside Scope/Jurisdiction", TreatmentCategory.WorkOutsideScope },
+                { "Bundled", TreatmentCategory.Bundled }
             };
     }
 }

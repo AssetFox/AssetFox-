@@ -37,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount
-            , IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
+            , IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectList, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, bool shouldBundleFeasibleTreatments)
         {
             var startYear = simulationYears[0];
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
@@ -86,44 +86,49 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         }
 
                         // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                        var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                                      section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY];
-                        var budgetAmount = (double)treatmentConsiderations.Where(_ => _.TreatmentName == section.AppliedTreatment)
-                                            .Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.
-                                            Where(_ => _.BudgetName == summaryData.Budget && _.Year == yearData.Year).Sum(_ => _.AllocatedAmount) ?? 0);
+                        var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause !=
+                                                      TreatmentCause.CashFlowProject ? section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY];
+                        var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                        treatmentConsiderations.FirstOrDefault() :
+                                                        treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                        var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
+                        var budgetAmount = (double)treatmentConsiderations.Sum(_ =>
+                                           _.FundingCalculationOutput?.AllocationMatrix
+                                            .Where(b => b.BudgetName == summaryData.Budget)
+                                            .Sum(bu => bu.AllocatedAmount) ?? 0);
 
                         var bpnName = _reportHelper.CheckAndGetValue<string>(section?.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&
-                            section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment)
+                            appliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                         {
-                            var category = TreatmentCategory.Other;
-                            var categoryKey = treatmentCategoryLookup[section.AppliedTreatment];
-                            if (map.ContainsKey(categoryKey))
-                            {
-                                category = map[categoryKey];
-                            }
+                            var category = appliedTreatment.Contains("Bundle") ?
+                                           TreatmentCategory.Bundled :
+                                           (map.ContainsKey(treatmentCategoryLookup[appliedTreatment]) ? map[treatmentCategoryLookup[appliedTreatment]] : TreatmentCategory.Other);
+                            var projectSource = committedProjectList.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment))?.ProjectSource.ToString();
                             summaryData.YearlyData.Add(new YearsData
                             {
                                 Year = yearData.Year,
-                                Treatment = section.AppliedTreatment,
+                                Treatment = appliedTreatment,
                                 Amount = budgetAmount,
-                                ProjectSource = section.ProjectSource,
+                                ProjectSource = projectSource,
                                 isCommitted = true,
                                 costPerBPN = (bpnName, budgetAmount),
                                 TreatmentCategory = category
                             });
-                            committedTreatments.Add(section.AppliedTreatment);
+                            committedTreatments.Add(appliedTreatment);
                             continue;
                         }
-                                                  
-                        var treatmentData = selectableTreatments.FirstOrDefault(_ => _.Name == section.AppliedTreatment);
+
+                        var treatmentData = appliedTreatment.Contains("Bundle") ?
+                                            selectableTreatments.FirstOrDefault(_ => appliedTreatment.Contains(_.Name)) :
+                                            selectableTreatments.FirstOrDefault(_ => _.Name == appliedTreatment);
                         summaryData.YearlyData.Add(new YearsData
                         {
                             Year = yearData.Year,
-                            Treatment = section.AppliedTreatment,
+                            Treatment = appliedTreatment,
                             Amount = budgetAmount,
                             costPerBPN = (bpnName, budgetAmount),
-                            TreatmentCategory = treatmentData.Category,
+                            TreatmentCategory = appliedTreatment.Contains("Bundle") ? TreatmentCategory.Bundled : treatmentData.Category,
                             AssetType = (AssetCategories)treatmentData.AssetCategory
                         });
                     }
@@ -214,9 +219,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 InsertWorkTypeTotals(startYear, firstContentRow, worksheet, workTypeTotal);
                 insertTotalAndPercentagePerCategory(worksheet, currentCell, numberOfYears, firstContentRow);
 
-                ExcelHelper.SetCustomFormat(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 7, simulationYears.Count + 3], ExcelHelperCellFormat.NegativeCurrency);
-                ExcelHelper.ApplyColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 7, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
-                ExcelHelper.SetTextColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 7, simulationYears.Count + 2], Color.White);
+                ExcelHelper.SetCustomFormat(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 8, simulationYears.Count + 3], ExcelHelperCellFormat.NegativeCurrency);
+                ExcelHelper.ApplyColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 8, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
+                ExcelHelper.SetTextColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 8, simulationYears.Count + 2], Color.White);
 
                 currentCell.Row += 2;
                 currentCell.Column = 1;
@@ -326,7 +331,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     // Text
                     worksheet.Cells[row, startColumnIndex + numberOfYears + 2].Value = $"Percentage Spent on " + worksheet.Cells[row, 1].Value.ToString().ToUpper();
                 }
-                var excelRange = worksheet.Cells[firstContentRow, numberOfYears + 3, firstContentRow + 7, numberOfYears + 3];
+                var excelRange = worksheet.Cells[firstContentRow, numberOfYears + 3, firstContentRow + 8, numberOfYears + 3];
                 ExcelHelper.ApplyColor(excelRange, Color.FromArgb(217, 217, 217));
                 ExcelHelper.ApplyBorder(excelRange);
                 ExcelHelper.SetCustomFormat(worksheet.Cells[firstContentRow, numberOfYears + 4, firstContentRow + 6, numberOfYears + 4], ExcelHelperCellFormat.Percentage);
@@ -430,6 +435,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
             firstContentRow++;
             foreach (var item in workTypeTotal.WorkOutsideScopeCostPerYear)
+            {
+                FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
+            }
+            firstContentRow++;
+            foreach (var item in workTypeTotal.BundledCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }

@@ -95,6 +95,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 workTypeTotal.WorkOutsideScopeCostPerYear[item.Year] += item.Amount;
                 workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
                 break;
+            case TreatmentCategory.Bundled:
+                if (!workTypeTotal.BundledCostPerYear.ContainsKey(item.Year))
+                {
+                    workTypeTotal.BundledCostPerYear.Add(item.Year, 0);
+                }
+                if (!workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
+                {
+                    workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
+                }
+                workTypeTotal.BundledCostPerYear[item.Year] += item.Amount;
+                workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
+                break;
             default:
                 if (!workTypeTotal.OtherCostPerYear.ContainsKey(item.Year))
                 {

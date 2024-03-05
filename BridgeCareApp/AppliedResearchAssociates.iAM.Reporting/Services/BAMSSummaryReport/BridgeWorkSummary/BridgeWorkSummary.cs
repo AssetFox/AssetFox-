@@ -40,7 +40,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
             List<int> simulationYears, WorkSummaryModel workSummaryModel, Dictionary<string, Budget> yearlyBudgetAmount,
-            IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
+            IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup,
+            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, bool shouldBundleFeasibleTreatments)
         {
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
@@ -65,12 +66,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var countForCompletedProject = new Dictionary<int, Dictionary<string, int>>();
             var countForCompletedCommittedProject = new Dictionary<int, Dictionary<string, int>>();
             FillDataToUseInExcel(reportOutputData, costPerBPNPerYear, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj,
-                countForCompletedProject, countForCompletedCommittedProject, treatmentCategoryLookup, committedProjectsForWorkOutsideScope);
+                countForCompletedProject, countForCompletedCommittedProject, treatmentCategoryLookup, committedProjectsForWorkOutsideScope, shouldBundleFeasibleTreatments);
 
             #endregion Initial work to set some data, which will be used throughout the Work summary TAB
 
             _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj,
-                simulationYears, yearlyBudgetAmount, costPerBPNPerYear, simulationTreatments, committedProjectsForWorkOutsideScope);
+                simulationYears, yearlyBudgetAmount, costPerBPNPerYear, simulationTreatments, committedProjectsForWorkOutsideScope, shouldBundleFeasibleTreatments);
 
             _bridgesCulvertsWorkSummary.FillBridgesCulvertsWorkSummarySections(worksheet, currentCell, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj, simulationYears, simulationTreatments);
             _projectsCompletedCount.FillProjectCompletedCountSection(worksheet, currentCell, countForCompletedProject, countForCompletedCommittedProject, simulationYears, simulationTreatments);
@@ -98,12 +99,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         #region Private methods
 
         private void FillDataToUseInExcel(
-     SimulationOutput reportOutputData, Dictionary<int, Dictionary<string, decimal>> costPerBPNPerYear,
-     Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costAndCountPerTreatmentPerYear,
-     Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
-     Dictionary<int, Dictionary<string, int>> countForCompletedProject,
-     Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject,
-     Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
+         SimulationOutput reportOutputData, Dictionary<int, Dictionary<string, decimal>> costPerBPNPerYear,
+         Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costAndCountPerTreatmentPerYear,
+         Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
+         Dictionary<int, Dictionary<string, int>> countForCompletedProject,
+         Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject,
+         Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
+         bool shouldBundleFeasibleTreatments)
         {
             var isInitialYear = true;
             Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
@@ -137,19 +139,26 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
 
                     // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                                  section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY];
-                    var appliedTreatment = section.AppliedTreatment;
-                    var treatmentCategory = treatmentCategoryLookup[appliedTreatment];
+                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause !=
+                                                  TreatmentCause.CashFlowProject ? section.TreatmentConsiderations :
+                                                  keyCashFlowFundingDetails[section_BRKEY];
+                    var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                        treatmentConsiderations.FirstOrDefault() :
+                                                        treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
+                    var treatmentCategory = appliedTreatment.Contains("Bundle") ? BAMSConstants.Bundled : treatmentCategoryLookup[appliedTreatment];
+                    var cost = treatmentConsiderations.
+                                Where(_ => _.TreatmentName?.ToLower() != BAMSConstants.NoTreatment && _.TreatmentName == appliedTreatment).
+                                Sum(_ => _.FundingCalculationOutput?.AllocationMatrix?.
+                                Sum(b => b.AllocatedAmount) ?? 0);
                     if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                         appliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                     {
-                        var committedCost = treatmentConsiderations.Where(_ => _.TreatmentName == appliedTreatment)
-                                            .Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearData.Year)?
-                                            .Sum(b => b.AllocatedAmount) ?? 0);
+                        var committedCost = cost;
                         if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
                         {
-                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (committedCost, 1, section.ProjectSource, treatmentCategory));
+                            var projectSource = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment))?.ProjectSource.ToString();
+                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (committedCost, 1, projectSource, treatmentCategory));
                         }
                         else
                         {
@@ -173,19 +182,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         }
 
                         // Remove from committedProjectsForWorkOutsideScope
-                        var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Treatment == appliedTreatment && _.Year == yearData.Year);
+                        var toRemove = committedProjectsForWorkOutsideScope.Where(_ => appliedTreatment.Contains(_.Treatment)); // Bundled has many treatment names under AppliedTreatment
                         if (toRemove != null)
                         {
-                            committedProjectsForWorkOutsideScope.Remove(toRemove);
+                            committedProjectsForWorkOutsideScope.RemoveAll(_ => toRemove.Contains(_));
                         }
 
                         continue;
                     }
                     //[TODO] - ask Jake regarding cash flow project. It won't have anything in the TreartmentOptions barring 1st year
-
-                    var cost = treatmentConsiderations.
-                                Where(_ => _.TreatmentName?.ToLower() != BAMSConstants.NoTreatment && _.TreatmentName == appliedTreatment)
-                                .Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearData.Year).Sum(b => b.AllocatedAmount) ?? 0);
+                                        
                     PopulateWorkedOnCostAndCount(yearData.Year, section, costAndCountPerTreatmentPerYear, cost);
 
                     PopulateCompletedProjectCount(yearData.Year, section, countForCompletedProject);
@@ -219,17 +225,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
             // if applied treatment is other than No Treatment
             else
-            {
-                if (!costAndCountPerTreatmentPerYear[year].ContainsKey(section.AppliedTreatment))
+            {                
+                var appliedTreatment = section.AppliedTreatment;
+                if (appliedTreatment.Contains("Bundle"))
                 {
-                    costAndCountPerTreatmentPerYear[year].Add(section.AppliedTreatment, (cost, 1));
+                    appliedTreatment = BAMSConstants.Bundled;
+                }
+                if (!costAndCountPerTreatmentPerYear[year].ContainsKey(appliedTreatment))
+                {
+                    costAndCountPerTreatmentPerYear[year].Add(appliedTreatment, (cost, 1));
                 }
                 else
                 {
-                    var values = costAndCountPerTreatmentPerYear[year][section.AppliedTreatment];
+                    var values = costAndCountPerTreatmentPerYear[year][appliedTreatment];
                     values.treatmentCost += cost;
                     values.bridgeCount += 1;
-                    costAndCountPerTreatmentPerYear[year][section.AppliedTreatment] = values;
+                    costAndCountPerTreatmentPerYear[year][appliedTreatment] = values;
                 }
             }
         }
@@ -252,13 +263,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
             else
             {
-                if (!countForCompletedProject[year].ContainsKey(section.AppliedTreatment))
+                var appliedTreatment = section.AppliedTreatment;
+                if (appliedTreatment.Contains("Bundle"))
+                {                    
+                    appliedTreatment = BAMSConstants.Bundled;
+                }
+                if (!countForCompletedProject[year].ContainsKey(appliedTreatment))
                 {
                     countForCompletedProject[year].Add(section.AppliedTreatment, 1);
                 }
                 else
                 {
-                    countForCompletedProject[year][section.AppliedTreatment] += 1;
+                    countForCompletedProject[year][appliedTreatment] += 1;
                 }
             }
         }

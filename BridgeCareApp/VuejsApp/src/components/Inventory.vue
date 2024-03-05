@@ -1,5 +1,5 @@
 <template> 
-     <div v-if="stateInventoryReportNames.length > 1" style="width: 300px; margin-left:650px">
+     <div v-if="stateInventoryReportNames.length > 1" style="width: 300px; margin-left:900px">
         <v-autocomplete
             v-model="inventoryReportName" 
             :items="stateInventoryReportNames"
@@ -142,6 +142,9 @@
                 reactiveData.value[1].push(keyAttributeValues.value[i][j])
             }
 
+            //Remove duplicates from the County's
+            const noDupes = new Set(keyAttributeValues.value.map(element => element[0]));
+            reactiveData.value[0] = Array.from(noDupes);
         })
 
         watch(staticHTMLForInventory,()=>{
@@ -248,14 +251,10 @@
                 selectedKeys[index] = '';
             })
             selectedInventoryIndex.value = [];
+            store.state.inventoryModule.staticHTMLForInventory = null;
             selectedKeys[0] = "";
             keyAttributeValues.value = await setupSelectLists();
 
-            clearForm();
-        }
-
-        function clearForm() {
-            store.state.inventoryModule.staticHTMLForInventory = null;
         }
 
         function onSelectInventoryItem(index: number){
@@ -293,7 +292,7 @@
                 }
                 };
 
-            if(reportType === 'P')
+            if(constraintDetails == "OR")
             {
                 for(let i = 0; i < inventoryDetails.value.length; i++){
                     if(i === index){
@@ -319,7 +318,10 @@
                 //Set the data equal to the dictionary
                 data.keyProperties = dictionary;
 
-                 getStaticInventoryHTMLAction({reportType: inventoryReportName, filterData: data.keyProperties}); 
+                if(selectedKeys.length == inventoryDetails.value.length)
+                {
+                    getStaticInventoryHTMLAction({reportType: inventoryReportName, filterData: data.keyProperties}); 
+                }
         }
 
         function QueryAccess() {

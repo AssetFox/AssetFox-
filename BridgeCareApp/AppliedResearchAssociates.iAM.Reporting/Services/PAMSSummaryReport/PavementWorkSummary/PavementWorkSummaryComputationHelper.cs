@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
@@ -92,39 +93,38 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>();
                 foreach (var section in yearData.Assets)
                 {
-                    var cost = section.TreatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount) ?? 0);
-                    PopulateTreatmentCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentPerYear);
-                    PopulateTreatmentGroupCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentGroupPerYear);
+                    var cost = section.TreatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount) ?? 0);                    
                     var appliedTreatment = section.AppliedTreatment;
                     var treatmentCategory = section.AppliedTreatment.Contains("Bundle") ? PAMSConstants.Bundled : treatmentCategoryLookup[appliedTreatment];
 
                     if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                         appliedTreatment.ToLower() != PAMSConstants.NoTreatment)
                     {
-                        var commitedCost = section.TreatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount) ?? 0);
-
                         if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
                         {
-                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (commitedCost, 1, section.ProjectSource, treatmentCategory));
+                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (cost, 1, section.ProjectSource, treatmentCategory));
                         }
                         else
                         {
                             var currentRecord = yearlyCostCommittedProj[yearData.Year][appliedTreatment];
-                            var treatmentCost = currentRecord.treatmentCost + commitedCost;
+                            var treatmentCost = currentRecord.treatmentCost + cost;
                             var bridgeCount = currentRecord.bridgeCount + 1;
                             var projectSource = currentRecord.projectSource;
                             yearlyCostCommittedProj[yearData.Year][appliedTreatment] = (treatmentCost, bridgeCount, projectSource, treatmentCategory);
                         }
 
                         // Remove from committedProjectsForWorkOutsideScope
-                        var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Treatment == appliedTreatment && _.Year == yearData.Year);
+                        var toRemove = committedProjectsForWorkOutsideScope.Where(_ => appliedTreatment.Contains(_.Treatment)); // Bundled has many treatment names under AppliedTreatment
                         if (toRemove != null)
                         {
-                            committedProjectsForWorkOutsideScope.Remove(toRemove);
+                            committedProjectsForWorkOutsideScope.RemoveAll(_ => toRemove.Contains(_));
                         }
 
                         continue;
                     }
+                    
+                    PopulateTreatmentCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentPerYear);
+                    PopulateTreatmentGroupCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentGroupPerYear);
                 }
             }
         }
@@ -148,8 +148,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 }
                 var treatmentGroupData = costAndLengthPerTreatmentGroupPerYear[yearsData.Year];
 
-                PopulateTreatmentCostAndLength(yearsData, costAndLengthPerTreatmentPerYear);
-                PopulateTreatmentGroupCostAndLength(yearsData, costAndLengthPerTreatmentGroupPerYear);
+                if (!yearsData.isCommitted)
+                {
+                    PopulateTreatmentCostAndLength(yearsData, costAndLengthPerTreatmentPerYear);
+                    PopulateTreatmentGroupCostAndLength(yearsData, costAndLengthPerTreatmentGroupPerYear);
+                }
             }
         }
         private void PopulateTreatmentCostAndLength(
@@ -194,7 +197,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             }
         }
 
-
         private void PopulateTreatmentCostAndLength(
             int year,
             AssetDetail section,
@@ -204,18 +206,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         {
             var segmentLength = section.ValuePerNumericAttribute["SEGMENT_LENGTH"];
             var surfaceId = section.ValuePerNumericAttribute["SURFACEID"];
-            if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(section.AppliedTreatment))
+            var appliedTreatment = section.AppliedTreatment;
+            if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(appliedTreatment))
             {
-                costAndLengthPerTreatmentPerYear[year].Add(section.AppliedTreatment, (cost, surfaceId == 62 ? cost : 0, (int)segmentLength.FeetToMiles()));
+                costAndLengthPerTreatmentPerYear[year].Add(appliedTreatment, (cost, surfaceId == 62 ? cost : 0, (int)segmentLength.FeetToMiles()));
             }
             else
             {
-                var values = costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment];
+                var values = costAndLengthPerTreatmentPerYear[year][appliedTreatment];
                 values.treatmentCost += cost;
                 if (surfaceId == 62)
                     values.compositeTreatmentCost += cost;
                 values.length += (int)segmentLength.FeetToMiles();
-                costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment] = values;
+                costAndLengthPerTreatmentPerYear[year][appliedTreatment] = values;
             }
         }
 
@@ -227,9 +230,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             )
         {
             var segmentLength = section.ValuePerNumericAttribute["SEGMENT_LENGTH"];
-
             var treatmentGroup = PavementTreatmentHelper.GetTreatmentGroup(section.AppliedTreatment);
-
             if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(treatmentGroup))
             {
                 costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, (cost, (int)segmentLength.FeetToMiles()));

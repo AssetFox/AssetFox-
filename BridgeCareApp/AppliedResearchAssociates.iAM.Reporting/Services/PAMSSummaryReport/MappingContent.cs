@@ -71,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
             }
         }
 
-        public static string GetNonCashFlowProjectPick(TreatmentCause treatmentCause, string projectSource)
+        public static string GetNonCashFlowProjectPick(TreatmentCause treatmentCause)
         {
             switch (treatmentCause)
             {

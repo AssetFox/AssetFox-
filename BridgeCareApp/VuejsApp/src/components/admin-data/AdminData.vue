@@ -142,7 +142,7 @@ import Vue, { computed, shallowRef, } from 'vue';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import EditAdminDataDialog from './EditAdminDataDialog.vue';
 import {EditAdminDataDialogData, emptyEditAdminDataDialogData} from '@/shared/models/modals/edit-data-dialog-data';
-import { clone } from 'ramda';
+import { clone, forEach } from 'ramda';
 import Dropdown from 'primevue/dropdown';
 import { Network } from '@/shared/models/iAM/network';
 import { Attribute } from '@/shared/models/iAM/attribute';
@@ -151,6 +151,7 @@ import { InputValidationRules, rules } from '@/shared/utils/input-validation-rul
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { Console } from 'console';
+import { report } from 'process';
 
     let store = useStore();
     let stateAvailableReportNames = computed<string[]>(()=>store.state.adminDataModule.availableReportNames);
@@ -405,7 +406,7 @@ import { Console } from 'console';
         editAdminDataDialogData.selectedSettings = clone(  selectedInventoryReports.value);
         editAdminDataDialogData.AddedItems = selectedInventoryReports.value.map(str=>
         {
-            return {value:str, networkType:str.substring(str.length - 3)};
+            return {value:str.slice(0, -3), networkType:str.substring(str.length - 3)};
         })
         editAdminDataDialogData.settingName =   inventoryReportsName;
         editAdminDataDialogData.settingsList = clone(inventoryReports);

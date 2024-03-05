@@ -304,7 +304,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
 
             checkCancelled(cancellationToken, simulationId);
-            //// Pavement Work Summary TAB
+            // Pavement Work Summary TAB
             reportDetailDto.Status = $"Creating Pavement Work Summary TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
@@ -312,7 +312,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var chartRowModel = _pavementWorkSummary.Fill(pamsWorkSummaryWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments, simulation.CommittedProjects, treatmentCategoryLookup, committedProjectsForWorkOutsideScope, simulation.ShouldBundleFeasibleTreatments);
 
             checkCancelled(cancellationToken, simulationId);
-            //// Pavement Work Summary By Budget TAB
+            // Pavement Work Summary By Budget TAB
             reportDetailDto.Status = $"Creating Pavement Work Summary By Budget TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
@@ -374,6 +374,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Status = "Summary output report completed with errors";
             IsComplete = true;
         }
+
         private void UpsertSimulationReportDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
 
         private void checkCancelled(CancellationToken? cancellationToken, Guid simulationId)

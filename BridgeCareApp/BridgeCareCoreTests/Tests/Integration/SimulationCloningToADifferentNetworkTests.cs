@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,8 +28,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRule;
 
 namespace BridgeCareCoreTests.Tests.Integration
 {
-
-    public class SimulationCloningTests
+    public class SimulationCloningToADifferentNetworkTests
     {
         private static ICompleteSimulationCloningService CreateCompleteSimulationCloningService()
         {
@@ -38,30 +37,33 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
-        public void SimulationInDb_Clone_Clones()
+        public void CloningToADifferentScenario()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
             var clonedSimulationId = cloningResult.Simulation.Id;
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
             Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
         }
 
         [Fact]
-        public void SimulationInDbWithScenarioTreatmentCost_Clone_Clones()
+        public void CloningToADifferentScenarioWithTreatmentCosts()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -81,6 +83,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.TreatmentCostRepo.UpsertOrDeleteScenarioTreatmentCosts(scenarioTreatmentCostPerTreatmentId, simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -89,8 +92,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var clonedTreatments = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(clonedSimulationId);
             var clonedTreatment = clonedTreatments.Single();
 
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
             Assert.NotEqual(treatment.Id, clonedTreatment.Id);
             Assert.Empty(clonedTreatment.Budgets);
             Assert.Empty(clonedTreatment.BudgetIds);
@@ -100,10 +103,11 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
-        public void SimulationInDbWithSelectableTreatment_Clone_Clones()
+        public void CloningToADifferentScenarioWithSelectableTreatments()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -116,6 +120,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(treatments, simulation.Id);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -126,8 +131,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var expectedCriterionLibrary = new CriterionLibraryDTO();
             ObjectAssertions.EquivalentExcluding(treatment, clonedTreatment, t => t.Id, t => t.CriterionLibrary, t => t.Budgets, t => t.BudgetIds, t => t.SupersedeRules);
             Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
             Assert.NotEqual(treatment.Id, clonedTreatment.Id);
             Assert.Empty(clonedTreatment.Budgets);
             Assert.Empty(clonedTreatment.BudgetIds);
@@ -135,10 +140,11 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
-        public void SimulationInDbWithSelectableTreatmentWithCriterionLibrary_Clone_Clones()
+        public void CloningToADifferentScenarioWithCriterionLibrary()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -153,6 +159,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var treatmentBefore = treatmentsBefore.Single();
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -163,8 +170,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var expectedCriterionLibrary = new CriterionLibraryDTO();
             ObjectAssertions.EquivalentExcluding(treatment, clonedTreatment, t => t.Id, t => t.CriterionLibrary, t => t.Budgets, t => t.BudgetIds, t => t.SupersedeRules);
             Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
             Assert.NotEqual(treatment.Id, clonedTreatment.Id);
             Assert.Empty(clonedTreatment.Budgets);
             Assert.Empty(clonedTreatment.BudgetIds);
@@ -173,10 +180,11 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
-        public void SimulationInDbWithSelectableTreatmentWithConsequences_Clone_Clones()
+        public void CloningToADifferentScenarioWithSelectableTreatmentWithConsequences()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -197,6 +205,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.TreatmentConsequenceRepo.UpsertOrDeleteScenarioTreatmentConsequences(treatmentConsequencesPerTreatmentId, simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -206,8 +215,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var clonedTreatment = clonedTreatments.Single();
 
             Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
             Assert.NotEqual(treatment.Id, clonedTreatment.Id);
             Assert.Empty(clonedTreatment.Budgets);
             Assert.Empty(clonedTreatment.BudgetIds);
@@ -220,10 +229,11 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
-        public void SimulationInDbWithSelectableTreatmentWithSupersedeRules_Clone_Clones()
+        public void CloningToADifferentScenarioWithSelectableTreatmentWithSupersedeRules()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -257,6 +267,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.TreatmentSupersedeRuleRepo.UpsertOrDeleteScenarioTreatmentSupersedeRules(treatmentWithSupersedeRulesPerTreatmentId, simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -266,8 +277,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var clonedTreatment1 = clonedTreatments.FirstOrDefault(_ => _.Name.Equals("Treatment name"));
 
             Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
             Assert.Equal(2, clonedTreatments.Count);
             Assert.True(clonedTreatment1.SupersedeRules.Count == 1);
             Assert.NotEqual(treatment.Id, clonedTreatment1.Id);
@@ -275,7 +286,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             Assert.Empty(clonedTreatment1.BudgetIds);
             Assert.Empty(clonedTreatment1.Consequences);
             Assert.Empty(clonedTreatment1.PerformanceFactors);
-            ObjectAssertions.EquivalentExcluding(treatment, clonedTreatment1, t => t.Id, t => t.Consequences, t => t.CriterionLibrary, t => t.BudgetIds, t => t.Budgets, t => t.SupersedeRules);            
+            ObjectAssertions.EquivalentExcluding(treatment, clonedTreatment1, t => t.Id, t => t.Consequences, t => t.CriterionLibrary, t => t.BudgetIds, t => t.Budgets, t => t.SupersedeRules);
             var clonedSupersedeRule = clonedTreatment1.SupersedeRules.Single();
             ObjectAssertions.EquivalentExcluding(treatmentSuperdedeRule, clonedSupersedeRule, _ => _.Id, _ => _.CriterionLibrary, _ => _.treatment.CriterionLibrary, _ => _.treatment.BudgetIds, t => t.treatment.Budgets, t => t.treatment.SupersedeRules, t => t.treatment.Id);
             SimulationCloningCriterionLibraryDtoAssertions.AssertValidLibraryClone(treatmentSuperdedeRule.CriterionLibrary, clonedSupersedeRule.CriterionLibrary, TestHelper.UnitOfWork.UserEntity?.Id);
@@ -283,7 +294,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
-        public void SimulationInDbWithRemainingLifeLimit_Clone_Clones()
+        public void CloningToADifferentScenarioWithRemainingLifeLimit()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var limitId = Guid.NewGuid();
@@ -291,7 +302,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var limits = new List<RemainingLifeLimitDTO> { limit };
 
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -299,6 +311,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteScenarioRemainingLifeLimits(limits, simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -308,22 +321,23 @@ namespace BridgeCareCoreTests.Tests.Integration
             var clonedLifeLimit = clonedLifeLimits.Single();
             ObjectAssertions.EquivalentExcluding(limit, clonedLifeLimit, c => c.CriterionLibrary, c => c.Id);
             Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
             var expectedCriterionLibrary = new CriterionLibraryDTO();
             ObjectAssertions.Equivalent(expectedCriterionLibrary, clonedLifeLimit.CriterionLibrary);
             Assert.NotEqual(limit.Id, clonedLifeLimit.Id);
         }
 
         [Fact]
-        public void SimulationInDbWithRemainingLifeLimitWithCriterionLibrary_Clone_Clones()
+        public void CloningToADifferentScenarioWithRemainingLifeLimitWithCriterionLibrary()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var limitId = Guid.NewGuid();
             var limit = RemainingLifeLimitDtos.DtoWithCriterionLibrary(TestAttributeNames.CulvDurationN, limitId, 1);
             var limits = new List<RemainingLifeLimitDTO> { limit };
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -332,6 +346,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var lifeLimitBefore = lifeLimitsBefore.Single();
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -341,8 +356,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var clonedLifeLimit = clonedLifeLimits.Single();
             ObjectAssertions.EquivalentExcluding(lifeLimitBefore, clonedLifeLimit, c => c.CriterionLibrary, c => c.Id);
             Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
             ObjectAssertions.EquivalentExcluding(lifeLimitBefore.CriterionLibrary, clonedLifeLimit.CriterionLibrary, c => c.Id, c => c.MergedCriteriaExpression, c => c.IsSingleUse, c => c.Name);
             Assert.NotEqual(Guid.Empty, clonedLifeLimit.CriterionLibrary.Id);
             Assert.NotEqual(lifeLimitBefore.Id, clonedLifeLimit.Id);
@@ -350,7 +365,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
-        public void SimulationInDbWithScenarioDeficientConditionGoals_Clone_Clones()
+        public void CloningToADifferentScenarioWithScenarioDeficientConditionGoals()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var deficientconditiongoalId = Guid.NewGuid();
@@ -358,7 +373,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var deficientconditiongoals = new List<DeficientConditionGoalDTO> { deficientconditiongoal };
 
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -366,6 +382,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteScenarioDeficientConditionGoals(deficientconditiongoals, simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -375,8 +392,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var clonedDeficientConditionGoal = clonedDeficientConditionGoals.Single();
             ObjectAssertions.EquivalentExcluding(deficientconditiongoal, clonedDeficientConditionGoal, c => c.CriterionLibrary, c => c.Id);
             Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
             Assert.Equal(deficientconditiongoal.DeficientLimit, clonedDeficientConditionGoal.DeficientLimit);
             Assert.Equal(deficientconditiongoal.Name, clonedDeficientConditionGoal.Name);
             var expectedCriterionLibrary = new CriterionLibraryDTO();
@@ -385,7 +402,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
-        public async Task SimulationInDbWithScenarioDeficientConditionGoalsWithCriterionLibrary_Clone_Clones()
+        public async Task CloningToADifferentScenarioWithScenarioDeficientConditionGoalsWithCriterionLibrary()
         {
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, false);
             TestHelper.UnitOfWork.SetUser(user.Username);
@@ -395,7 +412,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var deficientconditiongoal = DeficientConditionGoalDtos.DtoWithCriterionLibrary(deficientconditiongoalId, TestAttributeNames.CulvDurationN);
             var deficientconditiongoals = new List<DeficientConditionGoalDTO> { deficientconditiongoal };
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -404,6 +422,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var deficientConditionGoalBefore = deficientConditionGoalsBefore.Single();
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -413,20 +432,21 @@ namespace BridgeCareCoreTests.Tests.Integration
             var clonedDeficientConditionGoal = clonedDeficientConditionGoals.Single();
             ObjectAssertions.EquivalentExcluding(deficientConditionGoalBefore, clonedDeficientConditionGoal, c => c.CriterionLibrary, c => c.Id);
             Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
             ObjectAssertions.EquivalentExcluding(deficientConditionGoalBefore.CriterionLibrary, clonedDeficientConditionGoal.CriterionLibrary, c => c.Id, c => c.MergedCriteriaExpression, c => c.IsSingleUse, c => c.Name);
             Assert.NotEqual(deficientConditionGoalBefore.Id, clonedDeficientConditionGoal.Id);
             Assert.NotEqual(deficientConditionGoalBefore.CriterionLibrary.Id, clonedDeficientConditionGoal.CriterionLibrary.Id);
         }
 
         [Fact]
-        public void SimulationInDbWithAnalysisMethodInCriterionLibrary_Clone_Clones()
+        public void CloningToADifferentScenarioWithAnalysisMethodInCriterionLibrary()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var networkEntity = NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var networkId = networkEntity.Id;
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var explorer = TestHelper.UnitOfWork.AttributeRepo.GetExplorer();
             var network = NetworkMapper.ToDomain(networkEntity, explorer);
@@ -448,6 +468,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var newSimulationName = RandomStrings.WithPrefix("cloned");
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -462,10 +483,11 @@ namespace BridgeCareCoreTests.Tests.Integration
         }
 
         [Fact]
-        public void SimulationInDbWithSelectableTreatmentWithBudget_Clone_Clones()
+        public void CloningToADifferentScenarioWithSelectableTreatmentWithBudget()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -485,6 +507,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var treatmentBefore = treatmentsBefore.Single();
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -495,8 +518,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var expectedCriterionLibrary = new CriterionLibraryDTO();
             ObjectAssertions.EquivalentExcluding(treatment, clonedTreatment, t => t.Id, t => t.CriterionLibrary, t => t.Budgets, t => t.BudgetIds, t => t.SupersedeRules);
             Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
             Assert.NotEqual(treatment.Id, clonedTreatment.Id);
             var budgetBefore = treatmentBefore.Budgets.Single();
             var clonedBudget = clonedTreatment.Budgets.Single();
@@ -518,7 +541,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var targetconditionalgoal = TargetConditionGoalDtos.DtoWithCriterionLibrary(TestAttributeNames.CulvDurationN, targetconditionalgoalId);
             var targetconditionalgoals = new List<TargetConditionGoalDTO> { targetconditionalgoal };
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -527,6 +551,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var targetconditionalgoalBefore = targetconditionalgoalsBefore.Single();
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -536,8 +561,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var clonedTargetConditionalGoal = clonedTargetConditionalGoals.Single();
             ObjectAssertions.EquivalentExcluding(targetconditionalgoal, clonedTargetConditionalGoal, c => c.CriterionLibrary, c => c.Id);
             Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
             ObjectAssertions.EquivalentExcluding(targetconditionalgoalBefore.CriterionLibrary, clonedTargetConditionalGoal.CriterionLibrary, c => c.Id, c => c.MergedCriteriaExpression, c => c.IsSingleUse, c => c.Name);
             Assert.NotEqual(targetconditionalgoalBefore.Id, clonedTargetConditionalGoal.Id);
             Assert.NotEqual(targetconditionalgoalBefore.CriterionLibrary.Id, clonedTargetConditionalGoal.CriterionLibrary.Id);
@@ -549,20 +574,22 @@ namespace BridgeCareCoreTests.Tests.Integration
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, false);
             TestHelper.UnitOfWork.SetUser(user.Username);
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
             var clonedSimulationId = cloningResult.Simulation.Id;
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
             Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
             var clonedSimulationUser = clonedSimulation.Users.Single();
             Assert.Equal(user.Username, clonedSimulationUser.Username);
         }
@@ -573,7 +600,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
 
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -583,14 +611,15 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.CalculatedAttributeRepo.UpsertScenarioCalculatedAttributes(calculatedAttributes, simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
             var clonedSimulationId = cloningResult.Simulation.Id;
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
             Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
             var allAttributes = TestHelper.UnitOfWork.AttributeRepo.GetAttributes();
             var ageAttribute = allAttributes.Single(a => a.Name == TestAttributeNames.Age);
             var clonedAttribute = TestHelper.UnitOfWork.CalculatedAttributeRepo.GetScenarioCalulatedAttributesByScenarioAndAttributeId(clonedSimulationId, ageAttribute.Id);
@@ -607,7 +636,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, false);
             TestHelper.UnitOfWork.SetUser(user.Username);
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -621,14 +651,15 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.CriterionLibraryRepo.UpsertCriterionLibrary(calculatedAttributeCriterionLibrary);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
             var clonedSimulationId = cloningResult.Simulation.Id;
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
             Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal("Test Network", clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
             var allAttributes = TestHelper.UnitOfWork.AttributeRepo.GetAttributes();
             var ageAttribute = allAttributes.Single(a => a.Name == TestAttributeNames.Age);
             var clonedAttribute = TestHelper.UnitOfWork.CalculatedAttributeRepo.GetScenarioCalulatedAttributesByScenarioAndAttributeId(clonedSimulationId, ageAttribute.Id);
@@ -646,15 +677,16 @@ namespace BridgeCareCoreTests.Tests.Integration
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var networkId = Guid.NewGuid();
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
             var keyAttributeId = TestAttributeIds.BrKeyId;
 
             var maintainableAssets = new List<MaintainableAsset>();
             var assetId = Guid.NewGuid();
             var locationIdentifier = RandomStrings.WithPrefix("Location");
             var location = Locations.Section(locationIdentifier);
-            var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
+            var maintainableAsset = new MaintainableAsset(assetId, destinationNetworkId, location, "[Deck_Area]");
             var maintainableAssetLocationId = Guid.NewGuid();
-            var maintainableAssetEntity = maintainableAsset.ToEntity(networkId);
+            var maintainableAssetEntity = maintainableAsset.ToEntity(destinationNetworkId);
             var maintainableAssetLocation = new MaintainableAssetLocationEntity()
             {
                 Id = maintainableAssetLocationId,
@@ -667,7 +699,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             maintainableAssets.Add(testMaintainableAsset);
 
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId);
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -687,14 +719,15 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(sectionCommittedProjects);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
             var clonedSimulationId = cloningResult.Simulation.Id;
             var clonedSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(clonedSimulationId);
             Assert.Equal(newSimulationName, clonedSimulation.Name);
-            Assert.Equal(networkId, clonedSimulation.NetworkId);
-            Assert.Equal(network.Name, clonedSimulation.NetworkName);
+            Assert.Equal(destinationNetworkId, clonedSimulation.NetworkId);
+            Assert.Equal(simulation.NetworkName, clonedSimulation.NetworkName);
 
             var clonedProjects = TestHelper.UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(clonedSimulationId);
             var clonedProject = clonedProjects.Single();
@@ -717,7 +750,8 @@ namespace BridgeCareCoreTests.Tests.Integration
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var networkId = NetworkTestSetup.NetworkId;
-            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
+            var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, destinationNetworkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -727,6 +761,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -742,6 +777,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         public void SimulationInDbWithScenarioBudget_Clone_Clones()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
@@ -752,6 +788,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -766,6 +803,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         public void SimulationInDbWithBudgetWithPercentagePair_Clone_Clones()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
@@ -779,6 +817,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(budgetPriorities, simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -802,6 +841,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var networkId = NetworkTestSetup.NetworkId;
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
@@ -813,6 +853,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgets, simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -829,6 +870,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         public void SimulationInDbWithBudgetPriority_Clone_Clones()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
@@ -836,6 +878,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var budgetPriority = BudgetPriorityTestSetup.SetupSingleBudgetPriorityForSimulationInDb(simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -849,6 +892,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         public void SimulationInDbWithBudgetPriorityWithCriterionLibrary_Clone_Clones()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
@@ -856,6 +900,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var budgetPriority = BudgetPriorityTestSetup.SetupSingleBudgetPriorityWithCriterionLibraryForSimulationInDb(simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -871,6 +916,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         {
 
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
@@ -881,6 +927,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteScenarioCashFlowRules(cashFlowRules, simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -901,6 +948,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         public void SimulationInDbWithInvestmentPlan_Clone_Clones()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
             var newSimulationName = RandomStrings.WithPrefix("cloned");
@@ -910,6 +958,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -923,6 +972,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         public void SimulationInDbWithPerformanceCurve_Clone_Clones()
         {
             var networkId = SimulationCloningTestSetup.TestNetworkIdInDatabase();
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
             var simulationEntity = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
             var simulationId = simulationEntity.Id;
             var performanceCurveId = Guid.NewGuid();
@@ -938,6 +988,7 @@ namespace BridgeCareCoreTests.Tests.Integration
             var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationId);
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
@@ -954,6 +1005,7 @@ namespace BridgeCareCoreTests.Tests.Integration
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var networkId = Guid.NewGuid();
+            var destinationNetworkId = SimulationCloningTestSetup.TestDestinationNetworkIdInDatabase();
             var keyAttributeId = TestAttributeIds.BrKeyId;
 
             var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, new List<MaintainableAsset>(), networkId, keyAttributeId);
@@ -990,11 +1042,13 @@ namespace BridgeCareCoreTests.Tests.Integration
             TestHelper.UnitOfWork.Context.SaveChanges();
 
             var cloneSimulationDto = CloneSimulationDtos.Create(simulationId, networkId, newSimulationName);
+            cloneSimulationDto.DestinationNetworkId = destinationNetworkId;
             var cloningService = CreateCompleteSimulationCloningService();
             var cloningResult = cloningService.Clone(cloneSimulationDto);
 
             var warningMessage = cloningResult.WarningMessage;
             Assert.Contains("Budget in the wrong simulation", warningMessage);
         }
+
     }
 }

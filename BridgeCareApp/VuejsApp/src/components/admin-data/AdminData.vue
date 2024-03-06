@@ -102,7 +102,25 @@
                         Edit
                     </v-btn>
                 </v-row>
+            </v-col>      
+            <v-col cols = "8" class="ghd-constant-header">
+                <v-row style="margin-bottom: 5px;">
+                    <v-col cols = "2">
+                        <v-subheader class="ghd-md-gray ghd-control-label">Asset Type: </v-subheader> 
+                    </v-col>
+                    <v-col cols="5">
+                        <div id="AdminData-simulationReports-div" class="ghd-md-gray ghd-control-label elipsisList">{{assetTypeDelimited}}</div> 
+                    </v-col>                     
+                    <v-btn style="margin-left: 20px;margin-top:13px !important" 
+                        id="AdminData-editSimulationReports-btn" 
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                        variant = "outlined"
+                        @click="onEditAssetTypeClick">
+                        Edit
+                    </v-btn>
+                </v-row>
             </v-col>            
+      
             <v-col cols = "8" class="ghd-constant-header">
                 <v-row>
                     <v-col cols = "2">
@@ -160,6 +178,7 @@ import { Console } from 'console';
     let stateKeyFields = computed<string[]>(()=>store.state.adminDataModule.keyFields);
     let stateRawDataKeyFields = computed<string[]>(()=>store.state.adminDataModule.rawDataKeyFields);
     let stateRawdataNetwork = computed<string>(()=>store.state.adminDataModule.rawdataNetwork);
+    let stateAssetType = computed<string[]>(()=>store.state.adminDataModule.assetType);
     let stateConstraintType = computed<string>(()=>store.state.adminDataModule.constraintType);
     let hasUnsavedChanges = computed<boolean>(()=>store.state.unsavedChangesFlagModule.hasUnsavedChanges) ;
     let stateNetworks = computed<Network[]>(()=>store.state.networkModule.networks);
@@ -203,6 +222,7 @@ import { Console } from 'console';
     const selectedRawDataKeyFields= ref<string[]>([]);
     let selectedAvailableReports:string[]=[];
     const selectedSimulationReports =ref<string[]>([]);
+    const selectedassetTypes= ref<string[]> ([]);
     const selectedInventoryReports= ref<string[]>([]);
     const primaryNetwork = ref<string>('');
     const rawdataNetwork= ref<string> ('');
@@ -211,10 +231,15 @@ import { Console } from 'console';
     const rawDataKeyFieldsDelimited =ref<string>('');
     const simulationReportsDelimited= ref<string>('');
     const inventoryReportsDelimited=  ref<string>('');
+     const assetTypeDelimited= ref<string>('');
+
+     const assetList = ["Bridge", "Culvert", "Pavement"];
+
 
     let keyFieldsName: string  = 'KeyFields';
     let rawDataKeyFieldsName: string = 'RawDataKeyFields';
     let simulationReportsName: string = 'SimulationReports';
+    let assetTypeName: string = 'AssetType';
     let inventoryReportsName: string = 'InventoryReports';
 
     let InputRules: InputValidationRules = rules;
@@ -421,6 +446,18 @@ import { Console } from 'console';
         editAdminDataDialogData.settingName =   simulationReportsName;
         editAdminDataDialogData.settingsList = clone( simulationReports);
     }
+    function onEditAssetTypeClick(){
+        editAdminDataDialogData.selectedItem=''
+        editAdminDataDialogData.AddedItems = selectedassetTypes.value.map(str=>
+        {
+            return {value:str, networkType:''}
+        })
+        editAdminDataDialogData.showDialog = true;
+        editAdminDataDialogData.selectedSettings = clone(  selectedassetTypes.value);
+        editAdminDataDialogData.settingName =   assetTypeName;
+        editAdminDataDialogData.settingsList = clone( assetList);
+    }
+
     function onSubmitEditAdminDataDialogResult(selectedSettings: string[]){
         if(selectedSettings !== null)
 
@@ -461,6 +498,16 @@ import { Console } from 'console';
                     const simulation = convertToDelimited(selectedSimulationReports.value,',');
                     simulationReportsDelimited.value = simulation;
                     break;
+                case   assetTypeName:
+                assetTypeDelimited.value=''
+                selectedassetTypes.value=[];
+                    selectedSettings.forEach(function(value){
+                        selectedassetTypes.value.push(value);   
+                                     }     )     
+                    const assetType = convertToDelimited(selectedassetTypes.value,',');
+                    assetTypeDelimited.value = assetType;
+                    break;
+
             }
 
             editAdminDataDialogData.selectedSettings = [];
@@ -476,6 +523,7 @@ import { Console } from 'console';
             hasUnsavedChangesCore('', selectedSimulationReports.value, stateSimulationReportNames.value) ||
             hasUnsavedChangesCore('', selectedKeyFields.value, stateKeyFields.value) ||
             hasUnsavedChangesCore('', selectedRawDataKeyFields.value, stateRawDataKeyFields.value) ||
+            //hasUnsavedChangesCore('', selectedassetTypes.value, stateAssetType.value) ||
             primaryNetwork.value != statePrimaryNetwork.value || rawdataNetwork.value != stateRawdataNetwork.value ||
             constraintTypeRadioGroup.value != stateConstraintType.value
         setHasUnsavedChangesAction({ value: hasChanged });

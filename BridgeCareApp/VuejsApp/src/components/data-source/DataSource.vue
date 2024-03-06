@@ -153,7 +153,7 @@
 </template>
 
 <script setup lang='ts'>
-import Vue, { computed, onMounted, reactive, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
+import { computed, onMounted, reactive, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
 import { clone, isNil, prop } from 'ramda';
 import {
     Datasource, 
@@ -212,7 +212,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     let sqlResponse = ref<string | null>('');
     let sqlValid = ref<boolean>(false);
 
-    const sourceTypeItem = ref<string>('');
+    let sourceTypeItem = ref('');
     let dataSourceTypeItem = ref<string | null>('');
     let datasourceNames = ref<string[]>([]);
     let dataSourceExcelColumns = ref<DataSourceExcelColumns>({ locationColumn: [], dateColumn: []});
@@ -241,13 +241,13 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     let connectionStringPlaceHolderMessage = ref<string>('');    
 
-    created();
+/*     created();
     function created() {
         getDataSourcesAction();
         getDataSourceTypesAction();
     }
-    
-    onMounted(() => mounted)
+ */    
+    onMounted(() => mounted())
     function mounted() {
 
         fileSelect = document.getElementById('file-select') as HTMLInputElement;   
@@ -276,7 +276,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
         dataSources.value.forEach(_ => {
         dsItems.value.push({text:_.name,value:_.name})
         });
-    })
+         setSourceItemTypeVModel();
+     })
 
     watch(dataSourceTypes, () =>  {
         dsTypeItems.value = clone(dataSourceTypes.value);
@@ -303,6 +304,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     })
 
     watch(sourceTypeItem, () => {
+        
         // get the current data source object
         let currentDatasource = clone(dataSources.value.length>0 ? dataSources.value.find(f => f.name === sourceTypeItem.value) : clone(emptyDatasource));
         currentDatasource ? currentDatasource = clone(currentDatasource) : currentDatasource = clone(emptyDatasource);
@@ -363,6 +365,15 @@ import ConfirmDialog from 'primevue/confirmdialog';
     watch(currentExcelLocationColumn, () =>  {
         currentDatasource.value.locationColumn = currentExcelLocationColumn.value;
     })
+
+    function setSourceItemTypeVModel()
+    {
+        if(sourceTypeItem.value == "")
+        {
+            sourceTypeItem.value = dsItems.value[0];
+        }
+
+    }
 
     function onLoadExcel() {
         if ( hasValue(file.value)) {

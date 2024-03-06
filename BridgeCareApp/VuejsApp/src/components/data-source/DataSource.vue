@@ -276,7 +276,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
         dataSources.value.forEach(_ => {
         dsItems.value.push({text:_.name,value:_.name})
         });
-         setSourceItemTypeVModel();
      })
 
     watch(dataSourceTypes, () =>  {
@@ -366,15 +365,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
         currentDatasource.value.locationColumn = currentExcelLocationColumn.value;
     })
 
-    function setSourceItemTypeVModel()
-    {
-        if(sourceTypeItem.value == "")
-        {
-            sourceTypeItem.value = dsItems.value[0];
-        }
-
-    }
-
     function onLoadExcel() {
         if ( hasValue(file.value)) {
             importExcelSpreadsheetFileAction({
@@ -450,6 +440,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
         connectionStringPlaceHolderMessage.value = 'New connection string';
         datColumns.value = [];
         locColumns.value = [];
+        showExcel.value = true;
       }
     }
     function allowSave(): boolean {

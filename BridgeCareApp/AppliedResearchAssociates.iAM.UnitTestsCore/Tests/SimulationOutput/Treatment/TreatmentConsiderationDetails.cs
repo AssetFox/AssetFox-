@@ -15,8 +15,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             {
                 BudgetPriorityLevel = 10,
             };
-            var budgetUsageDetail = BudgetUsageDetails.Detail(budgetName);
-            detail.BudgetUsages.Add(budgetUsageDetail);
+            //var budgetUsageDetail = BudgetUsageDetails.Detail(budgetName);
+            //detail.BudgetUsages.Add(budgetUsageDetail);
             var cashFlowConsiderationDetail = CashFlowConsiderationDetails.Detail();
             detail.CashFlowConsiderations.Add(cashFlowConsiderationDetail);
             return detail;

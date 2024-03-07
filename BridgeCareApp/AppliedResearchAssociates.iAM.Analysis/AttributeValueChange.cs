@@ -33,7 +33,7 @@ public sealed class AttributeValueChange : CompilableExpression
         }
     }
 
-    public ChangeApplicator GetApplicator(CalculateEvaluateScope scope)
+    public ConsequenceApplicator GetApplicator(CalculateEvaluateScope scope)
     {
         switch (Attribute)
         {
@@ -47,12 +47,12 @@ public sealed class AttributeValueChange : CompilableExpression
             {
                 var oldNumber = scope.GetNumber(Attribute.Name);
                 var newNumber = NumberChanger.Invoke(oldNumber);
-                return new ChangeApplicator(() => scope.SetNumber(Attribute.Name, newNumber), newNumber);
+                return new ConsequenceApplicator(Attribute, () => scope.SetNumber(Attribute.Name, newNumber), newNumber);
             }
 
         case TextAttribute _:
             var newText = Expression;
-            return new ChangeApplicator(() => scope.SetText(Attribute.Name, newText), null);
+            return new ConsequenceApplicator(Attribute, () => scope.SetText(Attribute.Name, newText), null);
 
         default:
             throw new InvalidOperationException("Invalid attribute type.");

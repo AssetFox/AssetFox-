@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport
         public Dictionary<int, double> MaintenanceCostPerYear { get; set; } = new Dictionary<int, double>();
         public Dictionary<int, double> OtherCostPerYear { get; set; } = new Dictionary<int, double>();
         public Dictionary<int, double> WorkOutsideScopeCostPerYear { get; set; } = new Dictionary<int, double>();
-
+        public Dictionary<int, double> BundledCostPerYear { get; set; } = new Dictionary<int, double>();
         public Dictionary<int, double> TotalCostPerYear { get; set; } = new Dictionary<int, double>();
     }
 }

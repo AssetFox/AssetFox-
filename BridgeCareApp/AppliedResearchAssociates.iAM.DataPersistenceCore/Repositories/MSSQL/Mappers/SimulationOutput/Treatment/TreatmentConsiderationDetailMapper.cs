@@ -44,8 +44,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 BudgetPriorityLevel = entity.BudgetPriorityLevel,
             };
-            var budgetUsageDetails = BudgetUsageDetailMapper.ToDomainList(entity.BudgetUsageDetails);
-            domain.BudgetUsages.AddRange(budgetUsageDetails);
+            //var budgetUsageDetails = BudgetUsageDetailMapper.ToDomainList(entity.BudgetUsageDetails);
+            //domain.BudgetUsages.AddRange(budgetUsageDetails);
             var cashFlowConsiderationDetails = CashFlowConsiderationDetailMapper.ToDomainList(entity.CashFlowConsiderationDetails);
             domain.CashFlowConsiderations.AddRange(cashFlowConsiderationDetails);
             return domain;
@@ -73,9 +73,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 var entity = ToEntityWithoutChildren(consideration, assetDetailId);
                 family.TreatmentConsiderationDetails.Add(entity);
-                var budgetUsageDetails = BudgetUsageDetailMapper.ToEntityList(consideration.BudgetUsages, entity.Id);
+                //var budgetUsageDetails = BudgetUsageDetailMapper.ToEntityList(consideration.BudgetUsages, entity.Id);
+                //family.BudgetUsageDetails.AddRange(budgetUsageDetails);
                 var cashFlowConsiderationDetails = CashFlowConsiderationDetailMapper.ToEntityList(consideration.CashFlowConsiderations, entity.Id);
-                family.BudgetUsageDetails.AddRange(budgetUsageDetails);
                 family.CashFlowConsiderationDetails.AddRange(cashFlowConsiderationDetails);
             }
         }

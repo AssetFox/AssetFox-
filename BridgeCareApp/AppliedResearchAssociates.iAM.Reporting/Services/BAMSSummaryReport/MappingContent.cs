@@ -121,7 +121,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
             case TreatmentCause.SelectedTreatment:
                 return "BAMS Pick";
             case TreatmentCause.CommittedProject:
-                 return projectSource;
+                return string.IsNullOrEmpty(projectSource) ? "Committed" : projectSource;
             default:
                 return treatmentCause.ToString();
             }

@@ -46,6 +46,11 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public bool ShouldUseExtraFundsAcrossBudgets { get; set; }
 
         /// <summary>
+        /// Allows multiple treatment selection
+        /// </summary>
+        public bool shouldAllowMultipleTreatments { get; set; }
+
+        /// <summary>
         /// Describes the attribute used to determine the benefit based
         /// on the improvement to conditions of this specific attribute
         /// </summary>

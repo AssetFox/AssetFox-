@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
@@ -28,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
             var currentCell = AddHeadersCells(unfundedRecommendationWorksheet);
 
             // Enable Auto Filter
-            using (var autoFilterCells = unfundedRecommendationWorksheet.Cells[1, 1, currentCell.Row, currentCell.Column - 1])
+            using (var autoFilterCells = unfundedRecommendationWorksheet.Cells[1, 1, currentCell.Row, currentCell.Column])
             {
                 autoFilterCells.AutoFilter = true;
             }
@@ -50,21 +48,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
             int headerRowIndex = 1; var headersRow = GetHeadersRow();
             for (int column = 0; column < headersRow.Count; column++)
             {
-                worksheet.Cells[headerRowIndex, column + 1].Style.WrapText = true;
-                worksheet.Cells[headerRowIndex, column + 1].Value = headersRow[column];                
+                var headerCell = worksheet.Cells[headerRowIndex, column + 1];
+                headerCell.Value = headersRow[column];
+                headerCell.Style.WrapText = true;
                 ExcelHelper.MergeCells(worksheet, headerRowIndex, column + 1, headerRowIndex + 1, column + 1);
             }
             
             var currentCell = new CurrentCell { Row = headerRowIndex + 1, Column = worksheet.Dimension.Columns };
 
             worksheet.Cells.AutoFitColumns();
-            using (ExcelRange autoFilterCells = worksheet.Cells[2, 1, currentCell.Row, currentCell.Column - 1])
+            using (ExcelRange autoFilterCells = worksheet.Cells[2, 1, currentCell.Row, currentCell.Column])
             {
                 autoFilterCells.AutoFilter = true;
             }
 
+            worksheet.DefaultColWidth = 13;
             worksheet.Row(headerRowIndex).Height = 40;
-            worksheet.Cells.Style.WrapText = false;
 
             return currentCell;
         }

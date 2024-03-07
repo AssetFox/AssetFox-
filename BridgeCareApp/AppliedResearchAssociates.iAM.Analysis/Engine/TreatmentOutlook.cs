@@ -23,7 +23,7 @@ internal sealed class TreatmentOutlook
         }
     }
 
-    public TreatmentOutlook(SimulationRunner simulationRunner, AssetContext templateContext, SelectableTreatment initialTreatment, int initialYear, IEnumerable<RemainingLifeCalculator.Factory> remainingLifeCalculatorFactories)
+    public TreatmentOutlook(SimulationRunner simulationRunner, AssetContext templateContext, Treatment initialTreatment, int initialYear, IEnumerable<RemainingLifeCalculator.Factory> remainingLifeCalculatorFactories)
     {
         SimulationRunner = simulationRunner ?? throw new ArgumentNullException(nameof(simulationRunner));
         TemplateContext = templateContext ?? throw new ArgumentNullException(nameof(templateContext));
@@ -97,7 +97,7 @@ internal sealed class TreatmentOutlook
     private readonly SimulationRunner SimulationRunner;
     private readonly AssetContext TemplateContext;
     private readonly AssetContext AccumulationContext;
-    private readonly SelectableTreatment InitialTreatment;
+    private readonly Treatment InitialTreatment;
     private readonly int InitialYear;
     private readonly IReadOnlyCollection<RemainingLifeCalculator> RemainingLifeCalculators;
 

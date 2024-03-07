@@ -26,10 +26,38 @@ public class SimulationRunnerTests
             NameOfUsableBudget = scenario.InvestmentPlan.Budgets.First().Name,
             Cost = 100,
             Name = "Lovecraftian Horror",
-            NameOfTemplateTreatment = scenario.SelectableTreatments.Single(t => t.ForCommittedProjectsOnly).Name,
-            ProjectSource = ProjectSourceDTO.Maintenance.ToString(),
-        }) ;
-        
+            NameOfTemplateTreatment = scenario.SelectableTreatments.First(t => t.ForCommittedProjectsOnly).Name,
+        });
+
+        return RunTest(scenario);
+    }
+
+    [Fact]
+    public Task MultipleCommittedProjectsForOneAssetYear()
+    {
+        var scenario = InputCreation.CreateExtremelyMinimalInput();
+
+        scenario.CommittedProjects.Add(new()
+        {
+            AssetID = scenario.Network.MaintainableAssets.Find(asset => asset.Name == "LA 1").ID,
+            Year = 2020,
+            NameOfUsableBudget = scenario.InvestmentPlan.Budgets.First().Name,
+            Cost = 100,
+            Name = "Lovecraftian Horror #1",
+            NameOfTemplateTreatment = scenario.SelectableTreatments.First(t => t.ForCommittedProjectsOnly).Name,
+        });
+
+        scenario.CommittedProjects.Add(new()
+        {
+            AssetID = scenario.Network.MaintainableAssets.Find(asset => asset.Name == "LA 1").ID,
+            Year = 2020,
+            NameOfUsableBudget = scenario.InvestmentPlan.Budgets.First().Name,
+            Cost = 100,
+            Name = "Lovecraftian Horror #2",
+            NameOfTemplateTreatment = scenario.SelectableTreatments
+                .First(t => !t.ForCommittedProjectsOnly && t.Name != scenario.NameOfPassiveTreatment).Name,
+        });
+
         return RunTest(scenario);
     }
 

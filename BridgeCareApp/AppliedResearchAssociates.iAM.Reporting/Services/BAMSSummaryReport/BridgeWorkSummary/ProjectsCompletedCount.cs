@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using OfficeOpenXml;
-
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
@@ -99,6 +97,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         worksheet.Cells[row, column].Value = count;
                         totalCount += count;
                     }
+                    else
+                    {
+                        worksheet.Cells[row, column].Value = 0;
+                    }
                     row++;
                 }
                 worksheet.Cells[row, column].Value = totalCount;
@@ -135,25 +137,26 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 decimal committedTotalCount = 0;
                 foreach (var data in yearlyItem.Value)
                 {
-                    MPMSTreatments.Add(data.Key); // Tracking treatment names for MPMS projects
-                    if (!uniqueTreatments.ContainsKey(data.Key))
+                    var dataKey = data.Key.Contains("Bundle") ? BAMSConstants.BundledTreatments : data.Key;
+                    MPMSTreatments.Add(dataKey); // Tracking treatment names for MPMS projects
+                    if (!uniqueTreatments.ContainsKey(dataKey))
                     {
-                        uniqueTreatments.Add(data.Key, currentCell.Row);
-                        worksheet.Cells[currentCell.Row, column].Value = data.Key;
+                        uniqueTreatments.Add(dataKey, currentCell.Row);
+                        worksheet.Cells[currentCell.Row, column].Value = dataKey;
                         // setting up the row with zeros
                         worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, currentCell.Column + 1 + simulationYears.Count()].Value = 0;
 
                         var cellToEnterCount = yearlyItem.Key - startYear;
-                        worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCount + 2].Value = data.Value;
+                        worksheet.Cells[uniqueTreatments[dataKey], column + cellToEnterCount + 2].Value = data.Value;
 
-                        projectRowNumberModel.TreatmentsCount.Add(data.Key + "_" + yearlyItem.Key, currentCell.Row);
+                        projectRowNumberModel.TreatmentsCount.Add(dataKey + "_" + yearlyItem.Key, currentCell.Row);
                         currentCell.Row += 1;
                     }
                     else
                     {
                         var cellToEnterCost = yearlyItem.Key - startYear;
-                        worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost + 2].Value = data.Value;
-                        projectRowNumberModel.TreatmentsCount.Add(data.Key + "_" + yearlyItem.Key, uniqueTreatments[data.Key]);
+                        worksheet.Cells[uniqueTreatments[dataKey], column + cellToEnterCost + 2].Value = data.Value;
+                        projectRowNumberModel.TreatmentsCount.Add(dataKey + "_" + yearlyItem.Key, uniqueTreatments[dataKey]);
                     }
                     committedTotalCount += data.Value;
                 }
@@ -207,10 +210,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 {
                     if (treatment.AssetType == AssetCategories.Bridge || treatment.Name == BAMSConstants.NonCulvertNoTreatment)
                     {
-                        yearlyValues.Value.TryGetValue(treatment.Name, out var nonCulvertCount);
+                        var treatmentName = treatment.Name.Contains("Bundle") ? BAMSConstants.BundledTreatments : treatment.Name;
+                        yearlyValues.Value.TryGetValue(treatmentName, out var nonCulvertCount);
                         worksheet.Cells[row, column].Value = nonCulvertCount;
 
-                        var keyItem = treatment.Name + "_" + yearlyValues.Key;
+                        var keyItem = treatmentName + "_" + yearlyValues.Key;
                         if (projectRowNumberModel.TreatmentsCount.ContainsKey(keyItem) == false)
                         {
                             projectRowNumberModel.TreatmentsCount.Add(keyItem, row);

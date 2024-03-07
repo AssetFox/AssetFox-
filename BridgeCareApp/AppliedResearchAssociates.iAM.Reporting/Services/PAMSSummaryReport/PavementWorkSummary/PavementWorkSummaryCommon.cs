@@ -1,11 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml;
-using OfficeOpenXml.Style;
-
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using System;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
@@ -57,25 +53,39 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             new TreatmentGroup (TreatmentGroupCategory.Concrete,1, "Routine Maintenance", 0, 6),
             new TreatmentGroup (TreatmentGroupCategory.Concrete, 2, "CPR", 7, 14),
             new TreatmentGroup (TreatmentGroupCategory.Concrete, 3, "Major Rehabilitation", 15, 26),
-            new TreatmentGroup (TreatmentGroupCategory.Concrete, 4, "Reconstruction", 27, 27)
+            new TreatmentGroup (TreatmentGroupCategory.Concrete, 4, "Reconstruction", 27, 27),
+            new TreatmentGroup (TreatmentGroupCategory.Bundled, 1, "Multi Treatments", 0, 27)
         };
 
         public enum TreatmentGroupCategory
         {
             Bituminous = 'h',
-            Concrete = 'j'
+            Concrete = 'j',
+            Bundled = 'b'
         }
 
 
         private static void GetTreatmentCategoryAndNumber(string treatmentName, out TreatmentGroupCategory treatmentCategory, out int treatmentNumber)
         {
             var treatments = treatmentName.Split("+", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            var highestTreatment = treatments.Last();
-            treatmentCategory = (TreatmentGroupCategory)highestTreatment.Substring(0, 1).ToLower()[0];
-            var numberText = highestTreatment.Substring(1);
-            if (!int.TryParse(numberText, out treatmentNumber))
+
+            // Bundled treatments
+            if (treatments != null && treatments.Length > 0 && treatments.FirstOrDefault().Contains("Bundle"))
             {
-                treatmentNumber = -1;
+                treatmentCategory = TreatmentGroupCategory.Bundled;
+                treatmentNumber = 0; // default, change if required
+            }
+            else
+            {
+                //var highestTreatment = treatments.Last(); // this comes as number and then no valid TreatmentGroupCategory and hence TreatmentGroup
+                var firstTreatment = treatments?.First();
+                treatmentCategory = (TreatmentGroupCategory)firstTreatment.Substring(0, 1).ToLower()[0];
+                var highestTreatmentText = treatments.Last();
+                var numberText = !int.TryParse(highestTreatmentText, out _) ? firstTreatment.Substring(1) : highestTreatmentText;
+                if (!int.TryParse(numberText, out treatmentNumber))
+                {
+                    treatmentNumber = -1;
+                }
             }
         }
 
@@ -94,19 +104,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         }
 
 
-        public static string GetTreatmentGroupString(PavementTreatmentHelper.TreatmentGroupCategory treatmentCategory)
+        public static string GetTreatmentGroupString(TreatmentGroupCategory treatmentCategory)
         {
             switch (treatmentCategory)
             {
-            case PavementTreatmentHelper.TreatmentGroupCategory.Bituminous: return "Bituminous";
-            case PavementTreatmentHelper.TreatmentGroupCategory.Concrete: return "Concrete";
+            case TreatmentGroupCategory.Bituminous: return "Bituminous";
+            case TreatmentGroupCategory.Concrete: return "Concrete";
+            case TreatmentGroupCategory.Bundled: return "Bundled";
             default: return "Undefined";
             }
         }
 
     }
-
-
 
     public class PavementWorkSummaryCommon
     {
@@ -139,7 +148,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 worksheet.Cells[row++, column].Value = item;
             }
         }
-
 
         internal void SetPavementTreatmentGroupsExcelString(ExcelWorksheet worksheet,
             List<string> treatmentGroupNames, ref int row, ref int column)
@@ -250,8 +258,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelHelper.ApplyStyle(cells);
             ExcelHelper.ApplyBorder(cells);
         }
-
-
 
         public List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> GetAsphaltTreatments(List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> allTreatments)
         {

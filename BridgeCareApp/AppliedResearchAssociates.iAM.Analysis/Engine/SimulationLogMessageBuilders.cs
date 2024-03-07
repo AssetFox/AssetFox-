@@ -15,7 +15,7 @@ public static class SimulationLogMessageBuilders
             Subject = SimulationLogSubject.Calculation,
         };
 
-    internal static SimulationLogMessageBuilder InvalidTreatmentCost(AnalysisMaintainableAsset asset, SelectableTreatment treatment, double cost, Guid simulationId) => new SimulationLogMessageBuilder
+    internal static SimulationLogMessageBuilder InvalidTreatmentCost(AnalysisMaintainableAsset asset, Treatment treatment, double cost, Guid simulationId) => new SimulationLogMessageBuilder
     {
         SimulationId = simulationId,
         Status = SimulationLogStatus.Error,

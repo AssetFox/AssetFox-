@@ -47,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 workTypeTotal.RehabilitationCostPerYear[item.Year] += item.Amount;
                 workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
                 break;
-            case TreatmentCategory.Replacement:
+            case TreatmentCategory.Reconstruction:
                 if (!workTypeTotal.ReplacementCostPerYear.ContainsKey(item.Year))
                 {
                     workTypeTotal.ReplacementCostPerYear.Add(item.Year, 0);
@@ -93,6 +93,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
                 }
                 workTypeTotal.WorkOutsideScopeCostPerYear[item.Year] += item.Amount;
+                workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
+                break;
+            case TreatmentCategory.Bundled:
+                if (!workTypeTotal.BundledCostPerYear.ContainsKey(item.Year))
+                {
+                    workTypeTotal.BundledCostPerYear.Add(item.Year, 0);
+                }
+                if (!workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
+                {
+                    workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
+                }
+                workTypeTotal.BundledCostPerYear[item.Year] += item.Amount;
                 workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
                 break;
             default:

@@ -43,4 +43,10 @@ public enum TreatmentRejectionReason
     ///     limit. See <see cref="InvestmentPlan.MinimumProjectCostLimit"/>.
     /// </summary>
     CostIsBelowMinimumProjectCostLimit,
+
+    /// <summary>
+    ///     Indicates a treatment whose corresponding <see
+    ///     cref="TreatmentOption.WeightedObjectiveValue"/> value is zero or less.
+    /// </summary>
+    NonPositiveObjectiveValue,
 }

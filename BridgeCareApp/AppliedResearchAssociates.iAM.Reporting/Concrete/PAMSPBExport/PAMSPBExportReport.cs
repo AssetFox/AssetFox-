@@ -161,12 +161,16 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
-            var simulation = network.Simulations.First();                
+            var simulation = network.Simulations.First();
+            _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
             var networkMaintainableAssets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithLocations(_networkId);
-            var networkMaintainableAssetIds = networkMaintainableAssets.Select(x => x.Id);
+            var networkMaintainableAssetIds = networkMaintainableAssets.Select(x => x.Id);            
             var attributeDTOs = _unitOfWork.AttributeRepo.GetAttributes();
             var requiredAttributeIds = GetRequiredAttributeIds(attributeDTOs);
             var attributeDatumDTOs = _unitOfWork.AttributeDatumRepo.GetAllInNetwork(networkMaintainableAssetIds, requiredAttributeIds);
+            //Include treatments in simulation
+            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatmentsForReport(simulation);
 
             // Report
             using var excelPackage = new ExcelPackage(new FileInfo("PAMSPBExportReportData.xlsx"));
@@ -183,7 +187,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var treatmentsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSPBExportReportConstants.TreatmentTab);
-            _treatmentTab.Fill(treatmentsWorksheet, simulationOutput, simulationId, simulation.Network.Id, simulation.Treatments, networkMaintainableAssets);
+            _treatmentTab.Fill(treatmentsWorksheet, simulationOutput, simulationId, simulation.Network.Id, simulation.Treatments, networkMaintainableAssets, simulation.ShouldBundleFeasibleTreatments);
 
             checkCancelled(cancellationToken, simulationId);
             // Check and generate folder

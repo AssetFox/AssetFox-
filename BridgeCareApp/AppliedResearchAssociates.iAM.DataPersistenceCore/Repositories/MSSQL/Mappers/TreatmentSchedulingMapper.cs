@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         {
             var scheduling = selectableTreatment.Schedulings.GetAdd(new TreatmentScheduling());
             scheduling.OffsetToFutureYear = entity.OffsetToFutureYear;
-            scheduling.Treatment = selectableTreatment;
+            scheduling.TreatmentToSchedule = selectableTreatment;
         }
     }
 }

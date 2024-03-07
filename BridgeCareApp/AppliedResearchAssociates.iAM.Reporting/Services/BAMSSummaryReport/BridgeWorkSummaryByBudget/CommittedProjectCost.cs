@@ -31,21 +31,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             currentCell.Row += 1;
             var startOfCommittedBudget = currentCell.Row;
             currentCell.Column = 1;
-            var treatmentTracker = new Dictionary<string, int>();
-            foreach (var treatment in committedTreatments)
-            {
-                worksheet.Cells[currentCell.Row, currentCell.Column].Value = treatment;
-                treatmentTracker.Add(treatment, currentCell.Row);
-                worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row,
-                    currentCell.Column + 1 + simulationYears.Count].Value = 0.0;
-                currentCell.Row += 1;
-            }
+            var treatmentTracker = new Dictionary<string, int>();            
             foreach (var item in costForCommittedBudgets)
             {
                 if (item.ProjectSource != "Maintenance" && item.ProjectSource != "ProjectBuilder")
-                {
+                {                    
                     string currentProjectSource = item.ProjectSource;
-                    var rowNum = treatmentTracker[item.Treatment];
+                    var rowNum = currentCell.Row++;
+                    worksheet.Cells[rowNum, currentCell.Column].Value = item.Treatment;
+                    worksheet.Cells[rowNum, currentCell.Column + 2, rowNum, currentCell.Column + 1 + simulationYears.Count].Value = 0.0;
                     var cellToEnterCost = item.Year - startYear;
                     var cellValue = worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value;
                     var totalAmount = 0.0;
@@ -58,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     WorkTypeTotalHelper.FillWorkTypeTotals(item, workTypeTotal);
                 }
             }
-            worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.BridgeTotal;
+            worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.CommittedTotal;
 
             foreach (var totalCommittedBudget in totalBudgetPerYearForCommittedWork)
             {
@@ -94,18 +88,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var startOfSAPBudget = currentCell.Row;
             currentCell.Column = 1;
             var treatmentTracker = new Dictionary<string, int>();
-            foreach (var treatment in sapTreatments)
-            {
-                worksheet.Cells[currentCell.Row, currentCell.Column].Value = treatment;
-                treatmentTracker.Add(treatment, currentCell.Row);
-                worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, currentCell.Column + 1 + simulationYears.Count].Value = 0.0;
-                currentCell.Row += 1;
-            }
             foreach (var item in costForSAPBudgets)
             {
                 if (item.ProjectSource == "Maintenance")
                 {
-                    var rowNum = treatmentTracker[item.Treatment];
+                    var rowNum = currentCell.Row++;
+                    worksheet.Cells[rowNum, currentCell.Column].Value = item.Treatment;
+                    worksheet.Cells[rowNum, currentCell.Column + 2, rowNum, currentCell.Column + 1 + simulationYears.Count].Value = 0.0;
                     var cellToEnterCost = item.Year - startYear;
                     var totalAmount = (double)(worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value ?? 0.0);
                     totalAmount += item.Amount;
@@ -113,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     WorkTypeTotalHelper.FillWorkTypeTotals(item, workTypeTotal);
                 }
             }
-            worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.BridgeTotal;
+            worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.SAPTotal;
             foreach (var totalSAPBudget in totalBudgetPerYearForSAPWork)
             {
                 var year = totalSAPBudget.Key;
@@ -153,18 +142,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var startOfProjectBuilderBudget = currentCell.Row; 
             currentCell.Column = 1;
             var treatmentTracker = new Dictionary<string, int>();
-            foreach (var treatment in projectBuilderTreatments)
-            {
-                worksheet.Cells[currentCell.Row, currentCell.Column].Value = treatment;
-                treatmentTracker.Add(treatment, currentCell.Row);
-                worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, currentCell.Column + 1 + simulationYears.Count].Value = 0.0;
-                currentCell.Row += 1;
-            }
             foreach (var item in costForProjectBuilderBudgets)
             {
                 if (item.ProjectSource == "ProjectBuilder")
                 {
-                    var rowNum = treatmentTracker[item.Treatment];
+                    var rowNum = currentCell.Row++;
+                    worksheet.Cells[rowNum, currentCell.Column].Value = item.Treatment;
+                    worksheet.Cells[rowNum, currentCell.Column + 2, rowNum, currentCell.Column + 1 + simulationYears.Count].Value = 0.0;
                     var cellToEnterCost = item.Year - startYear;
                     var totalAmount = (double)(worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value ?? 0.0);
                     totalAmount += item.Amount;
@@ -172,7 +156,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     WorkTypeTotalHelper.FillWorkTypeTotals(item, workTypeTotal);
                 }
             }
-            worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.BridgeTotal;
+            worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.ProjectBuilderTotal;
             foreach (var totalProjectBuilderBudget in totalBudgetPerYearForProjectBuilderWork)
             {
                 var year = totalProjectBuilderBudget.Key;

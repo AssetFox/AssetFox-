@@ -261,7 +261,6 @@ import { Console } from 'console';
                 getAvailableReportsAction();
                  getSimulationReportsAction();
                 getInventoryReportsAction();
-                
         (() => {
             
             (async () => { 
@@ -382,7 +381,7 @@ import { Console } from 'console';
         else
             primaryNetwork.value = selectPrimaryNetworkItemValue.value;  
         checkHasUnsaved();       
-    })
+    }, { immediate: true })
 
     watch(selectRawdataNetworkItemValue,() =>  {
         if (selectRawdataNetworkItemValue === null) 
@@ -390,7 +389,7 @@ import { Console } from 'console';
         else 
             rawdataNetwork.value = selectRawdataNetworkItemValue.value;
         checkHasUnsaved();
-    })
+    }, { immediate: true })
 
     watch(primaryNetwork,() => {
         checkHasUnsaved();       

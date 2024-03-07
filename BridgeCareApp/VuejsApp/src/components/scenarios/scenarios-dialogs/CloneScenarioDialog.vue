@@ -135,7 +135,7 @@ import { useStore } from 'vuex';
                 ...props.dialogData.scenario,
                 destinationNetworkId: selectedNetworkId,
                 networkId: props.dialogData.scenario.networkId,
-                users: shared
+                users: shared.value
                     ? [
                           owner,
                           ... stateUsers.value

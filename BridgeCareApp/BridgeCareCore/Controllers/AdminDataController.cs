@@ -110,6 +110,24 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+
+        [HttpGet]
+        [Route("GetAssetType")]
+        [Authorize]
+        public async Task<IActionResult> GetAssetType()
+        {
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("SetAssetType/{AssetType}")]
+        [ClaimAuthorize("AdminAccess")]
+        public async Task<IActionResult> SetAssetType(string AssetType)
+        {
+            return Ok();
+        }
+
+
         [HttpGet]
         [Route("GetPrimaryNetwork")]
         [Authorize]

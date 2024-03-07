@@ -44,7 +44,12 @@ export default class AdminDataService {
     static GetAttributeName(): AxiosPromise {
         return coreAxiosInstance.get(`${API.AdminData}/GetAttributeName`);
     }
-    
+    static getAssetType(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.AdminData}/GetAssetType`);
+    }
+    static setAssetType(assetType: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.AdminData}/SetAssetType/${assetType}`);
+    }
     static getConstraintType(): AxiosPromise {
         return coreAxiosInstance.get(`${API.AdminData}/GetConstraintType`);
     }

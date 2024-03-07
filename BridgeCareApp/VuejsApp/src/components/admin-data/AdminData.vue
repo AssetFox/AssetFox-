@@ -347,7 +347,7 @@ import { report } from 'process';
         else
             primaryNetwork.value = selectPrimaryNetworkItemValue.value;  
         checkHasUnsaved();       
-    })
+    }, { immediate: true })
 
     watch(selectRawdataNetworkItemValue,() =>  {
         if (selectRawdataNetworkItemValue === null) 
@@ -355,7 +355,7 @@ import { report } from 'process';
         else 
             rawdataNetwork.value = selectRawdataNetworkItemValue.value;
         checkHasUnsaved();
-    })
+    }, { immediate: true })
 
     watch(primaryNetwork,() => {
         checkHasUnsaved();       

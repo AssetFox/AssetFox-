@@ -35,6 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public const string rawDataFieldKey = "RawDataKeyFields";
         public const string primaryNetworkKey = "PrimaryNetwork";
         public const string rawDataNetworkKey = "RawDataNetwork";
+        public const string assetTypeKey = "AssetType";
         public const string constraintTypeKey = "ConstraintType";
 
         //Reads in KeyFields record as a string but places values in a list to return.
@@ -185,6 +186,42 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.SaveChanges();
             }
 
+        }
+
+        //Reads in AssetType record as a string but places values in a list to return.
+        public IList<string> GetAssetType()
+        {
+            var existingAssetType = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == assetTypeKey).FirstOrDefault();
+            if (existingAssetType == null)
+            {
+                return null;
+            }
+            else
+            {
+                var assetType = existingAssetType.Value;
+                IList<string> AssetTypeList = assetType.Split(',').ToList();
+                return AssetTypeList;
+            }
+        }
+
+        //String is to be passed in as parameter. Sets the AssetType in the AdminSettings table. 
+        public void SetAssetType(string assetType)
+        {
+            var existingAssetType = _unitOfWork.Context.AdminSettings.Where(_ => _.Key == assetTypeKey).FirstOrDefault();
+            if (existingAssetType == null)
+            {
+                _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
+                {
+                    Key = assetTypeKey,
+                    Value = assetType
+                });
+            }
+            else
+            {
+                existingAssetType.Value = assetType;
+                _unitOfWork.Context.AdminSettings.Update(existingAssetType);
+            }
+            _unitOfWork.Context.SaveChanges();
         }
 
         public string GetPrimaryNetwork()

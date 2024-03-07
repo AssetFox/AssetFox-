@@ -32,7 +32,7 @@
             <v-col >
                 <v-select id="TreatmentDetailsTab-assetType-vselect"
                 class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
-                :items="Array.from(assetTypeMap.keys())"
+                :items="stateAssetType"
                 append-icon=ghd-down
                 label="Asset type"
                 variant="outlined"
@@ -181,6 +181,10 @@ import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditor
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { getUrl } from '@/shared/utils/get-url';
 
+    let store = useStore();
+    let stateAssetType = computed<string[]>(()=>store.state.adminDataModule.assetType);
+    async function getAssetTypeAction(payload?: any): Promise<any> {await store.dispatch('getAssetType',payload);}
+
     const emit = defineEmits(['submit', 'onModifyTreatmentDetails'])
     const props = defineProps<{
         selectedTreatmentDetails: TreatmentDetails,
@@ -201,6 +205,11 @@ import { getUrl } from '@/shared/utils/get-url';
     let assetTypeBinding = ref('');
 
     const mask = { mask: '##########' };
+
+    created();
+    function created() {
+        getAssetTypeAction();
+    }
 
     watch(assetTypeBinding, () => {
         onEditAssetType('assetType', assetTypeBinding.value)

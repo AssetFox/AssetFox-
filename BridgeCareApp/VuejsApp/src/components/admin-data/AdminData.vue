@@ -286,14 +286,14 @@ import { report } from 'process';
     })
     watch(statePrimaryNetwork,() => {
         selectPrimaryNetworkItemValue.value = statePrimaryNetwork.value;
-    })
+    }, { immediate: true })
     function onStatePrimaryNetworkChanged()
     {
         selectPrimaryNetworkItemValue.value = statePrimaryNetwork.value;
     }
     watch(stateRawdataNetwork,() =>  {
         selectRawdataNetworkItemValue.value = stateRawdataNetwork.value;
-    })
+    }, { immediate: true })
     function  onStateRawdataNetworkChanged()
     {
         selectPrimaryNetworkItemValue.value = statePrimaryNetwork.value;

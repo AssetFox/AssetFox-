@@ -182,7 +182,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
 
                 var decisionsAggregate = new PAMSDecisionAggregated();
                 var aggregatedTreatmentRejection = section.TreatmentRejections;
-                decisionsAggregate.Feasible = isCashFlowProject ? "-" : (aggregatedTreatmentRejection == null ? PAMSAuditReportConstants.Yes : PAMSAuditReportConstants.No);
+                if (!string.IsNullOrEmpty(includedBundles))
+                {
+                    decisionsAggregate.Feasible = PAMSAuditReportConstants.Yes;
+                    decisionsAggregate.Selected = PAMSAuditReportConstants.Yes;
+                }
+                else
+                {
+                    decisionsAggregate.Feasible = PAMSAuditReportConstants.No;
+                    decisionsAggregate.Selected = PAMSAuditReportConstants.No;
+                }
                 var currentAggregatedCIImprovement = Convert.ToDouble(decisionDataModel.CurrentAttributesValues.Last());
                 string aggregatedTreatmentName = null;
                 foreach (var option in section.TreatmentOptions)
@@ -198,7 +207,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 decisionsAggregate.CIImprovement = aggregatedTreatmentOption?.ConditionChange;
                 decisionsAggregate.Cost = aggregatedTreatmentOption != null ? aggregatedTreatmentOption.Cost : 0;
                 decisionsAggregate.BCRatio = aggregatedTreatmentOption != null ? aggregatedTreatmentOption.Benefit / aggregatedTreatmentOption.Cost : 0;
-                decisionsAggregate.Selected = isCashFlowProject ? PAMSAuditReportConstants.CashFlow : (section.AppliedTreatment == aggregatedTreatmentString ? PAMSAuditReportConstants.Yes : PAMSAuditReportConstants.No);
 
                 var aggregatedAmountSpent = aggregatedTreatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.
                                     Where(_ => _.Year == year.Year).Sum(_ => _.AllocatedAmount)

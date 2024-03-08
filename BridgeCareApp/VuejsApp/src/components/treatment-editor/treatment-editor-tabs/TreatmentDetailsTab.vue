@@ -32,7 +32,7 @@
             <v-col >
                 <v-select id="TreatmentDetailsTab-assetType-vselect"
                 class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border'
-                :items="stateAssetType"
+                :items="Array.from(assetTypeMap.keys())"
                 append-icon=ghd-down
                 label="Asset type"
                 variant="outlined"
@@ -218,7 +218,15 @@ import { getUrl } from '@/shared/utils/get-url';
     watch(treatmentCategoryBinding, () => {
         onEditTreatmentType('category', treatmentCategoryBinding.value)
     })
+    
     watch(selectedTreatmentDetails, () => {
+        // Populate assetTypeMap and assetTypeReverseMap
+        stateAssetType.value.forEach((assetType, index) => {
+            // Assign numerical indices to each asset type
+            assetTypeMap.set(assetType, index);
+            assetTypeReverseMap.set(index, assetType);
+        });
+
         treatmentCategoryBinding.value = treatmentCategoryReverseMap.get(selectedTreatmentDetails.value.category)!;
         assetTypeBinding.value = assetTypeReverseMap.get(selectedTreatmentDetails.value.assetType)!;
         TreatmentIsUnSelectable.value = selectedTreatmentDetails.value.isUnselectable;

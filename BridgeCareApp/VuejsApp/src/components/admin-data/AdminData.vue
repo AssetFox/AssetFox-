@@ -233,9 +233,9 @@ import { Console } from 'console';
     const rawDataKeyFieldsDelimited =ref<string>('');
     const simulationReportsDelimited= ref<string>('');
     const inventoryReportsDelimited=  ref<string>('');
-     const assetTypeDelimited= ref<string>('');
+    const assetTypeDelimited= ref<string>('');
 
-     const assetList = ["Bridge", "Culvert", "Pavement"];
+    const assetList = ["Bridge", "Culvert", "Pavement"];
 
 
     let keyFieldsName: string  = 'KeyFields';

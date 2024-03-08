@@ -100,8 +100,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             supersedeRule.Treatment = preventTreatmentEntity?.ToDomain(simulation, simpleTreatments);
             // Criterion
             var criterionLibrary = entity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin?.CriterionLibrary;
-            supersedeRule.Criterion.Expression = criterionLibrary.MergedCriteriaExpression ?? string.Empty;
-            supersedeRule.Criterion.Id = criterionLibrary.Id;            
+            if (criterionLibrary != null)
+            {
+                supersedeRule.Criterion.Expression = criterionLibrary.MergedCriteriaExpression ?? string.Empty;
+                supersedeRule.Criterion.Id = criterionLibrary.Id;
+            }
         }
 
         public static TreatmentSupersedeRuleDTO ToDto(this ScenarioTreatmentSupersedeRuleEntity entity, List<TreatmentDTO> treatmentList) =>

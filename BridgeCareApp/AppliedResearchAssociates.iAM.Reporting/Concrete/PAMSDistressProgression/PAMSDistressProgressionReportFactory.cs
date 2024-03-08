@@ -3,7 +3,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Concrete.PAMSDistressProgression
+namespace AppliedResearchAssociates.iAM.Reporting
 {
     public class PAMSDistressProgressionReportFactory : IReportFactory
     {

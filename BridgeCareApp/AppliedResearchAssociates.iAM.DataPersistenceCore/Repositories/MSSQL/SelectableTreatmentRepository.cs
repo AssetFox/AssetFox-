@@ -590,7 +590,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.AsTransaction(() =>
             {
                 _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
-                    _.ScenarioSelectableTreatment.SimulationId == simulationId);
+                    _.ScenarioSelectableTreatment.SimulationId == simulationId && !entityIds.Contains(_.ScenarioSelectableTreatment.Id));
+
+                _unitOfWork.Context.DeleteAll<ScenarioTreatmentSupersedeRuleEntity>(_ =>
+                    _.ScenarioSelectableTreatment.SimulationId == simulationId && !entityIds.Contains(_.ScenarioSelectableTreatment.Id));
 
                 _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentEntity>(_ =>
                     _.SimulationId == simulationId && !entityIds.Contains(_.Id));

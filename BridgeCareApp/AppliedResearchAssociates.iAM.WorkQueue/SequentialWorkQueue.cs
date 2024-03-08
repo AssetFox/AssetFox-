@@ -1,11 +1,14 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Channels;
+using AppliedResearchAssociates.iAM.Common;
+using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Hubs.Services;
+using AppliedResearchAssociates.iAM.WorkQueue.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using static System.Formats.Asn1.AsnWriter;
 
@@ -76,12 +79,16 @@ public class SequentialWorkQueue<T>
 
             QueueEntryTimestamp = WorkQueue.EntryTimestampPerId[WorkId];
 
+            _log = new WorkQueueNLog();
+
             _ = WorkQueue.IncompleteElements.TryAdd(WorkId, this);
         }
 
         public string MostRecentStatusMessage { get; private set; } = "";
 
         public DateTime QueueEntryTimestamp { get; }
+
+        private ILog _log;
 
         public int QueueIndex
         {
@@ -112,6 +119,7 @@ public class SequentialWorkQueue<T>
 
         public void StartWork(IServiceProvider serviceProvider)
         {
+            _log = new WorkQueueNLog();
             if (WorkQueue.EntryTimestampPerId.ContainsKey(WorkId))
             {
                 WorkStartTimestamp = DateTime.Now;
@@ -141,6 +149,7 @@ public class SequentialWorkQueue<T>
                 }
                 else
                 {
+                    _log.Error($"{WorkCompletion.Exception?.InnerException?.Message ?? ""}\r\n{WorkCompletion.Exception?.InnerException?.StackTrace ?? ""}");
                     WorkSpec.OnFault(serviceProvider, WorkCompletion.Exception?.InnerException?.Message ?? "");
                 }
 

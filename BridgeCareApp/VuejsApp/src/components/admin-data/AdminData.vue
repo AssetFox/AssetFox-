@@ -235,9 +235,6 @@ import { Console } from 'console';
     const inventoryReportsDelimited=  ref<string>('');
     const assetTypeDelimited= ref<string>('');
 
-    const assetList = ["Bridge", "Culvert", "Pavement"];
-
-
     let keyFieldsName: string  = 'KeyFields';
     let rawDataKeyFieldsName: string = 'RawDataKeyFields';
     let simulationReportsName: string = 'SimulationReports';
@@ -466,7 +463,6 @@ import { Console } from 'console';
         editAdminDataDialogData.showDialog = true;
         editAdminDataDialogData.selectedSettings = clone(  selectedAssetTypes.value);
         editAdminDataDialogData.settingName =   assetTypeName;
-        editAdminDataDialogData.settingsList = clone( assetList);
     }
 
     function onSubmitEditAdminDataDialogResult(selectedSettings: string[]){

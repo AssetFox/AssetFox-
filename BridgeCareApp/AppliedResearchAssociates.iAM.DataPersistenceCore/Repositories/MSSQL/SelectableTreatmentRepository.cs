@@ -40,6 +40,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var treatments = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
                 .Where(_ => _.SimulationId == simulation.Id)
+                .AsSplitQuery()
                 .Include(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
                 .ThenInclude(_ => _.ScenarioBudget)
                 .ThenInclude(_ => _.ScenarioBudgetAmounts)
@@ -69,6 +70,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var simpleTreatments = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
                 .Where(_ => _.SimulationId == simulation.Id).ToList();
 
+            //Sort treatment based on supersede dependencies.
+            //This must be performed to hyrdate treatments in the correct order during Simulation load.
             var sortedTreatments = TopologicalSort(treatments);
 
             sortedTreatments.ForEach(_ => _.CreateSelectableTreatment(simulation, simpleTreatments));
@@ -92,20 +95,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
             }
 
-            void Dfs(Guid treatmentId)
+            void DepthFirstSearch(Guid treatmentId)
             {
                 if (!visited.Contains(treatmentId))
                 {
                     visited.Add(treatmentId);
                     foreach (var nextId in graph[treatmentId])
-                        Dfs(nextId);
+                        DepthFirstSearch(nextId);
 
                     sorted.Add(treatments.FirstOrDefault(_ => _.Id == treatmentId));
                 }
             }
 
             foreach (var treatment in treatments)
-                Dfs(treatment.Id);
+                DepthFirstSearch(treatment.Id);
 
             return sorted;
         }
@@ -132,6 +135,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public TreatmentLibraryDTO GetSingleTreatmentLibary(Guid libraryId)
         {
             var entity = _unitOfWork.Context.TreatmentLibrary.AsNoTracking()
+                .AsSplitQuery()
                 .Include(_ => _.Treatments)
                 .ThenInclude(_ => _.TreatmentCosts)
                 .ThenInclude(_ => _.TreatmentCostEquationJoin)
@@ -177,6 +181,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return _unitOfWork.Context.TreatmentLibrary.AsNoTracking()
+                .AsSplitQuery()
                 .Include(_ => _.Treatments)
                 .ThenInclude(_ => _.TreatmentCosts)
                 .ThenInclude(_ => _.TreatmentCostEquationJoin)
@@ -436,6 +441,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
                 .Where(_ => _.SimulationId == simulationId)
+                .AsSplitQuery()
                 .Include(_ => _.ScenarioTreatmentCosts)
                 .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
                 .ThenInclude(_ => _.Equation)
@@ -471,6 +477,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             var names = _unitOfWork.Context.SelectableTreatment
                 .Where(t => t.TreatmentLibraryId == libraryId)
+                .AsSplitQuery()
                 .Select(t => t.Name)
                 .OrderBy(s => s)
                 .ToList();
@@ -486,6 +493,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var treatments = _unitOfWork.Context.SelectableTreatment.Where(_ => _.TreatmentLibraryId == libraryId).Select(_ => _.ToDto(null));
             return _unitOfWork.Context.SelectableTreatment.AsNoTracking()
+                .AsSplitQuery()
                 .Include(_ => _.TreatmentCosts)
                 .ThenInclude(_ => _.TreatmentCostEquationJoin)
                 .ThenInclude(_ => _.Equation)
@@ -628,10 +636,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.AsTransaction(() =>
             {
                 _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
-                    _.ScenarioSelectableTreatment.SimulationId == simulationId && !entityIds.Contains(_.ScenarioSelectableTreatment.Id));
+                    _.ScenarioSelectableTreatment.SimulationId == simulationId);
+
+                _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentSupersedeRuleEntity>(_ =>
+                    _.ScenarioTreatmentSupersedeRule.ScenarioSelectableTreatment.SimulationId == simulationId);
 
                 _unitOfWork.Context.DeleteAll<ScenarioTreatmentSupersedeRuleEntity>(_ =>
-                    _.ScenarioSelectableTreatment.SimulationId == simulationId && !entityIds.Contains(_.ScenarioSelectableTreatment.Id));
+                    _.ScenarioSelectableTreatment.SimulationId == simulationId);
 
                 _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentEntity>(_ =>
                     _.SimulationId == simulationId && !entityIds.Contains(_.Id));
@@ -854,6 +865,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public TreatmentDTOWithSimulationId GetScenarioSelectableTreatmentById(Guid id)
         {
             var entity = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
+                .AsSplitQuery()
                 .Include(_ => _.ScenarioTreatmentCosts)
                 .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
                 .ThenInclude(_ => _.Equation)
@@ -884,6 +896,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public TreatmentLibraryDTO GetTreatmentLibraryWithSingleTreatmentByTreatmentId(Guid treatmentId)
         {            
             var entity = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
+                .AsSplitQuery()
                 .Include(_ => _.TreatmentCosts)
                 .ThenInclude(_ => _.TreatmentCostEquationJoin)
                 .ThenInclude(_ => _.Equation)
@@ -1014,6 +1027,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var treatments = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
                 .Where(_ => _.SimulationId == simulation.Id)
+                .AsSplitQuery()
                 .Include(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
                 .ThenInclude(_ => _.ScenarioBudget)
                 .ThenInclude(_ => _.ScenarioBudgetAmounts)
@@ -1051,6 +1065,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
                 .Where(_ => _.SimulationId == simulationId)
+                .AsSplitQuery()
                 .Include(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Select(_ => _.ToDto(null))

@@ -286,14 +286,14 @@ import { report } from 'process';
     })
     watch(statePrimaryNetwork,() => {
         selectPrimaryNetworkItemValue.value = statePrimaryNetwork.value;
-    })
+    }, { immediate: true })
     function onStatePrimaryNetworkChanged()
     {
         selectPrimaryNetworkItemValue.value = statePrimaryNetwork.value;
     }
     watch(stateRawdataNetwork,() =>  {
         selectRawdataNetworkItemValue.value = stateRawdataNetwork.value;
-    })
+    }, { immediate: true })
     function  onStateRawdataNetworkChanged()
     {
         selectPrimaryNetworkItemValue.value = statePrimaryNetwork.value;
@@ -347,7 +347,7 @@ import { report } from 'process';
         else
             primaryNetwork.value = selectPrimaryNetworkItemValue.value;  
         checkHasUnsaved();       
-    })
+    }, { immediate: true })
 
     watch(selectRawdataNetworkItemValue,() =>  {
         if (selectRawdataNetworkItemValue === null) 
@@ -355,7 +355,7 @@ import { report } from 'process';
         else 
             rawdataNetwork.value = selectRawdataNetworkItemValue.value;
         checkHasUnsaved();
-    })
+    }, { immediate: true })
 
     watch(primaryNetwork,() => {
         checkHasUnsaved();       

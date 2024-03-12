@@ -69,7 +69,45 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var simpleTreatments = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
                 .Where(_ => _.SimulationId == simulation.Id).ToList();
 
-            treatments.ForEach(_ => _.CreateSelectableTreatment(simulation, simpleTreatments));
+            var sortedTreatments = TopologicalSort(treatments);
+
+            sortedTreatments.ForEach(_ => _.CreateSelectableTreatment(simulation, simpleTreatments));
+        }
+
+        private static List<ScenarioSelectableTreatmentEntity> TopologicalSort(List<ScenarioSelectableTreatmentEntity> treatments)
+        {
+            var graph = new Dictionary<Guid, List<Guid>>();
+            var visited = new HashSet<Guid>();
+            var sorted = new List<ScenarioSelectableTreatmentEntity>();
+
+            foreach (var treatment in treatments)
+            {
+                
+                if (!graph.ContainsKey(treatment.Id))
+                    graph[treatment.Id] = new List<Guid>();
+
+                foreach (var rule in treatment.ScenarioTreatmentSupersedeRules ?? new List<ScenarioTreatmentSupersedeRuleEntity>()) // Null-check for safety
+                {
+                    graph[treatment.Id].Add(rule.PreventTreatmentId);
+                }
+            }
+
+            void Dfs(Guid treatmentId)
+            {
+                if (!visited.Contains(treatmentId))
+                {
+                    visited.Add(treatmentId);
+                    foreach (var nextId in graph[treatmentId])
+                        Dfs(nextId);
+
+                    sorted.Add(treatments.FirstOrDefault(_ => _.Id == treatmentId));
+                }
+            }
+
+            foreach (var treatment in treatments)
+                Dfs(treatment.Id);
+
+            return sorted;
         }
 
         public void GetScenarioSelectableTreatmentsNoChildren(Simulation simulation)

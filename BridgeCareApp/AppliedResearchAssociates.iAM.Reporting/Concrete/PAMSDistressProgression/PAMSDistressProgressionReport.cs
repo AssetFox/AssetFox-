@@ -53,6 +53,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
 
+            _opiCalculations = new OPICalculations();
+
             //create report objects            
             _reportHelper = new ReportHelper(_unitOfWork);
 
@@ -179,13 +181,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkID, explorer);
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
-
             var simulation = network.Simulations.First();
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
-            var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
-            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
-
+            
             using var excelPackage = new ExcelPackage(new FileInfo("DistressProgressionReportTestData.xlsx"));
             checkCancelled(cancellationToken, simulationId);
 

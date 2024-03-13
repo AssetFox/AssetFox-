@@ -251,10 +251,10 @@ import { text } from 'stream/consumers';
     let rules = ref<InputValidationRules>(validationRules);
 
     let dataSourceGridHeaders: any[] = [
-        { title: 'Name', key: 'name', align: 'left', sortable: true, class: '', width: '' },
-        { title: 'Data Source', key: 'data source', align: 'left', sortable: true, class: '', width: '' },
-        { title: 'Data Source Type', key: 'data source', align: 'left', sortable: true, class: '', width: '' },
-    ];
+    { title: 'Name', key: 'name', align: 'left', sortable: true, class: '', width: '' },
+    { title: 'Data Source', key: 'dataSource.name', align: 'left', sortable: true, class: '', width: '' },
+    { title: 'Data Source Type', key: 'dataSource.type', align: 'left', sortable: true, class: '', width: '' },
+];
 
     const addNetworkDialogData = reactive<AddNetworkDialogData>(emptyAddNetworkDialogData);
     let pagination: Pagination = emptyPagination;

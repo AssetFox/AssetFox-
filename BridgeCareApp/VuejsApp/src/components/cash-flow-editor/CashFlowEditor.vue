@@ -350,13 +350,13 @@ async function getCashFlowRuleLibrariesAction(payload?: any): Promise<any> {awai
 async function selectedCashFlowRuleLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectCashFlowRuleLibrary', payload);}
 async function upsertCashFlowRuleLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertCashFlowRuleLibrary', payload);}
 async function deleteCashFlowRuleLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteCashFlowRuleLibrary', payload);}
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
-async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification', payload);}
+function setHasUnsavedChangesAction(payload?: any) { store.dispatch('setHasUnsavedChanges', payload);}
 async function getScenarioCashFlowRulesAction(payload?: any): Promise<any> {await store.dispatch('getScenarioCashFlowRules', payload);}
 async function upsertScenarioCashFlowRulesAction(payload?: any): Promise<any> {await store.dispatch('upsertScenarioCashFlowRules', payload);}
-async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification', payload);}
+function addSuccessNotificationAction(payload?: any) { store.dispatch('addSuccessNotification', payload);}
 async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario', payload);}
-async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario', payload);}
+ function selectScenarioAction(payload?: any) { store.dispatch('selectScenario', payload);}
 
 function cashFlowRuleLibraryMutator(payload: any){store.commit('cashFlowRuleLibraryMutator', payload);}
 function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selectedCashFlowRuleLibraryMutator', payload);}

@@ -358,18 +358,18 @@ import { getUrl } from '@/shared/utils/get-url';
 
     async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedTargetConditionGoalLibrary',payload);} 
     async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess',payload);}
-    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification',payload);}
+    function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification',payload);}
     async function getTargetConditionGoalLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getTargetConditionGoalLibraries',payload);} 
-    async function selectTargetConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectTargetConditionGoalLibrary',payload);}
+    function selectTargetConditionGoalLibraryAction(payload?: any) { store.dispatch('selectTargetConditionGoalLibrary',payload);}
     async function upsertTargetConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertTargetConditionGoalLibrary',payload);}
     async function deleteTargetConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteTargetConditionGoalLibrary',payload);}
     async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes',payload);}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges',payload);}
+    function setHasUnsavedChangesAction(payload?: any){ store.dispatch('setHasUnsavedChanges',payload);}
     async function getScenarioTargetConditionGoalsAction(payload?: any): Promise<any> {await store.dispatch('getScenarioTargetConditionGoals',payload);}
     async function upsertScenarioTargetConditionGoalsAction(payload?: any): Promise<any> {await store.dispatch('upsertScenarioTargetConditionGoals',payload);}
-    async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification',payload);}
+    function addSuccessNotificationAction(payload?: any) { store.dispatch('addSuccessNotification',payload);}
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario',payload);}
-    async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario',payload);}
+    function selectScenarioAction(payload?: any) { store.dispatch('selectScenario',payload);}
 
     function addedOrUpdatedTargetConditionGoalLibraryMutator(payload:any){store.commit('addedOrUpdatedTargetConditionGoalLibraryMutator',payload);} 
     function selectedTargetConditionGoalLibraryMutator(payload:any){store.commit('selectedTargetConditionGoalLibraryMutator',payload);} 

@@ -240,15 +240,15 @@ import ConfirmDialog from 'primevue/confirmdialog';
     async function getAnalysisMethodAction(payload?: any): Promise<any>{await store.dispatch('getAnalysisMethod', payload)} 
     async function upsertAnalysisMethodAction(payload?: any): Promise<any>{await store.dispatch('upsertAnalysisMethod', payload)} 
 
-    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification', payload)}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any>{await store.dispatch('setHasUnsavedChanges', payload)} 
+    function addErrorNotificationAction(payload?: any){ store.dispatch('addErrorNotification', payload)}
+    function setHasUnsavedChangesAction(payload?: any){ store.dispatch('setHasUnsavedChanges', payload)} 
 
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>{await store.dispatch('getCurrentUserOrSharedScenario', payload)}
-    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario', payload)} 
+    function selectScenarioAction(payload?: any){ store.dispatch('selectScenario', payload)} 
 
     const selectedScenarioId = ref<string>(getBlankGuid());
     const analysisMethod = ref<AnalysisMethod>(clone(emptyAnalysisMethod));
-    let benefit = computed<Benefit>(() => analysisMethod.value.benefit)
+    let benefit = computed<Benefit>(() => analysisMethod.value.benefit)//
     const optimizationStrategy: SelectItem[] = [
         { text: 'Benefit', value: OptimizationStrategy.Benefit },
         {

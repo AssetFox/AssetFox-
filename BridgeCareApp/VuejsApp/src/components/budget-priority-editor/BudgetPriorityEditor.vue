@@ -293,15 +293,15 @@ import { vMaska } from "maska"
     let isSharedLibrary = computed<boolean>(() => store.state.budgetPriorityModule.isSharedLibrary);
     async function getIsSharedLibraryAction(payload?: any): Promise<any>{await store.dispatch('getIsSharedBudgetPriorityLibrary', payload)}
     async function getHasPermittedAccessAction(payload?: any): Promise<any>{await store.dispatch('getHasPermittedAccess', payload)}
-    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification', payload) }
+    function addErrorNotificationAction(payload?: any){ store.dispatch('addErrorNotification', payload) }
     async function getBudgetPriorityLibrariesAction(payload?: any): Promise<any>{await store.dispatch('getBudgetPriorityLibraries', payload)}
-    async function selectBudgetPriorityLibraryAction(payload?: any): Promise<any>{await store.dispatch('selectBudgetPriorityLibrary', payload)}
+    function selectBudgetPriorityLibraryAction(payload?: any){ store.dispatch('selectBudgetPriorityLibrary', payload)}
     async function upsertBudgetPriorityLibraryAction(payload?: any): Promise<any>{await store.dispatch('upsertBudgetPriorityLibrary', payload) }
     async function deleteBudgetPriorityLibraryAction(payload?: any): Promise<any>{await store.dispatch('deleteBudgetPriorityLibrary', payload)}
     async function getScenarioSimpleBudgetDetailsAction(payload?: any): Promise<any>{await store.dispatch('getScenarioSimpleBudgetDetails', payload)} 
     async function upsertScenarioBudgetPrioritiesAction(payload?: any): Promise<any>{await store.dispatch('upsertScenarioBudgetPriorities', payload) }
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any>{await store.dispatch('setHasUnsavedChanges', payload) }
-    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification', payload)}
+     function setHasUnsavedChangesAction(payload?: any){ store.dispatch('setHasUnsavedChanges', payload) }
+    function addSuccessNotificationAction(payload?: any){ store.dispatch('addSuccessNotification', payload)}
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>{await store.dispatch( 'getCurrentUserOrSharedScenario', payload)}
     function selectScenarioAction(payload?: any): void { store.dispatch('selectScenario', payload)}
     

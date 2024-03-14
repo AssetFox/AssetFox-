@@ -59,7 +59,7 @@ const props = defineProps<{
     }>()
 const { useTreatment, closed } = toRefs(props);
 
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification', payload);}
 
     const fileSelect = ref<HTMLInputElement>({} as HTMLInputElement);
     let tableHeaders: any[] = [

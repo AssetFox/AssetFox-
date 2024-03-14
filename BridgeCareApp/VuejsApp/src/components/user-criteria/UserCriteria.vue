@@ -261,6 +261,20 @@ const filteredUsersCriteriaFilter = computed(() => {
     })
   });
 }
+
+watch(search, () => {
+  if (loading || !search.value || search.value.trim() === '') {
+    return assignedUsersCriteriaFilter.value;
+  }
+
+  const lowerCaseSearch = search.value.toLowerCase();
+
+  return assignedUsersCriteriaFilter.value.filter((item: { [s: string]: any; } | ArrayLike<unknown>) => {
+    return Object.values(item).some(val => String(val).toLowerCase().includes(lowerCaseSearch));
+  });
+
+  });
+
 watch(stateUsersCriteriaFilter, () => {
     stateUsersCriteriaFilter.value.forEach((userCriteriafilter: UserCriteriaFilter)=>{
     let tempUserCriteria = userCriteriafilter;

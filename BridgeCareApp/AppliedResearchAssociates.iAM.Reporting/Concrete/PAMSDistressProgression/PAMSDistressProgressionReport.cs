@@ -53,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
 
-            _opiCalculations = new OPICalculations();
+            _opiCalculations = new OPICalculations(_unitOfWork);
 
             //create report objects            
             _reportHelper = new ReportHelper(_unitOfWork);

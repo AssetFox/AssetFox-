@@ -2,15 +2,11 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 using OfficeOpenXml.Style;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressionReport
@@ -69,7 +65,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     }
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column++].Value = CheckGetValue(sectionValuePerNumericAttribute, "SEGMENT_LENGTH");
-                    worksheet.Cells[row, column++].Value = CheckGetValue(sectionValuePerNumericAttribute, "WIDTH");
+                    worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "WIDTH");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "ROUGHNESS");
                     // right border line
                     ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
@@ -268,25 +265,34 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
             }
         }
 
-        private CurrentCell FillHeaders(ExcelWorksheet worksheet, List<int> simulationYears)
+        private static CurrentCell FillHeaders(ExcelWorksheet worksheet, List<int> simulationYears)
         {
             int headerRow = 1;
+            const double minimumColumnWidth = 18;
             var headers = GetInitialHeaders();
             var currentCell = new CurrentCell { Row = headerRow, Column = headers.Count };
             for (int column = 0; column < headers.Count; column++)
-            {
-                worksheet.Cells[headerRow, column + 1].Value = headers[column];
-                ExcelHelper.MergeCells(worksheet, headerRow, column + 1, headerRow + 1, column + 1);
-                ExcelHelper.ApplyBorder(worksheet.Cells[headerRow, column + 1, headerRow + 1, column + 1]);
+            {                      
+                if (column != headers.Count - 1)
+                {
+                    worksheet.Column(column + 1).Width = minimumColumnWidth;
+                    worksheet.Cells[headerRow, column + 1].Value = headers[column];
+                    ExcelHelper.MergeCells(worksheet, headerRow, column + 1, headerRow + 1, column + 1);                    
+                }
+                else
+                {
+                    worksheet.Column(column + 1).Width = minimumColumnWidth - 3;
+                    worksheet.Cells[headerRow + 1, column + 1].Value = headers[column];
+                }
+                ExcelHelper.ApplyBorder(worksheet.Cells[headerRow, column + 1, headerRow + 1, column + 1]);                
             }
-            worksheet.Cells[headerRow, 1, headerRow + 1, headers.Count].AutoFitColumns();
 
             currentCell = FillDynamicHeaders(worksheet, currentCell, simulationYears);
 
             return currentCell;
         }
 
-        private CurrentCell FillDynamicHeaders(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears)
+        private static CurrentCell FillDynamicHeaders(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears)
         {            
             var row = currentCell.Row;
             var yearPartOneHeaders = GetPartOneHeaders();
@@ -296,14 +302,23 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
             foreach (var simulationYear in simulationYears)
             {
                 var column = currentCell.Column + 1;
-                worksheet.Cells[row, column].Value = simulationYear;                
+                worksheet.Cells[row, column].Value = simulationYear;
                 var yearStartColumn = column;
-                column = BuildDataSubHeaders(worksheet, row + 1, column, yearPartOneHeaders, ColorTranslator.FromHtml("#70AD47")); // TODO 1st yr green include OPI coln
+                column = BuildDataSubHeaders(worksheet, row + 1, column, yearPartOneHeaders, ColorTranslator.FromHtml("#70AD47"));
                 column = BuildDataSubHeaders(worksheet, row + 1, column, yearBituminousHeaders, Color.Black);
                 column = BuildDataSubHeaders(worksheet, row + 1, column, yearConcreteHeaders, ColorTranslator.FromHtml("#FFF2CC"));
+                if (simulationYear == simulationYears[0])
+                {
+                    // For OPI
+                    yearStartColumn--;
+                    worksheet.Cells[row, yearStartColumn].Value = simulationYear;
+                    worksheet.Cells[row + 1, yearStartColumn].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    worksheet.Cells[row + 1, yearStartColumn].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#70AD47"));
+                }
+
                 ExcelHelper.MergeCells(worksheet, row, yearStartColumn, row, column - 1);
                 ExcelHelper.ApplyBorder(worksheet.Cells[row, yearStartColumn, row, column - 1]);
-                worksheet.Cells[row, yearStartColumn, row, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;                
+                worksheet.Cells[row, yearStartColumn, row, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
                 currentCell.Column = column;
             }
 
@@ -319,7 +334,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
             return currentCell;
         }
 
-        private int BuildDataSubHeaders(ExcelWorksheet worksheet, int row, int column, List<string> subHeaders, Color color)
+        private static int BuildDataSubHeaders(ExcelWorksheet worksheet, int row, int column, List<string> subHeaders, Color color)
         {
             var startColumn = column;
             for (var index = 0; index < subHeaders.Count; index++)

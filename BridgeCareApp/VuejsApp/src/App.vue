@@ -332,17 +332,17 @@ import { getUrl } from './shared/utils/get-url';
     async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks', payload);}
     async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes', payload);}
     async function getAnnouncementsAction(payload?: any): Promise<any> { await store.dispatch('getAnnouncements', payload);}
-    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification', payload);}
-    async function addWarningNotificationAction(payload?: any): Promise<any> { await store.dispatch('addWarningNotification', payload);}
-    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification', payload);} 
-    async function addInfoNotificationAction(payload?: any): Promise<any> { await store.dispatch('addInfoNotification', payload);} 
-    async function addTaskCompletedNotificationAction(payload: any): Promise<any> { await store.dispatch('addTaskCompletedNotification', payload)}
-    async function removeNotificationAction(payload?: any): Promise<any> { await store.dispatch('removeNotification', payload);}
-    async function clearNotificationCounterAction(payload?: any): Promise<any> { await store.dispatch('clearNotificationCounter', payload);} 
+    function addSuccessNotificationAction(payload?: any) { store.dispatch('addSuccessNotification', payload);}
+    function addWarningNotificationAction(payload?: any) { store.dispatch('addWarningNotification', payload);}
+    function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification', payload);} 
+    function addInfoNotificationAction(payload?: any) { store.dispatch('addInfoNotification', payload);} 
+    function addTaskCompletedNotificationAction(payload: any) { store.dispatch('addTaskCompletedNotification', payload)}
+    function removeNotificationAction(payload?: any) { store.dispatch('removeNotification', payload);}
+    function clearNotificationCounterAction(payload?: any) { store.dispatch('clearNotificationCounter', payload);} 
     async function generatePollingSessionIdAction(payload?: any): Promise<any> { await store.dispatch('generatePollingSessionId', payload);}
     async function getAllUsersAction(payload?: any): Promise<any> { await store.dispatch('getAllUsers', payload);}
     async function getUserCriteriaFilterAction(payload?: any): Promise<any> { await store.dispatch('getUserCriteriaFilter', payload);} 
-    async function loadNotificationsActions(payload?: any): Promise<any> { await store.dispatch('loadNotifications', payload);} 
+    function loadNotificationsActions(payload?: any) {  store.dispatch('loadNotifications', payload);} 
     async function azureB2CLoginAction(payload?: any): Promise<any> { await store.dispatch('azureB2CLogin', payload);} 
     async function azureB2CLogoutAction(payload?: any): Promise<any> { await store.dispatch('azureB2CLogout', payload);} 
     async function getCurrentUserByUserNameAction(payload?: any): Promise<any> { await store.dispatch('getCurrentUserByUserName', payload);}
@@ -351,10 +351,10 @@ import { getUrl } from './shared/utils/get-url';
     async function getAgencyLogoAction(payload?: any): Promise<any> { await store.dispatch('getAgencyLogo', payload);} 
     async function getProductLogoAction(payload?: any): Promise<any> { await store.dispatch('getProductLogo', payload);} 
     async function getInventoryReportsAction(payload?: any): Promise<any> { await store.dispatch('getInventoryReports', payload);} 
-    async function setAlertMessageAction(payload?: any): Promise<any> { await store.dispatch('setAlertMessage', payload);} 
-    function incrementProcessCounterAction(payload?: any): void {  store.dispatch('incrementProcessCounter', payload);}
-    function decrementProcessCounterAction(payload?: any): void {  store.dispatch('decrementProcessCounter', payload);}
-    function setProcessCounterAction(payload?: any): void {  store.dispatch('setProcessCounter', payload);}
+    function setAlertMessageAction(payload?: any) { store.dispatch('setAlertMessage', payload);} 
+    function incrementProcessCounterAction(payload?: any) { store.dispatch('incrementProcessCounter', payload);}
+    function decrementProcessCounterAction(payload?: any) { store.dispatch('decrementProcessCounter', payload);}
+    function setProcessCounterAction(payload?: any) { store.dispatch('setProcessCounter', payload);}
 
     let drawer: boolean = false;
     let latestNewsDate: string = '0001-01-01';

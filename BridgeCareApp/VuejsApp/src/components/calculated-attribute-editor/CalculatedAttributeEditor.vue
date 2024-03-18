@@ -404,12 +404,12 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     async function getScenarioCalculatedAttributeAction(payload?: any): Promise<any> {await store.dispatch('getScenarioCalculatedAttribute', payload);}
     async function getSelectedLibraryCalculatedAttributesAction(payload?: any): Promise<any> {await store.dispatch('getSelectedLibraryCalculatedAttributes', payload);}
     async function selectCalculatedAttributeLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectCalculatedAttributeLibrary', payload);}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+    function setHasUnsavedChangesAction(payload?: any) { store.dispatch('setHasUnsavedChanges', payload);}
     async function getCalculatedAttributesAction(payload?: any): Promise<any> {await store.dispatch('getCalculatedAttributes', payload);}
-    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
-    async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification', payload);}
+    function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification', payload);}
+    function addSuccessNotificationAction(payload?: any) { store.dispatch('addSuccessNotification', payload);}
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario', payload);}
-    async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario', payload);}
+    function selectScenarioAction(payload?: any) { store.dispatch('selectScenario', payload);}
     function selectedCalculatedAttributeLibraryMutator(payload: any){store.commit('selectedCalculatedAttributeLibraryMutator', payload);}
     function calculatedAttributeLibraryMutator(payload: any){store.commit('calculatedAttributeLibraryMutator', payload);}
     let getUserNameByIdGetter: any = store.getters.getUserNameById;

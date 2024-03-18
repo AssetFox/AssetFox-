@@ -398,17 +398,17 @@ import { getUrl } from '@/shared/utils/get-url';
     async function getNetworks(payload?: any): Promise<any> {await store.dispatch('getNetworks', payload);}
     async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedDeficientConditionGoalLibrary', payload);}
     async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess', payload);}
-    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+    function addErrorNotificationAction(payload?: any) {store.dispatch('addErrorNotification', payload);}
     async function getDeficientConditionGoalLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getDeficientConditionGoalLibraries', payload);}
     async function selectDeficientConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectDeficientConditionGoalLibrary', payload);}
     async function upsertDeficientConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertDeficientConditionGoalLibrary', payload);}
     async function deleteDeficientConditionGoalLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteDeficientConditionGoalLibrary', payload);}
     async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes', payload);}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+    function setHasUnsavedChangesAction(payload?: any){ store.dispatch('setHasUnsavedChanges', payload);}
     async function getScenarioDeficientConditionGoalsAction(payload?: any): Promise<any> {await store.dispatch('getScenarioDeficientConditionGoals', payload);}
     async function upsertScenarioDeficientConditionGoalsAction(payload?: any): Promise<any> {await store.dispatch('upsertScenarioDeficientConditionGoals', payload);}
-    async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification', payload);}
-    async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario', payload);}
+    function addSuccessNotificationAction(payload?: any) { store.dispatch('addSuccessNotification', payload);}
+    function selectScenarioAction(payload?: any) { store.dispatch('selectScenario', payload);}
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario', payload);}
     
     function addedOrUpdatedDeficientConditionGoalLibraryMutator(payload: any){store.commit('addedOrUpdatedDeficientConditionGoalLibraryMutator', payload);}

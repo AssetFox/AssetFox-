@@ -133,8 +133,8 @@ import { getUrl } from '@/shared/utils/get-url';
     let store = useStore();
     const router = useRouter(); 
     const stateSimulationReportNames = computed<string[]>(() => store.state.adminDataModule.simulationReportNames);
-    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification',payload);} 
-    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification',payload);} 
+    function addErrorNotificationAction(payload?: any) {  store.dispatch('addErrorNotification',payload);} 
+    function addSuccessNotificationAction(payload?: any) { store.dispatch('addSuccessNotification',payload);} 
     async function getSimulationReportsAction(payload?: any): Promise<any> { await store.dispatch('getSimulationReports',payload);} 
 
     let editShow = ref<boolean>(false);

@@ -781,10 +781,10 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
     let hasAdminAccess: boolean = (store.state.authenticationModule.hasAdminAccess) ; 
     let hasSimulationAccess:boolean = (store.state.authenticationModule.hasSimulationAccess) ; 
 
-    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification', payload)}
-    async function addWarningNotificationAction(payload?: any): Promise<any>{await store.dispatch('addWarningNotification', payload)}
-    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification', payload)}
-    async function addInfoNotificationAction(payload?: any): Promise<any>{await store.dispatch('addInfoNotification', payload)}
+    function addSuccessNotificationAction(payload?: any){ store.dispatch('addSuccessNotification', payload)}
+    function addWarningNotificationAction(payload?: any){ store.dispatch('addWarningNotification', payload)}
+    function addErrorNotificationAction(payload?: any){ store.dispatch('addErrorNotification', payload)}
+    function addInfoNotificationAction(payload?: any){ store.dispatch('addInfoNotification', payload)}
     async function getScenariosAction(payload?: any): Promise<any>{await store.dispatch('getScenarios', payload)}
     async function getSharedScenariosPageAction(payload?: any): Promise<any>{await store.dispatch('getSharedScenariosPage', payload)}
     async function createScenarioAction(payload?: any): Promise<any>{await store.dispatch('createScenario', payload)}
@@ -802,7 +802,7 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
     async function updateSimulationReportDetailAction(payload?: any): Promise<any>{await store.dispatch('updateSimulationReportDetail', payload)}
     async function updateNetworkRollupDetailAction(payload?: any): Promise<any>{await store.dispatch('updateNetworkRollupDetail', payload)}
 
-    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario', payload)} 
+    function selectScenarioAction(payload?: any){ store.dispatch('selectScenario', payload)} 
     async function upsertBenefitQuantifierAction(payload?: any): Promise<any>{await store.dispatch('upsertBenefitQuantifier', payload)} 
     async function aggregateNetworkDataAction(payload?: any): Promise<any>{await store.dispatch('aggregateNetworkData')} 
     async function getUserScenariosPageAction(payload?: any): Promise<any>{await store.dispatch('getUserScenariosPage', payload)}

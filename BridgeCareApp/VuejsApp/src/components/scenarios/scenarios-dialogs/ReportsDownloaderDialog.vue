@@ -71,8 +71,8 @@ import { useStore } from 'vuex';
 
     let stateSimulationReportNames: string[] = (store.state.adminDataModule.simulationReportNames)
 
-    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification')}
-    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification')}
+    function addSuccessNotificationAction(payload?: any){ store.dispatch('addSuccessNotification')}
+    function addErrorNotificationAction(payload?: any){ store.dispatch('addErrorNotification')}
     async function getSimulationReportsAction(payload?: any): Promise<any>{await store.dispatch('getSimulationReports')}
 
     let reports: SelectItem[] = [];   

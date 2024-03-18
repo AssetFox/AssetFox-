@@ -500,8 +500,8 @@ import { getUrl } from '@/shared/utils/get-url';
   await store.dispatch('getTreatmentLibraries', payload);
 }
 
-async function selectTreatmentLibraryAction(payload?: any): Promise<any> {
-  await store.dispatch('selectTreatmentLibrary', payload);
+function selectTreatmentLibraryAction(payload?: any) {
+  store.dispatch('selectTreatmentLibrary', payload);
 }
 
 async function upsertTreatmentLibraryAction(payload?: any): Promise<any> {
@@ -576,8 +576,8 @@ async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>
   await store.dispatch('getCurrentUserOrSharedScenario', payload);
 }
 
-async function selectScenarioAction(payload?: any): Promise<any> {
-  await store.dispatch('selectScenario', payload);
+function selectScenarioAction(payload?: any) {
+  store.dispatch('selectScenario', payload);
 }
 
 async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
@@ -589,12 +589,12 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
 }
 
 
-async function addedOrUpdatedTreatmentLibraryMutator(payload?: any): Promise<any> {
-  await store.commit('addedOrUpdatedTreatmentLibraryMutator', payload);
+ function addedOrUpdatedTreatmentLibraryMutator(payload?: any) {
+  store.commit('addedOrUpdatedTreatmentLibraryMutator', payload);
 }
 
-async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
-  await store.commit('selectedTreatmentLibraryMutator', payload);
+ function selectedTreatmentLibraryMutator(payload?: any) {
+  store.commit('selectedTreatmentLibraryMutator', payload);
 }
 
 

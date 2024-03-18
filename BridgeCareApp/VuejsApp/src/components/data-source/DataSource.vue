@@ -197,8 +197,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
     async function importExcelSpreadsheetFileAction(payload?: any): Promise<any> {await store.dispatch('importExcelSpreadsheetFile', payload);}
     async function getExcelSpreadsheetColumnHeadersAction(payload?: any): Promise<any> {await store.dispatch('getExcelSpreadsheetColumnHeaders', payload);}
     async function checkSqlCommandAction(payload?: any): Promise<any> {await store.dispatch('checkSqlCommand', payload);}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
-    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification', payload);} 
+    function setHasUnsavedChangesAction(payload?: any){ store.dispatch('setHasUnsavedChanges', payload);}
+    function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification', payload);} 
 
     let getUserNameByIdGetter: any = store.getters.getUserNameById;
     let getIdByUserNameGetter: any = store.getters.getIdByUserName ;

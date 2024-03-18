@@ -204,7 +204,7 @@ import { report } from 'process';
     async function setConstraintTypeAction(payload?: any): Promise<any> {await store.dispatch('setConstraintType',payload);}
     async function getNetworks(payload?: any): Promise<any> {await store.dispatch('getNetworks',payload);}
     async function getAttributes(payload?: any): Promise<any> {await store.dispatch('getAttributes',payload);}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges',payload);}
+    function setHasUnsavedChangesAction(payload?: any){ store.dispatch('setHasUnsavedChanges',payload);}
 
     const selectPrimaryNetworkItems= ref<SelectItem[]>([]);
     const selectRawDataNetworkItems=  ref<SelectItem[]> ([]);

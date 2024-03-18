@@ -2,7 +2,7 @@
     <v-dialog max-width="350" persistent v-model="dialogDataWithButtons.showDialog">
         <v-card>
             <v-card-title class="headline">
-                <v-row justify-center>
+                <v-row justify-center style="margin-left:100px; margin-top: 0px">
                     {{dialogDataWithButtons.heading}}
                 </v-row>
             </v-card-title>

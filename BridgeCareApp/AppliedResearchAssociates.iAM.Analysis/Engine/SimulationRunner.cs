@@ -337,9 +337,9 @@ public sealed class SimulationRunner
 
     private static readonly IComparer<BudgetPriority> BudgetPriorityComparer = SelectionComparer<BudgetPriority>.Create(priority => priority.PriorityLevel);
 
-    private IReadOnlyCollection<SelectableTreatment> ActiveTreatments;
+    private IReadOnlyCollection<SelectableTreatment> ActiveTreatments = Array.Empty<SelectableTreatment>();
 
-    private IReadOnlyList<BudgetContext> BudgetContexts;
+    private IReadOnlyList<BudgetContext> BudgetContexts = Array.Empty<BudgetContext>();
 
     private IReadOnlyDictionary<int, IEnumerable<BudgetPriority>> BudgetPrioritiesPerYear;
 

@@ -68,10 +68,10 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     public void ApplyTreatmentConsequences(Treatment treatment)
     {
-        var consequenceActions = treatment.GetConsequenceActions(this);
-        foreach (var consequenceAction in consequenceActions)
+        var consequenceApplicators = treatment.GetConsequenceApplicators(this);
+        foreach (var consequenceApplicator in consequenceApplicators)
         {
-            consequenceAction();
+            consequenceApplicator.Change();
         }
     }
 
@@ -320,18 +320,36 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
             if (EventSchedule.ContainsKey(schedulingYear))
             {
-                Detail.TreatmentSchedulingCollisions.Add(new TreatmentSchedulingCollisionDetail(schedulingYear, scheduling.Treatment.Name));
+                Detail.TreatmentSchedulingCollisions.Add(new TreatmentSchedulingCollisionDetail(schedulingYear, scheduling.TreatmentToSchedule.Name));
             }
             else
             {
-                EventSchedule.Add(schedulingYear, scheduling.Treatment);
+                EventSchedule.Add(schedulingYear, scheduling.TreatmentToSchedule);
             }
         }
 
         if (treatment != SimulationRunner.Simulation.DesignatedPassiveTreatment)
         {
             FirstUnshadowedYearForAnyTreatment = year + treatment.ShadowForAnyTreatment;
-            FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
+
+            if (treatment is TreatmentBundle bundle)
+            {
+                // [REVIEW] The assumption that any treatment has just one same-treatment shadow
+                // (i.e. that a Treatment object is always atomic) was thoroughly baked into the
+                // data design of the analysis engine rewrite back in 2020. We haven't yet
+                // accumulated budget (especially time) for refactoring with such a large splash
+                // radius, so this is, for now, how we're handling same-treatment shadows for a
+                // treatment that is actually multiple treatments.
+
+                foreach (var bundledTreatment in bundle.BundledTreatments)
+                {
+                    FirstUnshadowedYearForSameTreatment[bundledTreatment.Name] = year + bundledTreatment.ShadowForSameTreatment;
+                }
+            }
+            else
+            {
+                FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
+            }
 
             foreach (var (attribute, factor) in treatment.PerformanceCurveAdjustmentFactors)
             {
@@ -461,11 +479,15 @@ internal sealed class AssetContext : CalculateEvaluateScope
         PrepareForTreatment();
 
         if (EventSchedule.TryGetValue(year, out var scheduledEvent) &&
-            scheduledEvent.IsT1(out var treatment) &&
-            treatment is CommittedProject project)
+            scheduledEvent.IsT1(out var treatment))
         {
-            ApplyTreatment(project, year);
-            rollForwardEvents.Add(new(year, Asset.Id, Asset.AssetName, project.Name));
+            if (treatment is not (CommittedProject or CommittedProjectBundle))
+            {
+                throw new InvalidOperationException("Simulation engine scheduled invalid roll-forward event.");
+            }
+
+            ApplyTreatment(treatment, year);
+            rollForwardEvents.Add(new(year, Asset.Id, Asset.AssetName, treatment.Name));
         }
         else if (!SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
         {
@@ -483,9 +505,18 @@ internal sealed class AssetContext : CalculateEvaluateScope
         SetInitialValues(SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
         SetInitialValues(SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
-        foreach (var committedProject in SimulationRunner.CommittedProjectsPerAsset[Asset])
+        foreach (var committedProjects in SimulationRunner.CommittedProjectsPerAsset[Asset].GroupBy(cp => cp.Year))
         {
-            EventSchedule.Add(committedProject.Year, committedProject);
+            var year = committedProjects.Key;
+            var numberOfProjects = committedProjects.Count();
+            if (numberOfProjects > 1)
+            {
+                EventSchedule.Add(year, new CommittedProjectBundle(committedProjects));
+            }
+            else if (numberOfProjects == 1)
+            {
+                EventSchedule.Add(year, committedProjects.Single());
+            }
         }
 
         InitializeCalculatedFields();

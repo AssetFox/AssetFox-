@@ -2,13 +2,17 @@
 
 namespace AppliedResearchAssociates.iAM.Analysis;
 
-public sealed class TreatmentScheduling : WeakEntity, IValidator
+public sealed class TreatmentScheduling : WeakEntity, IValidator, ITreatmentScheduling
 {
     public int OffsetToFutureYear { get; set; }
 
-    public ValidatorBag Subvalidators => new ValidatorBag();
+    public string ShortDescription => nameof(TreatmentScheduling);
 
-    public SelectableTreatment Treatment { get; set; }
+    public ValidatorBag Subvalidators => new();
+
+    public SelectableTreatment TreatmentToSchedule { get; set; }
+
+    Treatment ITreatmentScheduling.TreatmentToSchedule => TreatmentToSchedule;
 
     public ValidationResultBag GetDirectValidationResults()
     {
@@ -19,13 +23,11 @@ public sealed class TreatmentScheduling : WeakEntity, IValidator
             results.Add(ValidationStatus.Error, "Offset to future year is less than one.", this, nameof(OffsetToFutureYear));
         }
 
-        if (Treatment == null)
+        if (TreatmentToSchedule == null)
         {
-            results.Add(ValidationStatus.Error, "Treatment is unset.", this, nameof(Treatment));
+            results.Add(ValidationStatus.Error, "Treatment is unset.", this, nameof(TreatmentToSchedule));
         }
 
         return results;
     }
-
-    public string ShortDescription => nameof(TreatmentScheduling);
 }

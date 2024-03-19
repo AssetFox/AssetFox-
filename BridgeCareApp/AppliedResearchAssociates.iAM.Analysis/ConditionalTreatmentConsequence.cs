@@ -41,7 +41,7 @@ public sealed class ConditionalTreatmentConsequence : TreatmentConsequence
     {
         var results = base.GetDirectValidationResults();
 
-        if (!Equation.ExpressionIsBlank && !(Attribute is NumberAttribute))
+        if (!Equation.ExpressionIsBlank && Attribute is not NumberAttribute)
         {
             results.Add(ValidationStatus.Error, "Equation is set and attribute is not a number.", this);
         }
@@ -49,9 +49,9 @@ public sealed class ConditionalTreatmentConsequence : TreatmentConsequence
         return results;
     }
 
-    internal override IEnumerable<ChangeApplicator> GetChangeApplicators(AssetContext scope, Treatment treatment)
+    internal override IEnumerable<ConsequenceApplicator> GetConsequenceApplicators(AssetContext scope, Treatment treatment)
     {
-        var applicators = base.GetChangeApplicators(scope, treatment);
+        var applicators = base.GetConsequenceApplicators(scope, treatment);
 
         if (!Equation.ExpressionIsBlank && Attribute is NumberAttribute)
         {
@@ -62,7 +62,7 @@ public sealed class ConditionalTreatmentConsequence : TreatmentConsequence
                 var logBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, scope.SimulationRunner.Simulation.Id);
                 scope.SimulationRunner.Send(logBuilder);
             }
-            var equationApplicator = new ChangeApplicator(() => scope.SetNumber(Attribute.Name, newValue), newValue);
+            var equationApplicator = new ConsequenceApplicator(Attribute, () => scope.SetNumber(Attribute.Name, newValue), newValue);
             applicators = applicators.Append(equationApplicator);
         }
 

@@ -127,10 +127,10 @@ import ScenarioService from '@/services/scenario.service';
 
     let userId = ref<string>(store.state.authenticationModule.userId);
 
-    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification',payload)}
-    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification',payload)}
+    function addSuccessNotificationAction(payload?: any){ store.dispatch('addSuccessNotification',payload)}
+    function addErrorNotificationAction(payload?: any){ store.dispatch('addErrorNotification',payload)}
 
-    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario',payload)} 
+    function selectScenarioAction(payload?: any){ store.dispatch('selectScenario',payload)} 
 
     async function runSimulationAction(payload?: any): Promise<any>{await store.dispatch('runSimulation', payload)}   
     async function runNewSimulationAction(payload?: any): Promise<any>{await store.dispatch('runNewSimulation',payload)}

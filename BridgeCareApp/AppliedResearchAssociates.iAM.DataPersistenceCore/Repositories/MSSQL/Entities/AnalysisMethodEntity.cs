@@ -24,6 +24,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public bool ShouldUseExtraFundsAcrossBudgets { get; set; }
 
+        public bool shouldAllowMultipleTreatments { get; set; }
+
         public virtual SimulationEntity Simulation { get; set; }
 
         public virtual AttributeEntity Attribute { get; set; }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace AppliedResearchAssociates.Validation
 {
@@ -11,7 +9,9 @@ namespace AppliedResearchAssociates.Validation
             Validator = validator;
             ValidationPath = validationPath;
         }
-        public IValidator Validator { get; set; }
+
         public IEnumerable<string> ValidationPath { get; set; }
+
+        public IValidator Validator { get; set; }
     }
 }

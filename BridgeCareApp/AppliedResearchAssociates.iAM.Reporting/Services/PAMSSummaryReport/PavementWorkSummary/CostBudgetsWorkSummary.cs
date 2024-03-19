@@ -12,6 +12,7 @@ using WorkTypeMap = AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummary
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using static AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary.PavementTreatmentHelper;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
 {
@@ -25,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         private Dictionary<int, decimal> TotalCommittedSpent = new Dictionary<int, decimal>();
         private Dictionary<int, decimal> TotalSAPSpent = new Dictionary<int, decimal>();
         private Dictionary<int, decimal> TotalProjectBuilderSpent = new Dictionary<int, decimal>();
-        
+        private bool ShouldBundleFeasibleTreatments;
         private int TotalSpentRow = 0;
 
         public CostBudgetsWorkSummary()
@@ -42,8 +43,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             List<(string TreatmentName, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments,
             Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals,
             ICollection<CommittedProject> committedProjects,
-            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
+            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
+            bool shouldBundleFeasibleTreatments)
         {
+            ShouldBundleFeasibleTreatments = shouldBundleFeasibleTreatments;
             FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfSAPWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfProjectBuilderWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
@@ -86,8 +89,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals,
             WorkSummaryByBudgetModel workSummaryByBudgetModel,
             SimulationOutput reportOutputData,
-            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
-        {            
+            List<BaseCommittedProjectDTO> committedProjectsList,
+            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
+            bool shouldBundleFeasibleTreatments)
+        {
+            ShouldBundleFeasibleTreatments = shouldBundleFeasibleTreatments;
             FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfSAPWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfProjectBuilderWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
@@ -97,7 +103,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             FillTreatmentGroupTotalsSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentGroupPerYear);
             var workTypeTotalsWorkOutsideScope = AddCostOfWorkOutsideScope(committedProjectsForWorkOutsideScope);
             FillWorkTypeTotalsSectionByBudget(worksheet, currentCell, simulationYears, workTypeTotals, workTypeTotalsWorkOutsideScope, yearlyBudgetAmount, out var totalSpendingRow, workSummaryByBudgetModel);
-            FillBudgetTotalSectionByBudget(worksheet, currentCell, simulationYears, totalSpendingRow, workSummaryByBudgetModel, reportOutputData);
+            FillBudgetTotalSectionByBudget(worksheet, currentCell, simulationYears, totalSpendingRow, workSummaryByBudgetModel, reportOutputData, committedProjectsList);
             FillBudgetAnalysisSectionByBudget(worksheet, currentCell, simulationYears, yearlyBudgetAmount, totalSpendingRow, workSummaryByBudgetModel, reportOutputData);
 
             var chartRowsModel = new ChartRowsModel();
@@ -140,7 +146,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             // filling in the treatments in the excel TAB
             _pavementWorkSummaryCommon.SetPavementTreatmentExcelString(worksheet, simulationTreatments, ref row, ref column);
-
+            // Bundled Treatments
+            if (ShouldBundleFeasibleTreatments)
+            {
+                worksheet.Cells[row++, column].Value = PAMSConstants.BundledTreatments;
+            }
             worksheet.Cells[row++, column].Value = PAMSConstants.AsphaltTotal;
             column++;
             var fromColumn = column + 1;
@@ -162,9 +172,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     if (!workTypeFullDepthAsphalt.ContainsKey(treatment.Category))
                     {
                         workTypeFullDepthAsphalt.Add(treatment.Category, new SortedDictionary<int, decimal>()
-                    {
-                        { yearlyValues.Key, cost }
-                    });
+                        {
+                            { yearlyValues.Key, cost }
+                        });
                     }
                     else
                     {
@@ -175,6 +185,41 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         workTypeFullDepthAsphalt[treatment.Category][yearlyValues.Key] += cost;
                     }
                 }
+
+                if (ShouldBundleFeasibleTreatments)
+                {
+                    decimal bundledCost = 0;
+                    foreach (var yearlyValue in yearlyValues.Value)
+                    {
+                        var treatment = yearlyValue.Key;
+                        if (treatment.Contains("Bundle") && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
+                        {
+                            var category = TreatmentCategory.Bundled;
+                            decimal cost = 0;
+                            cost = (yearlyValue.Value.treatmentCost - yearlyValue.Value.compositeTreatmentCost);
+                            bundledCost += cost;
+                            asphaltTotalCost += cost;
+
+                            if (!workTypeFullDepthAsphalt.ContainsKey(category))
+                            {
+                                workTypeFullDepthAsphalt.Add(category, new SortedDictionary<int, decimal>()
+                                {
+                                    { yearlyValues.Key, cost }
+                                });
+                            }
+                            else
+                            {
+                                if (!workTypeFullDepthAsphalt[category].ContainsKey(yearlyValues.Key))
+                                {
+                                    workTypeFullDepthAsphalt[category].Add(yearlyValues.Key, 0);
+                                }
+                                workTypeFullDepthAsphalt[category][yearlyValues.Key] += cost;
+                            }
+                        }
+                    }
+                    worksheet.Cells[row++, column].Value = bundledCost;
+                }
+                
                 worksheet.Cells[row, column].Value = asphaltTotalCost;
                 asphaltTotalRow = row;
                 TotalAsphaltSpent.Add(yearlyValues.Key, asphaltTotalCost);
@@ -230,7 +275,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             // filling in the treatments in the excel TAB
             _pavementWorkSummaryCommon.SetPavementTreatmentExcelString(worksheet, simulationTreatments, ref row, ref column);
-
+            // Bundled Treatments
+            if (ShouldBundleFeasibleTreatments)
+            {
+                worksheet.Cells[row++, column].Value = PAMSConstants.BundledTreatments;
+            }
             worksheet.Cells[row++, column].Value = PAMSConstants.CompositeTotal;
             column++;
             var fromColumn = column + 1;
@@ -264,8 +313,42 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         }
                         workTypeComposite[treatment.Category][yearlyValues.Key] += cost;
                     }
-                    //}
                 }
+
+                if (ShouldBundleFeasibleTreatments)
+                {
+                    decimal bundledCost = 0;
+                    foreach (var yearlyValue in yearlyValues.Value)
+                    {
+                        var treatment = yearlyValue.Key;
+                        if (treatment.Contains("Bundle") && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
+                        {
+                            var category = TreatmentCategory.Bundled;
+                            decimal cost = 0;
+                            cost = yearlyValue.Value.compositeTreatmentCost;
+                            bundledCost += cost;
+                            CompositeTotalCost += cost;
+
+                            if (!workTypeComposite.ContainsKey(category))
+                            {
+                                workTypeComposite.Add(category, new SortedDictionary<int, decimal>()
+                            {
+                                { yearlyValues.Key, cost }
+                            });
+                            }
+                            else
+                            {
+                                if (!workTypeComposite[category].ContainsKey(yearlyValues.Key))
+                                {
+                                    workTypeComposite[category].Add(yearlyValues.Key, 0);
+                                }
+                                workTypeComposite[category][yearlyValues.Key] += cost;
+                            }
+                        }
+                    }
+                    worksheet.Cells[row++, column].Value = bundledCost;
+                }
+                
                 worksheet.Cells[row, column].Value = CompositeTotalCost;
                 compositeTotalRow = row;
                 TotalCompositeSpent.Add(yearlyValues.Key, CompositeTotalCost);
@@ -318,7 +401,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             // filling in the treatments in the excel TAB
             _pavementWorkSummaryCommon.SetPavementTreatmentExcelString(worksheet, simulationTreatments, ref row, ref column);
-
+            // Bundled Treatments
+            if (ShouldBundleFeasibleTreatments)
+            {
+                worksheet.Cells[row++, column].Value = PAMSConstants.BundledTreatments;
+            }
             worksheet.Cells[row++, column].Value = PAMSConstants.ConcreteTotal;
             column++;
             var fromColumn = column + 1;
@@ -353,8 +440,42 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         }
                         workTypeConcrete[treatment.Category][yearlyValues.Key] += cost;
                     }
-                    //}
                 }
+
+                if (ShouldBundleFeasibleTreatments)
+                {
+                    decimal bundledCost = 0;
+                    foreach (var yearlyValue in yearlyValues.Value)
+                    {
+                        var treatment = yearlyValue.Key;
+                        if (treatment.Contains("Bundle") && treatment.ToLower().Contains((char)PavementTreatmentHelper.TreatmentGroupCategory.Concrete))
+                        {
+                            var category = TreatmentCategory.Bundled;
+                            decimal cost = 0;
+                            cost = yearlyValue.Value.treatmentCost;
+                            bundledCost += cost;
+                            ConcreteTotalCost += cost;
+
+                            if (!workTypeConcrete.ContainsKey(category))
+                            {
+                                workTypeConcrete.Add(category, new SortedDictionary<int, decimal>()
+                            {
+                                { yearlyValues.Key, cost }
+                            });
+                            }
+                            else
+                            {
+                                if (!workTypeConcrete[category].ContainsKey(yearlyValues.Key))
+                                {
+                                    workTypeConcrete[category].Add(yearlyValues.Key, 0);
+                                }
+                                workTypeConcrete[category][yearlyValues.Key] += cost;
+                            }
+                        }
+                    }
+                    worksheet.Cells[row++, column].Value = bundledCost;
+                }
+
                 worksheet.Cells[row, column].Value = ConcreteTotalCost;
                 concreteTotalRow = row;
                 TotalConcreteSpent.Add(yearlyValues.Key, ConcreteTotalCost);
@@ -371,15 +492,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         }
 
         private void AddTreatmentGroupTotalDetails(ExcelWorksheet worksheet, CurrentCell currentCell,
-            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
-            PavementTreatmentHelper.TreatmentGroupCategory treatmentGroupCategory)
+            Dictionary<int, Dictionary<TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
+            TreatmentGroupCategory treatmentGroupCategory)
         {
             int startRow, startColumn, row, column;
             _pavementWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
 
             var treatmentGroups = PavementTreatmentHelper.GetListOfTreatmentGroupForCategory(treatmentGroupCategory);
-
-            var prefix = PavementTreatmentHelper.GetTreatmentGroupString(treatmentGroupCategory) + " - ";
+            var prefix = GetTreatmentGroupString(treatmentGroupCategory) + " - ";
             var treatmentGroupTitles = treatmentGroups.Select(tg => prefix + tg.GroupDescription).ToList();
 
             _pavementWorkSummaryCommon.SetPavementTreatmentGroupsExcelString(worksheet, treatmentGroupTitles, ref row, ref column);
@@ -420,8 +540,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "PAMS Treatment Groups Totals");
 
-            AddTreatmentGroupTotalDetails(worksheet, currentCell, costAndLengthPerTreatmentGroupPerYear, PavementTreatmentHelper.TreatmentGroupCategory.Bituminous);
-            AddTreatmentGroupTotalDetails(worksheet, currentCell, costAndLengthPerTreatmentGroupPerYear, PavementTreatmentHelper.TreatmentGroupCategory.Concrete);
+            AddTreatmentGroupTotalDetails(worksheet, currentCell, costAndLengthPerTreatmentGroupPerYear, TreatmentGroupCategory.Bituminous);
+            AddTreatmentGroupTotalDetails(worksheet, currentCell, costAndLengthPerTreatmentGroupPerYear, TreatmentGroupCategory.Concrete);
+            if (ShouldBundleFeasibleTreatments)
+            {
+                AddTreatmentGroupTotalDetails(worksheet, currentCell, costAndLengthPerTreatmentGroupPerYear, TreatmentGroupCategory.Bundled);
+            }
         }
 
         private void FillWorkTypeTotalsSection(ExcelWorksheet worksheet, CurrentCell currentCell,
@@ -432,7 +556,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             out int totalSpendingRow
             )
         {
-            var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement, TreatmentCategory.WorkOutsideScope };
+            var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Reconstruction, TreatmentCategory.WorkOutsideScope, TreatmentCategory.Bundled };
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "Work Type Totals", "Total (all years)");
 
@@ -530,10 +654,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells[startRow + 2, column + 2].Value = "Percentage spent on REHABILITATION";
 
             worksheet.Cells[startRow + 3, column + 1].Style.Numberformat.Format = "#0.00%";
-            worksheet.Cells[startRow + 3, column + 2].Value = "Percentage spent on REPLACEMENT";
+            worksheet.Cells[startRow + 3, column + 2].Value = "Percentage spent on RECONSTRUCTION";
 
             worksheet.Cells[startRow + 4, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 4, column + 2].Value = "Percentage spent on WORK OUTSIDE SCOPE/JURISDICTION";
+
+            // TODO : should we hide this based on setting?
+            worksheet.Cells[startRow + 5, column + 1].Style.Numberformat.Format = "#0.00%";
+            worksheet.Cells[startRow + 5, column + 2].Value = "Percentage spent on BUNDLED";
 
             row += 2;
             worksheet.Cells[row, 1].Value = "Total PAMS Budget";
@@ -565,7 +693,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     out int totalSpendingRow,
                     WorkSummaryByBudgetModel workSummaryByBudgetModel)
         {
-            var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement, TreatmentCategory.WorkOutsideScope };
+            var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Reconstruction, TreatmentCategory.WorkOutsideScope, TreatmentCategory.Bundled };
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "Work Type Totals", "Total (all years)");
 
@@ -662,10 +790,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells[startRow + 2, column + 2].Value = "Percentage spent on REHABILITATION";
 
             worksheet.Cells[startRow + 3, column + 1].Style.Numberformat.Format = "#0.00%";
-            worksheet.Cells[startRow + 3, column + 2].Value = "Percentage spent on REPLACEMENT";
+            worksheet.Cells[startRow + 3, column + 2].Value = "Percentage spent on RECONSTRUCTION";
 
             worksheet.Cells[startRow + 4, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 4, column + 2].Value = "Percentage spent on WORK OUTSIDE SCOPE/JURISDICTION";
+
+            // TODO : should we hide this based on setting?
+            worksheet.Cells[startRow + 5, column + 1].Style.Numberformat.Format = "#0.00%";
+            worksheet.Cells[startRow + 5, column + 2].Value = "Percentage spent on BUNDLED";
 
             row += 2;
             worksheet.Cells[row, 1].Value = "Total PAMS Budget";  
@@ -731,7 +863,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 worksheet.Cells[row + 2, column].Value = projectBuilderBudgetTotal;
 
                 // PAMS based on treatments
-                worksheet.Cells[pamsRow, column].Value = (decimal)worksheet.Cells[totalSpendingRow, column].Value - (decimal)mpmsBudgetTotal - (decimal)sapBudgetTotal - (decimal)projectBuilderBudgetTotal;
+                worksheet.Cells[pamsRow, column].Value = (decimal)worksheet.Cells[totalSpendingRow, column].Value;// - (decimal)mpmsBudgetTotal - (decimal)sapBudgetTotal - (decimal)projectBuilderBudgetTotal;
 
                 column++;
             }
@@ -750,7 +882,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             CurrentCell currentCell, List<int> simulationYears,
             int totalSpendingRow,
             WorkSummaryByBudgetModel workSummaryByBudgetModel,
-            SimulationOutput reportOutputData)
+            SimulationOutput reportOutputData,
+            List<BaseCommittedProjectDTO> committedProjectsList)
         {
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", "Budget Total");
@@ -784,22 +917,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         {
                             foreach (var consideration in section.TreatmentConsiderations)
                             {
-                                foreach (var budgetUsage in consideration.BudgetUsages.Where(bu => bu.BudgetName.Equals(workSummaryByBudgetModel.BudgetName, StringComparison.OrdinalIgnoreCase)))
+                                foreach (var budgetUsage in consideration.FundingCalculationOutput?.AllocationMatrix.Where(bu => bu.BudgetName.Equals(workSummaryByBudgetModel.BudgetName, StringComparison.OrdinalIgnoreCase) && bu.Year == year))
                                 {
-                                    if (Enum.TryParse<ProjectSourceDTO>(section.ProjectSource, true, out var projectSource))
+                                    var projectSource = committedProjectsList.FirstOrDefault(_ => section.AppliedTreatment.Contains(_.Treatment))?.ProjectSource;
+                                    switch (projectSource)
                                     {
-                                        switch (projectSource)
-                                        {
-                                        case ProjectSourceDTO.Committed:
-                                            mpmsBudgetTotal += (decimal)budgetUsage.CoveredCost;
-                                            break;
-                                        case ProjectSourceDTO.Maintenance:
-                                            sapBudgetTotal += (decimal)budgetUsage.CoveredCost;
-                                            break;
-                                        case ProjectSourceDTO.ProjectBuilder:
-                                            projectBuilderBudgetTotal += (decimal)budgetUsage.CoveredCost;
-                                            break;
-                                        }
+                                    case ProjectSourceDTO.Committed:
+                                        mpmsBudgetTotal += (decimal)budgetUsage.AllocatedAmount;
+                                        break;
+                                    case ProjectSourceDTO.Maintenance:
+                                        sapBudgetTotal += (decimal)budgetUsage.AllocatedAmount;
+                                        break;
+                                    case ProjectSourceDTO.ProjectBuilder:
+                                        projectBuilderBudgetTotal += (decimal)budgetUsage.AllocatedAmount;
+                                        break;
                                     }
                                 }
                             }
@@ -811,7 +942,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 worksheet.Cells[row + 1, column].Value = sapBudgetTotal;
                 worksheet.Cells[row + 2, column].Value = projectBuilderBudgetTotal;
 
-                var pamsBudgetTotal = (decimal)worksheet.Cells[totalSpendingRow, column].Value - mpmsBudgetTotal - sapBudgetTotal - projectBuilderBudgetTotal;
+                var pamsBudgetTotal = (decimal)worksheet.Cells[totalSpendingRow, column].Value; // - mpmsBudgetTotal - sapBudgetTotal - projectBuilderBudgetTotal;
                 worksheet.Cells[pamsRow, column].Value = pamsBudgetTotal;
 
                 column++;
@@ -840,9 +971,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             currentCell.Column = column;
             var committedTotalRow = 0;
 
-            var uniqueTreatments = new Dictionary<string, int>();
-            var costForTreatments = new Dictionary<string, decimal>();
-            var map = BAMSSummaryReport.BridgeWorkSummary.WorkTypeMap.Map;
+            var uniqueTreatments = new Dictionary<string, int>();            
+            var map = WorkTypeMap.Map;
             // filling in the committed treatments in the excel TAB
             foreach (var yearlyItem in yearlyCostCommittedProj)
             {
@@ -855,26 +985,26 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     var dataValue = data.Value;
                     if (dataValue.projectSource != "Maintenance" && dataValue.projectSource != "ProjectBuilder")
                     {
-                        if (!uniqueTreatments.ContainsKey(data.Key))
+                        var key = data.Key.Contains("Bundle") ? data.Key : dataValue.treatmentCategory;
+                        if (!uniqueTreatments.ContainsKey(key))
                         {
-                            uniqueTreatments.Add(data.Key, currentCell.Row);
-                            worksheet.Cells[row++, column].Value = data.Key;
+                            uniqueTreatments.Add(key, currentCell.Row);
+                            worksheet.Cells[row++, column].Value = key;
                             var cellToEnterCost = yearlyItem.Key - startYear;
-                            worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
-                            costForTreatments.Add(data.Key, dataValue.treatmentCost);
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;                            
                             currentCell.Row += 1;
                         }
                         else
                         {
                             var cellToEnterCost = yearlyItem.Key - startYear;
-                            worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
                         }
                         committedTotalCost += dataValue.treatmentCost;
 
                         // setting up data for Work type totals
-                        if (map.ContainsKey(data.Key))
+                        if (map.ContainsKey(dataValue.treatmentCategory))
                         {
-                            var category = map[data.Key];
+                            var category = map[dataValue.treatmentCategory];
                             var treatmentCost = dataValue.treatmentCost;
                             var currYear = yearlyItem.Key;
                             FillWorkTypeTotalMPMS(workTypeTotalMPMS, category, simulationYears, currYear, treatmentCost);
@@ -944,8 +1074,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var sapTotalRow = 0;
 
             var uniqueTreatments = new Dictionary<string, int>();
-            var costForTreatments = new Dictionary<string, decimal>();
-            var map = BAMSSummaryReport.BridgeWorkSummary.WorkTypeMap.Map;
+            var map = WorkTypeMap.Map;
 
             foreach (var yearlyItem in yearlyCostSAPProj)
             {
@@ -957,27 +1086,25 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     var dataValue = data.Value;
                     if (dataValue.projectSource == "Maintenance")
                     {
-                        if (!uniqueTreatments.ContainsKey(data.Key))
+                        var key = data.Key.Contains("Bundle") ? data.Key : dataValue.treatmentCategory;
+                        if (!uniqueTreatments.ContainsKey(key))
                         {
-                            uniqueTreatments.Add(data.Key, currentCell.Row);
-                            worksheet.Cells[row++, column].Value = data.Key;
-
+                            uniqueTreatments.Add(key, currentCell.Row);
+                            worksheet.Cells[row++, column].Value = key;
                             var cellToEnterCost = yearlyItem.Key - startYear;
-                            worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
-
-                            costForTreatments.Add(data.Key, dataValue.treatmentCost);
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
                             currentCell.Row += 1;
                         }
                         else
                         {
                             var cellToEnterCost = yearlyItem.Key - startYear;
-                            worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
                         }
                         sapTotalCost += dataValue.treatmentCost;
 
-                        if (map.ContainsKey(data.Key))
+                        if (map.ContainsKey(dataValue.treatmentCategory))
                         {
-                            var category = map[data.Key];
+                            var category = map[dataValue.treatmentCategory];
                             var treatmentCost = dataValue.treatmentCost;
                             var currYear = yearlyItem.Key;
                             FillWorkTypeTotalSAP(workTypeTotalSAP, category, simulationYears, currYear, treatmentCost);
@@ -1052,7 +1179,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var projectBuilderTotalRow = 0;
 
             var uniqueTreatments = new Dictionary<string, int>();
-            var costForTreatments = new Dictionary<string, decimal>();
             var map = WorkTypeMap.Map;
 
             foreach (var yearlyItem in yearlyCostProjectBuilderProj)
@@ -1065,27 +1191,25 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     var dataValue = data.Value;
                     if (dataValue.projectSource == "ProjectBuilder")
                     {
-                        if (!uniqueTreatments.ContainsKey(data.Key))
+                        var key = data.Key.Contains("Bundle") ? data.Key : dataValue.treatmentCategory;
+                        if (!uniqueTreatments.ContainsKey(key))
                         {
-                            uniqueTreatments.Add(data.Key, currentCell.Row);
-                            worksheet.Cells[row++, column].Value = data.Key;
-
+                            uniqueTreatments.Add(key, currentCell.Row);
+                            worksheet.Cells[row++, column].Value = key;
                             var cellToEnterCost = yearlyItem.Key - startYear + 2;
-                            worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost].Value = dataValue.treatmentCost;
-
-                            costForTreatments.Add(data.Key, dataValue.treatmentCost);
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost].Value = dataValue.treatmentCost;                            
                             currentCell.Row += 1;
                         }
                         else
                         {
                             var cellToEnterCost = yearlyItem.Key - startYear + 2;
-                            worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost].Value = dataValue.treatmentCost;
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost].Value = dataValue.treatmentCost;
                         }
                         projectBuilderTotalCost += dataValue.treatmentCost;
 
-                        if (map.ContainsKey(data.Key))
+                        if (map.ContainsKey(dataValue.treatmentCategory))
                         {
-                            var category = map[data.Key];
+                            var category = map[dataValue.treatmentCategory];
                             var treatmentCost = dataValue.treatmentCost;
                             var currYear = yearlyItem.Key;
                             FillWorkTypeTotalProjectBuilder(workTypeTotalProjectBuilder, category, simulationYears, currYear, treatmentCost);
@@ -1106,10 +1230,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             column = currentCell.Column;
             worksheet.Cells[currentCell.Row, column].Value = "Project Builder Total";
             column++;
-
             int firstTotalYear = TotalProjectBuilderSpent.Count > 0 ? TotalProjectBuilderSpent.Keys.Min() : startYear;
             var offsetForTotal = firstTotalYear - startYear;
-
             var fromColumn = column + 1 + offsetForTotal;
 
             foreach (var cost in TotalProjectBuilderSpent)
@@ -1125,9 +1247,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             }
 
             projectBuilderTotalRow = currentCell.Row;
-
             fromColumn = column + 1;
-
             var endColumn = startColumn + simulationYears.Count + 1;
 
             ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, projectBuilderTotalRow, endColumn]);
@@ -1358,20 +1478,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         {
                             foreach (var consideration in section.TreatmentConsiderations)
                             {
-                                foreach (var budgetUsage in consideration.BudgetUsages.Where(bu => bu.BudgetName.Equals(workSummaryByBudgetModel.BudgetName, StringComparison.OrdinalIgnoreCase)))
+                                foreach (var budgetUsage in consideration.FundingCalculationOutput?.AllocationMatrix.Where(bu => bu.BudgetName.Equals(workSummaryByBudgetModel.BudgetName, StringComparison.OrdinalIgnoreCase) && bu.Year == year))
                                 {
                                     if (Enum.TryParse<ProjectSourceDTO>(section.ProjectSource, true, out var projectSource))
                                     {
                                         switch (projectSource)
                                         {
                                         case ProjectSourceDTO.Committed:
-                                            mpmsBudgetTotal += Convert.ToDecimal(budgetUsage.CoveredCost);
+                                            mpmsBudgetTotal += budgetUsage.AllocatedAmount;
                                             break;
                                         case ProjectSourceDTO.Maintenance:
-                                            sapBudgetTotal += Convert.ToDecimal(budgetUsage.CoveredCost);
+                                            sapBudgetTotal += budgetUsage.AllocatedAmount;
                                             break;
                                         case ProjectSourceDTO.ProjectBuilder:
-                                            projectBuilderBudgetTotal += Convert.ToDecimal(budgetUsage.CoveredCost);
+                                            projectBuilderBudgetTotal += budgetUsage.AllocatedAmount;
                                             break;
                                         }
                                     }

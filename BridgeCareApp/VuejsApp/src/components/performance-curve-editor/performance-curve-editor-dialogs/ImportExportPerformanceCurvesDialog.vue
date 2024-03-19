@@ -45,7 +45,7 @@ const props = defineProps<{
     showDialog: boolean
     }>()
     let showDialogComputed = computed(() => props.showDialog);
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
+function addErrorNotificationAction(payload?: any) {store.dispatch('addErrorNotification');}
 
     let PerformanceCurvesFile: File | null = null;
     let overwriteBudgets: boolean = true;

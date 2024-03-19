@@ -41,6 +41,8 @@ internal sealed class BudgetContext
 
     public void AllocateCost(decimal cost, int targetYear) => _AllocateCost(cost, targetYear - FirstYearOfAnalysisPeriod);
 
+    public decimal GetAmount(int year) => AmountPerYear[year - FirstYearOfAnalysisPeriod];
+
     public void MoveToNextYear()
     {
         ++CurrentYearIndex;
@@ -54,6 +56,7 @@ internal sealed class BudgetContext
         if (Budget.InvestmentPlan.AllowFundingCarryover)
         {
             AmountPerYear[CurrentYearIndex] += AmountPerYear[CurrentYearIndex - 1];
+            AmountPerYear[CurrentYearIndex - 1] = 0;
         }
     }
 

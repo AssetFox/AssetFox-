@@ -72,8 +72,13 @@ namespace BridgeCareCore.Services
                     {
                         _.BudgetIds = budgetIds;
                     }
-                    
-                });               
+                    _.SupersedeRules.ForEach(__ =>
+                    {
+                        __.Id = Guid.NewGuid();
+                        __.treatment = rows.First(row => row.Name == __.treatment.Name);
+                    });
+                   
+                });
             }           
             return rows;
         }

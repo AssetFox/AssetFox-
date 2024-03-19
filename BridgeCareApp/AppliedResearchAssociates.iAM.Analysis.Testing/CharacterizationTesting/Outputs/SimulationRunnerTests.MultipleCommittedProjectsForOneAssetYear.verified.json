@@ -1,0 +1,76 @@
+﻿{
+  "InitialAssetSummaries": [
+    {
+      "AssetId": "00000000-0000-0000-0000-000000000000",
+      "AssetName": "LA 1",
+      "ValuePerNumericAttribute": {
+        "AREA": 1,
+        "AGE": 25,
+        "HEALTH": 85
+      },
+      "ValuePerTextAttribute": {}
+    }
+  ],
+  "InitialConditionOfNetwork": 85,
+  "LastModifiedDate": "0001-01-01T00:00:00",
+  "RollForwardEvents": [],
+  "Years": [
+    {
+      "Assets": [
+        {
+          "ProjectSource": null,
+          "AppliedTreatment": "Bundle[Lovecraftian Horror #1|Lovecraftian Horror #2]",
+          "SpatialWeightForOrderingOptions": null,
+          "TreatmentCause": "CommittedProject",
+          "TreatmentConsiderations": [
+            {
+              "BudgetPriorityLevel": null,
+              "CashFlowConsiderations": [],
+              "FundingCalculationInput": null,
+              "FundingCalculationOutput": {
+                "AllocationMatrix": [
+                  {
+                    "Year": 2020,
+                    "BudgetName": "Bag of money",
+                    "TreatmentName": "Lovecraftian Horror #1",
+                    "AllocatedAmount": 100.0
+                  },
+                  {
+                    "Year": 2020,
+                    "BudgetName": "Bag of money",
+                    "TreatmentName": "Lovecraftian Horror #2",
+                    "AllocatedAmount": 100.0
+                  }
+                ]
+              },
+              "TreatmentName": "Bundle[Lovecraftian Horror #1|Lovecraftian Horror #2]"
+            }
+          ],
+          "TreatmentFundingIgnoresSpendingLimit": false,
+          "TreatmentOptions": [],
+          "TreatmentRejections": [],
+          "TreatmentSchedulingCollisions": [],
+          "TreatmentStatus": "Applied",
+          "AssetId": "00000000-0000-0000-0000-000000000000",
+          "AssetName": "LA 1",
+          "ValuePerNumericAttribute": {
+            "AREA": 1,
+            "AGE": 25,
+            "HEALTH": 100
+          },
+          "ValuePerTextAttribute": {}
+        }
+      ],
+      "Budgets": [
+        {
+          "AvailableFunding": 999800.0,
+          "BudgetName": "Bag of money"
+        }
+      ],
+      "ConditionOfNetwork": 100,
+      "DeficientConditionGoals": [],
+      "TargetConditionGoals": [],
+      "Year": 2020
+    }
+  ]
+}

@@ -21,7 +21,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore
                 SpendingStrategy = SpendingStrategy.NoSpending,
                 ShouldApplyMultipleFeasibleCosts = false,
                 ShouldDeteriorateDuringCashFlow = false,
-                ShouldUseExtraFundsAcrossBudgets = false
+                ShouldUseExtraFundsAcrossBudgets = false,
+                shouldAllowMultipleTreatments = false
             };
             return returnValue;
         }

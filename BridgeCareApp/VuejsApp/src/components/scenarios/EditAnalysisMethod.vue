@@ -48,13 +48,12 @@
                                 density="compact"
                                 menu-icon=custom:GhdDownSvg
                                 v-model="analysisMethod.spendingStrategy"
-                                @update:model-value="onSetAnalysisMethodProperty('spendingStrategy',$event)"
-                            >
+                                @update:model-value="onSetAnalysisMethodProperty('spendingStrategy',$event)">
                             </v-select>
                         </v-col>                      
                     </v-row>
                     <v-row>
-                        <v-col cols = "4">
+                        <v-col cols = "3">
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Attribute</v-subheader>
                             <v-select
                                 id="EditAnalysisMethod-benefitAttribute-select"
@@ -71,7 +70,7 @@
                             >
                             </v-select>
                         </v-col>
-                        <v-col cols = "4">
+                        <v-col cols = "3">
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Limit</v-subheader>
                             <v-text-field
                                 id="EditAnalysisMethod-benefitLimit-textField"
@@ -93,15 +92,30 @@
                             >
                             </v-text-field>
                         </v-col>
-                        <v-col cols = "4" class="ghd-constant-header">
-                            <v-switch style="margin-left:10px;margin-top:30px;"
-                                id="EditAnalysisMethod-allowMultiBudgetFunding-switch"
-                                class="ghd-checkbox"
-                                color="#2A578D"
-                                label="Allow Multi Budget Funding"
-                                v-model="analysisMethod.shouldUseExtraFundsAcrossBudgets"
-                                @update:model-value='onSetAnalysisMethodProperty("shouldUseExtraFundsAcrossBudgets",$event)'/>
+                    </v-row>
+                    <v-row>
+                        <v-col cols = "3">
+                            <v-switch 
+                            id="EditAnalysisMethod-allowMultiBudgetFunding-switch"
+                            class="ghd-checkbox"
+                            color="#2A578D"
+                            label="Allow Multi Budget Funding"
+                            :disabled="!hasAdminAccess"
+                            v-model="analysisMethod.shouldUseExtraFundsAcrossBudgets"
+                            @update:model-value='onSetAnalysisMethodProperty("shouldUseExtraFundsAcrossBudgets",$event)'/>
+                            
                         </v-col>
+                        <v-col cols = "3">
+                            <v-switch 
+                            id="EditAnalysisMethod-allowMultipleTreatments-switch"
+                            class="ghd-checkbox"
+                            color="#2A578D"
+                            label="Allow Multiple Treatments"
+                            :disabled="!hasAdminAccess"
+                            v-model="analysisMethod.shouldAllowMultipleTreatments"
+                            @update:model-value='onSetAnalysisMethodProperty("shouldAllowMultipleTreatments",$event)'/>
+                        </v-col>
+                    
                     </v-row>
                     <v-row>
                         <v-row justify="space-between" style="padding-left: 10px;">
@@ -226,15 +240,15 @@ import ConfirmDialog from 'primevue/confirmdialog';
     async function getAnalysisMethodAction(payload?: any): Promise<any>{await store.dispatch('getAnalysisMethod', payload)} 
     async function upsertAnalysisMethodAction(payload?: any): Promise<any>{await store.dispatch('upsertAnalysisMethod', payload)} 
 
-    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification', payload)}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any>{await store.dispatch('setHasUnsavedChanges', payload)} 
+    function addErrorNotificationAction(payload?: any){ store.dispatch('addErrorNotification', payload)}
+    function setHasUnsavedChangesAction(payload?: any){ store.dispatch('setHasUnsavedChanges', payload)} 
 
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>{await store.dispatch('getCurrentUserOrSharedScenario', payload)}
-    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario', payload)} 
+    function selectScenarioAction(payload?: any){ store.dispatch('selectScenario', payload)} 
 
     const selectedScenarioId = ref<string>(getBlankGuid());
     const analysisMethod = ref<AnalysisMethod>(clone(emptyAnalysisMethod));
-    let benefit = computed<Benefit>(() => analysisMethod.value.benefit)
+    let benefit = computed<Benefit>(() => analysisMethod.value.benefit)//
     const optimizationStrategy: SelectItem[] = [
         { text: 'Benefit', value: OptimizationStrategy.Benefit },
         {

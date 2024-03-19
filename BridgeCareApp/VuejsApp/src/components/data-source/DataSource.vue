@@ -113,11 +113,11 @@
                             <v-btn id="DataSource-Cancel-vbtn"  @click="resetDataSource" v-show="showMssql || showExcel" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' flat>Cancel</v-btn>
                             <v-btn id="DataSource-Test-vbtn"  @click="checkSQLConnection" v-show="showMssql" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>Test</v-btn>
                             <p>&nbsp;&nbsp;&nbsp;</p>
-                            <v-btn id="DataSource-Save-vbtn"   v-show="showMssql || showExcel" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onSaveDatasource">Save</v-btn>
+                            <v-btn id="DataSource-Save-vbtn"   :disabled="!sourceTypeItemSelected" v-show="showMssql || showExcel" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onSaveDatasource">Save</v-btn>
                             <p>&nbsp;&nbsp;&nbsp;</p>
                             <v-btn id="DataSource-Load-vbtn"  :disabled="isNewDataSource" variant = "outlined" v-show="showExcel" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onLoadExcel">Load</v-btn>
                             <p>&nbsp;&nbsp;&nbsp;</p>
-                            <v-btn id="DataSource-Delete-vbtn"  :disabled="isNewDataSource" v-show="showMssql || showExcel" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onDeleteClick">Delete</v-btn>
+                            <v-btn id="DataSource-Delete-vbtn"  :disabled="isNewDataSource || !sourceTypeItemSelected" v-show="showMssql || showExcel" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onDeleteClick">Delete</v-btn>
                         </v-row>
                     </v-col>
                 </v-row>
@@ -153,7 +153,7 @@
 </template>
 
 <script setup lang='ts'>
-import Vue, { computed, onMounted, reactive, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
+import { computed, onMounted, reactive, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
 import { clone, isNil, prop } from 'ramda';
 import {
     Datasource, 
@@ -197,8 +197,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
     async function importExcelSpreadsheetFileAction(payload?: any): Promise<any> {await store.dispatch('importExcelSpreadsheetFile', payload);}
     async function getExcelSpreadsheetColumnHeadersAction(payload?: any): Promise<any> {await store.dispatch('getExcelSpreadsheetColumnHeaders', payload);}
     async function checkSqlCommandAction(payload?: any): Promise<any> {await store.dispatch('checkSqlCommand', payload);}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
-    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification', payload);} 
+    function setHasUnsavedChangesAction(payload?: any){ store.dispatch('setHasUnsavedChanges', payload);}
+    function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification', payload);} 
 
     let getUserNameByIdGetter: any = store.getters.getUserNameById;
     let getIdByUserNameGetter: any = store.getters.getIdByUserName ;
@@ -212,7 +212,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
     let sqlResponse = ref<string | null>('');
     let sqlValid = ref<boolean>(false);
 
-    const sourceTypeItem = ref<string>('');
+    let sourceTypeItemSelected = ref<boolean>(false);
+    let sourceTypeItem = ref<string>('');
     let dataSourceTypeItem = ref<string | null>('');
     let datasourceNames = ref<string[]>([]);
     let dataSourceExcelColumns = ref<DataSourceExcelColumns>({ locationColumn: [], dateColumn: []});
@@ -241,19 +242,20 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     let connectionStringPlaceHolderMessage = ref<string>('');    
 
-    created();
+/*     created();
     function created() {
         getDataSourcesAction();
         getDataSourceTypesAction();
     }
-    
-    onMounted(() => mounted)
+ */    
+    onMounted(() => mounted())
     function mounted() {
 
         fileSelect = document.getElementById('file-select') as HTMLInputElement;   
 
         getDataSourcesAction();
         getDataSourceTypesAction();
+        showExcel.value = true;
         showSqlMessage.value = false;
     }
 
@@ -276,7 +278,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
         dataSources.value.forEach(_ => {
         dsItems.value.push({text:_.name,value:_.name})
         });
-    })
+     })
 
     watch(dataSourceTypes, () =>  {
         dsTypeItems.value = clone(dataSourceTypes.value);
@@ -300,9 +302,18 @@ import ConfirmDialog from 'primevue/confirmdialog';
             }
             
         }
-    })
+    }, { deep: true })
 
     watch(sourceTypeItem, () => {
+        if(sourceTypeItem.value != "")
+        {
+            sourceTypeItemSelected.value = true;
+        }
+        else
+        {
+            sourceTypeItemSelected.value = false;
+        }
+
         // get the current data source object
         let currentDatasource = clone(dataSources.value.length>0 ? dataSources.value.find(f => f.name === sourceTypeItem.value) : clone(emptyDatasource));
         currentDatasource ? currentDatasource = clone(currentDatasource) : currentDatasource = clone(emptyDatasource);

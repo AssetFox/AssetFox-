@@ -432,13 +432,13 @@ import ConfirmDialog from 'primevue/confirmdialog';
         // TODO:Remove this one?
         async function importCommittedProjectTemplate(payload?: any): Promise<any> { await store.dispatch('importComittedProjectTemplate', payload);}
 
-    async function selectTreatmentLibraryAction(payload?: any): Promise<any> { await store.dispatch('selectTreatmentLibrary', payload); }
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> { await store.dispatch('setHasUnsavedChanges', payload); }
-    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification', payload); }
+    function selectTreatmentLibraryAction(payload?: any){ store.dispatch('selectTreatmentLibrary', payload); }
+    function setHasUnsavedChangesAction(payload?: any) { store.dispatch('setHasUnsavedChanges', payload); }
+    function addSuccessNotificationAction(payload?: any) {  store.dispatch('addSuccessNotification', payload); }
     async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification', payload); } 
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> { await store.dispatch('getCurrentUserOrSharedScenario', payload); }
-    async function selectScenarioAction(payload?: any): Promise<any> { await store.dispatch('selectScenario', payload); }
-    async function setAlertMessageAction(payload?: any): Promise<any> { await store.dispatch('setAlertMessage', payload); }
+    function selectScenarioAction(payload?: any){  store.dispatch('selectScenario', payload); }
+    function setAlertMessageAction(payload?: any){ store.dispatch('setAlertMessage', payload); }
     
     let getUserNameByIdGetter: any = store.getters.getUserNameByIdGetter;
     

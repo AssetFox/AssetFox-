@@ -65,7 +65,8 @@ public sealed class CommittedProject : Treatment
 
     internal override bool CanUseBudget(Budget budget) => budget == Budget;
 
-    internal override IReadOnlyCollection<Action> GetConsequenceActions(AssetContext scope) => TemplateTreatment.GetConsequenceActions(scope);
+    internal override IReadOnlyCollection<ConsequenceApplicator> GetConsequenceApplicators(AssetContext scope)
+        => TemplateTreatment.GetConsequenceApplicators(scope);
 
     internal override double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts) => Cost;
 

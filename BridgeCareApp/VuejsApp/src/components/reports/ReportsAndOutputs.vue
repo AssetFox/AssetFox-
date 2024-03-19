@@ -28,23 +28,27 @@
                                     </div>
                                 </td>
                                 <td class="text-xs-left">
-                                    <v-btn v-if="props.item.name.includes('Summary')" class="ghd-blue" tooltip flat icon>
-                                                <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')" @click="showEditDialog">
-                                                <Dialog v-model:visible="editShow">
-                                                    <v-card>
-                                                <v-textarea
-                                                    class="sm-txt Montserrat-font-family"
-                                                    :value="props.item.mergedExpression"
-                                                    full-width
-                                                    no-resize
-                                                    variant="outlined"
-                                                    readonly
-                                                    rows="5"
-                                                />
-                                            </v-card>
-                                                </Dialog>
-
-                                            </v-btn>
+                                <v-menu location="left" >
+                                    <template v-slot:activator="{ props }">
+                                        <v-btn  v-bind="props" class="ghd-blue" icon variant="flat">
+                                            <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')">
+                                        </v-btn>
+                                    </template>
+                                    <v-card>
+                                        <v-card-text>
+                                            <v-textarea
+                                                class="sm-txt Montserrat-font-family"
+                                                :model-value="props.item.mergedExpression"
+                                                full-width
+                                                no-resize
+                                                outline
+                                                readonly
+                                                rows="5"
+                                                style = "min-width: 500px;min-height: 205px;"
+                                            />
+                                        </v-card-text>
+                                    </v-card>
+                                </v-menu>
                                     <v-btn v-if="props.item.name.includes('Summary')"
                                         @click="onShowCriterionEditorDialog(props.item.id)"
                                         class="ghd-blue"
@@ -129,8 +133,8 @@ import { getUrl } from '@/shared/utils/get-url';
     let store = useStore();
     const router = useRouter(); 
     const stateSimulationReportNames = computed<string[]>(() => store.state.adminDataModule.simulationReportNames);
-    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification',payload);} 
-    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification',payload);} 
+    function addErrorNotificationAction(payload?: any) {  store.dispatch('addErrorNotification',payload);} 
+    function addSuccessNotificationAction(payload?: any) { store.dispatch('addSuccessNotification',payload);} 
     async function getSimulationReportsAction(payload?: any): Promise<any> { await store.dispatch('getSimulationReports',payload);} 
 
     let editShow = ref<boolean>(false);

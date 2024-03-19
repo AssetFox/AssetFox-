@@ -55,5 +55,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void AddDefaultPerformanceFactors(Guid scenarioId, List<TreatmentDTO> treatments);
 
         LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId);
+
+        public List<TreatmentDTO> GetScenarioSelectableTreatmentsWithCriterionLibrary(Guid simulationId);
+
+        public void GetScenarioSelectableTreatmentsForReport(Simulation simulation);
     }
 }

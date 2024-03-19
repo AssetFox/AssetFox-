@@ -19,38 +19,104 @@ public sealed class TreatmentConsiderationDetail
         TreatmentName = treatmentName;
     }
 
+    internal TreatmentConsiderationDetail(TreatmentConsiderationDetail original)
+    {
+        TreatmentName = original.TreatmentName;
+        BudgetPriorityLevel = original.BudgetPriorityLevel;
+        CashFlowConsiderations.AddRange(original.CashFlowConsiderations.Select(_ => new CashFlowConsiderationDetail(_)));
+
+        if (original.FundingCalculationInput != null)
+        {
+            FundingCalculationInput = new(original.FundingCalculationInput);
+        }
+
+        if (original.FundingCalculationOutput != null)
+        {
+            FundingCalculationOutput = new(original.FundingCalculationOutput);
+        }
+    }
+
     /// <summary>
     ///     The priority level of the budget(s) that would be used to apply the treatment.
     /// </summary>
     public int? BudgetPriorityLevel { get; set; }
 
     /// <summary>
-    ///     The amounts in each budget prior to the analysis of this consideration.
-    /// </summary>
-    public List<BudgetDetail> BudgetsAtDecisionTime { get; } = new List<BudgetDetail>();
-
-    /// <summary>
-    ///     How each budget was or was not used to fund the treatment.
-    /// </summary>
-    public List<BudgetUsageDetail> BudgetUsages { get; } = new List<BudgetUsageDetail>();
-
-    /// <summary>
     ///     How each cash-flow rule was processed to determine if the treatment would be cash-flowed.
     /// </summary>
-    public List<CashFlowConsiderationDetail> CashFlowConsiderations { get; } = new List<CashFlowConsiderationDetail>();
+    public List<CashFlowConsiderationDetail> CashFlowConsiderations { get; } = new();
+
+    public FundingCalculationInput FundingCalculationInput { get; set; }
+
+    public FundingCalculationOutput FundingCalculationOutput { get; set; }
 
     /// <summary>
     ///     The treatment being considered.
     /// </summary>
     public string TreatmentName { get; }
 
-    internal TreatmentConsiderationDetail(TreatmentConsiderationDetail original)
+    public BudgetUsageStatus GetBudgetUsageStatus(int year, string budget, string treatment)
     {
-        TreatmentName = original.TreatmentName;
-        BudgetUsages.AddRange(original.BudgetUsages.Select(_ => new BudgetUsageDetail(_)));
-        CashFlowConsiderations.AddRange(original.CashFlowConsiderations.Select(_ => new CashFlowConsiderationDetail(_)));
-        BudgetsAtDecisionTime.AddRange(original.BudgetsAtDecisionTime.Select(_ => new BudgetDetail(_)));
+        // The output allocations should always have positive amounts. If zero amounts are allowed,
+        // this logic needs to be adjusted.
 
-        BudgetPriorityLevel = original.BudgetPriorityLevel;
+        if (FundingCalculationOutput.AllocationMatrix.Any(a => a.AllocatedAmount <= 0))
+        {
+            throw new Exception("Output allocations include non-positive amounts.");
+        }
+
+        if (FundingCalculationInput == null && FundingCalculationOutput != null)
+        {
+            // It was a committed project (automatically funded).
+
+            var allocation = FundingCalculationOutput.AllocationMatrix.SingleOrDefault(
+                a => (a.Year, a.BudgetName, a.TreatmentName) == (year, budget, treatment));
+
+            return allocation != null ? BudgetUsageStatus.CostCovered : BudgetUsageStatus.NotUsable;
+        }
+        else if (FundingCalculationInput != null && FundingCalculationOutput == null)
+        {
+            // It couldn't be funded.
+
+            var exclusion = FundingCalculationInput.ExclusionsMatrix.SingleOrDefault(
+                e => (e.BudgetName, e.TreatmentName) == (budget, treatment));
+
+            return exclusion?.Reason switch
+            {
+                FundingCalculationInput.ExclusionReason.TreatmentSettings => BudgetUsageStatus.NotUsable,
+                FundingCalculationInput.ExclusionReason.BudgetConditions => BudgetUsageStatus.ConditionNotMet,
+                null => BudgetUsageStatus.CostNotCovered,
+                _ => BudgetUsageStatus.Undefined
+            };
+        }
+        else if (FundingCalculationInput != null && FundingCalculationOutput != null)
+        {
+            // It was funded.
+
+            var allocation = FundingCalculationOutput.AllocationMatrix.SingleOrDefault(
+                a => (a.Year, a.BudgetName, a.TreatmentName) == (year, budget, treatment));
+
+            if (allocation != null)
+            {
+                return BudgetUsageStatus.CostCovered;
+            }
+
+            var exclusion = FundingCalculationInput.ExclusionsMatrix.SingleOrDefault(
+                e => (e.BudgetName, e.TreatmentName) == (budget, treatment));
+
+            return exclusion?.Reason switch
+            {
+                FundingCalculationInput.ExclusionReason.TreatmentSettings => BudgetUsageStatus.NotUsable,
+                FundingCalculationInput.ExclusionReason.BudgetConditions => BudgetUsageStatus.ConditionNotMet,
+                null => BudgetUsageStatus.NotNeeded,
+                _ => BudgetUsageStatus.Undefined
+            };
+        }
+        else
+        {
+            // Something isn't right.
+
+            throw new Exception("Treatment consideration detail is missing both input and output for funding calculation.");
+        }
     }
 }

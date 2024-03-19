@@ -36,12 +36,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             var row = currentCell.Row;
             var columnNo = currentCell.Column;
             var assetSummaryDetail = bridgeDataModel.AssetSummaryDetail;
-            var ruttingAvergeTotal = CalculateAverageRutting(assetSummaryDetail);
+            var ruttingAverageTotal = CalculateAverageRutting(assetSummaryDetail);
 
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = Math.Round(Convert.ToDecimal(_reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, PAMSAuditReportConstants.OPI)));
             worksheet.Cells[row, columnNo++].Value = Math.Round(Convert.ToDecimal(_reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, PAMSAuditReportConstants.IRI)));
-            worksheet.Cells[row, columnNo++].Value = Math.Round(Convert.ToDecimal(ruttingAvergeTotal), 3);
+            worksheet.Cells[row, columnNo++].Value = Math.Round(Convert.ToDecimal(ruttingAverageTotal), 3);
             worksheet.Cells[row, columnNo++].Value = Math.Round(Convert.ToDecimal(_reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, PAMSAuditReportConstants.FAULT)), 3);
 
             //var familyId = int.Parse(_reportHelper.CheckAndGetValue<string>(assetSummaryDetail.ValuePerTextAttribute, "FAMILY_ID"));

@@ -49,7 +49,7 @@ import { getUrl } from '@/shared/utils/get-url';
     const props = defineProps<{showDialog: boolean}>();
     const emit = defineEmits(['submit','delete']);
     const { showDialog } = toRefs(props);
-    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification', payload)}
+    function addErrorNotificationAction(payload?: any){ store.dispatch('addErrorNotification', payload)}
 
     const committedProjectsFile = ref<File | null>(null);
     const closed = ref< boolean >(false);

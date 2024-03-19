@@ -555,18 +555,18 @@ let isSharedLibrary = computed<boolean>(() => store.state.performanceCurveModule
 async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess', payload);}
 async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedPerformanceCurveLibrary', payload);}
 async function getPerformanceCurveLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getPerformanceCurveLibraries', payload);}
-async function selectPerformanceCurveLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectPerformanceCurveLibrary', payload);}
+function selectPerformanceCurveLibraryAction(payload?: any) { store.dispatch('selectPerformanceCurveLibrary', payload);}
 async function deletePerformanceCurveLibraryAction(payload?: any): Promise<any> {await store.dispatch('deletePerformanceCurveLibrary', payload);}
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
-async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification', payload);}
+function setHasUnsavedChangesAction(payload?: any) { store.dispatch('setHasUnsavedChanges', payload);}
 async function updatePerformanceCurveCriterionLibrariesAction(payload?: any): Promise<any> {await store.dispatch('updatePerformanceCurvesCriterionLibraries', payload);}
 async function upsertOrDeletePerformanceCurveLibraryUsersAction(payload?: any): Promise<any> {await store.dispatch('upsertOrDeletePerformanceCurveLibraryUsers', payload);}
 async function importScenarioPerformanceCurvesFileAction(payload?: any): Promise<any> {await store.dispatch('importScenarioPerformanceCurvesFile', payload);}
 async function importLibraryPerformanceCurvesFileAction(payload?: any): Promise<any> {await store.dispatch('importLibraryPerformanceCurvesFile', payload);}
-async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification', payload);}
+function addSuccessNotificationAction(payload?: any) { store.dispatch('addSuccessNotification', payload);}
 async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> {await store.dispatch('getCurrentUserOrSharedScenario', payload);}
-async function selectScenarioAction(payload?: any): Promise<any> {await store.dispatch('selectScenario', payload);}
-async function setAlertMessageAction(payload?: any): Promise<any> {await store.dispatch('setAlertMessage', payload);}
+function selectScenarioAction(payload?: any){ store.dispatch('selectScenario', payload);}
+function setAlertMessageAction(payload?: any) { store.dispatch('setAlertMessage', payload);}
 
 let getUserNameByIdGetter: any = store.getters.getUserNameById
 function performanceCurveLibraryMutator(payload:any){store.commit('performanceCurveLibraryMutator', payload);}

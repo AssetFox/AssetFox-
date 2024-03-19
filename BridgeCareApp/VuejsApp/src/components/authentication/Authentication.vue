@@ -28,13 +28,13 @@ import { useRouter } from 'vue-router';
     let currentUserCriteriaFilter= computed<UserCriteriaFilter>(() => store.state.userModule.currentUserCriteriaFilter);
     let securityType: string = store.state.authenticationModule.securityType;
 
-    async function setSuccessMessageAction(payload?: any): Promise<any> {await store.dispatch('setSuccessMessage');}
-    async function setErrorMessageAction(payload?: any): Promise<any> {await store.dispatch('setErrorMessage');}
+    function setSuccessMessageAction(payload?: any) { store.dispatch('setSuccessMessage');}
+    function setErrorMessageAction(payload?: any){ store.dispatch('setErrorMessage');}
     async function getUserTokensAction(payload?: any): Promise<any> {await store.dispatch('getUserTokens', payload);}
     async function getUserInfoAction(payload?: any): Promise<any> {await store.dispatch('getUserInfo');}
     async function getAzureAccountDetailsAction(payload?: any): Promise<any> {await store.dispatch('getAzureAccountDetails');}
     async function getUserCriteriaFilterAction(payload?: any): Promise<any> {await store.dispatch('getUserCriteriaFilter');}
-    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+     function addErrorNotificationAction(payload?: any){ store.dispatch('addErrorNotification', payload);}
 
     const $router = useRouter();
 

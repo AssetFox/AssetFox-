@@ -181,6 +181,10 @@ import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditor
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { getUrl } from '@/shared/utils/get-url';
 
+    let store = useStore();
+    let stateAssetType = computed<string[]>(()=>store.state.adminDataModule.assetType);
+    async function getAssetTypeAction(payload?: any): Promise<any> {await store.dispatch('getAssetType',payload);}
+
     const emit = defineEmits(['submit', 'onModifyTreatmentDetails'])
     const props = defineProps<{
         selectedTreatmentDetails: TreatmentDetails,
@@ -202,6 +206,11 @@ import { getUrl } from '@/shared/utils/get-url';
 
     const mask = { mask: '##########' };
 
+    created();
+    function created() {
+        getAssetTypeAction();
+    }
+
     watch(assetTypeBinding, () => {
         onEditAssetType('assetType', assetTypeBinding.value)
     })
@@ -209,7 +218,15 @@ import { getUrl } from '@/shared/utils/get-url';
     watch(treatmentCategoryBinding, () => {
         onEditTreatmentType('category', treatmentCategoryBinding.value)
     })
+    
     watch(selectedTreatmentDetails, () => {
+        // Populate assetTypeMap and assetTypeReverseMap
+        stateAssetType.value.forEach((assetType, index) => {
+            // Assign numerical indices to each asset type
+            assetTypeMap.set(assetType, index);
+            assetTypeReverseMap.set(index, assetType);
+        });
+
         treatmentCategoryBinding.value = treatmentCategoryReverseMap.get(selectedTreatmentDetails.value.category)!;
         assetTypeBinding.value = assetTypeReverseMap.get(selectedTreatmentDetails.value.assetType)!;
         TreatmentIsUnSelectable.value = selectedTreatmentDetails.value.isUnselectable;

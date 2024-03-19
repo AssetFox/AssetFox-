@@ -240,21 +240,21 @@ import { text } from 'stream/consumers';
     async function getNetworks(payload?: any): Promise<any> {await store.dispatch('getNetworks', payload);}
     async function getDataSources(payload?: any): Promise<any> {await store.dispatch('getDataSources', payload);}
     async function getAttributes(payload?: any): Promise<any> {await store.dispatch('getAttributes', payload);}
-    async function selectNetworkAction(payload?: any): Promise<any> {await store.dispatch('selectNetwork', payload);}
+    function selectNetworkAction(payload?: any) { store.dispatch('selectNetwork', payload);}
     async function createNetworkAction(payload?: any): Promise<any> {await store.dispatch('createNetwork', payload);}
     async function deleteNetworkAction(payload?: any): Promise<any> {await store.dispatch('deleteNetwork', payload);}
     async function aggregateNetworkAction(payload?: any): Promise<any> {await store.dispatch('aggregateNetworkData', payload);}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+    function setHasUnsavedChangesAction(payload?: any) { store.dispatch('setHasUnsavedChanges', payload);}
     async function getUserNameByIdGetter(payload?: any): Promise<any> {await store.dispatch('getUserNameById', payload);}
-    async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+    function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification', payload);}
 
     let rules = ref<InputValidationRules>(validationRules);
 
     let dataSourceGridHeaders: any[] = [
-        { title: 'Name', key: 'name', align: 'left', sortable: true, class: '', width: '' },
-        { title: 'Data Source', key: 'data source', align: 'left', sortable: true, class: '', width: '' },
-        { title: 'Data Source Type', key: 'data source', align: 'left', sortable: true, class: '', width: '' },
-    ];
+    { title: 'Name', key: 'name', align: 'left', sortable: true, class: '', width: '' },
+    { title: 'Data Source', key: 'dataSource.name', align: 'left', sortable: true, class: '', width: '' },
+    { title: 'Data Source Type', key: 'dataSource.type', align: 'left', sortable: true, class: '', width: '' },
+];
 
     const addNetworkDialogData = reactive<AddNetworkDialogData>(emptyAddNetworkDialogData);
     let pagination: Pagination = emptyPagination;

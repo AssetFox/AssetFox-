@@ -18,6 +18,7 @@ using System.Linq;
 using static BridgeCareCore.Security.SecurityConstants;
 using System.Data;
 using HotChocolate.Types.Descriptors.Definitions;
+using System.Security.Cryptography;
 
 namespace BridgeCareCore.Controllers
 {
@@ -109,6 +110,45 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+
+        [HttpGet]
+        [Route("GetAssetType")]
+        [Authorize]
+        public async Task<IActionResult> GetAssetType()
+        {
+            try
+            {
+                var AssetType = UnitOfWork.AdminSettingsRepo.GetAssetType();
+                return Ok(AssetType);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetAssetType - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("SetAssetType/{AssetType}")]
+        [ClaimAuthorize("AdminAccess")]
+        public async Task<IActionResult> SetAssetType(string AssetType)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.AdminSettingsRepo.SetAssetType(AssetType);
+                });
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetAssetType - {e.Message}");
+                throw;
+            }
+        }
+
 
         [HttpGet]
         [Route("GetPrimaryNetwork")]

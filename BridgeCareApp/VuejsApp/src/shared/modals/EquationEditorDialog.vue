@@ -400,7 +400,7 @@ const props = defineProps<{
     
 let stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributes);
 async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
+function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification');}
 
   let equation: Equation = {...emptyEquation, id: getNewGuid()};
   const attributesList = ref<string[]>([]);  

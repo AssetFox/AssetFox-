@@ -7,7 +7,7 @@
             </v-row>
             </v-card-title>
             <v-card-text class="ghd-dialog-box-padding-center">
-                <v-row>
+                <v-row v-if="DialogData.settingName != 'AssetType'">
                     <v-select :items='DialogData.settingsList'
                     variant="outlined"
                     item-title="text"
@@ -18,6 +18,25 @@
                     class="ghd-select ghd-text-field ghd-text-field-border"
                     density="compact">
                     </v-select>   
+                    <v-btn style="margin-top: 2px !important; margin-left: 10px !important"
+                    id="EditAdminDataDialog-addNewItems-btn"
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                    @click="onAddClick"
+                    :disabled='isAddDisabled()'>
+                        Add
+                    </v-btn>
+                </v-row>
+                <v-row v-else="DialogData.settingName == 'AssetType'">
+                    <v-text-field :items='DialogData.settingsList'
+                    variant="outlined"
+                    item-title="text"
+                    item-value="value"
+                    menu-icon=custom:GhdDownSvg
+                    v-model='DialogData.selectedItem'                         
+                    id="EditAdminDataDialog-addNewItems-select"
+                    class="ghd-select ghd-text-field ghd-text-field-border"
+                    density="compact">
+                    </v-text-field>   
                     <v-btn style="margin-top: 2px !important; margin-left: 10px !important"
                     id="EditAdminDataDialog-addNewItems-btn"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"

@@ -15,6 +15,7 @@ const state = {
     rawdataNetwork: '' as string,
     keyFields: [] as string[],
     rawDataKeyFields: [] as string[],
+    assetType: [] as string[],
     constraintType: '' as string,
 };
 
@@ -39,6 +40,9 @@ const mutations = {
     },
     rawdataNetworkMutator(state: any, network: string) {
         state.rawdataNetwork = network !== null ? network : '';
+    },
+    assetTypeMutator(state: any, assetType: string) {
+        state.assetType = assetType !== null ? clone(assetType) : [];
     },
     constraintTypeMutator(state: any, constraintType: string) {
         state.constraintType = constraintType !== null ? constraintType : '';
@@ -99,6 +103,14 @@ const actions = {
             .then((response: AxiosResponse<string[]>) => {
                 if (hasValue(response, 'data')) {
                     commit('rawDataKeyFieldsMutator', response.data);
+                }
+            });
+    },
+    async getAssetType({commit}: any) {
+        await AdminDataService.getAssetType()
+            .then((response: AxiosResponse<string[]>) => {
+                if (hasValue(response, 'data')) {
+                    commit('assetTypeMutator', response.data);
                 }
             });
     },
@@ -188,6 +200,20 @@ const actions = {
             }
         });
     },
+    async setAssetType(
+        { dispatch, commit }: any,
+        assetType: string,
+    ) {
+        await AdminDataService.setAssetType(assetType).then((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                commit('assetTypeMutator', assetType.split(','));
+                dispatch('addSuccessNotification', {
+                    message: 'Modified asset type',
+                });
+            }
+        });
+    },
+
     async setConstraintType(
         { dispatch, commit }: any,
         constraintType: string,

@@ -133,7 +133,7 @@ const props = defineProps<{
 }>()
 const { dialogData } = toRefs(props);
 
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
+function addErrorNotificationAction(payload?: any){ store.dispatch('addErrorNotification', payload);}
 
 let editBudgetsDialogGridHeaders: any[] = [
         { title: 'Order', key: 'order', sortable: false, align: 'center', class: '', width: '5%' },

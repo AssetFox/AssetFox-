@@ -18,7 +18,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
         {
             $"{PAMSAuditReportConstants.OPI}",
             $"{PAMSAuditReportConstants.IRI}",
-            $"{PAMSAuditReportConstants.RUT}",
+            $"{PAMSAuditReportConstants.RUT_LEFT}",
+            $"{PAMSAuditReportConstants.RUT_RIGHT}",
             $"{PAMSAuditReportConstants.FAULT}"
         };
 

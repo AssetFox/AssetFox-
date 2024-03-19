@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
@@ -476,11 +477,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
         {
             var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
+            var averageRutting = CalculateAverageRutting(selectedSection);
 
             worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "OPI_CALCULATED")));
-            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "ROUGHNESS")));
-            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_RUTTING")), 3);
-            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_FAULTING")), 3);
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, PAMSAuditReportConstants.IRI)));
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(averageRutting), 3);
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, PAMSAuditReportConstants.FAULT)), 3);
 
             if (row % 2 == 0) {
                 ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
@@ -488,6 +490,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
             return column;
         }
+
+        private double CalculateAverageRutting(AssetSummaryDetail selectedSection)
+        {
+            double ruttingLeftValue = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, PAMSAuditReportConstants.RUT_LEFT);
+            double ruttingRightValue = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, PAMSAuditReportConstants.RUT_RIGHT);
+            return (ruttingLeftValue + ruttingRightValue) / 2.0;
+        }
+        
 
         private void TrackInitialYearDataForParametersTAB(AssetSummaryDetail initialSection)
         {

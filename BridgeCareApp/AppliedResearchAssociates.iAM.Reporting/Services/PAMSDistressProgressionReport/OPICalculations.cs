@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 using OfficeOpenXml.Style;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressionReport
@@ -35,42 +36,46 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
             var column = currentCell.Column;
 
             foreach (var initialAssetSummary in reportOutputData.InitialAssetSummaries)
-            {
-                row++; column = 1;
-                var valuePerNumericAttribute = initialAssetSummary.ValuePerNumericAttribute;
+            {   
                 var valuePerTextAttribute = initialAssetSummary.ValuePerTextAttribute;
                 var crs = CheckGetTextValue(valuePerTextAttribute, "CRS");
-                worksheet.Cells[row, column++].Value = crs;
-                worksheet.Cells[row, column].Value = CheckGetValue(valuePerNumericAttribute, "SURFACEID");
-                // right border line
-                ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column++]);
+                
                 foreach (var yearData in reportOutputData.Years)
                 {
+                    column = 1;
                     var section = yearData.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == crs);
                     var sectionValuePerNumericAttribute = section.ValuePerNumericAttribute;
-                    if (yearData.Year == simulationYears[0])
-                    {
-                        worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "OPI");
-                        // double left border line
-                        ExcelHelper.ApplyLeftBorder(worksheet.Cells[row, column]);
-                        ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
-                    }
 
-                    // part 1 data
-                    worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "OPI_CALCULATED");
-                    // double left border line if not first yr
-                    if(yearData.Year != simulationYears[0])
-                    {
-                        ExcelHelper.ApplyLeftBorder(worksheet.Cells[row, column]);
-                    }
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    worksheet.Cells[row, column++].Value = yearData.Year;
+                    worksheet.Cells[row, column++].Value = crs;
+                    worksheet.Cells[row, column++].Value = CheckGetTextValue(valuePerTextAttribute, "DISTRICT");
+                    worksheet.Cells[row, column++].Value = CheckGetTextValue(valuePerTextAttribute, "CNTY");
+                    worksheet.Cells[row, column++].Value = CheckGetTextValue(valuePerTextAttribute, "SR");
+
+                    var lastUnderScoreIndex = crs.LastIndexOf('_');
+                    var hyphenIndex = crs.IndexOf('-');
+                    var startSeg = crs.Substring(lastUnderScoreIndex + 1, hyphenIndex - lastUnderScoreIndex - 1);
+                    var endSeg = crs.Substring(hyphenIndex + 1);
+                    worksheet.Cells[row, column++].Value = startSeg;
+                    worksheet.Cells[row, column++].Value = endSeg;                                        
                     worksheet.Cells[row, column++].Value = CheckGetValue(sectionValuePerNumericAttribute, "SEGMENT_LENGTH");
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "WIDTH");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
-                    worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "ROUGHNESS");
+                    worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "SURFACEID");
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+
+
+                    // part 1 data
+                    worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "OPI");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "OPI_CALCULATED");                     
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);                    
+                    worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "ROUGHNESS");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
+                    // right border line
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+
 
                     // Bituminous data
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BLRUTDP1");
@@ -80,9 +85,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BLRUTDP3");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BLRUTDP_Total");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BRRUTDP1");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BRRUTDP2");
@@ -90,9 +96,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BRRUTDP3");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BRRUTDP_Total");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BFATICR1");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BFATICR2");
@@ -100,9 +107,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BFATICR3");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BFATICR_Total");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BTRNSCT1");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BTRNSFT1");
@@ -118,9 +126,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BTRNSCT_Total");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BTRNSFT_Total");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BMISCCK1");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BMISCCK2");
@@ -128,9 +137,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BMISCCK3");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BMISCCK_Total");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BMISCCK1");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BMISCCK2");
@@ -138,9 +148,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BMISCCK3");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BMISCCK_Total");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BPATCHCT");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BPATCHSF");
@@ -150,9 +161,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BRAVLWT3");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BRAVLWT_Total");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BLTEDGE1");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BLTEDGE2");
@@ -160,9 +172,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BLTEDGE3");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "BLTEDGE_Total");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+
 
                     // Concrete data
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CNSLABCT");
@@ -174,9 +187,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CFLTJNT3");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CFLTJNT_Total");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CBRKSLB1");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CBRKSLB2");
@@ -184,9 +198,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CBRKSLB3");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CBRKSLB_Total");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CTRNCRK1");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CTRNCRK2");
@@ -194,9 +209,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CTRNCRK3");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CTRNCRK_Total");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CTRNJNT1");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CTRNJNT2");
@@ -204,9 +220,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CTRNJNT3");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CTRNJNT_Total");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CLNGCRK1");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CLNGCRK2");
@@ -214,9 +231,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CLNGCRK3");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CLNGCRK_Total");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CLNGJNT1");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CLNGJNT2");
@@ -224,21 +242,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CLNGJNT3");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CLNGJNT_Total");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CBPATCCT");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CBPATCSF");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CPCCPACT");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CPCCPASF");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CLJCPRU1");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CLJCPRU2");
@@ -246,9 +267,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CLJCPRU3");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CLJCPRU_Total");
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
                     // right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
+                    
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CRJCPRU1");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CRJCPRU2");
@@ -256,11 +278,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CRJCPRU3");
                     ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "CRJCPRU_Total");
-                    // double right border line
-                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column]);
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);                    
-                    worksheet.Column(column).Width = 3;
-                    column++;
+                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision2);
+                    // right border line
+                    ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column]);
+                    
+                    row++;
                 }
             }
         }
@@ -268,23 +290,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
         private static CurrentCell FillHeaders(ExcelWorksheet worksheet, List<int> simulationYears)
         {
             int headerRow = 1;
-            const double minimumColumnWidth = 18;
+            const double minimumColumnWidth = 15;
             var headers = GetInitialHeaders();
             var currentCell = new CurrentCell { Row = headerRow, Column = headers.Count };
             for (int column = 0; column < headers.Count; column++)
-            {                      
-                if (column != headers.Count - 1)
-                {
-                    worksheet.Column(column + 1).Width = minimumColumnWidth;
-                    worksheet.Cells[headerRow, column + 1].Value = headers[column];
-                    ExcelHelper.MergeCells(worksheet, headerRow, column + 1, headerRow + 1, column + 1);                    
-                }
-                else
-                {
-                    worksheet.Column(column + 1).Width = minimumColumnWidth - 3;
-                    worksheet.Cells[headerRow + 1, column + 1].Value = headers[column];
-                }
-                ExcelHelper.ApplyBorder(worksheet.Cells[headerRow, column + 1, headerRow + 1, column + 1]);                
+            {
+                worksheet.Cells[headerRow, column + 1].Value = headers[column];
+                worksheet.Column(column + 1).Width = minimumColumnWidth;
+                ExcelHelper.ApplyBorder(worksheet.Cells[headerRow, column + 1, headerRow, column + 1]);
+                ExcelHelper.ApplyStyle(worksheet.Cells[headerRow, column + 1, headerRow, column + 1]);
             }
 
             currentCell = FillDynamicHeaders(worksheet, currentCell, simulationYears);
@@ -293,34 +307,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
         }
 
         private static CurrentCell FillDynamicHeaders(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears)
-        {            
+        {
             var row = currentCell.Row;
             var yearPartOneHeaders = GetPartOneHeaders();
             var yearBituminousHeaders = GetBituminousHeaders();
             var yearConcreteHeaders = GetConcreteHeaders();
+            var column = currentCell.Column + 1;
+            var dynamicStartColumn = column;
 
-            foreach (var simulationYear in simulationYears)
-            {
-                var column = currentCell.Column + 1;
-                worksheet.Cells[row, column].Value = simulationYear;
-                var yearStartColumn = column;
-                column = BuildDataSubHeaders(worksheet, row + 1, column, yearPartOneHeaders, ColorTranslator.FromHtml("#70AD47"));
-                column = BuildDataSubHeaders(worksheet, row + 1, column, yearBituminousHeaders, Color.Black);
-                column = BuildDataSubHeaders(worksheet, row + 1, column, yearConcreteHeaders, ColorTranslator.FromHtml("#FFF2CC"));
-                if (simulationYear == simulationYears[0])
-                {
-                    // For OPI
-                    yearStartColumn--;
-                    worksheet.Cells[row, yearStartColumn].Value = simulationYear;
-                    worksheet.Cells[row + 1, yearStartColumn].Style.Fill.PatternType = ExcelFillStyle.Solid;
-                    worksheet.Cells[row + 1, yearStartColumn].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#70AD47"));
-                }
-
-                ExcelHelper.MergeCells(worksheet, row, yearStartColumn, row, column - 1);
-                ExcelHelper.ApplyBorder(worksheet.Cells[row, yearStartColumn, row, column - 1]);
-                worksheet.Cells[row, yearStartColumn, row, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-                currentCell.Column = column;
-            }
+            column = BuildDataSubHeaders(worksheet, row, column, yearPartOneHeaders, ColorTranslator.FromHtml("#70AD47"));
+            column = BuildDataSubHeaders(worksheet, row, column, yearBituminousHeaders, Color.Black);
+            column = BuildDataSubHeaders(worksheet, row, column, yearConcreteHeaders, ColorTranslator.FromHtml("#FFF2CC"));
+            
+            ExcelHelper.ApplyBorder(worksheet.Cells[row, dynamicStartColumn, row, column - 1]);
+            worksheet.Cells[row, dynamicStartColumn, row, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+            currentCell.Column = column;
 
             const double minimumColumnWidth = 15;
             for (int col = 1; col <= worksheet.Dimension.End.Column; col++)
@@ -443,17 +444,23 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
         // green shade
         private static List<string> GetPartOneHeaders() => new()
         {
-            "CALCULATED OPI",
-            "SEGMENT LENGTH",
-            "WIDTH",
-            "ROUGHNESS",
+            "AVERAGE OPI",
+            "CALCULATED OPI",            
+            "AVERAGE ROUGHNESS",
         };
 
         private static List<string> GetInitialHeaders() => new()
         {
+            "CONDITION YEAR",
             "CRS",
-            "Pavement Surface Type",
-            "OPI",
+            "DISTRICT",
+            "COUNTY",
+            "STATE ROUTE",
+            "SEGMENT START",
+            "SEGMENT END",
+            "LENGTH (FT)",
+            "WIDTH (FT)",
+            "Pavement Surface Type"            
         };
 
         private double CheckGetValue(Dictionary<string, double> valuePerNumericAttribute, string attribute) => _reportHelper.CheckAndGetValue<double>(valuePerNumericAttribute, attribute);

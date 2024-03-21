@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Common.Logging;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
@@ -22,7 +21,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private readonly IHubService _hubService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ReportHelper _reportHelper;
-        private readonly OPICalculations _opiCalculations;
+        private readonly OPICalculations _opiCalculationsTab;
+        private readonly Legend _legendTab;
 
         public Guid ID { get; set; }
 
@@ -53,7 +53,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
 
-            _opiCalculations = new OPICalculations(_unitOfWork);
+            _opiCalculationsTab = new OPICalculations(_unitOfWork);
+            _legendTab = new Legend();
 
             //create report objects            
             _reportHelper = new ReportHelper(_unitOfWork);
@@ -188,12 +189,19 @@ namespace AppliedResearchAssociates.iAM.Reporting
             using var excelPackage = new ExcelPackage(new FileInfo("DistressProgressionReportTestData.xlsx"));
             checkCancelled(cancellationToken, simulationId);
 
-            // Pavement Work Summary TAB
+            // Condition Data
             reportDetailDto.Status = $"Creating" + PAMSConstants.OPICalculationsTab + "TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var worksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.OPICalculationsTab);
-            _opiCalculations.Fill(worksheet, reportOutputData, simulationYears);
+            _opiCalculationsTab.Fill(worksheet, reportOutputData, simulationYears);
+
+            // Condition Data
+            reportDetailDto.Status = $"Creating" + PAMSConstants.Legend_Tab + "TAB";
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            var legendWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Legend_Tab);
+            Legend.Fill(legendWorksheet);
 
             //check and generate folder            
             var folderPathForSimulation = $"Reports\\{simulationId}";

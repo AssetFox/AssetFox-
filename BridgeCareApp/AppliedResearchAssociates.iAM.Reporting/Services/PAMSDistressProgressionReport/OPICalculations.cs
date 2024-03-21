@@ -7,7 +7,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 using OfficeOpenXml.Style;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressionReport
@@ -26,7 +25,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, List<int> simulationYears)
         {
             var currentCell = FillHeaders(worksheet, simulationYears);
-
             FillDynamicData(worksheet, simulationYears, reportOutputData, currentCell);
         }
 
@@ -47,7 +45,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     var sectionValuePerNumericAttribute = section.ValuePerNumericAttribute;
 
                     worksheet.Cells[row, column++].Value = yearData.Year;
-                    worksheet.Cells[row, column++].Value = crs;
+                    worksheet.Cells[row, column].Value = crs;
+                    worksheet.Column(column++).Width = 16;
                     worksheet.Cells[row, column++].Value = CheckGetTextValue(valuePerTextAttribute, "DISTRICT");
                     worksheet.Cells[row, column++].Value = CheckGetTextValue(valuePerTextAttribute, "CNTY");
                     worksheet.Cells[row, column++].Value = CheckGetTextValue(valuePerTextAttribute, "SR");

@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 

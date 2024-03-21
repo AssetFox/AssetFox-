@@ -32,7 +32,7 @@ namespace BridgeCareCore.Services
             {
                 if (model.IsPiecewise)
                 {
-                    return CheckPiecewise(model.Expression);
+                    return CheckPiecewise(model.Expression, model.IsAscendingAttribute);
                 }
 
                 var expression = model.Expression.Trim();
@@ -60,7 +60,7 @@ namespace BridgeCareCore.Services
             }
         }
 
-        private ValidationResult CheckPiecewise(string piecewise)
+        private ValidationResult CheckPiecewise(string piecewise, bool isAscendingAttribute)
         {
             var ageValues = new SortedDictionary<int, double>();
             piecewise = piecewise.Trim();
@@ -125,15 +125,31 @@ namespace BridgeCareCore.Services
                 var previous = ageValues.First();
                 foreach (var ageValue in ageValues)
                 {
-                    if (ageValue.Value > previous.Value)
+                    if (isAscendingAttribute)
                     {
-                        _log.Error($"Values for CONDITION must descend. Check pairs ({previous.Key},{previous.Value}) and ({ageValue.Key},{ageValue.Value})");
-                        return new ValidationResult
+                        if (ageValue.Value < previous.Value)
                         {
-                            IsValid = false,
-                            ValidationMessage = $"Values for CONDITION must descend. Check pairs ({previous.Key},{previous.Value}) and ({ageValue.Key},{ageValue.Value})"
-                        };
+                            _log.Error($"Values for CONDITION must ascend. Check pairs ({previous.Key},{previous.Value}) and ({ageValue.Key},{ageValue.Value})");
+                            return new ValidationResult
+                            {
+                                IsValid = false,
+                                ValidationMessage = $"Values for CONDITION must ascend. Check pairs ({previous.Key},{previous.Value}) and ({ageValue.Key},{ageValue.Value})"
+                            };
+                        }
                     }
+                    else
+                    {
+                        if (ageValue.Value > previous.Value)
+                        {
+                            _log.Error($"Values for CONDITION must descend. Check pairs ({previous.Key},{previous.Value}) and ({ageValue.Key},{ageValue.Value})");
+                            return new ValidationResult
+                            {
+                                IsValid = false,
+                                ValidationMessage = $"Values for CONDITION must descend. Check pairs ({previous.Key},{previous.Value}) and ({ageValue.Key},{ageValue.Value})"
+                            };
+                        }
+                    }
+                    
                     previous = ageValue;
                 }
 

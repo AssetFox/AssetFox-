@@ -64,6 +64,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
         public const string CompositeTotal = "PAMS Composite Total";
         public const string ConcreteTotal = "PAMS Concrete Total";
         public const string CommittedTotal = "Committed Total";
+        public const string OPICalculationsTab = "Condition Data";
 
         //Data Variables
         public const string Work = "Work";

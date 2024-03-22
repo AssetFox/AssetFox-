@@ -220,12 +220,13 @@ import { getUrl } from '@/shared/utils/get-url';
     })
     
     watch(selectedTreatmentDetails, () => {
+
+        assetTypeMap.clear();
         // Populate assetTypeMap and assetTypeReverseMap
         stateAssetType.value.forEach((assetType, index) => {
             // Assign numerical indices to each asset type
             assetTypeMap.set(assetType, index);
             assetTypeReverseMap.set(index, assetType);
-            console.log(assetTypeMap);
         });
 
         treatmentCategoryBinding.value = treatmentCategoryReverseMap.get(selectedTreatmentDetails.value.category)!;

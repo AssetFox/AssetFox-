@@ -169,12 +169,8 @@ export const emptyTreatmentDetails: TreatmentDetails = {
 };
 
 export const assetTypeMap: Map<string, AssetType> = new Map([
-    ['Bridge', 0],
-    ['Culvert', 1],
 ]);
 export const assetTypeReverseMap: Map<AssetType, string> = new Map([
-    [0, 'Bridge'],
-    [1, 'Culvert'],
 ]);
 
 // the maps are to convert data to be used in the UI to the data needed by Vue and backend

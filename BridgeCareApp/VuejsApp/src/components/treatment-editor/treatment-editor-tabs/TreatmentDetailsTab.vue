@@ -225,6 +225,7 @@ import { getUrl } from '@/shared/utils/get-url';
             // Assign numerical indices to each asset type
             assetTypeMap.set(assetType, index);
             assetTypeReverseMap.set(index, assetType);
+            console.log(assetTypeMap);
         });
 
         treatmentCategoryBinding.value = treatmentCategoryReverseMap.get(selectedTreatmentDetails.value.category)!;

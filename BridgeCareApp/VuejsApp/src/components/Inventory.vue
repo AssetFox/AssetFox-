@@ -3,6 +3,7 @@
         <v-autocomplete
             v-model="inventoryReportName" 
             :items="stateInventoryReportNames"
+            :label="`Select a Inventory Report`"
             variant="outlined"
             density="compact"
             class="ghd-select ghd-text-field ghd-text-field-border">
@@ -15,7 +16,7 @@
                 <v-row style="display: flex; align-items: center; justify-content: center">
                     <div class="flex xs4" v-for="(key, index) in inventoryDetails">
                         <v-autocomplete
-                        style="margin-top: 50px; width: 250px; margin-right: 20px"
+                        style="margin-top: 25px; width: 250px; margin-right: 20px"
                         class="ghd-select ghd-text-field ghd-text-field-border ghd-button-text"
                         :items="reactiveData[index]"
                         v-model="selectedInventoryIndex[index]"
@@ -36,7 +37,7 @@
             <v-divider></v-divider>
         </v-row>
     </v-layout>
-    <div style="margin: auto; margin-top: 25px; display: flex; align-items: center; justify-content: center" v-html="staticHTMLForInventory"></div>
+    <div style="margin: auto; margin-bottom: 25px; display: flex; align-items: center; justify-content: center" v-html="staticHTMLForInventory"></div>
 </template>
 
 <script lang="ts" setup>
@@ -318,7 +319,7 @@
                 //Set the data equal to the dictionary
                 data.keyProperties = dictionary;
 
-                if(selectedKeys.length == inventoryDetails.value.length)
+                if(selectedKeys.length === inventoryDetails.value.length)
                 {
                     getStaticInventoryHTMLAction({reportType: inventoryReportName, filterData: data.keyProperties}); 
                 }

@@ -28,21 +28,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             public readonly int RangeHigh;
         }
 
-        // Treatment Groups for H/Bituminous (Hot Mix Asphalt)
-        //1         Routine Maintenance            0,1,2,3,4,5,6,7,8,9,10,11
-        //2         Seal Coat                               12,13,14,15
-        //3         Minor Rehabilitation               16,17
-        //4         Major Rehabilitation               18,19,20,21,22
-        //5         Reconstruction                       23 (edited)
-
-        // Treatment Groups for J/Concrete (Jointed Concrete)
-        //1         Routine Maintenance            0,1,2,3,4,5,6,
-        //           Pavement Preservation:
-        //2                     CPR                           7,8,9,10,11,12,13,14
-        //3                     Major Rehabilitation   15,16,17,18,19,20,21,22,23,24,25,26
-        //4         Reconstruction                       27
-
-
         private static TreatmentGroup[] _treatmentGroups = new TreatmentGroup[]
         {
             new TreatmentGroup (TreatmentGroupCategory.Bituminous, 1, "Routine Maintenance", 0, 11),
@@ -57,6 +42,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             new TreatmentGroup (TreatmentGroupCategory.Bundled, 1, "Multi Treatments", 0, 27)
         };
 
+        // TODO update the usage of this as required
         public enum TreatmentGroupCategory
         {
             Bituminous = 'h',
@@ -261,12 +247,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
         public List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> GetAsphaltTreatments(List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> allTreatments)
         {
-            return allTreatments.Where(treatment => treatment.Name.ToLower().StartsWith((char)PavementTreatmentHelper.TreatmentGroupCategory.Bituminous)).ToList();
+            return allTreatments.Where(treatment => treatment.AssetType.ToString().ToLower() == PAMSConstants.Asphalt).ToList();
         }
 
         public List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> GetConcreteTreatments(List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> allTreatments)
         {
-            return allTreatments.Where(treatment => treatment.Name.ToLower().StartsWith((char)PavementTreatmentHelper.TreatmentGroupCategory.Concrete)).ToList();
+            return allTreatments.Where(treatment => treatment.AssetType.ToString().ToLower() == PAMSConstants.Concrete).ToList();
         }
 
         public List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> GetNoTreatments(List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> allTreatments)

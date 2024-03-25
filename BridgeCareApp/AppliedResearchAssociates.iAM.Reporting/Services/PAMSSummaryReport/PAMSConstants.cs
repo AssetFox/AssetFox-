@@ -87,5 +87,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
 
         public const string Bundled = "Bundled";
         public const string BundledTreatments = "Bundled Treatments";
+        public const string Asphalt = "asphalt";
+        public const string Concrete = "concrete";
     }
 }

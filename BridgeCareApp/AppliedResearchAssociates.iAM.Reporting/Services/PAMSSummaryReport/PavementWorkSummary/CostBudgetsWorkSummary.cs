@@ -192,7 +192,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     foreach (var yearlyValue in yearlyValues.Value)
                     {
                         var treatment = yearlyValue.Key;
-                        if (treatment.Contains("Bundle") && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
+                        if (treatment.Contains("Bundle"))// && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
                         {
                             var category = TreatmentCategory.Bundled;
                             decimal cost = 0;
@@ -321,7 +321,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     foreach (var yearlyValue in yearlyValues.Value)
                     {
                         var treatment = yearlyValue.Key;
-                        if (treatment.Contains("Bundle") && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
+                        if (treatment.Contains("Bundle"))// && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
                         {
                             var category = TreatmentCategory.Bundled;
                             decimal cost = 0;
@@ -448,7 +448,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     foreach (var yearlyValue in yearlyValues.Value)
                     {
                         var treatment = yearlyValue.Key;
-                        if (treatment.Contains("Bundle") && treatment.ToLower().Contains((char)PavementTreatmentHelper.TreatmentGroupCategory.Concrete))
+                        if (treatment.Contains("Bundle"))// && treatment.ToLower().Contains((char)TreatmentGroupCategory.Concrete))
                         {
                             var category = TreatmentCategory.Bundled;
                             decimal cost = 0;

@@ -168,12 +168,14 @@ namespace BridgeCareCore.Services
         {
             var performanceCurvesWorksheet = excelPackage.Workbook.Worksheets[0];
             var worksheetStart = performanceCurvesWorksheet.Dimension.Start;
-            var worksheetEnd = performanceCurvesWorksheet.Dimension.End;            
+            var worksheetEnd = performanceCurvesWorksheet.Dimension.End;
+            var attrDict = new Dictionary<string, bool>(); 
             for (var dataRow = worksheetStart.Row + 1; dataRow <= worksheetEnd.Row; dataRow++)
             {
                 var startColumn = worksheetStart.Column;
                 var performanceEquationName = performanceCurvesWorksheet.GetValue<string>(dataRow, startColumn++);
                 var attribute = performanceCurvesWorksheet.GetValue<string>(dataRow, startColumn++);
+                
                 if (performanceEquationName == null && attribute == null)
                 {
                     continue;
@@ -197,9 +199,15 @@ namespace BridgeCareCore.Services
                     continue;
                 }
 
+                if (!attrDict.ContainsKey(attribute))
+                {
+                    var attr = _unitOfWork.AttributeRepo.GetSingleByName(attribute);
+                    attrDict.Add(attribute, attr.IsAscending);
+                }
+
                 // Validate equation
                 var isPiecewise = !string.IsNullOrEmpty(equationExpression) && equationExpression.Contains(")(");
-                var validateEquationResult = _expressionValidationService.ValidateEquation(new EquationValidationParameters { Expression = equationExpression, IsPiecewise = isPiecewise });
+                var validateEquationResult = _expressionValidationService.ValidateEquation(new EquationValidationParameters { Expression = equationExpression, IsPiecewise = isPiecewise, IsAscendingAttribute = attrDict[attribute] });
                 if (!validateEquationResult.IsValid)
                 {
                     performanceCurvesWithInvalidEquation.Add(performanceEquationName + ": " + equationExpression);

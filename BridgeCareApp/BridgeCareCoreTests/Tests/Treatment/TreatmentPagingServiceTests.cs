@@ -70,6 +70,8 @@ namespace BridgeCareCoreTests.Tests.Treatment
             var dtoClone = TreatmentDtos.Dto(treatmentId);
             dtoClone.Consequences = new List<TreatmentConsequenceDTO>();
             dtoClone.Costs = new List<TreatmentCostDTO>();
+            dtoClone.SupersedeRules = new List<TreatmentSupersedeRuleDTO>();
+            dto.SupersedeRules = new List<TreatmentSupersedeRuleDTO>();
             selectableTreatmentRepo.Setup(s => s.GetSelectableTreatments(libraryId)).ReturnsList(dto);
             var budgetId = Guid.NewGuid();
             var budget = BudgetDtos.New(budgetId);
@@ -105,6 +107,7 @@ namespace BridgeCareCoreTests.Tests.Treatment
             var consequence = TreatmentConsequenceDtos.Dto(consequenceId);
             dto.Costs = new List<TreatmentCostDTO> { cost };
             dto.Consequences = new List<TreatmentConsequenceDTO> { consequence };
+            dto.SupersedeRules = new List<TreatmentSupersedeRuleDTO>();
             var dtoClone = TreatmentDtos.Dto(treatmentId);
             selectableTreatmentRepo.Setup(s => s.GetSelectableTreatments(libraryId)).ReturnsList(dto);
             var budgetId = Guid.NewGuid();
@@ -148,6 +151,7 @@ namespace BridgeCareCoreTests.Tests.Treatment
             cost.Equation = EquationDtos.AgePlus1();
             dto.Costs = new List<TreatmentCostDTO> { cost };
             dto.Consequences = new List<TreatmentConsequenceDTO> { consequence };
+            dto.SupersedeRules = new List<TreatmentSupersedeRuleDTO>();
             var dtoClone = TreatmentDtos.Dto(treatmentId);
             selectableTreatmentRepo.Setup(s => s.GetSelectableTreatments(libraryId)).ReturnsList(dto);
             var budgetId = Guid.NewGuid();

@@ -65,6 +65,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
         public const string ConcreteTotal = "PAMS Concrete Total";
         public const string CommittedTotal = "Committed Total";
 
+        public const string TotalWorkBudget = "Total Work Budget";
         //Data Variables
         public const string Work = "Work";
         public const string Cost = "Cost";

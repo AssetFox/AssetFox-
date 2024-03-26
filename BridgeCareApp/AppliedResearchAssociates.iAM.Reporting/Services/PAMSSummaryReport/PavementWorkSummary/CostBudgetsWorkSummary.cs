@@ -664,7 +664,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells[startRow + 5, column + 2].Value = "Percentage spent on BUNDLED";
 
             row += 2;
-            worksheet.Cells[row, 1].Value = "Total PAMS Budget";
+            worksheet.Cells[row, 1].Value = PAMSConstants.TotalWorkBudget;
             column = fromColumn;
 
             decimal annualBudget = 0;
@@ -800,7 +800,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells[startRow + 5, column + 2].Value = "Percentage spent on BUNDLED";
 
             row += 2;
-            worksheet.Cells[row, 1].Value = "Total PAMS Budget";  
+            worksheet.Cells[row, 1].Value = PAMSConstants.TotalWorkBudget;  
             column = fromColumn;
 
             decimal annualBudget = 0;

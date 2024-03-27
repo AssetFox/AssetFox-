@@ -338,7 +338,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             reportDetailDto.Status = $"Creating Graph TABs";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _addGraphsInTabs.Add(excelPackage, worksheet, pamsWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
+            _addGraphsInTabs.Add(excelPackage, pamsWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
 
             checkCancelled(cancellationToken, simulationId);
             // Legend TAB

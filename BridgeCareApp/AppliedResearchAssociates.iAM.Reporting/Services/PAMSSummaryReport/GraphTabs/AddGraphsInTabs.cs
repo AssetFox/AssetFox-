@@ -32,15 +32,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Gra
             {
                 Worksheet = workSheet;
                 Title = title;
+                YAxisTitle = PAMSConstants.Graph_Tabs_YAxisTitle;
+                XAxisTitle = PAMSConstants.Graph_Tabs_XAxisTitle;
             }
             public string Title { get; }
             public ExcelWorksheet Worksheet { get; }
             public int DataColumn { get; set; } = 0;
             public ChartType type { get; set; }
+            public string YAxisTitle { get; set; }
+            public string XAxisTitle { get; set; }
         }
 
 
-        public void Add(ExcelPackage excelPackage, ExcelWorksheet worksheet, ExcelWorksheet pamsWorkSummaryWorksheet, ChartRowsModel chartRowModel, int simulationYearsCount)
+        public void Add(ExcelPackage excelPackage, ExcelWorksheet pamsWorkSummaryWorksheet, ChartRowsModel chartRowModel, int simulationYearsCount)
         {
             var graphDataDependentTabs = new Dictionary<string, GraphDataTab>();
             void AddGraphDataDependentTab(string tabTitle, string graphTitle) => graphDataDependentTabs.Add(tabTitle, new GraphDataTab(excelPackage.Workbook.Worksheets.Add(tabTitle), graphTitle));
@@ -68,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Gra
             startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, sourceStartRow, startColumn, simulationYearsCount);
             graphDataDependentTabs[PAMSConstants.IRI_BPN1_Tab].DataColumn = startColumn - columnsPerSet;
             graphDataDependentTabs[PAMSConstants.IRI_BPN1_Tab].type = ChartType.CountChart;
-
+            
             sourceStartRow = chartRowModel.IRI_BPN_2_ChartModel.sourceStartRow;
             startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, sourceStartRow, startColumn, simulationYearsCount);
             graphDataDependentTabs[PAMSConstants.IRI_BPN2_Tab].DataColumn = startColumn - columnsPerSet;
@@ -124,7 +128,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Gra
                 switch (graphDataTab.type)
                 {
                 case ChartType.CountChart:
-                    _conditionChart.Fill(graphDataTab.Worksheet, graphDataWorksheet, graphDataTab.DataColumn, simulationYearsCount, graphDataTab.Title);
+                    _conditionChart.Fill(graphDataTab.Worksheet, graphDataWorksheet, graphDataTab.DataColumn, simulationYearsCount, graphDataTab.Title, graphDataTab.YAxisTitle, graphDataTab.XAxisTitle);
                     break;
 
                 default:

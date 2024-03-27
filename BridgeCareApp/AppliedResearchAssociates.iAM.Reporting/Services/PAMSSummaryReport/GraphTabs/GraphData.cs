@@ -12,15 +12,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Gra
             var sourceRow = sourceStartRow - 1; var sourceCol = 1;
             int destRow = 1; int destCol = destStartCol; var summaryRow = sourceRow - 1;
 
-            // Summary title; could merge 1-5
-            graphDataSheet.Cells[destRow, destCol].Formula = $"{pamsWorkSummaryWorksheet.Cells[summaryRow, sourceCol].FullAddress}";
-            destRow++; 
-
-            // subtitle row = "Year", sourceRow + 3, sourceRow + 4, sourceRow + 5, sourceRow + 6            
-            graphDataSheet.Cells[destRow, destCol++].Value = "Year";
-
-
             // subtitle rows
+            destRow++;
 
             //Excellent
             sourceRow++;

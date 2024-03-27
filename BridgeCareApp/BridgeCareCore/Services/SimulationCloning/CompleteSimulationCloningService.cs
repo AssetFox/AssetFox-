@@ -55,6 +55,10 @@ namespace BridgeCareCore.Services
             var sourceSimulationId = dto.ScenarioId.ToString();
             var sourceSimulation = this.GetSimulation(sourceSimulationId);
             var simulationCloningCommittedProjectErrors = new SimulationCloningCommittedProjectErrors();
+            if(sourceSimulation.CommittedProjects.Any(_ => _.ScenarioBudgetId == null))
+            {
+                throw new Exception("Unable to clone committed projects with empty budgets");
+            }
             var badCommittedProjects = sourceSimulation.CommittedProjects.Where(c => !sourceSimulation.Budgets.Any(b => b.Id == c.ScenarioBudgetId)).ToList();
             if (badCommittedProjects.Any())
             {

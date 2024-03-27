@@ -198,10 +198,10 @@ import { getUrl } from '@/shared/utils/get-url';
     let uuidNIL: string = getBlankGuid();
     let treatmentCategoryMapValue: Map<string, TreatmentCategory> = clone(treatmentCategoryMap);
     let treatmentCategoryReverseMapValue: Map<TreatmentCategory, string> = clone(treatmentCategoryReverseMap);
-    let assetTypeReverseMapValue: Map<AssetType, string> = clone(assetTypeReverseMap);
+    let assetTypeReverseMapValue: Map<string, string> = clone(assetTypeReverseMap);
     let treatmentCategoryBinding = ref('');
     let categories = Array.from(treatmentCategoryMap.keys());
-    let assetTypeMapValue: Map<string, AssetType> = clone(assetTypeMap);
+    let assetTypeMapValue: Map<string, string> = clone(assetTypeMap);
     let assetTypeBinding = ref('');
 
     const mask = { mask: '##########' };
@@ -225,8 +225,8 @@ import { getUrl } from '@/shared/utils/get-url';
         // Populate assetTypeMap and assetTypeReverseMap
         stateAssetType.value.forEach((assetType, index) => {
             // Assign numerical indices to each asset type
-            assetTypeMap.set(assetType, index);
-            assetTypeReverseMap.set(index, assetType);
+            assetTypeMap.set(assetType, assetType);
+            assetTypeReverseMap.set(assetType, assetType);
         });
 
         treatmentCategoryBinding.value = treatmentCategoryReverseMap.get(selectedTreatmentDetails.value.category)!;
@@ -279,8 +279,7 @@ import { getUrl } from '@/shared/utils/get-url';
         onEditTreatmentDetails(property, category);
     }
     function onEditAssetType(property: string, key: any){
-        var asset = assetTypeMap.get(key);
-        onEditTreatmentDetails(property, asset);
+        onEditAssetTypeDetails(property, key);
     }
 
     function onEditTreatmentDetails(property: string, value: any) {
@@ -293,6 +292,19 @@ import { getUrl } from '@/shared/utils/get-url';
             ),
         );
     }
+
+        function onEditAssetTypeDetails(property: string, value: any) {
+            selectedTreatmentDetails.value.assetType = value;
+        emit(
+            'onModifyTreatmentDetails',
+            setItemPropertyValue(
+                property,
+                value,
+                selectedTreatmentDetails.value,
+            ),
+        );
+    }
+
 
     function onRemoveTreatmentCriterion() {
         emit(

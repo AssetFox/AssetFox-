@@ -1755,14 +1755,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         ? TreatmentCategory.Preservation
                         : (TreatmentCategory)Enum.Parse(typeof(TreatmentCategory), v));
 
-                entity.Property(e => e.AssetType)
-                .HasDefaultValue(AssetCategory.Bridge)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => string.IsNullOrWhiteSpace(v) || string.IsNullOrEmpty(v)
-                        ? AssetCategory.Bridge
-                        : (AssetCategory)Enum.Parse(typeof(AssetCategory), v));
-
                 entity.HasOne(d => d.TreatmentLibrary)
                     .WithMany(p => p.Treatments)
                     .HasForeignKey(d => d.TreatmentLibraryId)
@@ -1787,14 +1779,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     v => string.IsNullOrWhiteSpace(v) || string.IsNullOrEmpty(v)
                         ? TreatmentCategory.Preservation
                         : (TreatmentCategory)Enum.Parse(typeof(TreatmentCategory), v));
-
-                entity.Property(e => e.AssetType)
-                .HasDefaultValue(AssetCategory.Bridge)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => string.IsNullOrWhiteSpace(v) || string.IsNullOrEmpty(v)
-                        ? AssetCategory.Bridge
-                        : (AssetCategory)Enum.Parse(typeof(AssetCategory), v));
 
                 entity.HasOne(d => d.Simulation)
                 .WithMany(p => p.SelectableTreatments)

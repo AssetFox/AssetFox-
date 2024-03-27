@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         /// used in reporting - the user must still define the logic for this
         /// treatment using a criterion library
         /// </summary>
-        public AssetCategories AssetType { get; set; }
+        public string AssetType { get; set; }
 
         /// <summary>
         /// Has this setting been modified from the associated library?

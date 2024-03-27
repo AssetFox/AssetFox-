@@ -18,13 +18,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Gra
             _stackedColumnChartCommon = new StackedColumnChartCommon();
         }
 
-        public void Fill(ExcelWorksheet worksheet, ExcelWorksheet graphWorksheet, int dataStartColumn, int simulationYearsCount, string title)
+        public void Fill(ExcelWorksheet worksheet, ExcelWorksheet graphWorksheet, int dataStartColumn, int simulationYearsCount, string title, string yAxisTitle, string xAxisTitle)
         {
             _stackedColumnChartCommon.SetWorksheetProperties(worksheet);
             var chart = worksheet.Drawings.AddChart(title, eChartType.ColumnStacked);
             _stackedColumnChartCommon.SetChartProperties(chart, title, 1050, 700, 6, 6);
 
-            _stackedColumnChartCommon.SetChartAxes(chart);
+            _stackedColumnChartCommon.SetChartAxes(chart, yAxisTitle, xAxisTitle);
             AddSeries(graphWorksheet, dataStartColumn, simulationYearsCount, chart);
 
             ((ExcelBarChart)chart).GapWidth = 75;

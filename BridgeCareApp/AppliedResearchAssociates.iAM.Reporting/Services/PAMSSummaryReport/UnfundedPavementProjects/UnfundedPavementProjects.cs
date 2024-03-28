@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.UnfundedPavementProjects
 {
@@ -68,14 +69,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
             return currentCell;
         }
 
-        private List<string> GetHeadersRow()
+        private static List<string> GetHeadersRow() => new()
         {
-            return new List<string>
-            {
-                "District",
+                "CRS",
                 "County",
-                "SR",
-                "Section",
+                "Route",
+                "District",
+                "Start",
+                "End",
                 "Pavement Length",
                 "Pavement Area",
                 "Lanes",
@@ -90,7 +91,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
                 "OPI",
                 "Roughness",
             };
-        }
 
 
         public List<AssetDetail> GetUntreatedSections(SimulationYearDetail simulationYearDetail)
@@ -108,7 +108,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
             var treatmentsPerSection = new SortedDictionary<int, List<Tuple<SimulationYearDetail, AssetDetail, TreatmentOptionDetail>>>();
             var validFacilityIds = new List<int>(); // Unfunded IDs
             var firstYear = true;
-            foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
+            var years = simulationOutput.Years.OrderBy(yr => yr.Year);
+            foreach (var year in years)
             {
                 //get untreated sections
                 var untreatedSections = GetUntreatedSections(year);
@@ -131,10 +132,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
                     segmentNumber += section.AssetName;
 
                     var facilityId = Convert.ToInt32(segmentNumber);
-
-                    var treatmentOptions = section.TreatmentOptions.Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
+                    var treatmentOptions = section.TreatmentConsiderations.Any() ?
+                                            section.TreatmentOptions.Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList() :
+                                            section.TreatmentOptions;
                     treatmentOptions.Sort((a, b) => b.Benefit.CompareTo(a.Benefit));
-
                     var chosenTreatment = treatmentOptions.FirstOrDefault();
                     if (chosenTreatment != null)
                     {
@@ -175,19 +176,23 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
         private void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year, TreatmentOptionDetail treatment)
         {
             var rowNo = currentCell.Row; var columnNo = currentCell.Column;
-
-            worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "DISTRICT");
-            worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "COUNTY");
-            worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "SR");
-
-            var segmentNumber = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CNTY");
-            segmentNumber += _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "SR");
-            segmentNumber += section.AssetName;
-            worksheet.Cells[rowNo, columnNo++].Value = segmentNumber;
+            var valuePerNumericAttribute = section.ValuePerNumericAttribute;
+            var valuePerTextAttribute = section.ValuePerTextAttribute;
+            var crs = CheckGetTextValue(valuePerTextAttribute, "CRS");
+            worksheet.Cells[rowNo, columnNo++].Value = crs;            
+            worksheet.Cells[rowNo, columnNo++].Value = CheckGetTextValue(valuePerTextAttribute, "COUNTY");
+            worksheet.Cells[rowNo, columnNo++].Value = CheckGetTextValue(valuePerTextAttribute, "SR");
+            worksheet.Cells[rowNo, columnNo++].Value = CheckGetTextValue(valuePerTextAttribute, "DISTRICT");
+            var lastUnderScoreIndex = crs.LastIndexOf('_');
+            var hyphenIndex = crs.IndexOf('-');
+            var startSeg = crs.Substring(lastUnderScoreIndex + 1, hyphenIndex - lastUnderScoreIndex - 1);
+            var endSeg = crs.Substring(hyphenIndex + 1);
+            worksheet.Cells[rowNo, columnNo++].Value = startSeg;
+            worksheet.Cells[rowNo, columnNo++].Value = endSeg;
 
             //calculate area
-            double pavementLength = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SEGMENT_LENGTH");
-            double pavementWidth = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "WIDTH");
+            double pavementLength = CheckGetValue(valuePerNumericAttribute, "SEGMENT_LENGTH");
+            double pavementWidth = CheckGetValue(valuePerNumericAttribute, "WIDTH");
             double pavementArea = pavementLength * pavementWidth;
 
             worksheet.Cells[rowNo, columnNo].Style.Numberformat.Format = "0";
@@ -196,10 +201,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
             worksheet.Cells[rowNo, columnNo].Style.Numberformat.Format = "0";
             worksheet.Cells[rowNo, columnNo++].Value = pavementArea;
 
-            worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "LANES");
-            worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUSIPLAN");
-            worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "MPO_RPO");
-            worksheet.Cells[rowNo, columnNo++].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "RISKSCORE")), 2);
+            worksheet.Cells[rowNo, columnNo++].Value = CheckGetValue(valuePerNumericAttribute, "LANES");
+            worksheet.Cells[rowNo, columnNo++].Value = CheckGetTextValue(valuePerTextAttribute, "BUSIPLAN");
+            worksheet.Cells[rowNo, columnNo++].Value = CheckGetTextValue(valuePerTextAttribute, "MPO_RPO");
+            worksheet.Cells[rowNo, columnNo++].Value = Math.Round(Convert.ToDecimal(CheckGetValue(valuePerNumericAttribute, "RISKSCORE")), 2);
 
             var stateContractedFunded = pavementArea >= PAVEMENT_AREA_THRESHOLD ? "Y" : "N"; stateContractedFunded += " - " + Year.ToString();
             worksheet.Cells[rowNo, columnNo++].Value = stateContractedFunded;
@@ -214,12 +219,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
             var cashFlowPerYr = "1 / " + String.Format("{0:C0}", treatmentCost);
             worksheet.Cells[rowNo, columnNo++].Value = cashFlowPerYr;
 
-            worksheet.Cells[rowNo, columnNo++].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "OPI_CALCULATED")));
-            worksheet.Cells[rowNo, columnNo++].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "ROUGHNESS")), 2);
+            worksheet.Cells[rowNo, columnNo++].Value = Math.Round(Convert.ToDecimal(CheckGetValue(valuePerNumericAttribute, "OPI_CALCULATED")));
+            worksheet.Cells[rowNo, columnNo++].Value = Math.Round(Convert.ToDecimal(CheckGetValue(valuePerNumericAttribute, "ROUGHNESS")), 2);
 
             if (rowNo % 2 == 0) { ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo - 1], Color.LightGray); }
             ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, 1, rowNo, columnNo - 1]);
             currentCell.Column = columnNo;
         }
+
+        private double CheckGetValue(Dictionary<string, double> valuePerNumericAttribute, string attribute) => _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, attribute);
+
+        private string CheckGetTextValue(Dictionary<string, string> valuePerTextAttribute, string attribute) => _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, attribute);
     }
 }

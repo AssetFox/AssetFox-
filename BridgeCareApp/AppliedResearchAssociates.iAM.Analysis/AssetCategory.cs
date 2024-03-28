@@ -4,8 +4,8 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.Analysis;
 
-public enum AssetCategory
-{
-    Bridge,
-    Culvert
-}
+//public enum AssetCategory
+//{
+    //Bridge,
+    //Culvert
+//}

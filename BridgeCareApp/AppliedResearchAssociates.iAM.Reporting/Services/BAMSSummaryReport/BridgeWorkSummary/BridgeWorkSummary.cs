@@ -48,13 +48,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             #region Initial work to set some data, which will be used throughout the Work summary TAB
 
             // Getting list of treatments. It will be used in several places throughout this excel TAB
-            var simulationTreatments = new List<(string Name, AssetCategories AssetType, TreatmentCategory Category)>();
-            simulationTreatments.Add((BAMSConstants.CulvertNoTreatment, AssetCategories.Culvert, TreatmentCategory.Other));
-            simulationTreatments.Add((BAMSConstants.NonCulvertNoTreatment, AssetCategories.Bridge, TreatmentCategory.Other));
+            var simulationTreatments = new List<(string Name, string AssetType, TreatmentCategory Category)>();
+            simulationTreatments.Add((BAMSConstants.CulvertNoTreatment, "Culvert", TreatmentCategory.Other));
+            simulationTreatments.Add((BAMSConstants.NonCulvertNoTreatment, "Bridge", TreatmentCategory.Other));
             foreach (var item in selectableTreatments)
             {
                 if (item.Name.ToLower() == BAMSConstants.NoTreatment) continue;
-                simulationTreatments.Add((item.Name, (AssetCategories)item.AssetCategory, item.Category));
+                simulationTreatments.Add((item.Name, (string)item.AssetCategory, item.Category));
             }
             simulationTreatments.Sort((a, b) => a.Item1.CompareTo(b.Item1));
 

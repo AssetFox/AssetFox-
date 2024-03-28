@@ -1504,7 +1504,7 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
             addedRows[index] = updatedRow;
             return;
         }
-        let mapEntry = updatedRowsMap.get(rowId)
+        let mapEntry = updatedRowsMap.get(rowId);
         if(isNil(mapEntry)){
             const row = treatmentCache.find(r => r.id === rowId);
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
@@ -1516,12 +1516,6 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
         else
             updatedRowsMap.delete(rowId)
         checkHasUnsavedChanges();
-    }
-
-    function learChanges(){
-        updatedRowsMap.clear();
-        addedRows = [];
-        treatmentCache = [];
     }
 
     function checkHasUnsavedChanges(){

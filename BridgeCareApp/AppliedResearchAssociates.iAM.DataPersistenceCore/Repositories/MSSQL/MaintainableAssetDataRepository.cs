@@ -34,10 +34,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     if (reportTypeParam[0].Contains("(P)"))
                     {
                         var keyDatumFields = _unitOfWork.Context.Attribute
+                            .AsSplitQuery()
                             .Where(_ => keyDatumFieldNames.Contains(_.Name))
                             .Select(_ => new { _.Id, _.Name, Type = _.DataType })
                             .ToList();
                         var keyDatumFieldsNetwork = _unitOfWork.Context.Attribute
+                            .AsSplitQuery()
                             .Where(_ => _.Id == network.KeyAttributeId)
                             .Select(_ => new { _.Id, _.Name, Type = _.DataType })
                             .ToList();
@@ -56,6 +58,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         {
                             var keyFieldValue = new List<KeySegmentDatum>();
                             var filteredAggregatedKeyData = _unitOfWork.Context.AggregatedResult
+                                .AsSplitQuery()
                                 .Include(_ => _.MaintainableAsset)
                                 .Where(_ => _.MaintainableAsset.NetworkId == network.Id && _.AttributeId == attribute.Id);
                             foreach (var datum in filteredAggregatedKeyData)
@@ -70,6 +73,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         MainNetworkKeyTable = new List<MaintainableAssetQueryDTO>();
                         var keyDatumFieldIds = keyDatumFields.Select(_ => _.Id).ToList();
                         var filteredAggregatedData = _unitOfWork.Context.AggregatedResult
+                            .AsSplitQuery()
                             .Include(_ => _.MaintainableAsset)
                             .Include(_ => _.Attribute)
                             .Where(_ => _.MaintainableAsset.NetworkId == network.Id && keyDatumFieldIds.Contains(_.AttributeId))
@@ -94,11 +98,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         RawNetworkKeyTable = new List<MaintainableAssetQueryDTO>();
 
                         var rawKeyDatumFields = _unitOfWork.Context.Attribute
+                            .AsSplitQuery()
                             .Where(_ => rawKeyDatumFieldNames.Contains(_.Name))
                             .Select(_ => new { _.Id, _.Name, Type = _.DataType })
                             .ToList();
 
                         var rawKeyDatumFieldsNetwork = _unitOfWork.Context.Attribute
+                            .AsSplitQuery()
                             .Where(_ => _.Id == rawNetwork.KeyAttributeId)
                             .Select(_ => new { _.Id, _.Name, Type = _.DataType })
                             .ToList();
@@ -113,6 +119,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         }
                         var rawKeyDatumFieldIds = rawKeyDatumFields.Select(_ => _.Id).ToList();
                         var filteredRawAggregatedData = _unitOfWork.Context.AggregatedResult
+                            .AsSplitQuery()
                             .Include(_ => _.MaintainableAsset)
                             .Include(_ => _.Attribute)
                             .Where(_ => _.MaintainableAsset.NetworkId == rawNetwork.Id && rawKeyDatumFieldIds.Contains(_.AttributeId))
@@ -135,6 +142,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         {
                             var rawKeyFieldValue = new List<KeySegmentDatum>();
                             var filteredRawAggregatedKeyData = _unitOfWork.Context.AggregatedResult
+                                .AsSplitQuery()
                                 .Include(_ => _.MaintainableAsset)
                                 .Where(_ => _.MaintainableAsset.NetworkId == rawNetwork.Id && _.AttributeId == attribute.Id);
 
@@ -170,6 +178,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var targetAsset = lookupSource.FirstOrDefault(_ => _.KeyValue.Value == keyValue);
             if (targetAsset == null) return new List<SegmentAttributeDatum>();
             var asset = _unitOfWork.Context.MaintainableAsset
+                .AsSplitQuery()
                 .Where(_ => _.Id == targetAsset.AssetId)
                 .Include(_ => _.AggregatedResults)
                 .ThenInclude(_ => _.Attribute)
@@ -257,6 +266,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var targetAsset = lookupSource.FirstOrDefault(_ => _.KeyValue.Value == keyValue);
             if (targetAsset == null) return new List<SegmentAttributeDatum>();
             var asset = _unitOfWork.Context.MaintainableAsset
+                .AsSplitQuery()
                 .Where(_ => _.Id == commonAssetIdsGuid)
                 .Include(_ => _.AggregatedResults)
                 .ThenInclude(_ => _.Attribute)
@@ -298,11 +308,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var network = _unitOfWork.NetworkRepo.GetMainNetwork();
             var result = new List<List<string>>();
             var keyDatumFields = _unitOfWork.Context.Attribute
+                .AsSplitQuery()
                 .Where(_ => keyFieldNames.Contains(_.Name))
                 .Select(_ => new { _.Id, _.Name, Type = _.DataType })
                 .ToList();
             var assets = _unitOfWork.Context.MaintainableAsset.Where(_ => _.NetworkId == network.Id).ToList();
             var aggregatedData = _unitOfWork.Context.AggregatedResult
+                    .AsSplitQuery()
                     .Include(_ => _.MaintainableAsset)
                     .Include(_ => _.Attribute)
                     .Where(_ => keyFieldNames.Contains(_.Attribute.Name) && _.MaintainableAsset.NetworkId == network.Id)

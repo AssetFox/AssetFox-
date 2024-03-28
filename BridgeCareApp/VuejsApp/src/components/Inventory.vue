@@ -1,14 +1,14 @@
 <template> 
-<div style="width: 300px; margin: 0 auto;">
-    <v-autocomplete
-        v-model="inventoryReportName" 
-        :items="stateInventoryReportNames"
-        :label="`Select a Inventory Report`"
-        variant="outlined"
-        density="compact"
-        class="ghd-select ghd-text-field ghd-text-field-border">
-    </v-autocomplete>
-</div>
+    <div style="width: 300px; margin: 0 auto;">
+        <v-autocomplete
+            v-model="inventoryReportName" 
+            :items="stateInventoryReportNames"
+            :label="`Select a Inventory Report`"
+            variant="outlined"
+            density="compact"
+            class="ghd-select ghd-text-field ghd-text-field-border">
+        </v-autocomplete>
+    </div>
     <v-layout>
         <v-row>
             <v-row justify="space-between"></v-row>
@@ -95,7 +95,7 @@
 
     let inventoryData: any  = null;
     let sanitizedHTML: any = null;
-    let inventoryReportName: string = '';
+    let inventoryReportName = ref<string>('');
 
     const beforeRouteLeave = () => {
     // Reset staticHTMLForInventory when leaving the route
@@ -142,10 +142,6 @@
                 let j = 1;
                 reactiveData.value[1].push(keyAttributeValues.value[i][j])
             }
-
-            //Remove duplicates from the County's
-            const noDupes = new Set(keyAttributeValues.value.map(element => element[0]));
-            reactiveData.value[0] = Array.from(noDupes);
         })
 
         watch(staticHTMLForInventory,()=>{
@@ -154,11 +150,18 @@
 
         watch(stateInventoryReportNames,()=>{
             if(stateInventoryReportNames.value.length > 0)
-                inventoryReportName = stateInventoryReportNames.value[0]
+                inventoryReportName.value = stateInventoryReportNames.value[0]
             
-            lastThreeLetters = inventoryReportName.slice(-3);
+            lastThreeLetters = inventoryReportName.value.slice(-3);
             reportType = lastThreeLetters[1];
         });
+
+        watch(inventoryReportName,()=>{
+            if(selectedInventoryIndex.value.length === 3)
+            {
+                HandleSelectedItems(1)
+            }
+        })
         
         watch(stateKeyFields,()=>{
             if(reportType === 'P') {
@@ -321,7 +324,7 @@
 
                 if(selectedKeys.length === inventoryDetails.value.length)
                 {
-                    getStaticInventoryHTMLAction({reportType: inventoryReportName, filterData: data.keyProperties}); 
+                    getStaticInventoryHTMLAction({reportType: inventoryReportName.value, filterData: data.keyProperties}); 
                 }
         }
 

@@ -33,7 +33,7 @@ public sealed class SelectableTreatment : Treatment
     ///     This property isn't used by the analysis engine. It probably shouldn't exist among the
     ///     types in this module.
     /// </remarks>
-    public AssetCategory AssetCategory { get; set; }
+    public string AssetCategory { get; set; }
 
     public ICollection<Budget> Budgets { get; } = new SetWithoutNulls<Budget>();
 

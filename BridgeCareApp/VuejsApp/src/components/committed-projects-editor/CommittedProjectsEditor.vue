@@ -656,10 +656,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 value: budget.name
             }),
         );
-        budgetSelectItems.value.push({
-            text: 'None',
-            value: ''
-        });
     });
 
     watch(stateSectionCommittedProjects, () => {

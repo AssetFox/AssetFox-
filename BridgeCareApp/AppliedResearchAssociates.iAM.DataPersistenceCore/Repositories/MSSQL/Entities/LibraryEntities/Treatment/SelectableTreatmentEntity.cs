@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using static AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums.TreatmentEnum;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment
 {
@@ -22,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public TreatmentCategory Category { get; set; } = TreatmentCategory.Preservation;
 
-        public AssetCategory AssetType { get; set; } = AssetCategory.Bridge;
+        public string AssetType { get; set; }
 
         public virtual TreatmentLibraryEntity TreatmentLibrary { get; set; }
 

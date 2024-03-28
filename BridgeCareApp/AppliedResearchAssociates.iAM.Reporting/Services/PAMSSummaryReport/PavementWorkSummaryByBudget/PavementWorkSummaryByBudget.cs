@@ -46,10 +46,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             SetupBudgetModelsAndCommittedTreatments(reportOutputData, selectableTreatments, workSummaryByBudgetModels, committedTreatments, shouldBundleFeasibleTreatments);
 
-            var simulationTreatments = new List<(string Name, AssetCategories AssetType, TreatmentCategory Category)>();
+            var simulationTreatments = new List<(string Name, string AssetType, TreatmentCategory Category)>();
             foreach (var item in selectableTreatments)
             {
-                simulationTreatments.Add((item.Name, (AssetCategories)item.AssetCategory, item.Category));
+                simulationTreatments.Add((item.Name, (string)item.AssetCategory, item.Category));
             }
             simulationTreatments.Sort((a, b) => a.Name.CompareTo(b.Name));
 
@@ -199,7 +199,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                                 selectableTreatments.FirstOrDefault(_ => appliedTreatment.Contains(_.Name)) :
                                                 selectableTreatments.FirstOrDefault(_ => _.Name == appliedTreatment);
                             var category = section.AppliedTreatment.Contains("Bundle") ? TreatmentCategory.Bundled : treatmentData.Category;
-                            var assetCategory = (AssetCategories)treatmentData.AssetCategory;
+                            var assetCategory = (string)treatmentData.AssetCategory;
                             summaryModel.YearlyData.Add(new YearsData
                             {
                                 Year = yearData.Year,

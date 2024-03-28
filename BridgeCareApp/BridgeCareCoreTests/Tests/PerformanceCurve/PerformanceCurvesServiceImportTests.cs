@@ -41,6 +41,7 @@ namespace BridgeCareCoreTests.Tests
             var libraryName = RandomStrings.WithPrefix("PerformanceCurve library");
             var unitOfWork = UnitOfWorkMocks.New();
             var performanceCurveRepo = PerformanceCurveRepositoryMocks.New();
+            var attributeRepo = AttributeRepositoryMocks.New();
             var expectedPerformanceCurve = new PerformanceCurveDTO
             {
                 Attribute = "AGE",
@@ -58,6 +59,12 @@ namespace BridgeCareCoreTests.Tests
                 },
                 Id = Guid.NewGuid(),
             };
+            var expectedAttr = new AttributeDTO
+            {
+                Id = Guid.NewGuid(),
+                IsAscending = true,
+                Name = expectedPerformanceCurve.Attribute
+            };
             var outputCurves = new List<PerformanceCurveDTO> { expectedPerformanceCurve };
             var outputDto = new PerformanceCurveLibraryDTO
             {
@@ -67,7 +74,9 @@ namespace BridgeCareCoreTests.Tests
             };
             performanceCurveRepo.SetupGetPerformanceCurveLibrary(outputDto);
             performanceCurveRepo.SetupGetPerformanceCurvesForLibrary(libraryId, outputCurves);
+            attributeRepo.Setup(_ => _.GetSingleByName(expectedPerformanceCurve.Attribute)).Returns(expectedAttr);
             unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(performanceCurveRepo.Object);
+            unitOfWork.Setup(u => u.AttributeRepo).Returns(attributeRepo.Object);
             var performanceCurvesService = CreatePerformanceCurvesService(unitOfWork);
 
             // Act
@@ -93,11 +102,20 @@ namespace BridgeCareCoreTests.Tests
             // Setup
             var libraryId = Guid.NewGuid();
             var unitOfWork = UnitOfWorkMocks.New();
-            var performanceCurveRepo = PerformanceCurveRepositoryMocks.New(unitOfWork); 
+            var performanceCurveRepo = PerformanceCurveRepositoryMocks.New(unitOfWork);           
             var mockExpressionValidationService = ExpressionValidationServiceMocks.EverythingIsValid();
             var hubService = HubServiceMocks.Default();
             var performanceCurvesService = CreatePerformanceCurvesService(unitOfWork);
             var args = new List<List<PerformanceCurveDTO>>();
+            var attributeRepo = AttributeRepositoryMocks.New();
+            var expectedAttr = new AttributeDTO
+            {
+                Id = Guid.NewGuid(),
+                IsAscending = true,
+                Name = "AGE"
+            };
+            attributeRepo.Setup(_ => _.GetSingleByName(expectedAttr.Name)).Returns(expectedAttr);
+            unitOfWork.Setup(u => u.AttributeRepo).Returns(attributeRepo.Object);
             performanceCurveRepo.Setup(r => r.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(Capture.In(args), It.IsAny<Guid>()));
             performanceCurveRepo.Setup(r => r.GetScenarioPerformanceCurves(It.IsAny<Guid>()))
                 .Returns(() => args.Last());
@@ -136,6 +154,15 @@ namespace BridgeCareCoreTests.Tests
             performanceCurveRepo.SetupUpsertOrDeleteScenarioPerformanceCurvesThrows("exception message");
             var mockUnitOfWork = UnitOfWorkMocks.New();
             mockUnitOfWork.Setup(m => m.PerformanceCurveRepo).Returns(performanceCurveRepo.Object);
+            var attributeRepo = AttributeRepositoryMocks.New();
+            var expectedAttr = new AttributeDTO
+            {
+                Id = Guid.NewGuid(),
+                IsAscending = true,
+                Name = "AGE"
+            };
+            attributeRepo.Setup(_ => _.GetSingleByName(expectedAttr.Name)).Returns(expectedAttr);
+            mockUnitOfWork.Setup(u => u.AttributeRepo).Returns(attributeRepo.Object);
             var performanceCurvesService = CreatePerformanceCurvesService(mockUnitOfWork, mockExpressionValidationService);
 
             // Act            
@@ -165,6 +192,15 @@ namespace BridgeCareCoreTests.Tests
             performanceCurveRepo.Setup(r => r.UpsertOrDeleteScenarioPerformanceCurvesNonAtomic(Capture.In(args), It.IsAny<Guid>()));
             performanceCurveRepo.Setup(r => r.GetScenarioPerformanceCurves(It.IsAny<Guid>()))
                 .Returns(() => args.Last());
+            var attributeRepo = AttributeRepositoryMocks.New();
+            var expectedAttr = new AttributeDTO
+            {
+                Id = Guid.NewGuid(),
+                IsAscending = true,
+                Name = "AGE"
+            };
+            attributeRepo.Setup(_ => _.GetSingleByName(expectedAttr.Name)).Returns(expectedAttr);
+            unitOfWork.Setup(u => u.AttributeRepo).Returns(attributeRepo.Object);
             //.Returns<List<PerformanceCurveDTO>>(x => args.Last());
 
             // Act            

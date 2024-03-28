@@ -57,14 +57,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
         public const string OPI_Statewide_Tab = "PennDOT OPI Statewide";
         public const string OPI_Statewide_Tab_Title = "PennDOT OPI Statewide";
 
+        public const string Graph_Tabs_YAxisTitle = "Miles";
+        public const string Graph_Tabs_XAxisTitle = "Year";
+
         public const string Legend_Tab = "Legend";
-        public const string Legend_Tab_Title = "";
 
         public const string AsphaltTotal = "PAMS Full Depth Asphalt Total";
         public const string CompositeTotal = "PAMS Composite Total";
         public const string ConcreteTotal = "PAMS Concrete Total";
         public const string CommittedTotal = "Committed Total";
 
+        public const string TotalWorkBudget = "Total Work Budget";
         //Data Variables
         public const string Work = "Work";
         public const string Cost = "Cost";

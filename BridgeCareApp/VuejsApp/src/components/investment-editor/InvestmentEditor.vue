@@ -287,6 +287,8 @@
 
         <ConfirmDeleteAlert :dialogData='confirmDeleteAlertData' @submit='onSubmitConfirmDeleteAlertResult' />
 
+        <ConfirmDeleteAlert :dialogData='cpChangedAlertData' @submit='onSubmitCpChangedAlertResult' />
+
         <CreateBudgetLibraryDialog :dialogData='createBudgetLibraryDialogData'
                                    :libraryNames='librarySelectItemNames'
                                    @submit='onSubmitCreateCreateBudgetLibraryDialogResult' />
@@ -478,6 +480,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let showSetRangeForAddingBudgetYearsDialog: boolean = false;
     let showSetRangeForDeletingBudgetYearsDialog: boolean = false;
     let confirmDeleteAlertData = ref<AlertData>(clone(emptyAlertData));
+    let cpChangedAlertData = ref<AlertData>(clone(emptyAlertData));
     let uuidNIL: string = getBlankGuid();
     let rules: InputValidationRules = validationRules;
     let showImportExportInvestmentBudgetsDialog = ref<boolean>(false);
@@ -1362,9 +1365,11 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value: "";
                 firstYearOfAnalysisPeriodShift.value = 0;
                 investmentPlanMutator(investmentPlanUpsert)
+                if(librarySelectItemValue.value != null || deletionBudgetIds.value.length > 0)
+                    onShowCpChangeAlert();
                 clearChanges();                                            
                 addSuccessNotificationAction({message: "Modified investment"});
-                librarySelectItemValue.value = null;
+                librarySelectItemValue.value = null;               
             }           
         });
     }
@@ -1428,6 +1433,15 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         };
     }
 
+    function onShowCpChangeAlert() {
+        cpChangedAlertData.value = {
+            showDialog: true,
+            heading: 'Warning',
+            choice: false,
+            message: 'All related committed projects have had their budgets set to none.A new budget will need to be set for the aformentioned committed projects',
+        };
+    }
+
     function onSubmitConfirmDeleteAlertResult(submit: boolean) {
         confirmDeleteAlertData.value = clone(emptyAlertData);
 
@@ -1435,6 +1449,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             librarySelectItemValue.value = null;
             deleteBudgetLibraryAction(selectedBudgetLibrary.value.id);
         }
+    }
+
+    function onSubmitCpChangedAlertResult(submit: boolean) {
+        cpChangedAlertData.value = clone(emptyAlertData);
     }
 
     function disableCrudButton() {

@@ -630,8 +630,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             decimal totalSpentTotal = 0;
             foreach (var year in simulationYears)
             {
-                totalSpentTotal += columnTotals[year];
-                worksheet.Cells[row, column].Value = columnTotals[year];
+                totalSpentTotal += columnTotals[year] + TotalCommittedSpent[year] + TotalSAPSpent[year] + TotalProjectBuilderSpent[year];
+                worksheet.Cells[row, column].Value = columnTotals[year] + TotalCommittedSpent[year] + TotalSAPSpent[year] + TotalProjectBuilderSpent[year];
                 column++;
             }
             totalSpendingRow = row;
@@ -664,7 +664,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells[startRow + 5, column + 2].Value = "Percentage spent on BUNDLED";
 
             row += 2;
-            worksheet.Cells[row, 1].Value = "Total PAMS Budget";
+            worksheet.Cells[row, 1].Value = PAMSConstants.TotalWorkBudget;
             column = fromColumn;
 
             decimal annualBudget = 0;
@@ -766,8 +766,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             decimal totalSpentTotal = 0;
             foreach (var year in simulationYears)
             {
-                totalSpentTotal += columnTotals[year];
-                worksheet.Cells[row, column].Value = columnTotals[year];
+                totalSpentTotal += columnTotals[year] + TotalCommittedSpent[year] + TotalSAPSpent[year] + TotalProjectBuilderSpent[year];
+                worksheet.Cells[row, column].Value = columnTotals[year] + TotalCommittedSpent[year] + TotalSAPSpent[year] + TotalProjectBuilderSpent[year];
                 column++;
             }
             totalSpendingRow = row;
@@ -800,7 +800,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells[startRow + 5, column + 2].Value = "Percentage spent on BUNDLED";
 
             row += 2;
-            worksheet.Cells[row, 1].Value = "Total PAMS Budget";  
+            worksheet.Cells[row, 1].Value = PAMSConstants.TotalWorkBudget;  
             column = fromColumn;
 
             decimal annualBudget = 0;
@@ -863,7 +863,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 worksheet.Cells[row + 2, column].Value = projectBuilderBudgetTotal;
 
                 // PAMS based on treatments
-                worksheet.Cells[pamsRow, column].Value = (decimal)worksheet.Cells[totalSpendingRow, column].Value;// - (decimal)mpmsBudgetTotal - (decimal)sapBudgetTotal - (decimal)projectBuilderBudgetTotal;
+                worksheet.Cells[pamsRow, column].Value = (decimal)worksheet.Cells[totalSpendingRow, column].Value - (decimal)mpmsBudgetTotal - (decimal)sapBudgetTotal - (decimal)projectBuilderBudgetTotal;
 
                 column++;
             }
@@ -942,7 +942,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 worksheet.Cells[row + 1, column].Value = sapBudgetTotal;
                 worksheet.Cells[row + 2, column].Value = projectBuilderBudgetTotal;
 
-                var pamsBudgetTotal = (decimal)worksheet.Cells[totalSpendingRow, column].Value; // - mpmsBudgetTotal - sapBudgetTotal - projectBuilderBudgetTotal;
+                var pamsBudgetTotal = (decimal)worksheet.Cells[totalSpendingRow, column].Value - mpmsBudgetTotal - sapBudgetTotal - projectBuilderBudgetTotal;
                 worksheet.Cells[pamsRow, column].Value = pamsBudgetTotal;
 
                 column++;

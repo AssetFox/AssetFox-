@@ -1,14 +1,14 @@
 <template> 
-     <div v-if="stateInventoryReportNames.length > 1" style="width: 300px; margin-left:900px">
-        <v-autocomplete
-            v-model="inventoryReportName" 
-            :items="stateInventoryReportNames"
-            :label="`Select a Inventory Report`"
-            variant="outlined"
-            density="compact"
-            class="ghd-select ghd-text-field ghd-text-field-border">
-        </v-autocomplete>
-     </div>
+<div style="width: 300px; margin: 0 auto;">
+    <v-autocomplete
+        v-model="inventoryReportName" 
+        :items="stateInventoryReportNames"
+        :label="`Select a Inventory Report`"
+        variant="outlined"
+        density="compact"
+        class="ghd-select ghd-text-field ghd-text-field-border">
+    </v-autocomplete>
+</div>
     <v-layout>
         <v-row>
             <v-row justify="space-between"></v-row>
@@ -347,7 +347,7 @@
         }
 
         function isDisabled(index: number) {
-            if(querySelectedData.length < index * 2 && constraintDetails == "AND") {
+            if(querySelectedData.length < index * 2 && constraintDetails === "AND") {
                 return true;
             }
             return false;

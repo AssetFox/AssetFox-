@@ -207,6 +207,92 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return returnValueList;
         }
 
+        public List<SegmentAttributeDatum> GetPAMSAssetAttributes(Dictionary<string, string> queryDictionary, string keyValue)
+        {
+            // Initialization of all variables
+            string keyName = null;
+            string countyName = "COUNTY";
+            string countyVal = queryDictionary[countyName];
+            string srName = "SR";
+            string srVal = queryDictionary[srName];
+            string segVal = keyValue;
+
+            // Check if the queryDictionary contains the key "SEG" and retrieve its value if it exists
+            if (queryDictionary.ContainsKey("SEG"))
+            {
+                keyName = "SEG";
+            }
+            else
+            {
+                throw new ArgumentException($"No Segment found in the request.");
+            }
+
+            // Check for the existence of the given key
+            if (!KeyProperties.ContainsKey(keyName))
+            {
+                throw new ArgumentException($"{keyName} not a key attribute in PennDOT network");
+            }
+
+            var countySource = KeyProperties[countyName];
+            var countyList = countySource.Where(_ => _.KeyValue.Value == countyVal).ToList();
+
+            var srSource = KeyProperties[srName];
+            var srList = srSource.Where(_ => _.KeyValue.Value == srVal).ToList();
+
+            var segSource = KeyProperties[keyName];
+            var segList = segSource.Where(_ => _.KeyValue.Value == segVal).ToList();
+
+            // Extract asset IDs from each list
+            var countyAssetIds = countyList.Select(item => item.AssetId);
+            var srAssetIds = srList.Select(item => item.AssetId);
+            var segAssetIds = segList.Select(item => item.AssetId);
+
+            // Find common asset IDs among all three lists
+            var commonAssetIds = countyAssetIds.Intersect(srAssetIds).Intersect(segAssetIds);
+
+            Guid commonAssetIdsGuid = commonAssetIds.FirstOrDefault();
+            // Get the target segment info
+            var lookupSource = KeyProperties[keyName];
+            var debugMe = lookupSource.Select(_ => _.KeyValue.Value).ToList();
+            var targetAsset = lookupSource.FirstOrDefault(_ => _.KeyValue.Value == keyValue);
+            if (targetAsset == null) return new List<SegmentAttributeDatum>();
+            var asset = _unitOfWork.Context.MaintainableAsset
+                .Where(_ => _.Id == commonAssetIdsGuid)
+                .Include(_ => _.AggregatedResults)
+                .ThenInclude(_ => _.Attribute)
+                .FirstOrDefault();
+            if (asset == null) return new List<SegmentAttributeDatum>();
+            var attributeIdList = asset.AggregatedResults.Select(_ => _.AttributeId).Distinct();
+
+            // Populate the return value list
+            var returnValueList = new List<SegmentAttributeDatum>();
+
+            foreach (var attributeId in attributeIdList)
+            {
+                // Get the entry with the most recent value
+                var maxEntry = asset.AggregatedResults
+                    .Where(_ => _.AttributeId == attributeId)
+                    .OrderByDescending(_ => _.Year)
+                    .First();
+                string attributeValue = (maxEntry.Discriminator[0] == 'N') ? maxEntry.NumericValue.ToString() : maxEntry.TextValue;
+                returnValueList.Add(new SegmentAttributeDatum(maxEntry.Attribute.Name, attributeValue));
+            }
+
+            // Add in each key property if it does not exist
+            foreach (var keyProperty in KeyProperties)
+            {
+                if (!returnValueList.Any(_ => _.Name == keyProperty.Key))
+                {
+                    // This does not exist in the set yet
+                    var specificKeyValue = KeyProperties[keyProperty.Key].FirstOrDefault(_ => _.AssetId == asset.Id);
+                    if (specificKeyValue != null) returnValueList.Add(new SegmentAttributeDatum(keyProperty.Key, specificKeyValue.KeyValue.TextValue));
+                }
+            }
+
+            return returnValueList;
+        }
+
+
         public List<List<string>> GetKeyPropertiesTable(List<string> keyFieldNames)
         {
             var network = _unitOfWork.NetworkRepo.GetMainNetwork();

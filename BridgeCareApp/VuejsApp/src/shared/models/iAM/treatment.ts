@@ -68,7 +68,7 @@ export interface Treatment {
     budgetIds: string[];
     addTreatment: boolean;
     category: TreatmentCategory;
-    assetType: AssetType;
+    assetType: string;
     isModified: boolean;
     libraryId: string;
     isUnselectable: boolean;
@@ -98,7 +98,7 @@ export interface TreatmentDetails {
     shadowForSameTreatment: number;
     criterionLibrary: CriterionLibrary;
     category: TreatmentCategory;
-    assetType: AssetType;
+    assetType: string;
     isUnselectable: boolean;
 }
 
@@ -133,7 +133,7 @@ export const emptyTreatment: Treatment = {
     budgetIds: [],
     addTreatment: false,
     category: TreatmentCategory.preservation,
-    assetType: AssetType.bridge,
+    assetType: '',
     performanceFactors: [],
     isModified: false,
     libraryId:  getBlankGuid(),
@@ -164,17 +164,13 @@ export const emptyTreatmentDetails: TreatmentDetails = {
     shadowForSameTreatment: 0,
     criterionLibrary: clone(emptyCriterionLibrary),
     category: TreatmentCategory.preservation,
-    assetType: AssetType.bridge,
+    assetType: '',
     isUnselectable: false,
 };
 
-export const assetTypeMap: Map<string, AssetType> = new Map([
-    ['Bridge', 0],
-    ['Culvert', 1],
+export const assetTypeMap: Map<string, string> = new Map([
 ]);
-export const assetTypeReverseMap: Map<AssetType, string> = new Map([
-    [0, 'Bridge'],
-    [1, 'Culvert'],
+export const assetTypeReverseMap: Map<string, string> = new Map([
 ]);
 
 // the maps are to convert data to be used in the UI to the data needed by Vue and backend

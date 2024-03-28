@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int pavementCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
             Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
-            List<(string TreatmentName, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments,
+            List<(string TreatmentName, string AssetType, TreatmentCategory Category)> simulationTreatments,
             Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals,
             ICollection<CommittedProject> committedProjects,
             List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
@@ -85,7 +85,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int pavementCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
             Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
-            List<(string TreatmentName, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments,
+            List<(string TreatmentName, string AssetType, TreatmentCategory Category)> simulationTreatments,
             Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals,
             WorkSummaryByBudgetModel workSummaryByBudgetModel,
             SimulationOutput reportOutputData,
@@ -115,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             CurrentCell currentCell,
             List<int> simulationYears,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndCountPerTreatmentPerYear,
-            List<(string TreatmentName, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments
+            List<(string TreatmentName, string AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of PAMS Full Depth Asphalt Work", "PAMS Full Depth Asphalt Work");
@@ -132,7 +132,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             List<int> simulationYears,
             CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndCountPerTreatmentPerYear,
-            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments
+            List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
             var workTypeFullDepthAsphalt = new Dictionary<TreatmentCategory, SortedDictionary<int, decimal>>();
@@ -242,7 +242,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 CurrentCell currentCell,
                 List<int> simulationYears,
                 Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndCountPerTreatmentPerYear,
-                List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments
+                List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments
                 )
         {
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
@@ -260,7 +260,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             List<int> simulationYears,
             CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndCountPerTreatmentPerYear,
-            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)>
+            List<(string Name, string AssetType, TreatmentCategory Category)>
             simulationTreatments
             )
         {
@@ -369,7 +369,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             CurrentCell currentCell,
             List<int> simulationYears,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndCountPerTreatmentPerYear,
-            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments
+            List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
@@ -387,7 +387,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             List<int> simulationYears,
             CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndCountPerTreatmentPerYear,
-            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments
+            List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
             var workTypeConcrete = new Dictionary<TreatmentCategory, SortedDictionary<int, decimal>>();

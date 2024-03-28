@@ -278,6 +278,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
             }
 
+            if(projects.Any(_ => _.ScenarioBudgetId == null))
+            {
+                throw new Exception("Committed projects with an empty budget cannot be saved");
+            }
+
             var keyAttrDict = new Dictionary<Guid, string>();
             simulationIds.ForEach(_ =>
             {

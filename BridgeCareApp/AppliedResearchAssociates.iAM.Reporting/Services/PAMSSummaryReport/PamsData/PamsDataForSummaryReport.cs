@@ -262,7 +262,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SEGMENT_LENGTH");
                 worksheet.Cells[rowNo, columnNo].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "WIDTH");
                 ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo++], ExcelHelperCellFormat.Number);
-                worksheet.Cells[rowNo, columnNo].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "DEPTH");
+                worksheet.Cells[rowNo, columnNo].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "PAVED_THICKNESS");
                 ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo++], ExcelHelperCellFormat.DecimalPrecision2);
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DIRECTION");
@@ -477,7 +477,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
         {
             var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
-            var averageRutting = CalculateAverageRutting(selectedSection);
+            var averageRutting = CalculateRuttingBasedOnSurfaceType(selectedSection);
 
             worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "OPI_CALCULATED")));
             worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, PAMSAuditReportConstants.IRI)));
@@ -491,13 +491,39 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             return column;
         }
 
-        private double CalculateAverageRutting(AssetSummaryDetail selectedSection)
+        private double CalculateRuttingBasedOnSurfaceType(AssetSummaryDetail selectedSection)
         {
-            double ruttingLeftValue = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, PAMSAuditReportConstants.RUT_LEFT);
-            double ruttingRightValue = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, PAMSAuditReportConstants.RUT_RIGHT);
-            return (ruttingLeftValue + ruttingRightValue) / 2.0;
+            SurfaceType surfaceType = GetSurfaceType(selectedSection);
+
+            if (surfaceType == SurfaceType.Asphalt)
+            {
+                return CalculateAverageRutting(PAMSAuditReportConstants.RUT_LEFT, PAMSAuditReportConstants.RUT_RIGHT, selectedSection);
+            }
+            else if (surfaceType == SurfaceType.Concrete)
+            {
+                return CalculateAverageRutting("CRJCPRU_Total", "CLJCPRU_Total", selectedSection);
+            }
+            return 0;
         }
-        
+
+        private double CalculateAverageRutting(string firstAttributeName, string secondAttributeName, AssetSummaryDetail selectedSection)
+        {
+            double firstValue = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, firstAttributeName);
+            double secondValue = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, secondAttributeName);
+            return (firstValue + secondValue) / 2;
+        }
+
+        private SurfaceType GetSurfaceType(AssetSummaryDetail selectedSection)
+        {
+            int surfaceId = Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "SURFACEID"));
+            return surfaceId > 62 ? SurfaceType.Concrete : SurfaceType.Asphalt;
+        }
+
+        enum SurfaceType
+        {
+            Asphalt,
+            Concrete
+        }
 
         private void TrackInitialYearDataForParametersTAB(AssetSummaryDetail initialSection)
         {

@@ -145,7 +145,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         }
 
         internal void SetPavementTreatmentExcelString(ExcelWorksheet worksheet,
-            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments, ref int row, ref int column)
+            List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments, ref int row, ref int column)
         {
             foreach (var item in simulationTreatments)
             {
@@ -245,17 +245,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelHelper.ApplyBorder(cells);
         }
 
-        public List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> GetAsphaltTreatments(List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> allTreatments)
+        public List<(string Name, string AssetType, TreatmentCategory Category)> GetAsphaltTreatments(List<(string Name, string AssetType, TreatmentCategory Category)> allTreatments)
         {
             return allTreatments.Where(treatment => treatment.AssetType.ToString().ToLower() == PAMSConstants.Asphalt).ToList();
         }
 
-        public List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> GetConcreteTreatments(List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> allTreatments)
+        public List<(string Name, string AssetType, TreatmentCategory Category)> GetConcreteTreatments(List<(string Name, string AssetType, TreatmentCategory Category)> allTreatments)
         {
             return allTreatments.Where(treatment => treatment.AssetType.ToString().ToLower() == PAMSConstants.Concrete).ToList();
         }
 
-        public List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> GetNoTreatments(List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> allTreatments)
+        public List<(string Name, string AssetType, TreatmentCategory Category)> GetNoTreatments(List<(string Name, string AssetType, TreatmentCategory Category)> allTreatments)
         {
             return allTreatments.Where(treatment => treatment.Name.ToLower().Equals(PAMSConstants.NoTreatment)).ToList();
         }

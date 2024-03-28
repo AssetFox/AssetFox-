@@ -162,7 +162,8 @@ import { getUrl } from '@/shared/utils/get-url';
             //DialogData.value.selectedSettings.push(settingSelectItemValue.value,DialogData.value.settingName === "InventoryReports" ? primarySuffix : "")
             DialogData.value.AddedItems.push({value: DialogData.value.selectedItem, 
             networkType: DialogData.value.settingName === "InventoryReports" ? primarySuffix : ""})
-        }            
+        }
+        DialogData.value.selectedItem = '';            
     }
 
     function isAddDisabled(){

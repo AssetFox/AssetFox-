@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
     {
         public static SelectableTreatmentEntity ToLibraryEntity(this TreatmentDTO dto, Guid libraryId) =>
             new SelectableTreatmentEntity
-            {
+        {
                 Id = dto.Id,
                 TreatmentLibraryId = libraryId,
                 Name = dto.Name,
@@ -24,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
                 Description = dto.Description,
                 Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
-                AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType,
+                AssetType = dto.AssetType,
                 IsUnselectable = dto.IsUnselectable
             };
 
@@ -44,7 +44,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 IsUnselectable = dto.IsUnselectable,
 
                 Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
-                AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType,                
+                AssetType = dto.AssetType,                
                 ScenarioTreatmentPerformanceFactors = dto.ToScenarioSelectableTreatmentPerformanceFactorEntity(baseEntityProperties),
            
             };
@@ -144,7 +144,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             selectableTreatment.SetShadowForSameTreatment(entity.ShadowForSameTreatment);
             selectableTreatment.Description = entity.Description;
             selectableTreatment.Category = (TreatmentCategory)entity.Category;
-            selectableTreatment.AssetCategory = (AssetCategory)(AssetCategories)entity.AssetType;
+            selectableTreatment.AssetCategory = entity.AssetType;
             selectableTreatment.ForCommittedProjectsOnly = entity.IsUnselectable;
 
             if (entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Any())
@@ -221,7 +221,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                      ? entity.CriterionLibrarySelectableTreatmentJoin.CriterionLibrary.ToDto()
                      : new CriterionLibraryDTO(),
                 Category = (TreatmentCategory)entity.Category,
-                AssetType = (AssetCategories)entity.AssetType,
+                AssetType = string.Join(", ", entity.AssetType),
                 IsUnselectable = entity.IsUnselectable,
                 SupersedeRules = new List<TreatmentSupersedeRuleDTO>()
             };
@@ -318,7 +318,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Category = (TreatmentCategory)entity.Category,
                 IsModified = entity.IsModified,
                 LibraryId = entity.LibraryId,
-                AssetType = (AssetCategories)entity.AssetType,
+                AssetType = string.Join(", ", entity.AssetType),
                 IsUnselectable = entity.IsUnselectable,
                 SupersedeRules = new List<TreatmentSupersedeRuleDTO>()
             };

@@ -1518,12 +1518,6 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
         checkHasUnsavedChanges();
     }
 
-    function learChanges(){
-        updatedRowsMap.clear();
-        addedRows = [];
-        treatmentCache = [];
-    }
-
     function checkHasUnsavedChanges(){
         const hasUnsavedChanges: boolean = 
             addedRows.length > 0 ||

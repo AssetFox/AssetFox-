@@ -2,6 +2,7 @@
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.Analysis;
+using System.Linq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -23,11 +24,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
 
         public static void CreateTreatmentScheduling(this ScenarioTreatmentSchedulingEntity entity,
-            SelectableTreatment selectableTreatment)
+            SelectableTreatment selectableTreatment, Simulation simulation)
         {
             var scheduling = selectableTreatment.Schedulings.GetAdd(new TreatmentScheduling());
             scheduling.OffsetToFutureYear = entity.OffsetToFutureYear;
-            scheduling.TreatmentToSchedule = selectableTreatment;
+            scheduling.TreatmentToSchedule = simulation.Treatments.FirstOrDefault(_ => _.Id == selectableTreatment.Id);
         }
     }
 }

@@ -96,8 +96,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             SelectableTreatment selectableTreatment, Simulation simulation, List<ScenarioSelectableTreatmentEntity> simpleTreatments)
         {
             var supersedeRule = selectableTreatment.AddSupersedeRule();
-            var preventTreatmentEntity = simpleTreatments?.FirstOrDefault(_ => _.Id == entity.PreventTreatmentId);
-            supersedeRule.Treatment = preventTreatmentEntity?.ToDomain(simulation, simpleTreatments);
+            supersedeRule.Treatment = simulation.Treatments.FirstOrDefault(_ => _.Id == entity.PreventTreatmentId);
             // Criterion
             var criterionLibrary = entity.CriterionLibraryScenarioTreatmentSupersedeRuleJoin?.CriterionLibrary;
             if (criterionLibrary != null)

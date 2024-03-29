@@ -35,17 +35,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             if (_summaryReportHelper == null) { throw new ArgumentNullException(nameof(_summaryReportHelper)); }
         }
 
-        private List<string> GetHeaders()
+        private static List<string> GetHeaders() => new()
         {
-            return new List<string>
-            {
-                "Section",
-                "Start Segment",
-                "End Segment",
-                "District",
+                "CRS",
                 "County",
-                "CNTY NO",
-                "Route",                
+                "Route",
+                "District",
+                "Start",
+                "End",                               
 
                 "Length(ft)",
                 "Width(ft)",
@@ -66,7 +63,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 "Truck %",
                 "Risk Score",
             };
-        }
 
         private List<string> GetSubHeaders()
         {
@@ -246,18 +242,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 rowNo++; columnNo = 1;
                 var crs = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CRS");
                 worksheet.Cells[rowNo, columnNo++].Value = crs;
-
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SR");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT");
                 var lastUnderScoreIndex = crs.LastIndexOf('_');
                 var hyphenIndex = crs.IndexOf('-');
                 var startSeg = crs.Substring(lastUnderScoreIndex + 1, hyphenIndex - lastUnderScoreIndex - 1);
                 var endSeg = crs.Substring(hyphenIndex + 1);
-
                 worksheet.Cells[rowNo, columnNo++].Value = startSeg;
                 worksheet.Cells[rowNo, columnNo++].Value = endSeg;
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CNTY");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SR");
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SEGMENT_LENGTH");
                 worksheet.Cells[rowNo, columnNo].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "WIDTH");

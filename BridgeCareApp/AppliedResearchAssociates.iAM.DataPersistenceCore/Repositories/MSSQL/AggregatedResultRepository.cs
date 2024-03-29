@@ -146,25 +146,60 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return entities.Select(AggregatedResultMapper.ToDto).ToList();
         }
 
-        public Dictionary<Guid, List<(string , string)>> GetAllAggregatedResultsForNetwork(Guid networkId)
+        public List<AggregatedResultDTO> GetAllAggregatedResultsForNetwork(Guid networkId)
+        {
+            return _unitOfWork.Context.AggregatedResult
+                .Include(_ => _.MaintainableAsset)
+                .Include(_ => _.Attribute)
+                .Where(_ => _.MaintainableAsset.NetworkId == networkId)
+                .Select(e => AggregatedResultMapper.ToDto(e))
+                .AsNoTracking().AsSplitQuery().ToList();
+        }
+
+        public Dictionary<Guid, List<AssetAttributeValuePair>> GetAllAggregatedResultsForNetworkExport(Guid networkId)
         {
             return _unitOfWork.Context.MaintainableAsset
-                    .Where(_ => _.NetworkId == networkId)
-                    .SelectMany(ma => _unitOfWork.Context.AggregatedResult.Where(ar => ar.MaintainableAssetId == ma.Id).DefaultIfEmpty(),
-                        (ma, ar) => new { ma, ar })
-                    .SelectMany(
-                        t => _unitOfWork.Context.Attribute.Where(a => a.Id == t.ar.AttributeId).DefaultIfEmpty(),
-                        (t, a) => new
-                        {
-                            MaintainableAssetId = t.ma.Id,
-                            AttributeName = a != null ? a.Name : null,
-                            AttributeValue = t.ar.TextValue != null ? t.ar.TextValue : (t.ar.NumericValue != null ? t.ar.NumericValue.ToString() : null)
-                        })
                     .AsSplitQuery()
+                    .AsNoTracking()
+                    .Where(_ => _.NetworkId == networkId)
+                    .Join(_unitOfWork.Context.AggregatedResult,
+                          maintainableAsset => maintainableAsset.Id,
+                          aggregatedResult => aggregatedResult.MaintainableAssetId,
+                          (maintainableAsset, aggregatedResult) => new { maintainableAsset, aggregatedResult })
+                    .Join(_unitOfWork.Context.Attribute,
+                          combined => combined.aggregatedResult.AttributeId,
+                          attribute => attribute.Id,
+                          (combined, attribute) => new { combined, attribute })
+                    .Select(_ => new
+                    {
+                        MaintainableAssetId = _.combined.maintainableAsset.Id,
+                        AttributeName = _.attribute.Name,
+                        AttributeValue = _.combined.aggregatedResult.TextValue != null ? _.combined.aggregatedResult.TextValue : (_.combined.aggregatedResult.NumericValue != null ? _.combined.aggregatedResult.NumericValue.ToString() : null)
+                    })
                     .AsEnumerable()
-                    .OrderBy(x => x.AttributeName)
-                    .GroupBy(x => x.MaintainableAssetId)
-                    .ToDictionary(g => g.Key, g => g.Select(_ => (_.AttributeName, _.AttributeValue)).ToList());
+                    .OrderBy(_ => _.AttributeName)
+                    .GroupBy(_ => _.MaintainableAssetId)
+                    .ToDictionary(_ => _.Key, _ => _.Select(__ => new AssetAttributeValuePair { AttributeName = __.AttributeName, AttributeValue = __.AttributeValue }).ToList());
+        }
+
+        public List<AttributeDefaultValuePair> GetAttributeDefaultValuePairs(Guid networkId)
+        {
+            return _unitOfWork.Context.MaintainableAsset
+                        .AsSplitQuery()
+                        .AsNoTracking()
+                        .Where(_ => _.NetworkId == networkId)
+                        .SelectMany(ma => _unitOfWork.Context.AggregatedResult.Where(ar => ar.MaintainableAssetId == ma.Id).DefaultIfEmpty(),
+                            (ma, ar) => new { ma, ar })
+                        .SelectMany(
+                            t => _unitOfWork.Context.Attribute.Where(a => a.Id == t.ar.AttributeId).DefaultIfEmpty(),
+                            (t, a) => new AttributeDefaultValuePair
+                            {
+                                AttributeName = a.Name,
+                                DefaultAttributeValue = a.DefaultValue
+                            })
+                        .AsSplitQuery()
+                        .Distinct()
+                        .ToList();
         }
     }
 }

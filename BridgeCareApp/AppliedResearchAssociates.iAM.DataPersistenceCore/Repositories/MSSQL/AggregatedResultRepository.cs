@@ -146,14 +146,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return entities.Select(AggregatedResultMapper.ToDto).ToList();
         }
 
-        public List<AggregatedResultDTO> GetAllAggregatedResultsForNetwork(Guid networkId)
+        public Dictionary<Guid, List<(string , string)>> GetAllAggregatedResultsForNetwork(Guid networkId)
         {
-            return _unitOfWork.Context.AggregatedResult
-                .Include(_ => _.MaintainableAsset)
-                .Include(_ => _.Attribute)
-                .Where(_ => _.MaintainableAsset.NetworkId == networkId)
-                .Select(e => AggregatedResultMapper.ToDto(e))
-                .AsNoTracking().AsSplitQuery().ToList();
+            return _unitOfWork.Context.MaintainableAsset
+                    .Where(_ => _.NetworkId == networkId)
+                    .SelectMany(ma => _unitOfWork.Context.AggregatedResult.Where(ar => ar.MaintainableAssetId == ma.Id).DefaultIfEmpty(),
+                        (ma, ar) => new { ma, ar })
+                    .SelectMany(
+                        t => _unitOfWork.Context.Attribute.Where(a => a.Id == t.ar.AttributeId).DefaultIfEmpty(),
+                        (t, a) => new
+                        {
+                            MaintainableAssetId = t.ma.Id,
+                            AttributeName = a != null ? a.Name : null,
+                            AttributeValue = t.ar.TextValue != null ? t.ar.TextValue : (t.ar.NumericValue != null ? t.ar.NumericValue.ToString() : null)
+                        })
+                    .AsSplitQuery()
+                    .AsEnumerable()
+                    .OrderBy(x => x.AttributeName)
+                    .GroupBy(x => x.MaintainableAssetId)
+                    .ToDictionary(g => g.Key, g => g.Select(_ => (_.AttributeName, _.AttributeValue)).ToList());
         }
     }
 }

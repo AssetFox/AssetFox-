@@ -10,56 +10,45 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.NetworkExportReport
 {
     public class NetworkTab
     {
-        public void Fill(ExcelWorksheet worksheet, List<Data.Networking.MaintainableAsset> maintainableAssets, List<AggregatedResultDTO> aggregatedResults)
+        public void Fill(ExcelWorksheet worksheet, List<Data.Networking.MaintainableAsset> maintainableAssets, Dictionary<Guid, List<(string, string)>> aggregatedResults, List<string> attributes)
         {
-            var currentCell = AddHeadersCells(worksheet, aggregatedResults.Select(_ => _.Attribute).OrderBy(_ => _.Name).ToList());
-            FillDynamicDataInWorkSheet(worksheet, currentCell, maintainableAssets, aggregatedResults.OrderBy(_ => _.Attribute.Name).ToList(), aggregatedResults.OrderBy(_ => _.Attribute.Name).Select(_ => _.Attribute.Name).Distinct().ToList());
+            var currentCell = AddHeadersCells(worksheet, attributes);
+            FillDynamicDataInWorkSheet(worksheet, currentCell, maintainableAssets, aggregatedResults, attributes);
             worksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
             worksheet.Cells.AutoFitColumns();
         }
 
-        private static CurrentCell AddHeadersCells(ExcelWorksheet worksheet, List<AttributeDTO> attributeDTOs)
+        private static CurrentCell AddHeadersCells(ExcelWorksheet worksheet, List<string> attributes)
         {
             int headerRow = 1;
             int column = 1;
 
             worksheet.Cells.Style.WrapText = false;
             worksheet.Cells[headerRow, column++].Value = "MaintainableAssetID";
-            foreach (var attr in attributeDTOs.Select(_ => _.Name).Distinct().ToList())
+            foreach (var attr in attributes)
                 worksheet.Cells[headerRow, column++].Value = attr;
 
             return new CurrentCell { Row = ++headerRow, Column = column };
         }
 
-        private void FillDynamicDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, List<Data.Networking.MaintainableAsset> maintainableAssets, List<AggregatedResultDTO> aggregatedResults, List<string> uniqueAttributeNames)
+        private void FillDynamicDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, List<Data.Networking.MaintainableAsset> maintainableAssets, Dictionary<Guid, List<(string, string)>> aggregatedResults, List<string> uniqueAttributeNames)
         {
             foreach (var asset in maintainableAssets)
             {
-                var aggregatedResultsForAsset = aggregatedResults.Where(_ => _.MaintainableAssetId == asset.Id).ToList();
-                var attributes = aggregatedResultsForAsset.Select(_ => _.Attribute).ToList();
-                var values = new List<string>();
+                aggregatedResults.TryGetValue(asset.Id, out var aggregatedResultsForAsset);
 
-                foreach (var result in aggregatedResultsForAsset)
-                {
-                    if (result.TextValue != null) values.Add(result.TextValue);
-                    else if (result.NumericValue != null) values.Add(result.NumericValue.ToString());
-                    else values.Add(attributes.FirstOrDefault(_ => _.Name == result.Attribute.Name).DefaultValue);
-                }
-
-                var networkModel = GenerateNetworkModel(asset.Id, attributes, values);
+                var networkModel = GenerateNetworkModel(asset.Id, aggregatedResultsForAsset);
                 currentCell = FillDataInWorksheet(worksheet, networkModel, currentCell, aggregatedResults.Select(_ => _.Attribute).ToList(), uniqueAttributeNames);
             }
             ExcelHelper.ApplyBorder(worksheet.Cells[1, 1, currentCell.Row - 1, currentCell.Column]);
         }
 
-        private NetworkExportReportModel GenerateNetworkModel(Guid maintainableAssetID, List<AttributeDTO> attributeDTOs, List<string> values)
+        private NetworkExportReportModel GenerateNetworkModel(Guid maintainableAssetID, List<(string, string)> aggregatedResultsForAsset)
         {
             var networkModel = new NetworkExportReportModel() {
                 MaintainableAssetID = maintainableAssetID,
-                Attributes = new Dictionary<string, string>()
+                Attributes = aggregatedResultsForAsset.ToDictionary(_ => _.Item1, _ => _.Item2)
             };
-            for (int i = 0; i < attributeDTOs.Count; i++)
-                networkModel.Attributes.Add(attributeDTOs[i].Name, values[i]);
             return networkModel;
         }
 

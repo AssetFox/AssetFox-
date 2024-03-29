@@ -10,96 +10,81 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 {
     public static class PavementTreatmentHelper
     {
-        public struct TreatmentGroup
+        public readonly struct TreatmentGroup
         {
-            public TreatmentGroup(TreatmentGroupCategory category, int groupNumber, string groupDescription, int rangeLow, int rangeHigh)
+            public TreatmentGroup(TreatmentCategory treatmentCategory, TreatmentGroupCategory category, string groupDescription)
             {
-                Category = category;
-                GroupNumber = groupNumber;
+                TreatmentCategory = treatmentCategory;
+                GroupCategory = category;
                 GroupDescription = groupDescription;
-                RangeLow = rangeLow;
-                RangeHigh = rangeHigh;
 
             }
-            public readonly TreatmentGroupCategory Category;
-            public readonly int GroupNumber;
+            public readonly TreatmentGroupCategory GroupCategory;
             public readonly string GroupDescription;
-            public readonly int RangeLow;
-            public readonly int RangeHigh;
+            public readonly TreatmentCategory TreatmentCategory;
         }
 
-        private static TreatmentGroup[] _treatmentGroups = new TreatmentGroup[]
+        private static readonly TreatmentGroup[] _treatmentGroups = new[]
         {
-            new TreatmentGroup (TreatmentGroupCategory.Bituminous, 1, "Routine Maintenance", 0, 11),
-            new TreatmentGroup (TreatmentGroupCategory.Bituminous, 2, "Seal Coat", 12, 15),
-            new TreatmentGroup (TreatmentGroupCategory.Bituminous, 3, "Minor Rehabilitation", 16, 17),
-            new TreatmentGroup (TreatmentGroupCategory.Bituminous, 4, "Major Rehabilitation", 18, 22),
-            new TreatmentGroup (TreatmentGroupCategory.Bituminous, 5, "Reconstruction", 23, 23),
-            new TreatmentGroup (TreatmentGroupCategory.Concrete,1, "Routine Maintenance", 0, 6),
-            new TreatmentGroup (TreatmentGroupCategory.Concrete, 2, "CPR", 7, 14),
-            new TreatmentGroup (TreatmentGroupCategory.Concrete, 3, "Major Rehabilitation", 15, 26),
-            new TreatmentGroup (TreatmentGroupCategory.Concrete, 4, "Reconstruction", 27, 27),
-            new TreatmentGroup (TreatmentGroupCategory.Bundled, 1, "Multi Treatments", 0, 27)
+            new TreatmentGroup (TreatmentCategory.Preservation, TreatmentGroupCategory.Bituminous, "Routine Maintenance"),
+            new TreatmentGroup (TreatmentCategory.Rehabilitation, TreatmentGroupCategory.Bituminous, "Major Rehabilitation"),
+            new TreatmentGroup (TreatmentCategory.Reconstruction, TreatmentGroupCategory.Bituminous, "Reconstruction"),
+            new TreatmentGroup (TreatmentCategory.Preservation, TreatmentGroupCategory.Concrete, "Preventive Maintenance"),
+            new TreatmentGroup (TreatmentCategory.Rehabilitation, TreatmentGroupCategory.Concrete, "Major Rehabilitation"),
+            new TreatmentGroup (TreatmentCategory.Reconstruction, TreatmentGroupCategory.Concrete, "Reconstruction"),
+            new TreatmentGroup (TreatmentCategory.Bundled, TreatmentGroupCategory.Bundled, "Multi Treatments")
         };
 
-        // TODO update the usage of this as required
         public enum TreatmentGroupCategory
         {
             Bituminous = 'h',
             Concrete = 'j',
-            Bundled = 'b'
+            Bundled = 'b',
+            Other = 'o'
         }
 
-
-        private static void GetTreatmentCategoryAndNumber(string treatmentName, out TreatmentGroupCategory treatmentCategory, out int treatmentNumber)
+        private static void GetTreatmentCategoryAndGroup(string treatmentName, out TreatmentGroupCategory groupCategory, out TreatmentCategory treatmentCategory, List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var treatments = treatmentName.Split("+", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 
             // Bundled treatments
             if (treatments != null && treatments.Length > 0 && treatments.FirstOrDefault().Contains("Bundle"))
             {
-                treatmentCategory = TreatmentGroupCategory.Bundled;
-                treatmentNumber = 0; // default, change if required
+                groupCategory = TreatmentGroupCategory.Bundled;
+                treatmentCategory = TreatmentCategory.Bundled;
             }
             else
-            {
-                //var highestTreatment = treatments.Last(); // this comes as number and then no valid TreatmentGroupCategory and hence TreatmentGroup
-                var firstTreatment = treatments?.First();
-                treatmentCategory = (TreatmentGroupCategory)firstTreatment.Substring(0, 1).ToLower()[0];
-                var highestTreatmentText = treatments.Last();
-                var numberText = !int.TryParse(highestTreatmentText, out _) ? firstTreatment.Substring(1) : highestTreatmentText;
-                if (!int.TryParse(numberText, out treatmentNumber))
-                {
-                    treatmentNumber = -1;
-                }
+            {   
+                var treatment = simulationTreatments.FirstOrDefault(_ => _.Name.Equals(treatmentName));
+                var assetType = treatment.AssetType;
+                groupCategory = assetType.ToLower().Equals(PAMSConstants.Asphalt) ?
+                                    TreatmentGroupCategory.Bituminous :
+                                    (assetType.ToLower().Equals(PAMSConstants.Concrete) ?
+                                        TreatmentGroupCategory.Concrete :
+                                        TreatmentGroupCategory.Other);
+                treatmentCategory = treatment.Category;
             }
         }
 
-        public static TreatmentGroup GetTreatmentGroup(string treatmentName)
+        public static TreatmentGroup GetTreatmentGroup(string treatmentName, List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments)
         {
-            TreatmentGroupCategory treatmentCategory;
-            int treatmentNumber;
-
-            GetTreatmentCategoryAndNumber(treatmentName, out treatmentCategory, out treatmentNumber);
-            return _treatmentGroups.SingleOrDefault(tg => tg.Category == treatmentCategory && tg.RangeLow <= treatmentNumber && tg.RangeHigh >= treatmentNumber);
+            GetTreatmentCategoryAndGroup(treatmentName, out var groupCategory, out var treatmentCategory, simulationTreatments);
+            return _treatmentGroups.SingleOrDefault(tg => tg.GroupCategory == groupCategory && tg.TreatmentCategory == treatmentCategory);
         }
 
         public static List<TreatmentGroup> GetListOfTreatmentGroupForCategory(TreatmentGroupCategory treatmentCategory)
         {
-            return _treatmentGroups.Where(tg => treatmentCategory == tg.Category).ToList();
+            return _treatmentGroups.Where(tg => treatmentCategory == tg.GroupCategory).ToList();
         }
 
 
-        public static string GetTreatmentGroupString(TreatmentGroupCategory treatmentCategory)
+        public static string GetTreatmentGroupString(TreatmentGroupCategory groupCategory) => groupCategory switch
         {
-            switch (treatmentCategory)
-            {
-            case TreatmentGroupCategory.Bituminous: return "Bituminous";
-            case TreatmentGroupCategory.Concrete: return "Concrete";
-            case TreatmentGroupCategory.Bundled: return "Bundled";
-            default: return "Undefined";
-            }
-        }
+            TreatmentGroupCategory.Bituminous => "Bituminous",
+            TreatmentGroupCategory.Concrete => "Concrete",
+            TreatmentGroupCategory.Bundled => "Bundled",
+            _ => "Undefined",
+        };
 
     }
 

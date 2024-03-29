@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
@@ -102,7 +101,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                             {
                                 treatmentData.Add(treatment.Name, (0, 0, 0));
 
-                                var treatmentGroup = PavementTreatmentHelper.GetTreatmentGroup(treatment.Name);
+                                var treatmentGroup = PavementTreatmentHelper.GetTreatmentGroup(treatment.Name, simulationTreatments);
                                 if (!treatmentGroupData.ContainsKey(treatmentGroup))
                                 {
                                     treatmentGroupData.Add(treatmentGroup, (0, 0));
@@ -113,7 +112,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 }
                 else
                 {
-                    _pavementWorkSummaryComputationHelper.FillDataToUseInExcel(budgetSummaryModel, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear);
+                    _pavementWorkSummaryComputationHelper.FillDataToUseInExcel(budgetSummaryModel, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments);
                 }
 
                 var workTypeTotals = _pavementWorkSummaryComputationHelper.CalculateWorkTypeTotals(costAndLengthPerTreatmentPerYear, simulationTreatments);

@@ -181,25 +181,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .GroupBy(_ => _.MaintainableAssetId)
                     .ToDictionary(_ => _.Key, _ => _.Select(__ => new AssetAttributeValuePair { AttributeName = __.AttributeName, AttributeValue = __.AttributeValue }).ToList());
         }
-
-        public List<AttributeDefaultValuePair> GetAttributeDefaultValuePairs(Guid networkId)
-        {
-            return _unitOfWork.Context.MaintainableAsset
-                        .AsSplitQuery()
-                        .AsNoTracking()
-                        .Where(_ => _.NetworkId == networkId)
-                        .SelectMany(ma => _unitOfWork.Context.AggregatedResult.Where(ar => ar.MaintainableAssetId == ma.Id).DefaultIfEmpty(),
-                            (ma, ar) => new { ma, ar })
-                        .SelectMany(
-                            t => _unitOfWork.Context.Attribute.Where(a => a.Id == t.ar.AttributeId).DefaultIfEmpty(),
-                            (t, a) => new AttributeDefaultValuePair
-                            {
-                                AttributeName = a.Name,
-                                DefaultAttributeValue = a.DefaultValue
-                            })
-                        .AsSplitQuery()
-                        .Distinct()
-                        .ToList();
-        }
     }
 }

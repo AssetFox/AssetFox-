@@ -163,7 +163,7 @@
             }
         })
         
-        watch(stateKeyFields,()=>{
+/*          watch(stateKeyFields,()=>{
             if(reportType === 'P') {
                 inventoryDetails.value = clone(stateKeyFields.value);
                 inventoryDetails.value.forEach(_ => selectedKeys.push(""));
@@ -171,14 +171,19 @@
                 getInventoryAction(inventoryDetails.value);
             }
         });
-
+ */ 
         watch(stateRawDataKeyFields,()=>{
-            if(reportType === 'R') {
                 inventoryDetails.value = clone(stateRawDataKeyFields.value);
 
                 inventoryDetails.value.forEach(_ => selectedKeys.push(""));
-                getInventoryAction([inventoryDetails.value[0]]);
-            } 
+                if(inventoryReportName.value.includes("BAMS"))
+                {
+                    getInventoryAction(inventoryDetails.value);
+                }
+                else
+                {
+                    getInventoryAction([inventoryDetails.value[0]]);
+                }
         });
 
         watch(stateConstraintType,()=>{

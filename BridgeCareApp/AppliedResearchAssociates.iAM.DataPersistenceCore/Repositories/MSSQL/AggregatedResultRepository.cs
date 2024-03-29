@@ -156,7 +156,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .AsNoTracking().AsSplitQuery().ToList();
         }
 
-        public Dictionary<Guid, List<AssetAttributeValuePair>> GetAllAggregatedResultsForNetworkExport(Guid networkId)
+        /// < summary>
+        /// Returns a dictionary of AssetAttributeValuePair lists for each MaintainableAsset in a given network
+        /// < /summary>
+        public Dictionary<Guid, List<AssetAttributeValuePair>> GetAssetAttributeValuePairDictionary(Guid networkId)
         {
             return _unitOfWork.Context.MaintainableAsset
                     .AsSplitQuery()

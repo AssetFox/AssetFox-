@@ -96,7 +96,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 simulationName = simulationObject.Name;
                 _networkId = simulationObject.NetworkId;
                 maintainableAssets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithLocations(_networkId);
-                aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAllAggregatedResultsForNetworkExport(_networkId);
+                aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAssetAttributeValuePairDictionary(_networkId);
             }
             catch (Exception e)
             {

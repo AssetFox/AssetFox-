@@ -156,9 +156,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .AsNoTracking().AsSplitQuery().ToList();
         }
 
-        /// < summary>
-        /// Returns a dictionary of AssetAttributeValuePair lists for each MaintainableAsset in a given network
-        /// < /summary>
+        /// <summary>
+        /// Gets a dictionary of AssetAttributeValuePair lists for each MaintainableAsset in a given network
+        /// </summary>
+        /// <paramref name="networkId">
+        /// GUID for Network
+        /// </paramref>
+        /// <returns>
+        /// List of AttributeName, AttributeValue for each MaintainableAsset
+        /// </returns>
+        /// <seealso cref="AssetAttributeValuePair"/>
         public Dictionary<Guid, List<AssetAttributeValuePair>> GetAssetAttributeValuePairDictionary(Guid networkId)
         {
             return _unitOfWork.Context.MaintainableAsset

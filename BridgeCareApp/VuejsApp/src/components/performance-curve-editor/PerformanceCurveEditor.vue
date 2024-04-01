@@ -1005,13 +1005,18 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
             propEq('id', performanceCurveId),
             currentPage.value,
         ) as PerformanceCurve;
+        var selectedAttr = find(
+            propEq('name', selectedPerformanceCurve.attribute),
+            stateNumericAttributes.value,
+        ) as Attribute;
 
-        if (!isNil(selectedPerformanceCurve)) {
+        if (!isNil(selectedPerformanceCurve) && !isNil(selectedAttr)) {
             hasSelectedPerformanceCurve = true;
 
             equationEditorDialogData.value = {
                 showDialog: true,
                 equation: selectedPerformanceCurve.equation,
+                isAscending: selectedAttr.isAscending
             };
         }
     }

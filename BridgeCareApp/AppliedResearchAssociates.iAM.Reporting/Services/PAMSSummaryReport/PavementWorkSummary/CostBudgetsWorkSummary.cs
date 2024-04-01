@@ -1412,7 +1412,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             }
 
-            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.Red);
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.Blue);
+            ExcelHelper.SetTextColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.White);
 
             var projectBuilderColor = Color.FromArgb(248, 203, 173);
             for (int i = 1; i <= 4; i++) // Apply color to the percentage rows
@@ -1516,7 +1517,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     worksheet.Cells[row + i, column].Style.Numberformat.Format = "0.00%";
                 }
 
-                ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.Red);
+                ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.Blue);
+                ExcelHelper.SetTextColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.White);
 
                 var projectBuilderColor = Color.FromArgb(248, 203, 173);
                 for (int i = 1; i <= 4; i++)

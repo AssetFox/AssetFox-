@@ -27,9 +27,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         private static readonly TreatmentGroup[] _treatmentGroups = new[]
         {
             new TreatmentGroup (TreatmentCategory.Preservation, TreatmentGroupCategory.Bituminous, "Routine Maintenance"),
+            new TreatmentGroup (TreatmentCategory.Maintenance, TreatmentGroupCategory.Bituminous, "Routine Maintenance"),
             new TreatmentGroup (TreatmentCategory.Rehabilitation, TreatmentGroupCategory.Bituminous, "Major Rehabilitation"),
             new TreatmentGroup (TreatmentCategory.Reconstruction, TreatmentGroupCategory.Bituminous, "Reconstruction"),
             new TreatmentGroup (TreatmentCategory.Preservation, TreatmentGroupCategory.Concrete, "Preventive Maintenance"),
+            new TreatmentGroup (TreatmentCategory.Maintenance, TreatmentGroupCategory.Concrete, "Preventive Maintenance"),
             new TreatmentGroup (TreatmentCategory.Rehabilitation, TreatmentGroupCategory.Concrete, "Major Rehabilitation"),
             new TreatmentGroup (TreatmentCategory.Reconstruction, TreatmentGroupCategory.Concrete, "Reconstruction"),
             new TreatmentGroup (TreatmentCategory.Bundled, TreatmentGroupCategory.Bundled, "Multi Treatments")

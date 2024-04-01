@@ -323,5 +323,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var attributeName = _unitOfWork.Context.Attribute.AsNoTracking().FirstOrDefault(a => a.Id == attributeId)?.Name;
             return attributeName ?? throw new InvalidOperationException("Cannot find attribute for the given id.");
         }
+
+        public List<AttributeDefaultValuePair> GetAttributeDefaultValuePairs(Guid networkId)
+        {
+            return _unitOfWork.Context.Attribute
+                .AsSplitQuery()
+                .AsNoTracking()
+                .Join(_unitOfWork.Context.AggregatedResult, 
+                      attribute => attribute.Id, 
+                      aggregatedResult => aggregatedResult.AttributeId, 
+                      (attribute, aggregatedResult) => new { attribute, aggregatedResult })
+                .Join(_unitOfWork.Context.MaintainableAsset, 
+                      combined => combined.aggregatedResult.MaintainableAssetId, 
+                      maintainableAsset => maintainableAsset.Id, 
+                      (combined, maintainableAsset) => new { combined.attribute, maintainableAsset })
+                .Where(_ => _.maintainableAsset.NetworkId == networkId)
+                .Select(_ => new AttributeDefaultValuePair
+                {
+                    AttributeName = _.attribute.Name, 
+                    DefaultAttributeValue = _.attribute.DefaultValue
+                })
+                .Distinct()
+                .ToList();
+        }
     }
 }

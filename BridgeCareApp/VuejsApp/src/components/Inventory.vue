@@ -176,7 +176,7 @@
                 inventoryDetails.value = clone(stateRawDataKeyFields.value);
 
                 inventoryDetails.value.forEach(_ => selectedKeys.push(""));
-                if(inventoryReportName.value.includes("BAMS"))
+                if(!stateInventoryReportNames.value.some(_ => _.includes("(R)")))
                 {
                     getInventoryAction(inventoryDetails.value);
                 }

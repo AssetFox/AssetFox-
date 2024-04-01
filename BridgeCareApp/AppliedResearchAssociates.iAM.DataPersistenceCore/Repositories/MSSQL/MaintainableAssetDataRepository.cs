@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             KeyProperties = new Dictionary<string, List<KeySegmentDatum>>();
             if(reportTypeParam != null)
             {
-                if(reportTypeParam[0].Contains("BAMS"))
+                if(!reportTypeParam.Any(_ => _.Contains("(R)")))
                 {
                     var keyDatumFields = _unitOfWork.Context.Attribute
                         .AsSplitQuery()
@@ -95,7 +95,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
                 if (reportTypeParam.Count() > 0)
                 {
-                    if (!reportTypeParam[0].Contains("BAMS"))
+                    if (reportTypeParam.Any(_ => _.Contains("(R)")))
                     {
                         // Populate raw key data table
                         RawNetworkKeyTable = new List<MaintainableAssetQueryDTO>();
@@ -184,7 +184,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         }
                     }
 
-                    if(!reportTypeParam[0].Contains("BAMS"))
+                    if(reportTypeParam.Any(_ => _.Contains("(R)")))
                     {
                         // Populate raw key data table
                         RawNetworkKeyTable = new List<MaintainableAssetQueryDTO>();

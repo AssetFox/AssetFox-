@@ -107,7 +107,7 @@ namespace BridgeCareCore.Controllers
             {
                 if (reportTypeParam.Count() > 0)
                 {
-                    if (!reportTypeParam[0].Contains("BAMS"))
+                    if (reportTypeParam.Any(_ => _.Contains("(R)")))
                     {
                         var assetKeyDataValues = assetKeyData.Select(_ => _.Value.FirstOrDefault()).Distinct().ToList();
                         foreach (var assetKeyDataValue in assetKeyDataValues)
@@ -160,7 +160,7 @@ namespace BridgeCareCore.Controllers
 
             try
             {
-                if (reportTypeParam[0].Contains("(P)"))
+                if (!reportTypeParam.Any(_ => _.Contains("(R)")))
                 {
                     queryData = _maintainableAssetRepository.QueryKeyAttributes(attributeList, NetworkTypes.Main);
                 }

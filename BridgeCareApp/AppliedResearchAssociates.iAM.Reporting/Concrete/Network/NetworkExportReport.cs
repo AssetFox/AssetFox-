@@ -89,14 +89,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             var simulationName = string.Empty;
             List<MaintainableAsset> maintainableAssets;
-            List<AggregatedResultDTO> aggregatedResults;
+            Dictionary<Guid, List<AssetAttributeValuePair>> aggregatedResults;
             try
             {
                 var simulationObject = _unitOfWork.SimulationRepo.GetSimulation(_scenarioId);
                 simulationName = simulationObject.Name;
                 _networkId = simulationObject.NetworkId;
                 maintainableAssets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithLocations(_networkId);
-                aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAllAggregatedResultsForNetwork(_networkId);
+                aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAssetAttributeValuePairDictionary(_networkId);
             }
             catch (Exception e)
             {
@@ -152,7 +152,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return;
         }
 
-        private string GenerateNetworkExportReport(IWorkQueueLog workQueueLog, List<MaintainableAsset> maintainableAssets, Guid networkId, List<AggregatedResultDTO> aggregatedResults, CancellationToken? cancellationToken = null)
+        private string GenerateNetworkExportReport(IWorkQueueLog workQueueLog, List<MaintainableAsset> maintainableAssets, Guid networkId, Dictionary<Guid, List<AssetAttributeValuePair>> aggregatedResults, CancellationToken? cancellationToken = null)
         {
             if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                 throw new Exception("Report was cancelled");
@@ -165,7 +165,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             using var excelPackage = new ExcelPackage(new FileInfo("NetworkExportReportData.xlsx"));
             var worksheet = excelPackage.Workbook.Worksheets.Add("Aggregated Results");
-            _networkTab.Fill(worksheet, maintainableAssets, aggregatedResults);
+            var attributeDefaultValuePairs = _unitOfWork.AttributeRepo.GetAttributeDefaultValuePairs(networkId);
+            _networkTab.Fill(worksheet, maintainableAssets, aggregatedResults, attributeDefaultValuePairs);
 
             if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                 throw new Exception("Report was cancelled");

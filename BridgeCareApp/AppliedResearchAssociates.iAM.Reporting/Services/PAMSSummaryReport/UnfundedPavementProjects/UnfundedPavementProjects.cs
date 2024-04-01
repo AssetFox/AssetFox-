@@ -122,7 +122,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
                 }
                 else
                 {
-                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "CNTY") + _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "SR") + _.AssetName))).ToList();
+                    validFacilityIds = validFacilityIds.Any() ?
+                        validFacilityIds.Intersect(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "CNTY") + _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "SR") + _.AssetName))).ToList() :
+                        untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "CNTY") + _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "SR") + _.AssetName)).ToList();
                 }
 
                 foreach (var section in untreatedSections)

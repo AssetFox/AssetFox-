@@ -10,6 +10,9 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using MoreLinq.Extensions;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using NetTopologySuite.Triangulate;
+using System.Text;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -29,47 +32,139 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             KeyProperties = new Dictionary<string, List<KeySegmentDatum>>();
             if(reportTypeParam != null)
             {
-                if(reportTypeParam.Count() > 0)
+                if(!reportTypeParam.Any(_ => _.Contains("(R)")))
                 {
-                    if (reportTypeParam[0].Contains("(P)"))
+                    var keyDatumFields = _unitOfWork.Context.Attribute
+                        .AsSplitQuery()
+                        .Where(_ => keyDatumFieldNames.Contains(_.Name))
+                        .Select(_ => new { _.Id, _.Name, Type = _.DataType })
+                        .ToList();
+                    var keyDatumFieldsNetwork = _unitOfWork.Context.Attribute
+                        .AsSplitQuery()
+                        .Where(_ => _.Id == network.KeyAttributeId)
+                        .Select(_ => new { _.Id, _.Name, Type = _.DataType })
+                        .ToList();
+                    // Ensure the network's key datum field is in the list of key properties
+                    foreach (var keyDatumField in keyDatumFields)
                     {
-                        var keyDatumFields = _unitOfWork.Context.Attribute
-                            .Where(_ => keyDatumFieldNames.Contains(_.Name))
+                        if (!keyDatumFields.Contains(keyDatumField))
+                        {
+                            keyDatumFields.Add(keyDatumField);
+                        }
+                    }
+
+                    // Populate key properties
+                    // TODO: Replace key properties with main data table
+                    foreach (var attribute in keyDatumFields)
+                    {
+                        var keyFieldValue = new List<KeySegmentDatum>();
+                        var filteredAggregatedKeyData = _unitOfWork.Context.AggregatedResult
+                            .AsSplitQuery()
+                            .Include(_ => _.MaintainableAsset)
+                            .Where(_ => _.MaintainableAsset.NetworkId == network.Id && _.AttributeId == attribute.Id);
+                        foreach (var datum in filteredAggregatedKeyData)
+                        {
+                            var dataValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
+                            keyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, dataValue) });
+                        }
+                        KeyProperties.Add(attribute.Name, keyFieldValue);
+                    }
+
+                    // Populate main key data table
+                    MainNetworkKeyTable = new List<MaintainableAssetQueryDTO>();
+                    var keyDatumFieldIds = keyDatumFields.Select(_ => _.Id).ToList();
+                    var filteredAggregatedData = _unitOfWork.Context.AggregatedResult
+                        .AsSplitQuery()
+                        .Include(_ => _.MaintainableAsset)
+                        .Include(_ => _.Attribute)
+                        .Where(_ => _.MaintainableAsset.NetworkId == network.Id && keyDatumFieldIds.Contains(_.AttributeId))
+                        .AsEnumerable()
+                        .GroupBy(_ => _.MaintainableAssetId);
+                    foreach (var asset in filteredAggregatedData)
+                    {
+                        var queryData = new MaintainableAssetQueryDTO() { AssetId = asset.Key };
+                        queryData.AssetProperties = new Dictionary<AttributeDTO, string>();
+                        foreach (var attribute in asset)
+                        {
+                            var convertedAttribute = attribute.Attribute.ToDto(null);
+                            var dataValue = convertedAttribute.Type == "NUMBER" ? attribute.NumericValue.ToString() : attribute.TextValue;
+                            queryData.AssetProperties.Add(convertedAttribute, dataValue);
+                        }
+                        MainNetworkKeyTable.Add(queryData);
+                    }
+                }
+                if (reportTypeParam.Count() > 0)
+                {
+                    if (reportTypeParam.Any(_ => _.Contains("(R)")))
+                    {
+                        // Populate raw key data table
+                        RawNetworkKeyTable = new List<MaintainableAssetQueryDTO>();
+
+                        var rawKeyDatumFields = _unitOfWork.Context.Attribute
+                            .AsSplitQuery()
+                            .Where(_ => rawKeyDatumFieldNames.Contains(_.Name))
                             .Select(_ => new { _.Id, _.Name, Type = _.DataType })
                             .ToList();
-                        var keyDatumFieldsNetwork = _unitOfWork.Context.Attribute
+
+                        var rawKeyDatumFieldsNetwork = _unitOfWork.Context.Attribute
+                            .AsSplitQuery()
                             .Where(_ => _.Id == network.KeyAttributeId)
                             .Select(_ => new { _.Id, _.Name, Type = _.DataType })
                             .ToList();
+
                         // Ensure the network's key datum field is in the list of key properties
-                        foreach (var keyDatumField in keyDatumFieldsNetwork)
+                        foreach (var rawKeyDatumField in rawKeyDatumFieldsNetwork)
                         {
-                            if (!keyDatumFields.Contains(keyDatumField))
+                            if (!rawKeyDatumFields.Contains(rawKeyDatumField))
                             {
-                                keyDatumFields.Add(keyDatumField);
+                                rawKeyDatumFields.Add(rawKeyDatumField);
                             }
                         }
-
-                        // Populate key properties
-                        // TODO: Replace key properties with main data table
-                        foreach (var attribute in keyDatumFields)
+                        var rawKeyDatumFieldIds = rawKeyDatumFields.Select(_ => _.Id).ToList();
+                        var filteredRawAggregatedData = _unitOfWork.Context.AggregatedResult
+                            .AsSplitQuery()
+                            .Include(_ => _.MaintainableAsset)
+                            .Include(_ => _.Attribute)
+                            .Where(_ => _.MaintainableAsset.NetworkId == rawNetwork.Id && rawKeyDatumFieldIds.Contains(_.AttributeId))
+                            .AsEnumerable()
+                            .GroupBy(_ => _.MaintainableAssetId);
+                        foreach (var asset in filteredRawAggregatedData)
                         {
-                            var keyFieldValue = new List<KeySegmentDatum>();
+                            var queryData = new MaintainableAssetQueryDTO() { AssetId = asset.Key };
+                            queryData.AssetProperties = new Dictionary<AttributeDTO, string>();
+                            foreach (var attribute in asset)
+                            {
+                                var convertedAttribute = attribute.Attribute.ToDto(null);
+                                var dataValue = convertedAttribute.Type == "NUMBER" ? attribute.NumericValue.ToString() : attribute.TextValue;
+                                queryData.AssetProperties.Add(convertedAttribute, dataValue);
+                            }
+                            RawNetworkKeyTable.Add(queryData);
+                        }
+
+                        foreach (var attribute in rawKeyDatumFields)
+                        {
+                            var rawKeyFieldValue = new List<KeySegmentDatum>();
                             var filteredAggregatedKeyData = _unitOfWork.Context.AggregatedResult
+                                .AsSplitQuery()
                                 .Include(_ => _.MaintainableAsset)
                                 .Where(_ => _.MaintainableAsset.NetworkId == network.Id && _.AttributeId == attribute.Id);
+
                             foreach (var datum in filteredAggregatedKeyData)
                             {
-                                var dataValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
-                                keyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, dataValue) });
+                                var datumValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
+                                rawKeyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, datumValue) });
                             }
-                            KeyProperties.Add(attribute.Name, keyFieldValue);
+                            if (attribute.Name != "COUNTY" && attribute.Name != "SR" && attribute.Name != "SEG")
+                            {
+                                KeyProperties.Add(attribute.Name, rawKeyFieldValue);
+                            }
                         }
 
                         // Populate main key data table
                         MainNetworkKeyTable = new List<MaintainableAssetQueryDTO>();
-                        var keyDatumFieldIds = keyDatumFields.Select(_ => _.Id).ToList();
+                        var keyDatumFieldIds = rawKeyDatumFields.Select(_ => _.Id).ToList();
                         var filteredAggregatedData = _unitOfWork.Context.AggregatedResult
+                            .AsSplitQuery()
                             .Include(_ => _.MaintainableAsset)
                             .Include(_ => _.Attribute)
                             .Where(_ => _.MaintainableAsset.NetworkId == network.Id && keyDatumFieldIds.Contains(_.AttributeId))
@@ -88,17 +183,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             MainNetworkKeyTable.Add(queryData);
                         }
                     }
-                    else if(reportTypeParam[0].Contains("(R)"))
+
+                    if(reportTypeParam.Any(_ => _.Contains("(R)")))
                     {
                         // Populate raw key data table
                         RawNetworkKeyTable = new List<MaintainableAssetQueryDTO>();
 
                         var rawKeyDatumFields = _unitOfWork.Context.Attribute
+                            .AsSplitQuery()
                             .Where(_ => rawKeyDatumFieldNames.Contains(_.Name))
                             .Select(_ => new { _.Id, _.Name, Type = _.DataType })
                             .ToList();
 
                         var rawKeyDatumFieldsNetwork = _unitOfWork.Context.Attribute
+                            .AsSplitQuery()
                             .Where(_ => _.Id == rawNetwork.KeyAttributeId)
                             .Select(_ => new { _.Id, _.Name, Type = _.DataType })
                             .ToList();
@@ -113,6 +211,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         }
                         var rawKeyDatumFieldIds = rawKeyDatumFields.Select(_ => _.Id).ToList();
                         var filteredRawAggregatedData = _unitOfWork.Context.AggregatedResult
+                            .AsSplitQuery()
                             .Include(_ => _.MaintainableAsset)
                             .Include(_ => _.Attribute)
                             .Where(_ => _.MaintainableAsset.NetworkId == rawNetwork.Id && rawKeyDatumFieldIds.Contains(_.AttributeId))
@@ -135,6 +234,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         {
                             var rawKeyFieldValue = new List<KeySegmentDatum>();
                             var filteredRawAggregatedKeyData = _unitOfWork.Context.AggregatedResult
+                                .AsSplitQuery()
                                 .Include(_ => _.MaintainableAsset)
                                 .Where(_ => _.MaintainableAsset.NetworkId == rawNetwork.Id && _.AttributeId == attribute.Id);
 
@@ -143,7 +243,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 var datumValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
                                 rawKeyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, datumValue) });
                             }
-                            KeyProperties.Add(attribute.Name, rawKeyFieldValue);
+                                KeyProperties.Add(attribute.Name, rawKeyFieldValue);
                         }
                     }
                 }
@@ -168,8 +268,59 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var lookupSource = KeyProperties[keyName];
             var debugMe = lookupSource.Select(_ => _.KeyValue.Value).ToList();
             var targetAsset = lookupSource.FirstOrDefault(_ => _.KeyValue.Value == keyValue);
+            var targetAssetValue = targetAsset.KeyValue.Value;
+            List<int> lastIntegers = new List<int>();
+            if (!KeyProperties.ContainsKey("BRKEY_"))
+            {
+                var parts = keyValue.Split('_');
+                var firstThreeValues = string.Join("_", parts.Take(3));
+                var matchingAssets = KeyProperties["CRSeg"].Where(item => item.KeyValue.Value.StartsWith(firstThreeValues)).ToList();
+
+                foreach (var item in matchingAssets)
+                {
+                    // Set the Item to a String
+                    string itemValue = item.KeyValue.Value;
+
+                    // Reverse the string
+                    string reversedString = ReverseString(itemValue);
+
+                    // Find the index of the first underscore in the reversed string
+                    int firstUnderscoreIndex = reversedString.IndexOf('_');
+
+                    // Extract the substring from the reversed string up to the first underscore
+                    string lastPartReversed = reversedString.Substring(0, firstUnderscoreIndex);
+
+                    // Reverse the substring back to its original order
+                    string lastPart = ReverseString(lastPartReversed);
+
+                    // Parse the substring as an integer
+                    if (int.TryParse(lastPart, out int lastInteger))
+                    {
+                        // Add the last integer to the list
+                        lastIntegers.Add(lastInteger);
+                    }
+                }
+
+                // Function to reverse a string
+                string ReverseString(string input)
+                {
+                    char[] charArray = input.ToCharArray();
+                    int left = 0;
+                    int right = charArray.Length - 1;
+                    while (left < right)
+                    {
+                        char temp = charArray[left];
+                        charArray[left] = charArray[right];
+                        charArray[right] = temp;
+                        left++;
+                        right--;
+                    }
+                    return new string(charArray);
+                }
+            }
             if (targetAsset == null) return new List<SegmentAttributeDatum>();
             var asset = _unitOfWork.Context.MaintainableAsset
+                .AsSplitQuery()
                 .Where(_ => _.Id == targetAsset.AssetId)
                 .Include(_ => _.AggregatedResults)
                 .ThenInclude(_ => _.Attribute)
@@ -189,9 +340,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .First();
                 string attributeValue = (maxEntry.Discriminator[0] == 'N') ? maxEntry.NumericValue.ToString() : maxEntry.TextValue;
                 returnValueList.Add(new SegmentAttributeDatum(maxEntry.Attribute.Name, attributeValue));
+
+                if (!KeyProperties.ContainsKey("BRKEY_"))
+                {
+                    //Start Seg Value
+                    var startSegValue = returnValueList
+                    .FirstOrDefault(_ => _.Name == "START_SEG")?.TextValue;
+                    //End Seg Val
+                    var endSegValue = returnValueList
+                        .FirstOrDefault(_ => _.Name == "END_SEG")?.TextValue;
+
+                    if (int.TryParse(startSegValue, out int startSegNumericValue) && int.TryParse(endSegValue, out int endSegNumericValue))
+                    {
+                        // Filter lastIntegers to include only the values within the range
+                        var filteredLastIntegers = lastIntegers.Where(value => value >= startSegNumericValue && value <= endSegNumericValue).ToList();
+                        //Sort
+                        var sortedIntegers = filteredLastIntegers.OrderBy(value => value).ToList();
+
+                        // Convert to a string
+                        string memberSegments = string.Join(", ", sortedIntegers);
+
+                        // Add to the returnValueList
+                        returnValueList.Add(new SegmentAttributeDatum("MEMBER_SEGMENTS", memberSegments));
+                    }
+
+                }
             }
-            //returnValueList.Add(new SegmentAttributeDatum("BRKEY", asset.FacilityName));
-            //returnValueList.Add(new SegmentAttributeDatum("BMSID", asset.SectionName));
 
             // Add in each key property if it does not exist
             foreach (var keyProperty in KeyProperties)
@@ -257,6 +431,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var targetAsset = lookupSource.FirstOrDefault(_ => _.KeyValue.Value == keyValue);
             if (targetAsset == null) return new List<SegmentAttributeDatum>();
             var asset = _unitOfWork.Context.MaintainableAsset
+                .AsSplitQuery()
                 .Where(_ => _.Id == commonAssetIdsGuid)
                 .Include(_ => _.AggregatedResults)
                 .ThenInclude(_ => _.Attribute)
@@ -298,11 +473,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var network = _unitOfWork.NetworkRepo.GetMainNetwork();
             var result = new List<List<string>>();
             var keyDatumFields = _unitOfWork.Context.Attribute
+                .AsSplitQuery()
                 .Where(_ => keyFieldNames.Contains(_.Name))
                 .Select(_ => new { _.Id, _.Name, Type = _.DataType })
                 .ToList();
             var assets = _unitOfWork.Context.MaintainableAsset.Where(_ => _.NetworkId == network.Id).ToList();
             var aggregatedData = _unitOfWork.Context.AggregatedResult
+                    .AsSplitQuery()
                     .Include(_ => _.MaintainableAsset)
                     .Include(_ => _.Attribute)
                     .Where(_ => keyFieldNames.Contains(_.Attribute.Name) && _.MaintainableAsset.NetworkId == network.Id)
@@ -372,7 +549,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
                 else if(networkType == NetworkTypes.Main)
                 {
-                    previousQuery = MainNetworkKeyTable;
+                    previousQuery = RawNetworkKeyTable;
                 }
             }
 

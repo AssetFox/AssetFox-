@@ -34,17 +34,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             if (_summaryReportHelper == null) { throw new ArgumentNullException(nameof(_summaryReportHelper)); }
         }
 
-        private List<string> GetHeaders()
+        private static List<string> GetHeaders() => new()
         {
-            return new List<string>
-            {
-                "Section",
-                "Start Segment",
-                "End Segment",
-                "District",
+                "CRS",
                 "County",
-                "CNTY NO",
-                "Route",                
+                "Route",
+                "District",
+                "Start",
+                "End",                               
 
                 "Length(ft)",
                 "Width(ft)",
@@ -65,7 +62,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 "Truck %",
                 "Risk Score",
             };
-        }
 
         private List<string> GetSubHeaders()
         {
@@ -245,23 +241,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 rowNo++; columnNo = 1;
                 var crs = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CRS");
                 worksheet.Cells[rowNo, columnNo++].Value = crs;
-
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SR");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT");
                 var lastUnderScoreIndex = crs.LastIndexOf('_');
                 var hyphenIndex = crs.IndexOf('-');
                 var startSeg = crs.Substring(lastUnderScoreIndex + 1, hyphenIndex - lastUnderScoreIndex - 1);
                 var endSeg = crs.Substring(hyphenIndex + 1);
-
                 worksheet.Cells[rowNo, columnNo++].Value = startSeg;
                 worksheet.Cells[rowNo, columnNo++].Value = endSeg;
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CNTY");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SR");
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SEGMENT_LENGTH");
                 worksheet.Cells[rowNo, columnNo].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "WIDTH");
                 ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo++], ExcelHelperCellFormat.Number);
-                worksheet.Cells[rowNo, columnNo].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "DEPTH");
+                worksheet.Cells[rowNo, columnNo].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "PAVED_THICKNESS");
                 ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo++], ExcelHelperCellFormat.DecimalPrecision2);
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DIRECTION");
@@ -476,7 +469,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
         {
             var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
-            var averageRutting = CalculateAverageRutting(selectedSection);
+            var averageRutting = CalculateRuttingBasedOnSurfaceType(selectedSection);
 
             worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "OPI_CALCULATED")));
             worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, PAMSAuditReportConstants.IRI)));
@@ -490,13 +483,39 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             return column;
         }
 
-        private double CalculateAverageRutting(AssetSummaryDetail selectedSection)
+        private double CalculateRuttingBasedOnSurfaceType(AssetSummaryDetail selectedSection)
         {
-            double ruttingLeftValue = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, PAMSAuditReportConstants.RUT_LEFT);
-            double ruttingRightValue = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, PAMSAuditReportConstants.RUT_RIGHT);
-            return (ruttingLeftValue + ruttingRightValue) / 2.0;
+            SurfaceType surfaceType = GetSurfaceType(selectedSection);
+
+            if (surfaceType == SurfaceType.Asphalt)
+            {
+                return CalculateAverageRutting(PAMSAuditReportConstants.RUT_LEFT, PAMSAuditReportConstants.RUT_RIGHT, selectedSection);
+            }
+            else if (surfaceType == SurfaceType.Concrete)
+            {
+                return CalculateAverageRutting("CRJCPRU_Total", "CLJCPRU_Total", selectedSection);
+            }
+            return 0;
         }
-        
+
+        private double CalculateAverageRutting(string firstAttributeName, string secondAttributeName, AssetSummaryDetail selectedSection)
+        {
+            double firstValue = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, firstAttributeName);
+            double secondValue = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, secondAttributeName);
+            return (firstValue + secondValue) / 2;
+        }
+
+        private SurfaceType GetSurfaceType(AssetSummaryDetail selectedSection)
+        {
+            int surfaceId = Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "SURFACEID"));
+            return surfaceId > 62 ? SurfaceType.Concrete : SurfaceType.Asphalt;
+        }
+
+        enum SurfaceType
+        {
+            Asphalt,
+            Concrete
+        }
 
         private void TrackInitialYearDataForParametersTAB(AssetSummaryDetail initialSection)
         {

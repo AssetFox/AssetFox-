@@ -41,11 +41,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
             var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>>();
             // Getting list of treatments. It will be used in several places throughout this excel TAB
-            var simulationTreatments = new List<(string Name, AssetCategories AssetType, TreatmentCategory Category)>();
+            var simulationTreatments = new List<(string Name, string AssetType, TreatmentCategory Category)>();
 
             foreach (var item in selectableTreatments)
             {
-                simulationTreatments.Add((item.Name, (AssetCategories)item.AssetCategory, item.Category));
+                simulationTreatments.Add((item.Name, (string)item.AssetCategory, item.Category));
             }
 
             simulationTreatments.Sort((a, b) => a.Name.CompareTo(b.Name));

@@ -19,6 +19,15 @@
                 {{ user.description }}
               </v-col>
               <v-col style='padding: 0' cols="3">
+                <v-row align-center>               
+                <v-btn id="UserCriteria-assignUnassignedUserCriteria-btn" @click='onGiveUnrestrictedAccess(user)'  class='ara-blue-bg text-white' 
+                          title='Allow All Assets'>
+                          <v-icon size='1.5em' style='padding-right: 0.5em'>fas fa-lock-open</v-icon>                   
+                    Allow All Assets
+                </v-btn>
+                </v-row>
+              </v-col>
+              <v-col style='padding: 0' cols="3">
                 <v-row align-center>
                   <v-btn id="UserCriteria-assignUnassignedUserCriteria-btn" @click='onEditCriteria(user)'  class='ara-blue-bg text-white' 
                           title='Give the user limited access to the bridge inventory'>
@@ -30,7 +39,7 @@
               <v-col justify-center style='padding: 0' xs2>
                 <v-row align-center>
                   <v-btn @click='onDeleteUser(user)' class='ara-orange' flat title='Delete User'>
-                    <v-icon>fas fa-trash</v-icon>
+                    <v-icon size='1.5em'>fas fa-trash</v-icon>
                   </v-btn>
                 </v-row>
               </v-col>

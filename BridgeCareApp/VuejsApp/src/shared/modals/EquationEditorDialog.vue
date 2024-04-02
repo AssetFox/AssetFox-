@@ -690,7 +690,8 @@ function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNot
           timeValue: 0,
           conditionValue: Math.trunc(add(1, timeInRatingData[0].conditionValue))
         };
-        piecewiseData = insert(0, n1, piecewiseData);
+        if(!isNil(props.dialogData.isAscending) && !props.dialogData.isAscending)
+          piecewiseData = insert(0, n1, piecewiseData);
       }
     } else {
       timeInRatingData = reverse(sortByProperty('conditionValue', dataPoints));
@@ -714,7 +715,8 @@ function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNot
           timeValue: 0,
           conditionValue: Math.trunc(add(1, timeInRatingData[0].conditionValue))
         };
-        piecewiseData = insert(0, n1, piecewiseData);
+        if(!isNil(props.dialogData.isAscending) && !props.dialogData.isAscending)
+          piecewiseData = insert(0, n1, piecewiseData);
       }
     }
 

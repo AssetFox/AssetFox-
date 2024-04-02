@@ -89,6 +89,15 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
         }
 
         /// <summary>
+        /// Right thick border
+        /// </summary>
+        /// <param name="cells"></param>
+        public static void ApplyRightTickBorder(ExcelRange cells)
+        {
+            cells.Style.Border.Right.Style = ExcelBorderStyle.Thick;
+        }
+
+        /// <summary>
         ///     Set currency format for given cells
         /// </summary>
         /// <param name="cells"></param>

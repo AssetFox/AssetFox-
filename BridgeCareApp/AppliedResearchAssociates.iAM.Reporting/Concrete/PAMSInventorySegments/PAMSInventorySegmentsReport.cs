@@ -99,11 +99,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             var resultsString = new StringBuilder();
             resultsString.Append("<table class=\"report-cell\">");
-            resultsString.Append(CreateHTMLSection("ID", new List<string>() { "COUNTY", "SR", "SEGMENT", "CRS_DATA" }));
-            resultsString.Append(CreateHTMLSection("Description", new List<string>() { "DIRECTION", "DIST", "MPO/RPO", "U_R_CODE", "BUSIPLAN", "AADT", "ADTT", "TRK_PCNT", "SURDATA", "", "FEDAID", "HPMS", "LANES", "", "LENGTH", "WIDTH", "AGE","" }));
-            resultsString.Append(CreateHTMLSection("Surface Attributes", new List<string>() { "SURFACE NAME", "SURFACE", "L_S_TYPE", "R_S_TYPE", "YR_BUILT","", "YR_LST_RESURFACE", "YR_LST_STRUCT_OVER" }));
+            resultsString.Append(CreateHTMLSection("ID", new List<string>() { "COUNTY", "SR", "SEGMENT", "CRS" }));
+            resultsString.Append(CreateHTMLSection("Description", new List<string>() { "DIRECTION", "DISTRICT", "MPO_RPO", "U_R_CODE", "BUSIPLAN", "AADT", "ADTT", "TRK_PERCENT", "FED_AID", "IS_HPMS", "LANES", "", "SEGMENT_LENGTH", "WIDTH", "AGE","" }));
+            resultsString.Append(CreateHTMLSection("Surface Attributes", new List<string>() { "SURFACE_NAME", "SURFACEID", "L_S_TYPE", "R_S_TYPE", "YR_BUILT","", "YEAR_LAST_OVERLAY", "LAST_STRUCTURAL_OVERLAY" }));
             resultsString.Append(CreateHTMLSection("Survey Information", new List<string>() { "Survey Date" }));
-            resultsString.Append(CreateHTMLSection("Measured Conditions", new List<string>() { "OPI", "ROUGAVE" }));
+            resultsString.Append(CreateHTMLSection("Measured Conditions", new List<string>() { "OPI", "ROUGHNESS" }));
             resultsString.Append(CreateHTMLDistressSection("Surface Defects"));
 
             resultsString.Append("</table>");
@@ -527,6 +527,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             descriptions.Add("CNTY", new AttributeDescription() { Description = "County ID" });
             descriptions.Add("COPI", new AttributeDescription() { Description = "COPI" });
             descriptions.Add("COUNTY", new AttributeDescription() { Description = "County" });
+            descriptions.Add("CRS", new AttributeDescription() { Description = "Section" });
             descriptions.Add("CRS_DATA", new AttributeDescription() { Description = "Section" });
             descriptions.Add("CRSDATA", new AttributeDescription() { Description = "Section" });
             descriptions.Add("DIRECTION", new AttributeDescription() { Description = "Direction" });
@@ -539,7 +540,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             descriptions.Add("FAMILY", new AttributeDescription() { Description = "Family" });
             descriptions.Add("FED_AID", new AttributeDescription() { Description = "Federal Aid?" });
             descriptions.Add("FEDAID", new AttributeDescription() { Description = "Federal Aid?" });
-            descriptions.Add("HPMS", new AttributeDescription() { Description = "HPMS?" });
+            descriptions.Add("IS_HPMS", new AttributeDescription() { Description = "HPMS?" });
             descriptions.Add("ID", new AttributeDescription() { Description = "ID" });
             descriptions.Add("INTERSTATE", new AttributeDescription() { Description = "Interstate" });
             descriptions.Add("L_S_TYPE", new AttributeDescription() { Description = "Left Shoulder Type" });
@@ -552,11 +553,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             descriptions.Add("RISKSCORE", new AttributeDescription() { Description = "RiskScore" });
             descriptions.Add("ROUGAVE", new AttributeDescription() { Description = "Roughness" });
             descriptions.Add("SECTION", new AttributeDescription() { Description = "SEC" });
+            descriptions.Add("SEGMENT_LENGTH", new AttributeDescription() { Description = "Segment Length" });
             descriptions.Add("SR", new AttributeDescription() { Description = "Route" });
             descriptions.Add("SURDATA", new AttributeDescription() { Description = "Surface" });
-            descriptions.Add("SURFACE", new AttributeDescription() { Description = "Surface ID" });
-            descriptions.Add("SURFACE NAME", new AttributeDescription() { Description = "Surface" });
-            descriptions.Add("SEGMENT", new AttributeDescription() { Description = "Segment" });
+            descriptions.Add("SURFACEID", new AttributeDescription() { Description = "Surface ID" });
+            descriptions.Add("SURFACE_NAME", new AttributeDescription() { Description = "Surface" });
+            descriptions.Add("SEG", new AttributeDescription() { Description = "Segment" });
             descriptions.Add("THICKNESS", new AttributeDescription() { Description = "THICKNESS" });
             descriptions.Add("TRK_PCNT", new AttributeDescription() { Description = "Truck %" });
             descriptions.Add("TRUEDATE", new AttributeDescription() { Description = "TrueDate" });

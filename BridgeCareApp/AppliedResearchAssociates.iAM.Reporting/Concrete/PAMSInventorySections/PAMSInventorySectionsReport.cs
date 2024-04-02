@@ -100,8 +100,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             var resultsString = new StringBuilder();
             resultsString.Append("<table class=\"report-cell\">");
-            resultsString.Append(CreateHTMLSection("ID", new List<string>() { "CRS", "", "COUNTY", "SR", "FROMSEGMENT", "TOSEGMENT", "Member Segments" }));
-            resultsString.Append(CreateHTMLSection("Description", new List<string>() { "DIRECTION", "DISTRICT", "MPO_RPO", "U_R_CODE", "BUSIPLAN", "AADT", "ADTT", "TRK_PERCENT", "SURFACE", "", "FED_AID", "IS_HPMS", "LANES", "", "SEGMENT_LENGTH", "WIDTH", "AGE", ""}));
+            resultsString.Append(CreateHTMLSection("ID", new List<string>() { "CRS", "", "COUNTY", "SR", "FROMSEGMENT", "TOSEGMENT", "MEMBER_SEGMENTS" }));
+            resultsString.Append(CreateHTMLSection("Description", new List<string>() { "DIRECTION", "DISTRICT", "MPO_RPO", "U_R_CODE", "BUSIPLAN", "AADT", "ADTT", "TRK_PERCENT", "FED_AID", "IS_HPMS", "LANES", "", "SEGMENT_LENGTH", "WIDTH", "AGE", ""}));
             resultsString.Append(CreateHTMLSection("Surface Attributes", new List<string>() { "SURFACE_NAME", "SURFACEID", "L_S_TYPE","R_S_TYPE", "YR_BUILT", "", "YEAR_LAST_OVERLAY", "LAST_STRUCTURAL_OVERLAY" }));
             resultsString.Append(CreateHTMLSection("Survey Information", new List<string>() { "Survey Date", ""}));
             resultsString.Append(CreateHTMLSection("Measured Conditions", new List<string>() { "OPI", "ROUGHNESS" }));
@@ -579,6 +579,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             descriptions.Add("LANES", new AttributeDescription() { Description = "Lanes" });
             descriptions.Add("LAST_STRUCTURAL_OVERLAY", new AttributeDescription() { Description = "Last Structural Overlay" });
             descriptions.Add("LENGTH", new AttributeDescription() { Description = "Length" });
+            descriptions.Add("MEMBER_SEGMENTS", new AttributeDescription() { Description = "Member Segments" });
             descriptions.Add("MPO/RPO", new AttributeDescription() { Description = "MPO/RPO Code" });
             descriptions.Add("MPO_RPO", new AttributeDescription() { Description = "MPO/RPO" });
             descriptions.Add("NHS_IND", new AttributeDescription() { Description = "" });

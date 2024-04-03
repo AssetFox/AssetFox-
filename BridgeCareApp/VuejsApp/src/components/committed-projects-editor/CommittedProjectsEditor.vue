@@ -407,31 +407,21 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     let projectPagination = shallowReactive<Pagination>(clone(emptyPagination));
 
-    const currentUserCriteriaFilter = computed<UserCriteriaFilter>(() => store.state.userModule.currentUserCriteriaFilter);
     const stateSectionCommittedProjects = computed<SectionCommittedProject[]>(() => store.state.committedProjectsModule.sectionCommittedProjects);
-    const committedProjectTemplate = computed<string>(() =>store.state.committedProjectsModule.committedProjectTemplate);
     const stateTreatmentLibraries = computed<TreatmentLibrary[]>(() =>store.state.treatmentModule.treatmentLibraries);
     const stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
-    const stateInvestmentPlan = computed<InvestmentPlan>(() => store.state.investmentModule.investmentPlan);
     const stateScenarioSimpleBudgetDetails = computed<SimpleBudgetDetail[]>(() =>store.state.investmentModule.scenarioSimpleBudgetDetails);
     const hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
     const networks = computed<Network[]>(() => store.state.networkModule.networks);
     const selectedStateTreatmentLibrary = computed<TreatmentLibrary>(() => store.state.treatmentModule.selectedTreatmentLibrary);
+    const stateSimpleScenarioSelectableTreatments = computed<SimpleTreatment[]>(() => store.state.treatmentModule.simpleScenarioSelectableTreatments);
 
-    async function getCommittedProjects(payload?: any): Promise<any> { await store.dispatch('getCommittedProjects', payload); }
     async function getTreatmentLibrariesAction(payload?: any): Promise<any> { await store.dispatch('getTreatmentLibraries', payload); }
-    async function getScenarioSelectableTreatmentsAction(payload?: any): Promise<any> { await store.dispatch('getScenarioSelectableTreatments', payload); }
-    async function getInvestmentPlanAction(payload?: any): Promise<any> { await store.dispatch('getInvestmentPlan', payload); }
+    async function getSimpleScenarioSelectableTreatmentsAction(payload?: any): Promise<any> { await store.dispatch('getSimpleScenarioSelectableTreatments', payload); }
     async function getScenarioSimpleBudgetDetailsAction(payload?: any): Promise<any> { await store.dispatch('getScenarioSimpleBudgetDetails', payload); }
     async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes', payload); }
     async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks', payload); }
-    async function deleteSpecificCommittedProjectsAction(payload?: any): Promise<any> { await store.dispatch('deleteSpecificCommittedProjects', payload); }
     async function deleteSimulationCommittedProjectsAction(payload?: any): Promise<any> { await store.dispatch('deleteSimulationCommittedProjects', payload); }
-    async function upsertCommittedProjectsAction(payload?: any): Promise<any> { await store.dispatch('upsertCommittedProjects', payload); }
-
-        // TODO:Remove this one?
-        async function importCommittedProjectTemplate(payload?: any): Promise<any> { await store.dispatch('importComittedProjectTemplate', payload);}
-
     function selectTreatmentLibraryAction(payload?: any){ store.dispatch('selectTreatmentLibrary', payload); }
     function setHasUnsavedChangesAction(payload?: any) { store.dispatch('setHasUnsavedChanges', payload); }
     function addSuccessNotificationAction(payload?: any) {  store.dispatch('addSuccessNotification', payload); }
@@ -554,7 +544,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
             i++   
         });
         await getTreatmentLibrariesAction();
-        await fetchTreatmentLibrary(scenarioId);
+        await getSimpleScenarioSelectableTreatmentsAction(scenarioId)
+        // await fetchTreatmentLibrary(scenarioId);
         hasScenario = true;
         await getNetworksAction();
         await InvestmentService.getScenarioBudgetYears(scenarioId).then(response => {  
@@ -646,7 +637,10 @@ import ConfirmDialog from 'primevue/confirmdialog';
         );
     };
 
-    watch(selectedStateTreatmentLibrary, () => {
+    watch(stateSimpleScenarioSelectableTreatments, () => {
+        treatmentSelectItems.value = stateSimpleScenarioSelectableTreatments.value.map(
+            (treatment: SimpleTreatment) => (treatment.name)
+        );
     });
 
     watch(stateScenarioSimpleBudgetDetails, () => {
@@ -867,10 +861,12 @@ import ConfirmDialog from 'primevue/confirmdialog';
     function handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
         row.treatment = treatmentName;
         updateCommittedProject(row, treatmentName, 'treatment')  
+        var treatment = clone(stateSimpleScenarioSelectableTreatments.value.find(_ => _.name === treatmentName))
+        if(isNil(treatment))
+            return;
         CommittedProjectsService.FillTreatmentValues({
             committedProjectId: row.id,
-            treatmentLibraryId: librarySelectItemValue.value ? librarySelectItemValue.value : getBlankGuid(),
-            treatmentName: treatmentName,
+            treatmentId: treatment.id,
             KeyAttributeValue: row.locationKeys[keyattr],
             networkId: networkId
         })

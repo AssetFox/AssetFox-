@@ -543,9 +543,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             categorySelectItems.value.push({text: cat, value: i})     
             i++   
         });
-        await getTreatmentLibrariesAction();
         await getSimpleScenarioSelectableTreatmentsAction(scenarioId)
-        // await fetchTreatmentLibrary(scenarioId);
         hasScenario = true;
         await getNetworksAction();
         await InvestmentService.getScenarioBudgetYears(scenarioId).then(response => {  

@@ -201,14 +201,12 @@ namespace BridgeCareCore.Controllers
                 var result = await Task.Factory.StartNew(() =>
                 {
                     CommittedProjectFillTreatmentReturnValuesModel returnValues = new CommittedProjectFillTreatmentReturnValuesModel();
-                    var treatment = UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatmentByLibraryIdAndName(
-                        treatmentValues.TreatmentLibraryId, treatmentValues.TreatmentName);
+                    var treatment = UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatmentById(treatmentValues.TreatmentId).Treatment;
                     if (treatment == null)
                         return returnValues;
-                    returnValues.ValidTreatmentConsequences =  _committedProjectService.GetValidConsequences(treatmentValues.CommittedProjectId, treatmentValues.TreatmentLibraryId,
-                        treatmentValues.KeyAttributeValue, treatmentValues.TreatmentName, treatmentValues.NetworkId);
-                    returnValues.TreatmentCost = _committedProjectService.GetTreatmentCost(treatmentValues.TreatmentLibraryId,
-                        treatmentValues.KeyAttributeValue, treatmentValues.TreatmentName, treatmentValues.NetworkId);
+                    returnValues.ValidTreatmentConsequences =  _committedProjectService.GetValidConsequences(treatmentValues.CommittedProjectId, treatmentValues.TreatmentId,
+                        treatmentValues.KeyAttributeValue, treatmentValues.NetworkId);
+                    returnValues.TreatmentCost = _committedProjectService.GetTreatmentCost(treatmentValues.KeyAttributeValue, treatmentValues.TreatmentId, treatmentValues.NetworkId);
                     
                     returnValues.TreatmentCategory = (TreatmentCategory)treatment.Category;
                     return returnValues;

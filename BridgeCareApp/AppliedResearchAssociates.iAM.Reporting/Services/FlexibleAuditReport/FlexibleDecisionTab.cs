@@ -64,6 +64,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
         {
             Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
             var primaryKey = _unitOfWork.AdminSettingsRepo.GetKeyFields();
+            var firstPrimaryKey = primaryKey[0];
             foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
             {
 
@@ -71,12 +72,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
 
                 if (string.IsNullOrEmpty(primaryKeyField) && initialAssetSummary.ValuePerNumericAttribute != null)
                 {
-                    primaryKeyField = _reportHelper.CheckAndGetValue<string>(initialAssetSummary.ValuePerNumericAttribute, primaryKey[0].ToString());
-                }
-                else
-                {
-                    // Throw an error if valuePerTextAttribute and valuePerNumericAttribute are null
-                    throw new Exception("Both valuePerTextAttribute and valuePerNumericAttribute are null.");
+                        primaryKeyField = initialAssetSummary.ValuePerNumericAttribute[primaryKey[0].ToString()].ToString();
                 }
                 var years = simulationOutput.Years.OrderBy(yr => yr.Year);
 
@@ -87,7 +83,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
                 var yearZeroRow = currentCell.Row++;
                 foreach (var year in years)
                 {
-                    var section = year.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, primaryKey[0].ToString()) == primaryKeyField);
+                    var section = year.Assets.FirstOrDefault(_ =>
+                    {
+                        var textValue = _reportHelper.CheckAndGetValue<string>(_.ValuePerTextAttribute, primaryKey[0].ToString());
+                        if (textValue == primaryKeyField)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            var numericValue = _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, primaryKey[0].ToString());
+                            return numericValue == Convert.ToDouble(primaryKeyField);
+                        }
+                    });
                     if (section.TreatmentCause == TreatmentCause.CommittedProject)
                     {
                         continue;

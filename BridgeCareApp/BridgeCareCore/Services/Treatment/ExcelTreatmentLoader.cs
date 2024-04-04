@@ -283,7 +283,7 @@ namespace BridgeCareCore.Services.Treatment
             var categoryString = dictionary.GetValueOrDefault(TreatmentExportStringConstants.Category.ToLowerInvariant());
             var treatmentCategory = EnumDeserializer.Deserialize<TreatmentCategory>(categoryString);
             var assetTypeString = dictionary.GetValueOrDefault(TreatmentExportStringConstants.AssetType.ToLowerInvariant());
-            var assetType = EnumDeserializer.Deserialize<AssetCategories>(assetTypeString);
+            var assetType = assetTypeString;
             var criterion = dictionary.GetValueOrDefault(TreatmentExportStringConstants.Criterion.ToLowerInvariant());
             
             var loadCosts = LoadCosts(worksheet);
@@ -294,7 +294,7 @@ namespace BridgeCareCore.Services.Treatment
                 Id = Guid.NewGuid(),
                 Description = description,
                 Category = (TreatmentCategory)treatmentCategory,
-                AssetType = (AssetCategories)assetType,
+                AssetType = (string)assetType,
                 ShadowForAnyTreatment = ParseInt(yearsBeforeAny),
                 ShadowForSameTreatment = ParseInt(yearsBeforeSame),
                 Costs = loadCosts.Costs,

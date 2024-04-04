@@ -3,16 +3,19 @@
     /// <summary>
     /// The types of assets to report.
     /// </summary>
-    public enum AssetCategories
-    {
+    //public class AssetCategories
+    //{
         /// <summary>
-        /// A bridge asset.
+        /// Gets or sets the value representing the asset.
         /// </summary>
-        Bridge,
+        //public string Value { get; set; }
 
         /// <summary>
-        /// A culvert asset.
+        /// Constructs an instance of AssetCategories with the specified asset value.
         /// </summary>
-        Culvert
-    }
+        //public AssetCategories(string value)
+        //{
+            //Value = value;
+        //}
+    //}
 }

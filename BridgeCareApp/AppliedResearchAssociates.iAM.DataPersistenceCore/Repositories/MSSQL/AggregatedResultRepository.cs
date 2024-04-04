@@ -155,5 +155,41 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(e => AggregatedResultMapper.ToDto(e))
                 .AsNoTracking().AsSplitQuery().ToList();
         }
+
+        /// <summary>
+        /// Gets a dictionary of AssetAttributeValuePair lists for each MaintainableAsset in a given network
+        /// </summary>
+        /// <paramref name="networkId">
+        /// GUID for Network
+        /// </paramref>
+        /// <returns>
+        /// List of AttributeName, AttributeValue for each MaintainableAsset
+        /// </returns>
+        /// <seealso cref="AssetAttributeValuePair"/>
+        public Dictionary<Guid, List<AssetAttributeValuePair>> GetAssetAttributeValuePairDictionary(Guid networkId)
+        {
+            return _unitOfWork.Context.MaintainableAsset
+                    .AsSplitQuery()
+                    .AsNoTracking()
+                    .Where(_ => _.NetworkId == networkId)
+                    .Join(_unitOfWork.Context.AggregatedResult,
+                          maintainableAsset => maintainableAsset.Id,
+                          aggregatedResult => aggregatedResult.MaintainableAssetId,
+                          (maintainableAsset, aggregatedResult) => new { maintainableAsset, aggregatedResult })
+                    .Join(_unitOfWork.Context.Attribute,
+                          combined => combined.aggregatedResult.AttributeId,
+                          attribute => attribute.Id,
+                          (combined, attribute) => new { combined, attribute })
+                    .Select(_ => new
+                    {
+                        MaintainableAssetId = _.combined.maintainableAsset.Id,
+                        AttributeName = _.attribute.Name,
+                        AttributeValue = _.combined.aggregatedResult.TextValue != null ? _.combined.aggregatedResult.TextValue : (_.combined.aggregatedResult.NumericValue != null ? _.combined.aggregatedResult.NumericValue.ToString() : null)
+                    })
+                    .AsEnumerable()
+                    .OrderBy(_ => _.AttributeName)
+                    .GroupBy(_ => _.MaintainableAssetId)
+                    .ToDictionary(_ => _.Key, _ => _.Select(__ => new AssetAttributeValuePair { AttributeName = __.AttributeName, AttributeValue = __.AttributeValue }).ToList());
+        }
     }
 }

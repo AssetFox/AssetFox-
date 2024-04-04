@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public TreatmentCategory Category { get; set; }
 
-        public AssetCategory AssetType { get; set; }
+        public string AssetType { get; set; }
 
         public bool IsModified { get; set; }
 

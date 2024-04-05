@@ -76,8 +76,7 @@ export interface CommittedProjectFillTreatmentReturnValues {
 
 export interface CommittedProjectFillTreatmentValues {
     committedProjectId: string;
-    treatmentLibraryId: string;
-    treatmentName: string;
+    treatmentId: string;
     KeyAttributeValue: string; 
     networkId: string;
 }

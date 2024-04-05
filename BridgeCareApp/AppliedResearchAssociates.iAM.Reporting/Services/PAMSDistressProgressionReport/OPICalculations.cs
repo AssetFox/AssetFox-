@@ -22,13 +22,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, List<int> simulationYears)
+        public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData)
         {
-            var currentCell = FillHeaders(worksheet, simulationYears);
-            FillDynamicData(worksheet, simulationYears, reportOutputData, currentCell);
+            var currentCell = FillHeaders(worksheet);
+            FillDynamicData(worksheet, reportOutputData, currentCell);
         }
 
-        private void FillDynamicData(ExcelWorksheet worksheet, List<int> simulationYears, SimulationOutput reportOutputData, CurrentCell currentCell)
+        private void FillDynamicData(ExcelWorksheet worksheet, SimulationOutput reportOutputData, CurrentCell currentCell)
         {
             var row = currentCell.Row;
             var column = currentCell.Column;
@@ -46,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
 
                     worksheet.Cells[row, column++].Value = yearData.Year;
                     worksheet.Cells[row, column].Value = crs;
-                    worksheet.Column(column++).Width = 16;
+                    worksheet.Column(column++).Width = 18;
                     worksheet.Cells[row, column++].Value = CheckGetTextValue(valuePerTextAttribute, "DISTRICT");
                     worksheet.Cells[row, column++].Value = CheckGetTextValue(valuePerTextAttribute, "CNTY");
                     worksheet.Cells[row, column++].Value = CheckGetTextValue(valuePerTextAttribute, "SR");
@@ -56,11 +56,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     var startSeg = crs.Substring(lastUnderScoreIndex + 1, hyphenIndex - lastUnderScoreIndex - 1);
                     var endSeg = crs.Substring(hyphenIndex + 1);
                     worksheet.Cells[row, column++].Value = startSeg;
-                    worksheet.Cells[row, column++].Value = endSeg;                                        
+                    worksheet.Cells[row, column++].Value = endSeg;
+                    worksheet.Cells[row, column++].Value = CheckGetTextValue(valuePerTextAttribute, "DIRECTION");
                     worksheet.Cells[row, column++].Value = CheckGetValue(sectionValuePerNumericAttribute, "SEGMENT_LENGTH");
-                    worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "WIDTH");
-                    ExcelHelper.SetCustomFormat(worksheet.Cells[row, column++], ExcelHelperCellFormat.DecimalPrecision2);
-                    worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "SURFACEID");
+                    worksheet.Cells[row, column++].Value = CheckGetValue(sectionValuePerNumericAttribute, "WIDTH");
+                    worksheet.Cells[row, column++].Value = CheckGetTextValue(valuePerTextAttribute, "BUSIPLAN");
+                    worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "SURFACEID") + "-" + CheckGetTextValue(valuePerTextAttribute, "SURFACE_NAME");
+                    worksheet.Column(column).Width = 37;
                     // right border line
                     ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
 
@@ -286,7 +288,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
             }
         }
 
-        private static CurrentCell FillHeaders(ExcelWorksheet worksheet, List<int> simulationYears)
+        private static CurrentCell FillHeaders(ExcelWorksheet worksheet)
         {
             int headerRow = 1;
             const double minimumColumnWidth = 15;
@@ -297,15 +299,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                 worksheet.Cells[headerRow, column + 1].Value = headers[column];
                 worksheet.Column(column + 1).Width = minimumColumnWidth;
                 ExcelHelper.ApplyBorder(worksheet.Cells[headerRow, column + 1, headerRow, column + 1]);
-                ExcelHelper.ApplyStyle(worksheet.Cells[headerRow, column + 1, headerRow, column + 1]);
             }
 
-            currentCell = FillDynamicHeaders(worksheet, currentCell, simulationYears);
+            currentCell = FillDynamicHeaders(worksheet, currentCell);
+            ExcelHelper.ApplyStyle(worksheet.Cells[headerRow, 1, headerRow, currentCell.Column - 1]);
 
             return currentCell;
         }
 
-        private static CurrentCell FillDynamicHeaders(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears)
+        private static CurrentCell FillDynamicHeaders(ExcelWorksheet worksheet, CurrentCell currentCell)
         {
             var row = currentCell.Row;
             var yearPartOneHeaders = GetPartOneHeaders();
@@ -457,8 +459,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
             "STATE ROUTE",
             "SEGMENT START",
             "SEGMENT END",
+            "DIRECTION",
             "LENGTH (FT)",
             "WIDTH (FT)",
+            "BPN",
             "Pavement Surface Type"            
         };
 

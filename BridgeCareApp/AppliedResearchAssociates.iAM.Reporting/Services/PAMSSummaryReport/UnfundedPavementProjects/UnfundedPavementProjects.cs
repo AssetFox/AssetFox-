@@ -6,7 +6,6 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.UnfundedPavementProjects
 {
@@ -42,7 +41,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
             unfundedRecommendationWorksheet.Cells.AutoFitColumns();
         }
 
-
         public CurrentCell AddHeadersCells(ExcelWorksheet worksheet)
         {
             // Row 1
@@ -77,27 +75,29 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
                 "District",
                 "Start",
                 "End",
-                "Pavement Length",
-                "Pavement Area",
+                "Length(ft)",
+                "Width(ft)",
+                "Pavement Depth(in)",
+                "Direction",
                 "Lanes",
                 "BPN",
+                "FamilyID",
                 "MPO/RPO",
+                "Surface Type",
                 "Risk Score",
                 "State Contracted Funded",
-                "Analysis Year",
+                "Analysis Year", // TODO should we rename to "Unfunded Year" ?
                 "Unfunded Treatment",
                 "Cost",
                 "Cash Flow Yrs/Amount",
                 "OPI",
                 "Roughness",
-            };
-
+        };
 
         public List<AssetDetail> GetUntreatedSections(SimulationYearDetail simulationYearDetail)
         {
             var untreatedSections = simulationYearDetail.Assets.Where(s =>
             s.TreatmentCause == TreatmentCause.NoSelection
-            //&& (!string.IsNullOrEmpty(s.ValuePerTextAttribute["NHS_IND"]) && !string.IsNullOrWhiteSpace(s.ValuePerTextAttribute["NHS_IND"]) && int.Parse(s.ValuePerTextAttribute["NHS_IND"]) == 1)
             && s.TreatmentOptions.Count > 0).ToList();
             return untreatedSections;
         }
@@ -174,7 +174,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
             }
         }
 
-
         private void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year, TreatmentOptionDetail treatment)
         {
             var rowNo = currentCell.Row; var columnNo = currentCell.Column;
@@ -199,17 +198,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
 
             worksheet.Cells[rowNo, columnNo].Style.Numberformat.Format = "0";
             worksheet.Cells[rowNo, columnNo++].Value = pavementLength;
-
-            worksheet.Cells[rowNo, columnNo].Style.Numberformat.Format = "0";
-            worksheet.Cells[rowNo, columnNo++].Value = pavementArea;
-
+            worksheet.Cells[rowNo, columnNo].Value = pavementWidth;
+            ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo++], ExcelHelperCellFormat.Number);
+            worksheet.Cells[rowNo, columnNo++].Value = CheckGetTextValue(valuePerTextAttribute, "DIRECTION");
+            worksheet.Cells[rowNo, columnNo].Value = CheckGetValue(valuePerNumericAttribute, "PAVED_THICKNESS");
+            ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo++], ExcelHelperCellFormat.DecimalPrecision2);
             worksheet.Cells[rowNo, columnNo++].Value = CheckGetValue(valuePerNumericAttribute, "LANES");
             worksheet.Cells[rowNo, columnNo++].Value = CheckGetTextValue(valuePerTextAttribute, "BUSIPLAN");
+            worksheet.Cells[rowNo, columnNo++].Value = CheckGetTextValue(valuePerTextAttribute, "FAMILY");
             worksheet.Cells[rowNo, columnNo++].Value = CheckGetTextValue(valuePerTextAttribute, "MPO_RPO");
+            worksheet.Cells[rowNo, columnNo++].Value = CheckGetValue(valuePerNumericAttribute, "SURFACEID").ToString() + "-" + CheckGetTextValue(valuePerTextAttribute, "SURFACE_NAME");
             worksheet.Cells[rowNo, columnNo++].Value = Math.Round(Convert.ToDecimal(CheckGetValue(valuePerNumericAttribute, "RISKSCORE")), 2);
 
             var stateContractedFunded = pavementArea >= PAVEMENT_AREA_THRESHOLD ? "Y" : "N"; stateContractedFunded += " - " + Year.ToString();
-            worksheet.Cells[rowNo, columnNo++].Value = stateContractedFunded;
+            worksheet.Cells[rowNo, columnNo++].Value = stateContractedFunded; // TODO should we remove this? "State Contracted Funded"
 
             worksheet.Cells[rowNo, columnNo++].Value = Year;
             worksheet.Cells[rowNo, columnNo++].Value = treatment?.TreatmentName ?? "";

@@ -7,12 +7,9 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport;
-using AppliedResearchAssociates.iAM.Reporting.Models.PAMSAuditReport;
+using AppliedResearchAssociates.iAM.Reporting.Models.FlexibleAuditReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.FlexibileAuditReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
 {
@@ -105,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
                     var cashFlowPrimaryKey = CheckGetTextValue(section.ValuePerTextAttribute, primaryKey[0].ToString());
                     if (section.TreatmentStatus != TreatmentStatus.Applied)
                     {
-                        var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(section.ValuePerTextAttribute, primaryKey[0].ToString()) == cashFlowPrimaryKey && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment && _.AppliedTreatment == section.AppliedTreatment);
+                        var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(section.ValuePerTextAttribute, primaryKey[0].ToString()) == cashFlowPrimaryKey && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != FlexibleAuditReportConstants.NoTreatment && _.AppliedTreatment == section.AppliedTreatment);
                         if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(cashFlowPrimaryKey))
                         {
                             keyCashFlowFundingDetails.Add(cashFlowPrimaryKey, fundingSection?.TreatmentConsiderations ?? new());
@@ -122,7 +119,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
             }
         }
 
-        private PAMSDecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, string brKey, SimulationYearDetail year, AssetDetail section, Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails)
+        private FlexibleDecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, string brKey, SimulationYearDetail year, AssetDetail section, Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails)
         {
             var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, brKey, year.Year, section);
 
@@ -144,11 +141,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
             decisionDataModel.BudgetLevels = budgetLevels;
 
             // Treatments
-            var decisionsTreatments = new List<PAMSDecisionTreatment>();
+            var decisionsTreatments = new List<FlexibleDecisionTreatment>();
             var isCashFlowProject = section.TreatmentCause == TreatmentCause.CashFlowProject;
             foreach (var treatment in treatments)
             {
-                var decisionsTreatment = new PAMSDecisionTreatment();
+                var decisionsTreatment = new FlexibleDecisionTreatment();
                 var treatmentRejection = section.TreatmentRejections.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.Feasible = isCashFlowProject ? "-" : (treatmentRejection == null ? FlexibleAuditReportConstants.Yes : FlexibleAuditReportConstants.No);
                 var currentCIImprovement = Convert.ToDouble(decisionDataModel.CurrentAttributesValues.Last());
@@ -188,7 +185,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
             if (ShouldBundleFeasibleTreatments == true)
             {
                 // Aggregated
-                var decisionsAggregated = new List<PAMSDecisionAggregated>();
+                var decisionsAggregated = new List<FlexibleDecisionAggregated>();
 
                 // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
                 var aggregatedTreatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
@@ -200,7 +197,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
                 // AllocationMatrix includes cash flow funding of future years.
                 var aggregatedAllocationMatrix = aggregatedTreatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
 
-                var decisionsAggregate = new PAMSDecisionAggregated();
+                var decisionsAggregate = new FlexibleDecisionAggregated();
                 var aggregatedTreatmentRejection = section.TreatmentRejections;
                 if (!string.IsNullOrEmpty(includedBundles))
                 {
@@ -250,9 +247,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
             return decisionDataModel;
         }
 
-        private PAMSDecisionDataModel GetInitialDecisionDataModel(HashSet<string> currentAttributes, string CRS, int year, AssetSummaryDetail section)
+        private FlexibleDecisionDataModel GetInitialDecisionDataModel(HashSet<string> currentAttributes, string CRS, int year, AssetSummaryDetail section)
         {
-            var decisionDataModel = new PAMSDecisionDataModel
+            var decisionDataModel = new FlexibleDecisionDataModel
             {
                 CRS = CRS,
                 AnalysisYear = year,
@@ -275,7 +272,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
         private double CheckGetValue(Dictionary<string, double> valuePerNumericAttribute, string attribute) => _reportHelper.CheckAndGetValue<double>(valuePerNumericAttribute, attribute);
         private string CheckGetTextValue(Dictionary<string, string> valuePerTextAttribute, string attribute) => _reportHelper.CheckAndGetValue<string>(valuePerTextAttribute, attribute);
 
-        private CurrentCell FillDataInWorksheet(ExcelWorksheet decisionsWorksheet, PAMSDecisionDataModel decisionsDataModel, int budgetsCount, HashSet<string> currentAttributes, CurrentCell currentCell)
+        private CurrentCell FillDataInWorksheet(ExcelWorksheet decisionsWorksheet, FlexibleDecisionDataModel decisionsDataModel, int budgetsCount, HashSet<string> currentAttributes, CurrentCell currentCell)
         {
             var row = currentCell.Row;
             int column = 1;
@@ -342,7 +339,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
             return new CurrentCell { Row = row + 1, Column = column - 1 };
         }
 
-        private int FillInitialDataInWorksheet(ExcelWorksheet decisionsWorksheet, PAMSDecisionDataModel decisionsDataModel, HashSet<string> currentAttributes, int row, int column)
+        private int FillInitialDataInWorksheet(ExcelWorksheet decisionsWorksheet, FlexibleDecisionDataModel decisionsDataModel, HashSet<string> currentAttributes, int row, int column)
         {
             ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
             decisionsWorksheet.Cells[row, column++].Value = decisionsDataModel.CRS;

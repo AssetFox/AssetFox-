@@ -12,7 +12,6 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Services;
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.FlexibileAuditReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport;
 using BridgeCareCore.Services;
@@ -189,7 +188,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
 
             // Report
-            using var excelPackage = new ExcelPackage(new FileInfo("PAMSAuditReportData.xlsx"));
+            using var excelPackage = new ExcelPackage(new FileInfo("GeneralAuditReportData.xlsx"));
 
             checkCancelled(cancellationToken, simulationId);
             // Asset TAB
@@ -222,7 +221,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             var folderPathForSimulation = $"Reports\\{simulationId}";
             Directory.CreateDirectory(folderPathForSimulation);
-            reportPath = Path.Combine(folderPathForSimulation, "PAMSAuditReport.xlsx");
+            reportPath = Path.Combine(folderPathForSimulation, "GeneralAuditReport.xlsx");
 
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(reportPath, bin);

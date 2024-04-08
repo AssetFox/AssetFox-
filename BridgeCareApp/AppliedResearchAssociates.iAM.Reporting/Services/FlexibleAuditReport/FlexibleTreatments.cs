@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Reflection.PortableExecutable;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
-using AppliedResearchAssociates.iAM.Reporting.Models.PAMSAuditReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.FlexibileAuditReport;
+using AppliedResearchAssociates.iAM.Reporting.Models.FlexibleAuditReport;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
@@ -57,11 +53,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
             return new CurrentCell { Row = 3, Column = headersRow.Count + 1 };
         }
 
-        public void FillDataInWorksheet(ExcelWorksheet worksheet, CurrentCell currentCell, PavementDataModel pavementDataModel)
+        public void FillDataInWorksheet(ExcelWorksheet worksheet, CurrentCell currentCell, FlexibleDataModel flexibleDataModel)
         {
             var row = currentCell.Row;
             var columnNo = currentCell.Column;
-            var assetSummaryDetail = pavementDataModel.AssetSummaryDetail;
+            var assetSummaryDetail = flexibleDataModel.AssetSummaryDetail;
 
             // Populate numeric attributes
             foreach (var numericAttribute in assetSummaryDetail.ValuePerNumericAttribute)

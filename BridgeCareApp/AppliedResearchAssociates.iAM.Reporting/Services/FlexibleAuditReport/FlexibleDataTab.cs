@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
-using AppliedResearchAssociates.iAM.Reporting.Models.PAMSAuditReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.FlexibileAuditReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport;
+using AppliedResearchAssociates.iAM.Reporting.Models.FlexibleAuditReport;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
@@ -115,7 +112,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
             }
         }
 
-        public void FillDataInWorksheet(ExcelWorksheet worksheet, CurrentCell currentCell, PavementDataModel DataModel)
+        public void FillDataInWorksheet(ExcelWorksheet worksheet, CurrentCell currentCell, FlexibleDataModel DataModel)
         {
             currentCell.Row++;
             currentCell.Column = 1;
@@ -138,7 +135,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
             currentCell.Column = columnNo;
         }
 
-        private static PavementDataModel GeneratePavementDataModel(double primaryKey, AssetSummaryDetail initialAssetSummary) => new()
+        private static FlexibleDataModel GeneratePavementDataModel(double primaryKey, AssetSummaryDetail initialAssetSummary) => new()
         {
             CRS = primaryKey,
             AssetSummaryDetail = initialAssetSummary

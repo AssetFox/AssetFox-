@@ -12,7 +12,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
     internal class UnfundedPavementProjects
     {
         private SummaryReportHelper _summaryReportHelper;
-        private double PAVEMENT_AREA_THRESHOLD = 0;
 
         public UnfundedPavementProjects()
         {
@@ -24,15 +23,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
         {
             // Add excel headers to excel.
             var currentCell = AddHeadersCells(unfundedRecommendationWorksheet);
-
-            // Enable Auto Filter
-            using (var autoFilterCells = unfundedRecommendationWorksheet.Cells[1, 1, currentCell.Row, currentCell.Column])
-            {
-                autoFilterCells.AutoFilter = true;
-            }
-
-            //set alignment
-            unfundedRecommendationWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
 
             //fill work sheet
             AddDynamicDataCells(unfundedRecommendationWorksheet, simulationOutput, currentCell);
@@ -49,20 +39,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
             {
                 var headerCell = worksheet.Cells[headerRowIndex, column + 1];
                 headerCell.Value = headersRow[column];
-                headerCell.Style.WrapText = true;
-                ExcelHelper.MergeCells(worksheet, headerRowIndex, column + 1, headerRowIndex + 1, column + 1);
-            }
-            
-            var currentCell = new CurrentCell { Row = headerRowIndex + 1, Column = worksheet.Dimension.Columns };
+                headerCell.Style.WrapText = true;                
+            }            
+
+            var currentCell = new CurrentCell { Row = headerRowIndex, Column = worksheet.Dimension.Columns };
 
             worksheet.Cells.AutoFitColumns();
-            using (ExcelRange autoFilterCells = worksheet.Cells[2, 1, currentCell.Row, currentCell.Column])
+            using (ExcelRange autoFilterCells = worksheet.Cells[1, 1, currentCell.Row, currentCell.Column])
             {
                 autoFilterCells.AutoFilter = true;
             }
 
             worksheet.DefaultColWidth = 13;
-            worksheet.Row(headerRowIndex).Height = 40;
+            worksheet.Row(headerRowIndex).Height = 42;
+            ExcelHelper.ApplyStyle(worksheet.Cells[headerRowIndex, 1, headerRowIndex, headersRow.Count]);
 
             return currentCell;
         }
@@ -84,14 +74,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
                 "FamilyID",
                 "MPO/RPO",
                 "Surface Type",
-                "Risk Score",
-                "State Contracted Funded",
-                "Analysis Year", // TODO should we rename to "Unfunded Year" ?
+                "Unfunded Year",
                 "Unfunded Treatment",
                 "Cost",
                 "Cash Flow Yrs/Amount",
                 "OPI",
                 "Roughness",
+                "Year Built",
+                "Year Last Resurface",
+                "Year Last  Structural Overlay",
+                "ADT",
+                "Truck %",
+                "Risk Score",
         };
 
         public List<AssetDetail> GetUntreatedSections(SimulationYearDetail simulationYearDetail)
@@ -194,24 +188,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
             //calculate area
             double pavementLength = CheckGetValue(valuePerNumericAttribute, "SEGMENT_LENGTH");
             double pavementWidth = CheckGetValue(valuePerNumericAttribute, "WIDTH");
-            double pavementArea = pavementLength * pavementWidth;
 
             worksheet.Cells[rowNo, columnNo].Style.Numberformat.Format = "0";
             worksheet.Cells[rowNo, columnNo++].Value = pavementLength;
             worksheet.Cells[rowNo, columnNo].Value = pavementWidth;
-            ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo++], ExcelHelperCellFormat.Number);
-            worksheet.Cells[rowNo, columnNo++].Value = CheckGetTextValue(valuePerTextAttribute, "DIRECTION");
+            ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo++], ExcelHelperCellFormat.Number);            
             worksheet.Cells[rowNo, columnNo].Value = CheckGetValue(valuePerNumericAttribute, "PAVED_THICKNESS");
             ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo++], ExcelHelperCellFormat.DecimalPrecision2);
+            worksheet.Cells[rowNo, columnNo++].Value = CheckGetTextValue(valuePerTextAttribute, "DIRECTION");
             worksheet.Cells[rowNo, columnNo++].Value = CheckGetValue(valuePerNumericAttribute, "LANES");
             worksheet.Cells[rowNo, columnNo++].Value = CheckGetTextValue(valuePerTextAttribute, "BUSIPLAN");
             worksheet.Cells[rowNo, columnNo++].Value = CheckGetTextValue(valuePerTextAttribute, "FAMILY");
             worksheet.Cells[rowNo, columnNo++].Value = CheckGetTextValue(valuePerTextAttribute, "MPO_RPO");
             worksheet.Cells[rowNo, columnNo++].Value = CheckGetValue(valuePerNumericAttribute, "SURFACEID").ToString() + "-" + CheckGetTextValue(valuePerTextAttribute, "SURFACE_NAME");
-            worksheet.Cells[rowNo, columnNo++].Value = Math.Round(Convert.ToDecimal(CheckGetValue(valuePerNumericAttribute, "RISKSCORE")), 2);
-
-            var stateContractedFunded = pavementArea >= PAVEMENT_AREA_THRESHOLD ? "Y" : "N"; stateContractedFunded += " - " + Year.ToString();
-            worksheet.Cells[rowNo, columnNo++].Value = stateContractedFunded; // TODO should we remove this? "State Contracted Funded"
 
             worksheet.Cells[rowNo, columnNo++].Value = Year;
             worksheet.Cells[rowNo, columnNo++].Value = treatment?.TreatmentName ?? "";
@@ -220,11 +209,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
             worksheet.Cells[rowNo, columnNo].Style.Numberformat.Format = @"_($* #,##0_);_($*  #,##0);_($* "" - ""??_);(@_)";
             worksheet.Cells[rowNo, columnNo++].Value = treatmentCost;
 
-            var cashFlowPerYr = "1 / " + String.Format("{0:C0}", treatmentCost);
+            var cashFlowPerYr = "1 / " + string.Format("{0:C0}", treatmentCost);
             worksheet.Cells[rowNo, columnNo++].Value = cashFlowPerYr;
 
             worksheet.Cells[rowNo, columnNo++].Value = Math.Round(Convert.ToDecimal(CheckGetValue(valuePerNumericAttribute, "OPI_CALCULATED")));
             worksheet.Cells[rowNo, columnNo++].Value = Math.Round(Convert.ToDecimal(CheckGetValue(valuePerNumericAttribute, "ROUGHNESS")), 2);
+            worksheet.Cells[rowNo, columnNo++].Value = CheckGetValue(valuePerNumericAttribute, "YR_BUILT");
+            worksheet.Cells[rowNo, columnNo++].Value = CheckGetValue(valuePerNumericAttribute, "YEAR_LAST_OVERLAY");
+            worksheet.Cells[rowNo, columnNo++].Value = CheckGetValue(valuePerNumericAttribute, "LAST_STRUCTURAL_OVERLAY");
+            worksheet.Cells[rowNo, columnNo++].Value = Math.Round(CheckGetValue(valuePerNumericAttribute, "AADT"));
+            worksheet.Cells[rowNo, columnNo++].Value = Math.Round(CheckGetValue(valuePerNumericAttribute, "TRK_PERCENT"));
+            worksheet.Cells[rowNo, columnNo++].Value = Math.Round(Convert.ToDecimal(CheckGetValue(valuePerNumericAttribute, "RISKSCORE")), 2);
 
             if (rowNo % 2 == 0) { ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo - 1], Color.LightGray); }
             ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, 1, rowNo, columnNo - 1]);

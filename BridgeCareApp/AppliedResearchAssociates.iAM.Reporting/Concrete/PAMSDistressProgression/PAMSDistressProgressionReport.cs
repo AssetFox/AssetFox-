@@ -18,11 +18,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 {
     public class PAMSDistressProgressionReport : IReport
     {
-        private readonly IHubService _hubService;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ReportHelper _reportHelper;
         private readonly OPICalculations _opiCalculationsTab;
-        private readonly Legend _legendTab;
 
         public Guid ID { get; set; }
 
@@ -46,18 +43,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Criteria { get; set; }
 
-        public PAMSDistressProgressionReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
+        public PAMSDistressProgressionReport(IUnitOfWork unitOfWork, string name, ReportIndexDTO results)
         {
             //store passed parameter   
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
-
             _opiCalculationsTab = new OPICalculations(_unitOfWork);
-            _legendTab = new Legend();
-
-            //create report objects            
-            _reportHelper = new ReportHelper(_unitOfWork);
 
             //check for existing report id
             var reportId = (results?.Id) ?? Guid.NewGuid();
@@ -171,14 +162,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
             });
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
-
-            var simulationYears = new List<int>();
-            foreach (var item in reportOutputData.Years)
-            {
-                simulationYears.Add(item.Year);
-            }
-
-            var simulationYearsCount = simulationYears.Count;
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkID, explorer);
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
@@ -194,7 +177,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var worksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.OPICalculationsTab);
-            _opiCalculationsTab.Fill(worksheet, reportOutputData, simulationYears);
+            _opiCalculationsTab.Fill(worksheet, reportOutputData);
 
             // Condition Data
             reportDetailDto.Status = $"Creating" + PAMSConstants.Legend_Tab + "TAB";

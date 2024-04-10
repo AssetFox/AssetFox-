@@ -98,7 +98,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     foreach (var yearlyValue in yearlyValues.Value)
                     {
                         var treatment = yearlyValue.Key;
-                        if (treatment.Contains("Bundle") && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
+                        if (treatment.Contains("Bundle"))// && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
                         {
                             var length = yearlyValue.Value.length;
                             bundledLength += length;
@@ -168,7 +168,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     foreach (var yearlyValue in yearlyValues.Value)
                     {
                         var treatment = yearlyValue.Key;
-                        if (treatment.Contains("Bundle") && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
+                        if (treatment.Contains("Bundle"))// && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
                         {
                             var length = yearlyValue.Value.length;
                             bundledLength += length;
@@ -239,7 +239,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     foreach (var yearlyValue in yearlyValues.Value)
                     {
                         var treatment = yearlyValue.Key;
-                        if (treatment.Contains("Bundle") && treatment.ToLower().Contains((char)TreatmentGroupCategory.Concrete))
+                        if (treatment.Contains("Bundle"))// && treatment.ToLower().Contains((char)TreatmentGroupCategory.Concrete))
                         {
                             var length = yearlyValue.Value.length;
                             bundledLength += length;
@@ -289,21 +289,26 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var treatmentGroups = GetListOfTreatmentGroupForCategory(treatmentGroupCategory);
 
             var prefix = GetTreatmentGroupString(treatmentGroupCategory) + " - ";
-            var treatmentGroupTitles = treatmentGroups.Select(tg => prefix + tg.GroupDescription).ToList();
+            var treatmentGroupTitles = treatmentGroups.Select(tg => prefix + tg.GroupDescription).Distinct().ToList();
 
             _pavementWorkSummaryCommon.SetPavementTreatmentGroupsExcelString(worksheet, treatmentGroupTitles, ref row, ref column);
 
             column++;
             var fromColumn = column + 1;
-
+            var descriptions = treatmentGroups.Select(_ => _.GroupDescription).Distinct().ToList();
             foreach (var yearlyValues in costAndLengthPerTreatmentGroupPerYear)
             {
                 row = startRow;
                 column = ++column;
-                foreach (var treatmentGroup in treatmentGroups)
+                foreach (var description in descriptions)
                 {
-                    yearlyValues.Value.TryGetValue(treatmentGroup, out var costAndLength);
-                    worksheet.Cells[row, column].Value = costAndLength.length;
+                    decimal treatmentLength = 0;
+                    foreach (var treatmentGroup in treatmentGroups.Where(_ => _.GroupDescription.Equals(description)))
+                    {
+                        yearlyValues.Value.TryGetValue(treatmentGroup, out var costAndLength);
+                        treatmentLength += costAndLength.length;
+                    }
+                    worksheet.Cells[row, column].Value = treatmentLength;
                     row++;
                 }
             }

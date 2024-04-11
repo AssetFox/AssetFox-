@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -22,9 +20,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void Fill(ExcelWorksheet generalSummaryWorksheet, SimulationOutput reportOutputData, IList<DeficientConditionGoalDTO> deficientConditions)
+        public void Fill(ExcelWorksheet generalSummaryWorksheet, SimulationOutput reportOutputData, IList<DeficientConditionGoalDTO> deficientConditions, ref CurrentCell currentCell)
         {
-            CurrentCell currentCell = new CurrentCell { Row = 2, Column = 1 };
+            //CurrentCell currentCell = new CurrentCell { Row = 2, Column = 1 };
             generalSummaryWorksheet.Cells[currentCell.Row, currentCell.Column].Value = "Deficient Condition Goals";
             currentCell.Row++;
             int startingColumn = currentCell.Column;

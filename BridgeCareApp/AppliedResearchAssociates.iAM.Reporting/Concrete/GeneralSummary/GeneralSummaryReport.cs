@@ -15,6 +15,7 @@ using AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.Gene
 using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.WorkQueue.Logging;
+using AppliedResearchAssociates.iAM.Reporting.Models;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
 {
@@ -177,19 +178,36 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             using var excelPackage = new ExcelPackage(new FileInfo("GeneralSummaryReport.xlsx"));
             var worksheet = excelPackage.Workbook.Worksheets.Add("General Summary");
 
+            CurrentCell currentCell = new CurrentCell { Row = 1, Column = 1 };
+
+            //TO-DO
+            // Insert actual scenario name here
+            worksheet.Cells[currentCell.Row, currentCell.Column].Value = "Scenario Name General Summary Report";
+            currentCell.Row += 2;
+
+            //TO-DO
             //Target Budgets Table
-            UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
-            var targetBudgets = _unitOfWork.BudgetRepo.GetBudgetYearsBySimulationId(simulationId);
+            currentCell.Row += 2;
+
+            //TO-DO
+            //Budget Spent Table
+            currentCell.Row += 2;
+
+            //TO-DO
+            //Budget Remaining Table
+            currentCell.Row += 2;
 
             //Deficient Condition Goals Table
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var deficientConditoinGoals = _unitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
-            _generalDeficientConditionGoals.Fill(worksheet, reportOutputData, deficientConditoinGoals);
+            _generalDeficientConditionGoals.Fill(worksheet, reportOutputData, deficientConditoinGoals, ref currentCell);
+            currentCell.Row += 2;
 
             //Target Condition Goals Table
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var targetConditionGoals = _unitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationId);
-            _generalTargetConditionGoals.Fill(worksheet, reportOutputData, targetConditionGoals);
+            _generalTargetConditionGoals.Fill(worksheet, reportOutputData, targetConditionGoals, ref currentCell);
+            currentCell.Row += 2;
 
             return functionReturnValue;
         }

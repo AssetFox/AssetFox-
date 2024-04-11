@@ -184,18 +184,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var targetBudgets = _unitOfWork.BudgetRepo.GetBudgetYearsBySimulationId(simulationId);
             _generalBudgetSummary.FillTargetBudgets(generalWorksheet, reportOutputData);
-            _generalBudgetSummary.FillBudgetSpent(generalWorksheet, reportOutputData);
-            _generalBudgetSummary.FillBudgetRemaining(generalWorksheet, reportOutputData);
 
             //Deficient Condition Goals Table
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var deficientConditoinGoals = _unitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
-            //_generalDeficientConditionGoals.Fill(generalWorksheet, reportOutputData, deficientConditoinGoals);
+            _generalDeficientConditionGoals.Fill(generalWorksheet, reportOutputData, deficientConditoinGoals);
 
             //Target Condition Goals Table
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var targetConditionGoals = _unitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationId);
-            //_generalTargetConditionGoals.Fill(generalWorksheet, reportOutputData, targetConditionGoals);
+            _generalTargetConditionGoals.Fill(generalWorksheet, reportOutputData, targetConditionGoals);
 
             // Work Done Tab
             var workDoneWorksheet = excelPackage.Workbook.Worksheets.Add("Work Done");

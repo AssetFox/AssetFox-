@@ -13,14 +13,12 @@ using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.GeneralBudgetSummary;
 using OfficeOpenXml;
-<<<<<<< HEAD
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.WorkQueue.Logging;
 using AppliedResearchAssociates.iAM.Reporting.Models;
-=======
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-    using BridgeCareCore.Services;
->>>>>>> vnext/25618
+using BridgeCareCore.Services;
+
 
 namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
 {

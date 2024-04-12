@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
@@ -24,116 +25,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void FillTargetBudgets(ExcelWorksheet generalSummaryWorksheet, SimulationOutput simulationOutput)
-        {
-            CurrentCell currentCell = new CurrentCell { Row = 1, Column = 1 };
-            generalSummaryWorksheet.Cells[1, 1].Value = "Target Budgets";
-            currentCell.Row++;
-            int startingColumn = currentCell.Column;
-
-            int currentRow = currentCell.Row;
-            var budgets = _reportHelper.GetBudgets(simulationOutput.Years);
-
-            startingColumn = startingColumn + 1;
-            int firstRow = currentCell.Row;
-            foreach (var year in simulationOutput.Years)
-            {
-                generalSummaryWorksheet.Cells[currentCell.Row, startingColumn].Value = year.Year;
-                ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow - 1, startingColumn, currentRow - 1, startingColumn]);
-                startingColumn++;
-            }
-            int finalColumn = startingColumn;
-            startingColumn = currentCell.Column;
-            currentRow = currentRow + 1;
-            int assetCount = simulationOutput.Years[0].Assets.Count;
-            int budgetIndex = 0;
-
-            for (int i = 0; i < assetCount; i++)
-            {
-                foreach (var budget in budgets)
-                {
-                    // Add budget to worksheet only if there are more budgets than assets
-                    if (budgetIndex < assetCount)
-                    {
-                        generalSummaryWorksheet.Cells[currentRow, startingColumn].Value = budget;
-                        ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, startingColumn, currentRow, startingColumn]);
-                        currentRow++;
-                        budgetIndex++;
-                    }
-                }
-            }
-            generalSummaryWorksheet.Cells[currentRow, startingColumn].Value = "Total Target Budgets";
-            ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, 1, currentRow, startingColumn]);
-
-            // Reset currentRow for writing yearly spent
-            currentRow = firstRow + 1;
-            // Initialize the column index for the current year
-            int currentYearColumn = startingColumn + 1;
-
-            // Iterate over the years
-            foreach (var year in simulationOutput.Years)
-            {
-                int finalRow = 1;
-
-                // Initialize total spent for the current year
-                decimal totalYearlySpent = 0;
-
-                // Iterate over the assets for the current year
-                foreach (var asset in year.Assets)
-                {
-
-                    // Check if the asset contains treatment considerations
-                    if (asset.TreatmentConsiderations != null && asset.TreatmentConsiderations.Any())
-                    {
-                        // Iterate over the treatment considerations
-                        foreach (var treatmentConsideration in asset.TreatmentConsiderations)
-                        {
-
-                            // Check if the treatment has funding data
-                            if (treatmentConsideration.FundingCalculationInput != null && treatmentConsideration.FundingCalculationInput.CurrentBudgetsToSpend != null)
-                            {
-                                // Iterate over the treatments to fund
-                                foreach (var fundedTreatment in treatmentConsideration.FundingCalculationInput.TreatmentsToFund)
-                                {
-                                    // Add treatment cost to the worksheet
-                                    generalSummaryWorksheet.Cells[currentRow, currentYearColumn].Value = fundedTreatment.Cost;
-                                    ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
-
-                                    // Increment total yearly spent
-                                    totalYearlySpent += fundedTreatment.Cost;
-
-                                    // Move to the next row for the next treatment
-                                    currentRow++;
-
-                                }
-                                finalRow = currentRow;
-                                currentCell.Row = currentRow;
-                                currentCell.Column = currentYearColumn;
-
-                            }
-                        }
-                    }
-                }
-                // Move to the next column
-                currentYearColumn++;
-
-
-                // Write total yearly spent at the bottom of the column
-                generalSummaryWorksheet.Cells[finalRow, currentYearColumn].Value = totalYearlySpent;
-                currentRow = firstRow + 1;
-                ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[finalRow, startingColumn, finalRow, startingColumn + 1]);
-
-                currentCell.Row = finalRow;
-            }
-            ExcelHelper.MergeCells(generalSummaryWorksheet, 1, 1, 1, finalColumn);
-
-            FillBudgetSpent(generalSummaryWorksheet, simulationOutput, currentCell);
-        }
-        public void FillBudgetSpent(ExcelWorksheet generalSummaryWorksheet, SimulationOutput simulationOutput, CurrentCell currentCell)
+        public void FillTargetBudgets(ExcelWorksheet generalSummaryWorksheet, SimulationOutput simulationOutput, CurrentCell currentCell)
         {
             generalSummaryWorksheet.Column(1).SetTrueWidth(20);
-            currentCell.Row = currentCell.Row + 7;
-            generalSummaryWorksheet.Cells[currentCell.Row, 1].Value = "Budget Spent";
+            currentCell.Row = currentCell.Row;
+            generalSummaryWorksheet.Cells[currentCell.Row, 1].Value = "Target Budgets";
             currentCell.Row++;
             int startingColumn = 1;
 
@@ -172,11 +68,95 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
 
             int firstRow = currentCell.Row;
 
+            int currentYearColumn = startingColumn + 1;
+
             foreach (var year in simulationOutput.Years)
             {
                 int finalRow = 1;
 
-                decimal totalYearlySpent = 0; // Initialize total spent for the current year
+                decimal totalYearlySpent = 0; 
+                foreach (var budget in year.Budgets)
+                {
+                    if (budget.AvailableFunding != null)
+                    {
+                            // Write budget name and spent amount to the worksheet
+                            generalSummaryWorksheet.Cells[currentRow, currentYearColumn].Value = budget.AvailableFunding;
+                            totalYearlySpent += budget.AvailableFunding;
+                            ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
+
+                        // Move to the next row
+                        currentRow++;
+                        finalRow = currentRow;
+                        ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[firstRow - 1, 1, firstRow - 1, finalColumn - 1]);
+                    }
+                }
+                ExcelHelper.MergeCells(generalSummaryWorksheet, firstRow - 1, 1, firstRow - 1, finalColumn - 1);
+                // Write total yearly spent at the bottom of the column
+                generalSummaryWorksheet.Cells[finalRow, startingColumn + 1].Value = totalYearlySpent;
+                ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[finalRow, startingColumn, finalRow, startingColumn + 1]);
+
+                // Reset currentRow for the next column
+                currentYearColumn++;
+                currentRow = firstRow + 1;
+
+                // Move to the next column for the next year
+                startingColumn++;
+                currentCell.Row = finalRow;
+            }
+            FillBudgetSpent(generalSummaryWorksheet, simulationOutput, currentCell);
+        }
+        public void FillBudgetSpent(ExcelWorksheet generalSummaryWorksheet, SimulationOutput simulationOutput, CurrentCell currentCell)
+        {
+            generalSummaryWorksheet.Column(1).SetTrueWidth(20);
+            generalSummaryWorksheet.Cells[currentCell.Row + 2, 1].Value = "Budget Spent";
+            currentCell.Row++;
+            int startingColumn = currentCell.Column;
+
+            int currentRow = currentCell.Row + 2;
+            var budgets = _reportHelper.GetBudgets(simulationOutput.Years);
+
+            startingColumn = startingColumn + 1;
+            int firstRow = currentCell.Row + 2;
+            currentCell.Row = currentCell.Row + 2;
+            foreach (var year in simulationOutput.Years)
+            {
+                generalSummaryWorksheet.Cells[currentCell.Row, startingColumn].Value = year.Year;
+                ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, startingColumn, currentRow, startingColumn]);
+                startingColumn++;
+            }
+
+            int finalColumn = startingColumn;
+            startingColumn = currentCell.Column;
+            currentRow = currentRow + 1;
+            int assetCount = simulationOutput.Years[0].Assets.Count;
+
+            Dictionary<string, int> budgetMap = new Dictionary<string, int>();
+            foreach (var budget in simulationOutput.Years[0].Budgets)
+            {
+                budgetMap.Add(budget.BudgetName, currentRow);
+                generalSummaryWorksheet.Cells[currentRow, startingColumn].Value = budget.BudgetName;
+                ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, startingColumn, currentRow, startingColumn]);
+                currentRow++;
+            }
+            generalSummaryWorksheet.Cells[currentRow, startingColumn].Value = "Total Target Budgets";
+            ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, 1, currentRow, startingColumn]);
+
+            // Reset currentRow for writing yearly spent
+            currentRow = firstRow + 1;
+            // Initialize the column index for the current year
+            int currentYearColumn = startingColumn + 1;
+
+            var workSummaryByBudgetData = new List<WorkSummaryByBudgetModel>();
+
+            var budgetsList = new HashSet<string>();
+
+            Dictionary<string, List<(decimal AllocatedAmount, int Year)>> listOfBudgetsSpent = new Dictionary<string, List<(decimal, int)>>();
+            foreach (var year in simulationOutput.Years)
+            {
+                int finalRow = 1;
+
+                // Initialize total spent for the current year
+                decimal totalYearlySpent = 0;
 
                 // Iterate over the assets for the current year
                 foreach (var asset in year.Assets)
@@ -187,52 +167,102 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                         // Iterate over the treatment considerations
                         foreach (var treatmentConsideration in asset.TreatmentConsiderations)
                         {
-                            int currentYearColumn = startingColumn + 1;
-                            if (treatmentConsideration.FundingCalculationInput != null)
+                            // Check if the treatment has funding data
+                            if (treatmentConsideration.FundingCalculationOutput != null)
                             {
-                                if (treatmentConsideration.FundingCalculationInput.CurrentBudgetsToSpend != null)
+                                Dictionary<(string Name, int Year), decimal> aggregatedAmounts = new Dictionary<(string, int), decimal>();
+
+                                foreach (var fundedTreatment in treatmentConsideration.FundingCalculationOutput.AllocationMatrix)
                                 {
-                                    // Iterate over the budget spent data
-                                    foreach (var budgetSpent in treatmentConsideration.FundingCalculationInput.CurrentBudgetsToSpend)
+                                    int rowNumber = budgetMap[fundedTreatment.BudgetName];
+
+                                    // Add or update the aggregated amount for the current budget name and year
+                                    var key = (fundedTreatment.BudgetName, fundedTreatment.Year);
+                                    if (aggregatedAmounts.ContainsKey(key))
                                     {
-                                        // Write budget name and spent amount to the worksheet
-                                        generalSummaryWorksheet.Cells[currentRow, currentYearColumn].Value = budgetSpent.Amount;
-                                        ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
-
-                                        // Increment total yearly spent
-                                        totalYearlySpent += budgetSpent.Amount;
-
-                                        // Move to the next row
-                                        currentRow++;
+                                        aggregatedAmounts[key] += fundedTreatment.AllocatedAmount;
                                     }
-                                    finalRow = currentRow;
-                                    currentRow = firstRow + 1;
-                                    currentYearColumn++;
-                                    ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[firstRow - 1, 1, firstRow - 1, finalColumn - 1]);
+                                    else
+                                    {
+                                        aggregatedAmounts[key] = fundedTreatment.AllocatedAmount;
+                                    }
+
+                                    // Add treatment cost to the worksheet
+                                    generalSummaryWorksheet.Cells[rowNumber, currentYearColumn].Value = fundedTreatment.AllocatedAmount;
+                                    ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[rowNumber, currentYearColumn, rowNumber, currentYearColumn]);
+
+                                    // Move to the next row for the next treatment
+                                    currentRow++;
                                 }
 
+                                foreach (var kvp in aggregatedAmounts)
+                                {
+                                    // Check if an entry already exists for the same name
+                                    if (listOfBudgetsSpent.TryGetValue(kvp.Key.Name, out var existingEntries))
+                                    {
+                                        // Check if any existing entry has the same year
+                                        bool yearExists = existingEntries.Any(entry => entry.Year == kvp.Key.Year);
+
+                                        if (!yearExists)
+                                        {
+                                            // Year does not exist, add the new value to the existing list
+                                            listOfBudgetsSpent[kvp.Key.Name].Add((kvp.Value, kvp.Key.Year));
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // Entry does not exist, create a new list and add the new entry
+                                        var newList = new List<(decimal, int)>();
+                                        newList.Add((kvp.Value, kvp.Key.Year));
+                                        listOfBudgetsSpent.Add(kvp.Key.Name, newList);
+                                    }
+                                }
+                                finalRow = currentRow;
+                                currentCell.Row = currentRow;
+                                currentCell.Column = currentYearColumn;
                             }
                         }
                     }
                 }
-                ExcelHelper.MergeCells(generalSummaryWorksheet, firstRow - 1, 1, firstRow - 1, finalColumn - 1);
+                // Move to the next column
+                currentYearColumn++;
+
+
                 // Write total yearly spent at the bottom of the column
-                generalSummaryWorksheet.Cells[finalRow, startingColumn + 1].Value = totalYearlySpent;
-                ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[finalRow, startingColumn, finalRow, startingColumn + 1]);
+                generalSummaryWorksheet.Cells[simulationOutput.Years[0].Assets.Count + 3, currentYearColumn - 1].Value = totalYearlySpent;
+                currentRow = firstRow + 1;
+                ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[simulationOutput.Years[0].Assets.Count + 3, currentYearColumn - 1, simulationOutput.Years[0].Assets.Count + 3, currentYearColumn - 1]);
 
-                // Reset currentRow for the next column
-                currentRow = currentRow + 1;
-
-                // Move to the next column for the next year
-                startingColumn++;
                 currentCell.Row = finalRow;
             }
-            FillBudgetRemaining(generalSummaryWorksheet, simulationOutput, currentCell);
+            int firstYear = simulationOutput.Years[0].Year;
+            foreach (var kvp in budgetMap)
+            {
+                // Get the corresponding row number and budget name
+                int rowNumber = kvp.Value;
+                string budgetName = kvp.Key;
+
+                // Check if the budget name exists in listOfBudgetsSpent
+                if (listOfBudgetsSpent.ContainsKey(budgetName))
+                {
+                    foreach (var listofBudgets in listOfBudgetsSpent[budgetName])
+                    {
+                        var eachAmount = listofBudgets.AllocatedAmount;
+                        var eachYear = listofBudgets.Year - firstYear;
+                        eachYear = eachYear + 2;
+                        generalSummaryWorksheet.Cells[rowNumber, eachYear].Value = eachAmount;
+                    }
+                }
+            }
+            currentCell.Row = firstRow + simulationOutput.Years[0].Budgets.Count;
+            ExcelHelper.MergeCells(generalSummaryWorksheet, firstRow - 1, 1, firstRow - 1, finalColumn - 1);
+            ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[firstRow - 1, 1, firstRow, finalColumn - 1]);
+            FillBudgetRemaining(generalSummaryWorksheet, simulationOutput, currentCell, listOfBudgetsSpent);
         }
 
-        public void FillBudgetRemaining(ExcelWorksheet generalSummaryWorksheet, SimulationOutput simulationOutput, CurrentCell currentCell)
+        public void FillBudgetRemaining(ExcelWorksheet generalSummaryWorksheet, SimulationOutput simulationOutput, CurrentCell currentCell, Dictionary<string, List<(decimal AllocatedAmount, int Year)>> listOfBudgetsSpent)
         {
-            currentCell.Row = currentCell.Row + 2;
+            currentCell.Row = currentCell.Row + 3;
             generalSummaryWorksheet.Cells[currentCell.Row, 1].Value = "Budget Remaining";
             currentCell.Row++;
             int startingColumn = 1;
@@ -250,9 +280,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             }
             int finalColumn = startingColumn;
             startingColumn = 1;
-            foreach (var budget in budgets)
+            foreach (var budget in simulationOutput.Years[0].Budgets)
             {
-                generalSummaryWorksheet.Cells[currentRow, startingColumn].Value = budget;
+                generalSummaryWorksheet.Cells[currentRow, startingColumn].Value = budget.BudgetName;
                 ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, startingColumn, currentRow, startingColumn]);
                 currentRow++;
             }
@@ -262,58 +292,65 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             startingColumn = 1;
 
             int firstRow = currentCell.Row;
-
+            int currentYearColumn = startingColumn + 1;
             foreach (var year in simulationOutput.Years)
             {
                 int finalRow = 1;
                 decimal totalYearlySpent = 0; // Initialize total spent for the current year
 
                 // Iterate over the assets for the current year
-                foreach (var asset in year.Assets)
+                foreach (var budget in year.Budgets)
                 {
                     // Check if the asset contains treatment considerations
-                    if (asset.TreatmentConsiderations != null && asset.TreatmentConsiderations.Any())
+                    if (budget.AvailableFunding != null)
                     {
-                        // Iterate over the treatment considerations
-                        foreach (var treatmentConsideration in asset.TreatmentConsiderations)
-                        {
-                            int currentYearColumn = startingColumn + 1;
-                            if (treatmentConsideration.FundingCalculationInput != null)
-                            {
-                                if (treatmentConsideration.FundingCalculationInput.CurrentBudgetsToSpend != null &&
-                                    treatmentConsideration.FundingCalculationInput.TreatmentsToFund != null)
-                                {
-                                    var budgetsSpent = treatmentConsideration.FundingCalculationInput.CurrentBudgetsToSpend;
-                                    var treatmentsFunded = treatmentConsideration.FundingCalculationInput.TreatmentsToFund;
+                                    var budgetsSpent = budget.AvailableFunding;
+                                    var treatmentName = budget.BudgetName;
+                                        if (listOfBudgetsSpent.ContainsKey(treatmentName))
+                                        {
+                                            // Find the entry with the matching year
+                                            var matchingEntry = listOfBudgetsSpent[treatmentName].FirstOrDefault(entry => entry.Year == year.Year);
 
-                                    // Iterate over budgets spent and treatments funded
-                                    for (int i = 0; i < budgetsSpent.Count; i++)
-                                    {
-                                            var budgetSpent = budgetsSpent[i];
-                                            var treatmentFunded = treatmentsFunded[0];
+                                            if (matchingEntry != default)
+                                            {
+                                                // Entry with the matching year found
+                                                decimal currentAllocatedAmount = matchingEntry.AllocatedAmount;
 
-                                            // Calculate remaining budget
-                                            decimal remainingBudget = budgetSpent.Amount - treatmentFunded.Cost;
+                                                // Subtract budgetSpent.Amount from the current allocated amount
+                                                decimal updatedAllocatedAmount = budgetsSpent - currentAllocatedAmount;
 
-                                            // Write budget name and spent amount to the worksheet
-                                            generalSummaryWorksheet.Cells[currentRow, currentYearColumn].Value = remainingBudget;
-                                            ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
+                                                generalSummaryWorksheet.Cells[currentRow, currentYearColumn].Value = updatedAllocatedAmount;
+                                                ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
+                                            }
+                                            else
+                                            {
+                                                // Write budget name and spent amount to the worksheet
+                                                generalSummaryWorksheet.Cells[currentRow, currentYearColumn].Value = budgetsSpent;
+                                                ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
 
-                                            // Increment total yearly spent
-                                            totalYearlySpent += remainingBudget;
+                                                // Increment total yearly spent
+                                                totalYearlySpent += budgetsSpent;
+
+                                            }
+                                        }
+                                        else
+                                        {
+                                                // Write budget name and spent amount to the worksheet
+                                                generalSummaryWorksheet.Cells[currentRow, currentYearColumn].Value = budgetsSpent;
+                                                ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
+
+                                                // Increment total yearly spent
+                                                totalYearlySpent += budgetsSpent;
+                                        }
 
                                             // Move to the next row
                                             currentRow++;
-                                    }
                                     finalRow = currentRow;
-                                    currentRow = firstRow + 1;
-                                    currentYearColumn++;
                                     ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[firstRow - 1, 1, firstRow - 1, finalColumn - 1]);
-                                }
-                            }
-                        }
                     }
                 }
+                currentRow = firstRow;
+                currentYearColumn++;
                 ExcelHelper.MergeCells(generalSummaryWorksheet, firstRow - 1, 1, firstRow - 1, finalColumn - 1);
                 // Write total yearly spent at the bottom of the column
                 generalSummaryWorksheet.Cells[finalRow, startingColumn + 1].Value = totalYearlySpent;

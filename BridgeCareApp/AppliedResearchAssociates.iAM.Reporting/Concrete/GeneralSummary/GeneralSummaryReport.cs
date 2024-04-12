@@ -193,7 +193,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
                         
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var targetBudgets = _unitOfWork.BudgetRepo.GetBudgetYearsBySimulationId(simulationId);
-            _generalBudgetSummary.FillTargetBudgets(generalWorksheet, reportOutputData, currentCell);
+            _generalBudgetSummary.FillTargetBudgets(generalWorksheet, reportOutputData);
 
             //Deficient Condition Goals Table
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);

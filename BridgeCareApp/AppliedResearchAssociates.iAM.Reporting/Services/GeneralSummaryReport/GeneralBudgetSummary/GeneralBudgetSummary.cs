@@ -25,8 +25,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void FillTargetBudgets(ExcelWorksheet generalSummaryWorksheet, SimulationOutput simulationOutput, CurrentCell currentCell)
+        public void FillTargetBudgets(ExcelWorksheet generalSummaryWorksheet, SimulationOutput simulationOutput)
         {
+            CurrentCell currentCell = new CurrentCell
+            {
+                Row = 1, // Initialize the row number
+                Column = 1 // Initialize the column number
+            };
             generalSummaryWorksheet.Column(1).SetTrueWidth(20);
             currentCell.Row = currentCell.Row;
             generalSummaryWorksheet.Cells[currentCell.Row, 1].Value = "Target Budgets";
@@ -149,12 +154,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             var workSummaryByBudgetData = new List<WorkSummaryByBudgetModel>();
 
             var budgetsList = new HashSet<string>();
+            int finalRow = 1;
 
             Dictionary<string, List<(decimal AllocatedAmount, int Year)>> listOfBudgetsSpent = new Dictionary<string, List<(decimal, int)>>();
             foreach (var year in simulationOutput.Years)
             {
-                int finalRow = 1;
-
+                finalRow = 1;
                 // Initialize total spent for the current year
                 decimal totalYearlySpent = 0;
 
@@ -224,12 +229,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                         }
                     }
                 }
+                generalSummaryWorksheet.Cells[firstRow + simulationOutput.Years[0].Budgets.Count + 1, currentYearColumn].Value = totalYearlySpent;
                 // Move to the next column
                 currentYearColumn++;
 
 
-                // Write total yearly spent at the bottom of the column
-                generalSummaryWorksheet.Cells[simulationOutput.Years[0].Assets.Count + 3, currentYearColumn - 1].Value = totalYearlySpent;
                 currentRow = firstRow + 1;
                 ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[simulationOutput.Years[0].Assets.Count + 3, currentYearColumn - 1, simulationOutput.Years[0].Assets.Count + 3, currentYearColumn - 1]);
 
@@ -254,6 +258,28 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                     }
                 }
             }
+            // Get the dimensions of the worksheet
+            int rowCount = generalSummaryWorksheet.Dimension.Rows;
+            int colCount = generalSummaryWorksheet.Dimension.Columns;
+
+            // Iterate through each row and column
+            for (int row = firstRow + 1; row <= firstRow + simulationOutput.Years[0].Budgets.Count; row++)
+            {
+                for (int col = 1; col <= colCount; col++)
+                {
+                    // Get the cell value
+                    var cellValue = generalSummaryWorksheet.Cells[row, col].Value;
+
+                    // Check if the cell is empty
+                    if (cellValue == null)
+                    {
+                        // If the cell is empty, set its value to 0
+                        generalSummaryWorksheet.Cells[row, col].Value = 0;
+                        ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[row, col, row, col]);
+                    }
+                }
+            }
+
             currentCell.Row = firstRow + simulationOutput.Years[0].Budgets.Count;
             ExcelHelper.MergeCells(generalSummaryWorksheet, firstRow - 1, 1, firstRow - 1, finalColumn - 1);
             ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[firstRow - 1, 1, firstRow, finalColumn - 1]);

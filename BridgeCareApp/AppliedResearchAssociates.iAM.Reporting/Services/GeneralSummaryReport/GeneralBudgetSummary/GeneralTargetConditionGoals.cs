@@ -46,6 +46,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
 
             currentCell.Row++;
 
+            // Check if the list is null or empty
+            if (targetConditions == null || targetConditions.Count == 0)
+            {
+                generalSummaryWorksheet.Cells[currentCell.Row, startingColumn].Value = "No Target Condition Goals for Scenario";
+                generalSummaryWorksheet.Cells[currentCell.Row, startingColumn, currentCell.Row, currentCell.Column - 1].Merge = true; // Optional: merge cells to center the text
+                generalSummaryWorksheet.Cells[currentCell.Row, startingColumn].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center; // Center the text horizontally
+                return; // Exit the method as there's nothing more to fill
+            }
+
             // Iterate over each TargetConditionGoalDTO to populate the table
             foreach (var goalDTO in targetConditions)
             {

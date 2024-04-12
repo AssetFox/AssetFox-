@@ -190,12 +190,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             // Insert actual scenario name here
             generalWorksheet.Cells[currentCell.Row, currentCell.Column].Value = "Scenario Name General Summary Report";
             currentCell.Row += 2;
-
-            
+                        
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var targetBudgets = _unitOfWork.BudgetRepo.GetBudgetYearsBySimulationId(simulationId);
             _generalBudgetSummary.FillTargetBudgets(generalWorksheet, reportOutputData, currentCell);
-
 
             //Deficient Condition Goals Table
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
@@ -203,11 +201,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             GeneralDeficientConditionGoals.Fill(generalWorksheet, reportOutputData, deficientConditoinGoals, currentCell);
             currentCell.Row += 2;
 
-
             //Target Condition Goals Table
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var targetConditionGoals = _unitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationId);
-
             GeneralTargetConditionGoals.Fill(generalWorksheet, reportOutputData, targetConditionGoals, currentCell);
             currentCell.Row += 2;
 

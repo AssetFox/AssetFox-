@@ -42,6 +42,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
 
             currentCell.Row++;
 
+            // Check if the list is null or empty
+            if (deficientConditions == null || deficientConditions.Count == 0)
+            {
+                generalSummaryWorksheet.Cells[currentCell.Row, startingColumn].Value = "No Deficient Condition Goals for Scenario";
+                generalSummaryWorksheet.Cells[currentCell.Row, startingColumn, currentCell.Row, currentCell.Column - 1].Merge = true; // Optional: merge cells to center the text
+                generalSummaryWorksheet.Cells[currentCell.Row, startingColumn].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center; // Center the text horizontally
+                return; // Exit the method as there's nothing more to fill
+            }
+
             // Populating data for each goal
             foreach (var goalDTO in deficientConditions)
             {
@@ -68,7 +77,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
 
                 currentCell.Row++; // Move to the next row for the next goal
             }
-            //return currentCell;
+            
         }
     }
 }

@@ -22,9 +22,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void Fill(ExcelWorksheet generalSummaryWorksheet, SimulationOutput reportOutputData, IList<TargetConditionGoalDTO> targetConditions, ref CurrentCell currentCell)
+        public static void Fill(ExcelWorksheet generalSummaryWorksheet, SimulationOutput reportOutputData, IList<TargetConditionGoalDTO> targetConditions, CurrentCell currentCell)
         {
-            //CurrentCell currentCell = new CurrentCell { Row = 1, Column = 1 };
             generalSummaryWorksheet.Cells[currentCell.Row, currentCell.Column].Value = "Target Condition Goals";
             currentCell.Row++;
             int startingColumn = currentCell.Column;

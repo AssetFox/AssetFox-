@@ -200,13 +200,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             //Deficient Condition Goals Table
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var deficientConditoinGoals = _unitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
-            _generalDeficientConditionGoals.Fill(worksheet, reportOutputData, deficientConditoinGoals, ref currentCell);
+            GeneralDeficientConditionGoals.Fill(worksheet, reportOutputData, deficientConditoinGoals, currentCell);
             currentCell.Row += 2;
 
             //Target Condition Goals Table
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var targetConditionGoals = _unitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationId);
-            _generalTargetConditionGoals.Fill(worksheet, reportOutputData, targetConditionGoals, ref currentCell);
+            GeneralTargetConditionGoals.Fill(worksheet, reportOutputData, targetConditionGoals, currentCell);
             currentCell.Row += 2;
 
             return functionReturnValue;

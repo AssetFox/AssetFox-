@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void Fill(ExcelWorksheet generalSummaryWorksheet, SimulationOutput reportOutputData, IList<DeficientConditionGoalDTO> deficientConditions, ref CurrentCell currentCell)
+        public static void Fill(ExcelWorksheet generalSummaryWorksheet, SimulationOutput reportOutputData, IList<DeficientConditionGoalDTO> deficientConditions, CurrentCell currentCell)
         {
             //CurrentCell currentCell = new CurrentCell { Row = 2, Column = 1 };
             generalSummaryWorksheet.Cells[currentCell.Row, currentCell.Column].Value = "Deficient Condition Goals";
@@ -68,6 +68,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
 
                 currentCell.Row++; // Move to the next row for the next goal
             }
+            //return currentCell;
         }
     }
 }

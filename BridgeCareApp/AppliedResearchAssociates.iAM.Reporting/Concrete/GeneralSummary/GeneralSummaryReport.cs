@@ -18,6 +18,7 @@ using AppliedResearchAssociates.iAM.WorkQueue.Logging;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using BridgeCareCore.Services;
+using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 
 namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
@@ -187,13 +188,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             CurrentCell currentCell = new CurrentCell { Row = 1, Column = 1 };
 
             //TO-DO
+            var scenarioName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
             // Insert actual scenario name here
-            generalWorksheet.Cells[currentCell.Row, currentCell.Column].Value = "Scenario Name General Summary Report";
+            generalWorksheet.Cells[currentCell.Row, currentCell.Column].Value = $"{scenarioName} General Summary Report";
+            ExcelHelper.MergeCells(generalWorksheet, 1, 1, 1, reportOutputData.Years.Count + 1);
+            ExcelHelper.ApplyBorder(generalWorksheet.Cells[1, 1, 1, reportOutputData.Years.Count + 1]);
             currentCell.Row += 2;
                         
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var targetBudgets = _unitOfWork.BudgetRepo.GetBudgetYearsBySimulationId(simulationId);
-            _generalBudgetSummary.FillTargetBudgets(generalWorksheet, reportOutputData);
+            _generalBudgetSummary.FillTargetBudgets(generalWorksheet, reportOutputData, currentCell);
 
             //Deficient Condition Goals Table
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);

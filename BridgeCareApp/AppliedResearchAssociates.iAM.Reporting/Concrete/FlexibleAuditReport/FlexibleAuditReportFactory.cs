@@ -5,13 +5,13 @@ using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
-    public class PAMSDistressProgressionReportFactory : IReportFactory
+    public class FlexibleAuditReportFactory : IReportFactory
     {
-        public string Name => "PAMSDistressProgressionReport";
+        public string Name => "FlexibleAuditReport";
 
         public IReport Create(IUnitOfWork uow, ReportIndexDTO results, IHubService hubService, string suffix = "")
         {
-            var report = new PAMSDistressProgressionReport(uow, Name, results);
+            var report = new FlexibleAuditReport(uow, Name, results, hubService);
             return report;
         }
     }

@@ -13,9 +13,14 @@ using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.GeneralBudgetSummary;
 using OfficeOpenXml;
+<<<<<<< HEAD
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.WorkQueue.Logging;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+=======
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+    using BridgeCareCore.Services;
+>>>>>>> vnext/25618
 
 namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
 {
@@ -27,6 +32,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
         private readonly GeneralBudgetSummary _generalBudgetSummary;
         private readonly GeneralDeficientConditionGoals _generalDeficientConditionGoals;
         private readonly GeneralTargetConditionGoals _generalTargetConditionGoals;
+        private readonly GeneralWorkDoneTab _generalWorkDoneTab;
 
         private Guid _networkId;
 
@@ -63,6 +69,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
 
             _generalBudgetSummary = new GeneralBudgetSummary(Warnings, _unitOfWork);
             //if (_generalBudgetSummary == null) { throw new ArgumentNullException(nameof(_generalBudgetSummary))};
+
+            _generalWorkDoneTab = new GeneralWorkDoneTab(_unitOfWork);
 
             _reportHelper = new ReportHelper(_unitOfWork);
 
@@ -176,38 +184,79 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
 
             using var excelPackage = new ExcelPackage(new FileInfo("GeneralSummaryReport.xlsx"));
-            var worksheet = excelPackage.Workbook.Worksheets.Add("General Summary");
+            var generalWorksheet = excelPackage.Workbook.Worksheets.Add("General Summary");
 
             CurrentCell currentCell = new CurrentCell { Row = 1, Column = 1 };
 
             //TO-DO
             // Insert actual scenario name here
-            worksheet.Cells[currentCell.Row, currentCell.Column].Value = "Scenario Name General Summary Report";
+            generalWorksheet.Cells[currentCell.Row, currentCell.Column].Value = "Scenario Name General Summary Report";
             currentCell.Row += 2;
 
-            //TO-DO
-            //Target Budgets Table
-            currentCell.Row += 2;
+            
+            UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
+            var targetBudgets = _unitOfWork.BudgetRepo.GetBudgetYearsBySimulationId(simulationId);
+            _generalBudgetSummary.FillTargetBudgets(generalWorksheet, reportOutputData);
+            _generalBudgetSummary.FillBudgetSpent(generalWorksheet, reportOutputData);
+            _generalBudgetSummary.FillBudgetRemaining(generalWorksheet, reportOutputData);
 
-            //TO-DO
-            //Budget Spent Table
-            currentCell.Row += 2;
-
-            //TO-DO
-            //Budget Remaining Table
-            currentCell.Row += 2;
 
             //Deficient Condition Goals Table
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var deficientConditoinGoals = _unitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
-            GeneralDeficientConditionGoals.Fill(worksheet, reportOutputData, deficientConditoinGoals, currentCell);
+            GeneralDeficientConditionGoals.Fill(generalWorksheet, reportOutputData, deficientConditoinGoals, currentCell);
             currentCell.Row += 2;
+
 
             //Target Condition Goals Table
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var targetConditionGoals = _unitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationId);
-            GeneralTargetConditionGoals.Fill(worksheet, reportOutputData, targetConditionGoals, currentCell);
+
+            GeneralTargetConditionGoals.Fill(generalWorksheet, reportOutputData, targetConditionGoals, currentCell);
             currentCell.Row += 2;
+
+            // Work Done Tab
+            var workDoneWorksheet = excelPackage.Workbook.Worksheets.Add("Work Done");
+            var simulationOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
+
+            // Sort data
+            simulationOutput.InitialAssetSummaries.Sort(
+                    (a, b) => _reportHelper.CheckAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_reportHelper.CheckAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
+                    );
+
+            foreach (var yearlySectionData in simulationOutput.Years)
+            {
+                yearlySectionData.Assets.Sort(
+                    (a, b) => _reportHelper.CheckAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_reportHelper.CheckAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
+                    );
+            }
+
+            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
+            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
+            _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
+            var simulation = network.Simulations.First();
+            _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
+            var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
+            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
+            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
+            var performanceCurvesAttributes = _reportHelper.GetPerformanceCurvesAttributes(simulation);
+            //HashSet<string> performanceCurvesAttributes = new HashSet<string>(attributeNameLookup.Values);
+            var primaryKeyField = _unitOfWork.AdminSettingsRepo.GetKeyFields();
+            _generalWorkDoneTab.Fill(workDoneWorksheet, reportOutputData, simulation, performanceCurvesAttributes);
+
+            //check and generate folder
+            var folderPathForSimulation = $"Reports\\{simulationId}";
+            Directory.CreateDirectory(folderPathForSimulation);
+            var filePath = Path.Combine(folderPathForSimulation, "GeneralSummaryReport.xlsx");
+
+
+            checkCancelled(cancellationToken, simulationId);
+            var bin = excelPackage.GetAsByteArray();
+            File.WriteAllBytes(filePath, bin);
+
+            //set return value
+            functionReturnValue = filePath;
 
             return functionReturnValue;
         }

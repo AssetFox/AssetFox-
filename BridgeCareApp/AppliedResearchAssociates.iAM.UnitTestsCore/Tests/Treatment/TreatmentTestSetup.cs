@@ -32,6 +32,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             dto.Budgets = budgets;
             budgetIds ??= new List<Guid>();
             dto.BudgetIds = budgetIds;
+            dto.AssetType = "";
             var treatmentBudget = BudgetDtos.New();
             var treatmentBudgets = new List<BudgetDTO> { treatmentBudget };
             ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, treatmentBudgets, simulationId);

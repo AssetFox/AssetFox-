@@ -13,6 +13,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using static AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary.PavementTreatmentHelper;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
 {
@@ -39,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             Dictionary<string, Budget> yearlyBudgetAmount,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int pavementCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
-            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
+            Dictionary<int, Dictionary<TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
             List<(string TreatmentName, string AssetType, TreatmentCategory Category)> simulationTreatments,
             Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals,
             ICollection<CommittedProject> committedProjects,
@@ -192,7 +193,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     foreach (var yearlyValue in yearlyValues.Value)
                     {
                         var treatment = yearlyValue.Key;
-                        if (treatment.Contains("Bundle") && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
+                        if (treatment.Contains("Bundle"))// && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
                         {
                             var category = TreatmentCategory.Bundled;
                             decimal cost = 0;
@@ -321,7 +322,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     foreach (var yearlyValue in yearlyValues.Value)
                     {
                         var treatment = yearlyValue.Key;
-                        if (treatment.Contains("Bundle") && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
+                        if (treatment.Contains("Bundle"))// && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
                         {
                             var category = TreatmentCategory.Bundled;
                             decimal cost = 0;
@@ -448,7 +449,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     foreach (var yearlyValue in yearlyValues.Value)
                     {
                         var treatment = yearlyValue.Key;
-                        if (treatment.Contains("Bundle") && treatment.ToLower().Contains((char)PavementTreatmentHelper.TreatmentGroupCategory.Concrete))
+                        if (treatment.Contains("Bundle"))// && treatment.ToLower().Contains((char)TreatmentGroupCategory.Concrete))
                         {
                             var category = TreatmentCategory.Bundled;
                             decimal cost = 0;
@@ -498,26 +499,32 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             int startRow, startColumn, row, column;
             _pavementWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
 
-            var treatmentGroups = PavementTreatmentHelper.GetListOfTreatmentGroupForCategory(treatmentGroupCategory);
+            var treatmentGroups = GetListOfTreatmentGroupForCategory(treatmentGroupCategory);
             var prefix = GetTreatmentGroupString(treatmentGroupCategory) + " - ";
-            var treatmentGroupTitles = treatmentGroups.Select(tg => prefix + tg.GroupDescription).ToList();
+            var treatmentGroupTitles = treatmentGroups.Select(tg => prefix + tg.GroupDescription).Distinct().ToList();
 
             _pavementWorkSummaryCommon.SetPavementTreatmentGroupsExcelString(worksheet, treatmentGroupTitles, ref row, ref column);
 
             column++;
             var fromColumn = column + 1;
-
+            var descriptions = treatmentGroups.Select(_ => _.GroupDescription).Distinct().ToList();
             foreach (var yearlyValues in costAndLengthPerTreatmentGroupPerYear)
             {
                 row = startRow;
-                column = ++column;
-                foreach (var treatmentGroup in treatmentGroups)
+                column = ++column;                
+                foreach (var description in descriptions)
                 {
-                    yearlyValues.Value.TryGetValue(treatmentGroup, out var costAndLength);
-                    worksheet.Cells[row, column].Value = costAndLength.treatmentCost;
+                    decimal treatmentCost = 0;
+                    foreach (var treatmentGroup in treatmentGroups.Where(_ => _.GroupDescription.Equals(description)))
+                    {
+                        yearlyValues.Value.TryGetValue(treatmentGroup, out var costAndLength);
+                        treatmentCost += costAndLength.treatmentCost;
+                    }
+                    worksheet.Cells[row, column].Value = treatmentCost;
                     row++;
                 }
             }
+            
             row--;
 
             ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
@@ -530,7 +537,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
         private void FillTreatmentGroupTotalsSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears,
-            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear
+            Dictionary<int, Dictionary<TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear
             )
         {
             if (simulationYears.Count <= 0)
@@ -647,19 +654,28 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             ExcelHelper.ApplyColor(worksheet.Cells[startRow, column, row, column], Color.FromArgb(217, 217, 217));
 
+            worksheet.Cells[startRow, column + 1].Formula = ExcelFormulas.Percentage(startRow, column, totalSpendingRow, column);
+            worksheet.Cells[startRow, column + 1].Style.Numberformat.Format = "#0.00%";
+            worksheet.Cells[startRow, column + 2].Value = "Percentage spent on MAINTENANCE";
+
+            worksheet.Cells[startRow + 1, column + 1].Formula = ExcelFormulas.Percentage(startRow + 1, column, totalSpendingRow, column);
             worksheet.Cells[startRow + 1, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 1, column + 2].Value = "Percentage spent on PRESERVATION";
 
+            worksheet.Cells[startRow + 2, column + 1].Formula = ExcelFormulas.Percentage(startRow + 2, column, totalSpendingRow, column);
             worksheet.Cells[startRow + 2, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 2, column + 2].Value = "Percentage spent on REHABILITATION";
 
+            worksheet.Cells[startRow + 3, column + 1].Formula = ExcelFormulas.Percentage(startRow + 3, column, totalSpendingRow, column);
             worksheet.Cells[startRow + 3, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 3, column + 2].Value = "Percentage spent on RECONSTRUCTION";
 
+            worksheet.Cells[startRow + 4, column + 1].Formula = ExcelFormulas.Percentage(startRow + 4, column, totalSpendingRow, column);
             worksheet.Cells[startRow + 4, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 4, column + 2].Value = "Percentage spent on WORK OUTSIDE SCOPE/JURISDICTION";
 
             // TODO : should we hide this based on setting?
+            worksheet.Cells[startRow + 5, column + 1].Formula = ExcelFormulas.Percentage(startRow + 5, column, totalSpendingRow, column);
             worksheet.Cells[startRow + 5, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 5, column + 2].Value = "Percentage spent on BUNDLED";
 
@@ -782,25 +798,34 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelHelper.SetTextColor(worksheet.Cells[startRow, fromColumn, row, column - 1], Color.White);
 
             ExcelHelper.ApplyColor(worksheet.Cells[startRow, column, row, column], Color.FromArgb(217, 217, 217));
+           
+            worksheet.Cells[startRow, column + 1].Formula = ExcelFormulas.Percentage(startRow, column, totalSpendingRow, column);
+            worksheet.Cells[startRow, column + 1].Style.Numberformat.Format = "#0.00%";
+            worksheet.Cells[startRow, column + 2].Value = "Percentage spent on MAINTENANCE";
 
+            worksheet.Cells[startRow + 1, column + 1].Formula = ExcelFormulas.Percentage(startRow + 1, column, totalSpendingRow, column);
             worksheet.Cells[startRow + 1, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 1, column + 2].Value = "Percentage spent on PRESERVATION";
 
+            worksheet.Cells[startRow + 2, column + 1].Formula = ExcelFormulas.Percentage(startRow + 2, column, totalSpendingRow, column);
             worksheet.Cells[startRow + 2, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 2, column + 2].Value = "Percentage spent on REHABILITATION";
 
+            worksheet.Cells[startRow + 3, column + 1].Formula = ExcelFormulas.Percentage(startRow + 3, column, totalSpendingRow, column);
             worksheet.Cells[startRow + 3, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 3, column + 2].Value = "Percentage spent on RECONSTRUCTION";
 
+            worksheet.Cells[startRow + 4, column + 1].Formula = ExcelFormulas.Percentage(startRow + 4, column, totalSpendingRow, column);
             worksheet.Cells[startRow + 4, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 4, column + 2].Value = "Percentage spent on WORK OUTSIDE SCOPE/JURISDICTION";
 
             // TODO : should we hide this based on setting?
+            worksheet.Cells[startRow + 5, column + 1].Formula = ExcelFormulas.Percentage(startRow + 5, column, totalSpendingRow, column);
             worksheet.Cells[startRow + 5, column + 1].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow + 5, column + 2].Value = "Percentage spent on BUNDLED";
 
             row += 2;
-            worksheet.Cells[row, 1].Value = PAMSConstants.TotalWorkBudget;  
+            worksheet.Cells[row, 1].Value = PAMSConstants.TotalWorkBudget;
             column = fromColumn;
 
             decimal annualBudget = 0;
@@ -1394,7 +1419,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 double totalSpending = Convert.ToDouble(worksheet.Cells[totalSpendingRow, column].Value ?? 0.0);
 
                 // Calculate remaining budget
-                // TODO check if correct
                 var remainingBudget = yearlyBudget - totalSpending;
                 worksheet.Cells[row, column].Value = remainingBudget;
                 worksheet.Cells[row, column].Style.Numberformat.Format = "$#,##0.00";
@@ -1423,9 +1447,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             worksheet.Cells[startRow, column + 1].Formula = "SUM(" + worksheet.Cells[startRow, fromColumn, startRow, column].Address + ")";
             worksheet.Cells[startRow, column + 1].Style.Numberformat.Format = "$#,##0.00";
-
-
-
+            worksheet.Cells[startRow, column + 2].Formula = ExcelFormulas.Percentage(startRow, column + 1, totalSpendingRow + 2, column + 1);
+            worksheet.Cells[startRow, column + 2].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow, column + 3].Value = "Percentage of Total Budget that was Unspent";
 
             ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, startRow + 4, column]);
@@ -1503,7 +1526,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 }
 
                 decimal pamsBudgetTotal = Convert.ToDecimal(worksheet.Cells[totalSpendingRow, column].Value) - mpmsBudgetTotal - sapBudgetTotal - projectBuilderBudgetTotal;
-                decimal yearlyBudget = Convert.ToDecimal(yearlyBudgetAmount[workSummaryByBudgetModel.BudgetName].YearlyAmounts[yearIndex].Value);                
+                decimal yearlyBudget = Convert.ToDecimal(yearlyBudgetAmount[workSummaryByBudgetModel.BudgetName].YearlyAmounts[yearIndex].Value);
                 decimal remainingBudget = yearlyBudget - (pamsBudgetTotal + mpmsBudgetTotal + sapBudgetTotal + projectBuilderBudgetTotal);
                 worksheet.Cells[row, column].Value = Convert.ToDouble(remainingBudget);
                 worksheet.Cells[row, column].Style.Numberformat.Format = "$#,##0.00";
@@ -1516,25 +1539,28 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     worksheet.Cells[row + i, column].Value = Convert.ToDouble(percentage);
                     worksheet.Cells[row + i, column].Style.Numberformat.Format = "0.00%";
                 }
-
-                ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.Blue);
-                ExcelHelper.SetTextColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.White);
-
-                var projectBuilderColor = Color.FromArgb(248, 203, 173);
-                for (int i = 1; i <= 4; i++)
-                {
-                    ExcelHelper.ApplyColor(worksheet.Cells[startRow + i, fromColumn, startRow + i, column], projectBuilderColor);
-                }
-
-                worksheet.Cells[startRow, column + 1].Formula = "SUM(" + worksheet.Cells[startRow, fromColumn, startRow, column].Address + ")";
-                worksheet.Cells[startRow, column + 1].Style.Numberformat.Format = "$#,##0.00";
-                worksheet.Cells[startRow, column + 3].Value = "Percentage of Total Budget that was Unspent";
-                ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 3, column]);
-                ExcelHelper.ApplyBorder(worksheet.Cells[startRow, column + 1, startRow, column + 1]);
-                ExcelHelper.ApplyColor(worksheet.Cells[startRow, column + 1, startRow + 4, column + 1], Color.FromArgb(217, 217, 217));
-                ExcelHelper.SetCustomFormat(worksheet.Cells[startRow + 1, fromColumn, startRow + 4, column], ExcelHelperCellFormat.PercentageDecimal2);
-                _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, startRow + 5, column);
             }
+
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.Blue);
+            ExcelHelper.SetTextColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.White);
+
+            var projectBuilderColor = Color.FromArgb(248, 203, 173);
+            for (int i = 1; i <= 4; i++)
+            {
+                ExcelHelper.ApplyColor(worksheet.Cells[startRow + i, fromColumn, startRow + i, column], projectBuilderColor);
+            }
+
+            worksheet.Cells[startRow, column + 1].Formula = "SUM(" + worksheet.Cells[startRow, fromColumn, startRow, column].Address + ")";
+            worksheet.Cells[startRow, column + 1].Style.Numberformat.Format = "$#,##0.00";
+            worksheet.Cells[startRow, column + 2].Formula = ExcelFormulas.Percentage(startRow, column + 1, totalSpendingRow + 2, column + 1);
+            worksheet.Cells[startRow, column + 2].Style.Numberformat.Format = "#0.00%";
+            worksheet.Cells[startRow, column + 3].Value = "Percentage of Total Budget that was Unspent";
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 3, column]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, column + 1, startRow, column + 1]);
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, column + 1, startRow + 4, column + 1], Color.FromArgb(217, 217, 217));
+            ExcelHelper.SetCustomFormat(worksheet.Cells[startRow + 1, fromColumn, startRow + 4, column], ExcelHelperCellFormat.PercentageDecimal2);
+            _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, startRow + 5, column);
+
         }
 
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> AddCostOfWorkOutsideScope(List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)

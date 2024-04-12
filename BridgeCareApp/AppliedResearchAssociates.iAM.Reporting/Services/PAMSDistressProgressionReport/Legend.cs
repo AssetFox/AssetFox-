@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using OfficeOpenXml;
-using OfficeOpenXml.Style;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressionReport
 {
@@ -14,6 +13,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
             var currentCell = FillHeaders(worksheet);
             FillData(worksheet, currentCell);
         }
+
         private static void FillData(ExcelWorksheet worksheet, CurrentCell currentCell)
         {
             var startColumn = 1;
@@ -137,23 +137,25 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
         private static List<Tuple<string, string>> GetPartOneLegendData() =>
             // list of columnName and Description pairs
             new() {
-                new Tuple<string, string>("AVERAGE OPI", "AVERAGE OPI OF ALL SEGEMENTS"),
+                new Tuple<string, string>("AVERAGE OPI", "AVERAGE OPI OF ALL SEGMENTS"),
                 new Tuple<string, string>("CALCULATED OPI", "OPI CALCULATED ON PROJECTED INDIVIDUAL DISTRESSES"),
-                new Tuple<string, string>("AVERAGE ROUGHNESS", "AVERAGE ROUGHNESS OF ALL SEGEMENTS"),
+                new Tuple<string, string>("AVERAGE ROUGHNESS", "AVERAGE ROUGHNESS OF ALL SEGMENTS"),
             };
 
         private static List<Tuple<string, string>> GetInitialLegendData() =>
             // list of columnName and Description pairs
             new() {
                 new Tuple<string, string>("CONDITION YEAR", "CONDITION SURVEY YEAR"),
-                new Tuple<string, string>("CRS", "COUNTY, ROUTE, SEGMENTS"),
+                new Tuple<string, string>("CRS", "COUNTY, ROUTE, DIRECTION, SEGMENTS"),
                 new Tuple<string, string>("DISTRICT", ""),
                 new Tuple<string, string>("COUNTY", ""),
                 new Tuple<string, string>("STATE ROUTE", ""),
-                new Tuple<string, string>("SEGMENET START", ""),
-                new Tuple<string, string>("SEGMENET END", ""),
-                new Tuple<string, string>("LENGTH (FT)", "TOTAL LENGTH, IN FEET, OF ALL SEGEMENTS"),
-                new Tuple<string, string>("WIDTH (FT)", "TOTAL WIDTH, IN FEET, OF ALL SEGEMENTS"),
+                new Tuple<string, string>("SEGMENT START", "FIRST SEGMENT IN CRS SECTION"),
+                new Tuple<string, string>("SEGMENT END", "LAST SEGMENT IN CRS SECTION"),
+                new Tuple<string, string>("DIRECTION", ""),
+                new Tuple<string, string>("LENGTH (FT)", "TOTAL LENGTH, IN FEET, OF ALL SEGMENTS"),
+                new Tuple<string, string>("WIDTH (FT)", "TOTAL WIDTH, IN FEET, OF ALL SEGMENTS"),
+                new Tuple<string, string>("BPN", "BUSINESS PLAN NETWORK"),
                 new Tuple<string, string>("PAVEMENT SURFACE TYPE", ""),
             };
     }

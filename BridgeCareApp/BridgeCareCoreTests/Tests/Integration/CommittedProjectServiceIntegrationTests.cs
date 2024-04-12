@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentCost;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Services;
 using OfficeOpenXml;
@@ -29,8 +30,6 @@ namespace BridgeCareCoreTests.Tests.Integration
         {
             var networkId = Guid.NewGuid();
             var service = CreateCommittedProjectService();
-            var treatmentLibraryId = Guid.NewGuid();
-            var treatmentLibrary = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
             var assetKeyData = "key";
             var treatmentName = "treatment";
             var keyAttributeId = Guid.NewGuid();
@@ -44,19 +43,20 @@ namespace BridgeCareCoreTests.Tests.Integration
             maintainableAssets.Add(maintainableAsset);
             var network = NetworkTestSetup.ModelForEntityInDbWithNewKeyTextAttribute(
                 TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, attributeName);
+            var scenario = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var scenarioId = scenario.Id;
             var attributes = new List<IamAttribute> { attribute };
             AggregatedResultTestSetup.SetTextAggregatedResultsInDb(TestHelper.UnitOfWork,
                 maintainableAssets, attributes, assetKeyData);
             var treatmentId = Guid.NewGuid();
-            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
-                TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, "treatment");
-            var treatmentCost = LibraryTreatmentCostTestSetup.ModelForEntityInDb(
-                TestHelper.UnitOfWork, treatmentId, treatmentLibraryId, mergedCriteriaExpression: "ThrowingCriteria");
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfSimulationInDb(
+                TestHelper.UnitOfWork, scenarioId, treatmentId, "treatment");
+            var treatmentCost = ScenarioTreatmentCostTestSetup.CostForTreatmentInDb(
+                TestHelper.UnitOfWork, treatmentId, scenarioId, mergedCriteriaExpression: "ThrowingCriteria");
 
             var exception = Assert.Throws<CalculateEvaluateCompilationException>(() => service.GetTreatmentCost(
-                treatmentLibraryId,
                 assetKeyData,
-                treatmentName,
+                treatmentId,
                 networkId));
             var expectedMessage = @"Unknown reference ""ThrowingCriteria"".";
             Assert.Equal(expectedMessage, exception.Message);
@@ -67,8 +67,6 @@ namespace BridgeCareCoreTests.Tests.Integration
         {
             var networkId = Guid.NewGuid();
             var service = CreateCommittedProjectService();
-            var treatmentLibraryId = Guid.NewGuid();
-            var treatmentLibrary = TreatmentLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, treatmentLibraryId);
             var assetKeyData = "key";
             var treatmentName = "treatment";
             var keyAttributeId = Guid.NewGuid();
@@ -87,14 +85,16 @@ namespace BridgeCareCoreTests.Tests.Integration
             maintainableAssets.Add(maintainableAsset);
             var network = NetworkTestSetup.ModelForEntityInDbWithNewKeyTextAttribute(
                 TestHelper.UnitOfWork, maintainableAssets, networkId, keyAttributeId, keyAttributeName);
+            var scenario = SimulationTestSetup.EntityInDb(TestHelper.UnitOfWork, networkId);
+            var scenarioId = scenario.Id;
             var attributes = new List<IamAttribute> { keyAttribute, resultAttribute };
             AggregatedResultTestSetup.SetTextAggregatedResultsInDb(TestHelper.UnitOfWork,
                 maintainableAssets, attributes, assetKeyData);
             var treatmentId = Guid.NewGuid();
-            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfLibraryInDb(
-                TestHelper.UnitOfWork, treatmentLibraryId, treatmentId, "treatment");
-            var treatmentCost = LibraryTreatmentCostTestSetup.ModelForEntityInDb(
-                TestHelper.UnitOfWork, treatmentId, treatmentLibraryId, mergedCriteriaExpression: $"[{resultAttributeName}]='ok'");
+            var treatment = TreatmentTestSetup.ModelForSingleTreatmentOfSimulationInDb(
+                TestHelper.UnitOfWork, scenarioId, treatmentId, "treatment");
+            var treatmentCost = ScenarioTreatmentCostTestSetup.CostForTreatmentInDb(
+                TestHelper.UnitOfWork, treatmentId, scenarioId, mergedCriteriaExpression: $"[{resultAttributeName}]='ok'", equation:"12345");
             var keyAttributes = new List<IamAttribute> { keyAttribute };
             var resultAttributes = new List<IamAttribute> { resultAttribute };
             var resultDictionary = new Dictionary<string, List<IamAttribute>>();
@@ -106,9 +106,8 @@ namespace BridgeCareCoreTests.Tests.Integration
                 maintainableAssets, resultDictionary);
 
             var cost = service.GetTreatmentCost(
-                treatmentLibraryId,
                 assetKeyData,
-                treatmentName,
+                treatmentId,
                 networkId);
 
             Assert.Equal(12345, cost);

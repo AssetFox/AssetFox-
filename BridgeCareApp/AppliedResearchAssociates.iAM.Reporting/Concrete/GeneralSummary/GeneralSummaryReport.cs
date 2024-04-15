@@ -189,14 +189,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
 
          
             var scenarioName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);            
-            generalWorksheet.Cells[currentCell.Row, currentCell.Column].Value = $"{scenarioName} General Summary Report";
-            ExcelHelper.MergeCells(generalWorksheet, 1, 1, 1, reportOutputData.Years.Count + 1);
-            ExcelHelper.ApplyBorder(generalWorksheet.Cells[1, 1, 1, reportOutputData.Years.Count + 1]);
-            currentCell.Row += 2;
+            //generalWorksheet.Cells[currentCell.Row, currentCell.Column].Value = $"{scenarioName} General Summary Report";
+            //ExcelHelper.MergeCells(generalWorksheet, 1, 1, 1, reportOutputData.Years.Count + 1);
+            //ExcelHelper.ApplyBorder(generalWorksheet.Cells[1, 1, 1, reportOutputData.Years.Count + 1]);
+            //currentCell.Row += 2;
 
             reportDetailDto.Status = $"Generating Budget Tables";
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var targetBudgets = _unitOfWork.BudgetRepo.GetBudgetYearsBySimulationId(simulationId);
+            currentCell.Column = 1;
             _generalBudgetSummary.FillTargetBudgets(generalWorksheet, reportOutputData, currentCell);
             currentCell.Row += 3;
 
@@ -204,6 +205,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             reportDetailDto.Status = $"Generating Deficient Conditions Table";
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var deficientConditoinGoals = _unitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
+            currentCell.Column = 1;
             GeneralDeficientConditionGoals.Fill(generalWorksheet, reportOutputData, deficientConditoinGoals, currentCell);
             currentCell.Row += 3;
 
@@ -211,6 +213,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             reportDetailDto.Status = $"Generating Target Condition Table";
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var targetConditionGoals = _unitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationId);
+            currentCell.Column = 1;
             GeneralTargetConditionGoals.Fill(generalWorksheet, reportOutputData, targetConditionGoals, currentCell);
 
             // Work Done Tab

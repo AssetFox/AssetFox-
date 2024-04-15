@@ -219,6 +219,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                     }
             }
 
+            Dictionary<string, List<(decimal AllocatedAmount, int Year)>> listOfBudgetsSpent = new Dictionary<string, List<(decimal, int)>>();
             var simulationYear = simulationOutput.Years.First().Year;
             foreach (var year in simulationOutput.Years)
             {
@@ -229,6 +230,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                     if (item.YearlyData[0].Year == simulationYear)
                     {
                         generalSummaryWorksheet.Cells[currentRow+ 1, currentYearColumn].Value = item.YearlyData[0].Amount;
+                        string budgetName = item.YearlyData[0].Treatment;
+                        decimal allocatedAmount = (decimal)item.YearlyData[0].Amount;
+                        int itemYear= item.YearlyData[0].Year;
+
+                        if (listOfBudgetsSpent.ContainsKey(budgetName))
+                        {
+                            // If the budget name exists, add the allocated amount and year to the existing list
+                            listOfBudgetsSpent[budgetName].Add((allocatedAmount, itemYear));
+                        }
+                        else
+                        {
+                            // If the budget name doesn't exist, create a new list and add the allocated amount and year
+                            listOfBudgetsSpent[budgetName] = new List<(decimal, int)>() { (allocatedAmount, itemYear) };
+                        }
                         totalYearlySpent += item.YearlyData[0].Amount;
                         ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
                     }
@@ -241,126 +256,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                 simulationYear = simulationYear + 1;
             }
 
-            Dictionary<string, List<(decimal AllocatedAmount, int Year)>> listOfBudgetsSpent = new Dictionary<string, List<(decimal, int)>>();
-            foreach (var year in simulationOutput.Years)
-            {
-                finalRow = 1;
-                // Initialize total spent for the current year
-                decimal totalYearlySpent = 0;
-
-                // Iterate over the assets for the current year
-                foreach (var asset in year.Assets)
-                {
-                    // Check if the asset contains treatment considerations
-                    if (asset.TreatmentConsiderations != null && asset.TreatmentConsiderations.Any())
-                    {
-                        // Iterate over the treatment considerations
-                        foreach (var treatmentConsideration in asset.TreatmentConsiderations)
-                        {
-                            // Check if the treatment has funding data
-                            if (treatmentConsideration.FundingCalculationOutput != null)
-                            {
-                                Dictionary<(string Name, int Year), decimal> aggregatedAmounts = new Dictionary<(string, int), decimal>();
-
-                                foreach (var fundedTreatment in treatmentConsideration.FundingCalculationOutput.AllocationMatrix)
-                                {
-                                    decimal totalAllocatedAmount = 0;
-                                    var key = (fundedTreatment.BudgetName, fundedTreatment.Year);
-
-                                    // Iterate over the allocation matrices
-                                    foreach (var allocationMatrix in treatmentConsideration.FundingCalculationOutput.AllocationMatrix)
-                                    {
-                                        if(allocationMatrix.BudgetName == key.BudgetName)
-                                        {
-                                            // Sum up the allocated amounts
-                                            totalAllocatedAmount += allocationMatrix.AllocatedAmount;
-                                        }
-                                    }
-                                    int rowNumber = budgetMap[fundedTreatment.BudgetName];
-
-                                    // Add or update the aggregated amount for the current budget name and year
-                                    if (aggregatedAmounts.ContainsKey(key))
-                                    {
-                                        aggregatedAmounts[key] = totalAllocatedAmount;
-                                    }
-                                    else
-                                    {
-                                        aggregatedAmounts[key] = totalAllocatedAmount;
-                                    }
-
-                                    // Add treatment cost to the total
-                                    if (totalYearlySpent == 0)
-                                    {
-                                        totalYearlySpent += totalAllocatedAmount;
-                                    }
-                                    // Add cost to the worksheet
-                                    //generalSummaryWorksheet.Cells[rowNumber, currentYearColumn].Value = aggregatedAmounts[key];
-                                    //ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[rowNumber, currentYearColumn, rowNumber, currentYearColumn]);
-
-                                    // Move to the next row for the next treatment
-                                    currentRow++;
-                                }
-
-                                foreach (var kvp in aggregatedAmounts)
-                                {
-                                    // Check if an entry already exists for the same name
-                                    if (listOfBudgetsSpent.TryGetValue(kvp.Key.Name, out var existingEntries))
-                                    {
-                                        // Check if any existing entry has the same year
-                                        bool yearExists = existingEntries.Any(entry => entry.Year == kvp.Key.Year);
-
-                                        if (!yearExists)
-                                        {
-                                            // Year does not exist, add the new value to the existing list
-                                            listOfBudgetsSpent[kvp.Key.Name].Add((kvp.Value, kvp.Key.Year));
-                                        }
-                                    }
-                                    else
-                                    {
-                                        // Entry does not exist, create a new list and add the new entry
-                                        var newList = new List<(decimal, int)>();
-                                        newList.Add((kvp.Value, kvp.Key.Year));
-                                        listOfBudgetsSpent.Add(kvp.Key.Name, newList);
-                                    }
-                                }
-                                finalRow = currentRow;
-                                currentCell.Row = currentRow;
-                                currentCell.Column = currentYearColumn;
-                            }
-                        }
-                    }
-                }
-                //generalSummaryWorksheet.Cells[firstRow + simulationOutput.Years[0].Budgets.Count + 1, currentYearColumn].Value = totalYearlySpent;
-                //ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[firstRow + simulationOutput.Years[0].Budgets.Count + 1, currentYearColumn]);
-
-                // Move to the next column
-                currentYearColumn++;
-
-
-                currentRow = firstRow + 1;
-                //ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[simulationOutput.Years[0].Assets.Count + 3, currentYearColumn - 1, simulationOutput.Years[0].Assets.Count + 3, currentYearColumn - 1]);
-
-                currentCell.Row = finalRow;
-            }
-            int firstYear = simulationOutput.Years[0].Year;
-            //foreach (var kvp in budgetMap)
-            //{
-            //    // Get the corresponding row number and budget name
-            //    int rowNumber = kvp.Value;
-            //    string budgetName = kvp.Key;
-
-            //    // Check if the budget name exists in listOfBudgetsSpent
-            //    if (listOfBudgetsSpent.ContainsKey(budgetName))
-            //    {
-            //        foreach (var listofBudgets in listOfBudgetsSpent[budgetName])
-            //        {
-            //            var eachAmount = listofBudgets.AllocatedAmount;
-            //            var eachYear = listofBudgets.Year - firstYear;
-            //            eachYear = eachYear + 2;
-            //            generalSummaryWorksheet.Cells[rowNumber, eachYear].Value = eachAmount;
-            //        }
-            //    }
-            //}
             // Get the dimensions of the worksheet
             int rowCount = generalSummaryWorksheet.Dimension.Rows;
             int colCount = generalSummaryWorksheet.Dimension.Columns;

@@ -403,6 +403,5 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                 currentCell.Row = finalRow;
             }
         }
-
     }
-    }
+}

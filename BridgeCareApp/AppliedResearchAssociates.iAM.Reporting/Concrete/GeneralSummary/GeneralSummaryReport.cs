@@ -187,29 +187,31 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
 
             CurrentCell currentCell = new CurrentCell { Row = 1, Column = 1 };
 
-            //TO-DO
-            var scenarioName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
-            // Insert actual scenario name here
+         
+            var scenarioName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);            
             generalWorksheet.Cells[currentCell.Row, currentCell.Column].Value = $"{scenarioName} General Summary Report";
             ExcelHelper.MergeCells(generalWorksheet, 1, 1, 1, reportOutputData.Years.Count + 1);
             ExcelHelper.ApplyBorder(generalWorksheet.Cells[1, 1, 1, reportOutputData.Years.Count + 1]);
             currentCell.Row += 2;
-                        
+
+            reportDetailDto.Status = $"Generating Budget Tables";
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var targetBudgets = _unitOfWork.BudgetRepo.GetBudgetYearsBySimulationId(simulationId);
             _generalBudgetSummary.FillTargetBudgets(generalWorksheet, reportOutputData, currentCell);
+            currentCell.Row += 3;
 
             //Deficient Condition Goals Table
+            reportDetailDto.Status = $"Generating Deficient Conditions Table";
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var deficientConditoinGoals = _unitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
             GeneralDeficientConditionGoals.Fill(generalWorksheet, reportOutputData, deficientConditoinGoals, currentCell);
-            currentCell.Row += 2;
+            currentCell.Row += 3;
 
             //Target Condition Goals Table
+            reportDetailDto.Status = $"Generating Target Condition Table";
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             var targetConditionGoals = _unitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationId);
             GeneralTargetConditionGoals.Fill(generalWorksheet, reportOutputData, targetConditionGoals, currentCell);
-            currentCell.Row += 2;
 
             // Work Done Tab
             var workDoneWorksheet = excelPackage.Workbook.Worksheets.Add("Work Done");
@@ -239,11 +241,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             var performanceCurvesAttributes = _reportHelper.GetPerformanceCurvesAttributes(simulation);
             //HashSet<string> performanceCurvesAttributes = new HashSet<string>(attributeNameLookup.Values);
             var primaryKeyField = _unitOfWork.AdminSettingsRepo.GetKeyFields();
+            reportDetailDto.Status = $"Generating Work Done Tab";
             _generalWorkDoneTab.Fill(workDoneWorksheet, reportOutputData, simulation, performanceCurvesAttributes);
 
             //check and generate folder
             var folderPathForSimulation = $"Reports\\{simulationId}";
-            Directory.CreateDirectory(folderPathForSimulation);
+            _ = Directory.CreateDirectory(folderPathForSimulation);
             var filePath = Path.Combine(folderPathForSimulation, "GeneralSummaryReport.xlsx");
 
 

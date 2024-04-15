@@ -189,10 +189,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
 
          
             var scenarioName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);            
-            //generalWorksheet.Cells[currentCell.Row, currentCell.Column].Value = $"{scenarioName} General Summary Report";
-            //ExcelHelper.MergeCells(generalWorksheet, 1, 1, 1, reportOutputData.Years.Count + 1);
-            //ExcelHelper.ApplyBorder(generalWorksheet.Cells[1, 1, 1, reportOutputData.Years.Count + 1]);
-            //currentCell.Row += 2;
+            generalWorksheet.Cells[currentCell.Row, currentCell.Column].Value = $"{scenarioName} General Summary Report";
+            ExcelHelper.MergeCells(generalWorksheet, 1, 1, 1, reportOutputData.Years.Count + 1);
+            ExcelHelper.ApplyBorder(generalWorksheet.Cells[1, 1, 1, reportOutputData.Years.Count + 1]);
+            currentCell.Row += 2;
 
             reportDetailDto.Status = $"Generating Budget Tables";
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);

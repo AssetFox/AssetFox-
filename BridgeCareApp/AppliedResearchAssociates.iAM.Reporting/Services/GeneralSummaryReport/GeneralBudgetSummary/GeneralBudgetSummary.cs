@@ -227,25 +227,29 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
 
                 foreach (var item in workSummaryByBudgetData)
                 {
-                    if (item.YearlyData[0].Year == simulationYear)
+                    if(item.YearlyData.Count > 0)
                     {
-                        generalSummaryWorksheet.Cells[currentRow+ 1, currentYearColumn].Value = item.YearlyData[0].Amount;
-                        string budgetName = item.YearlyData[0].Treatment;
-                        decimal allocatedAmount = (decimal)item.YearlyData[0].Amount;
-                        int itemYear= item.YearlyData[0].Year;
+                        if (item.YearlyData[0].Year == simulationYear)
+                        {
+                            generalSummaryWorksheet.Cells[currentRow + 1, currentYearColumn].Value = item.YearlyData[0].Amount;
+                            string budgetName = item.YearlyData[0].Treatment;
+                            decimal allocatedAmount = (decimal)item.YearlyData[0].Amount;
+                            int itemYear = item.YearlyData[0].Year;
 
-                        if (listOfBudgetsSpent.ContainsKey(budgetName))
-                        {
-                            // If the budget name exists, add the allocated amount and year to the existing list
-                            listOfBudgetsSpent[budgetName].Add((allocatedAmount, itemYear));
+                            if (listOfBudgetsSpent.ContainsKey(budgetName))
+                            {
+                                // If the budget name exists, add the allocated amount and year to the existing list
+                                listOfBudgetsSpent[budgetName].Add((allocatedAmount, itemYear));
+                            }
+                            else
+                            {
+                                // If the budget name doesn't exist, create a new list and add the allocated amount and year
+                                listOfBudgetsSpent[budgetName] = new List<(decimal, int)>() { (allocatedAmount, itemYear) };
+                            }
+                            totalYearlySpent += item.YearlyData[0].Amount;
+                            ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
                         }
-                        else
-                        {
-                            // If the budget name doesn't exist, create a new list and add the allocated amount and year
-                            listOfBudgetsSpent[budgetName] = new List<(decimal, int)>() { (allocatedAmount, itemYear) };
-                        }
-                        totalYearlySpent += item.YearlyData[0].Amount;
-                        ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
+
                     }
                     currentRow++;
                 }

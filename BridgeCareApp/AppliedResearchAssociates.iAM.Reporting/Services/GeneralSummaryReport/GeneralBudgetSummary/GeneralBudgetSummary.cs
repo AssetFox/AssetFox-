@@ -8,6 +8,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
@@ -151,7 +153,74 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             var budgetsList = new HashSet<string>();
             int finalRow = 1;
 
-            Dictionary<string, List<(decimal AllocatedAmount, int Year)>> listOfBudgetsSpent = new Dictionary<string, List<(decimal, int)>>();
+            //Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new Dictionary<double, List<TreatmentConsiderationDetail>>();
+            //// setting up model to store data. This will be used to fill up Bridge Work Summary By
+            //// Budget TAB
+            //var workSummaryByBudgets = new List<WorkSummaryByBudgetModel>();
+
+            //var workBudgets = new HashSet<string>();
+            //foreach (var yearData in simulationOutput.Years)
+            //{
+            //    foreach (var item in yearData.Budgets)
+            //    {
+            //        workBudgets.Add(item.BudgetName);
+            //    }
+            //}
+            //foreach (var item in workBudgets)
+            //{
+            //    workSummaryByBudgetData.Add(new WorkSummaryByBudgetModel
+            //    {
+            //        Budget = item,
+            //        YearlyData = new List<YearsData>()
+            //    });
+            //}
+
+            //foreach (var summaryData in workSummaryByBudgetData)
+            //{
+            //    foreach (var yearData in simulationOutput.Years)
+            //    {
+            //        var assets = yearData.Assets.Where(_ => _.TreatmentCause != TreatmentCause.NoSelection);
+            //        foreach (var section in assets)
+            //        {
+            //            var section_BRKEY = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
+
+            //            // Build keyCashFlowFundingDetails
+            //            if (section.TreatmentStatus != TreatmentStatus.Applied)
+            //            {
+            //                var fundingSection = yearData.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment && _.AppliedTreatment == section.AppliedTreatment);
+            //                if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(section_BRKEY))
+            //                {
+            //                    keyCashFlowFundingDetails.Add(section_BRKEY, fundingSection?.TreatmentConsiderations ?? new());
+            //                }
+            //            }
+
+            //            var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause !=
+            //                                            TreatmentCause.CashFlowProject ? section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY];
+            //            var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+            //            var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
+            //            var budgetAmount = (double)(treatmentConsiderations.Sum(_ =>
+            //                                               (_.FundingCalculationOutput?.AllocationMatrix
+            //                                                .Where(b => b.BudgetName == summaryData.Budget)
+            //                                                .Sum(bu => bu.AllocatedAmount)) ?? 0));
+            //            var bpnName = _reportHelper.CheckAndGetValue<string>(section?.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
+            //            if (section.TreatmentCause == TreatmentCause.CommittedProject &&
+            //                appliedTreatment.ToLower() != BAMSConstants.NoTreatment)
+            //            {
+            //                summaryData.YearlyData.Add(new YearsData
+            //                {
+            //                    Year = yearData.Year,
+            //                    Treatment = appliedTreatment,
+            //                    Amount = budgetAmount,
+            //                    isCommitted = true,
+            //                    costPerBPN = (bpnName, budgetAmount),
+            //                });
+            //            }
+            //            }
+            //        }
+            //}
+
+
+                        Dictionary<string, List<(decimal AllocatedAmount, int Year)>> listOfBudgetsSpent = new Dictionary<string, List<(decimal, int)>>();
             foreach (var year in simulationOutput.Years)
             {
                 finalRow = 1;

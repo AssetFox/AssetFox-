@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using OfficeOpenXml;
 
@@ -24,7 +25,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
 
         public static void Fill(ExcelWorksheet generalSummaryWorksheet, SimulationOutput reportOutputData, IList<TargetConditionGoalDTO> targetConditions, CurrentCell currentCell)
         {
+            currentCell.Column = 1;
             generalSummaryWorksheet.Cells[currentCell.Row, currentCell.Column].Value = "Target Condition Goals";
+            int titleEndColumn = currentCell.Column + 1 + reportOutputData.Years.Count;
+            ExcelHelper.MergeCells(generalSummaryWorksheet, currentCell.Row, currentCell.Column, currentCell.Row, titleEndColumn, true);
+            var titleRange = generalSummaryWorksheet.Cells[currentCell.Row, currentCell.Column, currentCell.Row, titleEndColumn];
+            ExcelHelper.ApplyBorder(titleRange);
+
             currentCell.Row++;
             int startingColumn = currentCell.Column;
 
@@ -50,10 +57,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             if (targetConditions == null || targetConditions.Count == 0)
             {
                 generalSummaryWorksheet.Cells[currentCell.Row, startingColumn].Value = "No Target Condition Goals for Scenario";
-                generalSummaryWorksheet.Cells[currentCell.Row, startingColumn, currentCell.Row, currentCell.Column - 1].Merge = true; // Optional: merge cells to center the text
-                generalSummaryWorksheet.Cells[currentCell.Row, startingColumn].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center; // Center the text horizontally
-                return; // Exit the method as there's nothing more to fill
+                int endColumn = currentCell.Column - 1;
+                ExcelHelper.MergeCells(generalSummaryWorksheet, currentCell.Row, startingColumn, currentCell.Row, endColumn, false);
+                ExcelHelper.HorizontalCenterAlign(generalSummaryWorksheet.Cells[currentCell.Row, startingColumn, currentCell.Row, endColumn]);
+
+                return;
             }
+
+            // Sort targetConditions by Attribute before populating the worksheet
+            //var sortedTargetConditions = targetConditions.OrderBy(tc => tc.Goal).ToList();
+
 
             // Iterate over each TargetConditionGoalDTO to populate the table
             foreach (var goalDTO in targetConditions)
@@ -68,20 +81,45 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                     var goalDetail = yearDetail.TargetConditionGoals.FirstOrDefault(g => g.GoalName.Equals(goalDTO.Name, StringComparison.OrdinalIgnoreCase) && g.AttributeName.Equals(goalDTO.Attribute, StringComparison.OrdinalIgnoreCase));
 
                     if (goalDetail != null)
-                    {
-                        // If the goalDetail is found, use ActualValue to fill in the data for this year
-                        generalSummaryWorksheet.Cells[currentCell.Row, currentCell.Column].Value = goalDetail.ActualValue;
+                    {                       
+                        
+                        string formattedPercentage = $"{goalDetail.ActualValue:0.##}%"; // Format string as needed
+                        var currentCellRange = generalSummaryWorksheet.Cells[currentCell.Row, currentCell.Column];
+                        currentCellRange.Value = formattedPercentage;
+
+                        // Right align the cell
+                        ExcelHelper.HorizontalRightAlign(currentCellRange);
+
+                        // Format the cell as percentage 
+                        ExcelHelper.SetCustomFormat(currentCellRange, ExcelHelperCellFormat.PercentageDecimal2);
                     }
                     else
                     {
                         // If no matching goalDetail is found for this year, use a placeholder
-                        generalSummaryWorksheet.Cells[currentCell.Row, currentCell.Column].Value = "N/A";
+                        //generalSummaryWorksheet.Cells[currentCell.Row, currentCell.Column].Value = "N/A";
+
+                        var currentCellRange = generalSummaryWorksheet.Cells[currentCell.Row, currentCell.Column];
+                        currentCellRange.Value = "N/A";
+
+                        // Right align the cell
+                        ExcelHelper.HorizontalRightAlign(currentCellRange);
                     }
 
                     currentCell.Column++; // Move to the next column for the next year
                 }
 
                 currentCell.Row++; // Move to the next row for the next goal
+            }
+
+            int totalRows = currentCell.Row - 1;
+            int endColumnForMerge = startingColumn + 1 + yearDetails.Count; // As calculated earlier
+            var usedRange = generalSummaryWorksheet.Cells[1, startingColumn, totalRows, endColumnForMerge];
+            ExcelHelper.ApplyBorder(usedRange);
+
+            // After all data is populated
+            for (int col = startingColumn; col <= endColumnForMerge; col++)
+            {
+                generalSummaryWorksheet.Column(col).AutoFit();  // Auto adjust column width
             }
         }
     }

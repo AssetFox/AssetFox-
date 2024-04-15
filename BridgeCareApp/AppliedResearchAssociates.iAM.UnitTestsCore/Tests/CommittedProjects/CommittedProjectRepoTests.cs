@@ -18,6 +18,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
@@ -76,7 +77,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Setup a simulation based on network
             var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"), "Test Simulation", user.Id, networkId);
             simulation.NetworkId = network.Id;
-
+            var ip = InvestmentPlanTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulation.Id);
             // Set up a selectable treatment for the test with sample budgets
             var treatmentbudget = TreatmentBudgetDtos.Dto();
             var libraryId = Guid.NewGuid();
@@ -94,10 +95,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             // Set up committed projects for the test
             List<SectionCommittedProjectDTO> sectionCommittedProjects = CreateTestCommittedProjects(simulation.Id);
-            TestHelper.UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(sectionCommittedProjects);
+            var budgetName = RandomStrings.WithPrefix("Budget");
+            var budgetId = Guid.NewGuid();
+            var budgetDto = BudgetDtos.New(budgetId, budgetName);
+            var budgetDtos = new List<BudgetDTO> { budgetDto };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgetDtos, simulation.Id);
+            
 
+            sectionCommittedProjects.ForEach(_ => _.ScenarioBudgetId = budgetId);
+            TestHelper.UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(sectionCommittedProjects);
             // Act
-            var testSimulation = CreateSimulation(simulation.Id, false);
+            var testSimulation = CreateSimulation(simulation.Id, TestHelper.UnitOfWork, true);
             testSimulation.Network.Id = Guid.Parse("502C1684-C8B6-48FD-9725-A2295AA3E0F0");
             TestHelper.UnitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(testSimulation);
 
@@ -113,7 +121,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
             var inputSimulationEntity = TestEntitiesForCommittedProjects.Simulations.Single(_ => _.Name == "FourYearTest");
-            var simulationDomain = CreateSimulation(inputSimulationEntity.Id);
+            var simulationDomain = CreateSimulation(inputSimulationEntity.Id, _testUOW);
             var simulationEntity = _testUOW.Context.Simulation.Single(s => s.Id == simulationDomain.Id);
             simulationEntity.NoTreatmentBeforeCommittedProjects = true;
             _testUOW.Context.Simulation.Update(simulationEntity);
@@ -180,7 +188,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             TestHelper.UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(treatments, simulation.Id);
 
             // Act
-            var testSimulation = CreateSimulation(simulation.Id, false);
+            var testSimulation = CreateSimulation(simulation.Id, _testUOW, false);
             testSimulation.Network.Id = Guid.Parse("502C1684-C8B6-48FD-9725-A2295AA3E0F0");
             TestHelper.UnitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(testSimulation);
 
@@ -193,7 +201,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
-            var simulationDomain = CreateSimulation(_badScenario, false);
+            var simulationDomain = CreateSimulation(_badScenario, _testUOW, false);
 
             // Act & Assert
             Assert.Throws<RowNotInTableException>(() => repo.GetSimulationCommittedProjects(simulationDomain));
@@ -405,9 +413,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         }
 
         #region Helpers
-        private Simulation CreateSimulation(Guid simulationId, bool populateInvestments = true)
+        private Simulation CreateSimulation(Guid simulationId, IUnitOfWork unitOfWork , bool populateInvestments = true)
         {
-            var explorer = _testUOW.AttributeRepo.GetExplorer();
+            var explorer = unitOfWork.AttributeRepo.GetExplorer();
             var testNetwork = explorer.AddNetwork();
             testNetwork.Id = TestDataForCommittedProjects.NetworkId;
             SectionMapper mapper = new(testNetwork);
@@ -418,7 +426,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var simulation = testNetwork.AddSimulation();
             simulation.Id = simulationId;
             // This has to be ignored to create a bad scenario object
-            if (populateInvestments) _testUOW.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            if (populateInvestments) unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             return simulation;
         }
 

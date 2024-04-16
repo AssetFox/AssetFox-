@@ -198,10 +198,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                                                         TreatmentCause.CashFlowProject ? section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY];
                         var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
                         var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
-                        var budgetAmount = (double)(treatmentConsiderations.Sum(_ =>
+                        var budgetAmount = (double)treatmentConsiderations.Sum(_ =>
                                                            (_.FundingCalculationOutput?.AllocationMatrix
                                                             .Where(b => b.BudgetName == summaryData.Budget)
-                                                            .Sum(bu => bu.AllocatedAmount)) ?? 0));
+                                                            .Sum(bu => bu.AllocatedAmount)) ?? 0);
                         var bpnName = _reportHelper.CheckAndGetValue<string>(section?.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                             appliedTreatment.ToLower() != BAMSConstants.NoTreatment)
@@ -332,49 +332,49 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                     // Check if the asset contains treatment considerations
                     if (budget.AvailableFunding != null)
                     {
-                                    var budgetsSpent = budget.AvailableFunding;
-                                    var treatmentName = budget.BudgetName;
-                                        if (listOfBudgetsSpent.ContainsKey(treatmentName))
-                                        {
-                                            // Find the entry with the matching year
-                                            var matchingEntry = listOfBudgetsSpent[treatmentName].FirstOrDefault(entry => entry.Year == year.Year);
+                        var budgetsSpent = budget.AvailableFunding;
+                        var treatmentName = budget.BudgetName;
+                            if (listOfBudgetsSpent.ContainsKey(treatmentName))
+                            {
+                                // Find the entry with the matching year
+                                var matchingEntry = listOfBudgetsSpent[treatmentName].FirstOrDefault(entry => entry.Year == year.Year);
 
-                                            if (matchingEntry != default)
-                                            {
-                                                // Entry with the matching year found
-                                                decimal currentAllocatedAmount = matchingEntry.AllocatedAmount;
+                                if (matchingEntry != default)
+                                {
+                                    // Entry with the matching year found
+                                    decimal currentAllocatedAmount = matchingEntry.AllocatedAmount;
 
-                                                // Subtract budgetSpent.Amount from the current allocated amount
-                                                decimal updatedAllocatedAmount = budgetsSpent - currentAllocatedAmount;
+                                    // Subtract budgetSpent.Amount from the current allocated amount
+                                    decimal updatedAllocatedAmount = budgetsSpent - currentAllocatedAmount;
 
-                                                generalSummaryWorksheet.Cells[currentRow, currentYearColumn].Value = updatedAllocatedAmount;
-                                                ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
-                                            }
-                                            else
-                                            {
-                                                // Write budget name and spent amount to the worksheet
-                                                generalSummaryWorksheet.Cells[currentRow, currentYearColumn].Value = budgetsSpent;
-                                                ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
+                                    generalSummaryWorksheet.Cells[currentRow, currentYearColumn].Value = updatedAllocatedAmount;
+                                    ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
+                                }
+                                else
+                                {
+                                    // Write budget name and spent amount to the worksheet
+                                    generalSummaryWorksheet.Cells[currentRow, currentYearColumn].Value = budgetsSpent;
+                                    ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
 
-                                                // Increment total yearly spent
-                                                totalYearlySpent += budgetsSpent;
+                                    // Increment total yearly spent
+                                    totalYearlySpent += budgetsSpent;
 
-                                            }
-                                        }
-                                        else
-                                        {
-                                                // Write budget name and spent amount to the worksheet
-                                                generalSummaryWorksheet.Cells[currentRow, currentYearColumn].Value = budgetsSpent;
-                                                ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
+                                }
+                            }
+                            else
+                            {
+                                // Write budget name and spent amount to the worksheet
+                                generalSummaryWorksheet.Cells[currentRow, currentYearColumn].Value = budgetsSpent;
+                                ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
 
-                                                // Increment total yearly spent
-                                                totalYearlySpent += budgetsSpent;
-                                        }
+                                // Increment total yearly spent
+                                totalYearlySpent += budgetsSpent;
+                            }
 
-                                            // Move to the next row
-                                            currentRow++;
-                                    finalRow = currentRow;
-                                    ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[firstRow - 1, 1, firstRow - 1, finalColumn - 1]);
+                        // Move to the next row
+                        currentRow++;
+                        finalRow = currentRow;
+                        ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[firstRow - 1, 1, firstRow - 1, finalColumn - 1]);
                     }
                 }
                 currentRow = firstRow;
@@ -392,6 +392,5 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                 currentCell.Row = finalRow;
             }
         }
-
     }
-    }
+}

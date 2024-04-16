@@ -60,6 +60,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                 int endColumn = currentCell.Column - 1;
                 ExcelHelper.MergeCells(generalSummaryWorksheet, currentCell.Row, startingColumn, currentCell.Row, endColumn, false);
                 ExcelHelper.HorizontalCenterAlign(generalSummaryWorksheet.Cells[currentCell.Row, startingColumn, currentCell.Row, endColumn]);
+                var range = generalSummaryWorksheet.Cells[currentCell.Row, startingColumn, currentCell.Row, endColumn];
+                ExcelHelper.ApplyBorder(range);
 
                 return;
             }
@@ -96,8 +98,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                     else
                     {
                         // If no matching goalDetail is found for this year, use a placeholder
-                        //generalSummaryWorksheet.Cells[currentCell.Row, currentCell.Column].Value = "N/A";
-
                         var currentCellRange = generalSummaryWorksheet.Cells[currentCell.Row, currentCell.Column];
                         currentCellRange.Value = "N/A";
 

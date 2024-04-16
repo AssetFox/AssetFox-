@@ -23,6 +23,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
 
         public static void Fill(ExcelWorksheet generalSummaryWorksheet, SimulationOutput reportOutputData, IList<DeficientConditionGoalDTO> deficientConditions, CurrentCell currentCell)
         {
+            currentCell.Column = 1;
             generalSummaryWorksheet.Cells[currentCell.Row, currentCell.Column].Value = "Deficient Condition Goals";
             int titleEndColumn = currentCell.Column + 1 + reportOutputData.Years.Count;
             ExcelHelper.MergeCells(generalSummaryWorksheet, currentCell.Row, currentCell.Column, currentCell.Row, titleEndColumn, true);
@@ -54,6 +55,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                 int endColumn = currentCell.Column - 1;
                 ExcelHelper.MergeCells(generalSummaryWorksheet, currentCell.Row, startingColumn, currentCell.Row, endColumn, false);
                 ExcelHelper.HorizontalCenterAlign(generalSummaryWorksheet.Cells[currentCell.Row, startingColumn, currentCell.Row, endColumn]);
+                var range = generalSummaryWorksheet.Cells[currentCell.Row, startingColumn, currentCell.Row, endColumn];
+                ExcelHelper.ApplyBorder(range);
 
                 return;
             }
@@ -97,7 +100,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             int totalRows = count;
             int endColumnForMerge = startingColumn + 1 + yearDetails.Count;
             var usedRange = generalSummaryWorksheet.Cells[1, startingColumn, totalRows, endColumnForMerge];
-            //ExcelHelper.ApplyBorder(usedRange);
+            ExcelHelper.ApplyBorder(usedRange);
 
             // After all data is populated
             for (int col = startingColumn; col <= endColumnForMerge; col++)

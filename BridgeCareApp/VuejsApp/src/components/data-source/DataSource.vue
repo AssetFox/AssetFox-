@@ -25,7 +25,7 @@
                 </v-row>
             </v-col>
         </v-col>
-        <v-divider v-if="showMssql || showExcel" style="background-color: #798899 !important;"></v-divider>
+        <v-divider v-if="dataSourceTypeItemSelected" style="background-color: #798899 !important;"></v-divider>
 
         <v-col cols="8" v-if="dataSourceTypeItemSelected">
             <div v-if="showMssql && !isNewDataSource" style="margin-top:5px;margin-bottom:12px;" class="ghd-control-label ghd-md-gray"> 

@@ -250,7 +250,7 @@ namespace BridgeCareCore.Controllers
                         }
                     }
                     var cloneResult = _completeSimulationCloningService.Clone(dto);
-                    if(cloneResult.WarningMessage != "")
+                    if(cloneResult.WarningMessage != null)
                         HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, $"{SimulationError}::CloneSimulation - {cloneResult.WarningMessage}");
                     return cloneResult;
                 });

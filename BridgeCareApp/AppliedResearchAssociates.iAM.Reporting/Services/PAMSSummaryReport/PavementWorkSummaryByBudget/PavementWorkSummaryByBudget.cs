@@ -66,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 // Inside iteration since each section has its own budget analysis section.
                 var costBudgetsWorkSummary = new CostBudgetsWorkSummary();
 
-                var costAndLengthPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>();
+                var costLengthSurfaceIdPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length, int surfaceId)>>();
                 var costAndLengthPerTreatmentGroupPerYear = new Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>>();
 
                 currentCell.Column = 1;
@@ -83,11 +83,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     // Add all treatments here, set all values to 0
                     foreach (var year in simulationYears)
                     {
-                        if (!costAndLengthPerTreatmentPerYear.ContainsKey(year))
+                        if (!costLengthSurfaceIdPerTreatmentPerYear.ContainsKey(year))
                         {
-                            costAndLengthPerTreatmentPerYear.Add(year, new Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>());
+                            costLengthSurfaceIdPerTreatmentPerYear.Add(year, new Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length, int surfaceId)>());
                         }
-                        var treatmentData = costAndLengthPerTreatmentPerYear[year];
+                        var treatmentData = costLengthSurfaceIdPerTreatmentPerYear[year];
 
                         if (!costAndLengthPerTreatmentGroupPerYear.ContainsKey(year))
                         {
@@ -99,8 +99,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         {
                             if (treatment.Name != PAMSConstants.NoTreatmentForWorkSummary)
                             {
-                                treatmentData.Add(treatment.Name, (0, 0, 0));
-
+                                treatmentData.Add(treatment.Name, (0, 0, 0, 0));
                                 var treatmentGroup = PavementTreatmentHelper.GetTreatmentGroup(treatment.Name, simulationTreatments);
                                 if (!treatmentGroupData.ContainsKey(treatmentGroup))
                                 {
@@ -112,13 +111,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 }
                 else
                 {
-                    _pavementWorkSummaryComputationHelper.FillDataToUseInExcel(budgetSummaryModel, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments);
+                    _pavementWorkSummaryComputationHelper.FillDataToUseInExcel(budgetSummaryModel, costLengthSurfaceIdPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments);
                 }
 
-                var workTypeTotals = _pavementWorkSummaryComputationHelper.CalculateWorkTypeTotals(costAndLengthPerTreatmentPerYear, simulationTreatments);
+                var workTypeTotals = _pavementWorkSummaryComputationHelper.CalculateWorkTypeTotals(costLengthSurfaceIdPerTreatmentPerYear, simulationTreatments);
                 costBudgetsWorkSummary.FillCostBudgetWorkSummarySectionsbyBudget(worksheet, currentCell, simulationYears,
                     yearlyBudgetAmount,
-                    costAndLengthPerTreatmentPerYear,
+                    costLengthSurfaceIdPerTreatmentPerYear,
                     yearlyCostCommittedProj,
                     costAndLengthPerTreatmentGroupPerYear, // We only care about cost here
                     simulationTreatments, // This should be filtered by budget/year; do we already have this by this point?

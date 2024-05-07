@@ -13,7 +13,7 @@ namespace BridgeCareCore.Services
                 return null;
             }
             var isvalid = criterionLibrary.IsValid();
-            var newId = isvalid ? Guid.NewGuid() : ownerId;
+            var newId = Guid.NewGuid();
             var clone = new CriterionLibraryDTO
             {
                 Id = newId,

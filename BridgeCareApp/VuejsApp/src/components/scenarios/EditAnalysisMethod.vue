@@ -330,10 +330,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
             ...stateAnalysisMethod.value,
             benefit: {
                 ...stateAnalysisMethod.value.benefit,
-                id:
-                    stateAnalysisMethod.value.benefit.id === getBlankGuid()
-                        ? getNewGuid()
-                        : stateAnalysisMethod.value.benefit.id,
             },
         };
     });
@@ -437,7 +433,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }    
 
     async function onUpsertAnalysisMethod() {
-
+        if(analysisMethod.value.benefit.id === getBlankGuid())
+            analysisMethod.value.benefit.id = getNewGuid();
         upsertAnalysisMethodAction({
                 analysisMethod: analysisMethod.value,
                 scenarioId: selectedScenarioId.value,

@@ -1025,7 +1025,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         else
                         {
                             var cellToEnterCost = yearlyItem.Key - startYear;
-                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
+                            var currentValue = worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value;
+                            decimal toAdd = currentValue == null ? 0 : Convert.ToDecimal(currentValue);
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost + toAdd;
                         }
                         committedTotalCost += dataValue.treatmentCost;
 
@@ -1126,7 +1128,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         else
                         {
                             var cellToEnterCost = yearlyItem.Key - startYear;
-                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
+                            var currentValue = worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value;
+                            decimal toAdd = currentValue == null ? 0 : Convert.ToDecimal(currentValue);
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost + toAdd;
                         }
                         sapTotalCost += dataValue.treatmentCost;
 
@@ -1231,7 +1235,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         else
                         {
                             var cellToEnterCost = yearlyItem.Key - startYear + 2;
-                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost].Value = dataValue.treatmentCost;
+                            var currentValue = worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost].Value;
+                            decimal toAdd = currentValue == null ? 0 : Convert.ToDecimal(currentValue);
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost].Value = dataValue.treatmentCost = toAdd;
                         }
                         projectBuilderTotalCost += dataValue.treatmentCost;
 

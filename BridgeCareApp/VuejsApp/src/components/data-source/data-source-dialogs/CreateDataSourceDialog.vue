@@ -8,7 +8,9 @@
         </v-card-title>           
       <v-card-text class="ghd-dialog-box-padding-center">
         <v-row column>
-          <v-text-field label="Name" outline id="CreateDataSourceDialog-Name-vtextField"
+          <v-text-field label="Name" id="CreateDataSourceDialog-Name-vtextField"
+            variant = "outlined"
+            density="compact"
             v-model="datasourceName"
             class="ghd-text-field-border ghd-text-field"/>
         </v-row>
@@ -53,7 +55,7 @@ import { clone } from 'ramda';
       newDataSource.value.name = datasourceName.value;
   })
 
-  watch(() => props.dialogData, () => {  
+  watch(showDialogComputed, () => {  
     newDataSource.value = {
         id: getNewGuid(),
         createdBy: getIdByUserNameGetter(getUserName()),

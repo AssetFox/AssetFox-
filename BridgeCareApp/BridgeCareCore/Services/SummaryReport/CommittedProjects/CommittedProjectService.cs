@@ -152,6 +152,17 @@ namespace BridgeCareCore.Services
 
             var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
             _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
+            var rawKeyDatumFieldNames = _unitOfWork.AdminSettingsRepo.GetRawKeyFields();
+
+            foreach (var kvp in _keyProperties.ToList())
+            {
+                var key = kvp.Key;
+                if (!rawKeyDatumFieldNames.Contains(key) && key != _networkKeyField)
+                {
+                    _keyProperties.Remove(key);
+                }
+            }
+
             _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
 
             if (committedProjectDTOs.Any())
@@ -299,13 +310,27 @@ namespace BridgeCareCore.Services
             }
             var locationColumnNames = new Dictionary<int, string>();
             var keyColumn = 0;
-            for (var column = 1; column <= _keyFields.Count; column++)
+
+            var rawKeyDatumFieldNames = _unitOfWork.AdminSettingsRepo.GetRawKeyFields();
+
+            foreach (var kvp in _keyProperties.ToList())
+            {
+                var key = kvp.Key;
+                if (!rawKeyDatumFieldNames.Contains(key) && key != _networkKeyField)
+                {
+                    _keyProperties.Remove(key);
+                }
+            }
+
+            _keyFields = _keyProperties.Keys.ToList();
+
+            for (var column = 1; column <= _keyProperties.Count; column++)
             {
                 var columnName = worksheet.GetCellValue<string>(1, column);
                 if (!_keyFields.Contains(columnName))
                 {
                     var keyFieldList = new StringBuilder();
-                    foreach (var field in _keyFields)
+                    foreach (var field in _keyProperties)
                     {
                         keyFieldList.Append(field);
                     }

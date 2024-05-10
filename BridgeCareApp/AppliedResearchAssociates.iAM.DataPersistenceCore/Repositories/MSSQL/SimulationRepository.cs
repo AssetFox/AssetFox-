@@ -36,6 +36,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var attributes = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
             var entity = CompleteSimulationMapper.ToNewEntity(completeSimulationDTO, attributes, keyAttribute, baseEntityProperties);
 
+            foreach (var treatment in entity.SelectableTreatments)
+            {
+                foreach (var supercedeRule in treatment.ScenarioTreatmentSupersedeRules)
+                {
+                    if (supercedeRule.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary.MergedCriteriaExpression == null)
+                    {
+                        supercedeRule.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary.MergedCriteriaExpression = string.Empty;
+                        supercedeRule.CriterionLibraryScenarioTreatmentSupersedeRuleJoin.CriterionLibrary.Name = string.Empty;
+                    }
+                }
+            }
+
             _unitOfWork.AsTransaction(() =>
             {
                 _unitOfWork.Context.AddEntity(entity);

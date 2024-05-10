@@ -30,7 +30,7 @@
               <v-col style='padding: 0' cols="3">
                 <v-row align-center>
                   <v-btn id="UserCriteria-assignUnassignedUserCriteria-btn" @click='onEditCriteria(user)'  class='ara-blue-bg text-white' 
-                          title='Give the user limited access to the bridge inventory'>
+                          title='Give the user limited access to the asset inventory'>
                     <v-icon size='1.5em' style='padding-right: 0.5em'>fas fa-edit</v-icon>
                     Assign Criteria Filter
                   </v-btn>

@@ -157,6 +157,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                 new Tuple<string, string>("WIDTH (FT)", "TOTAL WIDTH, IN FEET, OF ALL SEGMENTS"),
                 new Tuple<string, string>("BPN", "BUSINESS PLAN NETWORK"),
                 new Tuple<string, string>("PAVEMENT SURFACE TYPE", ""),
+                new Tuple<string, string>("FAMILY ID", ""),
+                new Tuple<string, string>("TREATMENT SELECTED", "")
             };
     }
 }

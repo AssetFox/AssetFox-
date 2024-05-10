@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressionReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
@@ -177,7 +176,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var worksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.OPICalculationsTab);
-            _opiCalculationsTab.Fill(worksheet, reportOutputData);
+            _opiCalculationsTab.Fill(worksheet, reportOutputData, simulation.ShouldBundleFeasibleTreatments);
 
             // Condition Data
             reportDetailDto.Status = $"Creating" + PAMSConstants.Legend_Tab + "TAB";
@@ -195,7 +194,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             checkCancelled(cancellationToken, simulationId);
 
             //set and return value
-            var filePath = Path.Combine(folderPathForSimulation, "SummaryReport.xlsx");
+            var filePath = Path.Combine(folderPathForSimulation, "PAMSDistressProgressionReport.xlsx");
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(filePath, bin);            
             var functionReturnValue = filePath ?? string.Empty;

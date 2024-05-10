@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
@@ -22,13 +23,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData)
+        public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, bool shouldBundleFeasibleTreatments)
         {
             var currentCell = FillHeaders(worksheet);
-            FillDynamicData(worksheet, reportOutputData, currentCell);
+            FillDynamicData(worksheet, reportOutputData, currentCell, shouldBundleFeasibleTreatments);
         }
 
-        private void FillDynamicData(ExcelWorksheet worksheet, SimulationOutput reportOutputData, CurrentCell currentCell)
+        private void FillDynamicData(ExcelWorksheet worksheet, SimulationOutput reportOutputData, CurrentCell currentCell, bool shouldBundleFeasibleTreatments)
         {
             var row = currentCell.Row;
             var column = currentCell.Column;
@@ -37,12 +38,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
             {   
                 var valuePerTextAttribute = initialAssetSummary.ValuePerTextAttribute;
                 var crs = CheckGetTextValue(valuePerTextAttribute, "CRS");
-                
+                Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
                 foreach (var yearData in reportOutputData.Years)
                 {
                     column = 1;
                     var section = yearData.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == crs);
                     var sectionValuePerNumericAttribute = section.ValuePerNumericAttribute;
+                    var sectionValuePerTextAttribute = section.ValuePerTextAttribute;
+                    // Build keyCashFlowFundingDetails
+                    if (section.TreatmentStatus != TreatmentStatus.Applied)
+                    {
+                        var fundingSection = yearData.Assets.FirstOrDefault(_ => CheckGetTextValue(sectionValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment && _.AppliedTreatment == section.AppliedTreatment);
+                        if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
+                        {
+                            keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
+                        }
+                    }                    
 
                     worksheet.Cells[row, column++].Value = yearData.Year;
                     worksheet.Cells[row, column].Value = crs;
@@ -62,7 +73,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Cells[row, column++].Value = CheckGetValue(sectionValuePerNumericAttribute, "WIDTH");
                     worksheet.Cells[row, column++].Value = CheckGetTextValue(valuePerTextAttribute, "BUSIPLAN");
                     worksheet.Cells[row, column].Value = CheckGetValue(sectionValuePerNumericAttribute, "SURFACEID") + "-" + CheckGetTextValue(valuePerTextAttribute, "SURFACE_NAME");
-                    worksheet.Column(column).Width = 37;
+                    worksheet.Column(column++).Width = 37;
+                    worksheet.Cells[row, column++].Value = CheckGetTextValue(valuePerTextAttribute, "FAMILY");
+
+                    // Treatment selected
+                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
+                                                  section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                  section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
+
+                    var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                 treatmentConsiderations.FirstOrDefault() :
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    worksheet.Cells[row, column].Value = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
+                    worksheet.Column(column).Width = 71;
+                    worksheet.Column(column).Style.WrapText = true;
                     // right border line
                     ExcelHelper.ApplyRightTickBorder(worksheet.Cells[row, column++]);
 
@@ -463,7 +487,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
             "LENGTH (FT)",
             "WIDTH (FT)",
             "BPN",
-            "Pavement Surface Type"            
+            "Pavement Surface Type",
+            "Family ID",
+            "Treatment Selected"
         };
 
         private double CheckGetValue(Dictionary<string, double> valuePerNumericAttribute, string attribute) => _reportHelper.CheckAndGetValue<double>(valuePerNumericAttribute, attribute);

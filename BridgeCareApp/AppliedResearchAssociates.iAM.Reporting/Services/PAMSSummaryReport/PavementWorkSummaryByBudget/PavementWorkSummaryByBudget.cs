@@ -48,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var simulationTreatments = new List<(string Name, string AssetType, TreatmentCategory Category)>();
             foreach (var item in selectableTreatments)
             {
-                simulationTreatments.Add((item.Name, (string)item.AssetCategory, item.Category));
+                simulationTreatments.Add((item.Name, item.AssetCategory, item.Category));
             }
             simulationTreatments.Sort((a, b) => a.Name.CompareTo(b.Name));
 
@@ -66,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 // Inside iteration since each section has its own budget analysis section.
                 var costBudgetsWorkSummary = new CostBudgetsWorkSummary();
 
-                var costAndLengthPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>();
+                var costLengthPerSurfaceIdPerTreatmentPerYear = new Dictionary<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>>();
                 var costAndLengthPerTreatmentGroupPerYear = new Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>>();
 
                 currentCell.Column = 1;
@@ -83,11 +83,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     // Add all treatments here, set all values to 0
                     foreach (var year in simulationYears)
                     {
-                        if (!costAndLengthPerTreatmentPerYear.ContainsKey(year))
+                        if (!costLengthPerSurfaceIdPerTreatmentPerYear.ContainsKey(year))
                         {
-                            costAndLengthPerTreatmentPerYear.Add(year, new Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>());
+                            costLengthPerSurfaceIdPerTreatmentPerYear.Add(year,
+                                new Dictionary<string, // treatmentName
+                                Dictionary<int, // surfaceId
+                            (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>());
                         }
-                        var treatmentData = costAndLengthPerTreatmentPerYear[year];
+                        var treatmentData = costLengthPerSurfaceIdPerTreatmentPerYear[year];
 
                         if (!costAndLengthPerTreatmentGroupPerYear.ContainsKey(year))
                         {
@@ -99,8 +102,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         {
                             if (treatment.Name != PAMSConstants.NoTreatmentForWorkSummary)
                             {
-                                treatmentData.Add(treatment.Name, (0, 0, 0));
-
+                                var dict = new Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>
+                                {
+                                    { 0, (0, 0, 0) }
+                                };
+                                treatmentData.Add(treatment.Name, dict);
                                 var treatmentGroup = PavementTreatmentHelper.GetTreatmentGroup(treatment.Name, simulationTreatments);
                                 if (!treatmentGroupData.ContainsKey(treatmentGroup))
                                 {
@@ -112,13 +118,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 }
                 else
                 {
-                    _pavementWorkSummaryComputationHelper.FillDataToUseInExcel(budgetSummaryModel, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments);
+                    _pavementWorkSummaryComputationHelper.FillDataToUseInExcel(budgetSummaryModel, costLengthPerSurfaceIdPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments);
                 }
 
-                var workTypeTotals = _pavementWorkSummaryComputationHelper.CalculateWorkTypeTotals(costAndLengthPerTreatmentPerYear, simulationTreatments);
+                var workTypeTotals = _pavementWorkSummaryComputationHelper.CalculateWorkTypeTotals(costLengthPerSurfaceIdPerTreatmentPerYear, simulationTreatments);
                 costBudgetsWorkSummary.FillCostBudgetWorkSummarySectionsbyBudget(worksheet, currentCell, simulationYears,
                     yearlyBudgetAmount,
-                    costAndLengthPerTreatmentPerYear,
+                    costLengthPerSurfaceIdPerTreatmentPerYear,
                     yearlyCostCommittedProj,
                     costAndLengthPerTreatmentGroupPerYear, // We only care about cost here
                     simulationTreatments, // This should be filtered by budget/year; do we already have this by this point?

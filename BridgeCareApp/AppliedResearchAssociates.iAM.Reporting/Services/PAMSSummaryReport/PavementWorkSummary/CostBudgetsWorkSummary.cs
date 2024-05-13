@@ -13,7 +13,6 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using static AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary.PavementTreatmentHelper;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
 {
@@ -38,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         public ChartRowsModel FillCostBudgetWorkSummarySections(
             ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
             Dictionary<string, Budget> yearlyBudgetAmount,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>> costLengthPerSurfaceIdPerTreatmentPerYear,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int pavementCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
             Dictionary<int, Dictionary<TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
             List<(string TreatmentName, string AssetType, TreatmentCategory Category)> simulationTreatments,
@@ -51,9 +50,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfSAPWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfProjectBuilderWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
-            FillCostOfFullDepthAsphaltWorkSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
-            FillCostOfCompositeWork(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
-            FillCostOfConcreteWork(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
+            FillCostOfFullDepthAsphaltWorkSection(worksheet, currentCell, simulationYears, costLengthPerSurfaceIdPerTreatmentPerYear, simulationTreatments);
+            FillCostOfCompositeWork(worksheet, currentCell, simulationYears, costLengthPerSurfaceIdPerTreatmentPerYear, simulationTreatments);
+            FillCostOfConcreteWork(worksheet, currentCell, simulationYears, costLengthPerSurfaceIdPerTreatmentPerYear, simulationTreatments);
             FillTreatmentGroupTotalsSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentGroupPerYear);
             var workTypeTotalsWorkOutsideScope = AddCostOfWorkOutsideScope(committedProjectsForWorkOutsideScope);
             FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, workTypeTotals, workTypeTotalsWorkOutsideScope, yearlyBudgetAmount, out var totalSpendingRow);
@@ -83,9 +82,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         public ChartRowsModel FillCostBudgetWorkSummarySectionsbyBudget(
             ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
             Dictionary<string, Budget> yearlyBudgetAmount,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>> costLengthPerSurfaceIdPerTreatmentPerYear,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int pavementCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
-            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
+            Dictionary<int, Dictionary<TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
             List<(string TreatmentName, string AssetType, TreatmentCategory Category)> simulationTreatments,
             Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals,
             WorkSummaryByBudgetModel workSummaryByBudgetModel,
@@ -98,9 +97,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfSAPWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfProjectBuilderWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
-            FillCostOfFullDepthAsphaltWorkSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
-            FillCostOfCompositeWork(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
-            FillCostOfConcreteWork(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
+            FillCostOfFullDepthAsphaltWorkSection(worksheet, currentCell, simulationYears, costLengthPerSurfaceIdPerTreatmentPerYear, simulationTreatments);
+            FillCostOfCompositeWork(worksheet, currentCell, simulationYears, costLengthPerSurfaceIdPerTreatmentPerYear, simulationTreatments);
+            FillCostOfConcreteWork(worksheet, currentCell, simulationYears, costLengthPerSurfaceIdPerTreatmentPerYear, simulationTreatments);
             FillTreatmentGroupTotalsSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentGroupPerYear);
             var workTypeTotalsWorkOutsideScope = AddCostOfWorkOutsideScope(committedProjectsForWorkOutsideScope);
             FillWorkTypeTotalsSectionByBudget(worksheet, currentCell, simulationYears, workTypeTotals, workTypeTotalsWorkOutsideScope, yearlyBudgetAmount, out var totalSpendingRow, workSummaryByBudgetModel);
@@ -115,7 +114,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelWorksheet worksheet,
             CurrentCell currentCell,
             List<int> simulationYears,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndCountPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>> costLengthPerSurfaceIdPerTreatmentPerYear,
             List<(string TreatmentName, string AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
@@ -123,7 +122,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             var asphaltTreatments = _pavementWorkSummaryCommon.GetNoTreatments(simulationTreatments).Concat(_pavementWorkSummaryCommon.GetAsphaltTreatments(simulationTreatments)).ToList();
 
-            var workTypeTotalFullDepthAsphalt = AddCostsOfFullDepthAsphaltWork(worksheet, simulationYears, currentCell, costAndCountPerTreatmentPerYear, asphaltTreatments);
+            var workTypeTotalFullDepthAsphalt = AddCostsOfFullDepthAsphaltWork(worksheet, simulationYears, currentCell, costLengthPerSurfaceIdPerTreatmentPerYear, asphaltTreatments);
 
             return workTypeTotalFullDepthAsphalt;
         }
@@ -132,7 +131,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelWorksheet worksheet,
             List<int> simulationYears,
             CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndCountPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>> costLengthPerSurfaceIdPerTreatmentPerYear,
             List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
@@ -156,7 +155,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             column++;
             var fromColumn = column + 1;
             // Filling in the cost per treatment per year in the excel TAB
-            foreach (var yearlyValues in costAndCountPerTreatmentPerYear)
+            foreach (var yearlyValues in costLengthPerSurfaceIdPerTreatmentPerYear)
             {
                 row = startRow;
                 column = ++column;
@@ -165,10 +164,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 foreach (var treatment in simulationTreatments)
                 {
                     decimal cost = 0;
-                    yearlyValues.Value.TryGetValue(treatment.Name, out var asphaltCost);
-                    worksheet.Cells[row++, column].Value = asphaltCost.treatmentCost - asphaltCost.compositeTreatmentCost;
-                    asphaltTotalCost += (asphaltCost.treatmentCost - asphaltCost.compositeTreatmentCost);
-                    cost = asphaltCost.treatmentCost - asphaltCost.compositeTreatmentCost;
+                    GetCosts(yearlyValues, treatment, out var treatmentCost, out var treatmentCompositeCost);
+                    var treatmentAsphaltCost = treatmentCost - treatmentCompositeCost;
+                    worksheet.Cells[row++, column].Value = treatmentAsphaltCost;
+                    asphaltTotalCost += treatmentAsphaltCost;
+                    cost = treatmentAsphaltCost;
 
                     if (!workTypeFullDepthAsphalt.ContainsKey(treatment.Category))
                     {
@@ -193,11 +193,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     foreach (var yearlyValue in yearlyValues.Value)
                     {
                         var treatment = yearlyValue.Key;
-                        if (treatment.Contains("Bundle"))// && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
+                        if (treatment.Contains("Bundle"))
                         {
                             var category = TreatmentCategory.Bundled;
                             decimal cost = 0;
-                            cost = (yearlyValue.Value.treatmentCost - yearlyValue.Value.compositeTreatmentCost);
+                            GetCostsInYearlyValue(yearlyValue.Value.Where(_ => _.Key < 62).ToList(), out var treatmentCost, out var compositeTreatmentCost);
+                            cost = treatmentCost - compositeTreatmentCost;
                             bundledCost += cost;
                             asphaltTotalCost += cost;
 
@@ -217,6 +218,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                 workTypeFullDepthAsphalt[category][yearlyValues.Key] += cost;
                             }
                         }
+
                     }
                     worksheet.Cells[row++, column].Value = bundledCost;
                 }
@@ -236,13 +238,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
             
             return workTypeFullDepthAsphalt;
-        }
+        }        
 
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillCostOfCompositeWork(
                 ExcelWorksheet worksheet,
                 CurrentCell currentCell,
                 List<int> simulationYears,
-                Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndCountPerTreatmentPerYear,
+                Dictionary<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>> costLengthPerSurfaceIdPerTreatmentPerYear,
                 List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments
                 )
         {
@@ -251,7 +253,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             var asphaltTreatments = _pavementWorkSummaryCommon.GetNoTreatments(simulationTreatments).Concat(_pavementWorkSummaryCommon.GetAsphaltTreatments(simulationTreatments)).ToList();
 
-            var workTypeComposite = AddCostsOfCompositeWork(worksheet, simulationYears, currentCell, costAndCountPerTreatmentPerYear, asphaltTreatments);
+            var workTypeComposite = AddCostsOfCompositeWork(worksheet, simulationYears, currentCell, costLengthPerSurfaceIdPerTreatmentPerYear, asphaltTreatments);
 
             return workTypeComposite;
         }
@@ -260,7 +262,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelWorksheet worksheet,
             List<int> simulationYears,
             CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndCountPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>> costLengthPerSurfaceIdPerTreatmentPerYear,
             List<(string Name, string AssetType, TreatmentCategory Category)>
             simulationTreatments
             )
@@ -285,7 +287,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             column++;
             var fromColumn = column + 1;
             // Filling in the cost per treatment per year in the excel TAB
-            foreach (var yearlyValues in costAndCountPerTreatmentPerYear)
+            foreach (var yearlyValues in costLengthPerSurfaceIdPerTreatmentPerYear)
             {
                 decimal CompositeTotalCost = 0;
                 row = startRow;
@@ -294,10 +296,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 foreach (var treatment in simulationTreatments)
                 {
                     decimal cost = 0;
-                    yearlyValues.Value.TryGetValue(treatment.Name, out var CompositeCost);
-                    worksheet.Cells[row++, column].Value = CompositeCost.compositeTreatmentCost;
-                    CompositeTotalCost += CompositeCost.compositeTreatmentCost;
-                    cost = CompositeCost.compositeTreatmentCost;
+                    GetCosts(yearlyValues, treatment, out var treatmentCost, out var treatmentCompositeCost);
+                    worksheet.Cells[row++, column].Value = treatmentCompositeCost;
+                    CompositeTotalCost += treatmentCompositeCost;
+                    cost = treatmentCompositeCost;
 
                     if (!workTypeComposite.ContainsKey(treatment.Category))
                     {
@@ -322,11 +324,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     foreach (var yearlyValue in yearlyValues.Value)
                     {
                         var treatment = yearlyValue.Key;
-                        if (treatment.Contains("Bundle"))// && treatment.ToLower().Contains((char)TreatmentGroupCategory.Bituminous))
+                        if (treatment.Contains("Bundle"))
                         {
                             var category = TreatmentCategory.Bundled;
                             decimal cost = 0;
-                            cost = yearlyValue.Value.compositeTreatmentCost;
+                            GetCostsInYearlyValue(yearlyValue.Value.Where(_ => _.Key == 62).ToList(), out var treatmentCost, out var compositeTreatmentCost);
+                            cost = compositeTreatmentCost;
                             bundledCost += cost;
                             CompositeTotalCost += cost;
 
@@ -369,7 +372,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelWorksheet worksheet,
             CurrentCell currentCell,
             List<int> simulationYears,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndCountPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>> costLengthPerSurfaceIdPerTreatmentPerYear,
             List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
@@ -378,7 +381,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             var concreteTreatments = _pavementWorkSummaryCommon.GetNoTreatments(simulationTreatments).Concat(_pavementWorkSummaryCommon.GetConcreteTreatments(simulationTreatments)).ToList();
 
-            var workTypeConcrete = AddCostsOfConcreteWork(worksheet, simulationYears, currentCell, costAndCountPerTreatmentPerYear, concreteTreatments);
+            var workTypeConcrete = AddCostsOfConcreteWork(worksheet, simulationYears, currentCell, costLengthPerSurfaceIdPerTreatmentPerYear, concreteTreatments);
 
             return workTypeConcrete;
         }
@@ -387,7 +390,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelWorksheet worksheet,
             List<int> simulationYears,
             CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndCountPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>> costLengthPerSurfaceIdPerTreatmentPerYear,
             List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
@@ -411,7 +414,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             column++;
             var fromColumn = column + 1;
             // Filling in the cost per treatment per year in the excel TAB
-            foreach (var yearlyValues in costAndCountPerTreatmentPerYear)
+            foreach (var yearlyValues in costLengthPerSurfaceIdPerTreatmentPerYear)
             {
                 decimal ConcreteTotalCost = 0;
                 row = startRow;
@@ -420,11 +423,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 foreach (var treatment in simulationTreatments)
                 {
                     decimal cost = 0;
-
-                    yearlyValues.Value.TryGetValue(treatment.Name, out var ConcreteCost);
-                    worksheet.Cells[row++, column].Value = ConcreteCost.treatmentCost;
-                    ConcreteTotalCost += ConcreteCost.treatmentCost;
-                    cost = ConcreteCost.treatmentCost;
+                    GetCosts(yearlyValues, treatment, out var treatmentCost, out var treatmentCompositeCost);
+                    worksheet.Cells[row++, column].Value = treatmentCost;
+                    ConcreteTotalCost += treatmentCost;
+                    cost = treatmentCost;
 
                     if (!workTypeConcrete.ContainsKey(treatment.Category))
                     {
@@ -442,18 +444,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         workTypeConcrete[treatment.Category][yearlyValues.Key] += cost;
                     }
                 }
-
+                
                 if (ShouldBundleFeasibleTreatments)
                 {
                     decimal bundledCost = 0;
                     foreach (var yearlyValue in yearlyValues.Value)
                     {
                         var treatment = yearlyValue.Key;
-                        if (treatment.Contains("Bundle"))// && treatment.ToLower().Contains((char)TreatmentGroupCategory.Concrete))
+                        if (treatment.Contains("Bundle"))
                         {
                             var category = TreatmentCategory.Bundled;
                             decimal cost = 0;
-                            cost = yearlyValue.Value.treatmentCost;
+                            GetCostsInYearlyValue(yearlyValue.Value.Where(_ => _.Key > 62).ToList(), out var treatmentCost, out var compositeTreatmentCost);
+                            cost = treatmentCost;
                             bundledCost += cost;
                             ConcreteTotalCost += cost;
 
@@ -1022,7 +1025,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         else
                         {
                             var cellToEnterCost = yearlyItem.Key - startYear;
-                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
+                            var currentValue = worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value;
+                            decimal toAdd = currentValue == null ? 0 : Convert.ToDecimal(currentValue);
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost + toAdd;
                         }
                         committedTotalCost += dataValue.treatmentCost;
 
@@ -1123,7 +1128,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         else
                         {
                             var cellToEnterCost = yearlyItem.Key - startYear;
-                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
+                            var currentValue = worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value;
+                            decimal toAdd = currentValue == null ? 0 : Convert.ToDecimal(currentValue);
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost + toAdd;
                         }
                         sapTotalCost += dataValue.treatmentCost;
 
@@ -1228,7 +1235,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         else
                         {
                             var cellToEnterCost = yearlyItem.Key - startYear + 2;
-                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost].Value = dataValue.treatmentCost;
+                            var currentValue = worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost].Value;
+                            decimal toAdd = currentValue == null ? 0 : Convert.ToDecimal(currentValue);
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost].Value = dataValue.treatmentCost = toAdd;
                         }
                         projectBuilderTotalCost += dataValue.treatmentCost;
 
@@ -1585,6 +1594,32 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             }
 
             return workTypeTotalWorkOutsideScope;
+        }
+
+        private static void GetCosts(KeyValuePair<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>> yearlyValues, (string Name, string AssetType, TreatmentCategory Category) treatment, out decimal treatmentCost, out decimal compositeTreatmentCost)
+        {
+            treatmentCost = 0;
+            compositeTreatmentCost = 0;
+            yearlyValues.Value.TryGetValue(treatment.Name, out var costAndLengthsPerSurfaceId);
+            if (costAndLengthsPerSurfaceId != null)
+            {
+                foreach (var value in costAndLengthsPerSurfaceId)
+                {
+                    treatmentCost += value.Value.treatmentCost;
+                    compositeTreatmentCost += value.Value.compositeTreatmentCost;
+                }
+            }
+        }
+
+        private static void GetCostsInYearlyValue(List<KeyValuePair<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> valuesPerSurfaceId, out decimal treatmentCost, out decimal compositeTreatmentCost)
+        {
+            treatmentCost = 0;
+            compositeTreatmentCost = 0;
+            foreach (var value in valuesPerSurfaceId)
+            {
+                treatmentCost += value.Value.treatmentCost;
+                compositeTreatmentCost += value.Value.compositeTreatmentCost;
+            }
         }
     }
 }

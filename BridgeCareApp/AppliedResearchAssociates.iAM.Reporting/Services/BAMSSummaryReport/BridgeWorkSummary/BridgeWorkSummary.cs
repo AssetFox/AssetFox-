@@ -270,7 +270,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 }
                 if (!countForCompletedProject[year].ContainsKey(appliedTreatment))
                 {
-                    countForCompletedProject[year].Add(section.AppliedTreatment, 1);
+                    countForCompletedProject[year].Add(appliedTreatment, 1);
                 }
                 else
                 {
@@ -288,7 +288,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 // if current year status is TreatmentCause.CashFlowProject, then the previous year
                 // is either 1st year of cashflow or somewhere in between, in both cases, we will
                 // remove the previous year project as it has not been conmleted.
-                countForCompletedProject[year - 1][section.AppliedTreatment] -= 1;
+                var appliedTreatment = section.AppliedTreatment;
+                if (appliedTreatment.Contains("Bundle"))
+                {
+                    appliedTreatment = BAMSConstants.Bundled;
+                }
+                countForCompletedProject[year - 1][appliedTreatment] -= 1;
             }
         }
 

@@ -50,13 +50,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             simulationTreatments.Sort((a, b) => a.Name.CompareTo(b.Name));
 
-
-            var costAndLengthPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>(); // Year, treatmentName, cost, length
+            // Year, treatmentName, surfaceId, cost, length, 
+            var costLengthPerSurfaceIdPerTreatmentPerYear = new Dictionary<int, // year
+                            Dictionary<string, // treatmentName
+                            Dictionary<int, // surfaceId
+                            (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>>();
             var costAndLengthPerTreatmentGroupPerYear = new Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>>();
-            _pavementWorkSummaryComputationHelper.FillDataToUseInExcel(reportOutputData, yearlyCostCommittedProj, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, treatmentCategoryLookup, committedProjectsForWorkOutsideScope, simulationTreatments);
-            var workTypeTotals = _pavementWorkSummaryComputationHelper.CalculateWorkTypeTotals(costAndLengthPerTreatmentPerYear, simulationTreatments);
-            var chartRowsModel = _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears, yearlyBudgetAmount, costAndLengthPerTreatmentPerYear, yearlyCostCommittedProj, costAndLengthPerTreatmentGroupPerYear, simulationTreatments, workTypeTotals, committedProjects, committedProjectsForWorkOutsideScope, shouldBundleFeasibleTreatments);
-            chartRowsModel = _treatmentsWorkSummary.FillTreatmentsWorkSummarySections(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments, workTypeTotals, chartRowsModel, shouldBundleFeasibleTreatments);
+            _pavementWorkSummaryComputationHelper.FillDataToUseInExcel(reportOutputData, yearlyCostCommittedProj, costLengthPerSurfaceIdPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, treatmentCategoryLookup, committedProjectsForWorkOutsideScope, simulationTreatments);
+            var workTypeTotals = _pavementWorkSummaryComputationHelper.CalculateWorkTypeTotals(costLengthPerSurfaceIdPerTreatmentPerYear, simulationTreatments);
+            var chartRowsModel = _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears, yearlyBudgetAmount, costLengthPerSurfaceIdPerTreatmentPerYear, yearlyCostCommittedProj, costAndLengthPerTreatmentGroupPerYear, simulationTreatments, workTypeTotals, committedProjects, committedProjectsForWorkOutsideScope, shouldBundleFeasibleTreatments);
+            chartRowsModel = _treatmentsWorkSummary.FillTreatmentsWorkSummarySections(worksheet, currentCell, simulationYears, costLengthPerSurfaceIdPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments, workTypeTotals, chartRowsModel, shouldBundleFeasibleTreatments);
             chartRowsModel = _iriConditionSummary.FillIriConditionSummarySection(worksheet, currentCell, reportOutputData, chartRowsModel);
             chartRowsModel = _opiConditionSummary.FillOpiConditionSummarySection(worksheet, currentCell, reportOutputData, chartRowsModel);
 

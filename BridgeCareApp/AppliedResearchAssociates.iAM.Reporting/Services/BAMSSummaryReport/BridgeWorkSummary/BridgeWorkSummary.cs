@@ -152,6 +152,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                 Sum(_ => _.FundingCalculationOutput?.AllocationMatrix?.
                                 Where(_ => _.Year == yearData.Year).
                                 Sum(b => b.AllocatedAmount) ?? 0);
+                    cost = Math.Round(cost, 0);
                     if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                         appliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                     {

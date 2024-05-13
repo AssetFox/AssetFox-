@@ -457,8 +457,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         }
                     }
 
-                    if (section_BRKEY == 6047 && (yearlySectionData.Year == 2028 || yearlySectionData.Year == 2029)) { }
-
                     // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
                     var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
                                                   section.TreatmentCause != TreatmentCause.CashFlowProject ?

@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.Style;
 using static AppliedResearchAssociates.iAM.Analysis.Engine.FundingCalculationOutput;
 
@@ -456,19 +457,23 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         }
                     }
 
+                    if (section_BRKEY == 6047 && (yearlySectionData.Year == 2028 || yearlySectionData.Year == 2029)) { }
+
                     // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                                  section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY];
+                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
+                                                  section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                  section.TreatmentConsiderations :
+                                                  keyCashFlowFundingDetails[section_BRKEY] ?? new();
                     var treatmentConsideration = shouldBundleFeasibleTreatments ?
-                                                        treatmentConsiderations.FirstOrDefault() :
-                                                        treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                            treatmentConsiderations.FirstOrDefault() :
+                            treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
                     var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
-                    var cost = treatmentConsideration == null ? 0 :
-                               Math.Round(treatmentConsideration.FundingCalculationOutput?.AllocationMatrix?.Sum(b => b.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis                    
+                    var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
+                    var cost = Math.Round(allocationMatrix?.Where(_ => _.Year == yearlySectionData.Year).Sum(_ => _.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis                    
                     var workCell = worksheet.Cells[row, column];
-                    if (abbreviatedTreatmentNames.ContainsKey(section.AppliedTreatment))
+                    if (abbreviatedTreatmentNames.ContainsKey(appliedTreatment))
                     {
-                        workCell.Value = abbreviatedTreatmentNames[section.AppliedTreatment];
+                        workCell.Value = abbreviatedTreatmentNames[appliedTreatment];
                         worksheet.Cells[row, column + 1].Value = cost;
 
                         if (!isInitialYear && section.TreatmentCause == TreatmentCause.CashFlowProject)
@@ -478,7 +483,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                 prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
                                     .Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY);
                             }
-                            if (prevYearSection.AppliedTreatment == section.AppliedTreatment)
+                            if (prevYearSection.AppliedTreatment == appliedTreatment)
                             {
                                 workCell.Value = "--";
                                 worksheet.Cells[row, column + 1].Value = cost;
@@ -490,8 +495,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
                     else
                     {
-                        workCell.Value = section.AppliedTreatment.ToLower() == BAMSConstants.NoTreatment ? "--" :
-                            section.AppliedTreatment.ToLower();
+                        workCell.Value = appliedTreatment.ToLower() == BAMSConstants.NoTreatment ? "--" : appliedTreatment.ToLower();
 
                         worksheet.Cells[row, column + 1].Value = cost;
                         ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1], ExcelFormatStrings.CurrencyWithoutCents);
@@ -600,11 +604,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             currentCell.Column = column++;
             currentCell.Row = initialRow;
             isInitialYear = true;
-            foreach (var sectionData in outputResults.Years)
+            foreach (var yearlySectionData in outputResults.Years)
             {
                 row = currentCell.Row; // setting row back to start
                 currentCell.Column = column;
-                foreach (var section in sectionData.Assets)
+                foreach (var section in yearlySectionData.Assets)
                 {
                     column = currentCell.Column;
                     column = AddSimulationYearData(worksheet, row, column, null, section);
@@ -615,7 +619,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     AssetDetail prevYearSection = null;
                     if (!isInitialYear)
                     {
-                        prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == sectionData.Year - 1)?
+                        prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)?
                             .Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY);
                     }
 
@@ -632,20 +636,23 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
 
                     // If TreatmentStatus Applied it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                                  section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY] ?? new();
+                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
+                                                  section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                  section.TreatmentConsiderations :
+                                                  keyCashFlowFundingDetails[section_BRKEY] ?? new();
                     var treatmentConsideration = shouldBundleFeasibleTreatments ?
-                                                 treatmentConsiderations.FirstOrDefault() :
-                                                 treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
-                    var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
-                    var cost = Math.Round(allocationMatrix?.Sum(_ => _.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis
+                            treatmentConsiderations.FirstOrDefault() :
+                            treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();                    
+                    var cost = Math.Round(allocationMatrix?.Where(_ => _.Year == yearlySectionData.Year).Sum(_ => _.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis
                     var recommendedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment; // Recommended Treatment
 
                     //check budget usages
                     var budgetName = "";
                     if (allocationMatrix?.Any() == true && cost > 0)
                     {
-                        var budgetNames = allocationMatrix.Select(_ => _.BudgetName).Distinct().ToList();
+                        var budgetNames = allocationMatrix.Where(_ => _.AllocatedAmount > 0 && _.Year == yearlySectionData.Year).
+                                          Select(_ => _.BudgetName).Distinct().ToList();
                         if (budgetNames.Count == 1) //single budget
                         {
                             budgetName = budgetNames.First() ?? ""; // Budget

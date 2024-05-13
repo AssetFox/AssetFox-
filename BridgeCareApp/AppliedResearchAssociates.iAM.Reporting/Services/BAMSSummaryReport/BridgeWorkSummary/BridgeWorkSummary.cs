@@ -150,6 +150,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     var cost = treatmentConsiderations.
                                 Where(_ => _.TreatmentName?.ToLower() != BAMSConstants.NoTreatment && _.TreatmentName == appliedTreatment).
                                 Sum(_ => _.FundingCalculationOutput?.AllocationMatrix?.
+                                Where(_ => _.Year == yearData.Year).
                                 Sum(b => b.AllocatedAmount) ?? 0);
                     if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                         appliedTreatment.ToLower() != BAMSConstants.NoTreatment)

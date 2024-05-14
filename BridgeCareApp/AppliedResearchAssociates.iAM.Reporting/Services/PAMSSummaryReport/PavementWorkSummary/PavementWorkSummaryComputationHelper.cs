@@ -21,39 +21,95 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
     {
         private static SummaryReportHelper _summaryReportHelper = new SummaryReportHelper();
 
-        // InRange excludes the high value to avoid overlap
+        // InRange excludes the high value to avoid overlap        
         private static bool InRange(this double value, double low, double high) =>
-            low <= value && value < high;
+           low < value && value <= high;
 
         private static double IriCondition(this AssetDetail detail) =>
             _summaryReportHelper.checkAndGetValue<double>(detail.ValuePerNumericAttribute, "ROUGHNESS");
 
-        public static bool IriConditionIsExcellent(this AssetDetail detail) =>
-            detail.IriCondition().InRange(0, 60);
+        public static bool IriConditionIsExcellent(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.IriCondition() <= 70,
+                "2" => detail.IriCondition() <= 75,
+                "3" => detail.IriCondition() <= 100,
+                "4" => detail.IriCondition() <= 120,
+                _ => false,
+            };
 
-        public static bool IriConditionIsGood(this AssetDetail detail) =>
-            detail.IriCondition().InRange(60, 95);
+        public static bool IriConditionIsGood(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.IriCondition().InRange(70, 100),
+                "2" => detail.IriCondition().InRange(75, 120),
+                "3" => detail.IriCondition().InRange(100, 150),
+                "4" => detail.IriCondition().InRange(120, 170),
+                _ => false,
+            };
 
-        public static bool IriConditionIsFair(this AssetDetail detail) =>
-            detail.IriCondition().InRange(95, 170);
+        public static bool IriConditionIsFair(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.IriCondition().InRange(100, 150),
+                "2" => detail.IriCondition().InRange(120, 170),
+                "3" => detail.IriCondition().InRange(150, 195),
+                "4" => detail.IriCondition().InRange(170, 220),
+                _ => false,
+            };
 
-        public static bool IriConditionIsPoor(this AssetDetail detail) =>
-            detail.IriCondition() >= 170;
-
+        public static bool IriConditionIsPoor(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.IriCondition() > 150,
+                "2" => detail.IriCondition() > 170,
+                "3" => detail.IriCondition() > 195,
+                "4" => detail.IriCondition() > 220,
+                _ => false,
+            };
+        
         private static double OpiCondition(this AssetDetail detail) =>
             _summaryReportHelper.checkAndGetValue<double>(detail.ValuePerNumericAttribute, "OPI_CALCULATED");
+                
+        public static bool OpiConditionIsExcellent(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.OpiCondition() > 95,
+                "2" => detail.OpiCondition() > 95,
+                "3" => detail.OpiCondition() > 90,
+                "4" => detail.OpiCondition() > 85,
+                _ => false,
+            };
 
-        public static bool OpiConditionIsExcellent(this AssetDetail detail) =>
-            detail.OpiCondition().InRange(90, 100);
+        public static bool OpiConditionIsGood(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.OpiCondition().InRange(85, 95),
+                "2" => detail.OpiCondition().InRange(80, 95),
+                "3" => detail.OpiCondition().InRange(80, 90),
+                "4" => detail.OpiCondition().InRange(70, 85),
+                _ => false,
+            };
 
-        public static bool OpiConditionIsGood(this AssetDetail detail) =>
-            detail.OpiCondition().InRange(75, 90);
+        public static bool OpiConditionIsFair(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.OpiCondition().InRange(75, 85),
+                "2" => detail.OpiCondition().InRange(70, 80),
+                "3" => detail.OpiCondition().InRange(65, 80),
+                "4" => detail.OpiCondition().InRange(59, 70),
+                _ => false,
+            };
 
-        public static bool OpiConditionIsFair(this AssetDetail detail) =>
-            detail.OpiCondition().InRange(60, 75);
-
-        public static bool OpiConditionIsPoor(this AssetDetail detail) =>
-            detail.OpiCondition() < 60;
+        public static bool OpiConditionIsPoor(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.OpiCondition() <= 75,
+                "2" => detail.OpiCondition() <= 70,
+                "3" => detail.OpiCondition() <= 65,
+                "4" => detail.OpiCondition() < 60,
+                _ => false,
+            };
     }
 
     public class PavementWorkSummaryComputationHelper
@@ -65,20 +121,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _summaryReportHelper = new SummaryReportHelper();
         }
 
-        internal double CalculateSegmentMilesForBPNWithCondition(List<AssetSummaryDetail> initialSectionSummaries, string bpn, Func<AssetSummaryDetail, bool> conditionFunction)
-        {
-            var postedSegments = !string.IsNullOrEmpty(bpn) ? initialSectionSummaries.FindAll(b => _summaryReportHelper.checkAndGetValue<string>(b.ValuePerTextAttribute, "BUSIPLAN") == bpn) : initialSectionSummaries;
-            var selectedSegments = postedSegments.FindAll(section => conditionFunction(section));
-            return selectedSegments.Sum(_ => _summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "SEGMENT_LENGTH")).FeetToMiles();
-        }
-
         internal double CalculateSegmentMilesForBPNWithCondition(List<AssetDetail> sectionSummaries, string bpn, Func<AssetDetail, bool> conditionFunction)
         {
             var postedSegments = !string.IsNullOrEmpty(bpn) ? sectionSummaries.FindAll(b => _summaryReportHelper.checkAndGetValue<string>(b.ValuePerTextAttribute, "BUSIPLAN") == bpn) : sectionSummaries;
             var selectedSegments = postedSegments.FindAll(section => conditionFunction(section));
             return selectedSegments.Sum(_ => _summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "SEGMENT_LENGTH")).FeetToMiles();
         }
-
 
         internal void FillDataToUseInExcel(SimulationOutput reportOutputData,
                 Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,

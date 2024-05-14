@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.StaticContent;
 using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
+using System;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
 {
@@ -22,14 +20,43 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _pavementWorkSummaryComputationHelper = new PavementWorkSummaryComputationHelper();
         }
 
-        private void AddSegmentMilesForBPN(ExcelWorksheet worksheet, int row, int column, List<AssetDetail> sectionDetails, BPNName bpn)
+        private void AddSegmentMilesForBPN(ExcelWorksheet worksheet, int row, int column, List<AssetDetail> sectionDetails, BPNName bpn, ChartRowsModel chartRowsModel = null)
         {
             var bpnKey = bpn.ToMatchInDictionary();
-                        
-            var excellentMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(sectionDetails, bpnKey, _ => _.IriConditionIsExcellent());
-            var goodMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(sectionDetails, bpnKey, _ => _.IriConditionIsGood());
-            var fairMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(sectionDetails, bpnKey, _ => _.IriConditionIsFair());
-            var poorMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(sectionDetails, bpnKey, _ => _.IriConditionIsPoor());
+            double excellentMiles = 0;
+            double goodMiles = 0;
+            double fairMiles = 0;
+            double poorMiles = 0;
+            
+            if (bpnKey != string.Empty)
+            {
+                excellentMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(sectionDetails, bpnKey, _ => _.IriConditionIsExcellent(bpnKey));
+                goodMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(sectionDetails, bpnKey, _ => _.IriConditionIsGood(bpnKey));
+                fairMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(sectionDetails, bpnKey, _ => _.IriConditionIsFair(bpnKey));
+                poorMiles = _pavementWorkSummaryComputationHelper.CalculateSegmentMilesForBPNWithCondition(sectionDetails, bpnKey, _ => _.IriConditionIsPoor(bpnKey));
+            }
+            else
+            {
+                excellentMiles = Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_1_ChartModel.sourceStartRow, column].Value) +
+                                 Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_2_ChartModel.sourceStartRow, column].Value) +
+                                 Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_3_ChartModel.sourceStartRow, column].Value) +
+                                 Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_4_ChartModel.sourceStartRow, column].Value);
+
+                goodMiles = Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_1_ChartModel.sourceStartRow + 1, column].Value) +
+                                 Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_2_ChartModel.sourceStartRow + 1, column].Value) +
+                                 Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_3_ChartModel.sourceStartRow + 1, column].Value) +
+                                 Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_4_ChartModel.sourceStartRow + 1, column].Value);
+
+                fairMiles = Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_1_ChartModel.sourceStartRow + 2, column].Value) +
+                                 Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_2_ChartModel.sourceStartRow + 2, column].Value) +
+                                 Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_3_ChartModel.sourceStartRow + 2, column].Value) +
+                                 Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_4_ChartModel.sourceStartRow + 2, column].Value);
+
+                poorMiles = Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_1_ChartModel.sourceStartRow + 3, column].Value) +
+                                 Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_2_ChartModel.sourceStartRow + 3, column].Value) +
+                                 Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_3_ChartModel.sourceStartRow + 3, column].Value) +
+                                 Convert.ToDouble(worksheet.Cells[chartRowsModel.IRI_BPN_4_ChartModel.sourceStartRow + 3, column].Value);
+            }
 
             worksheet.Cells[row++, column].Value = excellentMiles;
             worksheet.Cells[row++, column].Value = goodMiles;
@@ -43,8 +70,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             SimulationOutput reportOutputData,
             string title,
             ChartConditionModel chartConditionModel,
-            BPNName bpn
-            )
+            BPNName bpn,
+            ChartRowsModel chartRowsModel = null)
         {
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, reportOutputData.Years.Select(yearData => yearData.Year).ToList(), "", title);
 
@@ -64,7 +91,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             foreach (var yearlyData in reportOutputData.Years)
             {
                 row = startRow;
-                AddSegmentMilesForBPN(worksheet, row, column, yearlyData.Assets, bpn);
+                AddSegmentMilesForBPN(worksheet, row, column, yearlyData.Assets, bpn, chartRowsModel);
                 column = ++column;
             }
 
@@ -86,7 +113,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             AddIriConditionSection(worksheet, currentCell, reportOutputData, "IRI Condition - Pavement Section Miles BPN 2", chartRowsModel.IRI_BPN_2_ChartModel, BPNName.BPN2);
             AddIriConditionSection(worksheet, currentCell, reportOutputData, "IRI Condition - Pavement Section Miles BPN 3", chartRowsModel.IRI_BPN_3_ChartModel, BPNName.BPN3);
             AddIriConditionSection(worksheet, currentCell, reportOutputData, "IRI Condition - Pavement Section Miles BPN 4", chartRowsModel.IRI_BPN_4_ChartModel, BPNName.BPN4);
-            AddIriConditionSection(worksheet, currentCell, reportOutputData, "IRI Condition - Pavement Section Miles Statewide", chartRowsModel.IRI_StateWide_ChartModel, BPNName.Statewide);
+            AddIriConditionSection(worksheet, currentCell, reportOutputData, "IRI Condition - Pavement Section Miles Statewide", chartRowsModel.IRI_StateWide_ChartModel, BPNName.Statewide, chartRowsModel);
 
             return chartRowsModel;
         }

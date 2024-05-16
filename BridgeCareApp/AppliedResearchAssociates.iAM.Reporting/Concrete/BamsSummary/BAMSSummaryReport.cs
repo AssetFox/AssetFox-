@@ -354,7 +354,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
             // Create Simluation parameters TAB
             var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
-            checkCancelled(cancellationToken, simulationId);
+            checkCancelled(cancellationToken, simulationId);
             // Bridge Data TAB
             reportDetailDto.Status = $"Creating Bridge Data TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);

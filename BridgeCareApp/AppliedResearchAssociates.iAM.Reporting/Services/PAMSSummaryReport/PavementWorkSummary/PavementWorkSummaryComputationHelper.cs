@@ -23,10 +23,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
         // InRange excludes the high value to avoid overlap        
         private static bool InRange(this double value, double low, double high) =>
-           low < value && value <= high;
+           value >= low && value <= high;
 
         private static double IriCondition(this AssetDetail detail) =>
-            _summaryReportHelper.checkAndGetValue<double>(detail.ValuePerNumericAttribute, "ROUGHNESS");
+            Math.Round(_summaryReportHelper.checkAndGetValue<double>(detail.ValuePerNumericAttribute, "ROUGHNESS"));
 
         public static bool IriConditionIsExcellent(this AssetDetail detail, string bpnKey) =>
             bpnKey switch
@@ -41,73 +41,73 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         public static bool IriConditionIsGood(this AssetDetail detail, string bpnKey) =>
             bpnKey switch
             {
-                "1" => detail.IriCondition().InRange(70, 100),
-                "2" => detail.IriCondition().InRange(75, 120),
-                "3" => detail.IriCondition().InRange(100, 150),
-                "4" => detail.IriCondition().InRange(120, 170),
+                "1" => detail.IriCondition().InRange(71, 100),
+                "2" => detail.IriCondition().InRange(76, 120),
+                "3" => detail.IriCondition().InRange(101, 150),
+                "4" => detail.IriCondition().InRange(121, 170),
                 _ => false,
             };
 
         public static bool IriConditionIsFair(this AssetDetail detail, string bpnKey) =>
             bpnKey switch
             {
-                "1" => detail.IriCondition().InRange(100, 150),
-                "2" => detail.IriCondition().InRange(120, 170),
-                "3" => detail.IriCondition().InRange(150, 195),
-                "4" => detail.IriCondition().InRange(170, 220),
+                "1" => detail.IriCondition().InRange(101, 150),
+                "2" => detail.IriCondition().InRange(121, 170),
+                "3" => detail.IriCondition().InRange(151, 195),
+                "4" => detail.IriCondition().InRange(171, 220),
                 _ => false,
             };
 
         public static bool IriConditionIsPoor(this AssetDetail detail, string bpnKey) =>
             bpnKey switch
             {
-                "1" => detail.IriCondition() > 150,
-                "2" => detail.IriCondition() > 170,
-                "3" => detail.IriCondition() > 195,
+                "1" => detail.IriCondition() >= 151,
+                "2" => detail.IriCondition() >= 171,
+                "3" => detail.IriCondition() >= 196,
                 "4" => detail.IriCondition() > 220,
                 _ => false,
             };
-        
+
         private static double OpiCondition(this AssetDetail detail) =>
-            _summaryReportHelper.checkAndGetValue<double>(detail.ValuePerNumericAttribute, "OPI_CALCULATED");
-                
+            Math.Round(_summaryReportHelper.checkAndGetValue<double>(detail.ValuePerNumericAttribute, "OPI_CALCULATED"));
+
         public static bool OpiConditionIsExcellent(this AssetDetail detail, string bpnKey) =>
             bpnKey switch
             {
                 "1" => detail.OpiCondition() > 95,
                 "2" => detail.OpiCondition() > 95,
-                "3" => detail.OpiCondition() > 90,
-                "4" => detail.OpiCondition() > 85,
+                "3" => detail.OpiCondition() >= 91,
+                "4" => detail.OpiCondition() >= 86,
                 _ => false,
             };
 
         public static bool OpiConditionIsGood(this AssetDetail detail, string bpnKey) =>
             bpnKey switch
             {
-                "1" => detail.OpiCondition().InRange(85, 95),
-                "2" => detail.OpiCondition().InRange(80, 95),
-                "3" => detail.OpiCondition().InRange(80, 90),
-                "4" => detail.OpiCondition().InRange(70, 85),
+                "1" => detail.OpiCondition().InRange(86, 95),
+                "2" => detail.OpiCondition().InRange(81, 95),
+                "3" => detail.OpiCondition().InRange(81, 90),
+                "4" => detail.OpiCondition().InRange(71, 85),
                 _ => false,
             };
 
         public static bool OpiConditionIsFair(this AssetDetail detail, string bpnKey) =>
             bpnKey switch
             {
-                "1" => detail.OpiCondition().InRange(75, 85),
-                "2" => detail.OpiCondition().InRange(70, 80),
-                "3" => detail.OpiCondition().InRange(65, 80),
-                "4" => detail.OpiCondition().InRange(59, 70),
+                "1" => detail.OpiCondition().InRange(76, 85),
+                "2" => detail.OpiCondition().InRange(71, 80),
+                "3" => detail.OpiCondition().InRange(66, 80),
+                "4" => detail.OpiCondition().InRange(60, 70),
                 _ => false,
             };
 
         public static bool OpiConditionIsPoor(this AssetDetail detail, string bpnKey) =>
             bpnKey switch
             {
-                "1" => detail.OpiCondition() <= 75,
-                "2" => detail.OpiCondition() <= 70,
-                "3" => detail.OpiCondition() <= 65,
-                "4" => detail.OpiCondition() < 60,
+                "1" => detail.OpiCondition().InRange(0, 75),
+                "2" => detail.OpiCondition().InRange(0, 70),
+                "3" => detail.OpiCondition().InRange(0, 65),
+                "4" => detail.OpiCondition() >= 0 && detail.OpiCondition() < 60,
                 _ => false,
             };
     }

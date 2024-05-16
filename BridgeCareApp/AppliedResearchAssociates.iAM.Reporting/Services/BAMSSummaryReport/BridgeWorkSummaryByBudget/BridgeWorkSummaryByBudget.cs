@@ -93,10 +93,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                                         treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
                         var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
                         var budgetAmount = (double)treatmentConsiderations.Sum(_ =>
-                                           _.FundingCalculationOutput?.AllocationMatrix
-                                            .Where(b => b.BudgetName == summaryData.Budget)
-                                            .Sum(bu => bu.AllocatedAmount) ?? 0);
-
+                                           _.FundingCalculationOutput?.AllocationMatrix?.
+                                           Where(_ => _.Year == yearData.Year).
+                                           Where(b => b.BudgetName == summaryData.Budget).
+                                           Sum(bu => bu.AllocatedAmount) ?? 0);
+                        budgetAmount = Math.Round(budgetAmount, 0);
                         var bpnName = _reportHelper.CheckAndGetValue<string>(section?.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                             appliedTreatment.ToLower() != BAMSConstants.NoTreatment)

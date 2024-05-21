@@ -152,12 +152,12 @@ namespace BridgeCareCore.Services
 
             var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
             _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
-            var rawKeyDatumFieldNames = _unitOfWork.AdminSettingsRepo.GetRawKeyFields();
+            var primaryKeyFieldNames = _unitOfWork.AdminSettingsRepo.GetKeyFields();
 
             foreach (var kvp in _keyProperties.ToList())
             {
                 var key = kvp.Key;
-                if (!rawKeyDatumFieldNames.Contains(key) && key != _networkKeyField)
+                if (!primaryKeyFieldNames.Contains(key) && key != _networkKeyField)
                 {
                     _keyProperties.Remove(key);
                 }
@@ -311,12 +311,12 @@ namespace BridgeCareCore.Services
             var locationColumnNames = new Dictionary<int, string>();
             var keyColumn = 0;
 
-            var rawKeyDatumFieldNames = _unitOfWork.AdminSettingsRepo.GetRawKeyFields();
+            var primaryKeyFieldNames = _unitOfWork.AdminSettingsRepo.GetKeyFields();
 
             foreach (var kvp in _keyProperties.ToList())
             {
                 var key = kvp.Key;
-                if (!rawKeyDatumFieldNames.Contains(key) && key != _networkKeyField)
+                if (!primaryKeyFieldNames.Contains(key) && key != _networkKeyField)
                 {
                     _keyProperties.Remove(key);
                 }

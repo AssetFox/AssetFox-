@@ -166,9 +166,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                             // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
                             var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ? section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
                             var budgetAmount = (double)treatmentConsiderations.Sum(_ =>
-                                _.FundingCalculationOutput?.AllocationMatrix
-                                    .Where(b => b.BudgetName == summaryModel.BudgetName)
-                                    .Sum(bu => bu.AllocatedAmount));
+                                               _.FundingCalculationOutput?.AllocationMatrix?.
+                                               Where(_ => _.Year == yearData.Year).
+                                               Where(b => b.BudgetName == summaryModel.BudgetName).
+                                               Sum(bu => bu.AllocatedAmount) ?? 0);
+                            budgetAmount = Math.Round(budgetAmount, 0);
                             var category = TreatmentCategory.Other;
                             if (WorkTypeMap.Map.ContainsKey(section.AppliedTreatment))
                             {

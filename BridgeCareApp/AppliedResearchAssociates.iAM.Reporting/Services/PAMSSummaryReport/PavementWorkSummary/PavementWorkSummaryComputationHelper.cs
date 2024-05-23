@@ -143,7 +143,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>();
                 foreach (var section in yearData.Assets)
                 {
-                    var cost = section.TreatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Sum(b => b.AllocatedAmount) ?? 0);                    
+                    var cost = section.TreatmentConsiderations.
+                               Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.
+                               Where(_ => _.Year == yearData.Year).
+                               Sum(b => b.AllocatedAmount) ?? 0);
+                    cost = Math.Round(cost, 0);
                     var appliedTreatment = section.AppliedTreatment;
                     var treatmentCategory = section.AppliedTreatment.Contains("Bundle") ? PAMSConstants.Bundled : treatmentCategoryLookup[appliedTreatment];
 

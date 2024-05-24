@@ -36,8 +36,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             IReadOnlyCollection<SelectableTreatment> selectableTreatments,
             ICollection<CommittedProject> committedProjects,
             Dictionary<string, string> treatmentCategoryLookup,
-            List<DTOs.Abstract.BaseCommittedProjectDTO> committedProjectList,
-            List<DTOs.Abstract.BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
+            List<BaseCommittedProjectDTO> committedProjectList,
+            List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
             bool shouldBundleFeasibleTreatments)
         {
             var workSummaryByBudgetModels = CreateWorkSummaryByBudgetModels(reportOutputData);
@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     continue;
                 }
                 
-                PopulateYearlyCostCommittedProj(reportOutputData, budgetSummaryModel, yearlyCostCommittedProj, treatmentCategoryLookup, committedProjectList);
+                PopulateYearlyCostCommittedProj(reportOutputData, budgetSummaryModel, yearlyCostCommittedProj, treatmentCategoryLookup, committedProjectList, shouldBundleFeasibleTreatments);
 
                 // Inside iteration since each section has its own budget analysis section.
                 var costBudgetsWorkSummary = new CostBudgetsWorkSummary();
@@ -153,28 +153,39 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
                         if (section.TreatmentStatus != TreatmentStatus.Applied)
                         {
-                            var fundingSection = yearData.Assets.FirstOrDefault(_ => _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment && _.AppliedTreatment == section.AppliedTreatment);
+                            var fundingSection = yearData.Assets.FirstOrDefault(_ => _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS") == crs &&
+                                                 _.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                 _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment &&
+                                                 _.AppliedTreatment == section.AppliedTreatment);
                             if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
                             {
                                 keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
                             }
                         }
 
+                        // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
+                        var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
+                                                              section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                              section.TreatmentConsiderations :
+                                                              keyCashFlowFundingDetails[crs];
+                        var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                            treatmentConsiderations.FirstOrDefault() :
+                                                            treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                        var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
+                        var budgetAmount = (double)treatmentConsiderations.
+                                           Where(_ => _.TreatmentName?.ToLower() != PAMSConstants.NoTreatment && _.TreatmentName == appliedTreatment).
+                                           Sum(_ => _.FundingCalculationOutput?.AllocationMatrix?.
+                                           Where(_ => _.BudgetName == summaryModel.BudgetName && _.Year == yearData.Year).
+                                           Sum(b => b.AllocatedAmount) ?? 0);
+                        budgetAmount = Math.Round(budgetAmount, 0);
+
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&
-                            section.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment)
-                        {
-                            // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                            var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ? section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
-                            var budgetAmount = (double)treatmentConsiderations.Sum(_ =>
-                                               _.FundingCalculationOutput?.AllocationMatrix?.
-                                               Where(_ => _.Year == yearData.Year).
-                                               Where(b => b.BudgetName == summaryModel.BudgetName).
-                                               Sum(bu => bu.AllocatedAmount) ?? 0);
-                            budgetAmount = Math.Round(budgetAmount, 0);
+                            appliedTreatment.ToLower() != PAMSConstants.NoTreatment)
+                        {                            
                             var category = TreatmentCategory.Other;
-                            if (WorkTypeMap.Map.ContainsKey(section.AppliedTreatment))
+                            if (WorkTypeMap.Map.ContainsKey(appliedTreatment))
                             {
-                                category = WorkTypeMap.Map[section.AppliedTreatment];
+                                category = WorkTypeMap.Map[appliedTreatment];
                             }
                             category = section.AppliedTreatment.Contains("Bundle") ? TreatmentCategory.Bundled : category;
 
@@ -183,36 +194,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                 Year = yearData.Year,
                                 TreatmentName = section.AppliedTreatment,
                                 Amount = budgetAmount,
-                                isCommitted = true,
-                                //costPerBPN = (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
+                                isCommitted = true,                                
                                 TreatmentCategory = category,
                                 SurfaceId = (int)section.ValuePerNumericAttribute["SURFACEID"]
                             });
                             committedTreatments.Add(section.AppliedTreatment);
                         }
                         else
-                        {
-                            // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                            var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause !=
-                                                          TreatmentCause.CashFlowProject ? section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
-                            var treatmentConsideration = shouldBundleFeasibleTreatments ?
-                                                        treatmentConsiderations.FirstOrDefault() :
-                                                        treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
-                            var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
-                            var budgetAmount = (double)treatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.
-                                               Where(b => b.BudgetName == summaryModel.BudgetName).
-                                               Sum(bu => bu.AllocatedAmount) ?? 0);
+                        {                            
                             var treatmentData = appliedTreatment.Contains("Bundle") ?
                                                 selectableTreatments.FirstOrDefault(_ => appliedTreatment.Contains(_.Name)) :
                                                 selectableTreatments.FirstOrDefault(_ => _.Name == appliedTreatment);
                             var category = section.AppliedTreatment.Contains("Bundle") ? TreatmentCategory.Bundled : treatmentData.Category;
-                            var assetCategory = (string)treatmentData.AssetCategory;
+                            var assetCategory = treatmentData.AssetCategory;
                             summaryModel.YearlyData.Add(new YearsData
                             {
                                 Year = yearData.Year,
                                 TreatmentName = section.AppliedTreatment,
                                 Amount = budgetAmount,
-                                //costPerBPN = (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
                                 TreatmentCategory = category,
                                 AssetType = assetCategory,
                                 SurfaceId = (int)section.ValuePerNumericAttribute["SURFACEID"]
@@ -230,7 +229,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                 (decimal treatmentCost, int pavementCount,
                                 string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
                                 Dictionary<string, string> treatmentCategoryLookup,
-                                List<BaseCommittedProjectDTO> committedProjectList)
+                                List<BaseCommittedProjectDTO> committedProjectList,
+                                bool shouldBundleFeasibleTreatments)
         {
             yearlyCostCommittedProj.Clear();
 
@@ -246,17 +246,26 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 {
                     var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
                     // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                                    section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
+                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
+                                                  section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                  section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
                     if (treatmentConsiderations.Any(tc => tc.FundingCalculationOutput != null && tc.FundingCalculationOutput.AllocationMatrix.Any(bu => bu.BudgetName == summaryModel.BudgetName)))
                     {
+                        var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                        treatmentConsiderations.FirstOrDefault() :
+                                                        treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                        var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
+
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&
-                            section.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment)
+                            appliedTreatment.ToLower() != PAMSConstants.NoTreatment)
                         {
-                            var committedCost = treatmentConsiderations.Sum(_ =>
-                                _.FundingCalculationOutput?.AllocationMatrix.Where(b => b.BudgetName == summaryModel.BudgetName).Sum(bu => bu.AllocatedAmount)) ?? 0;
-                            var appliedTreatment = section.AppliedTreatment;
-                            var treatmentCategory = section.AppliedTreatment.Contains("Bundle") ? PAMSConstants.Bundled : treatmentCategoryLookup[appliedTreatment];                                                    
+                            var treatmentCategory = appliedTreatment.Contains("Bundle") ? PAMSConstants.Bundled : treatmentCategoryLookup[appliedTreatment];
+                            var committedCost = treatmentConsiderations.
+                                                Where(_=> _.TreatmentName == appliedTreatment).
+                                                Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.
+                                                Where(_ => _.BudgetName == summaryModel.BudgetName && _.Year == yearData.Year).
+                                                Sum(bu => bu.AllocatedAmount)) ?? 0;
+                            
                             if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
                             {
                                 var projectSource = committedProjectList.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment))?.ProjectSource.ToString() ?? string.Empty;

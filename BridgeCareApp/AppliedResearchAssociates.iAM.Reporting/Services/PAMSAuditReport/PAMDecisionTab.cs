@@ -7,11 +7,9 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSAuditReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
 {
@@ -102,9 +100,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             }
         }
 
-        private PAMSDecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, string brKey, SimulationYearDetail year, AssetDetail section, Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails)
+        private PAMSDecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, string crs, SimulationYearDetail year, AssetDetail section, Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails)
         {
-            var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, brKey, year.Year, section);
+            var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, crs, year.Year, section);
 
             // Budget levels
             var budgetsAtDecisionTime = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment)?.FundingCalculationInput?.CurrentBudgetsToSpend.Where(_ => _.Year == year.Year).ToList() ??
@@ -139,8 +137,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 decisionsTreatment.Selected = isCashFlowProject ? PAMSAuditReportConstants.CashFlow : (section.AppliedTreatment == treatment ? PAMSAuditReportConstants.Yes : PAMSAuditReportConstants.No);
 
                 // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                              section.TreatmentConsiderations : keyCashFlowFundingDetails[brKey];
+                var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
+                                              section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                              section.TreatmentConsiderations :
+                                              keyCashFlowFundingDetails[crs] ?? new();
                 var treatmentConsideration = ShouldBundleFeasibleTreatments ?
                                              treatmentConsiderations.FirstOrDefault() :
                                              treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
@@ -172,7 +172,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
 
                 // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
                 var aggregatedTreatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                              section.TreatmentConsiderations : keyCashFlowFundingDetails[brKey];
+                                              section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
                 var includedBundles = aggregatedTreatmentConsiderations.FirstOrDefault()?.TreatmentName;
                 var aggregatedTreatmentString = aggregatedTreatmentConsiderations.ToString();
                 var aggregatedTreatmentConsideration = aggregatedTreatmentConsiderations.FirstOrDefault();

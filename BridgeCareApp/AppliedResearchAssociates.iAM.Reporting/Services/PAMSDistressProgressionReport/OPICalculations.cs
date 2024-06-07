@@ -48,7 +48,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     // Build keyCashFlowFundingDetails
                     if (section.TreatmentStatus != TreatmentStatus.Applied)
                     {
-                        var fundingSection = yearData.Assets.FirstOrDefault(_ => CheckGetTextValue(sectionValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment && _.AppliedTreatment == section.AppliedTreatment);
+                        var fundingSection = yearData.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == crs &&
+                                             _.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                             _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
+                                             _.AppliedTreatment == section.AppliedTreatment);
                         if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
                         {
                             keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());

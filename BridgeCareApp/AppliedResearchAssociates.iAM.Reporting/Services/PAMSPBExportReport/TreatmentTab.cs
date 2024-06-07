@@ -153,7 +153,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             var crs = CheckGetTextValue(section.ValuePerTextAttribute, "CRS");
             if (section.TreatmentStatus != TreatmentStatus.Applied)
             {
-                var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(section.ValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment && _.AppliedTreatment == section.AppliedTreatment);
+                var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == crs &&
+                                     _.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                     _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
+                                     _.AppliedTreatment == section.AppliedTreatment);
                 if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
                 {
                     keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());

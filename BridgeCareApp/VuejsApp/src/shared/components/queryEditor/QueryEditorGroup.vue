@@ -33,7 +33,7 @@
                             </v-row>
                         </div>
                         <div v-if="!isNil(criteriaValue!.children)" >
-                            <div v-for="child in criteriaValue!.children!">
+                            <div v-for="child in criteriaValue!.children!" :key="child.id">
                                 <QueryEditorRule v-if="child.type === queryBuilderTypes.QueryBuilderRule" v-model:criteria-rule="(child.query as CriteriaRule)" 
                                 :query-rules="queryRules" :depth="depth + 1" 
                                 :id="child.id!"

@@ -102,7 +102,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
                     var cashFlowPrimaryKey = CheckGetTextValue(section.ValuePerTextAttribute, primaryKey[0].ToString());
                     if (section.TreatmentStatus != TreatmentStatus.Applied)
                     {
-                        var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(section.ValuePerTextAttribute, primaryKey[0].ToString()) == cashFlowPrimaryKey && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != FlexibleAuditReportConstants.NoTreatment && _.AppliedTreatment == section.AppliedTreatment);
+                        var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, primaryKey[0].ToString()) == cashFlowPrimaryKey &&
+                                             _.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                             _.AppliedTreatment.ToLower() != FlexibleAuditReportConstants.NoTreatment &&
+                                             _.AppliedTreatment == section.AppliedTreatment);
                         if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(cashFlowPrimaryKey))
                         {
                             keyCashFlowFundingDetails.Add(cashFlowPrimaryKey, fundingSection?.TreatmentConsiderations ?? new());

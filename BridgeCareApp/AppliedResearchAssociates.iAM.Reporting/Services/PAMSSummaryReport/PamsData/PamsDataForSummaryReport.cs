@@ -318,10 +318,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
                     if (section.TreatmentStatus != TreatmentStatus.Applied)
                     {
-                        var fundingSection = yearlySectionData.Assets.FirstOrDefault(_ => _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS") == crs &&
+                        var fundingSection = yearlySectionData.Assets.FirstOrDefault
+                                             (_ => _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "CRS") == crs &&
                                              _.TreatmentCause == TreatmentCause.SelectedTreatment &&
                                              _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
-                                             _.AppliedTreatment == section.AppliedTreatment);
+                                             _.AppliedTreatment == section.AppliedTreatment);                        
                         if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
                         {
                             keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
@@ -433,7 +434,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                                                   section.TreatmentCause != TreatmentCause.CashFlowProject ?
                                                   section.TreatmentConsiderations :
                                                   keyCashFlowFundingDetails[crs];
-
                     var treatmentConsideration = shouldBundleFeasibleTreatments ?
                                                  treatmentConsiderations.FirstOrDefault() :
                                                  treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);

@@ -62,36 +62,37 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
             foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
             {
-                var CRS = _reportHelper.CheckAndGetValue<string>(initialAssetSummary.ValuePerTextAttribute, "CRS");
-                //var familyId = int.Parse(_reportHelper.CheckAndGetValue<string>(initialAssetSummary.ValuePerTextAttribute, "FAMILY_ID"));
+                var crs = _reportHelper.CheckAndGetValue<string>(initialAssetSummary.ValuePerTextAttribute, "CRS");                
                 var years = simulationOutput.Years.OrderBy(yr => yr.Year);
 
                 // Year 0
-                var PAMSdecisionDataModel = GetInitialDecisionDataModel(currentAttributes, CRS, years.FirstOrDefault().Year - 1, initialAssetSummary);
+                var PAMSdecisionDataModel = GetInitialDecisionDataModel(currentAttributes, crs, years.FirstOrDefault().Year - 1, initialAssetSummary);
                 FillInitialDataInWorksheet(decisionsWorksheet, PAMSdecisionDataModel, currentAttributes, currentCell.Row, 1);
 
                 var yearZeroRow = currentCell.Row++;                
                 foreach (var year in years)
                 {
-                    var section = year.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == CRS);
+                    var section = year.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == crs);
                     if (section.TreatmentCause == TreatmentCause.CommittedProject)
                     {
                         continue;
                     }
 
                     // Build keyCashFlowFundingDetails
-                    var crs = CheckGetTextValue(section.ValuePerTextAttribute, "CRS");
                     if (section.TreatmentStatus != TreatmentStatus.Applied)
                     {
-                        var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(section.ValuePerTextAttribute, "CRS") == crs && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment && _.AppliedTreatment == section.AppliedTreatment);
+                        var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == crs &&
+                                             _.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                             _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
+                                             _.AppliedTreatment == section.AppliedTreatment);
                         if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
                         {
-                            keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
+                            keyCashFlowFundingDetails.Add(crs, fundingSection.TreatmentConsiderations ?? new());
                         }
                     }
 
                     // Generate data model                    
-                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, CRS, year, section, keyCashFlowFundingDetails);
+                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, crs, year, section, keyCashFlowFundingDetails);
 
                     // Fill in excel
                     currentCell = FillDataInWorksheet(decisionsWorksheet, decisionsDataModel, budgets.Count, currentAttributes, currentCell);
@@ -140,7 +141,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
                                               section.TreatmentCause != TreatmentCause.CashFlowProject ?
                                               section.TreatmentConsiderations :
-                                              keyCashFlowFundingDetails[crs] ?? new();
+                                              keyCashFlowFundingDetails[crs] ?? new();                
                 var treatmentConsideration = ShouldBundleFeasibleTreatments ?
                                              treatmentConsiderations.FirstOrDefault() :
                                              treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
@@ -171,8 +172,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 var decisionsAggregated = new List<PAMSDecisionAggregated>();
 
                 // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                var aggregatedTreatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                              section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
+                var aggregatedTreatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
+                                                        section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                        section.TreatmentConsiderations :
+                                                        keyCashFlowFundingDetails[crs] ?? new();
                 var includedBundles = aggregatedTreatmentConsiderations.FirstOrDefault()?.TreatmentName;
                 var aggregatedTreatmentString = aggregatedTreatmentConsiderations.ToString();
                 var aggregatedTreatmentConsideration = aggregatedTreatmentConsiderations.FirstOrDefault();

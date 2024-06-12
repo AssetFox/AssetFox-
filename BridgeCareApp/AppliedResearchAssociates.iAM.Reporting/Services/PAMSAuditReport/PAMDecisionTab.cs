@@ -119,17 +119,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                     }
                 }
             }
-            decisionDataModel.BudgetLevels = budgetLevels;
+            decisionDataModel.BudgetLevels = budgetLevels;            
 
             // Treatments
             var decisionsTreatments = new List<PAMSDecisionTreatment>();
             var isCashFlowProject = section.TreatmentCause == TreatmentCause.CashFlowProject;
             foreach (var treatment in treatments)
-            {
+            {             
                 var decisionsTreatment = new PAMSDecisionTreatment();
                 var treatmentRejection = section.TreatmentRejections.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.Feasible = isCashFlowProject ? "-" : (treatmentRejection == null ? PAMSAuditReportConstants.Yes : PAMSAuditReportConstants.No);
-                decisionsTreatment.Superseded = string.Empty; // TODO
+                decisionsTreatment.Superseded = decisionsTreatment.Feasible == PAMSAuditReportConstants.No &&
+                                                treatmentRejection?.TreatmentRejectionReason == TreatmentRejectionReason.Superseded ?
+                                                PAMSAuditReportConstants.Yes : PAMSAuditReportConstants.No;
                 var currentCIImprovement = Convert.ToDouble(decisionDataModel.CurrentAttributesValues.Last());
                 var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.CIImprovement = treatmentOption?.ConditionChange;

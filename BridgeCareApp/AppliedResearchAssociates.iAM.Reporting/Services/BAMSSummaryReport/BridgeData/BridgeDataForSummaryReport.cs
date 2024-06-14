@@ -254,8 +254,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             currentCell.Column = columnNo;
         }
 
-        private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column, AssetSummaryDetail initialSection, AssetDetail section)
+        private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column, AssetSummaryDetail initialSection, AssetDetail section, bool updateColumn = false)
         {
+            if (updateColumn)
+            {
+                column++;
+            }
             var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
             var minCActionCallDecider = MinCValue.minOfCulvDeckSubSuper;
@@ -331,7 +335,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             if (row % 2 == 0)
             {
-                ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
+                var toColumn = section == null ? column + 1 : column;
+                ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, toColumn], Color.LightGray);
             }
 
             // Setting color of MinCond over here, to avoid Color.LightGray overriding it
@@ -609,7 +614,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 foreach (var section in yearlySectionData.Assets)
                 {
                     column = currentCell.Column;
-                    column = AddSimulationYearData(worksheet, row, column, null, section);
+                    column = isInitialYear ?
+                             AddSimulationYearData(worksheet, row, column, null, section, true)
+                             : AddSimulationYearData(worksheet, row, column, null, section);
                     var initialColumnForShade = column;
 
                     //get unique key (brkey) to compare
@@ -625,7 +632,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     {
                         var cashFlowMap = MappingContent.GetCashFlowProjectPick(section.TreatmentCause, prevYearSection);
                         worksheet.Cells[row, ++column].Value = cashFlowMap.currentPick; //Project Pick
-                        worksheet.Cells[row, column - 18].Value = cashFlowMap.previousPick; //Project Pick previous year
+                        worksheet.Cells[row, column - 19].Value = cashFlowMap.previousPick; //Project Pick previous year
                     }
                     else
                     {
@@ -705,7 +712,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column], ExcelFormatStrings.CurrencyWithoutCents);
-                    
+
+                    // Superseded Treatments
+                    var supersededTreatments = section.TreatmentRejections.Where(_ => _.TreatmentRejectionReason == TreatmentRejectionReason.Superseded).
+                                               Select(_ => _.TreatmentName).Distinct().ToList() ?? new();
+                    worksheet.Cells[row, ++column].Value = supersededTreatments.Count > 0 ? string.Join(", ", supersededTreatments) : string.Empty;
+
+
                     if (!string.IsNullOrEmpty(recommendedTreatment) && !string.IsNullOrWhiteSpace(recommendedTreatment) && treatmentCategoryLookup.ContainsKey(recommendedTreatment))
                     {
                         worksheet.Cells[row, ++column].Value = treatmentCategoryLookup[recommendedTreatment]?.ToString(); // FHWA Work Type
@@ -727,8 +740,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment], Color.FromArgb(255, 0, 0));
 
                         // Color the previous year project also
-                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment - 18], Color.FromArgb(0, 255, 0));
-                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment - 18], Color.FromArgb(255, 0, 0));
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment - 19], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment - 19], Color.FromArgb(255, 0, 0));
                     }
 
                     column = column + 1;
@@ -1081,6 +1094,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "Budget",
                 "Recommended Treatment",
                 "Cost",
+                "Superseded Treatments",
                 "FHWA\r\nWork Types",
                 "District Remarks"
             };

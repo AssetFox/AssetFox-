@@ -714,9 +714,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column], ExcelFormatStrings.CurrencyWithoutCents);
 
                     // Superseded Treatments
-                    var supersededTreatments = section.TreatmentRejections.Where(_ => _.TreatmentRejectionReason == TreatmentRejectionReason.Superseded).
+                    var supersededTreatments = section.TreatmentRejections.
+                                               Where(_ => _.TreatmentRejectionReason == TreatmentRejectionReason.Superseded).
                                                Select(_ => _.TreatmentName).Distinct().ToList() ?? new();
-                    worksheet.Cells[row, ++column].Value = supersededTreatments.Count > 0 ? string.Join(", ", supersededTreatments) : string.Empty;
+                    worksheet.Cells[row, ++column].Value = supersededTreatments.Count > 0 ?
+                                                           string.Join(", ", supersededTreatments) :
+                                                           string.Empty;
 
 
                     if (!string.IsNullOrEmpty(recommendedTreatment) && !string.IsNullOrWhiteSpace(recommendedTreatment) && treatmentCategoryLookup.ContainsKey(recommendedTreatment))

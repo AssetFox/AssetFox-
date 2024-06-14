@@ -19,6 +19,7 @@ using AppliedResearchAssociates.iAM.Hubs;
 using System.Linq;
 using static BridgeCareCore.Security.SecurityConstants;
 using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace BridgeCareCore.Controllers
 {
@@ -29,10 +30,12 @@ namespace BridgeCareCore.Controllers
         public const string AuthenticationError = "Authentication Error";
         private static IConfigurationSection _esecConfig;
         private readonly ILog _log;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         public AuthenticationController(IConfiguration config, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor, ILog log) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _esecConfig = config?.GetSection("EsecConfig") ?? throw new ArgumentNullException(nameof(config));
             _log = log ?? throw new ArgumentNullException(nameof(log));
         }
@@ -274,6 +277,62 @@ namespace BridgeCareCore.Controllers
         public async Task<IActionResult> GetHasAdminAccess()
         {
             return Ok(true);
+        }
+
+        [HttpGet]
+        [Route("GetActiveStatus")]
+        [Authorize(Policy = Policy.AdminUser)]
+        public async Task<IActionResult> GetActiveStatus()
+        {
+            string userName = null;
+            var idToken = ContextAccessor?.HttpContext?.Request.Headers["Authorization"].ToString().Split(" ")[1];
+            var handler = new JwtSecurityTokenHandler();
+            var userToken = handler.ReadJwtToken(idToken);
+            var userNameClaim = userToken.Claims.FirstOrDefault(claim => claim.Type == "given_name");
+            if(userNameClaim == null)
+            {
+                var subClaim = userToken.Claims.FirstOrDefault(claim => claim.Type == "sub");
+                if (subClaim == null)
+                {
+                    return Unauthorized("The token does not contain a 'username' claim.");
+                }
+
+                const string cnPrefix = "CN=";
+                var cnStartIndex = subClaim.Value.IndexOf(cnPrefix);
+                if (cnStartIndex == -1)
+                {
+                    return null;
+                }
+
+                cnStartIndex += cnPrefix.Length;
+                var cnEndIndex = subClaim.Value.IndexOf(",", cnStartIndex);
+                if (cnEndIndex == -1)
+                {
+                    return null;
+                }
+
+                userName = subClaim.Value.Substring(cnStartIndex, cnEndIndex - cnStartIndex);
+            }
+            else
+            {
+                userName = userNameClaim.Value;
+            }
+
+            var user = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userName);
+
+            if(user.ActiveStatus = true)
+            {
+                return Ok(true);
+            }
+            else if(user.ActiveStatus != true && user.ActiveStatus != false)
+            {
+                user.ActiveStatus = true;
+                return Ok(true);
+            }
+            else
+            {
+                return Ok(false);
+            }
         }
 
         /// <summary>

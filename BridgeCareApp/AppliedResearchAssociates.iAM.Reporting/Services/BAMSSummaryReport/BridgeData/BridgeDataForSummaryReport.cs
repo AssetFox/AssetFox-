@@ -256,10 +256,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column, AssetSummaryDetail initialSection, AssetDetail section, bool updateColumn = false)
         {
-            if (updateColumn)
-            {
-                column++;
-            }
             var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
             var minCActionCallDecider = MinCValue.minOfCulvDeckSubSuper;

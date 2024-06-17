@@ -326,6 +326,8 @@ const emit = defineEmits(['submit'])
 let search = ref('');
 let inactiveSearch = ref('');
 const tempDeactivateUser = ref<any>([]);
+const tempDeactivateUserFilter = ref<any>([]);
+const tempReactivateUserFilter = ref<any>([]);
 const tempReactivateUser = ref<any>([]);
 
 const filteredUsersCriteriaFilter = computed(() => {
@@ -421,6 +423,17 @@ const inactiveFilteredUsersCriteriaFilter = computed(() => {
     })
   });
 }
+watch(search, () => {
+  if (loading || !search.value || search.value.trim() === '') {
+    return assignedUsersCriteriaFilter.value;
+  }
+
+  const lowerCaseSearch = search.value.toLowerCase();
+
+  return assignedUsersCriteriaFilter.value.filter((item: { [s: string]: any; } | ArrayLike<unknown>) => {
+    return Object.values(item).some(val => String(val).toLowerCase().includes(lowerCaseSearch));
+  });
+});
 
 watch(inactiveSearch, () => {
   // Sort for search
@@ -601,12 +614,20 @@ watch(stateUsers,()=>onUserCriteriaChanged())
 
   async function onSubmitDeactivateUserResponse(doDelete: boolean) {
   beforeDeactivateAlertData.value = { ...emptyAlertData };
+  tempDeactivateUserFilter.value = assignedUsersCriteriaFilter.value;
   if (doDelete && !itemsAreEqual(selectedUser, emptyUserCriteriaFilter)) {
     // Set tempDeactivateUser equal to the current value of inactiveUsersCriteriaFilter
     tempDeactivateUser.value = inactiveUsersCriteriaFilter.value;
     await deactivateUserAction({ userId: selectedUser.userId });
     // Add [Inactive] to the username
     selectedUser.userName = `${selectedUser.userName} [Inactive]`;
+
+    assignedUsersCriteriaFilter.value = tempDeactivateUserFilter.value;
+
+      // Filter and assign active users
+        assignedUsersCriteriaFilter.value = assignedUsersCriteriaFilter.value.filter((userCriteria: { userName: string; }) => {
+      return !userCriteria.userName.endsWith("[Inactive]");
+    });
 
     // Set inactiveUsersCriteriaFilter equal to the value of tempDeactivateUser
     inactiveUsersCriteriaFilter.value = tempDeactivateUser.value;
@@ -641,6 +662,7 @@ watch(stateUsers,()=>onUserCriteriaChanged())
 async function onSubmitReactivateUserResponse(doReactivate: boolean) {
   beforeReactivateAlertData.value = { ...emptyAlertData };
 
+  tempReactivateUserFilter.value = inactiveUsersCriteriaFilter.value;
   if (doReactivate && !itemsAreEqual(selectedUser, emptyUserCriteriaFilter)) {
     // Set tempReactivateUser equal to the current value of assignedUsersCriteriaFilter
     tempReactivateUser.value = assignedUsersCriteriaFilter.value;
@@ -649,6 +671,12 @@ async function onSubmitReactivateUserResponse(doReactivate: boolean) {
         // Remove the [Inactive] suffix from the userName
         selectedUser.userName = selectedUser.userName.replace(/\s\[Inactive\]$/, '');
 
+        inactiveUsersCriteriaFilter.value = tempReactivateUserFilter.value;
+
+        // Filter and assign inactive users
+          inactiveUsersCriteriaFilter.value = inactiveUsersCriteriaFilter.value.filter((userCriteria: { userName: string; }) => {
+            return userCriteria.userName.endsWith("[Inactive]");
+        });
         // Set assignedUsersCriteriaFilter equal to the value of tempReactivateUser
         assignedUsersCriteriaFilter.value = tempReactivateUser.value;
         

@@ -454,9 +454,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
 
                     // Superseded Treatments
-                    var supersededTreatments = section.TreatmentRejections.
+                    var supersededTreatments = section.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment ?
+                                               section.TreatmentRejections.
                                                Where(_ => _.TreatmentRejectionReason == TreatmentRejectionReason.Superseded).
-                                               Select(_ => _.TreatmentName).Distinct().ToList() ?? new();
+                                               Select(_ => _.TreatmentName).Distinct().ToList() ?? new() :
+                                               new();
                     worksheet.Cells[row, ++column].Value = supersededTreatments.Count > 0 ?
                                                            string.Join(", ", supersededTreatments) :
                                                            string.Empty;

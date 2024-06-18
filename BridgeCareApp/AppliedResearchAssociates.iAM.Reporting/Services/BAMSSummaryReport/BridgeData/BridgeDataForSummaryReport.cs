@@ -8,11 +8,8 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Common;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.Style;
-using static AppliedResearchAssociates.iAM.Analysis.Engine.FundingCalculationOutput;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeData
 {
@@ -710,9 +707,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column], ExcelFormatStrings.CurrencyWithoutCents);
 
                     // Superseded Treatments
-                    var supersededTreatments = section.TreatmentRejections.
+                    var supersededTreatments = section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment ?
+                                               section.TreatmentRejections.
                                                Where(_ => _.TreatmentRejectionReason == TreatmentRejectionReason.Superseded).
-                                               Select(_ => _.TreatmentName).Distinct().ToList() ?? new();
+                                               Select(_ => _.TreatmentName).Distinct().ToList() ?? new() :
+                                               new();
                     worksheet.Cells[row, ++column].Value = supersededTreatments.Count > 0 ?
                                                            string.Join(", ", supersededTreatments) :
                                                            string.Empty;

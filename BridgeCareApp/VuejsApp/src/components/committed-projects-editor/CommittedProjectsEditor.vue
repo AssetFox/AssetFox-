@@ -387,8 +387,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
         [0, "None"],
         [1, "iAMPick"],
         [2, "Committed"],
-        [3, "SAP"],
-        [4, "ProjectBuilder"]
+        [3, "MPMS"],
+        [4, "SAP"],
+        [5, "ProjectBuilder"]
     ]);
 
     const uuidNIL: string = getBlankGuid();

@@ -183,7 +183,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 var workTypeTotal = new WorkTypeTotal();
                 var amount = totalSpent.Sum(_ => _.amount);
                 if (amount > 0)
-                {                    
+                {
+                    // TODO add Committed Work Section and check if yearlyCostCommittedProjects need any adjustments..
+
+                    // TODO rename below to MPMS
                     _committedProjectCost.FillCostOfCommittedWork(worksheet, currentCell, simulationYears, costForCommittedBudgets.ToList(),
                         committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal);
                     _committedProjectCost.FillCostOfSAPWork(worksheet, currentCell, simulationYears, costForCommittedBudgets.ToList(),

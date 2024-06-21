@@ -7,6 +7,5 @@
         Committed, //default
         Maintenance,
         ProjectBuilder,
-        MPMS
     }
 }

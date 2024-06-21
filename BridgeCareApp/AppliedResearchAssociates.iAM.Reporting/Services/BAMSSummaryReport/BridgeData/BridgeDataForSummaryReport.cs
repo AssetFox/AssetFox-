@@ -8,11 +8,8 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Common;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.Style;
-using static AppliedResearchAssociates.iAM.Analysis.Engine.FundingCalculationOutput;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeData
 {
@@ -629,7 +626,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
                     else
                     {
-                        var projectSource = committedProjectList.FirstOrDefault(_ => section.AppliedTreatment.Contains(_.Treatment))?.ProjectSource.ToString() ?? string.Empty;
+                        var committedProject = committedProjectList.FirstOrDefault(_ => section.AppliedTreatment.Contains(_.Treatment) &&
+                                               _.Year == yearlySectionData.Year &&
+                                               _.LocationKeys["BRKEY_"] == section_BRKEY.ToString());
+                        var projectSource = committedProject?.ProjectSource.ToString() ?? string.Empty;
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, projectSource);
                     }
 

@@ -71,6 +71,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     Treatment = entity.Name,
                     Year = entity.Year,
                     ProjectSource = projectSourceDTO,
+                    ProjectSourceId = entity.ProjectSourceId,
                     ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
                     ShadowForSameTreatment = entity.ShadowForSameTreatment,
                     Category = convertedCategory,
@@ -95,7 +96,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
                 Category = dto.Category.ToString(),
                 Year = dto.Year,
-                ProjectSource = dto.ProjectSource.ToString()
+                ProjectSource = dto.ProjectSource.ToString(),
+                ProjectSourceId = dto.ProjectSourceId,
             };
 
             if (dto is SectionCommittedProjectDTO)

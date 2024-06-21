@@ -6,6 +6,7 @@
         ProjectPick,
         Committed, //default
         Maintenance,
-        ProjectBuilder
+        ProjectBuilder,
+        MPMS
     }
 }

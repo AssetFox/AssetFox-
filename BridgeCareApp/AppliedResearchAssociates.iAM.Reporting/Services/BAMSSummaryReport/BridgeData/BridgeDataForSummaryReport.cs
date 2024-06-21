@@ -629,8 +629,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
                     else
                     {
-                        var projectSource = committedProjectList.FirstOrDefault(_ => section.AppliedTreatment.Contains(_.Treatment))?.ProjectSource.ToString() ?? string.Empty;
+                        //Add Project Source
+                        var committedProject = committedProjectList.FirstOrDefault(_ => section.AppliedTreatment.Contains(_.Treatment) && _.Year == yearlySectionData.Year && _.LocationKeys["BRKEY_"] == section_BRKEY.ToString());
+                        var projectSource = committedProject?.ProjectSource.ToString() ?? string.Empty;
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, projectSource);
+
+                        // Add Project Source Id
+                        var projectSourceId = committedProject?.ProjectSourceId.ToString() ?? string.Empty;
+                        worksheet.Cells[row, ++column].Value = projectSourceId;
                     }
 
                     // If TreatmentStatus Applied it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
@@ -1078,6 +1084,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "Poor",
                 "Posted",
                 "Project Pick",
+                "Project Source Id",
                 "Budget",
                 "Recommended Treatment",
                 "Cost",

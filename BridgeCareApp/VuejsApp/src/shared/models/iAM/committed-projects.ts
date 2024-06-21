@@ -13,6 +13,7 @@ export interface BaseCommittedProject {
     locationKeys: { [key: string]: string; }; 
     category: TreatmentCategory;
     projectSource: string;
+    projectSourceId: string;
 }
 export interface SectionCommittedProjectTableData {
     id: string;
@@ -27,6 +28,8 @@ export interface SectionCommittedProjectTableData {
     yearErrors: string[];
     category: TreatmentCategory;
     projectSource: string;
+    projectSourceId: string;
+
 }
 export interface SectionCommittedProject extends BaseCommittedProject{
     name: string;
@@ -53,6 +56,7 @@ export const emptySectionCommittedProject = {
     locationKeys: {},
     name: '',
     projectSource: '',
+    projectSourceId: '',
     category: TreatmentCategory.other
 }
 

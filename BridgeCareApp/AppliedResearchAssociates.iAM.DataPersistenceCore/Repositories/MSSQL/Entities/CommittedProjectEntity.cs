@@ -28,5 +28,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual CommittedProjectLocationEntity CommittedProjectLocation { get; set; }
 
         public string ProjectSource { get; set; }
+
+        public string ProjectSourceId { get; set; }
     }
 }

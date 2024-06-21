@@ -72,6 +72,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 "Rut",
                 "Fault",
                 "Project Source",
+                "Project Source Id",
                 "Budget",
                 "Recommended Treatment",
                 "Cost",
@@ -184,7 +185,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             var dataSubHeaders = GetSubHeaders();
             worksheet.Cells[row, ++column].Value = simulationYears[0] - 1;
             column = currentCell.Column;
-            column = BuildDataSubHeaders(worksheet, column, row, dataSubHeaders, dataSubHeaders.Count - 5);
+            column = BuildDataSubHeaders(worksheet, column, row, dataSubHeaders, dataSubHeaders.Count - 6);
             ExcelHelper.MergeCells(worksheet, row, currentCell.Column + 1, row, column);
 
             // Empty column
@@ -425,8 +426,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     }
                     else
                     {
-                        var projectSource = committedProjectList.FirstOrDefault(_ => section.AppliedTreatment.Contains(_.Treatment))?.ProjectSource.ToString() ?? string.Empty;
+                        // Add Project Source
+                        var committedProject = committedProjectList.FirstOrDefault(_ => section.AppliedTreatment.Contains(_.Treatment) && _.Year == yearlySectionData.Year && _.LocationKeys["CRS"] == crs.ToString());
+                        var projectSource = committedProject?.ProjectSource.ToString() ?? string.Empty;
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, projectSource); //Project Pick
+
+                        // Add Project Source Id
+                        var projectSourceId = committedProject?.ProjectSourceId.ToString() ?? string.Empty;
+                        worksheet.Cells[row, ++column].Value = projectSourceId;
                     }
 
                     // If TreatmentStatus Applied it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict

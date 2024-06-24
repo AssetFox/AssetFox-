@@ -130,6 +130,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                 var currentCIImprovement = Convert.ToDouble(decisionDataModel.CurrentAttributesValues.Last());                
                 var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.Feasible = isCashFlowProject ? "-" : (treatmentOption != null ? BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No);
+                decisionsTreatment.Superseded = decisionsTreatment.Feasible == BAMSAuditReportConstants.No &&
+                                                treatmentRejection?.TreatmentRejectionReason == TreatmentRejectionReason.Superseded ?
+                                                BAMSAuditReportConstants.Yes : BAMSAuditReportConstants.No;
                 decisionsTreatment.CIImprovement = treatmentOption?.ConditionChange;
                 decisionsTreatment.Cost = treatmentOption != null ? treatmentOption.Cost : 0;
                 decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
@@ -213,6 +216,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             {
                 ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Feasible;
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Superseded;
                 SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.CIImprovement;
                 ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
@@ -368,6 +372,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             return new List<string>
             {
                 "Feasible?",
+                "Superseded?",
                 "CI\r\nImprovement",
                 "Priority Level",
                 "Cost",

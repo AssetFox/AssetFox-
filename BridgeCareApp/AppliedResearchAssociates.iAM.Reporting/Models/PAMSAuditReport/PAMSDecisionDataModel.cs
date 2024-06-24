@@ -54,5 +54,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSAuditReport
         public string BudgetsUsed { get; set; }
 
         public string BudgetUsageStatuses { get; set; }
+
+        public string Superseded { get; set; }
     }
 }

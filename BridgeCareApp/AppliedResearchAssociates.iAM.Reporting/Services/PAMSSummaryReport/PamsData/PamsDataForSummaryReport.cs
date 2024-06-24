@@ -76,6 +76,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 "Budget",
                 "Recommended Treatment",
                 "Cost",
+                "Superseded Treatments",
                 "District Remarks"
             };
         }
@@ -407,7 +408,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 foreach (var section in yearlySectionData.Assets)
                 {
                     column = currentCell.Column;
-                    column = AddSimulationYearData(worksheet, row, column, null, section);
+                    column = isInitialYear ?
+                             AddSimulationYearData(worksheet, row, column, null, section, true)
+                             : AddSimulationYearData(worksheet, row, column, null, section);
                     var initialColumnForShade = column;
                     var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
 
@@ -422,7 +425,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     {
                         var cashFlowMap = MappingContent.GetCashFlowProjectPick(section.TreatmentCause, prevYearSection);
                         worksheet.Cells[row, ++column].Value = cashFlowMap.currentPick; //Project Pick
-                        worksheet.Cells[row, column - 10].Value = cashFlowMap.previousPick; //Project Pick previous year
+                        worksheet.Cells[row, column - 11].Value = cashFlowMap.previousPick; //Project Pick previous year
                     }
                     else
                     {
@@ -456,6 +459,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     var cost = Math.Round(allocationMatrix?.Where(_ => _.Year == yearlySectionData.Year).Sum(_ => _.AllocatedAmount) ?? 0, 0);
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
+
+                    // Superseded Treatments
+                    var supersededTreatments = section.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment ?
+                                               section.TreatmentRejections.
+                                               Where(_ => _.TreatmentRejectionReason == TreatmentRejectionReason.Superseded).
+                                               Select(_ => _.TreatmentName).Distinct().ToList() ?? new() :
+                                               new();
+                    worksheet.Cells[row, ++column].Value = supersededTreatments.Count > 0 ?
+                                                           string.Join(", ", supersededTreatments) :
+                                                           string.Empty;
+
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
 
                     if (row % 2 == 0)
@@ -469,8 +483,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                         ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment], Color.FromArgb(255, 0, 0));
 
                         // Color the previous year project also
-                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment - 10], Color.FromArgb(0, 255, 0));
-                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment - 10], Color.FromArgb(255, 0, 0));
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment - 11], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment - 11], Color.FromArgb(255, 0, 0));
                     }
 
                     column = column + 1;
@@ -480,19 +494,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             }
         }
 
-        private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column, AssetSummaryDetail initialSection, AssetDetail section)
+        private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column, AssetSummaryDetail initialSection, AssetDetail section, bool updateColumn = false)
         {
+            if(updateColumn)
+            {
+                column++;
+            }
             var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
             var averageRutting = CalculateRuttingBasedOnSurfaceType(selectedSection);
-
+                        
             worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "OPI_CALCULATED")));
             worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, PAMSAuditReportConstants.IRI)));
             worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(averageRutting), 3);
             worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, PAMSAuditReportConstants.FAULT)), 3);
 
             if (row % 2 == 0) {
-                ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
+                var toColumn = section == null ? column + 1 : column;
+                ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, toColumn], Color.LightGray);
             }
 
             return column;

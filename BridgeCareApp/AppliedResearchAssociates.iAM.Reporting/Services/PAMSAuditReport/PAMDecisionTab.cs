@@ -45,7 +45,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
 
             ShouldBundleFeasibleTreatments = simulation.ShouldBundleFeasibleTreatments;
 
-
             // Add headers to excel
             var currentCell = AddHeadersCells(decisionsWorksheet, currentAttributes, budgets, treatments);
 
@@ -120,16 +119,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                     }
                 }
             }
-            decisionDataModel.BudgetLevels = budgetLevels;
+            decisionDataModel.BudgetLevels = budgetLevels;            
 
             // Treatments
             var decisionsTreatments = new List<PAMSDecisionTreatment>();
             var isCashFlowProject = section.TreatmentCause == TreatmentCause.CashFlowProject;
             foreach (var treatment in treatments)
-            {
+            {             
                 var decisionsTreatment = new PAMSDecisionTreatment();
                 var treatmentRejection = section.TreatmentRejections.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.Feasible = isCashFlowProject ? "-" : (treatmentRejection == null ? PAMSAuditReportConstants.Yes : PAMSAuditReportConstants.No);
+                decisionsTreatment.Superseded = decisionsTreatment.Feasible == PAMSAuditReportConstants.No &&
+                                                treatmentRejection?.TreatmentRejectionReason == TreatmentRejectionReason.Superseded ?
+                                                PAMSAuditReportConstants.Yes : PAMSAuditReportConstants.No;
                 var currentCIImprovement = Convert.ToDouble(decisionDataModel.CurrentAttributesValues.Last());
                 var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == treatment);
                 decisionsTreatment.CIImprovement = treatmentOption?.ConditionChange;
@@ -281,6 +283,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             {
                 ExcelHelper.HorizontalCenterAlign(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Feasible;
+                decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.Superseded;
                 SetDecimalFormat(decisionsWorksheet.Cells[row, column]);
                 decisionsWorksheet.Cells[row, column++].Value = decisionsTreatment.CIImprovement;
                 SetAccountingFormat(decisionsWorksheet.Cells[row, column]);
@@ -487,6 +490,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             return new List<string>
             {
                 "Feasible?",
+                "Superseded?",
                 "CI\r\nImprovement",
                 "Cost",
                 "B/C\r\nRatio",

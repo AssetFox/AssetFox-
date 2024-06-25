@@ -158,8 +158,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     {
                         var committedCost = cost;
                         if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
-                        {
-                            var projectSource = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment))?.ProjectSource.ToString();
+                        {                            
+                            var projectSource = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment) && _.Year == yearData.Year)?.ProjectSource.ToString();
                             yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (committedCost, 1, projectSource, treatmentCategory));
                         }
                         else
@@ -184,7 +184,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         }
 
                         // Remove from committedProjectsForWorkOutsideScope
-                        var toRemove = committedProjectsForWorkOutsideScope.Where(_ => appliedTreatment.Contains(_.Treatment)); // Bundled has many treatment names under AppliedTreatment
+                        // Bundled treatments have many treatment names under AppliedTreatment
+                        var toRemove = committedProjectsForWorkOutsideScope.Where(_ => appliedTreatment.Contains(_.Treatment) && _.Year == yearData.Year); 
                         if (toRemove != null)
                         {
                             committedProjectsForWorkOutsideScope.RemoveAll(_ => toRemove.Contains(_));

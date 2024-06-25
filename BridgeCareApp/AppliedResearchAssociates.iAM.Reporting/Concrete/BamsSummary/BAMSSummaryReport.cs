@@ -441,7 +441,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var folderPathForSimulation = $"Reports\\{simulationId}";
             Directory.CreateDirectory(folderPathForSimulation);
             var filePath = Path.Combine(folderPathForSimulation, "SummaryReport.xlsx");
-
+
             checkCancelled(cancellationToken, simulationId);
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(filePath, bin);

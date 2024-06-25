@@ -51,8 +51,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var localSimulationTreatments = new List<(string Name, string AssetType, TreatmentCategory Category)>(simulationTreatments);
             localSimulationTreatments.Remove((BAMSConstants.CulvertNoTreatment, "Culvert", TreatmentCategory.Other));
             localSimulationTreatments.Remove((BAMSConstants.NonCulvertNoTreatment, "Bridge", TreatmentCategory.Other));
-
-            // TODO add Committed Work Section and check if yearlyCostCommittedProjects need any adjustments..
+                        
             var workTypeTotalCommitted = FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProjects);
             var workTypeTotalMPMS = FillCostOfMPMSWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProjects);
             var workTypeTotalSAP = FillCostOfSAPWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProjects);

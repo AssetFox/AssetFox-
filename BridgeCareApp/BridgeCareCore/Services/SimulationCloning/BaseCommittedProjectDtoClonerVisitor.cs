@@ -28,6 +28,7 @@ namespace BridgeCareCore.Services
             clone.Category = dto.Category;
             clone.Year = dto.Year;
             clone.ProjectSource = dto.ProjectSource;
+            clone.ProjectSourceId = dto.ProjectSourceId;
             clone.SimulationId = dto.SimulationId;
             if (dto.ScenarioBudgetId != null)
             {

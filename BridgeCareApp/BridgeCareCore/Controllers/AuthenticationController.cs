@@ -91,7 +91,7 @@ namespace BridgeCareCore.Controllers
             };
             HttpContent content = new FormUrlEncodedContent(formData);
 
-            var responseTask =  await client.PostAsync("userinfo", content);
+            var responseTask = await client.PostAsync("userinfo", content);
 
             return responseTask.Content.ReadAsStringAsync().Result;
         }
@@ -289,7 +289,7 @@ namespace BridgeCareCore.Controllers
             var handler = new JwtSecurityTokenHandler();
             var userToken = handler.ReadJwtToken(idToken);
             var userNameClaim = userToken.Claims.FirstOrDefault(claim => claim.Type == "given_name");
-            if(userNameClaim == null)
+            if (userNameClaim == null)
             {
                 var subClaim = userToken.Claims.FirstOrDefault(claim => claim.Type == "sub");
                 if (subClaim == null)
@@ -318,19 +318,29 @@ namespace BridgeCareCore.Controllers
                 userName = userNameClaim.Value;
             }
 
+            // Get user
             var user = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userName);
 
-            if(user.ActiveStatus = true)
+            if (user == null)
             {
+                // If user is not found
+                return NotFound("User not found");
+            }
+
+            if (user.ActiveStatus == true)
+            {
+                // If user is active
                 return Ok(true);
             }
-            else if(user.ActiveStatus != true && user.ActiveStatus != false)
+            else if (user.ActiveStatus != true && user.ActiveStatus != false)
             {
+                // If user is not active or inacative/First time logging in
                 user.ActiveStatus = true;
                 return Ok(true);
             }
             else
             {
+                // If user is Inactive
                 return Ok(false);
             }
         }

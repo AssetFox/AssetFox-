@@ -8,6 +8,7 @@ export interface UserCriteriaFilter {
     name: string;
     hasCriteria: boolean;
     hasAccess: boolean;
+    activeStatus: boolean;
     criteria: string | null;
 }
 
@@ -19,5 +20,6 @@ export const emptyUserCriteriaFilter: UserCriteriaFilter = {
     userName: '',
     description: '',
     hasAccess: false,
+    activeStatus: true,
     hasCriteria: true
 };

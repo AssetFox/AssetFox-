@@ -128,15 +128,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
         }
 
-        public void DeleteUser(Guid userId)
+        public void DeactivateUser(Guid userId)
         {
-            if (!_unitOfWork.Context.User.Any(_ => _.Id == userId))
+            var user = _unitOfWork.Context.User.SingleOrDefault(_ => _.Id == userId);
+            if (user != null)
             {
-                return;
+                user.ActiveStatus = false;
+                user.Username = $"{user.Username} [Inactive]";
+                _unitOfWork.Context.SaveChanges();
             }
-
-            _unitOfWork.Context.DeleteEntity<UserEntity>(_ => _.Id == userId);
         }
+        public void ReactivateUser(Guid userId)
+        {
+            var user = _unitOfWork.Context.User.SingleOrDefault(_ => _.Id == userId);
+            if (user != null)
+            {
+                user.ActiveStatus = true;
+                if (user.Username.EndsWith("[Inactive]"))
+                {
+                    user.Username = user.Username.Substring(0, user.Username.Length - "[Inactive]".Length).Trim();
+                }
+                _unitOfWork.Context.SaveChanges();
+            }
+        }
+
 
         public string GetUserCriteria(Guid userId)
         {

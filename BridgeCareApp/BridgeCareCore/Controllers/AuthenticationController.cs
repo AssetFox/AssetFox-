@@ -288,7 +288,7 @@ namespace BridgeCareCore.Controllers
             var idToken = ContextAccessor?.HttpContext?.Request.Headers["Authorization"].ToString().Split(" ")[1];
             var handler = new JwtSecurityTokenHandler();
             var userToken = handler.ReadJwtToken(idToken);
-            var userNameClaim = userToken.Claims.FirstOrDefault(claim => claim.Type == "given_name");
+            var userNameClaim = userToken.Claims.FirstOrDefault(claim => claim.Type == "name");
             if (userNameClaim == null)
             {
                 var subClaim = userToken.Claims.FirstOrDefault(claim => claim.Type == "sub");

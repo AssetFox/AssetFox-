@@ -17,8 +17,12 @@ export default class UserService {
         return coreAxiosInstance.post(`${API.User}/UpdateLastNewsAccessDate/`, data);
     }
 
-    static deleteUser(userId: string): AxiosPromise {
-        return coreAxiosInstance.delete(`${API.UserCriteria}/DeleteUser/${userId}`);
+    static deactivateUser(userId: string): AxiosPromise {
+        return coreAxiosInstance.delete(`${API.UserCriteria}/DeactivateUser/${userId}`);
+    }
+
+    static reactivateUser(userId: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.UserCriteria}/ReactivateUser/${userId}`);
     }
 
     static getUserCriteriaFilterData(): AxiosPromise {

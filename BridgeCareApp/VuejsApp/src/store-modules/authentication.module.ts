@@ -205,29 +205,44 @@ const actions = {
         }
     },
     async setAzureUserInfo({ commit }: any, payload: any) {
-        if (payload.status) {            
-            await AuthenticationService.getHasAdminAccess().then((response: AxiosResponse) => {
-                let hasAdminAccess: boolean = false;
-                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    hasAdminAccess = response.data as boolean;
-                }
-                    commit('hasRoleMutator', true);
-                    commit('checkedForRoleMutator', true);
-                    commit('adminAccessMutator', hasAdminAccess);
-                    commit('usernameMutator', payload.username);
-                    commit('authenticatedMutator', true);
-                    commit('simulationAccessMutator', false);
-            });
+        if (payload.status) {    
+            // Check for active status
+                var activeStatus = await AuthenticationService.getActiveStatus();
+                if(activeStatus.data == true)
+                    {
+                        await AuthenticationService.getHasAdminAccess().then((response: AxiosResponse) => {
+                            let hasAdminAccess: boolean = false;
+                            if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                                hasAdminAccess = response.data as boolean;
+                            }
+                                commit('hasRoleMutator', true);
+                                commit('checkedForRoleMutator', true);
+                                commit('adminAccessMutator', hasAdminAccess);
+                                commit('usernameMutator', payload.username);
+                                commit('authenticatedMutator', true);
+                                commit('simulationAccessMutator', false);
+                        });
+                    }
+                    else
+                    {
+                        setCommits(commit);
+                        throw new Error('User is not active');
+                    }
         } else {
-            commit('hasRoleMutator', false);
-            commit('checkedForRoleMutator', false);
-            commit('adminAccessMutator', false);
-            commit('usernameMutator', '');
-            commit('authenticatedMutator', false);
-            commit('simulationAccessMutator', false);
+            setCommits(commit);
         }
     },
 };
+
+function setCommits({ commit }: any)
+{
+    commit('hasRoleMutator', false);
+    commit('checkedForRoleMutator', false);
+    commit('adminAccessMutator', false);
+    commit('usernameMutator', '');
+    commit('authenticatedMutator', false);
+    commit('simulationAccessMutator', false);
+}
 
 const getters = {};
 

@@ -8,6 +8,8 @@ namespace AppliedResearchAssociates.iAM.DTOs
     {
         public string Username { get; set; }
 
+        public bool ActiveStatus { get; set; } 
+
         public bool HasInventoryAccess { get; set; }
 
         public DateTime LastNewsAccessDate { get; set; }

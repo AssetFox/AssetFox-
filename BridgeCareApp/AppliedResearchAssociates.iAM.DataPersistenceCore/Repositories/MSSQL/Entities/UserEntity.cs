@@ -38,6 +38,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public bool HasInventoryAccess { get; set; }
 
+        public bool ActiveStatus { get; set; }  
+
         public DateTime LastNewsAccessDate { get; set; }
 
         public virtual CriterionLibraryUserEntity CriterionLibraryUserJoin { get; set; }

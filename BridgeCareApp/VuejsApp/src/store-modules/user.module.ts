@@ -24,8 +24,8 @@ const mutations = {
     usersMutator(state: any, users: User[]) {
         state.users = clone(users);
     },
-    deletedUserMutator(state: any, id: string) {
-        // this is to delete the user entry from criteria filter. Because the user is getting deleted from the system
+    deactivatedUserMutator(state: any, id: string) {
+        // this is to deactivate the user entry from criteria filter.
         state.usersCriteriaFilter = reject(
             propEq('userId', id),
             state.usersCriteriaFilter,
@@ -33,6 +33,16 @@ const mutations = {
 
         state.users = reject(propEq('id', id), state.users);
     },
+    reactivatedUserMutator(state: any, id: string) {
+        // this is to reactivate the user entry from criteria filter.
+        state.usersCriteriaFilter = reject(
+            propEq('userId', id),
+            state.usersCriteriaFilter,
+        );
+
+        state.users = reject(propEq('id', id), state.users);
+    },
+
     currentUserMutator(state: any, currentUser: User) {
         state.currentUser = currentUser;
     },
@@ -108,21 +118,37 @@ const actions = {
         );
     },
 
-    async deleteUser({ commit, dispatch }: any, payload: any) {
-        await UserService.deleteUser(payload.userId).then(
+    async deactivateUser({ commit, dispatch }: any, payload: any) {
+        await UserService.deactivateUser(payload.userId).then(
             (response: AxiosResponse) => {
                 if (
                     hasValue(response, 'status') &&
                     http2XX.test(response.status.toString())
                 ) {
-                    commit('deletedUserMutator', payload.userId);
+                    commit('deactivatedUserMutator', payload.userId);
                     dispatch('addSuccessNotification', {
-                        message: 'Deleted user',
+                        message: 'Deactivated user',
                     });
                 }
             },
         );
     },
+    async reactivateUser({ commit, dispatch }: any, payload: any) {
+        await UserService.reactivateUser(payload.userId).then(
+            (response: AxiosResponse) => {
+                if (
+                    hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                    commit('reactivatedUserMutator', payload.userId);
+                    dispatch('addSuccessNotification', {
+                        message: 'Reactivated user',
+                    });
+                }
+            },
+        );
+    },
+
     async getUserCriteriaFilter({ commit, dispatch }: any) {
             // @ts-ignore
             if (!store.state.userModule.checkedForCriteria) {

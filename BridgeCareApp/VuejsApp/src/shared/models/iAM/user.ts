@@ -3,11 +3,13 @@ import {getBlankGuid} from '@/shared/utils/uuid-utils';
 import {clone} from 'ramda';
 
 export interface User {
+name: any;
     id: string;
     username: string;
     description: string;
     criterionLibrary: CriterionLibrary;
     hasInventoryAccess: boolean;
+    activeStatus: boolean;
     lastNewsAccessDate: string;
 }
 
@@ -22,6 +24,7 @@ export const emptyUser: User = {
     description: '',
     criterionLibrary: clone(emptyCriterionLibrary),
     hasInventoryAccess: false,
+    activeStatus: false,
     lastNewsAccessDate: new Date().toISOString()
 };
 export interface LibraryUser {

@@ -25,4 +25,9 @@ export default class AuthenticationService {
     static getHasAdminAccess(): AxiosPromise {
         return coreAxiosInstance.get(`${API.Authentication}/GetHasAdminAccess`);
     }
+
+    static getActiveStatus(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Authentication}/GetActiveStatus`);
+    }
+
 }

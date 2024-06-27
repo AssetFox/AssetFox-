@@ -72,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 "Rut",
                 "Fault",
                 "Project Source",
-                "Project Source Id",
+                "Project Id",
                 "Budget",
                 "Recommended Treatment",
                 "Cost",
@@ -434,9 +434,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                         var projectSource = committedProject?.ProjectSource.ToString() ?? string.Empty;
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, projectSource); //Project Pick
 
-                        // Add Project Source Id
-                        var projectSourceId = committedProject?.ProjectSourceId.ToString() ?? string.Empty;
-                        worksheet.Cells[row, ++column].Value = projectSourceId;
+                        // Add Project Id
+                        var projectId = committedProject?.ProjectId.ToString() ?? string.Empty;
+                        worksheet.Cells[row, ++column].Value = projectId;
                     }
 
                     // If TreatmentStatus Applied it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict

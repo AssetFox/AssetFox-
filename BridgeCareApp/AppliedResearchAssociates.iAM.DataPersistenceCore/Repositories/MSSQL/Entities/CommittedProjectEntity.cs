@@ -29,6 +29,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public string ProjectSource { get; set; }
 
-        public string ProjectSourceId { get; set; }
+        public string ProjectId { get; set; }
     }
 }

@@ -131,7 +131,7 @@ namespace BridgeCareCore.Services
                         worksheet.Cells[row, column++].Value = budgetName;
                         worksheet.Cells[row, column++].Value = project.Cost;
                         worksheet.Cells[row, column++].Value = project.ProjectSource;
-                        worksheet.Cells[row, column++].Value = project.ProjectSourceId;
+                        worksheet.Cells[row, column++].Value = project.ProjectId;
                         worksheet.Cells[row, column++].Value = string.Empty; // AREA
                         worksheet.Cells[row, column++].Value = project.Category.ToString();
 
@@ -370,8 +370,8 @@ namespace BridgeCareCore.Services
                 //Get project source 
                 var projectSourceValue = worksheet.Cells[row, projectSourceIndex].Text;
 
-                //Get Project Source Id
-                var projectSourceIdValue = worksheet.GetCellValue<string>(row, _keyFields.Count + 8);
+                //Get Project Id
+                var projectIdValue = worksheet.GetCellValue<string>(row, _keyFields.Count + 8);
 
                 // Attempt to convert the string to enum
                 ProjectSourceDTO projectSource;
@@ -434,7 +434,7 @@ namespace BridgeCareCore.Services
                     Treatment = worksheet.GetCellValue<string>(row, _keyFields.Count + 1), // Assumes that InitialHeaders stays constant
                     Year = projectYear,
                     ProjectSource = projectSource,
-                    ProjectSourceId = projectSourceIdValue,
+                    ProjectId = projectIdValue,
                     ShadowForAnyTreatment = worksheet.GetCellValue<int>(row, _keyFields.Count + 3), // Assumes that InitialHeaders stays constant
                     ShadowForSameTreatment = worksheet.GetCellValue<int>(row, _keyFields.Count + 4), // Assumes that InitialHeaders stays constant
                     Cost = worksheet.GetCellValue<double>(row, _keyFields.Count + 6), // Assumes that InitialHeaders stays constant

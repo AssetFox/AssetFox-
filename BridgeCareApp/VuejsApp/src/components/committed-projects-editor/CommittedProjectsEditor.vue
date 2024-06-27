@@ -151,7 +151,7 @@
                                                 && header.key !== 'cost'
                                                 && header.key !== 'projectSource'
                                                 && header.key !== 'category'
-                                                && header.key !== 'projectSourceId'"
+                                                && header.key !== 'projectId'"
                                                 readonly
                                                 class="sm-txt"
                                                 density="compact"
@@ -195,7 +195,7 @@
                                                 variant="underlined"
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
-                                            <v-text-field v-if="header.key === 'projectSourceId'"
+                                            <v-text-field v-if="header.key === 'projectId'"
                                                 readonly
                                                 class="sm-txt"
                                                 density="compact"
@@ -244,7 +244,7 @@
                                                     v-model.number="item.item[header.key]"
                                                     :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
                                                 
-                                                <v-text-field v-if="header.key === 'projectSourceId'"
+                                                <v-text-field v-if="header.key === 'projectId'"
                                                     label="Edit"
                                                     single-line
                                                     variant="underlined"
@@ -528,8 +528,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
             width: '15%'
         },
         { 
-            title: 'Project Source Id', 
-            key: 'projectSourceId',
+            title: 'Project Id', 
+            key: 'projectId',
             align: 'left',
             sortable: false,
             class: '',
@@ -830,7 +830,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
         newRow.locationKeys['ID'] = getNewGuid();
         newRow.simulationId = scenarioId;
         newRow.projectSource = 'None';
-        newRow.projectSourceId = '';
+        newRow.projectId = '';
         addedRows.value.push(newRow)
         onPaginationChanged();   
      }
@@ -956,8 +956,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
             else if(property === 'budget'){
                 handleBudgetChange(row, scp, value)
             }
-            else if(property === 'projectSourceId') {
-                handleProjectSourceIdChange(row, scp, value);
+            else if(property === 'projectId') {
+                handleprojectIdChange(row, scp, value);
             }
             else if(property === 'projectSource') {
                 handleProjectSourceChange(row, scp, value)
@@ -1109,7 +1109,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             yearErrors: [],
             category: scp.category,
             projectSource: projectSourceMap.get(+scp.projectSource) || scp.projectSource,
-            projectSourceId: scp.projectSourceId
+            projectId: scp.projectId
         }
         return row
     }
@@ -1145,9 +1145,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
     onPaginationChanged();
     }
 
-    function handleProjectSourceIdChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, projectSourceId: string) {
-        row.projectSourceId = projectSourceId;
-    updateCommittedProject(row, projectSourceId, 'projectSourceId');
+    function handleprojectIdChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, projectId: string) {
+        row.projectId = projectId;
+    updateCommittedProject(row, projectId, 'projectId');
     onPaginationChanged();
     }
 

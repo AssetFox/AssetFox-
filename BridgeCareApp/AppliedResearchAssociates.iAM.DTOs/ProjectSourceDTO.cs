@@ -6,7 +6,7 @@
         ProjectPick,
         Committed, // default
         MPMS,
-        Maintenance, // SAP
+        SAP,
         ProjectBuilder
     }
 }

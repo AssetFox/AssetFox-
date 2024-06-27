@@ -149,7 +149,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var treatmentTracker = new Dictionary<string, int>();
             foreach (var item in costForSAPBudgets)
             {
-                if (item.ProjectSource == "Maintenance")
+                if (item.ProjectSource == "SAP")
                 {
                     var rowNum = currentCell.Row++;
                     worksheet.Cells[rowNum, currentCell.Column].Value = item.Treatment;
@@ -166,7 +166,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 var year = totalSAPBudget.Key;
                 var totalAmount = costForSAPBudgets
-                    .Where(item => item.Year == year && item.ProjectSource == "Maintenance")
+                    .Where(item => item.Year == year && item.ProjectSource == "SAP")
                     .Sum(item => item.Amount);
 
                 var cellToEnterTotalBridgeCost = year - startYear;

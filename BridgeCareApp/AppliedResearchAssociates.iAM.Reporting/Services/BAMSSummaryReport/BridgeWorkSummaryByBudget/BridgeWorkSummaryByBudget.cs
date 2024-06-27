@@ -179,7 +179,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     var mpmsAmountSum = Convert.ToDecimal(yearlycostForMpmsBudget.Sum(s => s.Amount));
                     totalBudgetPerYearForMPMS.Add(year, mpmsAmountSum);                                       
 
-                    var yearlycostForSapBudget = costForCommittedBudgets.Where(_ => _.Year == year && _.ProjectSource == "Maintenance");
+                    var yearlycostForSapBudget = costForCommittedBudgets.Where(_ => _.Year == year && _.ProjectSource == "SAP");
                     var sapAmountSum = Convert.ToDecimal(yearlycostForSapBudget.Sum(s => s.Amount));
                     totalBudgetPerYearForSAP.Add(year, sapAmountSum);
 

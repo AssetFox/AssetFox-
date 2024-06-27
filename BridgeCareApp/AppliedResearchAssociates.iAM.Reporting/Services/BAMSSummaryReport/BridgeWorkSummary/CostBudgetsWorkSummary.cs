@@ -582,7 +582,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 foreach (var data in yearlyItem.Value)
                 {
                     var dataValue = data.Value;
-                    if (dataValue.projectSource == "Maintenance")
+                    if (dataValue.projectSource == "SAP")
                     {
                         var key = data.Key.Contains("Bundle") ? data.Key : dataValue.treatmentCategory;
                         if (!uniqueTreatments.ContainsKey(key))

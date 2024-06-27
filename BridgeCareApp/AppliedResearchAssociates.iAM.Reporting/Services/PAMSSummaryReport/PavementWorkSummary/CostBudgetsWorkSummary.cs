@@ -883,7 +883,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 worksheet.Cells[row, column].Value = mpmsBudgetTotal;
 
                 // SAP
-                var sapBudgetTotal = committedProjects.Where(_ => _.Year == year && _.ProjectSource == ProjectSourceDTO.Maintenance).Select(_ => _.Cost).Sum();
+                var sapBudgetTotal = committedProjects.Where(_ => _.Year == year && _.ProjectSource == ProjectSourceDTO.SAP).Select(_ => _.Cost).Sum();
                 worksheet.Cells[row + 1, column].Value = sapBudgetTotal;
 
                 // Project Builder
@@ -953,7 +953,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                     case ProjectSourceDTO.Committed:
                                         mpmsBudgetTotal += (decimal)budgetUsage.AllocatedAmount;
                                         break;
-                                    case ProjectSourceDTO.Maintenance:
+                                    case ProjectSourceDTO.SAP:
                                         sapBudgetTotal += (decimal)budgetUsage.AllocatedAmount;
                                         break;
                                     case ProjectSourceDTO.ProjectBuilder:
@@ -1416,7 +1416,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
                 // Calculate the MPMS, SAP, and Project Builder totals based on committed projects
                 var mpmsBudgetTotal = committedProjects.Where(_ => _.Year == year && _.ProjectSource == ProjectSourceDTO.Committed).Select(_ => _.Cost).Sum();
-                var sapBudgetTotal = committedProjects.Where(_ => _.Year == year && _.ProjectSource == ProjectSourceDTO.Maintenance).Select(_ => _.Cost).Sum();
+                var sapBudgetTotal = committedProjects.Where(_ => _.Year == year && _.ProjectSource == ProjectSourceDTO.SAP).Select(_ => _.Cost).Sum();
                 var projectBuilderBudgetTotal = committedProjects.Where(_ => _.Year == year && _.ProjectSource == ProjectSourceDTO.ProjectBuilder).Select(_ => _.Cost).Sum();
 
                 double cellValue = Convert.ToDouble(worksheet.Cells[totalSpendingRow, column].Value ?? 0.0);
@@ -1520,7 +1520,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                         case ProjectSourceDTO.Committed:
                                             mpmsBudgetTotal += budgetUsage.AllocatedAmount;
                                             break;
-                                        case ProjectSourceDTO.Maintenance:
+                                        case ProjectSourceDTO.SAP:
                                             sapBudgetTotal += budgetUsage.AllocatedAmount;
                                             break;
                                         case ProjectSourceDTO.ProjectBuilder:

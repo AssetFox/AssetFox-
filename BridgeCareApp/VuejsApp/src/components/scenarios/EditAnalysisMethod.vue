@@ -1,3 +1,5 @@
+Line 164 Delete,
+
 <template>
     <v-card height="800px" class="elevation-0 vcard-main-layout">
         <v-row>
@@ -152,7 +154,7 @@
                                 <v-textarea
                                     id="EditAnalysisMethod-criteria-textArea"
                                     class="ghd-control-text ghd-control-border"
-                                    style="padding-bottom: 0px; height: 100px;"
+                                    style="padding-bottom: 0px; height: 250px;"
                                     no-resize
                                     variant="outlined"
                                     readonly
@@ -160,16 +162,6 @@
                                     v-model="analysisMethod.criterionLibrary.mergedCriteriaExpression"
                                 >
                                 </v-textarea>
-                                <div style="padding-top: 20px;"></div>
-                                <v-checkbox
-                                    id="EditAnalysisMethod-criteria-checkbox"
-                                    style="padding-top: 0px; margin-top: 4px;"
-                                    class="ghd-checkbox ghd-md-gray"
-                                    label="Criteria is intentionally empty (MUST check to Save)" 
-                                    v-model="criteriaIsIntentionallyEmpty"
-                                    v-show="criteriaIsEmpty()"
-                                >
-                                </v-checkbox>
                             </v-col>
                         </v-row>
                     </v-row>
@@ -184,7 +176,7 @@
                     >
                     <v-btn
                         id="EditAnalysisMethod-save-btn"
-                        :disabled="(criteriaIsInvalid() || !valid) || !hasUnsavedChanges"
+                        :disabled="(!valid) || !hasUnsavedChanges"
                         @click="onUpsertAnalysisMethod"
                         variant = "flat"
                         class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
@@ -197,6 +189,11 @@
                 :dialogData="criterionEditorDialogData"
                 @submit="onCriterionEditorDialogSubmit"
             />
+            <Alert
+            :dialogData="ConfirmEmptyCriteria"
+            @submit="onConfirmEmptyCriteriaAlertSubmit"
+            />
+
             <ConfirmDialog></ConfirmDialog>
 </template>
 
@@ -220,6 +217,8 @@ import {
     InputValidationRules,
     rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
+import {emptyAlertData} from '@/shared/models/modals/alert-data';
+import Alert from '@/shared/modals/Alert.vue';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { useStore } from 'vuex'; 
@@ -290,6 +289,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     const valid = ref<boolean>(true);
     const criteriaIsIntentionallyEmpty = ref<boolean>(false);
     let hasUnsavedChanges = ref<boolean>(false);
+    let ConfirmEmptyCriteria = ref(clone(emptyAlertData));
 
     //beforeRouteEnter(to: any, from: any, next: any) {
        //next((vm: any) => {
@@ -433,12 +433,19 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }    
 
     async function onUpsertAnalysisMethod() {
-        if(analysisMethod.value.benefit.id === getBlankGuid())
+        if(criteriaIsEmpty())
+        {
+            onConfirmEmptyCriteriaAlert();
+        }
+        else
+        {
+            if(analysisMethod.value.benefit.id === getBlankGuid())
             analysisMethod.value.benefit.id = getNewGuid();
         upsertAnalysisMethodAction({
                 analysisMethod: analysisMethod.value,
                 scenarioId: selectedScenarioId.value,
             });
+        }
         // const form: any = $refs.form;
 
         // await(form.validate(), () =>{
@@ -451,6 +458,30 @@ import ConfirmDialog from 'primevue/confirmdialog';
         // })
          
     }
+
+    function onConfirmEmptyCriteriaAlert() {
+        ConfirmEmptyCriteria.value = {
+            showDialog: true,
+            heading: 'Warning',
+            choice: true,
+            message:
+                'Warning: Criteria field is blank. A blank Criteria field will default to your user assigned assets.',
+        };
+    }
+
+    function onConfirmEmptyCriteriaAlertSubmit(submit: boolean) {
+        ConfirmEmptyCriteria.value = clone(emptyAlertData);
+
+        if (submit) {
+            if(analysisMethod.value.benefit.id === getBlankGuid())
+            analysisMethod.value.benefit.id = getNewGuid();
+        upsertAnalysisMethodAction({
+                analysisMethod: analysisMethod.value,
+                scenarioId: selectedScenarioId.value,
+            });
+        } 
+    }
+
 
     function onDiscardChanges() {
         analysisMethod.value = clone(stateAnalysisMethod.value);

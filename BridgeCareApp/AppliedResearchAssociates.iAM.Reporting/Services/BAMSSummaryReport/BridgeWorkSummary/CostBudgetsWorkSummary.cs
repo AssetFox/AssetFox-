@@ -18,14 +18,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
         private WorkSummaryModel _workSummaryModel;
 
-        private Dictionary<int, decimal> TotalCulvertSpent = new Dictionary<int, decimal>();
-        private Dictionary<int, decimal> TotalBridgeSpent = new Dictionary<int, decimal>();
-        private Dictionary<int, decimal> TotalCommittedSpent = new Dictionary<int, decimal>();
-        private Dictionary<int, decimal> TotalMPMSSpent = new Dictionary<int, decimal>();
-        private Dictionary<int, decimal> TotalSAPSpent = new Dictionary<int, decimal>();
-        private Dictionary<int, decimal> TotalProjectBuilderSpent = new Dictionary<int, decimal>();
-
-        private int CommittedTotalRow = 0;        
+        private Dictionary<int, decimal> TotalCulvertSpent = new();
+        private Dictionary<int, decimal> TotalBridgeSpent = new();
+        private Dictionary<int, decimal> TotalCommittedSpent = new();
+        private Dictionary<int, decimal> TotalMPMSSpent = new();
+        private Dictionary<int, decimal> TotalSAPSpent = new();
+        private Dictionary<int, decimal> TotalProjectBuilderSpent = new();
+                     
         private int TotalSpentRow = 0;
         private bool ShouldBundleFeasibleTreatments;
 
@@ -220,14 +219,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             currentCell.Row += workTypes.Count();
             var totalSpentRow = currentCell.Row;
             TotalSpentRow = totalSpentRow;
-            worksheet.Cells[totalSpentRow, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(totalSpentRow, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1); ;
+            worksheet.Cells[totalSpentRow, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(totalSpentRow, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1);
             worksheet.Cells[totalSpentRow, 1].Value = "Total Spent";
             for (var columnIndex = 3; columnIndex < 3 + numberOfYears; columnIndex++)
             {
                 var startAddress = worksheet.Cells[firstContentRow, columnIndex].Address;
                 var endAddress = worksheet.Cells[lastContentRow, columnIndex].Address;
+                var year = simulationYears[columnIndex - 3];
                 worksheet.Cells[currentCell.Row, columnIndex].Formula = ExcelFormulas.RangeSum(startAddress, endAddress);
                 worksheet.Cells[currentCell.Row, columnIndex].Calculate();
+                worksheet.Cells[currentCell.Row, columnIndex].Value = Convert.ToDecimal(worksheet.Cells[currentCell.Row, columnIndex].Value) +
+                                                                      TotalCommittedSpent[year] + TotalMPMSSpent[year] + TotalSAPSpent[year] + TotalProjectBuilderSpent[year];
             }
 
             // Adding percentage after the Total (all years)
@@ -463,8 +465,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.ApplyColor(worksheet.Cells[committedTotalRow, fromColumn, committedTotalRow, endColumn], Color.FromArgb(84, 130, 53));
             ExcelHelper.SetTextColor(worksheet.Cells[committedTotalRow, fromColumn, committedTotalRow, endColumn], Color.White);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, committedTotalRow + 1, endColumn);
-
-            CommittedTotalRow = committedTotalRow;
+                        
             return workTypeTotalCommitted;
         }
 
@@ -932,32 +933,40 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
-            worksheet.Cells[row++, column].Value = BAMSConstants.RemainingBudget;
-            worksheet.Cells[row++, column].Value = BAMSConstants.PercentBudgetSpentMPMS;
-            worksheet.Cells[row++, column].Value = BAMSConstants.PercentBudgetSpentBAMS;
+            var rowTitles = new List<string> { BAMSConstants.RemainingBudget, BAMSConstants.PercentBudgetSpentBAMS, BAMSConstants.PercentBudgetSpentCommitted, BAMSConstants.PercentBudgetSpentMPMS, BAMSConstants.PercentBudgetSpentSAP, BAMSConstants.PercentBudgetSpentProjectBuilder };
+            for (int index= 0;index < rowTitles.Count;index++)
+            {
+                worksheet.Cells[row++, column].Value = rowTitles[index];
+            }
             column++;
+
             var fromColumn = column + 1;
             foreach (var year in simulationYears)
             {
                 row = startRow;
                 column = ++column;
-                var totalSpent = Convert.ToDouble(worksheet.Cells[TotalSpentRow, column].Value);
+                var totalSpent = Convert.ToDecimal(worksheet.Cells[TotalSpentRow, column].Value);
 
-                worksheet.Cells[row, column].Value = Convert.ToDouble(worksheet.Cells[budgetTotalRow, column].Value) - totalSpent;
-                row++;
-                // TODO check if any update required here, what to consider here?
-                if (totalSpent != 0)
-                {
-                    worksheet.Cells[row, column].Formula = worksheet.Cells[CommittedTotalRow, column] + "/" + totalSpent;
-                }
-                else
-                {
-                    worksheet.Cells[row, column].Value = 0;
-                }
+                // Remaining
+                var yearlyBudget = Convert.ToDecimal(worksheet.Cells[budgetTotalRow, column].Value);
+                worksheet.Cells[row, column].Value = yearlyBudget - totalSpent;
                 row++;
 
-                worksheet.Cells[row, column].Formula = 1 + "-" + worksheet.Cells[row - 1, column];
+                var committedBudgetTotal = TotalCommittedSpent[year];
+                var mpmsBudgetTotal = TotalMPMSSpent[year];
+                var sapBudgetTotal = TotalSAPSpent[year];
+                var projectBuilderBudgetTotal = TotalProjectBuilderSpent[year];
+                var bamsBudgetTotal = totalSpent - (committedBudgetTotal + mpmsBudgetTotal + sapBudgetTotal + projectBuilderBudgetTotal);
+                var categoryBudgetTotals = new decimal[] { bamsBudgetTotal, committedBudgetTotal, mpmsBudgetTotal, sapBudgetTotal, projectBuilderBudgetTotal };
+                // Budget spent in each category
+                for (int rowIndex = 0; rowIndex < categoryBudgetTotals.Length; rowIndex++)
+                {
+                    // Calculate percentage
+                    var percentage = categoryBudgetTotals[rowIndex] / yearlyBudget;
+                    worksheet.Cells[row++, column].Value = percentage;
+                }
             }
+
             worksheet.Cells[startRow, column + 1].Formula = "SUM(" + worksheet.Cells[startRow, fromColumn, startRow, column] + ")";
             if (_workSummaryModel.AnnualizedAmount != 0)
             {
@@ -968,15 +977,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             worksheet.Cells[startRow, column + 2].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow, column + 3].Value = "Percentage of Total Budget that was Unspent";
 
-            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column + 1]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row - 1, column + 1]);
 
-            ExcelHelper.SetCustomFormat(worksheet.Cells[row - 2, fromColumn, row - 2, column + 1], ExcelHelperCellFormat.NegativeCurrency);
-            ExcelHelper.SetCustomFormat(worksheet.Cells[row - 1, fromColumn, row, column], ExcelHelperCellFormat.Percentage);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[row - 6, fromColumn, row - 6, column + 1], ExcelHelperCellFormat.NegativeCurrency);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[row - 5, fromColumn, row - 1, column], ExcelHelperCellFormat.Percentage);
 
             ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.Red);
-            ExcelHelper.ApplyColor(worksheet.Cells[startRow + 1, fromColumn, row, column], Color.FromArgb(248, 203, 173));
-            _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 3, column);
-            ExcelHelper.ApplyColor(worksheet.Cells[row + 2, startColumn, row + 2, column], Color.DimGray);
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow + 1, fromColumn, row - 1, column], Color.FromArgb(248, 203, 173));
+            _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 2, column);
+            ExcelHelper.ApplyColor(worksheet.Cells[row + 1, startColumn, row + 1, column], Color.DimGray);
         }
 
 

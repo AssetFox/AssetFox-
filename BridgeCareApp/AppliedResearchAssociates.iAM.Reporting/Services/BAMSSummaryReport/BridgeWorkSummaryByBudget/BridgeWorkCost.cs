@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using OfficeOpenXml;
-
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary;
 using AppliedResearchAssociates.iAM.Reporting.Models;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
-using static HotChocolate.ErrorCodes;
-using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget
 {
@@ -24,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
         internal void FillCostOfBridgeWork(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
-            List<YearsData> costForBridgeBudgets, Dictionary<int, double> totalBudgetPerYearForBridgeWork, WorkTypeTotal workTypeTotal)
+            List<YearsData> costForBridgeBudgets, Dictionary<int, decimal> totalBudgetPerYearForBridgeWork, WorkTypeTotal workTypeTotal)
         {
             var startYear = simulationYears[0];
             currentCell.Row += 1;

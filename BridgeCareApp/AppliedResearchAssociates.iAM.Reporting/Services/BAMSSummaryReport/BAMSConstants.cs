@@ -68,7 +68,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         public const string NoTreatmentForWorkSummary = "No Treatment";
         public const string Overall = "Overall";
         public const string PercentBudgetSpentBAMS = "Percent Budget Spent BAMS";
+        public const string PercentBudgetSpentCommitted = "Percent Budget Spent Committed";
         public const string PercentBudgetSpentMPMS = "Percent Budget Spent MPMS";
+        public const string PercentBudgetSpentSAP = "Percent Budget Spent SAP";
+        public const string PercentBudgetSpentProjectBuilder = "Percent Budget Spent Project Builder";
         public const string Poor = "Poor";
         public const string PoorBridgeCompareBridgeCount = "Poor Bridge Compare Bridge Count";
         public const string PoorBridgeCompareDeckArea = "Poor Bridge Compare Deck Area";

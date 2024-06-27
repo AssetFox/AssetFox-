@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             List<int> simulationYears,
             List<YearsData> costForCommittedBudgets,
             HashSet<string> committedTreatments,
-            Dictionary<int, double> totalBudgetPerYearForCommittedWork,
+            Dictionary<int, decimal> totalBudgetPerYearForCommittedWork,
             WorkTypeTotal workTypeTotal)
         {
             var startYear = simulationYears[0];
@@ -81,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             List<int> simulationYears,
             List<YearsData> costForCommittedBudgets,
             HashSet<string> mpmsTreatments,
-            Dictionary<int, double> totalBudgetPerYearForCommittedWork,
+            Dictionary<int, decimal> totalBudgetPerYearForCommittedWork,
             WorkTypeTotal workTypeTotal)
         {
             var startYear = simulationYears[0];
@@ -137,7 +137,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             List<int> simulationYears,
             List<YearsData> costForSAPBudgets,
             HashSet<string> sapTreatments,
-            Dictionary<int, double> totalBudgetPerYearForSAPWork,
+            Dictionary<int, decimal> totalBudgetPerYearForSAPWork,
             WorkTypeTotal workTypeTotal)
         {
             var startYear = simulationYears[0];
@@ -191,7 +191,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             List<int> simulationYears,
             List<YearsData> costForProjectBuilderBudgets,
             HashSet<string> projectBuilderTreatments,
-            Dictionary<int, double> totalBudgetPerYearForProjectBuilderWork,
+            Dictionary<int, decimal> totalBudgetPerYearForProjectBuilderWork,
             WorkTypeTotal workTypeTotal)
         {
             var startYear = simulationYears[0];

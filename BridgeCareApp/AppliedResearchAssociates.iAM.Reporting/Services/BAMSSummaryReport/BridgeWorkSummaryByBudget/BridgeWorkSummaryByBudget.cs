@@ -177,9 +177,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                     var yearlycostForMpmsBudget = costForCommittedBudgets.Where(_ => _.Year == year && _.ProjectSource == "MPMS");
                     var mpmsAmountSum = Convert.ToDecimal(yearlycostForMpmsBudget.Sum(s => s.Amount));
-                    totalBudgetPerYearForMPMS.Add(year, mpmsAmountSum);
+                    totalBudgetPerYearForMPMS.Add(year, mpmsAmountSum);                                       
 
-                    var yearlycostForSapBudget = costForCommittedBudgets.Where(_ => _.Year == year && _.ProjectSource == "SAP");
+                    var yearlycostForSapBudget = costForCommittedBudgets.Where(_ => _.Year == year && _.ProjectSource == "Maintenance");
                     var sapAmountSum = Convert.ToDecimal(yearlycostForSapBudget.Sum(s => s.Amount));
                     totalBudgetPerYearForSAP.Add(year, sapAmountSum);
 
@@ -316,7 +316,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     var year = startYear + yearTracker;                    
                     var perYearTotalSpent = totalSpent.Find(_ => _.year == year);                    
                     var perYearTotalSpentAmount = perYearTotalSpent.amount;
-
+                                        
                     // Remaining
                     var yearlyBudget = Convert.ToDecimal(worksheet.Cells[budgetTotalRow, column].Value);
                     worksheet.Cells[row, column].Value = yearlyBudget - perYearTotalSpentAmount;

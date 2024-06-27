@@ -134,7 +134,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (user != null)
             {
                 user.ActiveStatus = false;
-                user.Username = $"{user.Username} [Inactive]";
                 _unitOfWork.Context.SaveChanges();
             }
         }
@@ -144,10 +143,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (user != null)
             {
                 user.ActiveStatus = true;
-                if (user.Username.EndsWith("[Inactive]"))
-                {
-                    user.Username = user.Username.Substring(0, user.Username.Length - "[Inactive]".Length).Trim();
-                }
                 _unitOfWork.Context.SaveChanges();
             }
         }

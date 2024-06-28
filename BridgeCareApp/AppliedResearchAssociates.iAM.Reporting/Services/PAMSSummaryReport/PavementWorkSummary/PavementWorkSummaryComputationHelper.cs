@@ -182,7 +182,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     {
                         if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
                         {
-                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (cost, 1, section.ProjectSource, treatmentCategory));
+                            var projectSource = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment) &&
+                                                _.Year == yearData.Year)?.ProjectSource.ToString();
+                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (cost, 1, projectSource, treatmentCategory));
                         }
                         else
                         {
@@ -194,7 +196,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         }
 
                         // Remove from committedProjectsForWorkOutsideScope
-                        var toRemove = committedProjectsForWorkOutsideScope.Where(_ => appliedTreatment.Contains(_.Treatment)); // Bundled has many treatment names under AppliedTreatment
+                        // Bundled has many treatment names under AppliedTreatment
+                        var toRemove = committedProjectsForWorkOutsideScope.Where(_ => appliedTreatment.Contains(_.Treatment) && _.Year == yearData.Year);
                         if (toRemove != null)
                         {
                             committedProjectsForWorkOutsideScope.RemoveAll(_ => toRemove.Contains(_));
@@ -433,6 +436,5 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             }
             return workTypeTotals;
         }
-
     }
 }

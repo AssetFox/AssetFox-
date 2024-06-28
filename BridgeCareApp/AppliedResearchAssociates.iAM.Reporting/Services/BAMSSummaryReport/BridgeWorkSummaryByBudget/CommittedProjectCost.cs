@@ -25,7 +25,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             CurrentCell currentCell,
             List<int> simulationYears,
             List<YearsData> costForCommittedBudgets,
-            HashSet<string> committedTreatments,
             Dictionary<int, decimal> totalBudgetPerYearForCommittedWork,
             WorkTypeTotal workTypeTotal)
         {
@@ -80,7 +79,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             CurrentCell currentCell,
             List<int> simulationYears,
             List<YearsData> costForCommittedBudgets,
-            HashSet<string> mpmsTreatments,
             Dictionary<int, decimal> totalBudgetPerYearForCommittedWork,
             WorkTypeTotal workTypeTotal)
         {
@@ -136,7 +134,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             CurrentCell currentCell,
             List<int> simulationYears,
             List<YearsData> costForSAPBudgets,
-            HashSet<string> sapTreatments,
             Dictionary<int, decimal> totalBudgetPerYearForSAPWork,
             WorkTypeTotal workTypeTotal)
         {
@@ -190,7 +187,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             CurrentCell currentCell,
             List<int> simulationYears,
             List<YearsData> costForProjectBuilderBudgets,
-            HashSet<string> projectBuilderTreatments,
             Dictionary<int, decimal> totalBudgetPerYearForProjectBuilderWork,
             WorkTypeTotal workTypeTotal)
         {

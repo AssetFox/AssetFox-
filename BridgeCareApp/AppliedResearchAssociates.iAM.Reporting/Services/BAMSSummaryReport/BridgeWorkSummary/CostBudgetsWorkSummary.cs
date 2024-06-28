@@ -420,7 +420,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         else
                         {
                             var cellToEnterCost = yearlyItem.Key - startYear;
-                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
+                            var currentValue = worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value;
+                            decimal toAdd = currentValue == null ? 0 : Convert.ToDecimal(currentValue);
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost + toAdd;
                         }
                         committedTotalCost += dataValue.treatmentCost;
 
@@ -505,7 +507,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         else
                         {
                             var cellToEnterCost = yearlyItem.Key - startYear;
-                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
+                            var currentValue = worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value;
+                            decimal toAdd = currentValue == null ? 0 : Convert.ToDecimal(currentValue);
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost + toAdd;
                         }
                         committedTotalCost += dataValue.treatmentCost;
 
@@ -550,8 +554,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.ApplyColor(worksheet.Cells[mpmsTotalRow, fromColumn, mpmsTotalRow, endColumn], Color.FromArgb(84, 130, 53));
             ExcelHelper.SetTextColor(worksheet.Cells[mpmsTotalRow, fromColumn, mpmsTotalRow, endColumn], Color.White);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, mpmsTotalRow + 1, endColumn);
-
-            // CommittedTotalRow = mpmsTotalRow;
+                        
             return workTypeTotalMPMS;
         }
 
@@ -596,7 +599,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         else
                         {
                             var cellToEnterCost = yearlyItem.Key - startYear;
-                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost;
+                            var currentValue = worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value;
+                            decimal toAdd = currentValue == null ? 0 : Convert.ToDecimal(currentValue);
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost + 2].Value = dataValue.treatmentCost + toAdd;
                         }
                         sapTotalCost += dataValue.treatmentCost;
 
@@ -696,7 +701,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         else
                         {
                             var cellToEnterCost = yearlyItem.Key - startYear + 2;
-                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost].Value = dataValue.treatmentCost;
+                            var currentValue = worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost].Value;
+                            decimal toAdd = currentValue == null ? 0 : Convert.ToDecimal(currentValue);
+                            worksheet.Cells[uniqueTreatments[key], column + cellToEnterCost].Value = dataValue.treatmentCost = toAdd;
                         }
                         projectBuilderTotalCost += dataValue.treatmentCost;
 

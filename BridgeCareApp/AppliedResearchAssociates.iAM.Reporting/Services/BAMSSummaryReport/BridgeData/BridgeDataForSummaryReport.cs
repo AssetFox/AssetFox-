@@ -634,6 +634,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                                _.LocationKeys["BRKEY_"] == section_BRKEY.ToString());
                         var projectSource = committedProject?.ProjectSource.ToString() ?? string.Empty;
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, projectSource);
+
+                        // Add Project Id
+                        var projectId = committedProject?.ProjectId.ToString() ?? string.Empty;
+                        worksheet.Cells[row, ++column].Value = projectId;
                     }
 
                     // If TreatmentStatus Applied it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
@@ -1092,6 +1096,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "Poor",
                 "Posted",
                 "Project Pick",
+                "Project Id",
                 "Budget",
                 "Recommended Treatment",
                 "Cost",

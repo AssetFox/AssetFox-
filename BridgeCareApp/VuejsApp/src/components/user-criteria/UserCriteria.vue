@@ -302,7 +302,7 @@
 </template>
 
 <script lang='ts' setup>
-import Vue, { computed, getCurrentInstance } from 'vue';
+import Vue, { computed, getCurrentInstance, nextTick } from 'vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import EditCriteriaDialog from '@/shared/modals/CriterionFilterEditorDialog.vue';
@@ -376,7 +376,7 @@ const inactiveFilteredUsersCriteriaFilter = computed(() => {
 
   let unassignedUsers: User[]=[];
   let assignedUsers:User[] =[];
-  const inactiveUsers = ref<User[]>([]);
+  let inactiveUsers:User[] =[];
 
   const assignedUsersCriteriaFilter= ref<any>([]) ;
   const unassignedUsersCriteriaFilter=ref <UserCriteriaFilter[]> ([]);
@@ -406,7 +406,6 @@ const inactiveFilteredUsersCriteriaFilter = computed(() => {
   });
 
   watch(stateUsersCriteriaFilter, () => {
-    // Empty the list of inactive users
     stateUsersCriteriaFilter.value.forEach((userCriteriafilter: UserCriteriaFilter)=>{
       let tempUserCriteria = userCriteriafilter;
       if(tempUserCriteria.hasCriteria)
@@ -417,7 +416,7 @@ const inactiveFilteredUsersCriteriaFilter = computed(() => {
       }
 
       // If the user is in the list of inactive users, add it to the CriteriaFilter inactive list
-      if (inactiveUsers.value.some(user => user.username === tempUserCriteria.userName)) {
+      if (inactiveUsers.some(user => user.username === tempUserCriteria.userName)) {
           inactiveUsersCriteriaFilter.value.push(tempUserCriteria);
       }
     })
@@ -457,7 +456,7 @@ watch(stateUsers,()=>onUserCriteriaChanged())
     // Filter and Assign unassgined users, assigned users, and inactive users
     unassignedUsers = stateUsers.value.filter((user: User) => !user.hasInventoryAccess && user.activeStatus);
     assignedUsers = stateUsers.value.filter((user: User) => user.hasInventoryAccess && user.activeStatus);
-    inactiveUsers.value = stateUsers.value.filter((user: User) => !user.activeStatus);
+    inactiveUsers = stateUsers.value.filter((user: User) => !user.activeStatus);
 
     unassignedUsersCriteriaFilter.value = [{ ...emptyUserCriteriaFilter }];
     unassignedUsers.forEach((value) => {
@@ -477,18 +476,34 @@ watch(stateUsers,()=>onUserCriteriaChanged())
     unassignedUsersCriteriaFilter.value.shift(); // removes the 1st element, which is always bank in case
   }
 
+  // First watch: stateUsers
+  watch(stateUsers, () => {
+    onUserCriteriaChanged();
+    // Ensure the second watch runs only after the first watch completes
+    nextTick(() => {
+      // Second watch: stateUsersCriteriaFilter
+      watch(stateUsersCriteriaFilter, () => {
+        onUserCriteriaFilterChanged();
+      }, { immediate: true });
+    });
+  });
+
   watch(stateUsersCriteriaFilter, () => onUserCriteriaFilterChanged());
-  function onUserCriteriaFilterChanged() {
-      // Filter and assign active users
+    function onUserCriteriaFilterChanged() {
+    // Create a set of inactive usernames
+    const inactiveUsernamesSet = new Set(inactiveUsers.map(user => user.username));
+
+    // Filter and assign active users
     assignedUsersCriteriaFilter.value = stateUsersCriteriaFilter.value.filter(userCriteria => {
-      return !userCriteria.userName.endsWith("[Inactive]");
+      return !inactiveUsernamesSet.has(userCriteria.userName);
     });
 
-      // Filter and assign inactive users
+    // Filter and assign inactive users
     inactiveUsersCriteriaFilter.value = stateUsersCriteriaFilter.value.filter(userCriteria => {
-      return userCriteria.userName.endsWith("[Inactive]");
-  });
-}
+      return inactiveUsernamesSet.has(userCriteria.userName);
+    });
+  }
+
   onMounted(()=>mounted())
   function mounted() {
     getAllUserCriteriaFilterAction();
@@ -619,14 +634,11 @@ watch(stateUsers,()=>onUserCriteriaChanged())
     // Set tempDeactivateUser equal to the current value of inactiveUsersCriteriaFilter
     tempDeactivateUser.value = inactiveUsersCriteriaFilter.value;
     await deactivateUserAction({ userId: selectedUser.userId });
-    // Add [Inactive] to the username
-    selectedUser.userName = `${selectedUser.userName} [Inactive]`;
 
-    assignedUsersCriteriaFilter.value = tempDeactivateUserFilter.value;
-
+    const inactiveUsernamesSet = new Set(inactiveUsers.map(user => user.username));
       // Filter and assign active users
         assignedUsersCriteriaFilter.value = assignedUsersCriteriaFilter.value.filter((userCriteria: { userName: string; }) => {
-      return !userCriteria.userName.endsWith("[Inactive]");
+      return !inactiveUsernamesSet.has(userCriteria.userName);
     });
 
     // Set inactiveUsersCriteriaFilter equal to the value of tempDeactivateUser
@@ -668,14 +680,14 @@ async function onSubmitReactivateUserResponse(doReactivate: boolean) {
     tempReactivateUser.value = assignedUsersCriteriaFilter.value;
     await reactivateUserAction({ userId: selectedUser.userId })
       .then(() => {
-        // Remove the [Inactive] suffix from the userName
-        selectedUser.userName = selectedUser.userName.replace(/\s\[Inactive\]$/, '');
 
         inactiveUsersCriteriaFilter.value = tempReactivateUserFilter.value;
 
+        const inactiveUsernamesSet = new Set(inactiveUsers.map(user => user.username));
+
         // Filter and assign inactive users
           inactiveUsersCriteriaFilter.value = inactiveUsersCriteriaFilter.value.filter((userCriteria: { userName: string; }) => {
-            return userCriteria.userName.endsWith("[Inactive]");
+            return inactiveUsernamesSet.has(userCriteria.userName);
         });
         // Set assignedUsersCriteriaFilter equal to the value of tempReactivateUser
         assignedUsersCriteriaFilter.value = tempReactivateUser.value;

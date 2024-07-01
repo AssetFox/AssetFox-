@@ -25,22 +25,38 @@ const mutations = {
         state.users = clone(users);
     },
     deactivatedUserMutator(state: any, id: string) {
-        // this is to deactivate the user entry from criteria filter.
-        state.usersCriteriaFilter = reject(
-            propEq('userId', id),
-            state.usersCriteriaFilter,
-        );
+        // Deactivate the user in the usersCriteriaFilter
+        state.usersCriteriaFilter = state.usersCriteriaFilter.map((user: { userId: string; }) => {
+            if (user.userId === id) {
+                return { ...user, activeStatus: false };
+            }
+            return user;
+        });
 
-        state.users = reject(propEq('id', id), state.users);
+        // Deactivate the user in the users list
+        state.users = state.users.map((user: { id: string; }) => {
+            if (user.id === id) {
+                return { ...user, activeStatus: false };
+            }
+            return user;
+        });
     },
     reactivatedUserMutator(state: any, id: string) {
-        // this is to reactivate the user entry from criteria filter.
-        state.usersCriteriaFilter = reject(
-            propEq('userId', id),
-            state.usersCriteriaFilter,
-        );
+        // Reactivate the user in the usersCriteriaFilter
+        state.usersCriteriaFilter = state.usersCriteriaFilter.map((user: { userId: string; }) => {
+            if (user.userId === id) {
+                return { ...user, activeStatus: true };
+            }
+            return user;
+        });
 
-        state.users = reject(propEq('id', id), state.users);
+        // Reactivate the user in the users list
+        state.users = state.users.map((user: { id: string; }) => {
+            if (user.id === id) {
+                return { ...user, activeStatus: true };
+            }
+            return user;
+        });
     },
 
     currentUserMutator(state: any, currentUser: User) {

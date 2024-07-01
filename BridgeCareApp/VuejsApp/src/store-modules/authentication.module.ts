@@ -225,16 +225,16 @@ const actions = {
                     }
                     else
                     {
-                        setCommits(commit);
+                        setCommits({ commit });
                         throw new Error('User is not active');
                     }
         } else {
-            setCommits(commit);
+            setCommits({ commit });
         }
     },
 };
 
-function setCommits({ commit }: any)
+async function setCommits({ commit }: any)
 {
     commit('hasRoleMutator', false);
     commit('checkedForRoleMutator', false);

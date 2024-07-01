@@ -64,6 +64,11 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         public ProjectSourceDTO ProjectSource { get; set; }
 
         /// <summary>
+        /// Project Id associated with the committed project
+        /// </summary>
+        public string ProjectId { get; set; }
+
+        /// <summary>
         /// The number of years until any other treatment may be performed
         /// </summary>
         public int ShadowForAnyTreatment { get; set; }

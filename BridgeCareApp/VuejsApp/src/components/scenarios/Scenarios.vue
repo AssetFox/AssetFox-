@@ -756,6 +756,7 @@ import $vuetify from '@/plugins/vuetify';
 import { onBeforeMount } from 'vue';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
+import { User } from '@/shared/models/iAM/user';
 
     let store = useStore(); 
     const $router = useRouter();     
@@ -774,7 +775,6 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
     let stateTotalQueuedSimulations = computed<number>(() => store.state.scenarioModule.totalQueuedSimulations) ;
     const stateFastWorkQueuePage = computed<QueuedWork[]>(() => store.state.scenarioModule.currentFastWorkQueuePage);
     let stateTotalFastQueuedItems = computed<number>(() => store.state.scenarioModule.totalFastQueuedItems);
-
 
     let authenticated:boolean = (store.state.authenticationModule.authenticated);
     let userId: string = (store.state.authenticationModule.userId);
@@ -811,6 +811,7 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
     async function getWorkQueuePageAction(payload?: any): Promise<any>{await store.dispatch('getWorkQueuePage', payload)} 
     async function getFastWorkQueuePageAction(payload?: any): Promise<any>{await store.dispatch('getFastWorkQueuePage', payload)} 
     async function updateFastQueuedWorkStatusAction(payload?: any): Promise<any>{await store.dispatch('updateFastQueuedWorkStatus', payload)} 
+    async function getAllUserCriteriaFilterAction(payload?: any): Promise<any> {await store.dispatch('getAllUserCriteriaFilter',payload);}
     
     let networks: Network[] = [];
     let scenarioGridHeaders: any = [
@@ -1092,13 +1093,35 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
 
     watch(stateSharedScenariosPage, onstateSharedScenariosPageChanged) 
     function onstateSharedScenariosPageChanged(){
-        currentSharedScenariosPage.value = clone(stateSharedScenariosPage.value);
+
+            let stateUsers = computed<User[]>(()=>store.state.userModule.users);
+
+            // Clone the stateSharedScenariosPage
+            const clonedPage = clone(stateSharedScenariosPage.value);
+
+            // Get the list of inactive users
+            const inactiveUsers = stateUsers.value.filter(user => user.activeStatus === false);
+
+            // Create a set of inactive usernames for quick lookup
+            const inactiveUsernamesSet = new Set(inactiveUsers.map(user => user.username));
+
+            // Append [Inactive] to creators' names if they are in the inactive list
+            clonedPage.forEach(item => {
+            if (item.creator && inactiveUsernamesSet.has(item.creator)) {
+                item.creator += ' [Inactive]';
+                item.owner += ' [Inactive]';
+            }
+            });
+
+        // Update the currentSharedScenariosPage with the modified list
+        currentSharedScenariosPage.value = clonedPage
     }
 
     watch(stateTotalSharedScenarios, onStateTotalSharedScenariosChanged) 
     function onStateTotalSharedScenariosChanged(){
         totalSharedScenarios.value = stateTotalSharedScenarios.value;
     }
+
     watch(totalSharedScenarios, onTotalSharedScenariosChanged) 
     function onTotalSharedScenariosChanged(){
         setTabTotals();
@@ -1106,7 +1129,28 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
 
     watch(stateUserScenariosPage, onStateUserScenariosPageChanged) 
     function onStateUserScenariosPageChanged(){
-        currentUserScenariosPage.value = clone(stateUserScenariosPage.value);
+
+        let stateUsers = computed<User[]>(()=>store.state.userModule.users);
+
+        // Clone the stateUserScenariosPage
+        const clonedPage = clone(stateUserScenariosPage.value);
+
+        // Get the list of inactive users
+        const inactiveUsers = stateUsers.value.filter(user => user.activeStatus === false);
+
+        // Create a set of inactive usernames for quick lookup
+        const inactiveUsernamesSet = new Set(inactiveUsers.map(user => user.username));
+
+       // Append [Inactive] to creators' names if they are in the inactive list
+       clonedPage.forEach(item => {
+        if (item.creator && inactiveUsernamesSet.has(item.creator)) {
+            item.creator += ' [Inactive]';
+            item.owner += ' [Inactive]';
+        }
+    });
+    
+    // Update the currentUserScenariosPage with the modified list
+    currentUserScenariosPage.value = clonedPage
     }
 
     watch(stateTotalUserScenarios, onStateTotalUserScenariosChanged) 

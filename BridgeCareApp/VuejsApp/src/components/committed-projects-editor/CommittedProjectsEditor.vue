@@ -150,7 +150,8 @@
                                                 && header.key !== 'treatment'
                                                 && header.key !== 'cost'
                                                 && header.key !== 'projectSource'
-                                                && header.key !== 'category'"
+                                                && header.key !== 'category'
+                                                && header.key !== 'projectId'"
                                                 readonly
                                                 class="sm-txt"
                                                 density="compact"
@@ -187,12 +188,19 @@
                                                 variant="underlined"
                                                 :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), inputRules['generalRules'].valueIsNotEmpty, inputRules['generalRules'].valueIsWithinRange(item.item[header.key], [firstYear, lastYear])]"
                                                 :error-messages="item.item.yearErrors"/>
-
+                                                
                                             <currencyTextbox v-if="header.key === 'cost'"
                                                 :model-value='item.item[header.key]'
                                                 density="compact"
                                                 variant="underlined"
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
+
+                                            <v-text-field v-if="header.key === 'projectId'"
+                                                readonly
+                                                class="sm-txt"
+                                                density="compact"
+                                                variant="underlined"
+                                                :model-value="item.item[header.key]"/>
 
                                             <template v-slot:input>
                                                 <v-text-field v-if="header.key === 'keyAttr'"
@@ -235,6 +243,12 @@
                                                     single-line
                                                     v-model.number="item.item[header.key]"
                                                     :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
+                                                
+                                                <v-text-field v-if="header.key === 'projectId'"
+                                                    label="Edit"
+                                                    single-line
+                                                    variant="underlined"
+                                                    v-model="item.item[header.key]"/>
 
                                             </template>
                                         </editDialog>
@@ -508,6 +522,14 @@ import ConfirmDialog from 'primevue/confirmdialog';
         { 
             title: 'Project Source', 
             key: 'projectSource',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '15%'
+        },
+        { 
+            title: 'Project Id', 
+            key: 'projectId',
             align: 'left',
             sortable: false,
             class: '',
@@ -808,6 +830,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
         newRow.locationKeys['ID'] = getNewGuid();
         newRow.simulationId = scenarioId;
         newRow.projectSource = 'None';
+        newRow.projectId = '';
         addedRows.value.push(newRow)
         onPaginationChanged();   
      }
@@ -933,6 +956,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
             else if(property === 'budget'){
                 handleBudgetChange(row, scp, value)
             }
+            else if(property === 'projectId') {
+                handleprojectIdChange(row, scp, value);
+            }
             else if(property === 'projectSource') {
                 handleProjectSourceChange(row, scp, value)
             }
@@ -1043,8 +1069,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 ) == true &&
                 rules['generalRules'].valueIsWithinRange(
                     scp.year, [firstYear, lastYear],
-                ) === true &&
-                scp.projectSource !== ""
+                ) === true
                 
             );
         });
@@ -1083,7 +1108,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
             errors: [],
             yearErrors: [],
             category: scp.category,
-            projectSource: projectSourceMap.get(+scp.projectSource) || scp.projectSource
+            projectSource: projectSourceMap.get(+scp.projectSource) || scp.projectSource,
+            projectId: scp.projectId
         }
         return row
     }
@@ -1116,6 +1142,12 @@ import ConfirmDialog from 'primevue/confirmdialog';
     function handleProjectSourceChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, projectSource: string) {
         row.projectSource = projectSource;
     updateCommittedProject(row, projectSource, 'projectSource');
+    onPaginationChanged();
+    }
+
+    function handleprojectIdChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, projectId: string) {
+        row.projectId = projectId;
+    updateCommittedProject(row, projectId, 'projectId');
     onPaginationChanged();
     }
 

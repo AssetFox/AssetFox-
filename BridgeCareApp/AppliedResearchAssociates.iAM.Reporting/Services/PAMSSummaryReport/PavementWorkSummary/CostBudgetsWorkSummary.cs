@@ -1701,7 +1701,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 for (int i = 0; i < categoryBudgetTotals.Length; i++)
                 {
                     decimal percentage = yearlyBudget == 0 ? 0m : categoryBudgetTotals[i] / yearlyBudget;
-                    worksheet.Cells[row + i, column].Value = Convert.ToDouble(percentage);
+                    worksheet.Cells[row + i, column].Value = percentage;
                 }
             }            
 
@@ -1722,7 +1722,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 4, column]);
             ExcelHelper.ApplyBorder(worksheet.Cells[startRow, column + 1, startRow, column + 1]);
             ExcelHelper.ApplyColor(worksheet.Cells[startRow, column + 1, startRow + 5, column + 1], Color.FromArgb(217, 217, 217));
-            ExcelHelper.SetCustomFormat(worksheet.Cells[startRow + 1, fromColumn, startRow + 5, column], ExcelHelperCellFormat.PercentageDecimal2);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[startRow + 1, fromColumn, startRow + 5, column], ExcelHelperCellFormat.PercentDecimal4);
             _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, startRow + 6, column);
 
         }

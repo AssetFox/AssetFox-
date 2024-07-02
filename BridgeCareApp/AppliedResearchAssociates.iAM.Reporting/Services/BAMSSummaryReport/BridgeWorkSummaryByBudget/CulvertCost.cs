@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using OfficeOpenXml;
-
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary;
 using AppliedResearchAssociates.iAM.Reporting.Models;
@@ -21,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
         internal void FillCostOfCulvert(ExcelWorksheet worksheet, CurrentCell currentCell, List<YearsData> costForCulvertBudget,
-            Dictionary<int, double> totalBudgetPerYearForCulvert, List<int> simulationYears, WorkTypeTotal workTypeTotal)
+            Dictionary<int, decimal> totalBudgetPerYearForCulvert, List<int> simulationYears, WorkTypeTotal workTypeTotal)
         {
             var startYear = simulationYears[0];
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Culvert Work", "BAMS Culvert Work Type");

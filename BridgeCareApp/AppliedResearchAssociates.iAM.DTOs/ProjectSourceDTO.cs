@@ -4,8 +4,9 @@
     {
         None,
         ProjectPick,
-        Committed, //default
-        Maintenance,
-        ProjectBuilder,
+        Committed, // default
+        MPMS,
+        SAP,
+        ProjectBuilder
     }
 }

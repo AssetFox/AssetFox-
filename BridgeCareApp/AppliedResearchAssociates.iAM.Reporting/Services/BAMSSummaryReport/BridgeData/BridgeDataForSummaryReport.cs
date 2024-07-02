@@ -636,7 +636,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, projectSource);
 
                         // Add Project Id
-                        var projectId = committedProject?.ProjectId.ToString() ?? string.Empty;
+                        var projectId = committedProject?.ProjectId?.ToString() ?? string.Empty;
                         worksheet.Cells[row, ++column].Value = projectId;
                     }
 

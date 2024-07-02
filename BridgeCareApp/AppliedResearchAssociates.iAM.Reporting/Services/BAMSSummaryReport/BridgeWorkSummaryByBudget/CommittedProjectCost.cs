@@ -21,21 +21,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon();
         }
 
-        internal void FillCostOfCommittedWork(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
-            List<YearsData> costForCommittedBudgets, HashSet<string> committedTreatments,
-            Dictionary<int, double> totalBudgetPerYearForCommittedWork, WorkTypeTotal workTypeTotal)
+        internal void FillCostOfCommittedWork(ExcelWorksheet worksheet,
+            CurrentCell currentCell,
+            List<int> simulationYears,
+            List<YearsData> costForCommittedBudgets,
+            Dictionary<int, decimal> totalBudgetPerYearForCommittedWork,
+            WorkTypeTotal workTypeTotal)
         {
             var startYear = simulationYears[0];
             currentCell.Row += 1;
-            _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of MPMS Work", "MPMS Work Type");
+            _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of Committed Work", "Committed Work Type");
             currentCell.Row += 1;
             var startOfCommittedBudget = currentCell.Row;
             currentCell.Column = 1;
-            var treatmentTracker = new Dictionary<string, int>();            
+            var treatmentTracker = new Dictionary<string, int>();
             foreach (var item in costForCommittedBudgets)
             {
-                if (item.ProjectSource != "Maintenance" && item.ProjectSource != "ProjectBuilder")
-                {                    
+                if (item.ProjectSource == "Committed")
+                {
                     string currentProjectSource = item.ProjectSource;
                     var rowNum = currentCell.Row++;
                     worksheet.Cells[rowNum, currentCell.Column].Value = item.Treatment;
@@ -58,7 +61,61 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 var year = totalCommittedBudget.Key;
                 var totalAmount = costForCommittedBudgets
-                    .Where(item => item.Year == year && (item.ProjectSource != "Maintenance" && item.ProjectSource != "ProjectBuilder"))
+                    .Where(item => item.Year == year && (item.ProjectSource == "Committed"))
+                    .Sum(item => item.Amount);
+
+                var cellToEnterTotalBridgeCost = year - startYear;
+                worksheet.Cells[currentCell.Row, currentCell.Column + cellToEnterTotalBridgeCost + 2].Value = totalAmount;
+            }
+            ExcelHelper.ApplyBorder(worksheet.Cells[startOfCommittedBudget, currentCell.Column, currentCell.Row, simulationYears.Count + 2]);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[startOfCommittedBudget, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], ExcelHelperCellFormat.NegativeCurrency);
+            ExcelHelper.ApplyColor(worksheet.Cells[startOfCommittedBudget, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.DarkSeaGreen);
+            ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
+            ExcelHelper.SetTextColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.White);
+            currentCell.Row++;
+        }
+
+        internal void FillCostOfMPMSWork(ExcelWorksheet worksheet,
+            CurrentCell currentCell,
+            List<int> simulationYears,
+            List<YearsData> costForCommittedBudgets,
+            Dictionary<int, decimal> totalBudgetPerYearForCommittedWork,
+            WorkTypeTotal workTypeTotal)
+        {
+            var startYear = simulationYears[0];
+            currentCell.Row += 1;
+            _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of MPMS Work", "MPMS Work Type");
+            currentCell.Row += 1;
+            var startOfCommittedBudget = currentCell.Row;
+            currentCell.Column = 1;
+            var treatmentTracker = new Dictionary<string, int>();            
+            foreach (var item in costForCommittedBudgets)
+            {
+                if (item.ProjectSource == "MPMS")
+                {
+                    string currentProjectSource = item.ProjectSource;
+                    var rowNum = currentCell.Row++;
+                    worksheet.Cells[rowNum, currentCell.Column].Value = item.Treatment;
+                    worksheet.Cells[rowNum, currentCell.Column + 2, rowNum, currentCell.Column + 1 + simulationYears.Count].Value = 0.0;
+                    var cellToEnterCost = item.Year - startYear;
+                    var cellValue = worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value;
+                    var totalAmount = 0.0;
+                    if (cellValue != null)
+                    {
+                        totalAmount = (double)cellValue;
+                    }
+                    totalAmount += item.Amount;
+                    worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
+                    WorkTypeTotalHelper.FillWorkTypeTotals(item, workTypeTotal);
+                }
+            }
+            worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.CommittedTotal;
+
+            foreach (var totalCommittedBudget in totalBudgetPerYearForCommittedWork)
+            {
+                var year = totalCommittedBudget.Key;
+                var totalAmount = costForCommittedBudgets
+                    .Where(item => item.Year == year && (item.ProjectSource == "MPMS"))
                     .Sum(item => item.Amount);
 
                 var cellToEnterTotalBridgeCost = year - startYear;
@@ -77,8 +134,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             CurrentCell currentCell,
             List<int> simulationYears,
             List<YearsData> costForSAPBudgets,
-            HashSet<string> sapTreatments,
-            Dictionary<int, double> totalBudgetPerYearForSAPWork,
+            Dictionary<int, decimal> totalBudgetPerYearForSAPWork,
             WorkTypeTotal workTypeTotal)
         {
             var startYear = simulationYears[0];
@@ -90,7 +146,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var treatmentTracker = new Dictionary<string, int>();
             foreach (var item in costForSAPBudgets)
             {
-                if (item.ProjectSource == "Maintenance")
+                if (item.ProjectSource == "SAP")
                 {
                     var rowNum = currentCell.Row++;
                     worksheet.Cells[rowNum, currentCell.Column].Value = item.Treatment;
@@ -107,7 +163,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 var year = totalSAPBudget.Key;
                 var totalAmount = costForSAPBudgets
-                    .Where(item => item.Year == year && item.ProjectSource == "Maintenance")
+                    .Where(item => item.Year == year && item.ProjectSource == "SAP")
                     .Sum(item => item.Amount);
 
                 var cellToEnterTotalBridgeCost = year - startYear;
@@ -131,8 +187,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             CurrentCell currentCell,
             List<int> simulationYears,
             List<YearsData> costForProjectBuilderBudgets,
-            HashSet<string> projectBuilderTreatments,
-            Dictionary<int, double> totalBudgetPerYearForProjectBuilderWork,
+            Dictionary<int, decimal> totalBudgetPerYearForProjectBuilderWork,
             WorkTypeTotal workTypeTotal)
         {
             var startYear = simulationYears[0];

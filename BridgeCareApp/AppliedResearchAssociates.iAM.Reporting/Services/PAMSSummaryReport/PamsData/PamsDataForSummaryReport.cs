@@ -398,6 +398,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 row++;
             }
 
+            int rowsToSubtract = 12;
             currentCell.Column = column++;
             currentCell.Row = initialRow;
             isInitialYear = true;
@@ -425,7 +426,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     {
                         var cashFlowMap = MappingContent.GetCashFlowProjectPick(section.TreatmentCause, prevYearSection);
                         worksheet.Cells[row, ++column].Value = cashFlowMap.currentPick; //Project Pick
-                        worksheet.Cells[row, column - 11].Value = cashFlowMap.previousPick; //Project Pick previous year
+                        worksheet.Cells[row, column - rowsToSubtract].Value = cashFlowMap.previousPick; //Project Pick previous year
                     }
                     else
                     {
@@ -435,7 +436,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, projectSource); //Project Pick
 
                         // Add Project Id
-                        var projectId = committedProject?.ProjectId.ToString() ?? string.Empty;
+                        var projectId = committedProject?.ProjectId?.ToString() ?? string.Empty;
                         worksheet.Cells[row, ++column].Value = projectId;
                     }
 
@@ -483,8 +484,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                         ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment], Color.FromArgb(255, 0, 0));
 
                         // Color the previous year project also
-                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment - 11], Color.FromArgb(0, 255, 0));
-                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment - 11], Color.FromArgb(255, 0, 0));
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment - rowsToSubtract], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment - rowsToSubtract], Color.FromArgb(255, 0, 0));
                     }
 
                     column = column + 1;

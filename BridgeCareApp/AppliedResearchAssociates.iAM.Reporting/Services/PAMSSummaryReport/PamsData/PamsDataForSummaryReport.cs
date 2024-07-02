@@ -435,7 +435,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, projectSource); //Project Pick
 
                         // Add Project Id
-                        var projectId = committedProject?.ProjectId.ToString() ?? string.Empty;
+                        var projectId = committedProject?.ProjectId?.ToString() ?? string.Empty;
                         worksheet.Cells[row, ++column].Value = projectId;
                     }
 

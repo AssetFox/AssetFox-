@@ -106,16 +106,15 @@ export const convertCriteriaTypeObjectToCriteriaExpression = (
  * Creates a criteria expression from a given CriteriaRule object
  */
 function createCriteriaExpression(criteriaRule: CriteriaRule): string {
-    console.log('Criteria Rule:', criteriaRule); // Debug statement
-    if (typeof criteriaRule.value != 'undefined' && hasValue(criteriaRule.value)) {
+    // return the concatenated rule string
+    if (
+        typeof criteriaRule.value != 'undefined' &&
+        hasValue(criteriaRule.value)
+    ) {
         if (criteriaRule.value[0] != '[') {
-            const expression = `[${criteriaRule.selectedOperand}]${criteriaRule.selectedOperator}'${criteriaRule.value}'`;
-            console.log('Generated Expression:', expression); // Debug statement
-            return expression;
+            return `[${criteriaRule.selectedOperand}]${criteriaRule.selectedOperator}'${criteriaRule.value}'`;
         } else {
-            const expression = `[${criteriaRule.selectedOperand}]${criteriaRule.selectedOperator}${criteriaRule.value}`;
-            console.log('Generated Expression:', expression); // Debug statement
-            return expression;
+            return `[${criteriaRule.selectedOperand}]${criteriaRule.selectedOperator}${criteriaRule.value}`;
         }
     } else {
         return '';

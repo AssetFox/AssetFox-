@@ -88,7 +88,14 @@ import { hasValue } from '@/shared/utils/has-value-util';
             await getAttributeSelectValuesAction({attributeNames: [props.criteriaRule.selectedOperand]});
         }
         queryRule.value = props.queryRules.find(_ => _.label === props.criteriaRule.selectedOperand)!
-        criteriaValue.value.selectedOperator = '='
+        
+        // Conditionally set the operator
+        if (criteriaValue.value.selectedOperator === undefined) {
+            criteriaValue.value.selectedOperator = '=';
+        } else 
+        {
+            criteriaValue.value.selectedOperator = clone(props.criteriaRule.selectedOperator);
+        }
     })
 
     watch(selectedOperator, (newVal, oldVal) =>{

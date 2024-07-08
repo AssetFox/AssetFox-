@@ -19,8 +19,7 @@ using OfficeOpenXml;
 namespace AppliedResearchAssociates.iAM.Reporting
 {
     public class PAMSAuditReport : IReport
-    {
-        
+    {        
         protected readonly IHubService _hubService;
         private readonly IUnitOfWork _unitOfWork;
         private Guid _networkId;
@@ -176,7 +175,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             using var excelPackage = new ExcelPackage(new FileInfo("PAMSAuditReportData.xlsx"));
 
             checkCancelled(cancellationToken, simulationId);
-            // Bridge Data TAB
+            // Pavement TAB
             reportDetailDto.Status = $"Creating Data TAB";
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);

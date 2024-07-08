@@ -53,7 +53,7 @@ const actions = {
     async getUserTokens({ commit }: any, payload: any) {
         await AuthenticationService.getUserTokens(payload.code).then(
             (response: AxiosResponse) => {
-                const expirationInMilliseconds = moment().add(30, 'minutes');
+                const expirationInMilliseconds = moment().add(30, 'minutes');                
                 if (
                     hasValue(response, 'status') &&
                     http2XX.test(response.status.toString())
@@ -93,17 +93,27 @@ const actions = {
             'minutes',
         );
         
-        if (differenceInMinutes > 2) {
+        alert('in checkBrowserTokens1 ' + differenceInMinutes + " " + (differenceInMinutes > 15));
+
+        if (differenceInMinutes > 15) {
             return;
         }
 
-       await dispatch('refreshTokens');
+        alert('in checkBrowserTokens2');
+       
+        await dispatch('refreshTokens');
     },
 
+// TODO check with ESEC not B2C
+// On component load, check the token's time stamp, and set a delayed call to refresh the token when less than 5 minutes remain.
+// TODO try checking and renwing interval in logOut? Or atleast on each component load in router.ts
     async refreshTokens({ commit }: any) {
         if (!hasValue(localStorage.getItem('UserTokens'))) {
             throw new Error('Cannot determine user authentication status');
         } else {
+            
+            alert("RefreshToken");
+
             commit('refreshingMutator', true);
             const userTokens: UserTokens = JSON.parse(
                 localStorage.getItem('UserTokens') as string,
@@ -180,7 +190,8 @@ const actions = {
         }
     },
 
-    async logOut({ commit }: any) {
+    async logOut({ commit }: any) {        
+        alert('logout');
         commit('usernameMutator', '');
         commit('authenticatedMutator', false);
         localStorage.removeItem('UserInfo');

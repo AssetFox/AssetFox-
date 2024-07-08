@@ -11,6 +11,7 @@ export const clearRefreshIntervalID = () => {
 };
 
 export const setRefreshIntervalID = () => {
+    alert("in setRefreshIntervalID");
     if (!hasValue(refreshIntervalID)) {
         refreshIntervalID = window.setInterval(checkBrowserTokens, 30000);
     }
@@ -18,6 +19,7 @@ export const setRefreshIntervalID = () => {
 
 const checkBrowserTokens = () => {
     store.dispatch('checkBrowserTokens').catch((err: any) => {
+        alert(checkBrowserTokens + " " + err);
         store
             .dispatch('addErrorNotification', {
                 message: 'Browser token error',

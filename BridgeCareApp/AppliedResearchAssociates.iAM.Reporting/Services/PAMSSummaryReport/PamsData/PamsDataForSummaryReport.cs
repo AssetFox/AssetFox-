@@ -41,8 +41,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 "Route",
                 "District",
                 "Start",
-                "End",                               
-
+                "End",
                 "Length(ft)",
                 "Width(ft)",
                 "Pavement Depth(in)",
@@ -50,14 +49,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 "Lanes",
                 "FamilyID",
                 "MPO/ RPO",
-
+                "Posted Roads",
                 "Surface Type",
                 "BPN",
-
                 "Year Built",
                 "Year Last Resurface",
                 "Year Last  Structural Overlay",
-
                 "ADT",
                 "Truck %",
                 "Risk Score",
@@ -241,37 +238,39 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             foreach (var sectionSummary in reportOutputData.InitialAssetSummaries)
             {
                 rowNo++; columnNo = 1;
-                var crs = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CRS");
+
+                var valuePerNumericAttribute = sectionSummary.ValuePerNumericAttribute;
+                var valuePerTextAttribute = sectionSummary.ValuePerTextAttribute;
+
+                var crs = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "CRS");
                 worksheet.Cells[rowNo, columnNo++].Value = crs;
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SR");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "COUNTY");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "SR");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "DISTRICT");
                 var lastUnderScoreIndex = crs.LastIndexOf('_');
                 var hyphenIndex = crs.IndexOf('-');
                 var startSeg = crs.Substring(lastUnderScoreIndex + 1, hyphenIndex - lastUnderScoreIndex - 1);
                 var endSeg = crs.Substring(hyphenIndex + 1);
                 worksheet.Cells[rowNo, columnNo++].Value = startSeg;
                 worksheet.Cells[rowNo, columnNo++].Value = endSeg;
-
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SEGMENT_LENGTH");
-                worksheet.Cells[rowNo, columnNo].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "WIDTH");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "SEGMENT_LENGTH");
+                worksheet.Cells[rowNo, columnNo].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "WIDTH");
                 ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo++], ExcelHelperCellFormat.Number);
-                worksheet.Cells[rowNo, columnNo].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "PAVED_THICKNESS");
+                worksheet.Cells[rowNo, columnNo].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "PAVED_THICKNESS");
                 ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo++], ExcelHelperCellFormat.DecimalPrecision2);
-
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DIRECTION");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LANES");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FAMILY");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "MPO_RPO");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SURFACEID").ToString() + "-" + _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SURFACE_NAME");
-
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BUSIPLAN");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "YR_BUILT");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "YEAR_LAST_OVERLAY");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LAST_STRUCTURAL_OVERLAY");
-                worksheet.Cells[rowNo, columnNo++].Value = Math.Round(_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "AADT"));
-                worksheet.Cells[rowNo, columnNo++].Value = Math.Round(_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "TRK_PERCENT"));
-                worksheet.Cells[rowNo, columnNo++].Value = Math.Round(_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "RISKSCORE"));
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "DIRECTION");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "LANES");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "FAMILY");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "MPO_RPO");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "POSTED");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "SURFACEID").ToString() + "-" + _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "SURFACE_NAME");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "BUSIPLAN");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "YR_BUILT");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "YEAR_LAST_OVERLAY");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "LAST_STRUCTURAL_OVERLAY");
+                worksheet.Cells[rowNo, columnNo++].Value = Math.Round(_summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "AADT"));
+                worksheet.Cells[rowNo, columnNo++].Value = Math.Round(_summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "TRK_PERCENT"));
+                worksheet.Cells[rowNo, columnNo++].Value = Math.Round(_summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "RISKSCORE"));
 
 
                 if (rowNo % 2 == 0) { ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGray); }

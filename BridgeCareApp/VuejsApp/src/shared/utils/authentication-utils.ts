@@ -6,7 +6,6 @@ import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
 import AuthenticationService from '@/services/authentication.service';
 
 const isAuthenticatedEsecUser = () => {
-    alert('in isAuthenticatedEsecUser');
     return store
         .dispatch('checkBrowserTokens')
         .then(async () => {
@@ -77,7 +76,6 @@ export const isAuthenticatedUser = () => {
 };
 
 const onLogout = () => {
-    alert('onLogout');
     store.dispatch('logOut').then(() => {
         clearRefreshIntervalID(); 
         // @ts-ignore

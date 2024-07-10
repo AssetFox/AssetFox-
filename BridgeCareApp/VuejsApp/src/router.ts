@@ -156,14 +156,11 @@ const beforeEachFunc = (to: any, from: any, next: any) => {
             // @ts-ignore
             !store.state.authenticationModule.authenticated &&
             hasAuthInfo
-        ) {
-            alert('router beforeEachFunc');
-            
+        ) {            
             isAuthenticatedUser().then((isAuthenticated: boolean | void) => {
                 if (isAuthenticated) {
                     onHandlingUnsavedChanges(to, next);
                 } else {
-                    alert('router beforeEachFunc call onHandleLogout');
                     onHandleLogout();
                 }
             });
@@ -179,8 +176,6 @@ const beforeEachFunc = (to: any, from: any, next: any) => {
 // refrshToken will be invoked!!
 const beforeEnterFunc = (to: any, from: any, next: any) => {
     
-    alert('beforeEnterFunc');
-
     if (
         // @ts-ignore
         !store.state.authenticationModule.hasRole ||
@@ -194,7 +189,6 @@ const beforeEnterFunc = (to: any, from: any, next: any) => {
         next();
     }
 };
-
 
 const router = createRouter({
     history: createWebHistory(),
@@ -526,7 +520,6 @@ const router = createRouter({
     ],
 });
 
-alert('CreateRouter');
 router.beforeEach(beforeEachFunc);
 
 export default router;

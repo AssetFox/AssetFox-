@@ -93,13 +93,9 @@ const actions = {
             'minutes',
         );
         
-        alert('in checkBrowserTokens1 ' + differenceInMinutes + " " + (differenceInMinutes > 15));
-
         if (differenceInMinutes > 15) {
             return;
         }
-
-        alert('in checkBrowserTokens2');
        
         await dispatch('refreshTokens');
     },
@@ -112,8 +108,6 @@ const actions = {
             throw new Error('Cannot determine user authentication status');
         } else {
             
-            alert("RefreshToken");
-
             commit('refreshingMutator', true);
             const userTokens: UserTokens = JSON.parse(
                 localStorage.getItem('UserTokens') as string,
@@ -191,7 +185,6 @@ const actions = {
     },
 
     async logOut({ commit }: any) {        
-        alert('logout');
         commit('usernameMutator', '');
         commit('authenticatedMutator', false);
         localStorage.removeItem('UserInfo');

@@ -377,6 +377,7 @@ import { getUrl } from './shared/utils/get-url';
     
     let showNewsDialog= ref(false);
 
+    let tokenCheckInterval: ReturnType<typeof setInterval> | null = null;
     let hasUnreadNewsItem: boolean = false;
     let currentURL: any = '';
     let unauthorizedError: string = '';
@@ -599,6 +600,8 @@ import { getUrl } from './shared/utils/get-url';
         
         currentURL = router.currentRoute.value.name;
 
+        startTokenCheckTimer();
+
         if(config.agencyLogo.trim() === "")
             agencyLogo.value = new URL(`assets/images/generic/IAM_Main.jpg`, import.meta.url).href;
         else
@@ -617,11 +620,33 @@ import { getUrl } from './shared/utils/get-url';
 
     onBeforeUnmount(() => beforeDestroy());
     function beforeDestroy() {
+        stopTokenCheckTimer();
         $emitter.off(
             Hub.BroadcastEventType.BroadcastErrorEvent,
             onAddErrorNotification,
         );
     }
+
+    function startTokenCheckTimer()
+    {
+        tokenCheckInterval = setInterval(() => {
+            checkToken();
+      }, 300000);
+    }
+
+    function stopTokenCheckTimer()
+    {
+        if (tokenCheckInterval) 
+        {
+            clearInterval(tokenCheckInterval);
+            tokenCheckInterval = null; // Clear the reference to the interval
+        }
+    }
+
+    async function checkToken() {
+        await store.dispatch('checkBrowserTokens');
+    }
+
 
     function onAddErrorNotification(data: any) {
         let errorNotification:string = data.error.toString();

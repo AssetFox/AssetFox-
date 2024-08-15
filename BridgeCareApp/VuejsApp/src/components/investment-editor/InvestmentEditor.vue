@@ -105,26 +105,28 @@
                 <v-col cols = "6">
                     <v-row>
                         <v-col cols="auto">
-                        <v-btn id="InvestmentEditor-editBudgets-btn"
-                            @click='onShowEditBudgetsDialog'
-                            variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
-                            Edit Budgets
-                        </v-btn>
+                            <v-btn id="InvestmentEditor-editBudgets-btn"
+                                @click='onShowEditBudgetsDialog'
+                                variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                                Edit Budgets
+                            </v-btn>
                         </v-col>
-                        <v-col cols="2">
-                        <v-text-field id="InvestmentEditor-numberYearsToAdd-textField"
-                                      :disabled='currentPage.length === 0' type="number" min=1 v-maska:[mask]
-                                      class="ghd-text-field-border ghd-text-field"
-                                      v-bind:class="{ 'ghd-blue-text-field': currentPage.length !== 0}"
-                                      variant="outlined" density="compact" v-model.number="range" />
-                        </v-col>
-                        <v-col>
-                        <v-btn id="InvestmentEditor-addBudgetYearRange-btn"
+                        <v-col cols = "auto">
+                            <v-btn id="InvestmentEditor-addBudgetYearRange-btn"
                                :disabled='currentPage.length === 0'
                                @click='onSubmitAddBudgetYearRange'
                                class='ghd-right-paired-button ghd-blue ghd-button-text ghd-outline-button-padding ' variant = "outlined">
-                            Add Year(s)
-                        </v-btn>
+                               Add No. Years
+                            </v-btn>
+                        </v-col>
+                        <v-col cols="2">
+                            <v-text-field id="InvestmentEditor-numberYearsToAdd-textField"
+                                        :disabled='currentPage.length === 0' type="number" min=1 v-maska:[mask]
+                                        class="ghd-text-field-border ghd-text-field"
+                                        v-bind:class="{ 'ghd-blue-text-field': currentPage.length !== 0}"
+                                        variant="outlined" density="compact" v-model.number="range" />
+                        </v-col>
+                        <v-col>
                         </v-col>
                     </v-row>
                     <v-row>

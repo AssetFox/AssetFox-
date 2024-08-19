@@ -757,6 +757,8 @@ import { onBeforeMount } from 'vue';
 import { importCompletion } from '@/shared/models/iAM/ImportCompletion';
 import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
 import { User } from '@/shared/models/iAM/user';
+import router from '@/router';
+import { useRoute } from 'vue-router';
 
     let store = useStore(); 
     const $router = useRouter();     
@@ -1316,6 +1318,7 @@ import { User } from '@/shared/models/iAM/user';
     }
 
     onBeforeMount(() => {
+        const route = useRoute();
         networks = clone(stateNetworks.value);
         if (hasValue(networks) ) {
             initializeScenarioPages();
@@ -1443,6 +1446,22 @@ import { User } from '@/shared/models/iAM/user';
             { name: 'General work queue', icon: getUrl("assets/icons/queue.svg"), count: totalQueuedSimulations.value },
         );
         tab.value = 'My scenarios';
+
+        // Get the current tab name
+        const tabName = route.query.tab;
+
+        // Check if the tab has a query to go to a different tab
+        if (typeof tabName === 'string' && tabItems.some(item => item.name === tabName))
+        {
+        tab.value = tabName;
+        router.replace({ query: { ...route.query, tab: undefined } });
+      } 
+      else 
+      {
+        // If no valid tab query param, reset the query and set default tab
+        router.replace({ query: { ...route.query, tab: undefined } });
+        tab.value = 'My scenarios';
+      }
     });
 
     onBeforeUnmount(()=> {
@@ -1631,8 +1650,11 @@ import { User } from '@/shared/models/iAM/user';
                     scenarioId: selectedScenario.id,
                 }).then(() => (selectedScenario = clone(emptyScenario)));
             }
+            
+            //Add a small delay to avoid adding two items to the queue at the same time
+            await new Promise(resolve => setTimeout(resolve, 500));
+            tab.value = 'General work queue';
         }
-
     }
 
     function secondRunAnalysisModal() {
@@ -1677,7 +1699,7 @@ import { User } from '@/shared/models/iAM/user';
             }
     }
 
-    function onConfirmAnalysisPreCheckAlertSubmit(submit: boolean) {
+    async function onConfirmAnalysisPreCheckAlertSubmit(submit: boolean) {
         confirmAnalysisPreCheckAlertData.value = clone(emptyAlertPreChecksData);
 
         selectedScenario = runAnalysisScenario;
@@ -1688,6 +1710,10 @@ import { User } from '@/shared/models/iAM/user';
                 scenarioId: selectedScenario.id,
             }).then(() => (selectedScenario = clone(emptyScenario)));
         }
+
+        //Add a small delay to avoid adding two items to the queue at the same time
+        await new Promise(resolve => setTimeout(resolve, 500));
+        tab.value = 'General work queue';
     }
 
     function onShowConfirmConvertJsonToRelationalAlert(scenario: Scenario) {

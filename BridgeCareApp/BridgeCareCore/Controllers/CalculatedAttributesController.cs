@@ -150,9 +150,9 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("GetLibraryCalculatedAttrbiutePage/{libraryId}")]
+        [Route("GetLibraryCalculatedAttributePage/{libraryId}")]
         [Authorize]
-        public async Task<IActionResult> GetLibraryCalculatedAttrbiutePage(Guid libraryId, CalculatedAttributePagingRequestModel pageRequest)
+        public async Task<IActionResult> GetLibraryCalculatedAttributePage(Guid libraryId, CalculatedAttributePagingRequestModel pageRequest)
         {
             try
             {

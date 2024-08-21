@@ -1,13 +1,14 @@
 <template> 
-     <div v-if="stateInventoryReportNames.length > 1" style="width: 300px; margin-left:650px">
+    <div style="width: 300px; margin: 0 auto;">
         <v-autocomplete
             v-model="inventoryReportName" 
             :items="stateInventoryReportNames"
+            :label="`Select a Inventory Report`"
             variant="outlined"
             density="compact"
             class="ghd-select ghd-text-field ghd-text-field-border">
         </v-autocomplete>
-     </div>
+    </div>
     <v-layout>
         <v-row>
             <v-row justify="space-between"></v-row>
@@ -15,7 +16,7 @@
                 <v-row style="display: flex; align-items: center; justify-content: center">
                     <div class="flex xs4" v-for="(key, index) in inventoryDetails">
                         <v-autocomplete
-                        style="margin-top: 50px; width: 250px; margin-right: 20px"
+                        style="margin-top: 25px; width: 250px; margin-right: 20px"
                         class="ghd-select ghd-text-field ghd-text-field-border ghd-button-text"
                         :items="reactiveData[index]"
                         v-model="selectedInventoryIndex[index]"
@@ -36,7 +37,7 @@
             <v-divider></v-divider>
         </v-row>
     </v-layout>
-    <div style="margin: auto; margin-top: 25px; display: flex; align-items: center; justify-content: center" v-html="staticHTMLForInventory"></div>
+    <div style="margin: auto; margin-bottom: 25px; display: flex; align-items: center; justify-content: center" v-html="staticHTMLForInventory"></div>
 </template>
 
 <script lang="ts" setup>
@@ -94,7 +95,7 @@
 
     let inventoryData: any  = null;
     let sanitizedHTML: any = null;
-    let inventoryReportName: string = '';
+    let inventoryReportName = ref<string>('');
 
     const beforeRouteLeave = () => {
     // Reset staticHTMLForInventory when leaving the route
@@ -141,7 +142,6 @@
                 let j = 1;
                 reactiveData.value[1].push(keyAttributeValues.value[i][j])
             }
-
         })
 
         watch(staticHTMLForInventory,()=>{
@@ -150,13 +150,20 @@
 
         watch(stateInventoryReportNames,()=>{
             if(stateInventoryReportNames.value.length > 0)
-                inventoryReportName = stateInventoryReportNames.value[0]
+                inventoryReportName.value = stateInventoryReportNames.value[0]
             
-            lastThreeLetters = inventoryReportName.slice(-3);
+            lastThreeLetters = inventoryReportName.value.slice(-3);
             reportType = lastThreeLetters[1];
         });
+
+        watch(inventoryReportName,()=>{
+            if(selectedInventoryIndex.value.length === 3)
+            {
+                HandleSelectedItems(1)
+            }
+        })
         
-        watch(stateKeyFields,()=>{
+/*          watch(stateKeyFields,()=>{
             if(reportType === 'P') {
                 inventoryDetails.value = clone(stateKeyFields.value);
                 inventoryDetails.value.forEach(_ => selectedKeys.push(""));
@@ -164,14 +171,19 @@
                 getInventoryAction(inventoryDetails.value);
             }
         });
-
+ */ 
         watch(stateRawDataKeyFields,()=>{
-            if(reportType === 'R') {
                 inventoryDetails.value = clone(stateRawDataKeyFields.value);
 
                 inventoryDetails.value.forEach(_ => selectedKeys.push(""));
-                getInventoryAction([inventoryDetails.value[0]]);
-            } 
+                if(!stateInventoryReportNames.value.some(_ => _.includes("(R)")))
+                {
+                    getInventoryAction(inventoryDetails.value);
+                }
+                else
+                {
+                    getInventoryAction([inventoryDetails.value[0]]);
+                }
         });
 
         watch(stateConstraintType,()=>{
@@ -248,14 +260,10 @@
                 selectedKeys[index] = '';
             })
             selectedInventoryIndex.value = [];
+            store.state.inventoryModule.staticHTMLForInventory = null;
             selectedKeys[0] = "";
             keyAttributeValues.value = await setupSelectLists();
 
-            clearForm();
-        }
-
-        function clearForm() {
-            store.state.inventoryModule.staticHTMLForInventory = null;
         }
 
         function onSelectInventoryItem(index: number){
@@ -293,7 +301,7 @@
                 }
                 };
 
-            if(reportType === 'P')
+            if(constraintDetails == "OR")
             {
                 for(let i = 0; i < inventoryDetails.value.length; i++){
                     if(i === index){
@@ -319,7 +327,10 @@
                 //Set the data equal to the dictionary
                 data.keyProperties = dictionary;
 
-                 getStaticInventoryHTMLAction({reportType: inventoryReportName, filterData: data.keyProperties}); 
+                if(selectedKeys.length === inventoryDetails.value.length)
+                {
+                    getStaticInventoryHTMLAction({reportType: inventoryReportName.value, filterData: data.keyProperties}); 
+                }
         }
 
         function QueryAccess() {
@@ -344,7 +355,7 @@
         }
 
         function isDisabled(index: number) {
-            if(querySelectedData.length < index * 2 && constraintDetails == "AND") {
+            if(querySelectedData.length < index * 2 && constraintDetails === "AND") {
                 return true;
             }
             return false;

@@ -102,7 +102,25 @@
                         Edit
                     </v-btn>
                 </v-row>
+            </v-col>      
+            <v-col cols = "8" class="ghd-constant-header">
+                <v-row style="margin-bottom: 5px;">
+                    <v-col cols = "2">
+                        <v-subheader class="ghd-md-gray ghd-control-label">Asset Type: </v-subheader> 
+                    </v-col>
+                    <v-col cols="5">
+                        <div id="AdminData-simulationReports-div" class="ghd-md-gray ghd-control-label elipsisList">{{assetTypeDelimited}}</div> 
+                    </v-col>                     
+                    <v-btn style="margin-left: 20px;margin-top:13px !important" 
+                        id="AdminData-editSimulationReports-btn" 
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                        variant = "outlined"
+                        @click="onEditAssetTypeClick">
+                        Edit
+                    </v-btn>
+                </v-row>
             </v-col>            
+      
             <v-col cols = "8" class="ghd-constant-header">
                 <v-row>
                     <v-col cols = "2">
@@ -142,7 +160,7 @@ import Vue, { computed, shallowRef, } from 'vue';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import EditAdminDataDialog from './EditAdminDataDialog.vue';
 import {EditAdminDataDialogData, emptyEditAdminDataDialogData} from '@/shared/models/modals/edit-data-dialog-data';
-import { clone } from 'ramda';
+import { clone, forEach } from 'ramda';
 import Dropdown from 'primevue/dropdown';
 import { Network } from '@/shared/models/iAM/network';
 import { Attribute } from '@/shared/models/iAM/attribute';
@@ -151,6 +169,7 @@ import { InputValidationRules, rules } from '@/shared/utils/input-validation-rul
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { Console } from 'console';
+import { report } from 'process';
 
     let store = useStore();
     let stateAvailableReportNames = computed<string[]>(()=>store.state.adminDataModule.availableReportNames);
@@ -160,6 +179,7 @@ import { Console } from 'console';
     let stateKeyFields = computed<string[]>(()=>store.state.adminDataModule.keyFields);
     let stateRawDataKeyFields = computed<string[]>(()=>store.state.adminDataModule.rawDataKeyFields);
     let stateRawdataNetwork = computed<string>(()=>store.state.adminDataModule.rawdataNetwork);
+    let stateAssetType = computed<string[]>(()=>store.state.adminDataModule.assetType);
     let stateConstraintType = computed<string>(()=>store.state.adminDataModule.constraintType);
     let hasUnsavedChanges = computed<boolean>(()=>store.state.unsavedChangesFlagModule.hasUnsavedChanges) ;
     let stateNetworks = computed<Network[]>(()=>store.state.networkModule.networks);
@@ -172,6 +192,7 @@ import { Console } from 'console';
     async function getRawdataNetworkAction(payload?: any): Promise<any> {await store.dispatch('getRawdataNetwork',payload);}
     async function getKeyFieldsAction(payload?: any): Promise<any> {await store.dispatch('getKeyFields',payload);}
     async function getRawDataKeyFieldsAction(payload?: any): Promise<any> {await store.dispatch('getRawDataKeyFields',payload);}
+    async function getAssetTypeAction(payload?: any): Promise<any> {await store.dispatch('getAssetType',payload);}
     async function getConstraintTypeAction(payload?: any): Promise<any> {await store.dispatch('getConstraintType',payload);}
     async function setSimulationReportsAction(payload?: any): Promise<any> {await store.dispatch('setSimulationReports',payload);}
     async function setInventoryReportsAction(payload?: any): Promise<any> {await store.dispatch('setInventoryReports',payload);}
@@ -179,10 +200,11 @@ import { Console } from 'console';
     async function setRawdataNetworkAction(payload?: any): Promise<any> {await store.dispatch('setRawdataNetwork',payload);}
     async function setKeyFieldsAction(payload?: any): Promise<any> {await store.dispatch('setKeyFields',payload);}
     async function setRawDataKeyFieldsAction(payload?: any): Promise<any> {await store.dispatch('setRawDataKeyFields',payload);}
+    async function setAssetTypeAction(payload?: any): Promise<any> {await store.dispatch('setAssetType',payload);}
     async function setConstraintTypeAction(payload?: any): Promise<any> {await store.dispatch('setConstraintType',payload);}
     async function getNetworks(payload?: any): Promise<any> {await store.dispatch('getNetworks',payload);}
     async function getAttributes(payload?: any): Promise<any> {await store.dispatch('getAttributes',payload);}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges',payload);}
+    function setHasUnsavedChangesAction(payload?: any){ store.dispatch('setHasUnsavedChanges',payload);}
 
     const selectPrimaryNetworkItems= ref<SelectItem[]>([]);
     const selectRawDataNetworkItems=  ref<SelectItem[]> ([]);
@@ -203,6 +225,7 @@ import { Console } from 'console';
     const selectedRawDataKeyFields= ref<string[]>([]);
     let selectedAvailableReports:string[]=[];
     const selectedSimulationReports =ref<string[]>([]);
+    const selectedAssetTypes= ref<string[]> ([]);
     const selectedInventoryReports= ref<string[]>([]);
     const primaryNetwork = ref<string>('');
     const rawdataNetwork= ref<string> ('');
@@ -211,10 +234,12 @@ import { Console } from 'console';
     const rawDataKeyFieldsDelimited =ref<string>('');
     const simulationReportsDelimited= ref<string>('');
     const inventoryReportsDelimited=  ref<string>('');
+    const assetTypeDelimited= ref<string>('');
 
     let keyFieldsName: string  = 'KeyFields';
     let rawDataKeyFieldsName: string = 'RawDataKeyFields';
     let simulationReportsName: string = 'SimulationReports';
+    let assetTypeName: string = 'AssetType';
     let inventoryReportsName: string = 'InventoryReports';
 
     let InputRules: InputValidationRules = rules;
@@ -226,6 +251,7 @@ import { Console } from 'console';
                  getRawdataNetworkAction();
                  getKeyFieldsAction();
                  getRawDataKeyFieldsAction();
+                 getAssetTypeAction();
                  getConstraintTypeAction();
                 onStateConstraintTypeChanged();
                 getAttributes();
@@ -233,7 +259,6 @@ import { Console } from 'console';
                 getAvailableReportsAction();
                  getSimulationReportsAction();
                 getInventoryReportsAction();
-                
         (() => {
             
             (async () => { 
@@ -285,14 +310,14 @@ import { Console } from 'console';
     })
     watch(statePrimaryNetwork,() => {
         selectPrimaryNetworkItemValue.value = statePrimaryNetwork.value;
-    })
+    }, { immediate: true })
     function onStatePrimaryNetworkChanged()
     {
         selectPrimaryNetworkItemValue.value = statePrimaryNetwork.value;
     }
     watch(stateRawdataNetwork,() =>  {
         selectRawdataNetworkItemValue.value = stateRawdataNetwork.value;
-    })
+    }, { immediate: true })
     function  onStateRawdataNetworkChanged()
     {
         selectPrimaryNetworkItemValue.value = statePrimaryNetwork.value;
@@ -302,6 +327,9 @@ import { Console } from 'console';
     })
     watch(stateRawDataKeyFields,() =>{
         selectedRawDataKeyFields.value = clone(stateRawDataKeyFields.value);
+    })
+    watch(stateAssetType,() =>{
+        selectedAssetTypes.value = clone(stateAssetType.value);
     })
     watch(stateConstraintType,() => {
         constraintTypeRadioGroup.value = stateConstraintType.value
@@ -328,6 +356,11 @@ import { Console } from 'console';
         rawDataKeyFieldsDelimited.value = convertToDelimited(selectedRawDataKeyFields.value, ', ')
         checkHasUnsaved();       
     })
+    watch(selectedAssetTypes,() => {
+        assetTypeDelimited.value = '';
+        assetTypeDelimited.value = convertToDelimited(selectedAssetTypes.value, ', ')
+        checkHasUnsaved();       
+    })
     watch(selectedSimulationReports,() => {
         simulationReportsDelimited.value = '';
         simulationReportsDelimited.value = convertToDelimited(selectedSimulationReports.value, ', ')
@@ -346,7 +379,7 @@ import { Console } from 'console';
         else
             primaryNetwork.value = selectPrimaryNetworkItemValue.value;  
         checkHasUnsaved();       
-    })
+    }, { immediate: true })
 
     watch(selectRawdataNetworkItemValue,() =>  {
         if (selectRawdataNetworkItemValue === null) 
@@ -354,7 +387,7 @@ import { Console } from 'console';
         else 
             rawdataNetwork.value = selectRawdataNetworkItemValue.value;
         checkHasUnsaved();
-    })
+    }, { immediate: true })
 
     watch(primaryNetwork,() => {
         checkHasUnsaved();       
@@ -374,7 +407,8 @@ import { Console } from 'console';
             await setSimulationReportsAction(convertToDelimited(selectedSimulationReports.value, ','));
             await setInventoryReportsAction(convertToDelimited(selectedInventoryReports.value, ','));
             await setKeyFieldsAction(convertToDelimited(selectedKeyFields.value, ','));
-            await setRawDataKeyFieldsAction(convertToDelimited(selectedRawDataKeyFields.value, ','));                      
+            await setRawDataKeyFieldsAction(convertToDelimited(selectedRawDataKeyFields.value, ','));
+            await setAssetTypeAction(convertToDelimited(selectedAssetTypes.value, ','));                   
         })();
     }
     function onEditKeyFieldsClick(){
@@ -405,7 +439,7 @@ import { Console } from 'console';
         editAdminDataDialogData.selectedSettings = clone(  selectedInventoryReports.value);
         editAdminDataDialogData.AddedItems = selectedInventoryReports.value.map(str=>
         {
-            return {value:str, networkType:str.substring(str.length - 3)};
+            return {value:str.slice(0, -3), networkType:str.substring(str.length - 3)};
         })
         editAdminDataDialogData.settingName =   inventoryReportsName;
         editAdminDataDialogData.settingsList = clone(inventoryReports);
@@ -421,6 +455,17 @@ import { Console } from 'console';
         editAdminDataDialogData.settingName =   simulationReportsName;
         editAdminDataDialogData.settingsList = clone( simulationReports);
     }
+    function onEditAssetTypeClick(){
+        editAdminDataDialogData.selectedItem=''
+        editAdminDataDialogData.AddedItems = selectedAssetTypes.value.map(str=>
+        {
+            return {value:str, networkType:''}
+        })
+        editAdminDataDialogData.showDialog = true;
+        editAdminDataDialogData.selectedSettings = clone(  selectedAssetTypes.value);
+        editAdminDataDialogData.settingName =   assetTypeName;
+    }
+
     function onSubmitEditAdminDataDialogResult(selectedSettings: string[]){
         if(selectedSettings !== null)
 
@@ -461,6 +506,16 @@ import { Console } from 'console';
                     const simulation = convertToDelimited(selectedSimulationReports.value,',');
                     simulationReportsDelimited.value = simulation;
                     break;
+                case   assetTypeName:
+                assetTypeDelimited.value=''
+                selectedAssetTypes.value=[];
+                    selectedSettings.forEach(function(value){
+                        selectedAssetTypes.value.push(value);   
+                                     }     )     
+                    const assetType = convertToDelimited(selectedAssetTypes.value,',');
+                    assetTypeDelimited.value = assetType;
+                    break;
+
             }
 
             editAdminDataDialogData.selectedSettings = [];
@@ -476,6 +531,7 @@ import { Console } from 'console';
             hasUnsavedChangesCore('', selectedSimulationReports.value, stateSimulationReportNames.value) ||
             hasUnsavedChangesCore('', selectedKeyFields.value, stateKeyFields.value) ||
             hasUnsavedChangesCore('', selectedRawDataKeyFields.value, stateRawDataKeyFields.value) ||
+            hasUnsavedChangesCore('', selectedAssetTypes.value, stateAssetType.value) ||
             primaryNetwork.value != statePrimaryNetwork.value || rawdataNetwork.value != stateRawdataNetwork.value ||
             constraintTypeRadioGroup.value != stateConstraintType.value
         setHasUnsavedChangesAction({ value: hasChanged });

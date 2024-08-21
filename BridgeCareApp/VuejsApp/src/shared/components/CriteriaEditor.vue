@@ -236,7 +236,7 @@ const currentUserCriteriaFilter = computed<UserCriteriaFilter>(() => store.state
 
 async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes', payload);}
 async function getAttributeSelectValuesAction(payload?: any): Promise<any> {await store.dispatch('getAttributeSelectValues',payload);}
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification',payload);}
+function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification',payload);}
 const tab = ref<any>(null);
     const queryBuilderRules = ref<CriteriaConfigRule[]>([]);
     

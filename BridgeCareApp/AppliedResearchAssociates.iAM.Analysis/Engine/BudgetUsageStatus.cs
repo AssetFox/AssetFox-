@@ -16,7 +16,7 @@ public enum BudgetUsageStatus
     CostCovered,
 
     /// <summary>
-    ///     Indicates a budget that did not pay any cost of the treatment.
+    ///     Indicates a budget that could not pay for the treatment.
     /// </summary>
     CostNotCovered,
 
@@ -27,7 +27,7 @@ public enum BudgetUsageStatus
 
     /// <summary>
     ///     Indicates a budget that was usable, but other budgets before this one in the scenario's
-    ///     budget order were sufficient to pay for the treatment.
+    ///     budget order were sufficient.
     /// </summary>
     NotNeeded,
 

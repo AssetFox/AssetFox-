@@ -180,7 +180,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _workQueueService.GetFastQueuedWorkByDomainIdAndWorkType(request.DomainId, request.WorkType));
+                var result = await Task.Factory.StartNew(() => _workQueueService.GetQueuedWorkByDomainIdAndWorkType(request.DomainId, request.WorkType));
                 return Ok(result);
             }
             catch (Exception e)
@@ -250,6 +250,8 @@ namespace BridgeCareCore.Controllers
                         }
                     }
                     var cloneResult = _completeSimulationCloningService.Clone(dto);
+                    if(cloneResult.WarningMessage != null)
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, $"{SimulationError}::CloneSimulation - {cloneResult.WarningMessage}");
                     return cloneResult;
                 });
 

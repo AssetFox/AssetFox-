@@ -156,15 +156,7 @@ const beforeEachFunc = (to: any, from: any, next: any) => {
             // @ts-ignore
             !store.state.authenticationModule.authenticated &&
             hasAuthInfo
-        ) {
-            /*const isAuthenticatedUser: Promise<boolean | void> =
-                // @ts-ignore
-                store.state.authenticationModule.securityType ===
-                SecurityTypes.esec
-                  // @ts-ignore
-                    ? isAuthenticatedEsecUser(onHandlingUnsavedChanges(to, next))
-                    : isAuthenticatedAzureUser();*/
-
+        ) {            
             isAuthenticatedUser().then((isAuthenticated: boolean | void) => {
                 if (isAuthenticated) {
                     onHandlingUnsavedChanges(to, next);
@@ -180,7 +172,10 @@ const beforeEachFunc = (to: any, from: any, next: any) => {
     }
 };
 
+// TODO should we call beforeEachFunc instead of beforeEnterFunc? OR have beforeEnterFunc updated for when its ESEC so that checkBrowserTokens get called and
+// refrshToken will be invoked!!
 const beforeEnterFunc = (to: any, from: any, next: any) => {
+    
     if (
         // @ts-ignore
         !store.state.authenticationModule.hasRole ||
@@ -194,7 +189,6 @@ const beforeEnterFunc = (to: any, from: any, next: any) => {
         next();
     }
 };
-
 
 const router = createRouter({
     history: createWebHistory(),

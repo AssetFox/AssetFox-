@@ -14,7 +14,6 @@
                       class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family"
                       :items="dsItems"
                       v-model="sourceTypeItem"
-                      outline
                       variant = "outlined"
                       density="compact"
                     >
@@ -26,126 +25,106 @@
                 </v-row>
             </v-col>
         </v-col>
-        <v-divider v-show="showMssql || showExcel" style="background-color: #798899 !important;"></v-divider>
-        <v-row>
-            <div v-show="showMssql && !isNewDataSource" style="margin-top:5px;margin-bottom:12px;" class="ghd-control-label ghd-md-gray"
-            > 
+        <v-divider v-if="dataSourceTypeItemSelected" style="background-color: #798899 !important;"></v-divider>
+
+        <v-col cols="8" v-if="dataSourceTypeItemSelected">
+            <div v-if="showMssql && !isNewDataSource" style="margin-top:5px;margin-bottom:12px;" class="ghd-control-label ghd-md-gray"> 
                 Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
             </div>
-        </v-row>
-        <v-row>
-            <div class="ml-4">
-            <v-row>
-                <v-subheader v-show="showMssql || showExcel && !isNewDataSource" class="ghd-md-gray ghd-control-label" style="margin-left:2%;" >Source Type</v-subheader>
-            </v-row>
-            <v-row>
-                <v-select
-                id="DataSource-SourceType-vselect"
-                menu-icon=custom:GhdDownSvg
-                class="ghd-select ghd-text-field ghd-text-field-border ds-style Montserrat-font-family"
-                :items="dsTypeItems"
-                item-title = "text"
-                item-value = "value"
-                style="padding-right:20%; margin-left:2%;"
-                v-model="dataSourceTypeItem"
-                v-show="showMssql || showExcel && !isNewDataSource"
-                outline
-                variant = "outlined"
-                density="compact"
-                >
-                </v-select>
-            </v-row>
-            <v-row>               
-                <v-subheader v-show="showExcel  && !isNewDataSource" class="ghd-control-label ghd-md-gray Montserrat-font-family" style="margin-left:2%;">FileName</v-subheader>
-            </v-row> 
-            <v-row>
-                <v-text-field
+            <v-subheader v-if="showMssql || showExcel" class="ghd-md-gray ghd-control-label"  >Source Type</v-subheader>
+            <v-select
+            id="DataSource-SourceType-vselect"
+            menu-icon=custom:GhdDownSvg
+            class="ghd-select ghd-text-field ghd-text-field-border ds-style Montserrat-font-family"
+            :items="dsTypeItems"
+            item-title = "text"
+            item-value = "value"
+            v-model="dataSourceTypeItem"
+            v-if="showMssql || showExcel"
+            outline
+            variant = "outlined"
+            density="compact">
+            </v-select>
+    
+            <v-subheader v-if="showExcel  && !isNewDataSource" class="ghd-control-label ghd-md-gray Montserrat-font-family" >FileName</v-subheader>
+            <v-row style="margin: 0">
+                <v-text-field style="max-width: 475px;"
                     id="DataSource-fileName-vtextfield"
                     class="ghd-control-text ghd-control-border Montserrat-font-family"
                     v-model="fileName"
-                    style="margin-left:2%;"
                     item-title = "text"
                     item-value = "value"
-                    v-show="showExcel  && !isNewDataSource"
+                    v-if="showExcel  && !isNewDataSource"
                     outline
                     variant = "outlined"
                     density="compact"
                 ></v-text-field>
-                <v-btn id="DataSource-AddFile-vbtn" v-show="showExcel  && !isNewDataSource" 
-                    class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button Montserrat-font-family" style="margin-left:2%; margin-top: 2px;" variant = "outlined" @click="chooseFiles()">
+                <v-btn id="DataSource-AddFile-vbtn" v-if="showExcel  && !isNewDataSource" 
+                    class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button Montserrat-font-family" style="margin-left:10px; margin-top: 2px;" variant = "outlined" @click="chooseFiles()">
                     Add File
                 </v-btn>
                 <input @change="onSelect" id="file-select" type="file" hidden />
             </v-row>
-                <v-subheader v-show="showExcel  && !isNewDataSource" class="ghd-control-label ghd-md-gray Montserrat-font-family">Location Column</v-subheader>
-                <v-select
-                id="DataSource-Location-vselect"
-                :items="locColumns"
-                menu-icon=custom:GhdDownSvg
-                v-model="currentExcelLocationColumn"
-                v-show="showExcel  && !isNewDataSource"
-                item-title = "text"
-                item-value = "value"
-                class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
-                outline
-                variant = "outlined"
-                density="compact"
-                >
-                </v-select>
-                <v-subheader  v-show="showExcel  && !isNewDataSource" class="ghd-control-label ghd-md-gray Montserrat-font-family">Date Column</v-subheader>
-                <v-select
-                menu-icon=custom:GhdDownSvg
-                id="DataSource-Date-vselect"
-                :items="datColumns"
-                v-show="showExcel  && !isNewDataSource"
-                v-model="currentExcelDateColumn"
-                class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
-                outline
-                item-title = "text"
-                item-value = "value"
-                variant = "outlined"
-                density="compact"
-                >
-                </v-select>
-                <v-row justify="center" style="margin-left: 2%; margin-top: 10%;" class="text-center">
-                    <v-col align-self="center">
-                        <v-row justify="center">
-                            <v-btn id="DataSource-Cancel-vbtn"  @click="resetDataSource" v-show="showMssql || showExcel" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' flat>Cancel</v-btn>
-                            <v-btn id="DataSource-Test-vbtn"  @click="checkSQLConnection" v-show="showMssql" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>Test</v-btn>
-                            <p>&nbsp;&nbsp;&nbsp;</p>
-                            <v-btn id="DataSource-Save-vbtn"   v-show="showMssql || showExcel" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onSaveDatasource">Save</v-btn>
-                            <p>&nbsp;&nbsp;&nbsp;</p>
-                            <v-btn id="DataSource-Load-vbtn"  :disabled="isNewDataSource" variant = "outlined" v-show="showExcel" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onLoadExcel">Load</v-btn>
-                            <p>&nbsp;&nbsp;&nbsp;</p>
-                            <v-btn id="DataSource-Delete-vbtn"  :disabled="isNewDataSource" v-show="showMssql || showExcel" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onDeleteClick">Delete</v-btn>
-                        </v-row>
-                    </v-col>
-                </v-row>
-            </div>
-        </v-row>
-        <v-row>
-            <v-subheader v-show="showMssql" class="ghd-control-label ghd-md-gray Montserrat-font-family">Connection String            
-            </v-subheader>
-            <v-row>
-                    <v-col cols = "8">
-                        <v-textarea
-                          id="DataSource-ConnectionString-vtextarea"
-                          class="ghd-control-border Montserrat-font-family"
-                          :placeholder=connectionStringPlaceHolderMessage
-                          v-show="showMssql"
-                          v-model="selectedConnection"
-                          no-resize
-                          variant="outlined"
-                        >
-                        </v-textarea>
-                        <p class="p-success Montserrat-font-family" v-show="sqlValid && showSqlMessage">Test Connection: {{sqlResponse}}</p>
-                        <p class="p-fail Montserrat-font-family" v-show="!sqlValid && showSqlMessage">Test Connection: {{sqlResponse}}</p>
-                        <p class="p-success Montserrat-font-family" v-show="showSaveMessage">Successfully saved.</p>
-                        <p class="ara-blue Montserrat-font-family" v-show="isNewDataSource && showExcel">Save new data source before loading file.</p>
-                        <p class="p-fail Montserrat-font-family" v-show="false">Error! {{invalidColumn}} Column is invalid</p>
-                    </v-col>
+            <v-subheader v-if="showExcel  && !isNewDataSource" class="ghd-control-label ghd-md-gray Montserrat-font-family">Location Column</v-subheader>
+            <v-select
+            id="DataSource-Location-vselect"
+            :items="locColumns"
+            menu-icon=custom:GhdDownSvg
+            v-model="currentExcelLocationColumn"
+            v-if="showExcel  && !isNewDataSource"
+            item-title = "text"
+            item-value = "value"
+            class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
+            variant = "outlined"
+            density="compact">
+            </v-select>
+            <v-subheader  v-if="showExcel  && !isNewDataSource" class="ghd-control-label ghd-md-gray Montserrat-font-family">Date Column</v-subheader>
+            <v-select
+            menu-icon=custom:GhdDownSvg
+            id="DataSource-Date-vselect"
+            :items="datColumns"
+            v-if="showExcel  && !isNewDataSource"
+            v-model="currentExcelDateColumn"
+            class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
+            item-title = "text"
+            item-value = "value"
+            variant = "outlined"
+            density="compact">
+            </v-select>
+            <v-col  style="padding: 0;">
+                <v-subheader v-if="showMssql" class="ghd-control-label ghd-md-gray Montserrat-font-family">Connection String</v-subheader>
+                <v-textarea
+                    id="DataSource-ConnectionString-vtextarea"
+                    class="ghd-control-border Montserrat-font-family"
+                    :placeholder=connectionStringPlaceHolderMessage
+                    v-if="showMssql"
+                    v-model="selectedConnection"
+                    no-resize
+                    variant="outlined">
+                </v-textarea>
+                <p class="p-success Montserrat-font-family" v-if="sqlValid && showSqlMessage">Test Connection: {{sqlResponse}}</p>
+                <p class="p-fail Montserrat-font-family" v-if="!sqlValid && showSqlMessage">Test Connection: {{sqlResponse}}</p>
+                <p class="p-success Montserrat-font-family" v-if="showSaveMessage">Successfully saved.</p>
+                <p class="ara-blue Montserrat-font-family" v-if="isNewDataSource && showExcel">Save new data source before loading file.</p>
+                <p class="p-fail Montserrat-font-family" v-if="false">Error! {{invalidColumn}} Column is invalid</p>
+            </v-col>
+            <v-row justify="center" style="margin-left: 2%; margin-top: 4%;" class="text-center">
+                <v-col align-self="center">
+                    <v-row justify="center">
+                        <v-btn id="DataSource-Cancel-vbtn"  @click="resetDataSource" v-if="showMssql || showExcel" variant = "outlined" 
+                            class='btn-opts ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' flat>Cancel</v-btn>
+                        <v-btn id="DataSource-Test-vbtn"  @click="checkSQLConnection" v-if="showMssql" variant = "outlined"
+                            class='btn-opts ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center'>Test</v-btn>
+                        <v-btn id="DataSource-Save-vbtn"   :disabled="!sourceTypeItemSelected || !dataSourceTypeItemSelected" v-if="showMssql || showExcel" variant = "outlined" 
+                            class='btn-opts ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onSaveDatasource">Save</v-btn>
+                        <v-btn id="DataSource-Load-vbtn"  :disabled="isNewDataSource" variant = "outlined" v-if="showExcel" 
+                            class='btn-opts ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onLoadExcel">Load</v-btn>
+                        <v-btn id="DataSource-Delete-vbtn"  :disabled="isNewDataSource || !sourceTypeItemSelected" v-if="showMssql || showExcel" variant = "outlined" 
+                            class='btn-opts ghd-blue ghd-button-text ghd-outline-button-padding ghd-button vertical-center' @click="onDeleteClick">Delete</v-btn>
+                    </v-row>
+                </v-col>
             </v-row>
-        </v-row>
+        </v-col>
         <CreateDataSourceDialog :dialogData='createDataSourceDialogData'
                                 @submit='onCreateNewDataSource' />
         <ConfirmDialog></ConfirmDialog>
@@ -153,7 +132,7 @@
 </template>
 
 <script setup lang='ts'>
-import Vue, { computed, onMounted, reactive, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
+import { computed, onMounted, reactive, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
 import { clone, isNil, prop } from 'ramda';
 import {
     Datasource, 
@@ -197,8 +176,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
     async function importExcelSpreadsheetFileAction(payload?: any): Promise<any> {await store.dispatch('importExcelSpreadsheetFile', payload);}
     async function getExcelSpreadsheetColumnHeadersAction(payload?: any): Promise<any> {await store.dispatch('getExcelSpreadsheetColumnHeaders', payload);}
     async function checkSqlCommandAction(payload?: any): Promise<any> {await store.dispatch('checkSqlCommand', payload);}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
-    async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification', payload);} 
+    function setHasUnsavedChangesAction(payload?: any){ store.dispatch('setHasUnsavedChanges', payload);}
+    function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification', payload);} 
 
     let getUserNameByIdGetter: any = store.getters.getUserNameById;
     let getIdByUserNameGetter: any = store.getters.getIdByUserName ;
@@ -212,16 +191,19 @@ import ConfirmDialog from 'primevue/confirmdialog';
     let sqlResponse = ref<string | null>('');
     let sqlValid = ref<boolean>(false);
 
-    const sourceTypeItem = ref<string>('');
+    let sourceTypeItemSelected = ref<boolean>(false);
+    let sourceTypeItem = ref<string>('');
     let dataSourceTypeItem = ref<string | null>('');
+    let dataSourceTypeItemSelected = ref<boolean>(false);
     let datasourceNames = ref<string[]>([]);
     let dataSourceExcelColumns = ref<DataSourceExcelColumns>({ locationColumn: [], dateColumn: []});
 
     let currentExcelLocationColumn = ref<string>('');
     let currentExcelDateColumn = ref<string>('');
     let currentDatasource = ref<Datasource>(clone(emptyDatasource));
+    let currentRefDatasource = ref<Datasource>(clone(emptyDatasource));
     let unmodifiedDatasource = ref<Datasource>(clone(emptyDatasource));
-    const createDataSourceDialogData = reactive<CreateDataSourceDialogData>(emptyCreateDataSourceDialogData);
+    const createDataSourceDialogData = ref<CreateDataSourceDialogData>(emptyCreateDataSourceDialogData);
 
     let selectedConnection = ref<string>('');
     let showMssql = ref<boolean>(false);
@@ -241,19 +223,20 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     let connectionStringPlaceHolderMessage = ref<string>('');    
 
-    created();
+/*     created();
     function created() {
         getDataSourcesAction();
         getDataSourceTypesAction();
     }
-    
-    onMounted(() => mounted)
+ */    
+    onMounted(() => mounted())
     function mounted() {
 
         fileSelect = document.getElementById('file-select') as HTMLInputElement;   
 
         getDataSourcesAction();
         getDataSourceTypesAction();
+        showExcel.value = true;
         showSqlMessage.value = false;
     }
 
@@ -273,16 +256,22 @@ import ConfirmDialog from 'primevue/confirmdialog';
     })
 
     watch(dataSources, () =>  {
+        dsItems.value = [];
         dataSources.value.forEach(_ => {
         dsItems.value.push({text:_.name,value:_.name})
         });
-    })
+     })
 
     watch(dataSourceTypes, () =>  {
         dsTypeItems.value = clone(dataSourceTypes.value);
     })
 
     watch(dataSourceTypeItem, () =>  {
+        if(dataSourceTypeItem.value == "")
+            dataSourceTypeItemSelected.value = false;
+        else
+            dataSourceTypeItemSelected.value = true;
+
         if (dataSourceTypeItem.value===DSSQL) {
             showMssql.value = true;
             showExcel.value = false;
@@ -292,7 +281,13 @@ import ConfirmDialog from 'primevue/confirmdialog';
             showExcel.value = true;
             showMssql.value = false;
             currentDatasource.value.type = "Excel";
-            
+                        
+            if(!isNewDataSource.value) {
+                getExcelSpreadsheetColumnHeadersAction(currentDatasource.value.id);
+                currentExcelDateColumn.value = currentDatasource.value.dateColumn;
+                currentExcelLocationColumn.value = currentDatasource.value.locationColumn;
+            }
+                                   
             if(!isNewDataSource.value) {
                 getExcelSpreadsheetColumnHeadersAction(currentDatasource.value.id);
                 currentExcelDateColumn.value = currentDatasource.value.dateColumn;
@@ -300,30 +295,45 @@ import ConfirmDialog from 'primevue/confirmdialog';
             }
             
         }
-    })
+    }, { deep: true })
 
     watch(sourceTypeItem, () => {
-        // get the current data source object
-        let currentDatasource = clone(dataSources.value.length>0 ? dataSources.value.find(f => f.name === sourceTypeItem.value) : clone(emptyDatasource));
-        currentDatasource ? currentDatasource = clone(currentDatasource) : currentDatasource = clone(emptyDatasource);
-
-        if(isNil(currentDatasource.connectionString)) {
-            currentDatasource.connectionString = '';
+        if(sourceTypeItem.value != "")
+        {
+            sourceTypeItemSelected.value = true;
+        }
+        else
+        {
+            sourceTypeItemSelected.value = false;
         }
 
-        unmodifiedDatasource.value = clone(currentDatasource);
+        // get the current data source object
+        currentDatasource.value = clone(dataSources.value.length>0 ? dataSources.value.find(f => f.name === sourceTypeItem.value)! : clone(emptyDatasource));
+        currentDatasource.value ? currentDatasource.value = clone(currentDatasource.value) : currentDatasource.value = clone(emptyDatasource);
+
+        currentRefDatasource.value = currentDatasource.value;
+        if(isNil(currentDatasource.value.connectionString)) {
+            currentDatasource.value.connectionString = '';
+        }
+
+        unmodifiedDatasource.value = clone(currentDatasource.value);
+
+        if(dataSourceTypeItem.value == "")
+            dataSourceTypeItemSelected.value = false;
+        else
+            dataSourceTypeItemSelected.value = true;
 
         // update the source type droplist
-        dataSourceTypeItem.value = currentDatasource.type;
-        currentExcelDateColumn.value = currentDatasource.dateColumn;
-        currentExcelLocationColumn.value = currentDatasource.locationColumn;
-        selectedConnection.value = isOwner() ? currentDatasource.connectionString : '';
-        connectionStringPlaceHolderMessage.value = currentDatasource.connectionString != ''? "Replacement connection string" : 'New connection string';
+        dataSourceTypeItem.value = currentDatasource.value.type;
+        currentExcelDateColumn.value = currentDatasource.value.dateColumn;
+        currentExcelLocationColumn.value = currentDatasource.value.locationColumn;
+        selectedConnection.value = isOwner() ? currentDatasource.value.connectionString : '';
+        connectionStringPlaceHolderMessage.value = currentDatasource.value.connectionString != ''? "Replacement connection string" : 'New connection string';
         showSqlMessage.value = false; showSaveMessage.value = false;
         if(!isNewDataSource.value) {
-                getExcelSpreadsheetColumnHeadersAction(currentDatasource.id);
-                currentExcelDateColumn.value = currentDatasource.dateColumn;
-                currentExcelLocationColumn.value = currentDatasource.locationColumn;
+                getExcelSpreadsheetColumnHeadersAction(currentDatasource.value.id);
+                currentExcelDateColumn.value = currentDatasource.value.dateColumn;
+                currentExcelLocationColumn.value = currentDatasource.value.locationColumn;
             }
     })
 
@@ -398,6 +408,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 unmodifiedDatasource.value = clone(currentDatasource.value);
             });
         } else {
+            currentDatasource.value = currentRefDatasource.value;
             let exldat : ExcelDataSource = {
             id: currentDatasource.value.id,
             name: currentDatasource.value.name,
@@ -420,14 +431,20 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }
 
     function onDeleteClick(){
+        currentDatasource.value = currentRefDatasource.value;
         deleteDataSourceAction(currentDatasource.value.id).then(() => {
             resetDataSource();
         })
     }
     function onShowCreateDataSourceDialog() {
-        createDataSourceDialogData.showDialog = true;
+        createDataSourceDialogData.value.showDialog = true;
     }
     function onCreateNewDataSource(datasource: Datasource) {
+        if(dataSourceTypeItem.value == "")
+            dataSourceTypeItemSelected.value = false;
+        else
+            dataSourceTypeItemSelected.value = true;
+
         // add to the state
         if (datasource != null || datasource != undefined) {
         dataSources.value.push(datasource);
@@ -452,7 +469,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
         return result;
     }
     function resetDataSource() {
-        currentDatasource.value = emptyDatasource;
+        currentDatasource.value = clone(emptyDatasource);
         sourceTypeItem.value = '';
         dataSourceTypeItem.value = '';
         datColumns.value = [];
@@ -461,8 +478,14 @@ import ConfirmDialog from 'primevue/confirmdialog';
         showExcel.value = false;
         showSqlMessage.value = false;
         showSaveMessage.value = false;
+        isNewDataSource.value = false;
         selectedConnection.value = '';
-        connectionStringPlaceHolderMessage.value = 'New connection string';        
+        connectionStringPlaceHolderMessage.value = 'New connection string';   
+        if(dataSourceTypeItem.value === ""){
+            dataSourceTypeItemSelected.value = false;
+        }
+        else
+            dataSourceTypeItemSelected.value = true;     
     }
     function chooseFiles(){
         if(document != null)
@@ -559,5 +582,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
 }
 .p-success {
     color:green;
+}
+.btn-opts {
+    margin-left: 5px;
+    margin-right: 5px;
 }
 </style>

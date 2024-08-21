@@ -55,6 +55,10 @@ namespace BridgeCareCore.Services
             var sourceSimulationId = dto.ScenarioId.ToString();
             var sourceSimulation = this.GetSimulation(sourceSimulationId);
             var simulationCloningCommittedProjectErrors = new SimulationCloningCommittedProjectErrors();
+            if(sourceSimulation.CommittedProjects.Any(_ => _.ScenarioBudgetId == null))
+            {
+                throw new Exception("Unable to clone committed projects with empty budgets");
+            }
             var badCommittedProjects = sourceSimulation.CommittedProjects.Where(c => !sourceSimulation.Budgets.Any(b => b.Id == c.ScenarioBudgetId)).ToList();
             if (badCommittedProjects.Any())
             {
@@ -75,11 +79,15 @@ namespace BridgeCareCore.Services
             var baseEntityProperties = new BaseEntityProperties { CreatedBy = ownerId, LastModifiedBy = ownerId };
             var ownerName = _unitOfWork.CurrentUser?.Username;
             var cloneSimulation = CompleteSimulationCloner.Clone(sourceSimulation, dto, ownerId, ownerName);
-            //If the destination Network is different than the current network, change the network id to the destination id
-            if (dto.DestinationNetworkId != dto.NetworkId)
-            {
-                cloneSimulation.NetworkId = dto.DestinationNetworkId;
-            }
+            //Make sure the destination Network Id is not empty
+            if (dto.DestinationNetworkId != Guid.Empty)
+                {
+                   //If the destination Network is different than the current network, change the network id to the destination id
+                   if (dto.DestinationNetworkId != dto.NetworkId)
+                    {
+                        cloneSimulation.NetworkId = dto.DestinationNetworkId;
+                    }
+                }
 
             // save it
             var keyAttribute = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(dto.NetworkId);           
@@ -91,7 +99,7 @@ namespace BridgeCareCore.Services
             var scenarioAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetAttributeIdsByNetworkId(dto.NetworkId);
             var destinationScenarioAttributes = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetAttributeIdsByNetworkId(dto.DestinationNetworkId);
 
-            if (destinationScenarioAttributes.Any(c => !scenarioAttributes.Contains(c)) && destinationScenarioAttributes.Count > 0 || destinationScenarioAttributes.Count() == 0)
+            if (scenarioAttributes.Any(c => !destinationScenarioAttributes.Contains(c)) && scenarioAttributes.Count > 0 || destinationScenarioAttributes.Count == 0)
             {
                 return false;
             }

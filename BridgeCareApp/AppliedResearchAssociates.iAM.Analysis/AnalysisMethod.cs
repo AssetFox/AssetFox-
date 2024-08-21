@@ -40,8 +40,6 @@ public sealed class AnalysisMethod : WeakEntity, IValidator
 
     public bool ShouldDeteriorateDuringCashFlow { get; set; }
 
-    public bool ShouldRestrictCashFlowToFirstYearBudgets { get; set; } = true;
-
     public SpendingStrategy SpendingStrategy { get; set; } = SpendingStrategy.AsBudgetPermits;
 
     public ValidatorBag Subvalidators => new ValidatorBag { Benefit, BudgetPriorities, DeficientConditionGoals, Filter, RemainingLifeLimits, TargetConditionGoals };

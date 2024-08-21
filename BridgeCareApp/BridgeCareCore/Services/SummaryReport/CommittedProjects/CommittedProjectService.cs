@@ -40,6 +40,7 @@ namespace BridgeCareCore.Services
             "BUDGET",
             "COST",
             "PROJECTSOURCE",
+            "PROJECTSOURCEID",
             "AREA",
             "CATEGORY"
         };
@@ -130,6 +131,7 @@ namespace BridgeCareCore.Services
                         worksheet.Cells[row, column++].Value = budgetName;
                         worksheet.Cells[row, column++].Value = project.Cost;
                         worksheet.Cells[row, column++].Value = project.ProjectSource;
+                        worksheet.Cells[row, column++].Value = project.ProjectId;
                         worksheet.Cells[row, column++].Value = string.Empty; // AREA
                         worksheet.Cells[row, column++].Value = project.Category.ToString();
 
@@ -152,6 +154,17 @@ namespace BridgeCareCore.Services
 
             var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
             _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
+            var primaryKeyFieldNames = _unitOfWork.AdminSettingsRepo.GetKeyFields();
+
+            foreach (var kvp in _keyProperties.ToList())
+            {
+                var key = kvp.Key;
+                if (!primaryKeyFieldNames.Contains(key) && key != _networkKeyField)
+                {
+                    _keyProperties.Remove(key);
+                }
+            }
+
             _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
 
             if (committedProjectDTOs.Any())
@@ -292,6 +305,13 @@ namespace BridgeCareCore.Services
                 throw new InvalidOperationException("Required 'ProjectSource' column is missing in the Excel sheet.");
             }
 
+            int projectSourceIdIndex = headers.IndexOf("PROJECTSOURCEID") + 1;
+
+            if (projectSourceIndex == 0)
+            {
+                throw new InvalidOperationException("Required 'ProjectSourceId' column is missing in the Excel sheet.");
+            }
+
             // Get the column ID for the network's key field
             if (!headers.Contains(_networkKeyField))
             {
@@ -299,13 +319,27 @@ namespace BridgeCareCore.Services
             }
             var locationColumnNames = new Dictionary<int, string>();
             var keyColumn = 0;
-            for (var column = 1; column <= _keyFields.Count; column++)
+
+            var primaryKeyFieldNames = _unitOfWork.AdminSettingsRepo.GetKeyFields();
+
+            foreach (var kvp in _keyProperties.ToList())
+            {
+                var key = kvp.Key;
+                if (!primaryKeyFieldNames.Contains(key) && key != _networkKeyField)
+                {
+                    _keyProperties.Remove(key);
+                }
+            }
+
+            _keyFields = _keyProperties.Keys.ToList();
+
+            for (var column = 1; column <= _keyProperties.Count; column++)
             {
                 var columnName = worksheet.GetCellValue<string>(1, column);
                 if (!_keyFields.Contains(columnName))
                 {
                     var keyFieldList = new StringBuilder();
-                    foreach (var field in _keyFields)
+                    foreach (var field in _keyProperties)
                     {
                         keyFieldList.Append(field);
                     }
@@ -335,6 +369,9 @@ namespace BridgeCareCore.Services
 
                 //Get project source 
                 var projectSourceValue = worksheet.Cells[row, projectSourceIndex].Text;
+
+                //Get Project Id
+                var projectIdValue = worksheet.GetCellValue<string>(row, _keyFields.Count + 8);
 
                 // Attempt to convert the string to enum
                 ProjectSourceDTO projectSource;
@@ -397,6 +434,7 @@ namespace BridgeCareCore.Services
                     Treatment = worksheet.GetCellValue<string>(row, _keyFields.Count + 1), // Assumes that InitialHeaders stays constant
                     Year = projectYear,
                     ProjectSource = projectSource,
+                    ProjectId = projectIdValue,
                     ShadowForAnyTreatment = worksheet.GetCellValue<int>(row, _keyFields.Count + 3), // Assumes that InitialHeaders stays constant
                     ShadowForSameTreatment = worksheet.GetCellValue<int>(row, _keyFields.Count + 4), // Assumes that InitialHeaders stays constant
                     Cost = worksheet.GetCellValue<double>(row, _keyFields.Count + 6), // Assumes that InitialHeaders stays constant
@@ -436,13 +474,13 @@ namespace BridgeCareCore.Services
             _unitOfWork.CommittedProjectRepo.UpsertCommittedProjects(committedProjectDTOs);
         }
 
-        public double GetTreatmentCost(Guid treatmentLibraryId, string assetKeyData, string treatment, Guid networkId)
+        public double GetTreatmentCost(string assetKeyData, Guid treatmentId, Guid networkId)
         {
             var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, assetKeyData);
 
             if (asset == null)
                 return 0;
-            var treatmentCosts = _unitOfWork.TreatmentCostRepo.GetTreatmentCostsWithEquationJoinsByLibraryIdAndTreatmentName(treatmentLibraryId, treatment);
+            var treatmentCosts = _unitOfWork.TreatmentCostRepo.GetTreatmentCostByScenarioTreatmentId(treatmentId);
 
             double totalCost = 0;
             if (treatmentCosts == null)
@@ -479,13 +517,13 @@ namespace BridgeCareCore.Services
             return totalCost;
         }
 
-        public List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid treatmentLibraryId, string assetKeyData, string treatment, Guid networkId)
+        public List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid treatmentId, string assetKeyData, Guid networkId)
         {
             var consequencesToReturn = new List<CommittedProjectConsequenceDTO>();
             var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, assetKeyData);
             if (asset == null)
                 return consequencesToReturn;
-            var treatmentConsequences = _unitOfWork.TreatmentConsequenceRepo.GetTreatmentConsequencesByLibraryIdAndTreatmentName(treatmentLibraryId, treatment);
+            var treatmentConsequences = _unitOfWork.TreatmentConsequenceRepo.GetScenarioTreatmentConsequencesByTreatmentId(treatmentId);
             if (treatmentConsequences == null)
                 return consequencesToReturn;
             foreach (var consequence in treatmentConsequences)

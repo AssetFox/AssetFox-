@@ -10,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = entity.Id,
                 Username = entity.Username,
+                ActiveStatus = entity.ActiveStatus,
                 HasInventoryAccess = entity.HasInventoryAccess,
                 LastNewsAccessDate = entity.LastNewsAccessDate,
                 CriterionLibrary = entity.CriterionLibraryUserJoin != null

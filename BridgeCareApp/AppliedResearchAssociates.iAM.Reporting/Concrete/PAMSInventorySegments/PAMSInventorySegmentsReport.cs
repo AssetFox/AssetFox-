@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public bool IsComplete { get; private set; }
         public string Status { get; private set; }
         public string Criteria { get; set; }
-        private PAMSParameters _failedQuery = new PAMSParameters { County = "unknown", Routenum = 0, Segment = 0 };
+        private PAMSParameters _failedQuery = new PAMSParameters { County = "unknown", SR = 0, SEG = "0" };
 
         private List<SegmentAttributeDatum> _sectionData;
         private InventoryParameters sectionIds;
@@ -94,18 +94,16 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _sectionData = GetAsset(sectionIds);
             if (Errors.Count > 0) return; // Errors occured in the GetAsset method
 
-            var crspieces = _sectionData.FirstOrDefault(_ => _.Name == "CRS_Data").Value.Split(new[] { '_' }, 4);
-            var routeArray = crspieces[3].Split(new[] { '-' }, 2);
-            _sectionData.Add(new SegmentAttributeDatum("FROMSEGMENT", routeArray[0]));
-            _sectionData.Add(new SegmentAttributeDatum("TOSEGMENT", routeArray[1]));
+            var selectedSeg = _sectionData.FirstOrDefault(_ => _.Name == "SEG").Value;
+            _sectionData.Add(new SegmentAttributeDatum("SEGMENT", selectedSeg));
 
             var resultsString = new StringBuilder();
             resultsString.Append("<table class=\"report-cell\">");
-            resultsString.Append(CreateHTMLSection("ID", new List<string>() { "COUNTY", "SR", "TOSEGMENT", "CRS_DATA" }));
-            resultsString.Append(CreateHTMLSection("Description", new List<string>() { "DIRECTION", "DIST", "MPO/RPO", "U_R_CODE", "BUSIPLAN", "AADT", "ADTT", "TRK_PCNT", "SURDATA", "", "FEDAID", "HPMS", "LANES", "", "LENGTH", "WIDTH", "AGE","" }));
-            resultsString.Append(CreateHTMLSection("Surface Attributes", new List<string>() { "SURFACE NAME", "SURFACE", "L_S_TYPE", "R_S_TYPE", "YR_BUILT","", "YR_LST_RESURFACE", "YR_LST_STRUCT_OVER" }));
+            resultsString.Append(CreateHTMLSection("ID", new List<string>() { "COUNTY", "SR", "SEGMENT", "CRS" }));
+            resultsString.Append(CreateHTMLSection("Description", new List<string>() { "DIRECTION", "DISTRICT", "MPO_RPO", "U_R_CODE", "BUSIPLAN", "AADT", "ADTT", "TRK_PERCENT", "FED_AID", "IS_HPMS", "LANES", "", "SEGMENT_LENGTH", "WIDTH", "AGE","" }));
+            resultsString.Append(CreateHTMLSection("Surface Attributes", new List<string>() { "SURFACE_NAME", "SURFACEID", "L_S_TYPE", "R_S_TYPE", "YR_BUILT","", "YEAR_LAST_OVERLAY", "LAST_STRUCTURAL_OVERLAY" }));
             resultsString.Append(CreateHTMLSection("Survey Information", new List<string>() { "Survey Date" }));
-            resultsString.Append(CreateHTMLSection("Measured Conditions", new List<string>() { "OPI", "ROUGAVE" }));
+            resultsString.Append(CreateHTMLSection("Measured Conditions", new List<string>() { "OPI", "ROUGHNESS" }));
             resultsString.Append(CreateHTMLDistressSection("Surface Defects"));
 
             resultsString.Append("</table>");
@@ -145,19 +143,18 @@ namespace AppliedResearchAssociates.iAM.Reporting
             List<SegmentAttributeDatum> result = new List<SegmentAttributeDatum>();
 
             //var attributeList = new List<string>() {"County","SR"};
-
             var allAttributes = _unitofwork.AttributeRepo.GetAttributes();
             allAttributes.Add(new AttributeDTO() { Name = "Segment", Command = "SEG", DataSource = allAttributes.Single(_ => _.Name == "COUNTY").DataSource });
             var queryDictionary = new Dictionary<AttributeDTO, string>();
             try
             {
                 queryDictionary.Add(allAttributes.Single(_ => _.Name == "COUNTY"), keyProperties.County);
-                queryDictionary.Add(allAttributes.Single(_ => _.Name == "SR"), keyProperties.Routenum.ToString());
-                queryDictionary.Add(allAttributes.Single(_ => _.Name == "Segment"), keyProperties.Segment.ToString());
+                queryDictionary.Add(allAttributes.Single(_ => _.Name == "SR"), keyProperties.SR.ToString());
+                queryDictionary.Add(allAttributes.Single(_ => _.Name == "SEG"), keyProperties.SEG.ToString());
             }
             catch
             {
-                var errorMessage = $"Unable to find the segment in the database (County: {keyProperties.County}, Route: {keyProperties.Routenum}, Segment: {keyProperties.Segment}";
+                var errorMessage = $"Unable to find the segment in the database (County: {keyProperties.County}, Route: {keyProperties.SR}, Segment: {keyProperties.SEG}";
                 Errors.Add(errorMessage);
                 return new List<SegmentAttributeDatum>();
                 //throw new RowNotInTableException(errorMessage);
@@ -167,9 +164,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
             {
                 try
                 {
+                    var queryStringDictionary = queryDictionary.ToDictionary(_ => _.Key.Name, _ => _.Value);
                     var tmpsectionData = _unitofwork.DataSourceRepo.GetRawData(queryDictionary);
-                    var sectionId = tmpsectionData["CRS_Data"];
-                    result = _unitofwork.AssetDataRepository.GetAssetAttributes("CRS", sectionId);
+                    var sectionId = tmpsectionData["SEG"];
+                    result = _unitofwork.AssetDataRepository.GetPAMSAssetAttributes(queryStringDictionary, sectionId);
                 }
                 catch (Exception)
                 {
@@ -208,7 +206,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             {
                 returnstr = "";
             }
-            else if (returnVal.Value == null)
+            else if (returnVal == null || returnVal.Value == null)
             {
                 returnstr = DEFAULT_VALUE;
             }
@@ -529,6 +527,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             descriptions.Add("CNTY", new AttributeDescription() { Description = "County ID" });
             descriptions.Add("COPI", new AttributeDescription() { Description = "COPI" });
             descriptions.Add("COUNTY", new AttributeDescription() { Description = "County" });
+            descriptions.Add("CRS", new AttributeDescription() { Description = "Section" });
             descriptions.Add("CRS_DATA", new AttributeDescription() { Description = "Section" });
             descriptions.Add("CRSDATA", new AttributeDescription() { Description = "Section" });
             descriptions.Add("DIRECTION", new AttributeDescription() { Description = "Direction" });
@@ -541,8 +540,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             descriptions.Add("FAMILY", new AttributeDescription() { Description = "Family" });
             descriptions.Add("FED_AID", new AttributeDescription() { Description = "Federal Aid?" });
             descriptions.Add("FEDAID", new AttributeDescription() { Description = "Federal Aid?" });
-            descriptions.Add("FROMSEGMENT", new AttributeDescription() { Description = "From Segment" });
-            descriptions.Add("HPMS", new AttributeDescription() { Description = "HPMS?" });
+            descriptions.Add("IS_HPMS", new AttributeDescription() { Description = "HPMS?" });
             descriptions.Add("ID", new AttributeDescription() { Description = "ID" });
             descriptions.Add("INTERSTATE", new AttributeDescription() { Description = "Interstate" });
             descriptions.Add("L_S_TYPE", new AttributeDescription() { Description = "Left Shoulder Type" });
@@ -555,12 +553,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             descriptions.Add("RISKSCORE", new AttributeDescription() { Description = "RiskScore" });
             descriptions.Add("ROUGAVE", new AttributeDescription() { Description = "Roughness" });
             descriptions.Add("SECTION", new AttributeDescription() { Description = "SEC" });
-            descriptions.Add("SEG", new AttributeDescription() { Description = "SEG" });
+            descriptions.Add("SEGMENT_LENGTH", new AttributeDescription() { Description = "Segment Length" });
             descriptions.Add("SR", new AttributeDescription() { Description = "Route" });
             descriptions.Add("SURDATA", new AttributeDescription() { Description = "Surface" });
-            descriptions.Add("SURFACE", new AttributeDescription() { Description = "Surface ID" });
-            descriptions.Add("SURFACE NAME", new AttributeDescription() { Description = "Surface" });
-            descriptions.Add("TOSEGMENT", new AttributeDescription() { Description = "Segment" });
+            descriptions.Add("SURFACEID", new AttributeDescription() { Description = "Surface ID" });
+            descriptions.Add("SURFACE_NAME", new AttributeDescription() { Description = "Surface" });
+            descriptions.Add("SEG", new AttributeDescription() { Description = "Segment" });
             descriptions.Add("THICKNESS", new AttributeDescription() { Description = "THICKNESS" });
             descriptions.Add("TRK_PCNT", new AttributeDescription() { Description = "Truck %" });
             descriptions.Add("TRUEDATE", new AttributeDescription() { Description = "TrueDate" });

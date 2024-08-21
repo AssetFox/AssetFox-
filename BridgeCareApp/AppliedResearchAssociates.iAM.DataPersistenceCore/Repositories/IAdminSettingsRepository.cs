@@ -20,6 +20,8 @@ public interface IAdminSettingsRepository
 
     public IList<string> GetRawDataKeyFields();
     public void SetRawDataKeyFields(string keyFields);
+    public IList<string> GetAssetType();
+    public void SetAssetType(string assetType);
 
     void SetPrimaryNetwork(string name);
 

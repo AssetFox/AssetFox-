@@ -5,7 +5,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSAuditReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
@@ -59,28 +58,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             var columnNo = currentCell.Column;
             var assetSummaryDetail = pavementDataModel.AssetSummaryDetail;
 
-            //worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetSummaryDetail.ValuePerTextAttribute, "BMSID");
-
-            //var latitude = _reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, "LAT");
-            //var longitude = _reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, "LONG");
-
-            //// LAT and LONG appear to be in Degree/Minute/Second form, but concatenated into a single number without delimiters.
-            //var lat_degrees = Math.Floor(latitude / 10_000);
-            //var lat_minutes = Math.Floor((latitude - 10_000 * lat_degrees) / 100);
-            //var lat_seconds = latitude - 10_000 * lat_degrees - 100 * lat_minutes;
-
-            //var long_degrees = Math.Floor(longitude / 10_000);
-            //var long_minutes = Math.Floor((longitude - 10_000 * long_degrees) / 100);
-            //var long_seconds = longitude - 10_000 * long_degrees - 100 * long_minutes;
-
-            //// The "s are doubled up here so that they will be properly escaped in the excel formula.
-            //var lat_string = $"{lat_degrees}°{lat_minutes}'{lat_seconds}\"\"N";
-            //var long_string = $"{long_degrees}°{long_minutes}'{long_seconds}\"\"W";
-
-            //worksheet.Cells[row, columnNo].Style.Font.UnderLine = true;
-            //worksheet.Cells[row, columnNo].Style.Font.Color.SetColor(Color.Blue);
-            //ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            //worksheet.Cells[row, columnNo++].Formula = $"HYPERLINK(\"https://www.google.com/maps/place/{lat_string},{long_string}/data=!3m1!1e3\", \"{pavementDataModel.CRS}\")";
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             var crs = _reportHelper.CheckAndGetValue<string>(assetSummaryDetail.ValuePerTextAttribute, "CRS");
             worksheet.Cells[row, columnNo++].Value = crs;
@@ -92,7 +69,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
 
             worksheet.Cells[row, columnNo++].Value = startSeg;
             worksheet.Cells[row, columnNo++].Value = endSeg;
-            //ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo++]);
             var district_string = _reportHelper.CheckAndGetValue<string>(assetSummaryDetail.ValuePerTextAttribute, "DISTRICT");
             if (int.TryParse(district_string, out var district_int))
             {
@@ -107,10 +83,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, "SEGMENT_LENGTH");
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = "###,###,###,###,##0";
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetSummaryDetail.ValuePerTextAttribute, "MPO_RPO");
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetSummaryDetail.ValuePerTextAttribute, "POSTED");
 
-
-            // worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetSummaryDetail.ValuePerTextAttribute, "COUNTY");
-            //worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(assetSummaryDetail.ValuePerTextAttribute, "MPO_NAME");
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             var bpn_string = _reportHelper.CheckAndGetValue<string>(assetSummaryDetail.ValuePerTextAttribute, "BUSIPLAN");
             if (int.TryParse(bpn_string, out var bpn_int))
@@ -149,6 +123,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 "Family ID",
                 "Length",
                 "MPO/RPO",
+                "Posted Roads",
                 "BPN",
                 "NHS",
                 "Interstate",

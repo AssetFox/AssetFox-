@@ -8,8 +8,9 @@
         public const string No = "N";
         public const string OPI = "OPI";
         public const string IRI = "ROUGHNESS";
-        public const string RUT = "HPMS_RUTTING";
-        public const string FAULT = "HPMS_FAULTING";
+        public const string RUT_LEFT = "BLRUTDP_Total";
+        public const string RUT_RIGHT = "BRRUTDP_Total";
+        public const string FAULT = "CFLTJNT_Total";
         public const string CashFlow = "CF";
 
     }

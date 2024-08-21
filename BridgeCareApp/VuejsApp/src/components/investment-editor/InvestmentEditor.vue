@@ -287,6 +287,8 @@
 
         <ConfirmDeleteAlert :dialogData='confirmDeleteAlertData' @submit='onSubmitConfirmDeleteAlertResult' />
 
+        <ConfirmDeleteAlert :dialogData='cpChangedAlertData' @submit='onSubmitCpChangedAlertResult' />
+
         <CreateBudgetLibraryDialog :dialogData='createBudgetLibraryDialogData'
                                    :libraryNames='librarySelectItemNames'
                                    @submit='onSubmitCreateCreateBudgetLibraryDialogResult' />
@@ -409,18 +411,18 @@ let hasPermittedAccess = computed<boolean>(() => store.state.investmentModule.ha
 async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess', payload);}
 async function getInvestmentAction(payload?: any): Promise<any> {await store.dispatch('getInvestment', payload);}
 async function getBudgetLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getBudgetLibraries', payload);}
-async function selectBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('selectBudgetLibrary', payload);}
+function selectBudgetLibraryAction(payload?: any) { store.dispatch('selectBudgetLibrary', payload);}
 async function upsertInvestmentAction(payload?: any): Promise<any> {await store.dispatch('upsertInvestment', payload);}
 async function upsertBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertBudgetLibrary', payload);}
 async function deleteBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteBudgetLibrary', payload);}
 async function upsertOrDeleteBudgetLibraryUsersAction(payload: any): Promise<any> {await store.dispatch('upsertOrDeleteBudgetLibraryUsers', payload);}
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification', payload);}
-async function setHasUnsavedChangesAction(payload?: any): Promise<any> {await store.dispatch('setHasUnsavedChanges', payload);}
+function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification', payload);}
+function setHasUnsavedChangesAction(payload?: any) { store.dispatch('setHasUnsavedChanges', payload);}
 async function importScenarioInvestmentBudgetsFileAction(payload?: any): Promise<any> {await store.dispatch('importScenarioInvestmentBudgetsFile', payload);}
 async function importLibraryInvestmentBudgetsFileAction(payload?: any): Promise<any> {await store.dispatch('importLibraryInvestmentBudgetsFile', payload);}
 async function getCriterionLibrariesAction(payload?: any): Promise<any> {await store.dispatch('getCriterionLibraries', payload);}
-async function setAlertMessageAction(payload?: any): Promise<any> {await store.dispatch('setAlertMessage', payload);}
-async function addSuccessNotificationAction(payload?: any): Promise<any> {await store.dispatch('addSuccessNotification', payload);}
+function setAlertMessageAction(payload?: any) { store.dispatch('setAlertMessage', payload);}
+function addSuccessNotificationAction(payload?: any){ store.dispatch('addSuccessNotification', payload);}
     
 let getModifiedDate = store.getters.getLibraryDateModified;
 let getUserNameByIdGetter = store.getters.getUserNameById;
@@ -478,6 +480,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let showSetRangeForAddingBudgetYearsDialog: boolean = false;
     let showSetRangeForDeletingBudgetYearsDialog: boolean = false;
     let confirmDeleteAlertData = ref<AlertData>(clone(emptyAlertData));
+    let cpChangedAlertData = ref<AlertData>(clone(emptyAlertData));
     let uuidNIL: string = getBlankGuid();
     let rules: InputValidationRules = validationRules;
     let showImportExportInvestmentBudgetsDialog = ref<boolean>(false);
@@ -1362,9 +1365,11 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value: "";
                 firstYearOfAnalysisPeriodShift.value = 0;
                 investmentPlanMutator(investmentPlanUpsert)
+                if(librarySelectItemValue.value != null || deletionBudgetIds.value.length > 0)
+                    onShowCpChangeAlert();
                 clearChanges();                                            
                 addSuccessNotificationAction({message: "Modified investment"});
-                librarySelectItemValue.value = null;
+                librarySelectItemValue.value = null;               
             }           
         });
     }
@@ -1428,6 +1433,15 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         };
     }
 
+    function onShowCpChangeAlert() {
+        cpChangedAlertData.value = {
+            showDialog: true,
+            heading: 'Warning',
+            choice: false,
+            message: 'All related committed projects have had their budgets set to none.A new budget will need to be set for the aformentioned committed projects',
+        };
+    }
+
     function onSubmitConfirmDeleteAlertResult(submit: boolean) {
         confirmDeleteAlertData.value = clone(emptyAlertData);
 
@@ -1435,6 +1449,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             librarySelectItemValue.value = null;
             deleteBudgetLibraryAction(selectedBudgetLibrary.value.id);
         }
+    }
+
+    function onSubmitCpChangedAlertResult(submit: boolean) {
+        cpChangedAlertData.value = clone(emptyAlertData);
     }
 
     function disableCrudButton() {

@@ -53,7 +53,7 @@ const actions = {
     async getUserTokens({ commit }: any, payload: any) {
         await AuthenticationService.getUserTokens(payload.code).then(
             (response: AxiosResponse) => {
-                const expirationInMilliseconds = moment().add(30, 'minutes');
+                const expirationInMilliseconds = moment().add(30, 'minutes');                
                 if (
                     hasValue(response, 'status') &&
                     http2XX.test(response.status.toString())
@@ -93,17 +93,21 @@ const actions = {
             'minutes',
         );
         
-        if (differenceInMinutes > 2) {
+        if (differenceInMinutes > 15) {
             return;
         }
-
-       await dispatch('refreshTokens');
+       
+        await dispatch('refreshTokens');
     },
 
+// TODO check with ESEC not B2C
+// On component load, check the token's time stamp, and set a delayed call to refresh the token when less than 5 minutes remain.
+// TODO try checking and renwing interval in logOut? Or atleast on each component load in router.ts
     async refreshTokens({ commit }: any) {
         if (!hasValue(localStorage.getItem('UserTokens'))) {
             throw new Error('Cannot determine user authentication status');
         } else {
+            
             commit('refreshingMutator', true);
             const userTokens: UserTokens = JSON.parse(
                 localStorage.getItem('UserTokens') as string,
@@ -180,7 +184,7 @@ const actions = {
         }
     },
 
-    async logOut({ commit }: any) {
+    async logOut({ commit }: any) {        
         commit('usernameMutator', '');
         commit('authenticatedMutator', false);
         localStorage.removeItem('UserInfo');
@@ -205,29 +209,44 @@ const actions = {
         }
     },
     async setAzureUserInfo({ commit }: any, payload: any) {
-        if (payload.status) {            
-            await AuthenticationService.getHasAdminAccess().then((response: AxiosResponse) => {
-                let hasAdminAccess: boolean = false;
-                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    hasAdminAccess = response.data as boolean;
-                }
-                    commit('hasRoleMutator', true);
-                    commit('checkedForRoleMutator', true);
-                    commit('adminAccessMutator', hasAdminAccess);
-                    commit('usernameMutator', payload.username);
-                    commit('authenticatedMutator', true);
-                    commit('simulationAccessMutator', false);
-            });
+        if (payload.status) {    
+            // Check for active status
+                var activeStatus = await AuthenticationService.getActiveStatus();
+                if(activeStatus.data == true)
+                    {
+                        await AuthenticationService.getHasAdminAccess().then((response: AxiosResponse) => {
+                            let hasAdminAccess: boolean = false;
+                            if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                                hasAdminAccess = response.data as boolean;
+                            }
+                                commit('hasRoleMutator', true);
+                                commit('checkedForRoleMutator', true);
+                                commit('adminAccessMutator', hasAdminAccess);
+                                commit('usernameMutator', payload.username);
+                                commit('authenticatedMutator', true);
+                                commit('simulationAccessMutator', false);
+                        });
+                    }
+                    else
+                    {
+                        setCommits({ commit });
+                        throw new Error('User is not active');
+                    }
         } else {
-            commit('hasRoleMutator', false);
-            commit('checkedForRoleMutator', false);
-            commit('adminAccessMutator', false);
-            commit('usernameMutator', '');
-            commit('authenticatedMutator', false);
-            commit('simulationAccessMutator', false);
+            setCommits({ commit });
         }
     },
 };
+
+async function setCommits({ commit }: any)
+{
+    commit('hasRoleMutator', false);
+    commit('checkedForRoleMutator', false);
+    commit('adminAccessMutator', false);
+    commit('usernameMutator', '');
+    commit('authenticatedMutator', false);
+    commit('simulationAccessMutator', false);
+}
 
 const getters = {};
 

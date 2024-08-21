@@ -8,6 +8,7 @@ using System;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
 {
@@ -35,12 +36,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             var row = currentCell.Row;
             var columnNo = currentCell.Column;
             var assetSummaryDetail = bridgeDataModel.AssetSummaryDetail;
+            var ruttingAverageTotal = CalculateRuttingBasedOnSurfaceType(assetSummaryDetail);
 
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = Math.Round(Convert.ToDecimal(_reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, "OPI")));
-            worksheet.Cells[row, columnNo++].Value = Math.Round(Convert.ToDecimal(_reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, "ROUGHNESS")));
-            worksheet.Cells[row, columnNo++].Value = Math.Round(Convert.ToDecimal(_reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, "HPMS_RUTTING")), 3);
-            worksheet.Cells[row, columnNo++].Value = Math.Round(Convert.ToDecimal(_reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, "HPMS_FAULTING")), 3);
+            worksheet.Cells[row, columnNo++].Value = Math.Round(Convert.ToDecimal(_reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, PAMSAuditReportConstants.OPI)));
+            worksheet.Cells[row, columnNo++].Value = Math.Round(Convert.ToDecimal(_reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, PAMSAuditReportConstants.IRI)));
+            worksheet.Cells[row, columnNo++].Value = Math.Round(Convert.ToDecimal(ruttingAverageTotal), 3);
+            worksheet.Cells[row, columnNo++].Value = Math.Round(Convert.ToDecimal(_reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, PAMSAuditReportConstants.FAULT)), 3);
 
             //var familyId = int.Parse(_reportHelper.CheckAndGetValue<string>(assetSummaryDetail.ValuePerTextAttribute, "FAMILY_ID"));
             //if (familyId < 11)
@@ -48,7 +50,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             //    worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
             //    worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, "DECK_SEEDED");
-
             //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             //    worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
             //    worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, "SUP_SEEDED");
@@ -119,6 +120,40 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
             ExcelHelper.ApplyBorder(worksheet.Cells[row, 1, row, columnNo - 1]);
 
             currentCell.Column = columnNo;
+        }
+
+        private double CalculateRuttingBasedOnSurfaceType(AssetSummaryDetail selectedSection)
+        {
+            var surfaceType = GetSurfaceType(selectedSection);
+
+            if (surfaceType == SurfaceType.Asphalt)
+            {
+                return CalculateAverageRutting(PAMSAuditReportConstants.RUT_LEFT, PAMSAuditReportConstants.RUT_RIGHT, selectedSection);
+            }
+            else if (surfaceType == SurfaceType.Concrete)
+            {
+                return CalculateAverageRutting("CRJCPRU_Total", "CLJCPRU_Total", selectedSection);
+            }
+            return 0;
+        }
+
+        private double CalculateAverageRutting(string firstAttributeName, string secondAttributeName, AssetSummaryDetail assetSummaryDetail)
+        {
+            double firstValue = _reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, firstAttributeName);
+            double secondValue = _reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, secondAttributeName);
+            return (firstValue + secondValue) / 2;
+        }
+
+        private SurfaceType GetSurfaceType(AssetSummaryDetail assetSummaryDetail)
+        {
+            int surfaceId = Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(assetSummaryDetail.ValuePerNumericAttribute, "SURFACEID"));
+            return surfaceId > 62 ? SurfaceType.Concrete : SurfaceType.Asphalt;
+        }
+
+        enum SurfaceType
+        {
+            Asphalt,
+            Concrete
         }
 
         public CurrentCell AddHeadersCells(ExcelWorksheet worksheet)

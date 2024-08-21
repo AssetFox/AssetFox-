@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using OfficeOpenXml;
-
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary;
 using AppliedResearchAssociates.iAM.Reporting.Models;
@@ -21,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
         internal void FillCostOfBridgeWork(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
-            List<YearsData> costForBridgeBudgets, Dictionary<int, double> totalBudgetPerYearForBridgeWork, WorkTypeTotal workTypeTotal)
+            List<YearsData> costForBridgeBudgets, Dictionary<int, decimal> totalBudgetPerYearForBridgeWork, WorkTypeTotal workTypeTotal)
         {
             var startYear = simulationYears[0];
             currentCell.Row += 1;
@@ -33,17 +30,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var treatmentTracker = new Dictionary<string, int>();
             foreach (var treatment in costForBridgeBudgets)
             {
-                if (!treatmentTracker.ContainsKey(treatment.Treatment))
+                var key = treatment.Treatment.Contains("Bundle") ? BAMSConstants.BundledTreatments : treatment.Treatment;
+                if (!treatmentTracker.ContainsKey(key))
                 {
-                    treatmentTracker.Add(treatment.Treatment, currentCell.Row);
-                    worksheet.Cells[currentCell.Row, currentCell.Column].Value = treatment.Treatment;
+                    treatmentTracker.Add(key, currentCell.Row);
+                    worksheet.Cells[currentCell.Row, currentCell.Column].Value = key;
 
                     worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row,
                     currentCell.Column + 1 + simulationYears.Count].Value = 0.0;
                     currentCell.Row += 1;
                 }
 
-                var rowNum = treatmentTracker[treatment.Treatment];
+                var rowNum = treatmentTracker[key];
                 var cellToEnterCost = treatment.Year - startYear;
                 var cellValue = worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value;
                 var totalAmount = 0.0;

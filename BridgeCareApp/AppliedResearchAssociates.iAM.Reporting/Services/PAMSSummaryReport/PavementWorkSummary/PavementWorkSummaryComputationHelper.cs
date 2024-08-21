@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
-using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
-using static System.Collections.Specialized.BitVector32;
+using static AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary.PavementTreatmentHelper;
+using WorkSummaryByBudgetModel = AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport.WorkSummaryByBudgetModel;
+using YearsData = AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport.YearsData;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
 {
@@ -23,39 +21,95 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
     {
         private static SummaryReportHelper _summaryReportHelper = new SummaryReportHelper();
 
-        // InRange excludes the high value to avoid overlap
+        // InRange excludes the high value to avoid overlap        
         private static bool InRange(this double value, double low, double high) =>
-            low <= value && value < high;
+           value >= low && value <= high;
 
         private static double IriCondition(this AssetDetail detail) =>
-            _summaryReportHelper.checkAndGetValue<double>(detail.ValuePerNumericAttribute, "ROUGHNESS");
+            Math.Round(_summaryReportHelper.checkAndGetValue<double>(detail.ValuePerNumericAttribute, "ROUGHNESS"));
 
-        public static bool IriConditionIsExcellent(this AssetDetail detail) =>
-            detail.IriCondition().InRange(0, 60);
+        public static bool IriConditionIsExcellent(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.IriCondition() <= 70,
+                "2" => detail.IriCondition() <= 75,
+                "3" => detail.IriCondition() <= 100,
+                "4" => detail.IriCondition() <= 120,
+                _ => false,
+            };
 
-        public static bool IriConditionIsGood(this AssetDetail detail) =>
-            detail.IriCondition().InRange(60, 95);
+        public static bool IriConditionIsGood(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.IriCondition().InRange(71, 100),
+                "2" => detail.IriCondition().InRange(76, 120),
+                "3" => detail.IriCondition().InRange(101, 150),
+                "4" => detail.IriCondition().InRange(121, 170),
+                _ => false,
+            };
 
-        public static bool IriConditionIsFair(this AssetDetail detail) =>
-            detail.IriCondition().InRange(95, 170);
+        public static bool IriConditionIsFair(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.IriCondition().InRange(101, 150),
+                "2" => detail.IriCondition().InRange(121, 170),
+                "3" => detail.IriCondition().InRange(151, 195),
+                "4" => detail.IriCondition().InRange(171, 220),
+                _ => false,
+            };
 
-        public static bool IriConditionIsPoor(this AssetDetail detail) =>
-            detail.IriCondition() >= 170;
+        public static bool IriConditionIsPoor(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.IriCondition() >= 151,
+                "2" => detail.IriCondition() >= 171,
+                "3" => detail.IriCondition() >= 196,
+                "4" => detail.IriCondition() > 220,
+                _ => false,
+            };
 
         private static double OpiCondition(this AssetDetail detail) =>
-            _summaryReportHelper.checkAndGetValue<double>(detail.ValuePerNumericAttribute, "OPI_CALCULATED");
+            Math.Round(_summaryReportHelper.checkAndGetValue<double>(detail.ValuePerNumericAttribute, "OPI_CALCULATED"));
 
-        public static bool OpiConditionIsExcellent(this AssetDetail detail) =>
-            detail.OpiCondition().InRange(90, 100);
+        public static bool OpiConditionIsExcellent(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.OpiCondition() > 95,
+                "2" => detail.OpiCondition() > 95,
+                "3" => detail.OpiCondition() >= 91,
+                "4" => detail.OpiCondition() >= 86,
+                _ => false,
+            };
 
-        public static bool OpiConditionIsGood(this AssetDetail detail) =>
-            detail.OpiCondition().InRange(75, 90);
+        public static bool OpiConditionIsGood(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.OpiCondition().InRange(86, 95),
+                "2" => detail.OpiCondition().InRange(81, 95),
+                "3" => detail.OpiCondition().InRange(81, 90),
+                "4" => detail.OpiCondition().InRange(71, 85),
+                _ => false,
+            };
 
-        public static bool OpiConditionIsFair(this AssetDetail detail) =>
-            detail.OpiCondition().InRange(60, 75);
+        public static bool OpiConditionIsFair(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.OpiCondition().InRange(76, 85),
+                "2" => detail.OpiCondition().InRange(71, 80),
+                "3" => detail.OpiCondition().InRange(66, 80),
+                "4" => detail.OpiCondition().InRange(60, 70),
+                _ => false,
+            };
 
-        public static bool OpiConditionIsPoor(this AssetDetail detail) =>
-            detail.OpiCondition() < 60;
+        public static bool OpiConditionIsPoor(this AssetDetail detail, string bpnKey) =>
+            bpnKey switch
+            {
+                "1" => detail.OpiCondition().InRange(0, 75),
+                "2" => detail.OpiCondition().InRange(0, 70),
+                "3" => detail.OpiCondition().InRange(0, 65),
+                "4" => detail.OpiCondition() >= 0 && detail.OpiCondition() < 60,
+                _ => false,
+            };
     }
 
     public class PavementWorkSummaryComputationHelper
@@ -67,153 +121,215 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _summaryReportHelper = new SummaryReportHelper();
         }
 
-        internal double CalculateSegmentMilesForBPNWithCondition(List<AssetSummaryDetail> initialSectionSummaries, string bpn, Func<AssetSummaryDetail, bool> conditionFunction)
-        {
-            var postedSegments = !String.IsNullOrEmpty(bpn) ? initialSectionSummaries.FindAll(b => _summaryReportHelper.checkAndGetValue<string>(b.ValuePerTextAttribute, "BUSIPLAN") == bpn) : initialSectionSummaries;
-            var selectedSegments = postedSegments.FindAll(section => conditionFunction(section));
-            return selectedSegments.Sum(_ => _summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "SEGMENT_LENGTH")).FeetToMiles();
-        }
-
         internal double CalculateSegmentMilesForBPNWithCondition(List<AssetDetail> sectionSummaries, string bpn, Func<AssetDetail, bool> conditionFunction)
         {
-            var postedSegments = !String.IsNullOrEmpty(bpn) ? sectionSummaries.FindAll(b => _summaryReportHelper.checkAndGetValue<string>(b.ValuePerTextAttribute, "BUSIPLAN") == bpn) : sectionSummaries;
+            var postedSegments = !string.IsNullOrEmpty(bpn) ? sectionSummaries.FindAll(b => _summaryReportHelper.checkAndGetValue<string>(b.ValuePerTextAttribute, "BUSIPLAN") == bpn) : sectionSummaries;
             var selectedSegments = postedSegments.FindAll(section => conditionFunction(section));
             return selectedSegments.Sum(_ => _summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "SEGMENT_LENGTH")).FeetToMiles();
         }
 
-
-        internal void FillDataToUseInExcel(SimulationOutput reportOutputData, Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj, Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndLengthPerTreatmentPerYear, Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
+        internal void FillDataToUseInExcel(SimulationOutput reportOutputData,
+                Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
+                Dictionary<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>> costLengthPerSurfaceIdPerTreatmentPerYear,
+                Dictionary<int, Dictionary<TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
+                Dictionary<string, string> treatmentCategoryLookup,
+                List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
+                List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments,
+                bool shouldBundleFeasibleTreatments)
         {
+            Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
             foreach (var yearData in reportOutputData.Years)
             {
-                costAndLengthPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>());
-                costAndLengthPerTreatmentGroupPerYear.Add(yearData.Year, new Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>());
+                costLengthPerSurfaceIdPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>());
+                costAndLengthPerTreatmentGroupPerYear.Add(yearData.Year, new Dictionary<TreatmentGroup, (decimal treatmentCost, int length)>());
                 yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>();
                 foreach (var section in yearData.Assets)
                 {
-                    var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
-                    PopulateTreatmentCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentPerYear);
-                    PopulateTreatmentGroupCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentGroupPerYear);
-                    var appliedTreatment = section.AppliedTreatment;
-                    var treatmentCategory = treatmentCategoryLookup[appliedTreatment];
-                    if (section.TreatmentCause == TreatmentCause.CommittedProject &&
-                        appliedTreatment.ToLower() != BAMSConstants.NoTreatment)
+                    // Build keyCashFlowFundingDetails
+                    var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
+                    if (section.TreatmentStatus != TreatmentStatus.Applied)
                     {
-                        var commitedCost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                        var fundingSection = yearData.Assets.FirstOrDefault
+                                             (_ => _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "CRS") == crs &&
+                                             _.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                             _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
+                                             _.AppliedTreatment == section.AppliedTreatment);
+                        if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
+                        {
+                            keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
+                        }
+                    }
 
+                    // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
+                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
+                                                          section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                          section.TreatmentConsiderations :
+                                                          keyCashFlowFundingDetails[crs];
+                    var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                        treatmentConsiderations.FirstOrDefault() :
+                                                        treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
+                    var treatmentCategory = appliedTreatment.Contains("Bundle") ? PAMSConstants.Bundled : treatmentCategoryLookup[appliedTreatment];
+                    var cost = treatmentConsiderations.
+                               Where(_ => _.TreatmentName?.ToLower() != PAMSConstants.NoTreatment && _.TreatmentName == appliedTreatment).
+                               Sum(_ => _.FundingCalculationOutput?.AllocationMatrix?.
+                               Where(_ => _.Year == yearData.Year).
+                               Sum(b => b.AllocatedAmount) ?? 0);
+                    cost = Math.Round(cost, 0);                                                         
+
+                    if (section.TreatmentCause == TreatmentCause.CommittedProject &&
+                        appliedTreatment.ToLower() != PAMSConstants.NoTreatment)
+                    {
                         if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
                         {
-                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (commitedCost, 1, section.ProjectSource, treatmentCategory));
+                            var projectSource = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment) &&
+                                                _.Year == yearData.Year)?.ProjectSource.ToString();
+                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (cost, 1, projectSource, treatmentCategory));
                         }
                         else
                         {
                             var currentRecord = yearlyCostCommittedProj[yearData.Year][appliedTreatment];
-                            var treatmentCost = currentRecord.treatmentCost + commitedCost;
+                            var treatmentCost = currentRecord.treatmentCost + cost;
                             var bridgeCount = currentRecord.bridgeCount + 1;
                             var projectSource = currentRecord.projectSource;
                             yearlyCostCommittedProj[yearData.Year][appliedTreatment] = (treatmentCost, bridgeCount, projectSource, treatmentCategory);
                         }
 
                         // Remove from committedProjectsForWorkOutsideScope
-                        var toRemove = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => _.Treatment == appliedTreatment && _.Year == yearData.Year);
+                        // Bundled has many treatment names under AppliedTreatment
+                        var toRemove = committedProjectsForWorkOutsideScope.Where(_ => appliedTreatment.Contains(_.Treatment) && _.Year == yearData.Year);
                         if (toRemove != null)
                         {
-                            committedProjectsForWorkOutsideScope.Remove(toRemove);
+                            committedProjectsForWorkOutsideScope.RemoveAll(_ => toRemove.Contains(_));
                         }
-
+                        
                         continue;
                     }
+
+                    PopulateTreatmentCostAndLength(yearData.Year, section, cost, costLengthPerSurfaceIdPerTreatmentPerYear);
+                    PopulateTreatmentGroupCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentGroupPerYear, simulationTreatments);
                 }
             }
         }
 
         internal void FillDataToUseInExcel(WorkSummaryByBudgetModel budgetSummaryModel,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
-            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear
+            Dictionary<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>> costLengthPerSurfaceIdPerTreatmentPerYear,
+            Dictionary<int, Dictionary<TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
+            List<(string TreatmentName, string AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
-            foreach (var yearsData in budgetSummaryModel.YearlyData)
+            foreach (var yearData in budgetSummaryModel.YearlyData)
             {
-                if (!costAndLengthPerTreatmentPerYear.ContainsKey(yearsData.Year))
+                if (!costLengthPerSurfaceIdPerTreatmentPerYear.ContainsKey(yearData.Year))
                 {
-                    costAndLengthPerTreatmentPerYear.Add(yearsData.Year, new Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>());
+                    costLengthPerSurfaceIdPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>());
                 }
-                var treatmentData = costAndLengthPerTreatmentPerYear[yearsData.Year];
+                var treatmentData = costLengthPerSurfaceIdPerTreatmentPerYear[yearData.Year];
 
-                if (!costAndLengthPerTreatmentGroupPerYear.ContainsKey(yearsData.Year))
+                if (!costAndLengthPerTreatmentGroupPerYear.ContainsKey(yearData.Year))
                 {
-                    costAndLengthPerTreatmentGroupPerYear.Add(yearsData.Year, new Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>());
+                    costAndLengthPerTreatmentGroupPerYear.Add(yearData.Year, new Dictionary<TreatmentGroup, (decimal treatmentCost, int length)>());
                 }
-                var treatmentGroupData = costAndLengthPerTreatmentGroupPerYear[yearsData.Year];
+                var treatmentGroupData = costAndLengthPerTreatmentGroupPerYear[yearData.Year];
 
-                PopulateTreatmentCostAndLength(yearsData, costAndLengthPerTreatmentPerYear);
-                PopulateTreatmentGroupCostAndLength(yearsData, costAndLengthPerTreatmentGroupPerYear);
+                if (!yearData.isCommitted)
+                {
+                    PopulateTreatmentCostAndLength(yearData, costLengthPerSurfaceIdPerTreatmentPerYear);
+                    PopulateTreatmentGroupCostAndLength(yearData, costAndLengthPerTreatmentGroupPerYear, simulationTreatments);
+                }
             }
         }
         private void PopulateTreatmentCostAndLength(
             YearsData yearsData,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int count)>> costAndLengthPerTreatmentPerYear
+            Dictionary<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>> costLengthPerSurfaceIdPerTreatmentPerYear
             )
         {
             int segmentLength = 0;
-
-            if (!costAndLengthPerTreatmentPerYear[yearsData.Year].ContainsKey(yearsData.TreatmentName))
+            var year = yearsData.Year;
+            var appliedTreatment = yearsData.TreatmentName;
+            var surfaceId = yearsData.SurfaceId;
+            var cost = (decimal)yearsData.Amount;
+            var compositeTreatmentCost = surfaceId == 62 ? cost : 0;
+            if (!costLengthPerSurfaceIdPerTreatmentPerYear[yearsData.Year].ContainsKey(yearsData.TreatmentName))
             {
-                costAndLengthPerTreatmentPerYear[yearsData.Year].Add(yearsData.TreatmentName, ((decimal)yearsData.Amount, yearsData.SurfaceId == 62 ? (decimal)yearsData.Amount : 0, (int)segmentLength));
-            }
+                costLengthPerSurfaceIdPerTreatmentPerYear[year].Add(appliedTreatment,
+                    new() { { surfaceId, (cost, compositeTreatmentCost, segmentLength) } });
+            }        
             else
-            {
-                var values = costAndLengthPerTreatmentPerYear[yearsData.Year][yearsData.TreatmentName];
-                values.treatmentCost += (decimal)yearsData.Amount;
-                values.compositeTreatmentCost += yearsData.SurfaceId == 62 ? (decimal)yearsData.Amount : 0;
-                costAndLengthPerTreatmentPerYear[yearsData.Year][yearsData.TreatmentName] = values;
+            {                
+                var values = costLengthPerSurfaceIdPerTreatmentPerYear[year][appliedTreatment];
+                if (!values.ContainsKey(surfaceId))
+                {
+                    values.Add(surfaceId, (cost, compositeTreatmentCost, segmentLength));
+
+                    costLengthPerSurfaceIdPerTreatmentPerYear[year][appliedTreatment] = values;
+                }
+                else
+                {
+                    var surfaceIdValues = values[surfaceId];
+                    surfaceIdValues.treatmentCost += cost;
+                    surfaceIdValues.compositeTreatmentCost += compositeTreatmentCost;
+
+                    values[surfaceId] = surfaceIdValues;
+                }
             }
         }
 
         private void PopulateTreatmentGroupCostAndLength(
             YearsData yearsData,
-            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear
-            )
+            Dictionary<int, Dictionary<TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
+            List<(string TreatmentName, string AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var year = yearsData.Year;
-            var treatmentGroup = PavementTreatmentHelper.GetTreatmentGroup(yearsData.TreatmentName);
+            var treatmentGroup = GetTreatmentGroup(yearsData.TreatmentName, simulationTreatments);
             int segmentLength = 0;
 
             if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(treatmentGroup))
             {
-                costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, ((decimal)yearsData.Amount, (int)segmentLength));
+                costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, ((decimal)yearsData.Amount, (int)segmentLength.FeetToMiles()));
             }
             else
             {
                 var values = costAndLengthPerTreatmentPerYear[year][treatmentGroup];
                 values.treatmentCost += (decimal) yearsData.Amount;
-                values.length += (int)segmentLength;
+                values.length += (int)segmentLength.FeetToMiles();
                 costAndLengthPerTreatmentPerYear[year][treatmentGroup] = values;
             }
         }
 
-
-        private void PopulateTreatmentCostAndLength(
+        private static void PopulateTreatmentCostAndLength(
             int year,
             AssetDetail section,
             decimal cost,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> costAndLengthPerTreatmentPerYear
+            Dictionary<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>> costLengthPerSurfaceIdPerTreatmentPerYear
             )
-        {
+        {            
+            var surfaceId = (int)section.ValuePerNumericAttribute["SURFACEID"];
+            var appliedTreatment = section.AppliedTreatment;
+            var compositeTreatmentCost = surfaceId == 62 ? cost : 0;
             var segmentLength = section.ValuePerNumericAttribute["SEGMENT_LENGTH"];
-            var surfaceId = section.ValuePerNumericAttribute["SURFACEID"];
-            if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(section.AppliedTreatment))
+            var segmentLengthInMiles = (int)segmentLength.FeetToMiles();
+            if (!costLengthPerSurfaceIdPerTreatmentPerYear[year].ContainsKey(appliedTreatment))
             {
-                costAndLengthPerTreatmentPerYear[year].Add(section.AppliedTreatment, (cost, surfaceId == 62 ? cost : 0, (int)segmentLength));
+                costLengthPerSurfaceIdPerTreatmentPerYear[year].Add(appliedTreatment,
+                    new() { { surfaceId, (cost, compositeTreatmentCost, segmentLengthInMiles) } });
             }
             else
-            {
-                var values = costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment];
-                values.treatmentCost += cost;
-                if (surfaceId == 62)
-                    values.compositeTreatmentCost += cost;
-                values.length += (int)segmentLength;
-                costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment] = values;
+            {                
+                var values = costLengthPerSurfaceIdPerTreatmentPerYear[year][appliedTreatment];
+                if (!values.ContainsKey(surfaceId))
+                {
+                    values.Add(surfaceId, (cost, compositeTreatmentCost, segmentLengthInMiles));
+                    costLengthPerSurfaceIdPerTreatmentPerYear[year][appliedTreatment] = values;
+                }
+                else
+                {
+                    var surfaceIdValues = values[surfaceId];
+                    surfaceIdValues.treatmentCost += cost;
+                    surfaceIdValues.compositeTreatmentCost += compositeTreatmentCost;
+                    surfaceIdValues.length += segmentLengthInMiles;
+                    values[surfaceId] = surfaceIdValues;
+                }
             }
         }
 
@@ -221,44 +337,47 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             int year,
             AssetDetail section,
             decimal cost,
-            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear
-            )
+            Dictionary<int, Dictionary<TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
+            List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var segmentLength = section.ValuePerNumericAttribute["SEGMENT_LENGTH"];
-
-            var treatmentGroup = PavementTreatmentHelper.GetTreatmentGroup(section.AppliedTreatment);
-
+            var treatmentGroup = GetTreatmentGroup(section.AppliedTreatment, simulationTreatments);
             if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(treatmentGroup))
             {
-                costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, (cost, (int)segmentLength));
+                costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, (cost, (int)segmentLength.FeetToMiles()));
             }
             else
             {
                 var values = costAndLengthPerTreatmentPerYear[year][treatmentGroup];
                 values.treatmentCost += cost;
-                values.length += (int)segmentLength;
+                values.length += (int)segmentLength.FeetToMiles();
                 costAndLengthPerTreatmentPerYear[year][treatmentGroup] = values;
             }
         }
 
         internal Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> CalculateWorkTypeTotals(
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
-            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments
+            Dictionary<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>> costLengthPerSurfaceIdPerTreatmentPerYear,
+            List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
             var workTypeTotals = new Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>>();
 
-            foreach (var yearlyValues in costAndLengthPerTreatmentPerYear)
+            foreach (var yearlyValues in costLengthPerSurfaceIdPerTreatmentPerYear)
             {
                 foreach (var treatment in simulationTreatments)
                 {
                     decimal cost = 0;
                     int length = 0;
 
-                    yearlyValues.Value.TryGetValue(treatment.Name, out var costAndLength);
-                    cost = costAndLength.treatmentCost;
-                    length = costAndLength.length;
-
+                    yearlyValues.Value.TryGetValue(treatment.Name, out var costAndLengthsPerSurfaceId);
+                    if (costAndLengthsPerSurfaceId != null)
+                    {
+                        foreach (var value in costAndLengthsPerSurfaceId)
+                        {
+                            cost += value.Value.treatmentCost;
+                            length += value.Value.length;
+                        }
+                    }
                     if (!workTypeTotals.ContainsKey(treatment.Category))
                     {
                         workTypeTotals.Add(treatment.Category, new SortedDictionary<int, (decimal treatmentCost, int length)>()
@@ -278,9 +397,44 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         workTypeTotals[treatment.Category][yearlyValues.Key] = value;
                     }
                 }
+
+                foreach(var yearlyValue in yearlyValues.Value)
+                {
+                    var treatment = yearlyValue.Key;
+                    if (treatment.Contains("Bundle"))
+                    {
+                        var category = TreatmentCategory.Bundled;
+                        decimal cost = 0;
+                        int length = 0;
+                        var costAndLengthsPerSurfaceId = yearlyValue.Value;                        
+                        foreach (var value in costAndLengthsPerSurfaceId)
+                        {
+                            cost += value.Value.treatmentCost;
+                            length += value.Value.length;
+                        }
+
+                        if (!workTypeTotals.ContainsKey(category))
+                        {
+                            workTypeTotals.Add(category, new SortedDictionary<int, (decimal treatmentCost, int length)>()
+                            {
+                                { yearlyValues.Key, (cost, length) }
+                            });
+                        }
+                        else
+                        {
+                            if (!workTypeTotals[category].ContainsKey(yearlyValues.Key))
+                            {
+                                workTypeTotals[category].Add(yearlyValues.Key, (0, 0));
+                            }
+                            var value = workTypeTotals[category][yearlyValues.Key];
+                            value.treatmentCost += cost;
+                            value.length += length;
+                            workTypeTotals[category][yearlyValues.Key] = value;
+                        }
+                    }
+                }
             }
             return workTypeTotals;
         }
-
     }
 }

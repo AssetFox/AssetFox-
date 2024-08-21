@@ -150,7 +150,8 @@
                                                 && header.key !== 'treatment'
                                                 && header.key !== 'cost'
                                                 && header.key !== 'projectSource'
-                                                && header.key !== 'category'"
+                                                && header.key !== 'category'
+                                                && header.key !== 'projectId'"
                                                 readonly
                                                 class="sm-txt"
                                                 density="compact"
@@ -187,12 +188,19 @@
                                                 variant="underlined"
                                                 :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), inputRules['generalRules'].valueIsNotEmpty, inputRules['generalRules'].valueIsWithinRange(item.item[header.key], [firstYear, lastYear])]"
                                                 :error-messages="item.item.yearErrors"/>
-
+                                                
                                             <currencyTextbox v-if="header.key === 'cost'"
                                                 :model-value='item.item[header.key]'
                                                 density="compact"
                                                 variant="underlined"
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
+
+                                            <v-text-field v-if="header.key === 'projectId'"
+                                                readonly
+                                                class="sm-txt"
+                                                density="compact"
+                                                variant="underlined"
+                                                :model-value="item.item[header.key]"/>
 
                                             <template v-slot:input>
                                                 <v-text-field v-if="header.key === 'keyAttr'"
@@ -235,6 +243,12 @@
                                                     single-line
                                                     v-model.number="item.item[header.key]"
                                                     :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
+                                                
+                                                <v-text-field v-if="header.key === 'projectId'"
+                                                    label="Edit"
+                                                    single-line
+                                                    variant="underlined"
+                                                    v-model="item.item[header.key]"/>
 
                                             </template>
                                         </editDialog>
@@ -387,8 +401,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
         [0, "None"],
         [1, "iAMPick"],
         [2, "Committed"],
-        [3, "SAP"],
-        [4, "ProjectBuilder"]
+        [3, "MPMS"],
+        [4, "SAP"],
+        [5, "ProjectBuilder"]
     ]);
 
     const uuidNIL: string = getBlankGuid();
@@ -407,38 +422,28 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     let projectPagination = shallowReactive<Pagination>(clone(emptyPagination));
 
-    const currentUserCriteriaFilter = computed<UserCriteriaFilter>(() => store.state.userModule.currentUserCriteriaFilter);
     const stateSectionCommittedProjects = computed<SectionCommittedProject[]>(() => store.state.committedProjectsModule.sectionCommittedProjects);
-    const committedProjectTemplate = computed<string>(() =>store.state.committedProjectsModule.committedProjectTemplate);
     const stateTreatmentLibraries = computed<TreatmentLibrary[]>(() =>store.state.treatmentModule.treatmentLibraries);
     const stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
-    const stateInvestmentPlan = computed<InvestmentPlan>(() => store.state.investmentModule.investmentPlan);
     const stateScenarioSimpleBudgetDetails = computed<SimpleBudgetDetail[]>(() =>store.state.investmentModule.scenarioSimpleBudgetDetails);
     const hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
     const networks = computed<Network[]>(() => store.state.networkModule.networks);
     const selectedStateTreatmentLibrary = computed<TreatmentLibrary>(() => store.state.treatmentModule.selectedTreatmentLibrary);
+    const stateSimpleScenarioSelectableTreatments = computed<SimpleTreatment[]>(() => store.state.treatmentModule.simpleScenarioSelectableTreatments);
 
-    async function getCommittedProjects(payload?: any): Promise<any> { await store.dispatch('getCommittedProjects', payload); }
     async function getTreatmentLibrariesAction(payload?: any): Promise<any> { await store.dispatch('getTreatmentLibraries', payload); }
-    async function getScenarioSelectableTreatmentsAction(payload?: any): Promise<any> { await store.dispatch('getScenarioSelectableTreatments', payload); }
-    async function getInvestmentPlanAction(payload?: any): Promise<any> { await store.dispatch('getInvestmentPlan', payload); }
+    async function getSimpleScenarioSelectableTreatmentsAction(payload?: any): Promise<any> { await store.dispatch('getSimpleScenarioSelectableTreatments', payload); }
     async function getScenarioSimpleBudgetDetailsAction(payload?: any): Promise<any> { await store.dispatch('getScenarioSimpleBudgetDetails', payload); }
     async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes', payload); }
     async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks', payload); }
-    async function deleteSpecificCommittedProjectsAction(payload?: any): Promise<any> { await store.dispatch('deleteSpecificCommittedProjects', payload); }
     async function deleteSimulationCommittedProjectsAction(payload?: any): Promise<any> { await store.dispatch('deleteSimulationCommittedProjects', payload); }
-    async function upsertCommittedProjectsAction(payload?: any): Promise<any> { await store.dispatch('upsertCommittedProjects', payload); }
-
-        // TODO:Remove this one?
-        async function importCommittedProjectTemplate(payload?: any): Promise<any> { await store.dispatch('importComittedProjectTemplate', payload);}
-
-    async function selectTreatmentLibraryAction(payload?: any): Promise<any> { await store.dispatch('selectTreatmentLibrary', payload); }
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> { await store.dispatch('setHasUnsavedChanges', payload); }
-    async function addSuccessNotificationAction(payload?: any): Promise<any> { await store.dispatch('addSuccessNotification', payload); }
+    function selectTreatmentLibraryAction(payload?: any){ store.dispatch('selectTreatmentLibrary', payload); }
+    function setHasUnsavedChangesAction(payload?: any) { store.dispatch('setHasUnsavedChanges', payload); }
+    function addSuccessNotificationAction(payload?: any) {  store.dispatch('addSuccessNotification', payload); }
     async function addErrorNotificationAction(payload?: any): Promise<any> { await store.dispatch('addErrorNotification', payload); } 
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any> { await store.dispatch('getCurrentUserOrSharedScenario', payload); }
-    async function selectScenarioAction(payload?: any): Promise<any> { await store.dispatch('selectScenario', payload); }
-    async function setAlertMessageAction(payload?: any): Promise<any> { await store.dispatch('setAlertMessage', payload); }
+    function selectScenarioAction(payload?: any){  store.dispatch('selectScenario', payload); }
+    function setAlertMessageAction(payload?: any){ store.dispatch('setAlertMessage', payload); }
     
     let getUserNameByIdGetter: any = store.getters.getUserNameByIdGetter;
     
@@ -522,6 +527,14 @@ import ConfirmDialog from 'primevue/confirmdialog';
             class: '',
             width: '15%'
         },
+        { 
+            title: 'Project Id', 
+            key: 'projectId',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '15%'
+        },
         {
             title: 'Actions',
             key: 'actions',
@@ -553,8 +566,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             categorySelectItems.value.push({text: cat, value: i})     
             i++   
         });
-        await getTreatmentLibrariesAction();
-        await fetchTreatmentLibrary(scenarioId);
+        await getSimpleScenarioSelectableTreatmentsAction(scenarioId)
         hasScenario = true;
         await getNetworksAction();
         await InvestmentService.getScenarioBudgetYears(scenarioId).then(response => {  
@@ -646,7 +658,10 @@ import ConfirmDialog from 'primevue/confirmdialog';
         );
     };
 
-    watch(selectedStateTreatmentLibrary, () => {
+    watch(stateSimpleScenarioSelectableTreatments, () => {
+        treatmentSelectItems.value = stateSimpleScenarioSelectableTreatments.value.map(
+            (treatment: SimpleTreatment) => (treatment.name)
+        );
     });
 
     watch(stateScenarioSimpleBudgetDetails, () => {
@@ -656,10 +671,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 value: budget.name
             }),
         );
-        budgetSelectItems.value.push({
-            text: 'None',
-            value: ''
-        });
     });
 
     watch(stateSectionCommittedProjects, () => {
@@ -819,6 +830,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
         newRow.locationKeys['ID'] = getNewGuid();
         newRow.simulationId = scenarioId;
         newRow.projectSource = 'None';
+        newRow.projectId = '';
         addedRows.value.push(newRow)
         onPaginationChanged();   
      }
@@ -871,10 +883,12 @@ import ConfirmDialog from 'primevue/confirmdialog';
     function handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
         row.treatment = treatmentName;
         updateCommittedProject(row, treatmentName, 'treatment')  
+        var treatment = clone(stateSimpleScenarioSelectableTreatments.value.find(_ => _.name === treatmentName))
+        if(isNil(treatment))
+            return;
         CommittedProjectsService.FillTreatmentValues({
             committedProjectId: row.id,
-            treatmentLibraryId: librarySelectItemValue.value ? librarySelectItemValue.value : getBlankGuid(),
-            treatmentName: treatmentName,
+            treatmentId: treatment.id,
             KeyAttributeValue: row.locationKeys[keyattr],
             networkId: networkId
         })
@@ -941,6 +955,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
             }
             else if(property === 'budget'){
                 handleBudgetChange(row, scp, value)
+            }
+            else if(property === 'projectId') {
+                handleprojectIdChange(row, scp, value);
             }
             else if(property === 'projectSource') {
                 handleProjectSourceChange(row, scp, value)
@@ -1052,8 +1069,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 ) == true &&
                 rules['generalRules'].valueIsWithinRange(
                     scp.year, [firstYear, lastYear],
-                ) === true &&
-                scp.projectSource !== ""
+                ) === true
                 
             );
         });
@@ -1092,7 +1108,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
             errors: [],
             yearErrors: [],
             category: scp.category,
-            projectSource: projectSourceMap.get(+scp.projectSource) || scp.projectSource
+            projectSource: projectSourceMap.get(+scp.projectSource) || scp.projectSource,
+            projectId: scp.projectId
         }
         return row
     }
@@ -1125,6 +1142,12 @@ import ConfirmDialog from 'primevue/confirmdialog';
     function handleProjectSourceChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, projectSource: string) {
         row.projectSource = projectSource;
     updateCommittedProject(row, projectSource, 'projectSource');
+    onPaginationChanged();
+    }
+
+    function handleprojectIdChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, projectId: string) {
+        row.projectId = projectId;
+    updateCommittedProject(row, projectId, 'projectId');
     onPaginationChanged();
     }
 

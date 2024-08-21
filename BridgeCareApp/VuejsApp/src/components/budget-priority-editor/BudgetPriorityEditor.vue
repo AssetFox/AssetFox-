@@ -118,9 +118,12 @@
                                                         <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
                                                     </v-btn>
                                                     </div>
-                                                    <div v-else class='priority-criteria-output' style="width: 1000px;">
+                                                    <div style="display: flex; align-items: center;" v-else class='priority-criteria-output' >
                                                         <v-text-field readonly single-line class='sm-txt' variant="underlined"
-                                                                    :model-value='item.item.criteria' />                                        
+                                                                    :model-value='item.item.criteria' />   
+                                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' flat>
+                                                            <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>   
+                                                        </v-btn>                                  
                                                     </div>
                                             </template>
                                             <v-card>
@@ -290,15 +293,15 @@ import { vMaska } from "maska"
     let isSharedLibrary = computed<boolean>(() => store.state.budgetPriorityModule.isSharedLibrary);
     async function getIsSharedLibraryAction(payload?: any): Promise<any>{await store.dispatch('getIsSharedBudgetPriorityLibrary', payload)}
     async function getHasPermittedAccessAction(payload?: any): Promise<any>{await store.dispatch('getHasPermittedAccess', payload)}
-    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification', payload) }
+    function addErrorNotificationAction(payload?: any){ store.dispatch('addErrorNotification', payload) }
     async function getBudgetPriorityLibrariesAction(payload?: any): Promise<any>{await store.dispatch('getBudgetPriorityLibraries', payload)}
-    async function selectBudgetPriorityLibraryAction(payload?: any): Promise<any>{await store.dispatch('selectBudgetPriorityLibrary', payload)}
+    function selectBudgetPriorityLibraryAction(payload?: any){ store.dispatch('selectBudgetPriorityLibrary', payload)}
     async function upsertBudgetPriorityLibraryAction(payload?: any): Promise<any>{await store.dispatch('upsertBudgetPriorityLibrary', payload) }
     async function deleteBudgetPriorityLibraryAction(payload?: any): Promise<any>{await store.dispatch('deleteBudgetPriorityLibrary', payload)}
     async function getScenarioSimpleBudgetDetailsAction(payload?: any): Promise<any>{await store.dispatch('getScenarioSimpleBudgetDetails', payload)} 
     async function upsertScenarioBudgetPrioritiesAction(payload?: any): Promise<any>{await store.dispatch('upsertScenarioBudgetPriorities', payload) }
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any>{await store.dispatch('setHasUnsavedChanges', payload) }
-    async function addSuccessNotificationAction(payload?: any): Promise<any>{await store.dispatch('addSuccessNotification', payload)}
+     function setHasUnsavedChangesAction(payload?: any){ store.dispatch('setHasUnsavedChanges', payload) }
+    function addSuccessNotificationAction(payload?: any){ store.dispatch('addSuccessNotification', payload)}
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>{await store.dispatch( 'getCurrentUserOrSharedScenario', payload)}
     function selectScenarioAction(payload?: any): void { store.dispatch('selectScenario', payload)}
     
@@ -339,7 +342,7 @@ import { vMaska } from "maska"
     let budgetPriorityGridHeaders: any[] = [
         { title: 'Priority', key: 'priorityLevel', align: 'left', sortable: true, class: '', width: '5%' },
         { title: 'Year', key: 'year', align: 'left', sortable: false, class: '', width: '5%' },
-        { title: 'Criteria', key: 'criteria', align: 'left', sortable: false, class: '', width: '5%' },
+        { title: 'Criteria', key: 'criteria', align: 'left', sortable: false, class: ''},
         actionHeader
     ];
     let selectedBudgetPriorityGridRows = ref<BudgetPriorityGridDatum[]>([]);

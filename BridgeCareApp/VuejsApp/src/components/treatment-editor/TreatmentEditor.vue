@@ -33,7 +33,7 @@
             >
             </v-select>
         </v-col>
-        <v-col class="ghd-blue ghd-button-text ghd-text-padding" v-if='hasSelectedLibrary' style="border-style: solid;border-width: 2px; border-color: lightgray;margin-right: 5px;margin-bottom: 50px;">Treatments<br>
+        <v-col class="ghd-blue ghd-button-text ghd-text-padding" v-if='hasSelectedLibrary || hasScenario' style="border-style: solid;border-width: 2px; border-color: lightgray;margin-right: 5px;margin-bottom: 50px;">Treatments<br>
             <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
                 variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'
@@ -53,7 +53,7 @@
                     Upload
             </v-btn>
         </v-col>        
-        <v-col class="ghd-blue ghd-button-text ghd-text-padding" v-if='hasSelectedLibrary' style="border-style: solid;border-width: 2px; border-color: lightgray;margin-bottom: 50px;">Supersede<br>
+        <v-col class="ghd-blue ghd-button-text ghd-text-padding" v-if='hasSelectedLibrary || hasScenario' style="border-style: solid;border-width: 2px; border-color: lightgray;margin-bottom: 50px;">Supersede<br>
             <v-btn :disabled='false' @click='OnDownloadSupersedeTemplateClick()'
                 variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'
@@ -500,8 +500,8 @@ import { getUrl } from '@/shared/utils/get-url';
   await store.dispatch('getTreatmentLibraries', payload);
 }
 
-async function selectTreatmentLibraryAction(payload?: any): Promise<any> {
-  await store.dispatch('selectTreatmentLibrary', payload);
+function selectTreatmentLibraryAction(payload?: any) {
+  store.dispatch('selectTreatmentLibrary', payload);
 }
 
 async function upsertTreatmentLibraryAction(payload?: any): Promise<any> {
@@ -576,8 +576,8 @@ async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>
   await store.dispatch('getCurrentUserOrSharedScenario', payload);
 }
 
-async function selectScenarioAction(payload?: any): Promise<any> {
-  await store.dispatch('selectScenario', payload);
+function selectScenarioAction(payload?: any) {
+  store.dispatch('selectScenario', payload);
 }
 
 async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
@@ -589,12 +589,12 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
 }
 
 
-async function addedOrUpdatedTreatmentLibraryMutator(payload?: any): Promise<any> {
-  await store.commit('addedOrUpdatedTreatmentLibraryMutator', payload);
+ function addedOrUpdatedTreatmentLibraryMutator(payload?: any) {
+  store.commit('addedOrUpdatedTreatmentLibraryMutator', payload);
 }
 
-async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
-  await store.commit('selectedTreatmentLibraryMutator', payload);
+ function selectedTreatmentLibraryMutator(payload?: any) {
+  store.commit('selectedTreatmentLibraryMutator', payload);
 }
 
 
@@ -1504,7 +1504,7 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
             addedRows[index] = updatedRow;
             return;
         }
-        let mapEntry = updatedRowsMap.get(rowId)
+        let mapEntry = updatedRowsMap.get(rowId);
         if(isNil(mapEntry)){
             const row = treatmentCache.find(r => r.id === rowId);
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
@@ -1516,12 +1516,6 @@ async function selectedTreatmentLibraryMutator(payload?: any): Promise<any> {
         else
             updatedRowsMap.delete(rowId)
         checkHasUnsavedChanges();
-    }
-
-    function learChanges(){
-        updatedRowsMap.clear();
-        addedRows = [];
-        treatmentCache = [];
     }
 
     function checkHasUnsavedChanges(){

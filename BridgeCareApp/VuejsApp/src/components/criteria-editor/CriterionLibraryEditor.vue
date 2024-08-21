@@ -166,20 +166,20 @@ import { useRouter } from 'vue-router';
         await store.dispatch('upsertCriterionLibrary');
     }
 
-    async function selectCriterionLibraryAction(payload?: any): Promise<any> {
-        await store.dispatch('selectCriterionLibrary');
+     function selectCriterionLibraryAction(payload?: any) {
+        store.dispatch('selectCriterionLibrary');
     }
 
     async function deleteCriterionLibraryAction(payload?: any): Promise<any> {
         await store.dispatch('deleteCriterionLibrary');
     }
 
-    async function setSelectedCriterionIsValidAction(payload?: any): Promise<any> {
-        await store.dispatch('setSelectedCriterionIsValid');
+     function setSelectedCriterionIsValidAction(payload?: any) {
+        store.dispatch('setSelectedCriterionIsValid');
     }
 
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any> {
-        await store.dispatch('setHasUnsavedChanges');
+    function setHasUnsavedChangesAction(payload?: any){
+        store.dispatch('setHasUnsavedChanges');
     }
 
     async function selectScenarioRelatedCriterionAction(payload?: any): Promise<any> {

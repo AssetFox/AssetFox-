@@ -1,4 +1,6 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine;
+﻿using System;
+
+namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
 /// <summary>
 ///     Represents the reason that cash flow was not used to fund a specific treatment.
@@ -22,9 +24,12 @@ public enum ReasonAgainstCashFlow
     NoApplicableDistributionRule,
 
     /// <summary>
-    ///     Indicates a cash flow rule whose applicable distribution rule is for only one year and
-    ///     thus is unnecessary.
+    ///     Indicates a cash flow rule whose applicable distribution rule is for only one year.
+    ///     <em>This kind of distribution used to be automatically rejected. It is no longer
+    ///     automatically rejected. The funding is simply handled as it would be for a typical
+    ///     1-year selection without cash flow.</em>
     /// </summary>
+    [Obsolete("One-year distributions are no longer automatically rejected.")]
     ApplicableDistributionRuleIsForOnlyOneYear,
 
     /// <summary>
@@ -51,9 +56,7 @@ public enum ReasonAgainstCashFlow
     None,
 
     /// <summary>
-    ///     Indicates that (a) <see cref="AnalysisMethod.ShouldRestrictCashFlowToFirstYearBudgets"/>
-    ///     is enabled and (b) the first cash-flow year's funding pattern (i.e. allocated cost per
-    ///     budget) could not be applied to at least one future year of the cash-flow.
+    ///     Indicates a cash flow rule whose condition was not met.
     /// </summary>
-    FirstYearFundingPatternFailedInFutureYear,
+    ConditionNotMet,
 }

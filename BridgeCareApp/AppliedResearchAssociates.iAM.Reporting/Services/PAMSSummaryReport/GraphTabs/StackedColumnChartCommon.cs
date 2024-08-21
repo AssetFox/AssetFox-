@@ -27,18 +27,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Gra
         ///     Set chart axes
         /// </summary>
         /// <param name="chart"></param>
-        public void SetChartAxes(ExcelChart chart)
+        public void SetChartAxes(ExcelChart chart, string yAxisTitle, string xAxisTitle)
         {
             var xAxis = chart.XAxis;
             xAxis.MinorTickMark = eAxisTickMark.None;
             xAxis.MajorTickMark = eAxisTickMark.None;
             xAxis.Border.Fill.Style = eFillStyle.NoFill;
+            xAxis.Title.Text = xAxisTitle;
+            xAxis.Title.Font.Size = 12;
 
-            var yAxis = chart.YAxis;
+            var yAxis = chart.YAxis;            
             yAxis.MinorTickMark = eAxisTickMark.None;
             yAxis.MajorTickMark = eAxisTickMark.None;
             yAxis.MajorGridlines.Fill.Color = Color.LightGray;
             yAxis.Border.Fill.Style = eFillStyle.NoFill;
+            yAxis.Title.Text = yAxisTitle;
+            yAxis.Title.Font.Size = 12;
         }
 
         /// <summary>

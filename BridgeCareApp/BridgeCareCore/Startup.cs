@@ -21,6 +21,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BridgeCareCore.Services;
+using AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary;
 
 namespace BridgeCareCore
 {
@@ -113,6 +114,9 @@ namespace BridgeCareCore
             reportFactoryList.Add(new PAMSInventorySegmentsReportFactory());
             reportFactoryList.Add(new NetworkExportReportFactory());
             reportFactoryList.Add(new RawDataNetworkExportReportFactory());
+            reportFactoryList.Add(new PAMSDistressProgressionReportFactory());
+            reportFactoryList.Add(new FlexibleAuditReportFactory());
+            reportFactoryList.Add(new GeneralSummaryReportFactory());
             services.AddSingleton<IReportLookupLibrary>(service => new ReportLookupLibrary(reportFactoryList));
         }
 

@@ -19,7 +19,7 @@ public sealed class TreatmentSupersedeRule : WeakEntity, IValidator
 
         if (Treatment == null)
         {
-            results.Add(ValidationStatus.Error, "Treatment is unset.", this, nameof(Treatment));
+            results.Add(ValidationStatus.Error, "Treatment is unset. Check for circular supersede rules.", this, nameof(Treatment));
         }
 
         return results;

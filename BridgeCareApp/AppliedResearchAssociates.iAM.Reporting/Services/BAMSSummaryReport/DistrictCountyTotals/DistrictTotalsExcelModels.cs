@@ -9,8 +9,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
 {
     public static class DistrictTotalsExcelModels
     {
-        private static decimal TotalCost(AssetDetail section)
-            => section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+        private static decimal TotalCost(AssetDetail section, int year)
+            => section.TreatmentConsiderations.Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == year).Sum(b => b.AllocatedAmount) ?? 0);
 
         internal static IExcelModel DistrictTableContent(
             SimulationYearDetail year,
@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
                 {
                     if (inclusionPredicate(section))
                     {
-                        var cost = TotalCost(section);
+                        var cost = TotalCost(section, year.Year);
                         totalMoney += cost;
                     }
                 }

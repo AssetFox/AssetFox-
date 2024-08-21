@@ -400,7 +400,7 @@ const props = defineProps<{
     
 let stateNumericAttributes = computed<Attribute[]>(() => store.state.attributeModule.numericAttributes);
 async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes');}
-async function addErrorNotificationAction(payload?: any): Promise<any> {await store.dispatch('addErrorNotification');}
+function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification');}
 
   let equation: Equation = {...emptyEquation, id: getNewGuid()};
   const attributesList = ref<string[]>([]);  
@@ -690,7 +690,8 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
           timeValue: 0,
           conditionValue: Math.trunc(add(1, timeInRatingData[0].conditionValue))
         };
-        piecewiseData = insert(0, n1, piecewiseData);
+        if(!isNil(props.dialogData.isAscending) && !props.dialogData.isAscending)
+          piecewiseData = insert(0, n1, piecewiseData);
       }
     } else {
       timeInRatingData = reverse(sortByProperty('conditionValue', dataPoints));
@@ -714,7 +715,8 @@ async function addErrorNotificationAction(payload?: any): Promise<any> {await st
           timeValue: 0,
           conditionValue: Math.trunc(add(1, timeInRatingData[0].conditionValue))
         };
-        piecewiseData = insert(0, n1, piecewiseData);
+        if(!isNil(props.dialogData.isAscending) && !props.dialogData.isAscending)
+          piecewiseData = insert(0, n1, piecewiseData);
       }
     }
 

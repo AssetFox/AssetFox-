@@ -16,9 +16,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentCost
             Guid treatmentId,
             Guid simulationId,
             Guid? id = null,
-            string mergedCriteriaExpression = null)
+            string mergedCriteriaExpression = null,
+            string equation = "[AGE]")
         {
-            var cost = TreatmentCostDtos.WithEquationAndCriterionLibrary(id, equation:"[AGE]");
+            var cost = TreatmentCostDtos.WithEquationAndCriterionLibrary(id, equation:equation, mergedCriteriaExpression: mergedCriteriaExpression);
             var costs = new List<TreatmentCostDTO> { cost };
             var costDictionary = new Dictionary<Guid, List<TreatmentCostDTO>>
             {

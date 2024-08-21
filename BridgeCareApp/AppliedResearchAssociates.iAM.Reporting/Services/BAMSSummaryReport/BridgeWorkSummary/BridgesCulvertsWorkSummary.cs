@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using AppliedResearchAssociates.iAM.Analysis;
 using OfficeOpenXml;
 
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
@@ -30,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> workedOnCommitedProjCount,
             List<int> simulationYears,
-            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var projectRowNumberModel = new ProjectRowNumberModel();
             FillMPMSWorkedOnCount(worksheet, currentCell, workedOnCommitedProjCount, simulationYears, projectRowNumberModel);
@@ -51,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private void FillNumberOfCulvertsWorkedOnSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
             List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel,
-            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Number of Culverts Worked on", "Culvert Work Type");
             AddCountsOfCulvertsWorkedOn(worksheet, currentCell, countPerTreatmentPerYear, projectRowNumberModel, simulationTreatments);
@@ -60,7 +58,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private void FillNumberOfBridgesWorkedOnSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
             List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel,
-            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Number of Bridges Worked on", "Bridge Work Type");
             AddCountsOfBridgesWorkedOn(worksheet, currentCell, countPerTreatmentPerYear, projectRowNumberModel, simulationTreatments);
@@ -68,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         private void FillNumberOfBridgesCulvertsWorkedOnSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel,
-            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Number of Bridges and Culverts Worked on", "Bridge and Culvert Work Types");
             AddDetailsForNumberOfBridgesCulvertsWorkedOn(worksheet, currentCell, simulationYears, projectRowNumberModel, simulationTreatments);
@@ -90,18 +88,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 decimal committedTotalCount = 0;
                 foreach (var data in yearlyItem.Value)
                 {
-                    MPMSTreatments.Add(data.Key); // Tracking treatment names for MPMS projects
-                    if (!uniqueTreatments.ContainsKey(data.Key))
+                    var dataKey = data.Key.Contains("Bundle") ? BAMSConstants.BundledTreatments : data.Key;
+                    MPMSTreatments.Add(dataKey); // Tracking treatment names for MPMS projects
+                    if (!uniqueTreatments.ContainsKey(dataKey))
                     {
-                        uniqueTreatments.Add(data.Key, currentCell.Row);
-                        worksheet.Cells[currentCell.Row, column].Value = data.Key;
+                        uniqueTreatments.Add(dataKey, currentCell.Row);
+                        worksheet.Cells[currentCell.Row, column].Value = dataKey;
                         // setting up the row with zeros
                         worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, currentCell.Column + 1 + simulationYears.Count].Value = 0;
 
                         var cellToEnterCount = yearlyItem.Key - startYear;
-                        worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCount + 2].Value = data.Value.bridgeCount;
+                        worksheet.Cells[uniqueTreatments[dataKey], column + cellToEnterCount + 2].Value = data.Value.bridgeCount;
 
-                        var keyItem = data.Key + "_" + yearlyItem.Key;
+                        var keyItem = dataKey + "_" + yearlyItem.Key;
                         if(projectRowNumberModel.TreatmentsCount.ContainsKey(keyItem) == false)
                         {
                             projectRowNumberModel.TreatmentsCount.Add(keyItem, currentCell.Row);
@@ -117,12 +116,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     else
                     {
                         var cellToEnterCost = yearlyItem.Key - startYear;
-                        worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost + 2].Value = data.Value.bridgeCount;
+                        worksheet.Cells[uniqueTreatments[dataKey], column + cellToEnterCost + 2].Value = data.Value.bridgeCount;
 
-                        var keyItem = data.Key + "_" + yearlyItem.Key;
+                        var keyItem = dataKey + "_" + yearlyItem.Key;
                         if (projectRowNumberModel.TreatmentsCount.ContainsKey(keyItem) == false)
                         {
-                            projectRowNumberModel.TreatmentsCount.Add(keyItem, uniqueTreatments[data.Key]);
+                            projectRowNumberModel.TreatmentsCount.Add(keyItem, uniqueTreatments[dataKey]);
                         }
                         else
                         {
@@ -155,7 +154,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private void AddCountsOfCulvertsWorkedOn(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
             ProjectRowNumberModel projectRowNumberModel,
-            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
@@ -171,7 +170,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 double culvertTotalCount = 0; 
                 foreach (var treatment in simulationTreatments)
                 {
-                    if (treatment.AssetType == AssetCategories.Culvert || treatment.Name == BAMSConstants.CulvertNoTreatment)
+                    if (treatment.AssetType == "Culvert" || treatment.Name == BAMSConstants.CulvertNoTreatment)
                     {
                         yearlyValues.Value.TryGetValue(treatment.Name, out var culvertCostAndCount);
                         worksheet.Cells[row, column].Value = culvertCostAndCount.bridgeCount;
@@ -203,7 +202,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private void AddCountsOfBridgesWorkedOn(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
             ProjectRowNumberModel projectRowNumberModel,
-            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
@@ -220,12 +219,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 foreach (var treatment in simulationTreatments)
                 {
-                    if (treatment.AssetType == AssetCategories.Bridge && treatment.Name != BAMSConstants.CulvertNoTreatment)
+                    if (treatment.AssetType == "Bridge" && treatment.Name != BAMSConstants.CulvertNoTreatment)
                     {
-                        yearlyValues.Value.TryGetValue(treatment.Name, out var nonCulvertCostAndCount);
+                        var treatmentName = treatment.Name.Contains("Bundle") ? BAMSConstants.BundledTreatments : treatment.Name;                        
+                        yearlyValues.Value.TryGetValue(treatmentName, out var nonCulvertCostAndCount);
                         worksheet.Cells[row, column].Value = nonCulvertCostAndCount.bridgeCount;
 
-                        var keyItem = treatment.Name + "_" + yearlyValues.Key;
+                        var keyItem = treatmentName + "_" + yearlyValues.Key;
                         if (projectRowNumberModel.TreatmentsCount.ContainsKey(keyItem) == false)
                         {
                             projectRowNumberModel.TreatmentsCount.Add(keyItem, row);
@@ -251,21 +251,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         private void AddDetailsForNumberOfBridgesCulvertsWorkedOn(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel,
-            List<(string Name, AssetCategories AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
 
             worksheet.Cells[row++, column].Value = BAMSConstants.NoTreatmentForWorkSummary;
 
-            simulationTreatments.Remove((BAMSConstants.CulvertNoTreatment, AssetCategories.Culvert, TreatmentCategory.Other));
-            simulationTreatments.Remove((BAMSConstants.NonCulvertNoTreatment, AssetCategories.Bridge, TreatmentCategory.Other));
+            simulationTreatments.Remove((BAMSConstants.CulvertNoTreatment, "Culvert", TreatmentCategory.Other));
+            simulationTreatments.Remove((BAMSConstants.NonCulvertNoTreatment, "Bridge", TreatmentCategory.Other));
 
             foreach (var item in simulationTreatments)
             {
                 worksheet.Cells[row++, column].Value = item.Name;
             }
-            foreach (var item in MPMSTreatments)
+            foreach (var item in MPMSTreatments) 
             {
                 worksheet.Cells[row++, column].Value = item;
             }
@@ -299,6 +299,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         worksheet.Cells[row, column].Value = count;
                         totalCount += count;
                     }
+                    else
+                    {
+                        worksheet.Cells[row, column].Value = 0;
+                    }
                     row++;
                 }
                 worksheet.Cells[row, column].Value = totalCount;
@@ -309,8 +313,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.ApplyColor(worksheet.Cells[row + 2, startColumn, row + 2, column], Color.DimGray);
 
             // Adding back the two types of No treatments.
-            simulationTreatments.Add((BAMSConstants.CulvertNoTreatment, AssetCategories.Culvert, TreatmentCategory.Other));
-            simulationTreatments.Add((BAMSConstants.NonCulvertNoTreatment, AssetCategories.Bridge, TreatmentCategory.Other));
+            simulationTreatments.Add((BAMSConstants.CulvertNoTreatment, "Culvert", TreatmentCategory.Other));
+            simulationTreatments.Add((BAMSConstants.NonCulvertNoTreatment, "Bridge", TreatmentCategory.Other));
         }
 
         #endregion Private methods

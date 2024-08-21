@@ -29,6 +29,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         public const string CombineNHSNonNHSConditionByBridgeCount = "Combine NHS and Non-NHS Condition By Bridge Count";
         public const string CombineNHSNonNHSConditionByDeckArea = "Combine NHS and Non-NHS Without Committed Projects\nCombine NHS and Non-NHS Without Committed Projects\nCondition By Deck Area";
         public const string CommittedTotal = "Committed Total";
+        public const string SAPTotal = "SAP Total";
+        public const string ProjectBuilderTotal = "Project Builder Total";
         public const string CulvDurationN = "CULV_DURATION_N";
         public const string Culvert = "culvert";
         public const string CulvertBridgeType = "C";
@@ -66,7 +68,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         public const string NoTreatmentForWorkSummary = "No Treatment";
         public const string Overall = "Overall";
         public const string PercentBudgetSpentBAMS = "Percent Budget Spent BAMS";
+        public const string PercentBudgetSpentCommitted = "Percent Budget Spent Committed";
         public const string PercentBudgetSpentMPMS = "Percent Budget Spent MPMS";
+        public const string PercentBudgetSpentSAP = "Percent Budget Spent SAP";
+        public const string PercentBudgetSpentProjectBuilder = "Percent Budget Spent Project Builder";
         public const string Poor = "Poor";
         public const string PoorBridgeCompareBridgeCount = "Poor Bridge Compare Bridge Count";
         public const string PoorBridgeCompareDeckArea = "Poor Bridge Compare Deck Area";
@@ -86,5 +91,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         public const string Work = "Work";
         public const string Yes = "Y";
         public const string No = "N";
+
+        public const string Bundled = "Bundled";
+        public const string BundledTreatments = "Bundled Treatments";
     }
 }

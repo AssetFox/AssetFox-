@@ -1,3 +1,5 @@
+Line 164 Delete,
+
 <template>
     <v-card height="800px" class="elevation-0 vcard-main-layout">
         <v-row>
@@ -48,13 +50,12 @@
                                 density="compact"
                                 menu-icon=custom:GhdDownSvg
                                 v-model="analysisMethod.spendingStrategy"
-                                @update:model-value="onSetAnalysisMethodProperty('spendingStrategy',$event)"
-                            >
+                                @update:model-value="onSetAnalysisMethodProperty('spendingStrategy',$event)">
                             </v-select>
                         </v-col>                      
                     </v-row>
                     <v-row>
-                        <v-col cols = "4">
+                        <v-col cols = "3">
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Attribute</v-subheader>
                             <v-select
                                 id="EditAnalysisMethod-benefitAttribute-select"
@@ -71,7 +72,7 @@
                             >
                             </v-select>
                         </v-col>
-                        <v-col cols = "4">
+                        <v-col cols = "3">
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Limit</v-subheader>
                             <v-text-field
                                 id="EditAnalysisMethod-benefitLimit-textField"
@@ -93,15 +94,30 @@
                             >
                             </v-text-field>
                         </v-col>
-                        <v-col cols = "4" class="ghd-constant-header">
-                            <v-switch style="margin-left:10px;margin-top:30px;"
-                                id="EditAnalysisMethod-allowMultiBudgetFunding-switch"
-                                class="ghd-checkbox"
-                                color="#2A578D"
-                                label="Allow Multi Budget Funding"
-                                v-model="analysisMethod.shouldUseExtraFundsAcrossBudgets"
-                                @update:model-value='onSetAnalysisMethodProperty("shouldUseExtraFundsAcrossBudgets",$event)'/>
+                    </v-row>
+                    <v-row>
+                        <v-col cols = "3">
+                            <v-switch 
+                            id="EditAnalysisMethod-allowMultiBudgetFunding-switch"
+                            class="ghd-checkbox"
+                            color="#2A578D"
+                            label="Allow Multi Budget Funding"
+                            :disabled="!hasAdminAccess"
+                            v-model="analysisMethod.shouldUseExtraFundsAcrossBudgets"
+                            @update:model-value='onSetAnalysisMethodProperty("shouldUseExtraFundsAcrossBudgets",$event)'/>
+                            
                         </v-col>
+                        <v-col cols = "3">
+                            <v-switch 
+                            id="EditAnalysisMethod-allowMultipleTreatments-switch"
+                            class="ghd-checkbox"
+                            color="#2A578D"
+                            label="Allow Multiple Treatments"
+                            :disabled="!hasAdminAccess"
+                            v-model="analysisMethod.shouldAllowMultipleTreatments"
+                            @update:model-value='onSetAnalysisMethodProperty("shouldAllowMultipleTreatments",$event)'/>
+                        </v-col>
+                    
                     </v-row>
                     <v-row>
                         <v-row justify="space-between" style="padding-left: 10px;">
@@ -138,7 +154,7 @@
                                 <v-textarea
                                     id="EditAnalysisMethod-criteria-textArea"
                                     class="ghd-control-text ghd-control-border"
-                                    style="padding-bottom: 0px; height: 100px;"
+                                    style="padding-bottom: 0px; height: 250px;"
                                     no-resize
                                     variant="outlined"
                                     readonly
@@ -146,16 +162,6 @@
                                     v-model="analysisMethod.criterionLibrary.mergedCriteriaExpression"
                                 >
                                 </v-textarea>
-                                <div style="padding-top: 20px;"></div>
-                                <v-checkbox
-                                    id="EditAnalysisMethod-criteria-checkbox"
-                                    style="padding-top: 0px; margin-top: 4px;"
-                                    class="ghd-checkbox ghd-md-gray"
-                                    label="Criteria is intentionally empty (MUST check to Save)" 
-                                    v-model="criteriaIsIntentionallyEmpty"
-                                    v-show="criteriaIsEmpty()"
-                                >
-                                </v-checkbox>
                             </v-col>
                         </v-row>
                     </v-row>
@@ -170,7 +176,7 @@
                     >
                     <v-btn
                         id="EditAnalysisMethod-save-btn"
-                        :disabled="(criteriaIsInvalid() || !valid) || !hasUnsavedChanges"
+                        :disabled="(!valid) || !hasUnsavedChanges"
                         @click="onUpsertAnalysisMethod"
                         variant = "flat"
                         class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
@@ -183,6 +189,11 @@
                 :dialogData="criterionEditorDialogData"
                 @submit="onCriterionEditorDialogSubmit"
             />
+            <Alert
+            :dialogData="ConfirmEmptyCriteria"
+            @submit="onConfirmEmptyCriteriaAlertSubmit"
+            />
+
             <ConfirmDialog></ConfirmDialog>
 </template>
 
@@ -206,6 +217,8 @@ import {
     InputValidationRules,
     rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
+import {emptyAlertData} from '@/shared/models/modals/alert-data';
+import Alert from '@/shared/modals/Alert.vue';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { useStore } from 'vuex'; 
@@ -226,15 +239,15 @@ import ConfirmDialog from 'primevue/confirmdialog';
     async function getAnalysisMethodAction(payload?: any): Promise<any>{await store.dispatch('getAnalysisMethod', payload)} 
     async function upsertAnalysisMethodAction(payload?: any): Promise<any>{await store.dispatch('upsertAnalysisMethod', payload)} 
 
-    async function addErrorNotificationAction(payload?: any): Promise<any>{await store.dispatch('addErrorNotification', payload)}
-    async function setHasUnsavedChangesAction(payload?: any): Promise<any>{await store.dispatch('setHasUnsavedChanges', payload)} 
+    function addErrorNotificationAction(payload?: any){ store.dispatch('addErrorNotification', payload)}
+    function setHasUnsavedChangesAction(payload?: any){ store.dispatch('setHasUnsavedChanges', payload)} 
 
     async function getCurrentUserOrSharedScenarioAction(payload?: any): Promise<any>{await store.dispatch('getCurrentUserOrSharedScenario', payload)}
-    async function selectScenarioAction(payload?: any): Promise<any>{await store.dispatch('selectScenario', payload)} 
+    function selectScenarioAction(payload?: any){ store.dispatch('selectScenario', payload)} 
 
     const selectedScenarioId = ref<string>(getBlankGuid());
     const analysisMethod = ref<AnalysisMethod>(clone(emptyAnalysisMethod));
-    let benefit = computed<Benefit>(() => analysisMethod.value.benefit)
+    let benefit = computed<Benefit>(() => analysisMethod.value.benefit)//
     const optimizationStrategy: SelectItem[] = [
         { text: 'Benefit', value: OptimizationStrategy.Benefit },
         {
@@ -276,6 +289,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     const valid = ref<boolean>(true);
     const criteriaIsIntentionallyEmpty = ref<boolean>(false);
     let hasUnsavedChanges = ref<boolean>(false);
+    let ConfirmEmptyCriteria = ref(clone(emptyAlertData));
 
     //beforeRouteEnter(to: any, from: any, next: any) {
        //next((vm: any) => {
@@ -316,10 +330,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
             ...stateAnalysisMethod.value,
             benefit: {
                 ...stateAnalysisMethod.value.benefit,
-                id:
-                    stateAnalysisMethod.value.benefit.id === getBlankGuid()
-                        ? getNewGuid()
-                        : stateAnalysisMethod.value.benefit.id,
             },
         };
     });
@@ -423,11 +433,19 @@ import ConfirmDialog from 'primevue/confirmdialog';
     }    
 
     async function onUpsertAnalysisMethod() {
-
+        if(criteriaIsEmpty())
+        {
+            onConfirmEmptyCriteriaAlert();
+        }
+        else
+        {
+            if(analysisMethod.value.benefit.id === getBlankGuid())
+            analysisMethod.value.benefit.id = getNewGuid();
         upsertAnalysisMethodAction({
                 analysisMethod: analysisMethod.value,
                 scenarioId: selectedScenarioId.value,
             });
+        }
         // const form: any = $refs.form;
 
         // await(form.validate(), () =>{
@@ -440,6 +458,30 @@ import ConfirmDialog from 'primevue/confirmdialog';
         // })
          
     }
+
+    function onConfirmEmptyCriteriaAlert() {
+        ConfirmEmptyCriteria.value = {
+            showDialog: true,
+            heading: 'Warning',
+            choice: true,
+            message:
+                'Warning: Criteria field is blank. A blank Criteria field will default to your user assigned assets.',
+        };
+    }
+
+    function onConfirmEmptyCriteriaAlertSubmit(submit: boolean) {
+        ConfirmEmptyCriteria.value = clone(emptyAlertData);
+
+        if (submit) {
+            if(analysisMethod.value.benefit.id === getBlankGuid())
+            analysisMethod.value.benefit.id = getNewGuid();
+        upsertAnalysisMethodAction({
+                analysisMethod: analysisMethod.value,
+                scenarioId: selectedScenarioId.value,
+            });
+        } 
+    }
+
 
     function onDiscardChanges() {
         analysisMethod.value = clone(stateAnalysisMethod.value);

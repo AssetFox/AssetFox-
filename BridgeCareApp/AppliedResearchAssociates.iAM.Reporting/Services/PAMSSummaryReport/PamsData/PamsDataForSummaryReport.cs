@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
@@ -32,38 +34,31 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             if (_summaryReportHelper == null) { throw new ArgumentNullException(nameof(_summaryReportHelper)); }
         }
 
-        private List<string> GetHeaders()
+        private static List<string> GetHeaders() => new()
         {
-            return new List<string>
-            {
-                "Section",
-                "Start Segment",
-                "End Segment",
-                "District",
+                "CRS",
                 "County",
-                "CNTY NO",
-                "Route",                
-
-                "Length",
-                "Width",
-                "Pavement Depth",
+                "Route",
+                "District",
+                "Start",
+                "End",
+                "Length(ft)",
+                "Width(ft)",
+                "Pavement Depth(in)",
                 "Direction",
                 "Lanes",
                 "FamilyID",
                 "MPO/ RPO",
-
-                "Surface",
+                "Posted Roads",
+                "Surface Type",
                 "BPN",
-
                 "Year Built",
                 "Year Last Resurface",
-                "Year Last  Structural overlay",
-
+                "Year Last  Structural Overlay",
                 "ADT",
                 "Truck %",
                 "Risk Score",
             };
-        }
 
         private List<string> GetSubHeaders()
         {
@@ -74,15 +69,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 "Rut",
                 "Fault",
                 "Project Source",
+                "Project Id",
                 "Budget",
                 "Recommended Treatment",
                 "Cost",
+                "Superseded Treatments",
                 "District Remarks"
             };
         }
 
 
-        public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData)
+        public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, bool shouldBundleFeasibleTreatments, List<DTOs.Abstract.BaseCommittedProjectDTO> committedProjectList)
         {
             // Add data to excel.
             reportOutputData.Years.ForEach(_ => _simulationYears.Add(_.Year));
@@ -95,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             }
 
             FillData(worksheet, reportOutputData, currentCell);
-            FillDynamicData(worksheet, reportOutputData, currentCell);
+            FillDynamicData(worksheet, reportOutputData, currentCell, shouldBundleFeasibleTreatments, committedProjectList);
             worksheet.Cells.AutoFitColumns();
 
             const double minimumColumnWidth = 15;
@@ -186,7 +183,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             var dataSubHeaders = GetSubHeaders();
             worksheet.Cells[row, ++column].Value = simulationYears[0] - 1;
             column = currentCell.Column;
-            column = BuildDataSubHeaders(worksheet, column, row, dataSubHeaders, dataSubHeaders.Count - 5);
+            column = BuildDataSubHeaders(worksheet, column, row, dataSubHeaders, dataSubHeaders.Count - 6);
             ExcelHelper.MergeCells(worksheet, row, currentCell.Column + 1, row, column);
 
             // Empty column
@@ -241,38 +238,39 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             foreach (var sectionSummary in reportOutputData.InitialAssetSummaries)
             {
                 rowNo++; columnNo = 1;
-                var crs = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CRS");
-                worksheet.Cells[rowNo, columnNo++].Value = crs;
 
+                var valuePerNumericAttribute = sectionSummary.ValuePerNumericAttribute;
+                var valuePerTextAttribute = sectionSummary.ValuePerTextAttribute;
+
+                var crs = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "CRS");
+                worksheet.Cells[rowNo, columnNo++].Value = crs;
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "COUNTY");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "SR");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "DISTRICT");
                 var lastUnderScoreIndex = crs.LastIndexOf('_');
                 var hyphenIndex = crs.IndexOf('-');
                 var startSeg = crs.Substring(lastUnderScoreIndex + 1, hyphenIndex - lastUnderScoreIndex - 1);
                 var endSeg = crs.Substring(hyphenIndex + 1);
-
                 worksheet.Cells[rowNo, columnNo++].Value = startSeg;
                 worksheet.Cells[rowNo, columnNo++].Value = endSeg;
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CNTY");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SR");
-
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SEGMENT_LENGTH");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "WIDTH");
-                worksheet.Cells[rowNo, columnNo++].Value = ""; // _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "DEPTH");
-
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DIRECTION");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LANES");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FAMILY");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "MPO_RPO");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SURFACEID").ToString() + "-" + _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SURFACE_NAME");
-
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BUSIPLAN");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "YR_BUILT");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "YEAR_LAST_OVERLAY");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LAST_STRUCTURAL_OVERLAY");
-                worksheet.Cells[rowNo, columnNo++].Value = Math.Round(_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "AADT"));
-                worksheet.Cells[rowNo, columnNo++].Value = Math.Round(_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "TRK_PERCENT"));
-                worksheet.Cells[rowNo, columnNo++].Value = Math.Round(_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "RISKSCORE"));
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "SEGMENT_LENGTH");
+                worksheet.Cells[rowNo, columnNo].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "WIDTH");
+                ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo++], ExcelHelperCellFormat.Number);
+                worksheet.Cells[rowNo, columnNo].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "PAVED_THICKNESS");
+                ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo++], ExcelHelperCellFormat.DecimalPrecision2);
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "DIRECTION");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "LANES");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "FAMILY");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "MPO_RPO");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "POSTED");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "SURFACEID").ToString() + "-" + _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "SURFACE_NAME");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "BUSIPLAN");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "YR_BUILT");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "YEAR_LAST_OVERLAY");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "LAST_STRUCTURAL_OVERLAY");
+                worksheet.Cells[rowNo, columnNo++].Value = Math.Round(_summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "AADT"));
+                worksheet.Cells[rowNo, columnNo++].Value = Math.Round(_summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "TRK_PERCENT"));
+                worksheet.Cells[rowNo, columnNo++].Value = Math.Round(_summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "RISKSCORE"));
 
 
                 if (rowNo % 2 == 0) { ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGray); }
@@ -280,7 +278,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             currentCell.Row = rowNo; currentCell.Column = columnNo;
         }
 
-        private void FillDynamicData(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell)
+        private void FillDynamicData(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell, bool shouldBundleFeasibleTreatments, List<BaseCommittedProjectDTO> committedProjectList)
         {
             //initial row to populate data.
             const int initialRow = 4;
@@ -293,6 +291,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             if (outputResults.Years.Count > 0) { workDoneData = new List<int>(new int[outputResults.Years[0].Assets.Count]); }
 
             var isInitialYear = true;
+            Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
             foreach (var yearlySectionData in outputResults.Years)
             {
                 row = initialRow;
@@ -305,8 +304,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 {
                     TrackDataForParametersTAB(section.ValuePerNumericAttribute, section.ValuePerTextAttribute);
 
-                    //bool isNHS = int.TryParse(section.ValuePerTextAttribute["NHS_IND"], out var numericValue) && numericValue > 0;
-
                     AssetDetail prevYearSection = null;
                     if (section.TreatmentCause == TreatmentCause.CommittedProject && !isInitialYear)
                     {
@@ -314,13 +311,39 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                             .Assets.FirstOrDefault(_ => _.AssetName == section.AssetName);
                         previousYearCause = prevYearSection.TreatmentCause;
                         previousYearTreatment = prevYearSection.AppliedTreatment;
-                    }
+                    }                    
 
                     // Work done and cost for the given year
-                    var treatmentDone = section.AppliedTreatment.ToLower() == PAMSConstants.NoTreatment ? "--" : section.AppliedTreatment;
-                    var sumCoveredCost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                    // Build keyCashFlowFundingDetails
+                    var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
 
+                    if (section.TreatmentStatus != TreatmentStatus.Applied)
+                    {
+                        var fundingSection = yearlySectionData.Assets.FirstOrDefault
+                                             (_ => _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "CRS") == crs &&
+                                             _.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                             _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
+                                             _.AppliedTreatment == section.AppliedTreatment);                        
+                        if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
+                        {
+                            keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
+                        }
+                    }
+
+                    // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
+                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
+                                                  section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                  section.TreatmentConsiderations :
+                                                  keyCashFlowFundingDetails[crs] ?? new();
+                    var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                 treatmentConsiderations.FirstOrDefault() :
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    var treatmentName = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
+                    var treatmentDone = section.AppliedTreatment.ToLower() == PAMSConstants.NoTreatment ? "--" : treatmentName;
                     worksheet.Cells[row, column].Value = treatmentDone;
+
+                    var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
+                    var sumCoveredCost = Math.Round(allocationMatrix?.Where(_ => _.Year == yearlySectionData.Year).Sum(_ => _.AllocatedAmount) ?? 0, 0);
                     worksheet.Cells[row, column + 1].Value = sumCoveredCost;
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1]);
 
@@ -330,6 +353,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                             ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.LightGray);
                         }
                     }
+
+                    if (section.TreatmentCause == TreatmentCause.CashFlowProject)
+                    {
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, column, row, column + 1], Color.FromArgb(255, 0, 0));
+
+                        // Color the previous year project also
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, column - 2, row, column - 1], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, column - 2, row, column - 1], Color.FromArgb(255, 0, 0));
+                    }
+
                     ExcelHelper.ApplyLeftBorder(worksheet.Cells[row, column]);
                     ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column + 1]);
                     row++;
@@ -363,23 +397,27 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 row++;
             }
 
+            int columnsToSubtract = 12;
             currentCell.Column = column++;
             currentCell.Row = initialRow;
             isInitialYear = true;
-            foreach (var sectionData in outputResults.Years)
+            foreach (var yearlySectionData in outputResults.Years)
             {
                 row = currentCell.Row; // setting row back to start
                 currentCell.Column = column;
-                foreach (var section in sectionData.Assets)
+                foreach (var section in yearlySectionData.Assets)
                 {
                     column = currentCell.Column;
-                    column = AddSimulationYearData(worksheet, row, column, null, section);
+                    column = isInitialYear ?
+                             AddSimulationYearData(worksheet, row, column, null, section, true)
+                             : AddSimulationYearData(worksheet, row, column, null, section);
                     var initialColumnForShade = column;
+                    var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
 
                     AssetDetail prevYearSection = null;
                     if (!isInitialYear)
                     {
-                        prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == sectionData.Year - 1)
+                        prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
                             .Assets.FirstOrDefault(_ => _.AssetName == section.AssetName);
                     }
 
@@ -387,30 +425,52 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     {
                         var cashFlowMap = MappingContent.GetCashFlowProjectPick(section.TreatmentCause, prevYearSection);
                         worksheet.Cells[row, ++column].Value = cashFlowMap.currentPick; //Project Pick
-                        worksheet.Cells[row, column - 16].Value = cashFlowMap.previousPick; //Project Pick previous year
+                        worksheet.Cells[row, column - columnsToSubtract].Value = cashFlowMap.previousPick; //Project Pick previous year
+                        column++;
                     }
                     else
                     {
-                        worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, section.ProjectSource); //Project Pick
+                        // Add Project Source
+                        var committedProject = committedProjectList.FirstOrDefault(_ => section.AppliedTreatment.Contains(_.Treatment) && _.Year == yearlySectionData.Year && _.LocationKeys["CRS"] == crs.ToString());
+                        var projectSource = committedProject?.ProjectSource.ToString() ?? string.Empty;
+                        worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause, projectSource); //Project Pick
+
+                        // Add Project Id
+                        var projectId = committedProject?.ProjectId?.ToString() ?? string.Empty;
+                        worksheet.Cells[row, ++column].Value = projectId;
                     }
 
-                    var treatmentConsiderations = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == section.AppliedTreatment);
-                    BudgetUsageDetail budgetUsage = null;
-
-                    foreach (var item in treatmentConsiderations)
-                    {
-                        budgetUsage = item.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCovered);
-                    }
-
-                    var budgetName = budgetUsage == null ? "" : budgetUsage.BudgetName;
-
+                    // If TreatmentStatus Applied it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
+                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
+                                                  section.TreatmentCause != TreatmentCause.CashFlowProject ?
+                                                  section.TreatmentConsiderations :
+                                                  keyCashFlowFundingDetails[crs];
+                    var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                 treatmentConsiderations.FirstOrDefault() :
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
+                    var budgetNames = allocationMatrix?.Where(_ => _.AllocatedAmount > 0 && _.Year == yearlySectionData.Year).
+                                      Select(_ => _.BudgetName).Distinct().ToList() ?? new();
+                    var budgetName = string.Join(",", budgetNames);
                     worksheet.Cells[row, ++column].Value = budgetName; // Budget
-                    worksheet.Cells[row, ++column].Value = section.AppliedTreatment; // Project
+                    var project = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
+                    worksheet.Cells[row, ++column].Value = project;
                     var columnForAppliedTreatment = column;
 
-                    var cost = treatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                    var cost = Math.Round(allocationMatrix?.Where(_ => _.Year == yearlySectionData.Year).Sum(_ => _.AllocatedAmount) ?? 0, 0);
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
+
+                    // Superseded Treatments
+                    var supersededTreatments = section.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment ?
+                                               section.TreatmentRejections.
+                                               Where(_ => _.TreatmentRejectionReason == TreatmentRejectionReason.Superseded).
+                                               Select(_ => _.TreatmentName).Distinct().ToList() ?? new() :
+                                               new();
+                    worksheet.Cells[row, ++column].Value = supersededTreatments.Count > 0 ?
+                                                           string.Join(", ", supersededTreatments) :
+                                                           string.Empty;
+
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
 
                     if (row % 2 == 0)
@@ -424,8 +484,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                         ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment], Color.FromArgb(255, 0, 0));
 
                         // Color the previous year project also
-                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment - 16], Color.FromArgb(0, 255, 0));
-                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment - 16], Color.FromArgb(255, 0, 0));
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment - columnsToSubtract], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment - columnsToSubtract], Color.FromArgb(255, 0, 0));
                     }
 
                     column = column + 1;
@@ -435,23 +495,62 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             }
         }
 
-        private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column, AssetSummaryDetail initialSection, AssetDetail section)
+        private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column, AssetSummaryDetail initialSection, AssetDetail section, bool updateColumn = false)
         {
+            if(updateColumn)
+            {
+                column++;
+            }
             var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
-
+            var averageRutting = CalculateRuttingBasedOnSurfaceType(selectedSection);
+                        
             worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "OPI_CALCULATED")));
-            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "ROUGHNESS")));
-            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_RUTTING")), 3);
-            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_FAULTING")), 3);
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, PAMSAuditReportConstants.IRI)));
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(averageRutting), 3);
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, PAMSAuditReportConstants.FAULT)), 3);
 
             if (row % 2 == 0) {
-                ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
+                var toColumn = section == null ? column + 1 : column;
+                ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, toColumn], Color.LightGray);
             }
 
             return column;
         }
 
+        private double CalculateRuttingBasedOnSurfaceType(AssetSummaryDetail selectedSection)
+        {
+            SurfaceType surfaceType = GetSurfaceType(selectedSection);
+
+            if (surfaceType == SurfaceType.Asphalt)
+            {
+                return CalculateAverageRutting(PAMSAuditReportConstants.RUT_LEFT, PAMSAuditReportConstants.RUT_RIGHT, selectedSection);
+            }
+            else if (surfaceType == SurfaceType.Concrete)
+            {
+                return CalculateAverageRutting("CRJCPRU_Total", "CLJCPRU_Total", selectedSection);
+            }
+            return 0;
+        }
+
+        private double CalculateAverageRutting(string firstAttributeName, string secondAttributeName, AssetSummaryDetail selectedSection)
+        {
+            double firstValue = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, firstAttributeName);
+            double secondValue = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, secondAttributeName);
+            return (firstValue + secondValue) / 2;
+        }
+
+        private SurfaceType GetSurfaceType(AssetSummaryDetail selectedSection)
+        {
+            int surfaceId = Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "SURFACEID"));
+            return surfaceId > 62 ? SurfaceType.Concrete : SurfaceType.Asphalt;
+        }
+
+        enum SurfaceType
+        {
+            Asphalt,
+            Concrete
+        }
 
         private void TrackInitialYearDataForParametersTAB(AssetSummaryDetail initialSection)
         {

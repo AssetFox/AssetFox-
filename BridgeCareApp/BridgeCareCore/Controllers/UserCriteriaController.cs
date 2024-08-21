@@ -104,22 +104,43 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpDelete]
-        [Route("DeleteUser/{userId}")]
+        [Route("DeactivateUser/{userId}")]
         [ClaimAuthorize("UserCriteriaModifyAccess")]
-        public async Task<IActionResult> DeleteUser(Guid userId)
+        public async Task<IActionResult> DeactivateUser(Guid userId)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.UserCriteriaRepo.DeleteUser(userId);
+                    UnitOfWork.UserCriteriaRepo.DeactivateUser(userId);
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::DeleteUser - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::DeactivateUser - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("ReactivateUser/{userId}")]
+        [ClaimAuthorize("UserCriteriaModifyAccess")]
+        public async Task<IActionResult> ReactivateUser(Guid userId)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.UserCriteriaRepo.ReactivateUser(userId);
+                });
+
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::ReactivateUser - {e.Message}");
                 throw;
             }
         }

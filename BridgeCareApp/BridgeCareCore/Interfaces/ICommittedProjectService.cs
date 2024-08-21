@@ -16,8 +16,8 @@ namespace BridgeCareCore.Interfaces
 
         void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
 
-        double GetTreatmentCost(Guid simulationId, string assetKeyData, string treatment, Guid networkId);
+        double GetTreatmentCost(string assetKeyData, Guid treatmentId, Guid networkId);
 
-        List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid simulationId, string assetKeyData, string treatment, Guid networkId);
+        List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid treatmentId, string assetKeyData, Guid networkId);
     }
 }

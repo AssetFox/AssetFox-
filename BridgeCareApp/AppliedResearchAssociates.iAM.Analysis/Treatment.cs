@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.Validation;
 
@@ -31,11 +30,11 @@ public abstract class Treatment : WeakEntity, IValidator
         return results;
     }
 
-    internal abstract IEnumerable<TreatmentScheduling> GetSchedulings();
-
     internal abstract bool CanUseBudget(Budget budget);
 
-    internal abstract IReadOnlyCollection<Action> GetConsequenceActions(AssetContext scope);
+    internal abstract IReadOnlyCollection<ConsequenceApplicator> GetConsequenceApplicators(AssetContext scope);
 
     internal abstract double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts);
+
+    internal abstract IEnumerable<ITreatmentScheduling> GetSchedulings();
 }

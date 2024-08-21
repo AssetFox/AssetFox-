@@ -27,8 +27,6 @@ public sealed class AnalysisMethod
 
     public bool ShouldDeteriorateDuringCashFlow { get; set; }
 
-    public bool ShouldRestrictCashFlowToFirstYearBudgets { get; set; }
-
     public SpendingStrategy SpendingStrategy { get; set; }
 
     public List<TargetConditionGoal> TargetConditionGoals { get; init; } = new();

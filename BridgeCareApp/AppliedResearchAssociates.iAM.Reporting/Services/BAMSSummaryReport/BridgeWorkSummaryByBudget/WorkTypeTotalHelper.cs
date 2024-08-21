@@ -49,7 +49,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     workTypeTotal.RehabilitationCostPerYear[item.Year] += item.Amount;
                     workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
                     break;
-                case TreatmentCategory.Reconstruction:
+                //case TreatmentCategory.Reconstruction:
+                case TreatmentCategory.Replacement:
                     if (!workTypeTotal.ReplacementCostPerYear.ContainsKey(item.Year))
                     {
                         workTypeTotal.ReplacementCostPerYear.Add(item.Year, 0);

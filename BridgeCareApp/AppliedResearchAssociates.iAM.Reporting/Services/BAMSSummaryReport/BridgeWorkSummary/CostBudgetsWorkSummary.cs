@@ -173,7 +173,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", "BAMS Work Type Totals");
             var initialRow = currentCell.Row;
-            currentCell.Row++;
+            currentCell.Row++;                        
             var workTypes = EnumExtensions.GetValues<TreatmentCategory>();
             var numberOfYears = simulationYears.Count;
             worksheet.Cells[initialRow, 3 + numberOfYears].Value = "Total (all years)";
@@ -183,9 +183,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             var startColumnIndex = 3;
             var firstContentRow = currentCell.Row;
+            var rowIndex = firstContentRow;
             for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
             {
-                var rowIndex = firstContentRow + (int)workType;
+                if (workType == TreatmentCategory.Reconstruction)
+                {
+                    continue;
+                }
+                                
                 worksheet.Cells[rowIndex, 1].Value = workType.ToSpreadsheetString();
 
                 // For MPMS data
@@ -214,9 +219,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 // This line fills up data for "Total (all years)"
                 worksheet.Cells[rowIndex, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(rowIndex, startColumnIndex, rowIndex, startColumnIndex + numberOfYears - 1);
+
+                rowIndex++;
             }
-            var lastContentRow = firstContentRow + workTypes.Count - 1;
-            currentCell.Row += workTypes.Count();
+            var lastContentRow = rowIndex - 1; //firstContentRow + workTypes.Count - 1;
+            currentCell.Row = lastContentRow + 1;//+= workTypes.Count();
             var totalSpentRow = currentCell.Row;
             TotalSpentRow = totalSpentRow;
             worksheet.Cells[totalSpentRow, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(totalSpentRow, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1);
@@ -233,13 +240,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             // Adding percentage after the Total (all years)
+            rowIndex = firstContentRow;
             for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
             {
-                var rowIndex = firstContentRow + (int)workType;
+                if (workType == TreatmentCategory.Reconstruction)
+                {
+                    continue;
+                }
+
                 var col = startColumnIndex + numberOfYears + 1;
                 worksheet.Cells[rowIndex, col].Formula = ExcelFormulas.Percentage(rowIndex, col - 1, totalSpentRow, col - 1);
 
                 worksheet.Cells[rowIndex, col + 1].Value = $"Percentage Spent on {workType.ToSpreadsheetString().ToUpper()}";
+
+                rowIndex++;
             }
             currentCell.Row += 2;
             var contentColor = Color.FromArgb(84, 130, 53);

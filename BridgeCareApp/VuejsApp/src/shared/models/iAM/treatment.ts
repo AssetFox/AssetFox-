@@ -11,6 +11,7 @@ export enum TreatmentCategory {
     preservation,
     capacityAdding,
     rehabilitation,
+    reconstruction,
     replacement,
     maintenance,
     other,
@@ -178,17 +179,19 @@ export const treatmentCategoryMap: Map<string, TreatmentCategory> = new Map([
     ['Preservation', 0],
     ['Capacity Adding', 1],
     ['Rehabilitation', 2],
-    ['Replacement', 3],
-    ['Maintenance', 4],
-    ['Other', 5],
+    ['Reconstruction', 3],
+    ['Replacement', 4],
+    ['Maintenance', 5],
+    ['Other', 6],
 ]);
 export const treatmentCategoryReverseMap: Map<TreatmentCategory, string> = new Map([
     [0, 'Preservation'],
     [1, 'Capacity Adding'],
     [2, 'Rehabilitation'],
-    [3, 'Replacement'],
-    [4, 'Maintenance'],
-    [5, 'Other'],
+    [3, 'Reconstruction'],
+    [4, 'Replacement'],
+    [5, 'Maintenance'],
+    [6, 'Other'],
 ]);
 
 export const emptySimpleTreatment: SimpleTreatment = {

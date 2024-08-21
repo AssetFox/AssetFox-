@@ -243,7 +243,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 var datumValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
                                 rawKeyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, datumValue) });
                             }
+                            if (!KeyProperties.ContainsKey(attribute.Name))
+                            {
                                 KeyProperties.Add(attribute.Name, rawKeyFieldValue);
+                            }
                         }
                     }
                 }

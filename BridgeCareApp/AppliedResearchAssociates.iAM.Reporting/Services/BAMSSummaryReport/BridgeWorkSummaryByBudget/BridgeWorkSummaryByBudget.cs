@@ -222,18 +222,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Cells[initialRow, 3 + numberOfYears].Value = "Total (all years)";
                 var totalColumnHeaderRange = worksheet.Cells[initialRow, 3 + numberOfYears];
                 ExcelHelper.ApplyBorder(totalColumnHeaderRange);
-                ExcelHelper.ApplyStyle(totalColumnHeaderRange);
-
+                ExcelHelper.ApplyStyle(totalColumnHeaderRange);                
                 var workTypes = EnumExtensions.GetValues<TreatmentCategory>();
                 currentCell.Row++;
                 var firstContentRow = currentCell.Row;
+                var rowIndex = firstContentRow;
                 var rowTrackerForColoring = firstContentRow;
                 for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
                 {
-                    var rowIndex = firstContentRow + (int)workType;
+                    if (workType == TreatmentCategory.Reconstruction)
+                    {
+                        continue;
+                    }
+                    
                     worksheet.Cells[rowIndex, 1].Value = workType.ToSpreadsheetString();
                     worksheet.Cells[rowIndex, 3, rowIndex, simulationYears.Count + 2].Value = 0.0;
                     currentCell.Row++;
+
+                    rowIndex++;
                 }
 
                 InsertWorkTypeTotals(startYear, firstContentRow, worksheet, workTypeTotal);
@@ -329,10 +335,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     var bamsBudgetTotal = perYearTotalSpentAmount - (committedBudgetTotal + mpmsBudgetTotal + sapBudgetTotal + projectBuilderBudgetTotal);
                     var categoryBudgetTotals = new decimal[] { bamsBudgetTotal, committedBudgetTotal, mpmsBudgetTotal, sapBudgetTotal, projectBuilderBudgetTotal };
                     // Budget spent in each category
-                    for (int rowIndex = 0; rowIndex < categoryBudgetTotals.Length; rowIndex++)
+                    for (int index = 0; index < categoryBudgetTotals.Length; index++)
                     {
                         // Calculate percentage
-                        var percentage = categoryBudgetTotals[rowIndex] / yearlyBudget;
+                        var percentage = categoryBudgetTotals[index] / yearlyBudget;
                         worksheet.Cells[row++, column].Value = percentage;
                     }
                     yearTracker++;

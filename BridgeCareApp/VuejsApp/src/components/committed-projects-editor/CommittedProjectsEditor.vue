@@ -25,34 +25,6 @@
             </v-col>
         </v-row>
         <v-col>                   
-            <v-row>
-                <v-col>
-                    <v-select
-                    :items= 'templateSelectItems'
-                    class='ghd-control-border ghd-control-text ghd-select'
-                    label='Select a Template'
-                    style="width: 20% !important;"
-                    v-model="templateItemSelected"
-                    menu-icon=custom:GhdDownSvg
-                    variant="outlined"
-                    density="compact">
-                    </v-select>
-                    <v-btn @click='onDownloadSelectedTemplate' 
-                    class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" style="margin:0px;" variant="outlined">Download Selected Template</v-btn>
-                    <input
-                        id="addCommittedProjectTemplate"
-                        type="file"
-                        @change="handleAddCommittedProjectTemplateUpload"
-                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                        ref="committedProjectTemplateInput"
-                        hidden
-                    />
-                    <v-btn @click='onAddSelectedTemplate'  
-                        class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" 
-                        style="margin:10px;" 
-                        variant="outlined">Upload New Template</v-btn>
-                </v-col>
-            </v-row>
             <v-checkbox 
                     id="CommittedProjectsEditor-noTreatmentsBeforeCommittedProjects-ghdcheckbox"
                     label='No Treatments Before Committed Projects' v-model='isNoTreatmentBefore' />
@@ -1003,7 +975,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
         };
     }
 
-    function handleAddCommittedProjectTemplateUpload(event: { target: { files: any[]; }; }){
+/*     function handleAddCommittedProjectTemplateUpload(event: { target: { files: any[]; }; }){
              const file = event.target.files[0];
              CommittedProjectsService.addCommittedProjectTemplate(file).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -1015,7 +987,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
     function onAddSelectedTemplate(){
         document.getElementById("addCommittedProjectTemplate")?.click();
     }
-    
+ */    
     function onDownloadSelectedTemplate(){
         CommittedProjectsService.getSelectedCommittedProjectTemplate(templateItemSelected.value)
             .then((response: AxiosResponse) => {

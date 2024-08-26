@@ -257,6 +257,7 @@
             </v-footer>
             <Spinner />
             <Alert :dialog-data="alertDialogData" @submit="onAlertResult" />
+            <Alert :dialogData="ConfirmRunAnalysisCompleted" @submit="onConfirmRunAnalysisCompletedSubmit"/>
             <NewsDialog :showDialog="showNewsDialog" @close="onCloseNewsDialog()" />
         </v-main>
     </v-app>
@@ -376,6 +377,7 @@ import { getUrl } from './shared/utils/get-url';
     let b2cSecurityType: string = SecurityTypes.b2c;
     
     let showNewsDialog= ref(false);
+    let ConfirmRunAnalysisCompleted = ref(clone(emptyAlertData));
 
     let tokenCheckInterval: ReturnType<typeof setInterval> | null = null;
     let hasUnreadNewsItem: boolean = false;
@@ -692,8 +694,27 @@ import { getUrl } from './shared/utils/get-url';
             message: 'Task Completed',
             longMessage: data.task
         });
+
+        const stringData = JSON.stringify(data);
+
+        if(stringData.includes('Analysis'))
+        {
+            onShowRunAnalysisCompletedAlert();
+        }
     }
 
+    function onShowRunAnalysisCompletedAlert() {
+        ConfirmRunAnalysisCompleted.value = {
+            showDialog: true,
+            heading: 'Success',
+            choice: false,
+            message: `The Analysis on ${selectedScenario.value.name} has been completed`,        
+        };
+    }
+
+    function onConfirmRunAnalysisCompletedSubmit(submit: boolean) {
+        ConfirmRunAnalysisCompleted.value.showDialog = false;
+    }
 
     function onAlertResult(submit: boolean) {
         alertDialogData = clone(emptyAlertData);

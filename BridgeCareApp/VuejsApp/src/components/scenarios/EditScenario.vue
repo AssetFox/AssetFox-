@@ -472,6 +472,7 @@ import ScenarioService from '@/services/scenario.service';
                     scenarioId: selectedScenarioId,
                 }).then(() => (selectedScenario = clone(emptyScenario)));
             }
+            router.push({ path: '/Scenarios/', query: { tab: 'General work queue' } }).catch(() => {});
         }
 
     }
@@ -529,6 +530,7 @@ import ScenarioService from '@/services/scenario.service';
                 scenarioId: selectedScenarioId,
             }).then(() => (selectedScenario = clone(emptyScenario)));
         }
+        router.push({ path: '/Scenarios/', query: { tab: 'General work queue' } }).catch(() => {});
     }
 
 

@@ -1442,7 +1442,7 @@ import { User } from '@/shared/models/iAM/user';
             { name: 'Shared with me', icon: getUrl("assets/icons/share-empty.svg"), count: totalSharedScenarios.value },
             { name: 'General work queue', icon: getUrl("assets/icons/queue.svg"), count: totalQueuedSimulations.value },
         );
-        tab.value = 'My scenarios';
+        tab.value = tabItems[0].name;
     });
 
     onBeforeUnmount(()=> {
@@ -1564,7 +1564,7 @@ import { User } from '@/shared/models/iAM/user';
         scenario.name = name;
         if (hasValue(scenario.name)) {
             updateScenarioAction({ scenario: scenario }).then(() => {
-                if(tab.value == '0')
+                if(tab.value == tabItems[0].name)
                     onUserScenariosPagination();
                 else
                     onSharedScenariosPagination();

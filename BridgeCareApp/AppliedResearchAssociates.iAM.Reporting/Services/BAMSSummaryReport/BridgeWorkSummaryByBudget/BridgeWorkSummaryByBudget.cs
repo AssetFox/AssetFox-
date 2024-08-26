@@ -13,7 +13,7 @@ using AppliedResearchAssociates.iAM.Reporting.Models;
 using System;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget
 {
@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount
-            , IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectList, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, bool shouldBundleFeasibleTreatments)
+            , IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectList, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, bool shouldBundleFeasibleTreatments, List<SimpleBudgetDetailDTO> scenarioSimpleBudgets)
         {
             var startYear = simulationYears[0];
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
@@ -159,6 +159,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 var totalSpent = new List<(int year, decimal amount)>();
                 var numberOfYears = simulationYears.Count;
 
+                var scenarioBudgetId = scenarioSimpleBudgets.FirstOrDefault(_ => _.Name == summaryData.Budget)?.Id;
+
                 // Filling up the total, "culvert" and "Bridge work" costs
                 foreach (var year in simulationYears)
                 {
@@ -208,8 +210,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     _committedProjectCost.FillCostOfSAPWork(worksheet, currentCell, simulationYears, costForCommittedBudgets.ToList(),
                         totalBudgetPerYearForSAP, workTypeTotal);
                     _committedProjectCost.FillCostOfProjectBuilderWork(worksheet, currentCell, simulationYears, costForCommittedBudgets.ToList(),
-                        totalBudgetPerYearForProjectBuilder, workTypeTotal);
-                    _committedProjectCost.AddCostOfWorkOutsideScope(workTypeTotal, committedProjectsForWorkOutsideScope);
+                        totalBudgetPerYearForProjectBuilder, workTypeTotal);                                     
+                    _committedProjectCost.AddCostOfWorkOutsideScope(workTypeTotal, committedProjectsForWorkOutsideScope, scenarioBudgetId);
 
                     _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget.ToList(), totalBudgetPerYearForCulvert, simulationYears, workTypeTotal);
                     _bridgeWorkCost.FillCostOfBridgeWork(worksheet, currentCell, simulationYears, costForBridgeBudgets.ToList(), totalBudgetPerYearForBridgeWork, workTypeTotal);
@@ -228,12 +230,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 currentCell.Row++;
                 var firstContentRow = currentCell.Row;
                 var rowTrackerForColoring = firstContentRow;
+                var rowIndex = firstContentRow;
                 for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
                 {
-                    var rowIndex = firstContentRow + (int)workType;
+                    if (workType == TreatmentCategory.WorkOutsideScope)
+                    {
+                        continue;
+                    }
+                    
                     worksheet.Cells[rowIndex, 1].Value = workType.ToSpreadsheetString();
                     worksheet.Cells[rowIndex, 3, rowIndex, simulationYears.Count + 2].Value = 0.0;
                     currentCell.Row++;
+                    rowIndex++;
                 }
 
                 InsertWorkTypeTotals(startYear, firstContentRow, worksheet, workTypeTotal);
@@ -267,15 +275,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 cellTotalBridgeCareBudgetAllYears.Formula = ExcelFormulas.Sum(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, currentCell.Column + numberOfYears + 1]);
                 ExcelHelper.ApplyColor(cellTotalBridgeCareBudgetAllYears, Color.FromArgb(217, 217, 217));
                 ExcelHelper.ApplyBorder(cellTotalBridgeCareBudgetAllYears);
-                ExcelHelper.SetCustomFormat(cellTotalBridgeCareBudgetAllYears, ExcelHelperCellFormat.NegativeCurrency);
-
+                ExcelHelper.SetCustomFormat(cellTotalBridgeCareBudgetAllYears, ExcelHelperCellFormat.NegativeCurrency);                              
+                
                 ExcelHelper.ApplyBorder(worksheet.Cells[initialRow, currentCell.Column, currentCell.Row, simulationYears.Count + 2]);
                 ExcelHelper.SetCustomFormat(worksheet.Cells[initialRow + 1, currentCell.Column + 2, initialRow + 1, simulationYears.Count + 2], ExcelHelperCellFormat.NegativeCurrency);
-                ExcelHelper.SetCustomFormat(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], ExcelHelperCellFormat.NegativeCurrency);
-
+                
                 ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2],
                     Color.FromArgb(84, 130, 53));
                 ExcelHelper.SetTextColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.White);
+                ExcelHelper.SetCustomFormat(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], ExcelHelperCellFormat.NegativeCurrency);
+                currentCell.Row++;
+
+                FillWorkTypeTotalWorkOutsideScope(worksheet, currentCell, startYear, simulationYears, workTypeTotal.WorkOutsideScopeCostPerYear);
 
                 // Cost per BPN
                 currentCell.Row += 2;
@@ -329,10 +340,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     var bamsBudgetTotal = perYearTotalSpentAmount - (committedBudgetTotal + mpmsBudgetTotal + sapBudgetTotal + projectBuilderBudgetTotal);
                     var categoryBudgetTotals = new decimal[] { bamsBudgetTotal, committedBudgetTotal, mpmsBudgetTotal, sapBudgetTotal, projectBuilderBudgetTotal };
                     // Budget spent in each category
-                    for (int rowIndex = 0; rowIndex < categoryBudgetTotals.Length; rowIndex++)
+                    for (int index = 0; index < categoryBudgetTotals.Length; index++)
                     {
                         // Calculate percentage
-                        var percentage = categoryBudgetTotals[rowIndex] / yearlyBudget;
+                        var percentage = categoryBudgetTotals[index] / yearlyBudget;
                         worksheet.Cells[row++, column].Value = percentage;
                     }
                     yearTracker++;
@@ -377,6 +388,34 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.ApplyBorder(excelRange);
                 ExcelHelper.SetCustomFormat(worksheet.Cells[firstContentRow, numberOfYears + 4, firstContentRow + 6, numberOfYears + 4], ExcelHelperCellFormat.Percentage);
             }
+        }
+
+        private void FillWorkTypeTotalWorkOutsideScope(ExcelWorksheet worksheet, CurrentCell currentCell, int startYear, List<int> simulationYears, Dictionary<int, double> workOutsideScopeCostPerYear)
+        {
+            _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", TreatmentCategory.WorkOutsideScope.ToSpreadsheetString());
+
+            var startColumnIndex = 3;
+            var workOutsideScopeRow = ++currentCell.Row;
+            var numberOfYears = simulationYears.Count;
+            var contentColor = Color.FromArgb(84, 130, 53);
+
+            foreach (var item in workOutsideScopeCostPerYear)
+            {
+                FillTheExcelColumns(startYear, item, workOutsideScopeRow, worksheet);
+            }
+            var workOutsideScopeRowRangeForBorder = worksheet.Cells[workOutsideScopeRow, 1, workOutsideScopeRow, startColumnIndex + numberOfYears];
+            ExcelHelper.ApplyBorder(workOutsideScopeRowRangeForBorder);
+            var workOutsideScopeRowRange = worksheet.Cells[workOutsideScopeRow, startColumnIndex, workOutsideScopeRow, startColumnIndex + numberOfYears - 1];
+            ExcelHelper.ApplyColor(workOutsideScopeRowRange, contentColor);
+            ExcelHelper.SetCustomFormat(workOutsideScopeRowRange, ExcelHelperCellFormat.NegativeCurrency);
+            ExcelHelper.SetTextColor(workOutsideScopeRowRange, Color.White);
+
+            // Total cell
+            var workOutsideScopeRowTotalCell = worksheet.Cells[workOutsideScopeRow, startColumnIndex + numberOfYears];
+            workOutsideScopeRowTotalCell.Formula = ExcelFormulas.Sum(workOutsideScopeRow, startColumnIndex, workOutsideScopeRow, startColumnIndex + numberOfYears - 1);            
+            ExcelHelper.ApplyColor(workOutsideScopeRowTotalCell, Color.FromArgb(217, 217, 217));
+            ExcelHelper.ApplyBorder(workOutsideScopeRowTotalCell);
+            ExcelHelper.SetCustomFormat(workOutsideScopeRowTotalCell, ExcelHelperCellFormat.NegativeCurrency);
         }
 
         private void InsertCostPerBPN(ExcelWorksheet worksheet, CurrentCell currentCell, int startYear, WorkSummaryByBudgetModel summaryData,
@@ -474,12 +513,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
-            firstContentRow++;
-            foreach (var item in workTypeTotal.WorkOutsideScopeCostPerYear)
-            {
-                FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
-            }
-            firstContentRow++;
+            firstContentRow++;            
             foreach (var item in workTypeTotal.BundledCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);

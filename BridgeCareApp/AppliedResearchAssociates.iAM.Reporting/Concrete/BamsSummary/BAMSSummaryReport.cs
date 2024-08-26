@@ -299,6 +299,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
             _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
+            var scenarioSimpleBudgets = _unitOfWork.BudgetRepo.GetScenarioSimpleBudgetDetails(simulationId);
 
             var yearlyBudgetAmount = new Dictionary<string, Budget>();
             reportDetailDto.Status = $"Adding yearly budget amounts";
@@ -415,7 +416,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             // Bridge work summary by Budget TAB            
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
-            _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments, treatmentCategoryLookup, committedProjectList, committedProjectsForWorkOutsideScope, simulation.ShouldBundleFeasibleTreatments);
+            _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments, treatmentCategoryLookup, committedProjectList, committedProjectsForWorkOutsideScope, simulation.ShouldBundleFeasibleTreatments, scenarioSimpleBudgets);
             checkCancelled(cancellationToken, simulationId);
             reportDetailDto.Status = $"Creating District County Totals TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);

@@ -230,9 +230,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             currentCell.Row++; 
         }
 
-        internal void AddCostOfWorkOutsideScope(WorkTypeTotal workTypeTotal, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope)
+        internal void AddCostOfWorkOutsideScope(WorkTypeTotal workTypeTotal, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, Guid? scenarioBudgetId)
         {
-            foreach(var committedProjectForWorkOutsideScope in committedProjectsForWorkOutsideScope)
+            var committedProjectsForWorkOutsideScopeFiltered = committedProjectsForWorkOutsideScope.Where(_ => _.ScenarioBudgetId == scenarioBudgetId);
+            foreach(var committedProjectForWorkOutsideScope in committedProjectsForWorkOutsideScopeFiltered)
             {
                 var yearsData = new YearsData { TreatmentCategory = TreatmentCategory.WorkOutsideScope, Year = committedProjectForWorkOutsideScope.Year, Amount = committedProjectForWorkOutsideScope.Cost };
                 WorkTypeTotalHelper.FillWorkTypeTotals(yearsData, workTypeTotal);

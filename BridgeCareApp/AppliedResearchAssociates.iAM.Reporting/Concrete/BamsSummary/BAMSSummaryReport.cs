@@ -330,10 +330,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     checkCancelled(cancellationToken, simulationId);
                     if (!treatmentCategoryLookup.ContainsKey(treatmentObject.Name))
                     {
-                        var treatmentCategory = treatmentObject.Category == TreatmentCategory.Reconstruction ?
-                                                TreatmentCategory.Replacement.ToString() :
-                                                treatmentObject.Category.ToString();
-                        treatmentCategoryLookup.Add(treatmentObject.Name, treatmentCategory);
+                        var treatmentCategory = GetCategory(treatmentObject.Category);
+                        treatmentCategoryLookup.Add(treatmentObject.Name, treatmentCategory.ToString());
                     }
                 }
             }
@@ -349,9 +347,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     .Select(_ => new { Category = _.Key, Count = _.Count() })
                     .OrderByDescending(_ => _.Count)
                     .Select(_ => _.Category)
-                    .FirstOrDefault();
+                    .FirstOrDefault();                
                 if (!treatmentCategoryLookup.ContainsKey(newTreatment))
                 {
+                    bestTreatmentEntry = GetCategory(bestTreatmentEntry);
                     treatmentCategoryLookup.Add(newTreatment, bestTreatmentEntry.ToString());
                 }
             }
@@ -462,6 +461,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //return value
             return functionReturnValue;
         }
+
+        private static TreatmentCategory GetCategory(TreatmentCategory treatmentCategory) => treatmentCategory == TreatmentCategory.Reconstruction ?
+                                                                                             TreatmentCategory.Replacement :
+                                                                                             treatmentCategory;
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
 

@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
@@ -259,7 +260,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     checkCancelled(cancellationToken, simulationId);
                     if (!treatmentCategoryLookup.ContainsKey(treatmentObject.Name))
                     {
-                        treatmentCategoryLookup.Add(treatmentObject.Name, treatmentObject.Category.ToString());
+                        var treatmentCategory = GetCategory(treatmentObject.Category);
+                        treatmentCategoryLookup.Add(treatmentObject.Name, treatmentCategory.ToString());
                     }
                 }
             }
@@ -275,9 +277,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     .Select(_ => new { Category = _.Key, Count = _.Count() })
                     .OrderByDescending(_ => _.Count)
                     .Select(_ => _.Category)
-                    .FirstOrDefault();
+                    .FirstOrDefault();                
                 if (!treatmentCategoryLookup.ContainsKey(newTreatment))
                 {
+                    bestTreatmentEntry = GetCategory(bestTreatmentEntry);
                     treatmentCategoryLookup.Add(newTreatment, bestTreatmentEntry.ToString());
                 }
             }
@@ -366,6 +369,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return functionReturnValue;
         }
 
+        private static TreatmentCategory GetCategory(TreatmentCategory treatmentCategory) => treatmentCategory == TreatmentCategory.Replacement ?
+                                                                                             TreatmentCategory.Reconstruction :
+                                                                                             treatmentCategory;
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
 

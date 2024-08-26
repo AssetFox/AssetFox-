@@ -48,6 +48,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var simulationTreatments = new List<(string Name, string AssetType, TreatmentCategory Category)>();
             foreach (var item in selectableTreatments)
             {
+                var category = GetCategory(item.Category);
                 simulationTreatments.Add((item.Name, item.AssetCategory, item.Category));
             }
             simulationTreatments.Sort((a, b) => a.Name.CompareTo(b.Name));
@@ -207,6 +208,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                                 selectableTreatments.FirstOrDefault(_ => appliedTreatment.Contains(_.Name)) :
                                                 selectableTreatments.FirstOrDefault(_ => _.Name == appliedTreatment);
                             var category = section.AppliedTreatment.Contains("Bundle") ? TreatmentCategory.Bundled : treatmentData.Category;
+                            category = GetCategory(category);
                             var assetCategory = treatmentData.AssetCategory;
                             summaryModel.YearlyData.Add(new YearsData
                             {
@@ -305,5 +307,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 }).ToList();
             return workSummaryByBudgetData;
         }
+
+        private static TreatmentCategory GetCategory(TreatmentCategory treatmentCategory) => treatmentCategory == TreatmentCategory.Replacement ?
+                                                                                             TreatmentCategory.Reconstruction :
+                                                                                             treatmentCategory;
     }
 }

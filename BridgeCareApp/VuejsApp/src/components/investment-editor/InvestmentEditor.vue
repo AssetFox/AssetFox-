@@ -199,6 +199,7 @@
                            
                             <div v-if="header.key !== 'year' && header.key !== 'action'">
                                 <editDialog :return-value.sync='item.item.values[header.key]'
+                                    @open='defaultOnOpen(item.item.values[header.key])'
                                     @click='defaultOnEditBudgetYearValue(item.item.values[header.key])'
                                     @save='onEditBudgetYearValue(item.item.year, header.key, editValue)'
                                     @cancel='onEditBudgetYearValue(item.item.year, header.key, item.item.values[header.key])'                                    
@@ -1313,6 +1314,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
     function defaultOnEditBudgetYearValue(value: number | null) {
         editValue.value = value !== null ? value : 0;
+    }
+
+    function defaultOnOpen(value: number | null) {
+      defaultOnEditBudgetYearValue(value);
     }
 
     function onEditBudgetYearValue(year: number, budgetName: string, value: number) {//check out

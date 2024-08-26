@@ -275,28 +275,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 cellTotalBridgeCareBudgetAllYears.Formula = ExcelFormulas.Sum(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, currentCell.Column + numberOfYears + 1]);
                 ExcelHelper.ApplyColor(cellTotalBridgeCareBudgetAllYears, Color.FromArgb(217, 217, 217));
                 ExcelHelper.ApplyBorder(cellTotalBridgeCareBudgetAllYears);
-                ExcelHelper.SetCustomFormat(cellTotalBridgeCareBudgetAllYears, ExcelHelperCellFormat.NegativeCurrency);
-
-                var workOutsideScopeRow = ++currentCell.Row;
-                worksheet.Cells[currentCell.Row, 1].Value = TreatmentCategory.WorkOutsideScope.ToSpreadsheetString();
-                foreach (var item in workTypeTotal.WorkOutsideScopeCostPerYear)
-                {
-                    FillTheExcelColumns(startYear, item, workOutsideScopeRow, worksheet);
-                }
-                // Total for work outside scope
-                worksheet.Cells[workOutsideScopeRow, 3 + numberOfYears].Formula = ExcelFormulas.Sum(workOutsideScopeRow, 3, workOutsideScopeRow, 3 + numberOfYears - 1);
-                var workOutsideScopeRowTotalCells = worksheet.Cells[workOutsideScopeRow, 3 + numberOfYears];
-                ExcelHelper.ApplyColor(workOutsideScopeRowTotalCells, Color.FromArgb(217, 217, 217));
-                ExcelHelper.ApplyBorder(workOutsideScopeRowTotalCells);
-                ExcelHelper.SetCustomFormat(workOutsideScopeRowTotalCells, ExcelHelperCellFormat.NegativeCurrency);
-
+                ExcelHelper.SetCustomFormat(cellTotalBridgeCareBudgetAllYears, ExcelHelperCellFormat.NegativeCurrency);                              
+                
                 ExcelHelper.ApplyBorder(worksheet.Cells[initialRow, currentCell.Column, currentCell.Row, simulationYears.Count + 2]);
                 ExcelHelper.SetCustomFormat(worksheet.Cells[initialRow + 1, currentCell.Column + 2, initialRow + 1, simulationYears.Count + 2], ExcelHelperCellFormat.NegativeCurrency);
                 
-                ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row - 1, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2],
+                ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2],
                     Color.FromArgb(84, 130, 53));
-                ExcelHelper.SetTextColor(worksheet.Cells[currentCell.Row - 1, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.White);
-                ExcelHelper.SetCustomFormat(worksheet.Cells[currentCell.Row - 1, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], ExcelHelperCellFormat.NegativeCurrency);
+                ExcelHelper.SetTextColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.White);
+                ExcelHelper.SetCustomFormat(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], ExcelHelperCellFormat.NegativeCurrency);
+                currentCell.Row++;
+
+                FillWorkTypeTotalWorkOutsideScope(worksheet, currentCell, startYear, simulationYears, workTypeTotal.WorkOutsideScopeCostPerYear);
 
                 // Cost per BPN
                 currentCell.Row += 2;
@@ -398,6 +388,34 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.ApplyBorder(excelRange);
                 ExcelHelper.SetCustomFormat(worksheet.Cells[firstContentRow, numberOfYears + 4, firstContentRow + 6, numberOfYears + 4], ExcelHelperCellFormat.Percentage);
             }
+        }
+
+        private void FillWorkTypeTotalWorkOutsideScope(ExcelWorksheet worksheet, CurrentCell currentCell, int startYear, List<int> simulationYears, Dictionary<int, double> workOutsideScopeCostPerYear)
+        {
+            _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", TreatmentCategory.WorkOutsideScope.ToSpreadsheetString());
+
+            var startColumnIndex = 3;
+            var workOutsideScopeRow = ++currentCell.Row;
+            var numberOfYears = simulationYears.Count;
+            var contentColor = Color.FromArgb(84, 130, 53);
+
+            foreach (var item in workOutsideScopeCostPerYear)
+            {
+                FillTheExcelColumns(startYear, item, workOutsideScopeRow, worksheet);
+            }
+            var workOutsideScopeRowRangeForBorder = worksheet.Cells[workOutsideScopeRow, 1, workOutsideScopeRow, startColumnIndex + numberOfYears];
+            ExcelHelper.ApplyBorder(workOutsideScopeRowRangeForBorder);
+            var workOutsideScopeRowRange = worksheet.Cells[workOutsideScopeRow, startColumnIndex, workOutsideScopeRow, startColumnIndex + numberOfYears - 1];
+            ExcelHelper.ApplyColor(workOutsideScopeRowRange, contentColor);
+            ExcelHelper.SetCustomFormat(workOutsideScopeRowRange, ExcelHelperCellFormat.NegativeCurrency);
+            ExcelHelper.SetTextColor(workOutsideScopeRowRange, Color.White);
+
+            // Total cell
+            var workOutsideScopeRowTotalCell = worksheet.Cells[workOutsideScopeRow, startColumnIndex + numberOfYears];
+            workOutsideScopeRowTotalCell.Formula = ExcelFormulas.Sum(workOutsideScopeRow, startColumnIndex, workOutsideScopeRow, startColumnIndex + numberOfYears - 1);            
+            ExcelHelper.ApplyColor(workOutsideScopeRowTotalCell, Color.FromArgb(217, 217, 217));
+            ExcelHelper.ApplyBorder(workOutsideScopeRowTotalCell);
+            ExcelHelper.SetCustomFormat(workOutsideScopeRowTotalCell, ExcelHelperCellFormat.NegativeCurrency);
         }
 
         private void InsertCostPerBPN(ExcelWorksheet worksheet, CurrentCell currentCell, int startYear, WorkSummaryByBudgetModel summaryData,

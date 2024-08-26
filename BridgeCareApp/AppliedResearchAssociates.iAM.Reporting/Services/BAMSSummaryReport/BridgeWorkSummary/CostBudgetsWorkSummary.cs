@@ -77,11 +77,38 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             
             var budgetTotalRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, yearlyBudgetAmount, workTypeTotalAggregated, shouldBundleFeasibleTreatments);
 
+            FillWorkTypeTotalWorkOutsideScope(worksheet, currentCell, simulationYears, workTypeTotalAggregated.WorkTypeTotalWorkOutsideScope);
+
             var bpnTotalRow = FillBpnSection(worksheet, currentCell, simulationYears, bpnCostPerYear);
             FillRemainingBudgetSection(worksheet, simulationYears, currentCell, budgetTotalRow);
         }
 
         #region Private methods
+        private void FillWorkTypeTotalWorkOutsideScope(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> workTypeTotalWorkOutsideScope)
+        {
+            _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", TreatmentCategory.WorkOutsideScope.ToSpreadsheetString());
+            
+            var startColumnIndex = 3;
+            var workOutsideScopeRow = ++currentCell.Row;
+            var numberOfYears = simulationYears.Count;
+            var contentColor = Color.FromArgb(84, 130, 53);            
+            
+            AddWorkTypeTotalData(workTypeTotalWorkOutsideScope, TreatmentCategory.WorkOutsideScope, worksheet, workOutsideScopeRow);            
+            var workOutsideScopeRowRangeForBorder = worksheet.Cells[workOutsideScopeRow, 1, workOutsideScopeRow, startColumnIndex + numberOfYears];
+            ExcelHelper.ApplyBorder(workOutsideScopeRowRangeForBorder);
+            var workOutsideScopeRowRange = worksheet.Cells[workOutsideScopeRow, startColumnIndex, workOutsideScopeRow, startColumnIndex + numberOfYears - 1];
+            ExcelHelper.ApplyColor(workOutsideScopeRowRange, contentColor);
+            ExcelHelper.SetCustomFormat(workOutsideScopeRowRange, ExcelHelperCellFormat.NegativeCurrency);
+            ExcelHelper.SetTextColor(workOutsideScopeRowRange, Color.White);
+
+            // Total cell
+            var workOutsideScopeRowTotalCell = worksheet.Cells[workOutsideScopeRow, startColumnIndex + numberOfYears];
+            workOutsideScopeRowTotalCell.Formula = ExcelFormulas.Sum(workOutsideScopeRow, startColumnIndex, workOutsideScopeRow, startColumnIndex + numberOfYears - 1);
+            ExcelHelper.ApplyColor(workOutsideScopeRowTotalCell, Color.FromArgb(217, 217, 217));
+            ExcelHelper.SetCustomFormat(workOutsideScopeRowTotalCell, ExcelHelperCellFormat.NegativeCurrency);
+            currentCell.Row++;
+        }
+
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> AddCostOfWorkOutsideScope(List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, List<int> simulationYears)
         {
             var workTypeTotalWorkOutsideScope = new Dictionary<TreatmentCategory, SortedDictionary<int, decimal>>();
@@ -263,32 +290,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 averageAnnualBudget += budgetTotal;
             }
             var budgetTotalRow = currentCell.Row;
-            worksheet.Cells[currentCell.Row, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(currentCell.Row, startColumnIndex, budgetTotalRow, startColumnIndex + numberOfYears - 1);
-
-            // For work outside scope
-            var workOutsideScopeRow = ++currentCell.Row;
-            worksheet.Cells[workOutsideScopeRow, 1].Value = TreatmentCategory.WorkOutsideScope.ToSpreadsheetString();
-            AddWorkTypeTotalData(workTypeTotalAggregated.WorkTypeTotalWorkOutsideScope, TreatmentCategory.WorkOutsideScope, worksheet, workOutsideScopeRow);
-            worksheet.Cells[workOutsideScopeRow, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(workOutsideScopeRow, startColumnIndex, workOutsideScopeRow, startColumnIndex + numberOfYears - 1);
-            var workOutsideScopeRowRangeForBorder = worksheet.Cells[workOutsideScopeRow, 1, workOutsideScopeRow, 3 + numberOfYears];
-            ExcelHelper.ApplyBorder(workOutsideScopeRowRangeForBorder);
-            var workOutsideScopeRowRange = worksheet.Cells[workOutsideScopeRow, 3, workOutsideScopeRow, 3 + numberOfYears - 1];
-            ExcelHelper.ApplyColor(workOutsideScopeRowRange, contentColor);
-            ExcelHelper.SetCustomFormat(workOutsideScopeRowRange, ExcelHelperCellFormat.NegativeCurrency);
-            ExcelHelper.SetTextColor(workOutsideScopeRowRange, Color.White);
-            // Total for work outside scope
-            ExcelHelper.ApplyColor(worksheet.Cells[workOutsideScopeRow, startColumnIndex + numberOfYears], Color.FromArgb(217, 217, 217));
-            ExcelHelper.SetCustomFormat(worksheet.Cells[workOutsideScopeRow, startColumnIndex + numberOfYears], ExcelHelperCellFormat.NegativeCurrency);
+            worksheet.Cells[currentCell.Row, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(currentCell.Row, startColumnIndex, budgetTotalRow, startColumnIndex + numberOfYears - 1);            
 
             // AnnualizedAmount is used to fill the "Annualized Amount" row of Bridge Work Summary
             _workSummaryModel.AnnualizedAmount = (averageAnnualBudget / simulationYears.Count);
 
-            var rowRange = worksheet.Cells[currentCell.Row - 1, 1, currentCell.Row - 1, 3 + numberOfYears];
+            var rowRange = worksheet.Cells[currentCell.Row, 1, currentCell.Row, 3 + numberOfYears];
             ExcelHelper.ApplyBorder(rowRange);
-            var rowRangeForColor = worksheet.Cells[currentCell.Row - 1, 3, currentCell.Row - 1, 2 + numberOfYears];
+            var rowRangeForColor = worksheet.Cells[currentCell.Row, 3, currentCell.Row, 2 + numberOfYears];
             ExcelHelper.ApplyColor(rowRangeForColor, Color.FromArgb(0, 128, 0));            
 
-            var grandTotalRange = worksheet.Cells[currentCell.Row - 1, startColumnIndex + numberOfYears];
+            var grandTotalRange = worksheet.Cells[currentCell.Row, startColumnIndex + numberOfYears];
             ExcelHelper.ApplyColor(grandTotalRange, Color.FromArgb(217, 217, 217));            
             currentCell.Row++;
 

@@ -52,6 +52,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
             _testTreatment = new SelectableTreatmentEntity
             {
                 Id = Guid.NewGuid(),
+                AssetType = "",
                 TreatmentLibraryId = _testTreatmentLibrary.Id,
                 Name = "Test Name",
                 ShadowForAnyTreatment = 1,
@@ -88,6 +89,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
             _testScenarioTreatment = new ScenarioSelectableTreatmentEntity
             {
                 Id = Guid.NewGuid(),
+                AssetType = "",
                 SimulationId = simulationId,
                 Name = "Test Name",
                 ShadowForAnyTreatment = 1,

@@ -76,7 +76,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
             var inventoryReportKey = new AdminSettingsEntity()
             {
-                Key = "InventoryReportNames",
+                Key = "FailingInventoryReportNames",
                 Value = ""
             };
             entities.Add(inventoryReportKey);

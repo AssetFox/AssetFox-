@@ -215,6 +215,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
                 Name = "Test Scenario Treatment",
                 ShadowForAnyTreatment = 1,
                 ShadowForSameTreatment = 1,
+                AssetType = ""
             };
             TestHelper.UnitOfWork.Context.AddEntity(_testScenarioTreatment);
 
@@ -248,6 +249,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.TreatmentSupersedeRu
                 Name = "Test Treatment",
                 ShadowForAnyTreatment = 1,
                 ShadowForSameTreatment = 1,
+                AssetType = ""
             };
             TestHelper.UnitOfWork.Context.AddEntity(_testTreatment);
 

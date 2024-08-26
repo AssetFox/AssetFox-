@@ -30,6 +30,11 @@
                     label="Scenario name"
                     variant="outlined"
                     v-model="newScenario.name"
+                    v-model:errors="scenarioNameErrors"
+                    :rules="[
+                        rules.generalRules.valueIsNotEmpty,
+                        rules.generalRules.valueContainsNoSpecialCharacters
+                    ]"
                 ></v-text-field>
                 <v-checkbox v-model="shared" label="Share with all?" />
             </v-card-text>
@@ -44,7 +49,7 @@
                     >
                     <v-btn
                         id="CreateScenarioDialog-save-btn"
-                        :disabled="newScenario.name === '' || !isNetworkSelected"
+                        :disabled="newScenario.name === '' || !isNetworkSelected || hasValidationErrors()"
                         @click="onSubmit(true)"
                         class="ghd-blue ghd-button-text"
                         variant="outlined"
@@ -71,9 +76,15 @@ import { find, isNil, propEq } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { useStore } from 'vuex'; 
 import { validate } from 'uuid';
+import {
+    InputValidationRules,
+    rules as validationRules,
+} from '@/shared/utils/input-validation-rules';
 
   let store = useStore(); 
 
+  let rules: InputValidationRules = validationRules;
+  const scenarioNameErrors = ref<string[]>([]);
   const props = defineProps<{showDialog: boolean}>();
   const emit = defineEmits(['submit'])
   let showDialogComputed = computed(() => props.showDialog);
@@ -144,6 +155,21 @@ import { validate } from 'uuid';
                     : [owner]
             };
         }
+    }
+
+    function hasValidationErrors(): boolean {
+        scenarioNameErrors.value = [];
+
+        if (!newScenario.value.name) {
+            scenarioNameErrors.value.push('This field is required');
+        }
+
+        const specialCharError = rules.generalRules.valueContainsNoSpecialCharacters(newScenario.value.name);
+        if (specialCharError !== true) {
+            scenarioNameErrors.value.push(specialCharError as string);
+        }
+
+        return scenarioNameErrors.value.length > 0;
     }
 
     function onSubmit(submit: boolean) {

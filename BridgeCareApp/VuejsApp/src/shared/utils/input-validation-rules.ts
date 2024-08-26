@@ -24,6 +24,9 @@ const generalRules = {
     },
     'nameIsNotUnique': (name: string, names: string[]) => {
         return !contains(name, names) || 'Name must be unique';
+    },
+    'valueContainsNoSpecialCharacters': (value: string) => {
+        return /^[a-zA-Z0-9\s]*$/.test(value) || 'Value must not contain special characters';
     }
 };
 /***********************************************CASH FLOW RULES********************************************************/

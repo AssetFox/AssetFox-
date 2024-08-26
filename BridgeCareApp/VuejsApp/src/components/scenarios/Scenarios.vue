@@ -1583,7 +1583,7 @@ import { useRoute } from 'vue-router';
         scenario.name = name;
         if (hasValue(scenario.name)) {
             updateScenarioAction({ scenario: scenario }).then(() => {
-                if(tab.value == '0')
+                if(tab.value == tabItems[0].name)
                     onUserScenariosPagination();
                 else
                     onSharedScenariosPagination();

@@ -32,8 +32,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     Id = Guid.NewGuid(),
                     Username = username,
                     HasInventoryAccess = hasAdminClaim,
+                    ActiveStatus = true
                 });
-
+                
             });
         }
 

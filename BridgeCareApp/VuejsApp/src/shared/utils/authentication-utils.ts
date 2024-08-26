@@ -78,23 +78,8 @@ export const isAuthenticatedUser = () => {
 const onLogout = () => {
     store.dispatch('logOut').then(() => {
         clearRefreshIntervalID(); 
-        // @ts-ignore
-        if (window.location.host.toLowerCase().indexOf('penndot.gov') === -1 && store.state.authenticationModule.securityType === SecurityTypes.esec) {
-            /*
-             * In order to log out properly, the browser must visit the /iAM page of a penndot deployment, as iam-deploy.com cannot
-             * modify browser cookies for penndot.gov. So, the current host is sent as part of the query to the penndot site
-             * to allow the landing page to redirect the browser to the original host.
-             */
-            window.location.href =
-                'http://www.bamssyst.penndot.gov/iAM?host=' +
-                encodeURI(window.location.host);
-        } else {
-            if (
-                UnsecuredRoutePathNames.indexOf(router.currentRoute.path) === -1
-            ) {
-                router.push('/iAM/');
-            }
-        }
+        localStorage.clear();
+        sessionStorage.clear();      
     });
 };
 

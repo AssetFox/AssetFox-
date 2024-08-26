@@ -602,8 +602,11 @@ import { getUrl } from './shared/utils/get-url';
         
         currentURL = router.currentRoute.value.name;
 
-        startTokenCheckTimer();
-
+        if(securityType.value === SecurityTypes.esec)
+        {
+            startTokenCheckTimer(); 
+        }
+        
         if(config.agencyLogo.trim() === "")
             agencyLogo.value = new URL(`assets/images/generic/IAM_Main.jpg`, import.meta.url).href;
         else

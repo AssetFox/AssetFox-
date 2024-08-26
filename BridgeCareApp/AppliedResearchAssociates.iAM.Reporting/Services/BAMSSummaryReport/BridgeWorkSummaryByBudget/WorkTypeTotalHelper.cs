@@ -96,7 +96,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
                     }
                     workTypeTotal.WorkOutsideScopeCostPerYear[item.Year] += item.Amount;
-                    workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
                     break;
                 case TreatmentCategory.Bundled:
                     if (!workTypeTotal.BundledCostPerYear.ContainsKey(item.Year))
@@ -126,11 +125,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
             else
             {
-                if (!workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
+                if (treatmentCategory != TreatmentCategory.WorkOutsideScope)
                 {
-                    workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
+                    if (!workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
+                    {
+                        workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
+                    }
+                    workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
                 }
-                workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
             }
         }
     }

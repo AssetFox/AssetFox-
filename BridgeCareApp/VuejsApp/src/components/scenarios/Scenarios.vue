@@ -119,13 +119,14 @@
                                         <tr>
                                         <td>
                                         
-                                            <editDialog
+                                            <editScenarioNameDialog
                                                 size="large"
                                                 lazy
                                                 persistent
                                                 v-model:return-value="
-                                                    props.item.name
+                                                    nameUpdate
                                                 "
+                                                :initial-name="props.item.name"
                                                 @save="
                                                     onEditScenarioName(
                                                         props.item,
@@ -148,10 +149,13 @@
                                                             rules[
                                                                 'generalRules'
                                                             ].valueIsNotEmpty,
+                                                            rules[
+                                                                'generalRules'
+                                                            ].valueContainsNoSpecialCharacters,
                                                         ]"
                                                     />
                                                 </template>
-                                            </editDialog>
+                                            </editScenarioNameDialog>
                                         </td>
                                         <td>
                                             {{
@@ -704,6 +708,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import { AlertData, AlertDataWithButtons, AlertPreChecksData, emptyAlertData, emptyAlertDataWithButtons, emptyAlertPreChecksData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import editDialog from '@/shared/modals/Edit-Dialog.vue'
+import editScenarioNameDialog from '@/shared/modals/EditDialogForScenarioName.vue'
 import AlertWithButtons from '@/shared/modals/AlertWithButtons.vue';
 import AlertPreChecks from '@/shared/modals/AlertPreChecks.vue';
 import { emptyAlertButton } from '@/shared/models/modals/alert-data';

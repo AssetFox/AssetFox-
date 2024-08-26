@@ -36,7 +36,7 @@ export default class CalculatedAttributeService {
 
     static getLibraryCalculatedAttributePage(libraryId: string, data: CalculatedAttributePagingRequestModel): AxiosPromise{
         return coreAxiosInstance.post(
-            `${API.CalculatedAttributes}/GetLibraryCalculatedAttrbiutePage/${libraryId}`,
+            `${API.CalculatedAttributes}/GetLibraryCalculatedAttributePage/${libraryId}`,
             data,
         );
     }

@@ -579,7 +579,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
             search:  currentSearch.value,
             attributeId:  stateCalculatedAttributes.value.find(_ => _.name ===  selectedAttribute.attribute)!.id
         };
-        if((! hasSelectedLibrary.value &&  hasScenario.value) &&  selectedScenarioId !==  uuidNIL){
+        if(hasScenario.value && selectedScenarioId !==  uuidNIL){
             CalculatedAttributeService.getScenarioCalculatedAttrbiutetPage( selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as calculcatedAttributePagingPageModel;
@@ -592,7 +592,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                 }
             });
         }            
-        else if(hasSelectedLibrary.value){
+        else if(hasSelectedLibrary.value && !hasScenario.value){
             initializing = true;
             await CalculatedAttributeService.getCalculatedLibraryModifiedDate(selectedCalculatedAttributeLibrary.value.id).then(response => {
                   if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
@@ -728,7 +728,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         truelibrarySelectItemValue.value = librarySelectItemValue.value;
         selectCalculatedAttributeLibraryAction(
             librarySelectItemValue.value,
-        );
+        ).then(() => onAttributeSelectItemValueChanged());
     }
 
     // is so that users are asked wether or not to continue when switching attributes after making changes

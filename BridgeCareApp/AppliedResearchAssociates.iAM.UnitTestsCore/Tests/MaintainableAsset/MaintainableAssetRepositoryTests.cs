@@ -198,7 +198,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var network = NetworkTestSetup.ModelForEntityInDbWithExistingKeyAttribute(TestHelper.UnitOfWork, maintainableAssets, keyAttributeDto.Id, networkId);
             var simulation = SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId, simulationName, user.Id, networkId);
             var committedProjectId = Guid.NewGuid();
+            var budgetName = RandomStrings.WithPrefix("Budget");
+            var budgetId = Guid.NewGuid();
+            var budgetDto = BudgetDtos.New(budgetId, budgetName);
+            var budgetDtos = new List<BudgetDTO> { budgetDto };
+            ScenarioBudgetTestSetup.UpsertOrDeleteScenarioBudgets(TestHelper.UnitOfWork, budgetDtos, simulation.Id);
             var sectionCommittedProjectDto = SectionCommittedProjectDtos.Dto1(committedProjectId, simulation.Id);
+            sectionCommittedProjectDto.ScenarioBudgetId = budgetId;
             var sectionCommittedProjectDtos = new List<SectionCommittedProjectDTO> { sectionCommittedProjectDto };
             TestHelper.UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(sectionCommittedProjectDtos);
 

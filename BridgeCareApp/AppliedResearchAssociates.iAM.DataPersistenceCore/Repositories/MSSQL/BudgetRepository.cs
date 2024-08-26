@@ -204,6 +204,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.DeleteAll<CriterionLibraryBudgetEntity>(_ =>
                 _.Budget.BudgetLibraryId == libraryId);
 
+            foreach (var budget in budgets)
+            {
+                if (budget.CriterionLibrary != null && budget.CriterionLibrary.Id == Guid.Empty && !string.IsNullOrEmpty(budget.CriterionLibrary.MergedCriteriaExpression))
+                {
+                    budget.CriterionLibrary.Id = Guid.NewGuid();
+                }
+            }
+
             if (budgets.Any(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
                                  !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
             {

@@ -332,7 +332,20 @@
                 </v-col>
             </v-row>
     </v-col>
-    
+    <v-dialog v-model="showSuccessPopup" max-width="400px">
+        <v-card>
+            <v-card-text class="text-center">
+                Successfully uploaded treatments.
+            </v-card-text>
+            <v-card-actions>
+                <v-row justify="center" class="w-100">
+                    <v-btn color="primary" variant="text" 
+                    class='ghd-white-bg ghd-blue ghd-button-text' @click="showSuccessPopup = false">OK</v-btn>
+                </v-row>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
 </v-card>
     <ConfirmDeleteAlert
         :dialogData='confirmBeforeDeleteAlertData'
@@ -660,6 +673,7 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
     let loadedParentId: string  = uuidNIL;
     let newLibrarySelection: boolean = false;
     let newTreatment: Treatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
+    const showSuccessPopup = ref(false);
 
     
     beforeRouteEnter();
@@ -1493,6 +1507,7 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
                 }  
                 setAlertMessageAction('');             
             })
+            showSuccessPopup.value = true;
         }        
     }
 

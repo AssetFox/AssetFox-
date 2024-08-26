@@ -268,6 +268,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var lookupSource = KeyProperties[keyName];
             var debugMe = lookupSource.Select(_ => _.KeyValue.Value).ToList();
             var targetAsset = lookupSource.FirstOrDefault(_ => _.KeyValue.Value == keyValue);
+            if (targetAsset == null) return new List<SegmentAttributeDatum>();
             var targetAssetValue = targetAsset.KeyValue.Value;
             List<int> lastIntegers = new List<int>();
             if (!KeyProperties.ContainsKey("BRKEY_"))
@@ -318,7 +319,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     return new string(charArray);
                 }
             }
-            if (targetAsset == null) return new List<SegmentAttributeDatum>();
+            
             var asset = _unitOfWork.Context.MaintainableAsset
                 .AsSplitQuery()
                 .Where(_ => _.Id == targetAsset.AssetId)

@@ -29,6 +29,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
             var dto = new TreatmentDTO
             {
                 Id = resolveId,
+                AssetType = "",
                 Name = name,
                 Description = "Treatment description",
                 BudgetIds = new List<Guid>(),
@@ -52,6 +53,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
             {
                 Id = resolveId,
                 Name = name,
+                AssetType = "",
                 Description = "Treatment description",
                 Costs = new List<TreatmentCostDTO>(),
                 Consequences = new List<TreatmentConsequenceDTO>(),
@@ -70,6 +72,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SelectableTreatment
             {
                 Id = resolveId,
                 Name = name,
+                AssetType = "",
                 Description = "Treatment description",
                 Costs = new List<TreatmentCostDTO>(),
                 Consequences = new List<TreatmentConsequenceDTO>(),

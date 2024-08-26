@@ -582,6 +582,7 @@ namespace BridgeCareCoreTests.Tests.Integration
                         Name = "Treatment",
                         ShadowForAnyTreatment = 1,
                         ShadowForSameTreatment = 1,
+                        AssetType = "",
                         CriterionLibraryScenarioSelectableTreatmentJoin =
                             new CriterionLibraryScenarioSelectableTreatmentEntity
                             {
@@ -690,6 +691,7 @@ namespace BridgeCareCoreTests.Tests.Integration
                         Name = "Treatment2",
                         ShadowForAnyTreatment = 1,
                         ShadowForSameTreatment = 1,
+                        AssetType = "",
                         ScenarioSelectableTreatmentScenarioBudgetJoins =
                         new List<ScenarioSelectableTreatmentScenarioBudgetEntity>
                         {

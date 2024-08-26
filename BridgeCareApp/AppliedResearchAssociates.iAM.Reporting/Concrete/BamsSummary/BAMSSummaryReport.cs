@@ -23,6 +23,7 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;using AppliedResearchAssociates.iAM.Reporting.Services;using System.Threading;using AppliedResearchAssociates.iAM.Common.Logging;using AppliedResearchAssociates.iAM.WorkQueue;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -328,7 +329,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     checkCancelled(cancellationToken, simulationId);
                     if (!treatmentCategoryLookup.ContainsKey(treatmentObject.Name))
                     {
-                        treatmentCategoryLookup.Add(treatmentObject.Name, treatmentObject.Category.ToString());
+                        var treatmentCategory = treatmentObject.Category == TreatmentCategory.Reconstruction ?
+                                                TreatmentCategory.Replacement.ToString() :
+                                                treatmentObject.Category.ToString();
+                        treatmentCategoryLookup.Add(treatmentObject.Name, treatmentCategory);
                     }
                 }
             }

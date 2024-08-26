@@ -222,8 +222,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 rowIndex++;
             }
-            var lastContentRow = rowIndex - 1; //firstContentRow + workTypes.Count - 1;
-            currentCell.Row = lastContentRow + 1;//+= workTypes.Count();
+            var lastContentRow = rowIndex - 1;
+            currentCell.Row = lastContentRow + 1;
             var totalSpentRow = currentCell.Row;
             TotalSpentRow = totalSpentRow;
             worksheet.Cells[totalSpentRow, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(totalSpentRow, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1);

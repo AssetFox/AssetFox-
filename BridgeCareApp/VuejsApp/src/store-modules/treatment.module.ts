@@ -153,17 +153,19 @@ const actions = {
             },
         );
     },
-    async getScenarioSelectableTreatments({ commit }: any, scenarioId: string) {
-        await TreatmentService.getScenarioSelectedTreatments(scenarioId).then(
-            (response: AxiosResponse) => {
-                if (hasValue(response, 'data')) {
-                    commit(
-                        'scenarioSelectableTreatmentsMutator',
-                        response.data as Treatment[],
-                    );
-                }
-            },
-        );
+    async getScenarioSelectableTreatments({ commit }: any, scenario: { scenarioId: string }) {
+        const scenarioId = scenario.scenarioId;
+    
+        const response = await TreatmentService.getScenarioSelectedTreatments(scenarioId);
+        
+        if (hasValue(response, 'data')) {
+            commit(
+                'scenarioSelectableTreatmentsMutator',
+                response.data as Treatment[],
+            );
+        }
+    
+        return response.data;
     },
     async getSimpleScenarioSelectableTreatments({ commit }: any, scenarioId: string) {
         await TreatmentService.getSimpleTreatmentsByScenarioId(scenarioId).then(

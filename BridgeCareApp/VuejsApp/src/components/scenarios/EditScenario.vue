@@ -134,6 +134,7 @@ import ScenarioService from '@/services/scenario.service';
 
     async function runSimulationAction(payload?: any): Promise<any>{await store.dispatch('runSimulation', payload)}   
     async function runNewSimulationAction(payload?: any): Promise<any>{await store.dispatch('runNewSimulation',payload)}
+    async function getScenarioSelectableTreatmentsAction(payload?: any): Promise<any> {return await store.dispatch('getScenarioSelectableTreatments', payload)}
 
     let selectedScenarioId: string = getBlankGuid();
     let showImportExportCommittedProjectsDialog: boolean = false;
@@ -145,6 +146,7 @@ import ScenarioService from '@/services/scenario.service';
     let preCheckMessages: any;
     let preCheckHeading: string;
     let preCheckStatus: any;
+    let emptyTreatmentBudgets: any;
     let confirmAnalysisRunAlertData= ref(clone(emptyAlertDataWithButtons));
     let confirmAnalysisPreCheckAlertData= ref(clone(emptyAlertPreChecksData));
     let navigationTabs: NavigationTab[] = [
@@ -463,6 +465,14 @@ import ScenarioService from '@/services/scenario.service';
                     });
 
                 }
+                // Check which treatments have no budgets and add them to the warning list
+                emptyTreatmentBudgets = await getScenarioSelectableTreatmentsAction({ scenarioId: selectedScenarioId });
+                emptyTreatmentBudgets.forEach((treatment: { budgets: string | any[]; name: any; }) => {
+                    if (!treatment.budgets || treatment.budgets.length === 0) {
+                        preCheckMessages += `Treatment ${treatment.name} has no budgets.`
+                    }
+                });
+
                 secondRunAnalysisModal();
         }
         else if(submit == "continue") {

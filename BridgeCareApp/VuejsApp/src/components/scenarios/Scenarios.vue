@@ -77,17 +77,18 @@
                                             </v-col>
                                             
                                             <v-spacer></v-spacer>
-                                            <v-col>
+                                            <v-col class="d-flex justify-end" style="padding-right: 100px;">
                                                 <v-btn
-                                           id="Scenarios-createScenario-btn"
-                                            @click="
-                                                showCreateScenarioDialog = true
-                                            "
-                                            class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                                            variant="outlined"
-                                        >
-                                            Create new scenario
-                                        </v-btn>
+                                                    id="Scenarios-createScenario-btn"
+                                                    @click="
+                                                        showCreateScenarioDialog = true
+                                                    "
+                                                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                                                    variant="outlined"
+                                                    style="justify-content: end;"
+                                                >
+                                                    Create new scenario
+                                                </v-btn>
                                             </v-col>
                                             
                                         </v-row>

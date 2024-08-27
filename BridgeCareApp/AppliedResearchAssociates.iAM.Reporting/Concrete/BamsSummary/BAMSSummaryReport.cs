@@ -330,7 +330,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     checkCancelled(cancellationToken, simulationId);
                     if (!treatmentCategoryLookup.ContainsKey(treatmentObject.Name))
                     {
-                        var treatmentCategory = GetCategory(treatmentObject.Category);
+                        var treatmentCategory = SummaryReportHelper.GetCategory(treatmentObject.Category);
                         treatmentCategoryLookup.Add(treatmentObject.Name, treatmentCategory.ToString());
                     }
                 }
@@ -350,7 +350,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     .FirstOrDefault();                
                 if (!treatmentCategoryLookup.ContainsKey(newTreatment))
                 {
-                    bestTreatmentEntry = GetCategory(bestTreatmentEntry);
+                    bestTreatmentEntry = SummaryReportHelper.GetCategory(bestTreatmentEntry);
                     treatmentCategoryLookup.Add(newTreatment, bestTreatmentEntry.ToString());
                 }
             }
@@ -460,11 +460,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             //return value
             return functionReturnValue;
-        }
-
-        private static TreatmentCategory GetCategory(TreatmentCategory treatmentCategory) => treatmentCategory == TreatmentCategory.Reconstruction ?
-                                                                                             TreatmentCategory.Replacement :
-                                                                                             treatmentCategory;
+        }        
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
 

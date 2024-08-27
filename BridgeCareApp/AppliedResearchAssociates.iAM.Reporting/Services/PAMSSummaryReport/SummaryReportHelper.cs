@@ -1,6 +1,5 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
 {
@@ -18,5 +17,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
             //return value
             return itemValue;
         }
+
+        public static TreatmentCategory GetCategory(TreatmentCategory treatmentCategory) => treatmentCategory == TreatmentCategory.Replacement ?
+                                                                                             TreatmentCategory.Reconstruction :
+                                                                                             treatmentCategory;
     }
 }

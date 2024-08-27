@@ -45,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             foreach (var item in selectableTreatments)
             {
-                var category = GetCategory(item.Category);
+                var category = SummaryReportHelper.GetCategory(item.Category);
                 simulationTreatments.Add((item.Name, item.AssetCategory, category));
             }
 
@@ -68,10 +68,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells.AutoFitColumns();
 
             return chartRowsModel;
-        }
-
-        private static TreatmentCategory GetCategory(TreatmentCategory treatmentCategory) => treatmentCategory == TreatmentCategory.Replacement ?
-                                                                                             TreatmentCategory.Reconstruction :
-                                                                                             treatmentCategory;
+        }        
     }
 }

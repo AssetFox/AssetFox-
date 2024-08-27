@@ -56,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             foreach (var item in selectableTreatments)
             {
                 if (item.Name.ToLower() == BAMSConstants.NoTreatment) continue;
-                var category = GetCategory(item.Category);
+                var category = SummaryReportHelper.GetCategory(item.Category);
                 simulationTreatments.Add((item.Name, item.AssetCategory, category));
             }
             simulationTreatments.Sort((a, b) => a.Item1.CompareTo(b.Item1));
@@ -334,11 +334,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 completedProj[key] += 1;
             }
-        }
-
-        private static TreatmentCategory GetCategory(TreatmentCategory treatmentCategory) => treatmentCategory == TreatmentCategory.Reconstruction ?
-                                                                                             TreatmentCategory.Replacement :
-                                                                                             treatmentCategory;
+        }        
 
         #endregion Private methods
     }

@@ -48,13 +48,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             #region Initial work to set some data, which will be used throughout the Work summary TAB
 
             // Getting list of treatments. It will be used in several places throughout this excel TAB
-            var simulationTreatments = new List<(string Name, string AssetType, TreatmentCategory Category)>();
-            simulationTreatments.Add((BAMSConstants.CulvertNoTreatment, "Culvert", TreatmentCategory.Other));
-            simulationTreatments.Add((BAMSConstants.NonCulvertNoTreatment, "Bridge", TreatmentCategory.Other));
+            var simulationTreatments = new List<(string Name, string AssetType, TreatmentCategory Category)>
+            {
+                (BAMSConstants.CulvertNoTreatment, "Culvert", TreatmentCategory.Other),
+                (BAMSConstants.NonCulvertNoTreatment, "Bridge", TreatmentCategory.Other)
+            };
             foreach (var item in selectableTreatments)
             {
                 if (item.Name.ToLower() == BAMSConstants.NoTreatment) continue;
-                simulationTreatments.Add((item.Name, (string)item.AssetCategory, item.Category));
+                var category = SummaryReportHelper.GetCategory(item.Category);
+                simulationTreatments.Add((item.Name, item.AssetCategory, category));
             }
             simulationTreatments.Sort((a, b) => a.Item1.CompareTo(b.Item1));
 
@@ -104,7 +107,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
          Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
          Dictionary<int, Dictionary<string, int>> countForCompletedProject,
          Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject,
-         Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
+         Dictionary<string, string> treatmentCategoryLookup,
+         List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
          bool shouldBundleFeasibleTreatments)
         {
             var isInitialYear = true;
@@ -158,9 +162,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     {
                         var committedCost = cost;
                         if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
-                        {                            
-                            var projectSource = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment) &&
-                                                _.Year == yearData.Year)?.ProjectSource.ToString();
+                        {
+                            var committedProject = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment) &&
+                                                _.Year == yearData.Year);
+                            var projectSource = committedProject?.ProjectSource.ToString();                            
                             yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (committedCost, 1, projectSource, treatmentCategory));
                         }
                         else
@@ -329,7 +334,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 completedProj[key] += 1;
             }
-        }
+        }        
 
         #endregion Private methods
     }

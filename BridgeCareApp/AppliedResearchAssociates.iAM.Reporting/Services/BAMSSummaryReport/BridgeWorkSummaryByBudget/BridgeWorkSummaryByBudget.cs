@@ -224,16 +224,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Cells[initialRow, 3 + numberOfYears].Value = "Total (all years)";
                 var totalColumnHeaderRange = worksheet.Cells[initialRow, 3 + numberOfYears];
                 ExcelHelper.ApplyBorder(totalColumnHeaderRange);
-                ExcelHelper.ApplyStyle(totalColumnHeaderRange);
-
+                ExcelHelper.ApplyStyle(totalColumnHeaderRange);                
                 var workTypes = EnumExtensions.GetValues<TreatmentCategory>();
                 currentCell.Row++;
                 var firstContentRow = currentCell.Row;
-                var rowTrackerForColoring = firstContentRow;
                 var rowIndex = firstContentRow;
+                var rowTrackerForColoring = firstContentRow;
+                
                 for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
                 {
-                    if (workType == TreatmentCategory.WorkOutsideScope)
+                    if (workType == TreatmentCategory.Reconstruction || workType == TreatmentCategory.WorkOutsideScope)
                     {
                         continue;
                     }
@@ -241,6 +241,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     worksheet.Cells[rowIndex, 1].Value = workType.ToSpreadsheetString();
                     worksheet.Cells[rowIndex, 3, rowIndex, simulationYears.Count + 2].Value = 0.0;
                     currentCell.Row++;
+
                     rowIndex++;
                 }
 

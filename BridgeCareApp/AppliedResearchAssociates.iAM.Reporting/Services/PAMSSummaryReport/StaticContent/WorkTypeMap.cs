@@ -7,12 +7,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Sta
     public static class WorkTypeMap
     {
         public static Dictionary<string, TreatmentCategory> Map =
-            new Dictionary<string, TreatmentCategory>
+            new()
             {
                 // MPMS
-                {"Preservation", TreatmentCategory.Preservation },
+                { "Preservation", TreatmentCategory.Preservation },
                 { "Capacity Adding", TreatmentCategory.CapacityAdding },
-                {"Rehabilitation", TreatmentCategory.Rehabilitation },
+                { "Rehabilitation", TreatmentCategory.Rehabilitation },
+                { "Replacement", TreatmentCategory.Reconstruction },
                 { "Reconstruction", TreatmentCategory.Reconstruction },
                 { "Maintenance", TreatmentCategory.Maintenance },
                 { "Other", TreatmentCategory.Other },

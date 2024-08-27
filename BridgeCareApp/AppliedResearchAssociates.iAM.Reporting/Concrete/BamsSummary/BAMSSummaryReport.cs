@@ -23,6 +23,7 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;using AppliedResearchAssociates.iAM.Reporting.Services;using System.Threading;using AppliedResearchAssociates.iAM.Common.Logging;using AppliedResearchAssociates.iAM.WorkQueue;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -329,7 +330,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     checkCancelled(cancellationToken, simulationId);
                     if (!treatmentCategoryLookup.ContainsKey(treatmentObject.Name))
                     {
-                        treatmentCategoryLookup.Add(treatmentObject.Name, treatmentObject.Category.ToString());
+                        var treatmentCategory = SummaryReportHelper.GetCategory(treatmentObject.Category);
+                        treatmentCategoryLookup.Add(treatmentObject.Name, treatmentCategory.ToString());
                     }
                 }
             }
@@ -345,9 +347,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     .Select(_ => new { Category = _.Key, Count = _.Count() })
                     .OrderByDescending(_ => _.Count)
                     .Select(_ => _.Category)
-                    .FirstOrDefault();
+                    .FirstOrDefault();                
                 if (!treatmentCategoryLookup.ContainsKey(newTreatment))
                 {
+                    bestTreatmentEntry = SummaryReportHelper.GetCategory(bestTreatmentEntry);
                     treatmentCategoryLookup.Add(newTreatment, bestTreatmentEntry.ToString());
                 }
             }
@@ -457,7 +460,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             //return value
             return functionReturnValue;
-        }
+        }        
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
 

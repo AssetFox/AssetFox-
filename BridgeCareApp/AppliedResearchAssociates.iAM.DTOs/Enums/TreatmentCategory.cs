@@ -29,6 +29,11 @@
         Reconstruction,
 
         /// <summary>
+        /// The treatment will replace the exisiting asset
+        /// </summary>
+        Replacement,
+
+        /// <summary>
         /// Treatment is low-cost and usually applied according to a timed scehdule as opposed
         /// to reacting to specific asset condiitons.
         /// </summary>

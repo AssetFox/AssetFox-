@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.ShortNameGlossary
@@ -68,7 +67,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
             => new RelativeExcelRangeModel
             {
                 Content = content,
-                Size = new ExcelRangeSize(2, 1)
+                Size = new ExcelRangeSize(4, 1)
             };
 
     }

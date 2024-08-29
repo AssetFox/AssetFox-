@@ -21,12 +21,12 @@
                     <v-col style="padding: 0;">
                         <div style="width:75%; margin: 10px;">
                             <v-row style="margin: 0;">
-                                <v-select bg-color="white" density="compact" variant="outlined"
+                                <v-combobox bg-color="white" density="compact" variant="outlined"
                                 :items='queryRules'
                                 v-model="selectedQueryRule"
                                 item-title="label"
                                 item-value="label"
-                                return-object></v-select>
+                                return-object></v-combobox>
                                 <v-btn @click="onAddRuleClick"
                                      variant = "outlined" class='ghd-blue ghd-button-text ghd-button button-spacing' :disabled="selectedQueryRule === null">Add Rule</v-btn>
                                 <v-btn @click="onAddGroupClick" v-if="depth + 1 < maxDepth" variant = "outlined" class='ghd-blue ghd-button-text ghd-button'>Add Group</v-btn>

@@ -184,19 +184,38 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                     {
                         var section_BRKEY = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
 
-                        // Build keyCashFlowFundingDetails
+                        // Build keyCashFlowFundingDetails                    
                         if (section.TreatmentStatus != TreatmentStatus.Applied)
                         {
-                            var fundingSection = yearData.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment && _.AppliedTreatment == section.AppliedTreatment);
-                            if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(section_BRKEY))
+                            var fundingSection = yearData.Assets.
+                                                  FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY &&
+                                                                _.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                                _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment &&
+                                                                _.AppliedTreatment == section.AppliedTreatment);
+                            if (fundingSection != null)
                             {
-                                keyCashFlowFundingDetails.Add(section_BRKEY, fundingSection?.TreatmentConsiderations ?? new());
+                                if (!keyCashFlowFundingDetails.ContainsKey(section_BRKEY))
+                                {
+                                    keyCashFlowFundingDetails.Add(section_BRKEY, fundingSection.TreatmentConsiderations ?? new());
+                                }
+                                else
+                                {
+                                    keyCashFlowFundingDetails[section_BRKEY].AddRange(fundingSection.TreatmentConsiderations);
+                                }
                             }
                         }
 
-                        var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause !=
-                                                        TreatmentCause.CashFlowProject ? section.TreatmentConsiderations : keyCashFlowFundingDetails[section_BRKEY];
-                        var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                        // If CF then use obj from keyCashFlowFundingDetails otherwise from section
+                        var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                      section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                      (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                      section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                      (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                      section.TreatmentStatus == TreatmentStatus.Applied)) ?
+                                                      keyCashFlowFundingDetails[section_BRKEY] :
+                                                      section.TreatmentConsiderations ?? new();
+                        var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                     _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year));
                         var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
                         var budgetAmount = (double)treatmentConsiderations.Sum(_ =>
                                                            (_.FundingCalculationOutput?.AllocationMatrix

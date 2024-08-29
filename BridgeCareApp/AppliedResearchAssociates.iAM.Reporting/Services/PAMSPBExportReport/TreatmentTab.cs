@@ -148,27 +148,40 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSPBExport
             treatmentDataModel.Benefit = treatmentOption != null ? treatmentOption.Benefit : 0;
             // TODO remove infinity condition once fix is available for such edge cases
             treatmentDataModel.RemainingLife = treatmentOption != null && treatmentOption.RemainingLife?.ToString() != "-∞" ? treatmentOption.RemainingLife : 0;
-
-            // Build keyCashFlowFundingDetails
+                        
             var crs = CheckGetTextValue(section.ValuePerTextAttribute, "CRS");
+            // Build keyCashFlowFundingDetails
             if (section.TreatmentStatus != TreatmentStatus.Applied)
             {
-                var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == crs &&
-                                     _.TreatmentCause == TreatmentCause.SelectedTreatment &&
-                                     _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
-                                     _.AppliedTreatment == section.AppliedTreatment);
-                if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
+                var fundingSection = year.Assets.
+                                      FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == crs &&
+                                                    _.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                    _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
+                                                    _.AppliedTreatment == section.AppliedTreatment);
+                if (fundingSection != null)
                 {
-                    keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
+                    if (!keyCashFlowFundingDetails.ContainsKey(crs))
+                    {
+                        keyCashFlowFundingDetails.Add(crs, fundingSection.TreatmentConsiderations ?? new());
+                    }
+                    else
+                    {
+                        keyCashFlowFundingDetails[crs].AddRange(fundingSection.TreatmentConsiderations);
+                    }
                 }
             }
 
-            // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-            var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                          section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
-            var treatmentConsideration = shouldBundleFeasibleTreatments ?
-                                         treatmentConsiderations.FirstOrDefault() :
-                                         treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);         
+            // If CF then use obj from keyCashFlowFundingDetails otherwise from section
+            var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                          section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                          (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                          section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                          (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                          section.TreatmentStatus == TreatmentStatus.Applied)) ?
+                                          keyCashFlowFundingDetails[crs] :
+                                          section.TreatmentConsiderations ?? new();
+            var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                         _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year));
 
             treatmentDataModel.PriorityLevel = treatmentConsideration?.BudgetPriorityLevel;
             treatmentDataModel.TreatmentFundingIgnoresSpendingLimit = section.TreatmentFundingIgnoresSpendingLimit ? 1 : 0;

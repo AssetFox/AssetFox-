@@ -45,18 +45,27 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     var section = yearData.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == crs);
                     var sectionValuePerNumericAttribute = section.ValuePerNumericAttribute;
                     var sectionValuePerTextAttribute = section.ValuePerTextAttribute;
+
                     // Build keyCashFlowFundingDetails
                     if (section.TreatmentStatus != TreatmentStatus.Applied)
                     {
-                        var fundingSection = yearData.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == crs &&
-                                             _.TreatmentCause == TreatmentCause.SelectedTreatment &&
-                                             _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
-                                             _.AppliedTreatment == section.AppliedTreatment);
-                        if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
+                        var fundingSection = yearData.Assets.
+                                              FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == crs &&
+                                                            _.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                            _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
+                                                            _.AppliedTreatment == section.AppliedTreatment);
+                        if (fundingSection != null)
                         {
-                            keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
+                            if (!keyCashFlowFundingDetails.ContainsKey(crs))
+                            {
+                                keyCashFlowFundingDetails.Add(crs, fundingSection.TreatmentConsiderations ?? new());
+                            }
+                            else
+                            {
+                                keyCashFlowFundingDetails[crs].AddRange(fundingSection.TreatmentConsiderations);
+                            }
                         }
-                    }                    
+                    }
 
                     worksheet.Cells[row, column++].Value = yearData.Year;
                     worksheet.Cells[row, column].Value = crs;
@@ -79,14 +88,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSDistressProgressi
                     worksheet.Column(column++).Width = 37;
                     worksheet.Cells[row, column++].Value = CheckGetTextValue(valuePerTextAttribute, "FAMILY");
 
-                    // Treatment selected
-                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
-                                                  section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                                  section.TreatmentConsiderations : keyCashFlowFundingDetails[crs];
-
-                    var treatmentConsideration = shouldBundleFeasibleTreatments ?
-                                                 treatmentConsiderations.FirstOrDefault() :
-                                                 treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    // If CF then use obj from keyCashFlowFundingDetails otherwise from section
+                    var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                  section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                  (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                  section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                  (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                  section.TreatmentStatus == TreatmentStatus.Applied)) ?
+                                                  keyCashFlowFundingDetails[crs] :
+                                                  section.TreatmentConsiderations ?? new();
+                    var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                 _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year));
                     worksheet.Cells[row, column].Value = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
                     worksheet.Column(column).Width = 71;
                     worksheet.Column(column).Style.WrapText = true;

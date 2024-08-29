@@ -345,11 +345,11 @@ const tab = ref<any>(null);
                 );
             }
 
-            if (hasValue(missingAttributes)) {
+            /* if (hasValue(missingAttributes)) {
                 getAttributeSelectValuesAction({
                     attributeNames: missingAttributes,
                 });
-            }
+            } */
         }
     });
 

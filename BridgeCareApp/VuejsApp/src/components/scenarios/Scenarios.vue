@@ -764,6 +764,7 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
 import { User } from '@/shared/models/iAM/user';
 import router from '@/router';
 import { useRoute } from 'vue-router';
+import ReportsService from '@/services/reports.service';
 
     let store = useStore(); 
     const $router = useRouter();     
@@ -1367,6 +1368,7 @@ import { useRoute } from 'vue-router';
         availableActions = {
             runAnalysis: 'runAnalysis',
             reports: 'reports',
+            deleteReports: 'deletedReports',
             settings: 'settings',
             share: 'share',
             clone: 'clone',
@@ -1388,6 +1390,12 @@ import { useRoute } from 'vue-router';
             {
                 title: 'Reports',
                 action: availableActions.reports,
+                icon: getUrl("assets/icons/clipboard.svg"),
+                isCustomIcon: true
+            },
+            {
+                title: 'Delete all generated Reports',
+                action: availableActions.deleteReports,
                 icon: getUrl("assets/icons/clipboard.svg"),
                 isCustomIcon: true
             },
@@ -1789,6 +1797,24 @@ import { useRoute } from 'vue-router';
             }
         });
     }
+
+    async function onDeleteAllGeneratedReports(localScenario: Scenario) {
+        await ReportsService.deleteAllGeneratedReports(
+            selectedScenarioId,
+        ).then((response: AxiosResponse<any>) => {
+            if (hasValue(response, 'data')) {
+                const fileInfo: FileInfo = response.data as FileInfo;
+                FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+            } else {
+                addErrorNotificationAction({
+                    message: 'Failed to delete report.',
+                    longMessage:
+                        'Failed to download the report or output. Make sure the scenario has been run',
+                });
+            }
+        });
+    }
+
     function onShowShareScenarioDialog(scenario: Scenario) {
         shareScenarioDialogData.value = {
             showDialog: true,
@@ -2156,6 +2182,9 @@ import { useRoute } from 'vue-router';
                 break;
             case availableActions.reports:
                 onNavigateToReportsView(scenario);
+                break;
+            case availableActions.deleteReports:
+            onDeleteAllGeneratedReports(scenario);
                 break;
             case availableActions.settings:
                 if (canModifySharedScenario(scenarioUsers) || isOwner) {

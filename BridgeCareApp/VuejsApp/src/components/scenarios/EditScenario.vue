@@ -529,8 +529,8 @@ import ScenarioService from '@/services/scenario.service';
                 networkId: networkId,
                 scenarioId: selectedScenarioId,
             }).then(() => (selectedScenario = clone(emptyScenario)));
+            router.push({ path: '/Scenarios/', query: { tab: 'General work queue' } }).catch(() => {});
         }
-        router.push({ path: '/Scenarios/', query: { tab: 'General work queue' } }).catch(() => {});
     }
 
 

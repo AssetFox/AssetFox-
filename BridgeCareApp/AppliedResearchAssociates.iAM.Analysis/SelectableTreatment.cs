@@ -37,12 +37,6 @@ public sealed class SelectableTreatment : Treatment
 
     public ICollection<Budget> Budgets { get; } = new SetWithoutNulls<Budget>();
 
-    /// <remarks>
-    ///     This property isn't used by the analysis engine. It probably shouldn't exist among the
-    ///     types in this module.
-    /// </remarks>
-    public TreatmentCategory Category { get; set; }
-
     public IReadOnlyCollection<ConditionalTreatmentConsequence> Consequences => _Consequences;
 
     public IReadOnlyCollection<TreatmentCost> Costs => _Costs;

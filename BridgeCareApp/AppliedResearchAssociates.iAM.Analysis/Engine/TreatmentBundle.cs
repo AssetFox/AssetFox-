@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
@@ -10,6 +11,8 @@ internal class TreatmentBundle : Treatment
 
     public TreatmentBundle(IEnumerable<Treatment> bundledTreatments)
     {
+        Category = TreatmentCategory.Bundled;
+
         BundledTreatments = bundledTreatments?.OrderBy(t => t.Name).ToList()
             ?? throw new ArgumentNullException(nameof(bundledTreatments));
 
@@ -17,8 +20,13 @@ internal class TreatmentBundle : Treatment
         // properties afterward. This is a safe assumption, because this type is only used inside
         // the analysis engine.
 
-        var joinedNames = string.Join('|', BundledTreatments.Select(t => t.Name));
-        Name = $"Bundle[{joinedNames}]";
+        var joinedNamesPerCategory = BundledTreatments.GroupBy(t => t.Category).OrderBy(g => g.Key.ToString()).Select(g =>
+        {
+            var joinedNames = string.Join('|', g.OrderBy(t => t.Name).Select(t => t.Name));
+            return $"[{joinedNames}]";
+        });
+
+        Name = $"Bundle{string.Concat(joinedNamesPerCategory)}";
 
         PerformanceCurveAdjustmentFactors = BundledTreatments
             .SelectMany(t => t.PerformanceCurveAdjustmentFactors)

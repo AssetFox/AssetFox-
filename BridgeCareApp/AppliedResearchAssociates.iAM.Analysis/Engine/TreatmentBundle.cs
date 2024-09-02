@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 
@@ -11,7 +10,7 @@ internal class TreatmentBundle : Treatment
 
     public TreatmentBundle(IEnumerable<Treatment> bundledTreatments)
     {
-        Category = TreatmentCategory.Bundled;
+        Category = DTOs.Enums.TreatmentCategory.Bundled;
 
         BundledTreatments = bundledTreatments?.OrderBy(t => t.Name).ToList()
             ?? throw new ArgumentNullException(nameof(bundledTreatments));

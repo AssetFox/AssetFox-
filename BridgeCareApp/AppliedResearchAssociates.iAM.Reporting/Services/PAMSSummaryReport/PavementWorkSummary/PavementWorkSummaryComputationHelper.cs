@@ -146,26 +146,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 foreach (var section in yearData.Assets)
                 {                    
                     var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
+
                     // Build keyCashFlowFundingDetails
-                    if (section.TreatmentStatus != TreatmentStatus.Applied)
-                    {
-                        var fundingSection = yearData.Assets.
-                                              FirstOrDefault(_ => _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "CRS") == crs &&
-                                                            _.TreatmentCause == TreatmentCause.SelectedTreatment &&
-                                                            _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
-                                                            _.AppliedTreatment == section.AppliedTreatment);
-                        if (fundingSection != null)
-                        {
-                            if (!keyCashFlowFundingDetails.ContainsKey(crs))
-                            {
-                                keyCashFlowFundingDetails.Add(crs, fundingSection.TreatmentConsiderations ?? new());
-                            }
-                            else
-                            {
-                                keyCashFlowFundingDetails[crs].AddRange(fundingSection.TreatmentConsiderations);
-                            }
-                        }
-                    }
+                    _summaryReportHelper.BuildKeyCashFlowFundingDetails(yearData, section, crs, keyCashFlowFundingDetails);
 
                     // If CF then use obj from keyCashFlowFundingDetails otherwise from section
                     var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&

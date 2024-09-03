@@ -149,28 +149,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 foreach (var yearData in reportOutputData.Years)
                 {
                     foreach (var section in yearData.Assets)
-                    {                        
+                    {
                         var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
                         // Build keyCashFlowFundingDetails
-                        if (section.TreatmentStatus != TreatmentStatus.Applied)
-                        {
-                            var fundingSection = yearData.Assets.
-                                                  FirstOrDefault(_ => _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "CRS") == crs &&
-                                                                _.TreatmentCause == TreatmentCause.SelectedTreatment &&
-                                                                _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
-                                                                _.AppliedTreatment == section.AppliedTreatment);
-                            if (fundingSection != null)
-                            {
-                                if (!keyCashFlowFundingDetails.ContainsKey(crs))
-                                {
-                                    keyCashFlowFundingDetails.Add(crs, fundingSection.TreatmentConsiderations ?? new());
-                                }
-                                else
-                                {
-                                    keyCashFlowFundingDetails[crs].AddRange(fundingSection.TreatmentConsiderations);
-                                }
-                            }
-                        }
+                        _summaryReportHelper.BuildKeyCashFlowFundingDetails(yearData, section, crs, keyCashFlowFundingDetails);
 
                         // If CF then use obj from keyCashFlowFundingDetails otherwise from section
                         var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
@@ -193,7 +175,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                             appliedTreatment.ToLower() != PAMSConstants.NoTreatment)
-                        {                            
+                        {
                             var category = TreatmentCategory.Other;
                             if (WorkTypeMap.Map.ContainsKey(appliedTreatment))
                             {
@@ -206,14 +188,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                 Year = yearData.Year,
                                 TreatmentName = section.AppliedTreatment,
                                 Amount = budgetAmount,
-                                isCommitted = true,                                
+                                isCommitted = true,
                                 TreatmentCategory = category,
                                 SurfaceId = (int)section.ValuePerNumericAttribute["SURFACEID"]
                             });
                             committedTreatments.Add(section.AppliedTreatment);
                         }
                         else
-                        {                            
+                        {
                             var treatmentData = appliedTreatment.Contains("Bundle") ?
                                                 selectableTreatments.FirstOrDefault(_ => appliedTreatment.Contains(_.Name)) :
                                                 selectableTreatments.FirstOrDefault(_ => _.Name == appliedTreatment);
@@ -234,6 +216,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 }
             }
         }
+
+        
 
         private void PopulateYearlyCostCommittedProj(
                                 SimulationOutput reportOutputData,
@@ -258,6 +242,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 foreach (var section in yearData.Assets)
                 {
                     var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
+
                     // If CF then use obj from keyCashFlowFundingDetails otherwise from section
                     var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
                                                   section.TreatmentStatus == TreatmentStatus.Progressed) ||

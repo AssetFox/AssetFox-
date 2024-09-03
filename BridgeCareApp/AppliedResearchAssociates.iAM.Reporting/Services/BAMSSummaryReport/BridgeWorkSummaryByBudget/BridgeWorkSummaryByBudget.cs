@@ -26,6 +26,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private ReportHelper _reportHelper;
         private readonly IUnitOfWork _unitOfWork;
         private int TotalSpentRow = 0;
+        private SummaryReportHelper _summaryReportHelper;
 
         public BridgeWorkSummaryByBudget(IUnitOfWork unitOfWork)
         {
@@ -35,6 +36,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _bridgeWorkCost = new BridgeWorkCost();
             _committedProjectCost = new CommittedProjectCost();
             _reportHelper = new ReportHelper(_unitOfWork);
+            _summaryReportHelper = new SummaryReportHelper();
         }
 
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount
@@ -77,24 +79,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         var section_BRKEY = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
 
                         // Build keyCashFlowFundingDetails                    
-                        if (section.TreatmentStatus != TreatmentStatus.Applied)
-                        {
-                            var fundingSection = yearData.Assets.
-                                                  FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY                       && _.TreatmentCause == TreatmentCause.SelectedTreatment &&
-                                                                _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment &&
-                                                                _.AppliedTreatment == section.AppliedTreatment);
-                            if (fundingSection != null)
-                            {
-                                if (!keyCashFlowFundingDetails.ContainsKey(section_BRKEY))
-                                {
-                                    keyCashFlowFundingDetails.Add(section_BRKEY, fundingSection.TreatmentConsiderations ?? new());
-                                }
-                                else
-                                {
-                                    keyCashFlowFundingDetails[section_BRKEY].AddRange(fundingSection.TreatmentConsiderations);
-                                }
-                            }
-                        }
+                        _summaryReportHelper.BuildKeyCashFlowFundingDetails(yearData, section, section_BRKEY, keyCashFlowFundingDetails, _reportHelper);
 
                         // If CF then use obj from keyCashFlowFundingDetails otherwise from section
                         var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&

@@ -22,6 +22,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private PostedClosedBridgeWorkSummary _postedClosedBridgeWorkSummary;
         private ProjectsCompletedCount _projectsCompletedCount;
         private ReportHelper _reportHelper;
+        private SummaryReportHelper _summaryReportHelper;
         private readonly IUnitOfWork _unitOfWork;
 
         public BridgeWorkSummary(IList<string> Warnings, IUnitOfWork unitOfWork)
@@ -36,6 +37,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _postedClosedBridgeWorkSummary = new PostedClosedBridgeWorkSummary(workSummaryModel, _unitOfWork);
             _projectsCompletedCount = new ProjectsCompletedCount(Warnings);            
             _reportHelper = new ReportHelper(_unitOfWork);
+            _summaryReportHelper = new SummaryReportHelper();
         }
 
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
@@ -133,26 +135,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
 
                     // Build keyCashFlowFundingDetails                    
-                    if (section.TreatmentStatus != TreatmentStatus.Applied)
-                    {
-                        var fundingSection = yearData.Assets.
-                                              FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY &&
-                                                            _.TreatmentCause == TreatmentCause.SelectedTreatment &&
-                                                            _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment &&
-                                                            _.AppliedTreatment == section.AppliedTreatment);
-                        if (fundingSection != null)
-                        {
-                            if (!keyCashFlowFundingDetails.ContainsKey(section_BRKEY))
-                            {
-                                keyCashFlowFundingDetails.Add(section_BRKEY, fundingSection.TreatmentConsiderations ?? new());
-                            }
-                            else
-                            {
-                                keyCashFlowFundingDetails[section_BRKEY].AddRange(fundingSection.TreatmentConsiderations);
-                            }
-                        }
-                    }
-                                        
+                    _summaryReportHelper.BuildKeyCashFlowFundingDetails(yearData, section, section_BRKEY, keyCashFlowFundingDetails, _reportHelper);
+
                     // If CF then use obj from keyCashFlowFundingDetails otherwise from section
                     var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
                                                   section.TreatmentStatus == TreatmentStatus.Progressed) ||
@@ -178,9 +162,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         var committedCost = cost;
                         if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
                         {
+                            // TODO add projectSource in firstOrDefault clause "&& _.ProjectSource.ToString() == section.ProjectSource"
                             var committedProject = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment) &&
-                                                _.Year == yearData.Year);
-                            var projectSource = committedProject?.ProjectSource.ToString();                            
+                                                   _.Year == yearData.Year && _.ProjectSource.ToString() == section.ProjectSource);
+                            var projectSource = committedProject?.ProjectSource.ToString();
                             yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (committedCost, 1, projectSource, treatmentCategory));
                         }
                         else

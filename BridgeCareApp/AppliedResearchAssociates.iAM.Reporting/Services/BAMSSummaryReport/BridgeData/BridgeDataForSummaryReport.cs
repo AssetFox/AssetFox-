@@ -445,26 +445,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                     // Work done in a year
                     // Build keyCashFlowFundingDetails                    
-                    if (section.TreatmentStatus != TreatmentStatus.Applied)
-                    {
-                        var fundingSection = yearlySectionData.Assets.
-                                              FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY &&
-                                                            _.TreatmentCause == TreatmentCause.SelectedTreatment &&
-                                                            _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment &&
-                                                            _.AppliedTreatment == section.AppliedTreatment);
-                        if (fundingSection != null)
-                        {
-                            if (!keyCashFlowFundingDetails.ContainsKey(section_BRKEY))
-                            {
-                                keyCashFlowFundingDetails.Add(section_BRKEY, fundingSection.TreatmentConsiderations ?? new());
-                            }
-                            else
-                            {
-                                keyCashFlowFundingDetails[section_BRKEY].AddRange(fundingSection.TreatmentConsiderations);
-                            }
-                        }
-                    }
-                    
+                    _summaryReportHelper.BuildKeyCashFlowFundingDetails(yearlySectionData, section, section_BRKEY, keyCashFlowFundingDetails, _reportHelper);
+
                     // If CF then use obj from keyCashFlowFundingDetails otherwise from section
                     var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
                                                   section.TreatmentStatus == TreatmentStatus.Progressed) ||
@@ -474,8 +456,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                                   section.TreatmentStatus == TreatmentStatus.Applied)) ?
                                                   keyCashFlowFundingDetails[section_BRKEY] :
                                                   section.TreatmentConsiderations ?? new();
-                    var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                                 _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year));
+                    if((section_BRKEY == 897 && (yearlySectionData.Year == 2028 || yearlySectionData.Year == 2037)) || (section_BRKEY == 38542 && (yearlySectionData.Year == 2025 || yearlySectionData.Year == 2039)))
+                    {
+
+                    }
+                    // var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                    //      treatmentConsiderations.FirstOrDefault() :
+                    //      treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                    // TODO should consider appliedTreatment  to reflect correctly???
+                    var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                    _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
+                                                    _.TreatmentName == section.AppliedTreatment):
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                    _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
+                                                    section.AppliedTreatment.Contains(_.TreatmentName));
                     var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
                     var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();                    
                     var cost = Math.Round(allocationMatrix?.Where(_ => _.Year == yearlySectionData.Year).Sum(_ => _.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis
@@ -640,7 +635,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                                   keyCashFlowFundingDetails[section_BRKEY] :
                                                   section.TreatmentConsiderations ?? new();
                     var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                                 _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year));
+                                                 _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
+                                                 _.TreatmentName == section.AppliedTreatment);
                     var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();                    
                     var cost = Math.Round(allocationMatrix?.Where(_ => _.Year == yearlySectionData.Year).Sum(_ => _.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis
                     var recommendedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment; // Recommended Treatment

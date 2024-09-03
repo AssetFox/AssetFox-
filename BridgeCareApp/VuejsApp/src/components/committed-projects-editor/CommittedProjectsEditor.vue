@@ -288,6 +288,19 @@
         />
         <ConfirmDialog></ConfirmDialog>
     </v-div>
+    <v-dialog v-model="showSuccessPopup" max-width="400px">
+        <v-card>
+            <v-card-text class="text-center">
+                Successfully uploaded committed projects.
+            </v-card-text>
+            <v-card-actions>
+                <v-row justify="center" class="w-100">
+                    <v-btn color="primary" variant="text" 
+                    class='ghd-white-bg ghd-blue ghd-button-text' @click="showSuccessPopup = false">OK</v-btn>
+                </v-row>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </v-card>
 </template>
 <script setup lang="ts">
@@ -377,6 +390,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
         [4, "SAP"],
         [5, "ProjectBuilder"]
     ]);
+
+    const showSuccessPopup = ref(false);
 
     const uuidNIL: string = getBlankGuid();
     let addedRows = ref<SectionCommittedProject[]>([]);
@@ -1311,6 +1326,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
             onPaginationChanged().then(() => {
                 setAlertMessageAction('');
             })
+            showSuccessPopup.value = true; 
         } 
     }
 

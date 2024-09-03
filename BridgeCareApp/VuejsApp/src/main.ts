@@ -54,7 +54,7 @@ app.use(KendoChartInstaller);
 //app.use(VueCurrencyInput);
 //authenticationModule.state.securityType = config.securityType as string;
 
-app.use(connectionHub);
+app.use(connectionHub, null);
 
 // app.use(VueScreen, {
 //     sm: 576,

@@ -314,6 +314,19 @@
                                              @submit='onSubmitImportExportInvestmentBudgetsDialogResult' 
                                              @submit-success-import="onSuccessImportSubmit"/>
     </v-row>
+    <v-dialog v-model="showSuccessPopup" max-width="400px">
+        <v-card>
+            <v-card-text class="text-center">
+                Successfully uploaded budgets.
+            </v-card-text>
+            <v-card-actions>
+                <v-row justify="center" class="w-100">
+                    <v-btn color="primary" variant="text" 
+                    class="ghd-white-bg ghd-blue ghd-button-text" @click="showSuccessPopup = false">OK</v-btn>
+                </v-row>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </v-card>
     <ConfirmDialog></ConfirmDialog>
 </template>
@@ -504,6 +517,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let newLibrarySelection: boolean = false;
 
     let editValue = ref<number | null>(0);
+
+    let showSuccessPopup = ref(false);
 
     let originalFirstYear: number = 0
     let firstYearOfAnalysisPeriodShift = shallowRef<number>(0);
@@ -1656,6 +1671,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
                 }
             })
+            showSuccessPopup.value = true;  
         }        
     }
 

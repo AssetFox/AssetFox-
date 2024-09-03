@@ -123,21 +123,15 @@
                                                 size="large"
                                                 lazy
                                                 persistent
-                                                v-model:return-value="
-                                                    nameUpdate
-                                                "
-                                                :initial-name="props.item.name"
+                                                v-model:return-value="nameUpdate"
+                                                :initial-name="nameUpdate"
                                                 @save="
                                                     onEditScenarioName(
                                                         props.item,
                                                         nameUpdate,
                                                     )
                                                 "
-                                                @open="
-                                                    prepareForNameEdit(
-                                                        props.item.name,
-                                                    )
-                                                "
+                                                @open="prepareForNameEdit( props.item.name,)"
                                             >
                                                 {{ props.item.name }}
                                                 <template v-slot:input>
@@ -328,13 +322,12 @@
                                     <template slot="items" slot-scope="props" v-slot:item="props">
                                     <tr>
                                         <td>
-                                            <editDialog
+                                            <editScenarioNameDialog
                                                 size="large"
                                                 lazy
                                                 persistent
-                                                v-model:return-value="
-                                                    props.item.name
-                                                "
+                                                v-model:return-value="nameUpdate"
+                                                :initial-name="props.item.name"
                                                 @save="
                                                     onEditScenarioName(
                                                         props.item,
@@ -357,10 +350,13 @@
                                                             rules[
                                                                 'generalRules'
                                                             ].valueIsNotEmpty,
+                                                            rules[
+                                                                'generalRules'
+                                                            ].valueContainsNoSpecialCharacters,
                                                         ]"
                                                     />
                                                 </template>
-                                            </editDialog>
+                                            </editScenarioNameDialog>
                                         </td>
                                         <td>
                                             {{

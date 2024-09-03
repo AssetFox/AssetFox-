@@ -30,26 +30,24 @@
                     label="Scenario name"
                     variant="outlined"
                     v-model="newScenario.name"
-                    v-model:errors="scenarioNameErrors"
-                    :rules="[
-                        rules.generalRules.valueIsNotEmpty,
-                        rules.generalRules.valueContainsNoSpecialCharacters
-                    ]"
+                    :error-messages="scenarioNameErrors"
+                    @input="validateScenarioName"
                 ></v-text-field>
                 <v-checkbox v-model="shared" label="Share with all?" />
             </v-card-text>
             <v-card-actions>
                 <v-row justify-space-between row>
                     <v-btn
-                    variant="text"
+                        variant="text"
                         id="CreateScenarioDialog-cancel-btn"
                         @click="onSubmit(false)"
-                        class='ghd-white-bg ghd-blue ghd-button-text'
-                        >Cancel</v-btn
+                        class="ghd-white-bg ghd-blue ghd-button-text"
                     >
+                        Cancel
+                    </v-btn>
                     <v-btn
                         id="CreateScenarioDialog-save-btn"
-                        :disabled="newScenario.name === '' || !isNetworkSelected || hasValidationErrors()"
+                        :disabled="isSaveButtonDisabled"
                         @click="onSubmit(true)"
                         class="ghd-blue ghd-button-text"
                         variant="outlined"
@@ -72,7 +70,6 @@ import {
     ScenarioUser,
 } from '@/shared/models/iAM/scenario';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import { find, isNil, propEq } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { useStore } from 'vuex'; 
 import { validate } from 'uuid';
@@ -80,6 +77,7 @@ import {
     InputValidationRules,
     rules as validationRules,
 } from '@/shared/utils/input-validation-rules';
+import { find, isNil, propEq } from 'ramda';
 
   let store = useStore(); 
 
@@ -157,7 +155,7 @@ import {
         }
     }
 
-    function hasValidationErrors(): boolean {
+    function validateScenarioName() {
         scenarioNameErrors.value = [];
 
         if (!newScenario.value.name) {
@@ -168,9 +166,16 @@ import {
         if (specialCharError !== true) {
             scenarioNameErrors.value.push(specialCharError as string);
         }
-
-        return scenarioNameErrors.value.length > 0;
     }
+
+    const hasValidationErrors = computed(() => scenarioNameErrors.value.length > 0);
+
+    const isSaveButtonDisabled = computed(() => 
+        newScenario.value.name === '' || !isNetworkSelected.value || hasValidationErrors.value
+    );
+
+    // Trigger validation on name change
+    watch(() => newScenario.value.name, validateScenarioName);
 
     function onSubmit(submit: boolean) {
         if (submit) {
@@ -184,5 +189,4 @@ import {
         newScenario.value = { ...emptyScenario, id: getNewGuid() };
         shared = ref(false);
     }
-
 </script>

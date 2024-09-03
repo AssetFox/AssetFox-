@@ -41,59 +41,65 @@ import "primevue/resources/themes/bootstrap4-light-blue/theme.css"
 import 'primevue/resources/primevue.min.css'
 import 'primeicons/primeicons.css';
 import "primeflex/primeflex.css";
-const app = createApp(App);
+
+store.dispatch('loadConfig').then(() => {
+    const config = store.getters.getConfig;
+    store.dispatch('setSecurityType', config.securityType);
+
+    const app = createApp(App);
 
 
-app.use(router);
-app.use(store);
-app.use(vuetify);
-app.use(PrimeVue);
-//app.use(VueWorker);
-app.use(KendoChartInstaller);
+    app.use(router);
+    app.use(store);
+    app.use(vuetify);
+    app.use(PrimeVue);
+    //app.use(VueWorker);
+    app.use(KendoChartInstaller);
 
-//app.use(VueCurrencyInput);
-//authenticationModule.state.securityType = config.securityType as string;
+    //app.use(VueCurrencyInput);
+    //authenticationModule.state.securityType = config.securityType as string;
 
-app.use(connectionHub, null);
+    app.use(connectionHub, null);
 
-// app.use(VueScreen, {
-//     sm: 576,
-//     md: 768,
-//     lg: 992,
-//     xl: 1200,
-//     xxl: 1400,
-//     freeRealEstate: 1700,
-//     breakpointsOrder: ['sm', 'md', 'lg', 'xl', 'xxl', 'freeRealEstate'],
-// });
+    // app.use(VueScreen, {
+    //     sm: 576,
+    //     md: 768,
+    //     lg: 992,
+    //     xl: 1200,
+    //     xxl: 1400,
+    //     freeRealEstate: 1700,
+    //     breakpointsOrder: ['sm', 'md', 'lg', 'xl', 'xxl', 'freeRealEstate'],
+    // });
 
-var defaultOptions = {
-    allowedTags: VueSanitize.defaults.allowedTags.concat([
-        'html',
-        'head',
-        'body',
-        'link',
-    ]),
-    allowedAttributes: false,
-};
+    var defaultOptions = {
+        allowedTags: VueSanitize.defaults.allowedTags.concat([
+            'html',
+            'head',
+            'body',
+            'link',
+        ]),
+        allowedAttributes: false,
+    };
 
-// Font awesome (free) library
-library.add(faSignInAlt);
-library.add(faSignOutAlt);
+    // Font awesome (free) library
+    library.add(faSignInAlt);
+    library.add(faSignOutAlt);
 
-app.use(VueSanitize, defaultOptions);
-app.use(ConfirmationService);
-app.component("Dialog",Dialog)
-   .component("Button", Button)
-   .component("DataTable", DataTable)
-   .component("ConfirmDialog", ConfirmDialog)
-   .component('font-awesome-icon', FontAwesomeIcon);
+    app.use(VueSanitize, defaultOptions);
+    app.use(ConfirmationService);
+    app.component("Dialog",Dialog)
+    .component("Button", Button)
+    .component("DataTable", DataTable)
+    .component("ConfirmDialog", ConfirmDialog)
+    .component('font-awesome-icon', FontAwesomeIcon);
 
-app.config.globalProperties.productionTip = false;
-//app.use(VuejsDialog);
-//app.config.globalProperties.$config = config;
-app.mount('#app');
-// fetch(import.meta.env.BASE_URL + 'config.json')
-//     .then(response => response.json())
-//     .then(config => {
-      
-//     });
+    app.config.globalProperties.productionTip = false;
+    //app.use(VuejsDialog);
+    //app.config.globalProperties.$config = config;
+    app.mount('#app');
+    // fetch(import.meta.env.BASE_URL + 'config.json')
+    //     .then(response => response.json())
+    //     .then(config => {
+        
+    //     });
+});

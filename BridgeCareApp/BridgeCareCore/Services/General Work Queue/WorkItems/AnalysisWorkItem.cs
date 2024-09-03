@@ -161,6 +161,8 @@ public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserI
 
         var runner = new SimulationRunner(simulation);
 
+        var logDtos = new List<SimulationLogDTO>();
+
         var databaseUsageLock = new object();
 
         runner.Progress += (sender, eventArgs) =>
@@ -188,6 +190,9 @@ public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserI
                     simulationAnalysisDetail.Status = "Analysis complete. Preparing to save to database.";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+
+                    _unitOfWork.SimulationLogRepo.CreateLog(logDtos);
+
                     var hubServiceLogger = new HubServiceLogger(_hubService, HubConstant.BroadcastScenarioStatusUpdate, _unitOfWork.CurrentUser?.Username);
                     var updateSimulationAnalysisDetailLogger = new CallbackLogger(message => UpdateSimulationAnalysisDetailFromString(message));
                     _unitOfWork.SimulationOutputRepo.CreateSimulationOutputViaJson(SimulationId, simulation.Results);
@@ -214,20 +219,22 @@ public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserI
                 var message = eventArgs.MessageBuilder;
                 if (loggedMessages.Add(message.Message))
                 {
+                    
                     var dto = SimulationLogMessageBuilderMapper.ToDTO(message);
-                    _unitOfWork.SimulationLogRepo.CreateLog(dto);
+                    logDtos.Add(dto);
                 }
 
                 switch (message.Status)
                 {
                 case SimulationLogStatus.Warning:
                     simulationAnalysisDetail.Status = eventArgs.MessageBuilder.Message;
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, SimulationId);
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
                     break;
 
                 case SimulationLogStatus.Error:
+                    simulationAnalysisDetail.Status = message.Message;
+                    break;
                 case SimulationLogStatus.Fatal:
+                    _unitOfWork.SimulationLogRepo.CreateLog(logDtos);
                     simulationAnalysisDetail.Status = message.Message;
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);

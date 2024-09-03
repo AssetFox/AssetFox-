@@ -63,13 +63,13 @@ internal class TreatmentBundle : Treatment
             {
                 if (g.Key is NumberAttribute target)
                 {
-                    scope.SimulationRunner.Send(new()
+                    /*scope.SimulationRunner.Send(new()
                     {
                         Message = $"Multiple treatments in a bundle are applying consequences to a single number attribute ({g.Key.Name}).",
                         SimulationId = scope.SimulationRunner.Simulation.Id,
                         Status = DTOs.Enums.SimulationLogStatus.Warning,
                         Subject = DTOs.Enums.SimulationLogSubject.Calculation,
-                    });
+                    });*/
 
                     var bestApplicator = target.IsDecreasingWithDeterioration
                         ? applicators.MaxBy(a => a.NewValue)
@@ -79,13 +79,13 @@ internal class TreatmentBundle : Treatment
                 }
                 else
                 {
-                    scope.SimulationRunner.Send(new()
+                    /*scope.SimulationRunner.Send(new()
                     {
                         Message = $"Multiple treatments in a bundle are applying consequences to a single non-number attribute ({g.Key.Name}).",
                         SimulationId = scope.SimulationRunner.Simulation.Id,
                         Status = DTOs.Enums.SimulationLogStatus.Fatal,
                         Subject = DTOs.Enums.SimulationLogSubject.Calculation,
-                    });
+                    });*/
                 }
             }
         }

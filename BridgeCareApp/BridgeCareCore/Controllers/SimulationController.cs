@@ -378,7 +378,7 @@ namespace BridgeCareCore.Controllers
                 if (e is not SimulationException)
                 {
                     var logDto = SimulationLogDtos.GenericException(simulationId, e);
-                    UnitOfWork.SimulationLogRepo.CreateLog(logDto);
+                    UnitOfWork.SimulationLogRepo.CreateLog(new List<SimulationLogDTO> { logDto });
                     HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::RunSimulation {simulationName} - {e.Message}");
                 }
                 else
@@ -640,7 +640,7 @@ namespace BridgeCareCore.Controllers
                 if (e is not SimulationException)
                 {
                     var logDto = SimulationLogDtos.GenericException(simulationId, e);
-                    UnitOfWork.SimulationLogRepo.CreateLog(logDto);
+                    UnitOfWork.SimulationLogRepo.CreateLog(new List<SimulationLogDTO> { logDto });
                     HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::ValidateSimulation {simulationName} - {e.Message}");
                 }
                 else

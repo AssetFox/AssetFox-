@@ -1,13 +1,7 @@
 {
-    "authorizationEndpoint": "https://oidcservicessyst.penndot.gov/affwebservices/CASSO/oidc/BAMS/authorize",
-    "clientId": "a56bb9d5-190d-4873-afea-0767d82dd91c",
-    "redirectUri": "https://v2.iam-deploy.com/Authentication/",
-    "reportType": [ "BAMSSummaryReport", "BAMSPBExportReport", 
-                "InventoryLookup", "PAMSSummaryReport", 
-                "ScenarioOutput", "BAMSAuditReport", 
-                "PAMSPBExportReport", "BAMSInventoryLookup", "PAMSInventoryLookupSections", "PAMSInventoryLookupSegments" ],
-    "agencyLogo": "",
-    "productLogo": "",
-    "implementationName": "",
+    "authorizationEndpoint": "https://oidcservicessyst.pa.gov/affwebservices/CASSO/oidc/PAMS2/authorize",
+    "esecScope": "PAMS",
+    "clientId": "dc13cef3-9887-45d3-b273-b94f3f3870cd",
+    "redirectUri": "https://pamstest.iam-deploy.com/Authentication/",
     "securityType": "B2C"
 }

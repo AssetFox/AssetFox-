@@ -20,7 +20,7 @@ const state = {
     hasSimulationAccess: false,
     username: '',
     refreshing: false,
-    securityType: 'B2C',
+    securityType: '',
     pennDotSecurityType: 'ESEC',
     azureSecurityType: 'B2C',
 };
@@ -46,6 +46,9 @@ const mutations = {
     },
     refreshingMutator(state: any, refreshing: boolean) {
         state.refreshing = refreshing;
+    },
+    securityTypeMutator(state: any, securityType: string) {
+        state.securityType = securityType;
     },
 };
 
@@ -236,6 +239,9 @@ const actions = {
             setCommits({ commit });
         }
     },
+    setSecurityType({ commit }: any, payload: any) {
+        commit('securityTypeMutator', payload);
+    }
 };
 
 async function setCommits({ commit }: any)

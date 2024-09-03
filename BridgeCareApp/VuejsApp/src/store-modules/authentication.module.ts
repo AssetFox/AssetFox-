@@ -11,7 +11,6 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import moment from 'moment';
 import { isNil } from 'ramda';
 import { SecurityTypes } from '@/shared/utils/security-types';
-import { config } from '@/config';
 
 const state = {
     authenticated: false,

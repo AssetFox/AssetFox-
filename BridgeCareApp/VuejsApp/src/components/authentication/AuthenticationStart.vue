@@ -35,7 +35,6 @@
     } from '@/shared/utils/authentication-utils';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-//import { config } from '@/config'; 
 
     let store = useStore();
     let authenticated: boolean = (store.state.authenticationModule.authenticated);

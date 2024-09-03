@@ -17,7 +17,6 @@ using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.WorkQueue;
 using AppliedResearchAssociates.Validation;
 using BridgeCareCore.Models;
-using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeCareCore.Services;
@@ -223,17 +222,12 @@ public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserI
                     
                     var dto = SimulationLogMessageBuilderMapper.ToDTO(message);
                     logDtos.Add(dto);
-                   //_unitOfWork.SimulationLogRepo.CreateLog(new List<SimulationLogDTO> { dto });
                 }
 
                 switch (message.Status)
                 {
                 case SimulationLogStatus.Warning:
                     simulationAnalysisDetail.Status = eventArgs.MessageBuilder.Message;
-                    /*
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, SimulationId);
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-                    */
                     break;
 
                 case SimulationLogStatus.Error:

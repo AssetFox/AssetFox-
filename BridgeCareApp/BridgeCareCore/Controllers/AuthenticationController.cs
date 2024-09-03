@@ -299,20 +299,6 @@ namespace BridgeCareCore.Controllers
                     return Unauthorized("The token does not contain a 'username' claim.");
                 }
 
-                /*const string cnPrefix = "UserID=";
-                var cnStartIndex = subClaim.Value.IndexOf(cnPrefix);
-                if (cnStartIndex == -1)
-                {
-                    return BadRequest("Unable to find username claim.");
-                }
-
-                cnStartIndex += cnPrefix.Length;
-                var cnEndIndex = subClaim.Value.IndexOf(",", cnStartIndex);
-                if (cnEndIndex == -1)
-                {
-                    return BadRequest("Unable to find username claim.");
-                }*/
-
                 userName = SecurityFunctions.ParseLdap(userToken.GetClaimValue("sub"))[0];
             }
             else

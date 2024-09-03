@@ -124,6 +124,7 @@
                                             v-model="item.item[header.key]"
                                             :rules="[inputRules['generalRules'].valueIsNotEmpty]"
                                             :style="getTreatmentStyle(item.item[header.key])"
+                                            :error-messages="item.item.treatmentErrors"
                                             @update:model-value="onEditCommittedProjectProperty(item.item,header.key,item.item[header.key])">
                                         </v-select>
                                         <v-select
@@ -134,7 +135,9 @@
                                             density="compact"
                                             variant="underlined"
                                             v-model="item.item[header.key]"
+                                            :style="getProjectSourceStyle(item.item)"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"
+                                            :error-messages="item.item.projectSourceErrors"
                                             @update:model-value="onEditCommittedProjectProperty(item.item, header.key, item.item.projectSource)"
                                             
                                         ></v-select>
@@ -186,6 +189,7 @@
                                                 v-maska:[yearMask]
                                                 density="compact"
                                                 variant="underlined"
+                                                :style="getYearStyle(item.item)"
                                                 :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), inputRules['generalRules'].valueIsNotEmpty, inputRules['generalRules'].valueIsWithinRange(item.item[header.key], [firstYear, lastYear])]"
                                                 :error-messages="item.item.yearErrors"/>
                                                 
@@ -193,6 +197,8 @@
                                                 :model-value='item.item[header.key]'
                                                 density="compact"
                                                 variant="underlined"
+                                                :style="getCostStyle(item.item)"
+                                                :error-messages="item.item.costErrors"
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
                                             <v-text-field v-if="header.key === 'projectId'"
@@ -724,6 +730,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
                     const row = data.items.find(scp => scp.id == selectedCommittedProject.value);
                     allImportedTreatments = data.items;
 
+                    checkProjectSources();
+
                     //Check to see if any imported treatments are missing from the treatment list
                     for(let i = 0; i < data.items.length; i++)
                     {
@@ -948,7 +956,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
         if(!isNil(row))
         {
             if(property === 'treatment'){
-                handleTreatmentChange(scp, value, row)             
+                handleTreatmentChange(scp, value, row);
+                checkTreatments();             
             }
             else if(property === 'keyAttr'){
                 handleKeyAttrChange(row, scp, value);               
@@ -960,7 +969,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 handleprojectIdChange(row, scp, value);
             }
             else if(property === 'projectSource') {
-                handleProjectSourceChange(row, scp, value)
+                handleProjectSourceChange(row, scp, value);
+                checkProjectSources();
             }
             else{
                 updateCommittedProject(row, value, property)
@@ -1086,6 +1096,9 @@ import ConfirmDialog from 'primevue/confirmdialog';
         })
         checkExistenceOfAssets();
         checkYears();
+        checkProjectSources();
+        checkTreatments();
+        checkCosts();
     }
 
     function cpItemFactory(scp: SectionCommittedProject): SectionCommittedProjectTableData {
@@ -1106,6 +1119,10 @@ import ConfirmDialog from 'primevue/confirmdialog';
             treatmentId: '',
             id: scp.id,
             errors: [],
+            projectSourceErrors: [],
+            treatmentErrors: [],
+            costErrors: [],
+            budgetErrors: [],
             yearErrors: [],
             category: scp.category,
             projectSource: projectSourceMap.get(+scp.projectSource) || scp.projectSource,
@@ -1216,22 +1233,93 @@ import ConfirmDialog from 'primevue/confirmdialog';
                           
     }
 
-    function checkYear(scp:SectionCommittedProjectTableData){
-        if(!hasValue(scp.year))
-            scp.yearErrors = ['Value cannot be empty'];
-        else if (investmentYears.value.length === 0)
-            scp.yearErrors = ['There are no years in the investment settings']
-        else if(scp.year.toString().length < 4 || scp.year < 1900)
-            scp.yearErrors = ['Invalid Year value'];      
-        else
-            scp.yearErrors = [];
-    }
+    // (value >= range[0] && value <= range[1]) || `Value must be in range ${range[0]} - ${range[1]}`;
 
+    function checkYear(scp:SectionCommittedProjectTableData){
+        // Ensure the year value is not empty
+        if (!hasValue(scp.year)) {
+            scp.yearErrors = ['Value cannot be empty'];
+            return;
+        }
+
+        // Check if investment years are set
+        if (investmentYears.value.length === 0) {
+            scp.yearErrors = ['There are no years in the investment settings'];
+            return;
+        }
+
+        // Ensure the year is a valid four-digit number
+        if (scp.year.toString().length < 4 || scp.year < 1900) {
+            scp.yearErrors = ['Invalid Year value'];
+            return;
+        }
+
+        // Check if the year is within the specified range
+        if (scp.year < firstYear || scp.year > lastYear) {
+            scp.yearErrors = [`Year must be within ${firstYear} - ${lastYear}`];
+            return;
+        }
+
+        // If all checks pass, clear the errors
+        scp.yearErrors = [];
+    }
     function checkYears()
     {
         currentPage.value.forEach(scp => {
             checkYear(scp);
         });
+    }
+
+    function checkProjectSources() {
+        currentPage.value.forEach(scp => {
+            checkProjectSource(scp);
+        });
+    }
+    function checkProjectSource(scp: SectionCommittedProjectTableData) {
+        if (scp.projectSource === "None") {
+            scp.projectSourceErrors.push('Select a project source.')
+        } else {
+            scp.errors = [];
+        }
+    }
+
+    function checkTreatments() {
+        currentPage.value.forEach(scp => {
+            checkTreatment(scp);
+        });
+    }
+    function checkTreatment(scp: SectionCommittedProjectTableData) {
+        const treatments = treatmentSelectItems.value;
+        if (!treatments.includes(scp.treatment)) {
+            scp.treatmentErrors.push('Select a correct treatment');
+        } else {
+            scp.errors = [];
+        }
+    }
+
+    function checkCosts() {
+        currentPage.value.forEach(scp => {
+            checkCost(scp);
+        });
+    }
+    function checkCost(scp: SectionCommittedProjectTableData) {
+        let cost = scp.cost;
+        if (cost === -1 || cost === -1.0) {
+            scp.costErrors.push('Fix project cost.')
+        } else {
+            scp.errors = [];
+        }
+    }
+
+    function checkBudgets() {
+        currentPage.value.forEach(scp => {
+            checkBudget(scp);
+        });
+    }
+    function checkBudget(scp: SectionCommittedProjectTableData) {
+        if (scp.budget) {
+            scp.budgetErrors.push('Select a correct budget.');
+        }
     }
 
     function updateCommittedProject(row: SectionCommittedProject, value: any, property: string){
@@ -1377,10 +1465,33 @@ import ConfirmDialog from 'primevue/confirmdialog';
         } 
     }   
 
-    //Add red boxesa round missing treatments
+    //Add red boxes round missing treatments
     const getTreatmentStyle = (treatment: string) => {
-    const isInMissingTreatments = missingTreatmentsValue.value.includes(treatment);
-    return isInMissingTreatments ? { border: '1px solid red', padding: '3px' } : {};
+        const isInMissingTreatments = missingTreatmentsValue.value.includes(treatment);
+        return isInMissingTreatments ? { border: '1px solid red', padding: '3px' } : {};
+    };
+    // Conditional style function for the 'year' field
+    const getYearStyle = (scp: SectionCommittedProjectTableData) => {
+        checkYear(scp);  
+        return scp.yearErrors.some(error => !!error) ? { border: '1px solid red', padding: '3px' } : {};
+    };
+
+    // Conditional style function for the 'budget' field
+    const getBudgetStyle = (scp: SectionCommittedProjectTableData) => {
+        checkBudget(scp);  
+        return scp.budgetErrors.some(error => !!error) ? { border: '1px solid red', padding: '3px' } : {};
+    };
+
+    // Conditional style function for the 'projectSource' field
+    const getProjectSourceStyle = (scp: SectionCommittedProjectTableData) => {
+        checkProjectSource(scp);  
+        return scp.projectSourceErrors.some(error => !!error) ? { border: '1px solid red', padding: '3px' } : {};
+    };
+
+    // Conditional style function for the 'cost' field
+    const getCostStyle = (scp: SectionCommittedProjectTableData) => {
+        checkCost(scp); 
+        return scp.costErrors.some(error => !!error) ? { border: '1px solid red', padding: '3px' } : {};
     };
 
     async function initializePages(){

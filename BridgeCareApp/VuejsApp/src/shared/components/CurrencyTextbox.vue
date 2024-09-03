@@ -2,7 +2,13 @@
 import { useCurrencyInput } from 'vue-currency-input';
 import { watch } from 'vue';
 
-const props = defineProps({ modelValue: Number });
+const props = defineProps({
+  modelValue: Number,
+  errorMessages: {
+    type: Array as () => string[],
+    default: () => [],
+  }
+});
 
 const { inputRef, formattedValue, numberValue, setValue } = useCurrencyInput({
   currency: 'USD',
@@ -10,7 +16,7 @@ const { inputRef, formattedValue, numberValue, setValue } = useCurrencyInput({
   hideGroupingSeparatorOnFocus: false,
   hideNegligibleDecimalDigitsOnFocus: true,
   precision: 2,
-  valueRange: { min: 0 },
+  valueRange: { min: -1 },
 });
 
 watch(
@@ -26,6 +32,7 @@ watch(
     v-model="formattedValue"
     variant="solo"
     ref="inputRef"
+    :error-messages="props.errorMessages"
   >
   </v-text-field>
 </template>

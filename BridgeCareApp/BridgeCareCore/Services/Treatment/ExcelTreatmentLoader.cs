@@ -285,7 +285,8 @@ namespace BridgeCareCore.Services.Treatment
             var assetTypeString = dictionary.GetValueOrDefault(TreatmentExportStringConstants.AssetType.ToLowerInvariant());
             var assetType = assetTypeString;
             var criterion = dictionary.GetValueOrDefault(TreatmentExportStringConstants.Criterion.ToLowerInvariant());
-            
+            var isUnselectable = false;
+            bool.TryParse(dictionary.GetValueOrDefault(TreatmentExportStringConstants.IsTreatmentUnselectable.ToLowerInvariant()), out isUnselectable);
             var loadCosts = LoadCosts(worksheet);
             var loadConsequences = LoadConsequences(worksheet);
             var newTreatment = new TreatmentDTO
@@ -293,6 +294,7 @@ namespace BridgeCareCore.Services.Treatment
                 Name = worksheetName,
                 Id = Guid.NewGuid(),
                 Description = description,
+                IsUnselectable = isUnselectable,
                 Category = (TreatmentCategory)treatmentCategory,
                 AssetType = (string)assetType,
                 ShadowForAnyTreatment = ParseInt(yearsBeforeAny),

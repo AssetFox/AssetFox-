@@ -34,8 +34,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("The network has no maintainable assets for rollup.");
             }
 
-            var assets = _unitOfWork.Context.MaintainableAsset
+            var assets = _unitOfWork.Context.MaintainableAsset.AsNoTracking()
                 .Where(_ => _.NetworkId == networkId)
+                .AsSplitQuery()
                 .Select(asset => new MaintainableAssetEntity
                 {
                     Id = asset.Id,
@@ -88,6 +89,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var assets = _unitOfWork.Context.MaintainableAsset.AsNoTracking()
                 .Where(_ => _.NetworkId == networkId)
+                .AsSplitQuery()
                 .Select(asset => new MaintainableAssetEntity
                 {
                     Id = asset.Id,
@@ -146,11 +148,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (attrEntity.DataType == "NUMBER")
                 return  _unitOfWork.Context.MaintainableAsset.AsNoTracking().Include(_ => _.AggregatedResults)
-                    .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
+                    .Where(_ => _.NetworkId == network.Id).AsSplitQuery().SelectMany(_ => _.AggregatedResults)
                     .Any(_ => _.AttributeId == attrEntity.Id && _.NumericValue.ToString() == attributeValue);
             else
                 return _unitOfWork.Context.MaintainableAsset.AsNoTracking().Include(_ => _.AggregatedResults)
-                    .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
+                    .Where(_ => _.NetworkId == network.Id).AsSplitQuery().SelectMany(_ => _.AggregatedResults)
                     .Any(_ => _.AttributeId == attrEntity.Id && _.TextValue == attributeValue);
         }
 
@@ -166,6 +168,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var aggResults = _unitOfWork.Context.MaintainableAsset.AsNoTracking().Include(_ => _.AggregatedResults)
                     .Where(_ => _.NetworkId == network.Id)
+                    .AsSplitQuery()
                     .SelectMany(_ => _.AggregatedResults)
                     .Where(_ => _.AttributeId == attrEntity.Id)
                     .Select(_ => attrEntity.DataType == "NUMBER" ? _.NumericValue.ToString() : _.TextValue)
@@ -238,7 +241,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public List<Guid> GetMaintainableAssetAttributeIdsByNetworkId(Guid networkId)
         {
-            var attributeIds = _unitOfWork.Context.AggregatedResult
+            var attributeIds = _unitOfWork.Context.AggregatedResult.AsNoTracking()
                 .Include(_ => _.MaintainableAsset)
                 .Where(ar => ar.MaintainableAsset.NetworkId == networkId)
                 .Select(ar => ar.AttributeId)

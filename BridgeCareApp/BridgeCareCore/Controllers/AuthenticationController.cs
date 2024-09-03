@@ -20,6 +20,7 @@ using System.Linq;
 using static BridgeCareCore.Security.SecurityConstants;
 using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
+using BridgeCareCore.Security;
 
 namespace BridgeCareCore.Controllers
 {
@@ -130,6 +131,8 @@ namespace BridgeCareCore.Controllers
                 var responseTask = await client.PostAsync("token", content);
 
                 var response = responseTask.Content.ReadAsStringAsync().Result;
+
+                _log.Information("ESEC Response: " + response);
 
                 ValidateResponse(response);
 
@@ -281,13 +284,12 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetActiveStatus")]
-        [Authorize(Policy = Policy.AdminUser)]
         public async Task<IActionResult> GetActiveStatus()
         {
-            string userName = null;
             var idToken = ContextAccessor?.HttpContext?.Request.Headers["Authorization"].ToString().Split(" ")[1];
             var handler = new JwtSecurityTokenHandler();
             var userToken = handler.ReadJwtToken(idToken);
+            var userName = "";
             var userNameClaim = userToken.Claims.FirstOrDefault(claim => claim.Type == "name");
             if (userNameClaim == null)
             {
@@ -297,26 +299,27 @@ namespace BridgeCareCore.Controllers
                     return Unauthorized("The token does not contain a 'username' claim.");
                 }
 
-                const string cnPrefix = "CN=";
+                /*const string cnPrefix = "UserID=";
                 var cnStartIndex = subClaim.Value.IndexOf(cnPrefix);
                 if (cnStartIndex == -1)
                 {
-                    return null;
+                    return BadRequest("Unable to find username claim.");
                 }
 
                 cnStartIndex += cnPrefix.Length;
                 var cnEndIndex = subClaim.Value.IndexOf(",", cnStartIndex);
                 if (cnEndIndex == -1)
                 {
-                    return null;
-                }
+                    return BadRequest("Unable to find username claim.");
+                }*/
 
-                userName = subClaim.Value.Substring(cnStartIndex, cnEndIndex - cnStartIndex);
+                userName = SecurityFunctions.ParseLdap(userToken.GetClaimValue("sub"))[0];
             }
             else
             {
                 userName = userNameClaim.Value;
             }
+            
 
             // Get user
             var user = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userName);

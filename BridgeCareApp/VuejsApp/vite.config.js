@@ -33,5 +33,16 @@ export default defineConfig({
         }
     ]
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split vendor libraries into a separate chunk
+          vendor: ['vue', 'vue-router', 'vuex'],
+          // You can also split other large dependencies or modules
+        },
+      },
+    },
+  },
   logLevel: 'warn'
 });

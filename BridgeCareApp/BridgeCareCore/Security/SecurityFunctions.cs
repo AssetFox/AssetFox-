@@ -60,7 +60,7 @@ namespace BridgeCareCore.Security
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var responseTask = client.GetAsync("jwks?AuthorizationProvider=OIDC Auth Provider");
+            var responseTask = client.GetAsync("jwks?AuthorizationProvider=" + esecConfig["EsecOIDCProvider"]);
             responseTask.Wait();
 
             var resultJson = responseTask.Result.Content.ReadAsStringAsync().Result;

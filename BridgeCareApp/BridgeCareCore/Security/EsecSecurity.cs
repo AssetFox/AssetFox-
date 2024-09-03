@@ -70,7 +70,15 @@ namespace BridgeCareCore.Security
         /// <returns></returns>
         public UserInfo GetUserInformation(HttpRequest request)
         {
-            var idToken = request.Headers["Authorization"].ToString().Split(" ")[1];
+            var idToken = "";
+            try
+            {
+                idToken = request.Headers["Authorization"].ToString().Split(" ")[1];
+            }
+            catch
+            {
+                throw new Exception("Token not found. Auth headers returned: " + request.Headers["Authorization"].ToString());
+            }
 
             if (string.IsNullOrEmpty(idToken))
             {

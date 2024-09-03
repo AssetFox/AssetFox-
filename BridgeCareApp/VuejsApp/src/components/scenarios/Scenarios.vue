@@ -1835,10 +1835,12 @@ import { useRoute } from 'vue-router';
                 scenarioId: selectedScenario.id,
             }).then(() => {
                 selectedScenario = clone(emptyScenario)               
-                if(tab.value == '0')
+                if(tab.value == '0') {
                     onUserScenariosPagination();
-                else
+                }
+                else {
                     onSharedScenariosPagination();
+                }
             });
         }
     }

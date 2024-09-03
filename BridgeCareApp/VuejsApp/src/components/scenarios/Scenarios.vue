@@ -1380,18 +1380,6 @@ import { useRoute } from 'vue-router';
         }
         actionItemsForSharedScenario = [
             {
-                title: 'Run Analysis',
-                action: availableActions.runAnalysis,
-                icon: getUrl("assets/icons/monitor.svg"),
-                isCustomIcon: true
-            },
-            {
-                title: 'Reports',
-                action: availableActions.reports,
-                icon: getUrl("assets/icons/clipboard.svg"),
-                isCustomIcon: true
-            },
-            {
                 title: 'Settings',
                 action: availableActions.settings,
                 icon: getUrl("assets/icons/gear.svg"),
@@ -1404,11 +1392,17 @@ import { useRoute } from 'vue-router';
                 isCustomIcon: true
             },
             {
-                title: 'Convert Output from Json to Relational',
-                action: availableActions.convert,
-                icon: "fas fa-exchange-alt",
-                isCustomIcon: false
+                title: 'Run Analysis',
+                action: availableActions.runAnalysis,
+                icon: getUrl("assets/icons/monitor.svg"),
+                isCustomIcon: true
             },
+            {
+                title: 'Reports',
+                action: availableActions.reports,
+                icon: getUrl("assets/icons/clipboard.svg"),
+                isCustomIcon: true
+            }, 
             {
                 title: 'Clone',
                 action: availableActions.clone,

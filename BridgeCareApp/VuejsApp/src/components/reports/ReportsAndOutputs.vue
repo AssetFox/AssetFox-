@@ -148,6 +148,7 @@ import { Hub } from '@/connectionHub';
     function addErrorNotificationAction(payload?: any) {  store.dispatch('addErrorNotification',payload);} 
     function addSuccessNotificationAction(payload?: any) { store.dispatch('addSuccessNotification',payload);} 
     async function getSimulationReportsAction(payload?: any): Promise<any> { await store.dispatch('getSimulationReports',payload);} 
+    async function updateSimulationReportDetailAction(payload?: any): Promise<any>{await store.dispatch('updateSimulationReportDetail', payload)}
 
     let editShow = ref<boolean>(false);
 
@@ -157,8 +158,6 @@ import { Hub } from '@/connectionHub';
     let selectedScenarioId: string = getBlankGuid();
 
     let rules: InputValidationRules = clone(validationRules);
-
-    async function updateSimulationReportDetailAction(payload?: any): Promise<any>{await store.dispatch('updateSimulationReportDetail', payload)}
 
     const criterionEditorDialogData = ref<GeneralCriterionEditorDialogData>(clone(emptyGeneralCriterionEditorDialogData));
     const currentPage = ref<Report[]>([]);
@@ -206,7 +205,7 @@ import { Hub } from '@/connectionHub';
     });
 
     onBeforeUnmount(async () => {
-        $emitter.on(
+        $emitter.off(
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
             getReportStatus,
         );
@@ -243,6 +242,7 @@ import { Hub } from '@/connectionHub';
             selectedReport.value = currentPage.value[0];
 
     });
+    
     const onRowSelect = (event:any) => {
         selectedReport.value = {
             id: event.data.id,
@@ -388,6 +388,7 @@ import { Hub } from '@/connectionHub';
                 addSuccessNotificationAction({
                         message: selectedReport.value.name +  ' report has been deleted for ' + simulationName + '.',
                     });
+                    selectedReport.value.isGenerated = false;
             } else {
                 addErrorNotificationAction({
                     message: 'Failed to delete report.',

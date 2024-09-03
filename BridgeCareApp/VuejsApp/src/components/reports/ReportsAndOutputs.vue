@@ -385,8 +385,9 @@ import { Hub } from '@/connectionHub';
             selectedScenarioId, selectedReport.value.name
         ).then((response: AxiosResponse<any>) => {
             if (hasValue(response, 'data')) {
-                const fileInfo: FileInfo = response.data as FileInfo;
-                FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                addSuccessNotificationAction({
+                        message: selectedReport.value.name +  ' report has been deleted for ' + simulationName + '.',
+                    });
             } else {
                 addErrorNotificationAction({
                     message: 'Failed to delete report.',

@@ -48,7 +48,7 @@ export default class ReportsService {
 
     static deleteAllGeneratedReports(scenarioId: string): AxiosPromise {
         return coreAxiosInstance.get(               
-            `${API.Report}/DeleteReport/${scenarioId}`,
+            `${API.Report}/DeleteAllGeneratedReports/${scenarioId}`,
         );
     }
 }

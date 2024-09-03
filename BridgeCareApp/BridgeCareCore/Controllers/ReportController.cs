@@ -211,16 +211,27 @@ namespace BridgeCareCore.Controllers
                 }
 
                 var availableReport = UnitOfWork.ReportIndexRepository.GetAllForScenario(report.simulationId)
-                .Where(_ => _.Type == report.reportName)
-                .OrderByDescending(_ => _.CreationDate)
-                .FirstOrDefault();
+                    .Where(_ => _.Type == report.reportName)
+                    .OrderByDescending(_ => _.CreationDate)
+                    .FirstOrDefault();
+
                 if (availableReport == null)
                 {
                     report.isGenerated = false;
                 }
                 else
                 {
-                    report.isGenerated = true;
+                    var reportPath = Path.Combine(Environment.CurrentDirectory, "Reports", reportDetails[0].simulationId.ToString());
+
+                    // Check if the directory exists and if the file exists
+                    if (Directory.Exists(reportPath) && System.IO.File.Exists(availableReport.Result))
+                    {
+                        report.isGenerated = true;
+                    }
+                    else
+                    {
+                        report.isGenerated = false;
+                    }
                 }
             }
             return Ok(reportDetails);
@@ -254,32 +265,32 @@ namespace BridgeCareCore.Controllers
                 return CreateErrorListing(message);
             }
 
-            var reportPath = Path.Combine(Environment.CurrentDirectory, "Reports", simulationId.ToString());
+            // Get path
+            var reportPath = Path.Combine(Environment.CurrentDirectory, report.Result);
             if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
             {
                 var message = new List<string>() { $"The report for {simulationName} did not include any results" };
                 return CreateErrorListing(message);
             }
 
+            // Check if the file path is valid and if the file or directory exists
+            if (!System.IO.File.Exists(reportPath))
+            {
+                var message = new List<string> { $"The report or directory for {simulationName} does not exist." };
+                return CreateErrorListing(message);
+            }
+
             try
             {
-                if (Directory.Exists(reportPath))
-                {
-                    // Delete the directory and all its contents
-                    Directory.Delete(reportPath, true);
-                }
-                else
-                {
-                    var message = new List<string>() { $"The report path {reportPath} does not exist" };
-                    return CreateErrorListing(message);
-                }
+                System.IO.File.Delete(reportPath);
+                return Ok($"The report {reportName} for simulation {simulationName} has been successfully deleted.");
             }
             catch (Exception e)
             {
+                var message = new List<string>() { $"The report path {reportPath} does not exist" };
                 return CreateErrorListing(new List<string>() { e.Message });
             }
 
-            return Ok($"The report {reportName} for simulation {simulationName} has been successfully deleted.");
         }
 
         [HttpGet]
@@ -300,11 +311,19 @@ namespace BridgeCareCore.Controllers
                 return CreateErrorListing(message);
             }
 
+            // Get path
             var reportPath = Path.Combine(Environment.CurrentDirectory, "Reports", simulationId.ToString());
             if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
             {
                 var message = new List<string>() { $"The report for {simulationName} did not include any results" };
                 return CreateErrorListing(message);
+            }
+
+            // Throw an error if the path does not exist
+            if (!Directory.Exists(reportPath))
+            {
+                var message = new List<string>() { $"The report path for {simulationName} does not exist." };
+                return CreateErrorListing(message);  // Or throw an exception if you prefer
             }
 
             try

@@ -1785,6 +1785,7 @@ import ReportsService from '@/services/reports.service';
             },
         });
     }
+    
     function onNavigateToReportsView(localScenario: Scenario) {
         selectScenarioAction({scenarioId: localScenario.id });
         $router.push({
@@ -1800,11 +1801,12 @@ import ReportsService from '@/services/reports.service';
 
     async function onDeleteAllGeneratedReports(localScenario: Scenario) {
         await ReportsService.deleteAllGeneratedReports(
-            selectedScenarioId,
+            localScenario.id,
         ).then((response: AxiosResponse<any>) => {
             if (hasValue(response, 'data')) {
-                const fileInfo: FileInfo = response.data as FileInfo;
-                FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                addSuccessNotificationAction({
+                        message: ' All reports for ' + localScenario.name + ' have been deleted.',
+                    });
             } else {
                 addErrorNotificationAction({
                     message: 'Failed to delete report.',

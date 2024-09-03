@@ -123,21 +123,15 @@
                                                 size="large"
                                                 lazy
                                                 persistent
-                                                v-model:return-value="
-                                                    nameUpdate
-                                                "
-                                                :initial-name="props.item.name"
+                                                v-model:return-value="nameUpdate"
+                                                :initial-name="nameUpdate"
                                                 @save="
                                                     onEditScenarioName(
                                                         props.item,
                                                         nameUpdate,
                                                     )
                                                 "
-                                                @open="
-                                                    prepareForNameEdit(
-                                                        props.item.name,
-                                                    )
-                                                "
+                                                @open="prepareForNameEdit( props.item.name,)"
                                             >
                                                 {{ props.item.name }}
                                                 <template v-slot:input>
@@ -332,9 +326,7 @@
                                                 size="large"
                                                 lazy
                                                 persistent
-                                                v-model:return-value="
-                                                    nameUpdate
-                                                "
+                                                v-model:return-value="nameUpdate"
                                                 :initial-name="props.item.name"
                                                 @save="
                                                     onEditScenarioName(

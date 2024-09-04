@@ -28,10 +28,12 @@ import committedProjectsModule from '@/store-modules/committed-project.module';
 import adminDataModule from '@/store-modules/admin-data.module';
 import adminSiteSettingsModule from '@/store-modules/admin-site-settings.module';
 import alertModule from '@/store-modules/alert.module';
+import configModule from '@/store-modules/config.module';
 
 
 export default createStore({
     modules: {
+        configModule,
         busyModule,
         authenticationModule,
         networkModule,

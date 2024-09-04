@@ -4,7 +4,7 @@
       "SecurityType": "ESEC",
       "RolesClaims": [
         {
-          "IPRoles": [ "PD-BAMS-Administrator", "PAMS-Administrator" ],
+          "IPRoles": [ "PD-BAMS-Administrator", "PD-PAMS-Administrator" ],
           "InternalRole": "Administrator",
           "Claims": [
             "AdminAccess",
@@ -92,7 +92,7 @@
           ]
         },
         {
-          "IPRoles": [ "PD-BAMS-DBEngineer", "PD-BAMS-PlanningPartner" ],
+          "IPRoles": [ "PD-BAMS-DBEngineer", "PD-BAMS-PlanningPartner", "PD-PAMS-PavementManager" ],
           "InternalRole": "Editor",
           "Claims": [
             "AttributesViewAccess",
@@ -164,7 +164,7 @@
           ]
         },
         {
-          "IPRoles": [ "PD-BAMS-CWOPA" ],
+          "IPRoles": [ "PD-BAMS-CWOPA", "PD-PAMS-CWOPA" ],
           "InternalRole": "SimulationPowerUser",
           "Claims": [
             "SimulationAccess",
@@ -231,7 +231,7 @@
           ]
         },
         {
-          "IPRoles": [ "ReadOnly" ],
+          "IPRoles": [ "ReadOnly", "PD-PAMSViewers" ],
           "InternalRole": "ReadOnly",
           "Claims": [
             "AttributesViewAccess",

@@ -183,7 +183,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
                         {
                             var projectSource = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment) &&
-                                                _.Year == yearData.Year)?.ProjectSource.ToString();
+                                                _.Year == yearData.Year && _.ProjectSource.ToString() == section.ProjectSource)?.ProjectSource.ToString();
                             yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (cost, 1, projectSource, treatmentCategory));
                         }
                         else

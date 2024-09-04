@@ -163,8 +163,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                                       section.TreatmentStatus == TreatmentStatus.Applied)) ?
                                                       keyCashFlowFundingDetails[crs] :
                                                       section.TreatmentConsiderations ?? new();
-                        var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                                     _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year));
+
+                        var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                             treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                section.AppliedTreatment.Contains(_.TreatmentName)) :
+                                             treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                _.TreatmentName == section.AppliedTreatment);
+
                         var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
                         var budgetAmount = (double)treatmentConsiderations.
                                            Where(_ => _.TreatmentName?.ToLower() != PAMSConstants.NoTreatment && _.TreatmentName == appliedTreatment).
@@ -254,8 +261,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                                   section.TreatmentConsiderations ?? new();                    
                     if (treatmentConsiderations.Any(tc => tc.FundingCalculationOutput != null && tc.FundingCalculationOutput.AllocationMatrix.Any(bu => bu.BudgetName == summaryModel.BudgetName)))
                     {
-                        var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                                 _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year));
+
+                        var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                             treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                section.AppliedTreatment.Contains(_.TreatmentName)) :
+                                             treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                _.TreatmentName == section.AppliedTreatment);
+
                         var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
 
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&

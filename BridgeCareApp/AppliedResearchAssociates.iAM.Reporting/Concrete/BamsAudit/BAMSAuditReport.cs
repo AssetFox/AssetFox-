@@ -208,7 +208,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var decisionsWorksheet = excelPackage.Workbook.Worksheets.Add(BAMSAuditReportConstants.DecisionsTab);
             var performanceCurvesAttributes = _reportHelper.GetPerformanceCurvesAttributes(simulation);
             ValidateSections(simulationOutput, reportDetailDto, simulationId, new HashSet<string>(performanceCurvesAttributes.Except(dataTabRequiredAttributes)));
-            _decisionTab.Fill(decisionsWorksheet, simulationOutput, simulation, performanceCurvesAttributes);
+            _decisionTab.Fill(decisionsWorksheet, simulationOutput, simulation, performanceCurvesAttributes, simulation.ShouldBundleFeasibleTreatments);
 
             checkCancelled(cancellationToken, simulationId);
             // Check and generate folder

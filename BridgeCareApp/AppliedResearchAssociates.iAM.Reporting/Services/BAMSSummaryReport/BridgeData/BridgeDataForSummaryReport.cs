@@ -445,7 +445,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                     // Work done in a year
                     // Build keyCashFlowFundingDetails                    
-                    _summaryReportHelper.BuildKeyCashFlowFundingDetails(yearlySectionData, section, section_BRKEY, keyCashFlowFundingDetails, _reportHelper);
+                    _reportHelper.BuildKeyCashFlowFundingDetails(yearlySectionData, section, section_BRKEY, keyCashFlowFundingDetails);
 
                     // If CF then use obj from keyCashFlowFundingDetails otherwise from section
                     var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
@@ -456,21 +456,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                                   section.TreatmentStatus == TreatmentStatus.Applied)) ?
                                                   keyCashFlowFundingDetails[section_BRKEY] :
                                                   section.TreatmentConsiderations ?? new();
-                    if((section_BRKEY == 897 && (yearlySectionData.Year == 2028 || yearlySectionData.Year == 2037)) || (section_BRKEY == 38542 && (yearlySectionData.Year == 2025 || yearlySectionData.Year == 2039)))
-                    {
-
-                    }
-                    // var treatmentConsideration = shouldBundleFeasibleTreatments ?
-                    //      treatmentConsiderations.FirstOrDefault() :
-                    //      treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
-                    // TODO should consider appliedTreatment  to reflect correctly???
+                    
                     var treatmentConsideration = shouldBundleFeasibleTreatments ?
                                                  treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
                                                     _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
-                                                    _.TreatmentName == section.AppliedTreatment):
+                                                    section.AppliedTreatment.Contains(_.TreatmentName)) :
                                                  treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
                                                     _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
-                                                    section.AppliedTreatment.Contains(_.TreatmentName));
+                                                    _.TreatmentName == section.AppliedTreatment);
+
                     var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
                     var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();                    
                     var cost = Math.Round(allocationMatrix?.Where(_ => _.Year == yearlySectionData.Year).Sum(_ => _.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis
@@ -634,9 +628,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                                   section.TreatmentStatus == TreatmentStatus.Applied)) ?
                                                   keyCashFlowFundingDetails[section_BRKEY] :
                                                   section.TreatmentConsiderations ?? new();
-                    var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                                 _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
-                                                 _.TreatmentName == section.AppliedTreatment);
+
+                    var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                    _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
+                                                    section.AppliedTreatment.Contains(_.TreatmentName)) :
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                    _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
+                                                    _.TreatmentName == section.AppliedTreatment);
+
                     var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();                    
                     var cost = Math.Round(allocationMatrix?.Where(_ => _.Year == yearlySectionData.Year).Sum(_ => _.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis
                     var recommendedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment; // Recommended Treatment

@@ -88,6 +88,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                     {
                         continue;
                     }
+                    // TODO this report needs to be revised/enhanced to handle both types of keys throught this report tab. Currently it looks to be partially handling keys.
 
                     // Build keyCashFlowFundingDetails
                     var cashFlowPrimaryKey = CheckGetTextValue(section.ValuePerTextAttribute, primaryKey[0].ToString());
@@ -167,8 +168,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                                               section.TreatmentStatus == TreatmentStatus.Applied)) ?
                                               keyCashFlowFundingDetails[primaryKeyField] :
                                               section.TreatmentConsiderations ?? new();
-                var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                             _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year));
+                                
+                var treatmentConsideration = ShouldBundleFeasibleTreatments ?
+                                     treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
+                                        section.AppliedTreatment.Contains(_.TreatmentName)) :
+                                     treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
+                                        _.TreatmentName == section.AppliedTreatment);
+
                 // AllocationMatrix includes cash flow funding of future years.
                 var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
                 var amountSpent = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.
@@ -207,10 +215,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                                               section.TreatmentStatus == TreatmentStatus.Applied)) ?
                                               keyCashFlowFundingDetails[primaryKeyField] :
                                               section.TreatmentConsiderations ?? new();
+
                 var aggregatedTreatmentConsideration = aggregatedTreatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                             _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year));
-                var includedBundles = aggregatedTreatmentConsiderations.FirstOrDefault()?.TreatmentName;
-                var aggregatedTreatmentString = aggregatedTreatmentConsiderations.ToString();
+                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
+                                        section.AppliedTreatment.Contains(_.TreatmentName));
+
+                var includedBundles = aggregatedTreatmentConsideration?.TreatmentName;                
                 
                 // AllocationMatrix includes cash flow funding of future years.
                 var aggregatedAllocationMatrix = aggregatedTreatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();

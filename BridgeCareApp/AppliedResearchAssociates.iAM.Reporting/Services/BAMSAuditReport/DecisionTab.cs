@@ -8,7 +8,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSAuditReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
@@ -27,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void Fill(ExcelWorksheet decisionsWorksheet, SimulationOutput simulationOutput, Simulation simulation, HashSet<string> performanceCurvesAttributes)
+        public void Fill(ExcelWorksheet decisionsWorksheet, SimulationOutput simulationOutput, Simulation simulation, HashSet<string> performanceCurvesAttributes, bool shouldBundleFeasibleTreatments)
         {
             columnNumbersBudgetsUsed = new List<int>();
             // Distinct performance curves' attributes
@@ -46,14 +45,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             var currentCell = AddHeadersCells(decisionsWorksheet, currentAttributes, budgets, treatments);
 
             // Fill data in excel
-            FillDynamicDataInWorkSheet(simulationOutput, currentAttributes, budgets, treatments, decisionsWorksheet, currentCell);
+            FillDynamicDataInWorkSheet(simulationOutput, currentAttributes, budgets, treatments, decisionsWorksheet, currentCell, shouldBundleFeasibleTreatments);
 
             decisionsWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
             decisionsWorksheet.Cells.AutoFitColumns();
             PerformPostAutofitAdjustments(decisionsWorksheet, columnNumbersBudgetsUsed);
         }
 
-        private void FillDynamicDataInWorkSheet(SimulationOutput simulationOutput, HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, ExcelWorksheet decisionsWorksheet, CurrentCell currentCell)
+        private void FillDynamicDataInWorkSheet(SimulationOutput simulationOutput, HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, ExcelWorksheet decisionsWorksheet, CurrentCell currentCell, bool shouldBundleFeasibleTreatments)
         {
             Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
 
@@ -78,28 +77,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                     }
 
                     // Build keyCashFlowFundingDetails                    
-                    if (section.TreatmentStatus != TreatmentStatus.Applied)
-                    {
-                        var fundingSection = year.Assets.
-                                              FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == brKey &&
-                                                            _.TreatmentCause == TreatmentCause.SelectedTreatment &&
-                                                            _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment &&
-                                                            _.AppliedTreatment == section.AppliedTreatment);
-                        if (fundingSection != null)
-                        {
-                            if (!keyCashFlowFundingDetails.ContainsKey(brKey))
-                            {
-                                keyCashFlowFundingDetails.Add(brKey, fundingSection.TreatmentConsiderations ?? new());
-                            }
-                            else
-                            {
-                                keyCashFlowFundingDetails[brKey].AddRange(fundingSection.TreatmentConsiderations);
-                            }
-                        }
-                    }
+                    _reportHelper.BuildKeyCashFlowFundingDetails(year, section, brKey, keyCashFlowFundingDetails);
 
                     // Generate data model                    
-                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, brKey, year, section, keyCashFlowFundingDetails);
+                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, brKey, year, section, keyCashFlowFundingDetails, shouldBundleFeasibleTreatments);
 
                     // Fill in excel
                     currentCell = FillDataInWorksheet(decisionsWorksheet, decisionsDataModel, budgets.Count, currentAttributes, familyId, currentCell);
@@ -108,7 +89,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
             }
         }
 
-        private DecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, double brKey, SimulationYearDetail year, AssetDetail section, Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails)
+        private DecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, double brKey, SimulationYearDetail year, AssetDetail section, Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails, bool shouldBundleFeasibleTreatments)
         {
             var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, brKey, year.Year, section);
 
@@ -159,8 +140,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSAuditReport
                                               section.TreatmentStatus == TreatmentStatus.Applied)) ?
                                               keyCashFlowFundingDetails[brKey] :
                                               section.TreatmentConsiderations ?? new();
-                var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                             _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year));
+
+                var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                             treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
+                                                section.AppliedTreatment.Contains(_.TreatmentName)) :
+                                             treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
+                                                _.TreatmentName == section.AppliedTreatment);
+
                 // AllocationMatrix includes cash flow funding of future years.
                 var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
                 var amountSpent = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.

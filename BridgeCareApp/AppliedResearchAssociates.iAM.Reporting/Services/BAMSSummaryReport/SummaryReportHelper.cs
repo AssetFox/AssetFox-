@@ -82,29 +82,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 
         public static TreatmentCategory GetCategory(TreatmentCategory treatmentCategory) => treatmentCategory == TreatmentCategory.Reconstruction ?
                                                                                              TreatmentCategory.Replacement :
-                                                                                             treatmentCategory;
-
-        public void BuildKeyCashFlowFundingDetails(SimulationYearDetail yearData, AssetDetail section, double brKey, Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails, ReportHelper reportHelper)
-        {
-            if (section.TreatmentStatus != TreatmentStatus.Applied)
-            {
-                var fundingSection = yearData.Assets.
-                                      FirstOrDefault(_ => reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == brKey &&
-                                                    _.TreatmentCause == TreatmentCause.SelectedTreatment &&
-                                                    _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment &&
-                                                    _.AppliedTreatment == section.AppliedTreatment);
-                if (fundingSection != null)
-                {
-                    if (!keyCashFlowFundingDetails.ContainsKey(brKey))
-                    {
-                        keyCashFlowFundingDetails.Add(brKey, fundingSection.TreatmentConsiderations ?? new());
-                    }
-                    else
-                    {
-                        keyCashFlowFundingDetails[brKey].AddRange(fundingSection.TreatmentConsiderations);
-                    }
-                }
-            }
-        }
+                                                                                             treatmentCategory;       
     }
 }

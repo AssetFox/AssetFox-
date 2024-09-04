@@ -79,7 +79,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         var section_BRKEY = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
 
                         // Build keyCashFlowFundingDetails                    
-                        _summaryReportHelper.BuildKeyCashFlowFundingDetails(yearData, section, section_BRKEY, keyCashFlowFundingDetails, _reportHelper);
+                        _reportHelper.BuildKeyCashFlowFundingDetails(yearData, section, section_BRKEY, keyCashFlowFundingDetails);
 
                         // If CF then use obj from keyCashFlowFundingDetails otherwise from section
                         var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
@@ -90,8 +90,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                                       section.TreatmentStatus == TreatmentStatus.Applied)) ?
                                                       keyCashFlowFundingDetails[section_BRKEY] :
                                                       section.TreatmentConsiderations ?? new();
-                        var treatmentConsideration = treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                                     _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year));
+
+                        var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                     treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                        section.AppliedTreatment.Contains(_.TreatmentName)) :
+                                                     treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                        _.TreatmentName == section.AppliedTreatment);
+
                         var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
                         var budgetAmount = (double)treatmentConsiderations.Sum(_ =>
                                            _.FundingCalculationOutput?.AllocationMatrix?.

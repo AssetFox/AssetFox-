@@ -306,7 +306,6 @@ import { useStore } from 'vuex';
 import router from './router';
 import mitt, { Emitter, EventType } from 'mitt'
 import vuetify from '@/plugins/vuetify';
-import config from '../public/config.json';
 import { getUrl } from './shared/utils/get-url';
 
     let store = useStore();
@@ -390,7 +389,7 @@ import { getUrl } from './shared/utils/get-url';
     let inventoryReportName: string = '';
     let alert: Ref<boolean> = ref(false);
 
-        const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
     
     created();
 
@@ -607,12 +606,12 @@ import { getUrl } from './shared/utils/get-url';
             startTokenCheckTimer(); 
         }
         
-        if(config.agencyLogo.trim() === "")
+        if(agencyLogoBase64.value === '')
             agencyLogo.value = new URL(`assets/images/generic/IAM_Main.jpg`, import.meta.url).href;
         else
             agencyLogo.value = agencyLogoBase64.value
 
-        if(config.productLogo.trim() === "")
+        if(productLogoBase64.value === '')
             productLogo.value = new URL(`assets/images/generic/IAM_Banner.jpg`, import.meta.url).href;
         else
             productLogo.value = productLogoBase64.value

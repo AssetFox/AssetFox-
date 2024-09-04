@@ -15,9 +15,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     public static class ISimulationLogRepositoryExtensions
     {
         public static void CreateLog(this ISimulationLogRepository repository,
-            SimulationLogDTO dto)
+            List<SimulationLogDTO> dtos)
         {
-            var list = new List<SimulationLogDTO> { dto };
+            var list = dtos;
             repository.CreateLogs(list);
         }
     }

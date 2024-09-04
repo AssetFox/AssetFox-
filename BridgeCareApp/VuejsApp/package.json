@@ -1,6 +1,6 @@
 {
     "name": "bridge-care",
-    "version": "v3.2.1 rev. 3",
+    "version": "v3.2.2",
     "port": "8080",
     "private": true,
     "description": "BridgeCare",
@@ -9,6 +9,7 @@
     },
     "scripts": {
         "dev": "vite",
+        "dev-build": "vite build --mode development",
         "serve": "vite preview",
         "lint": "wotan 'src/**'",
         "build-prod": "vite build",

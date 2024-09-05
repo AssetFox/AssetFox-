@@ -8,7 +8,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSAuditReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
@@ -78,17 +77,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                     }
 
                     // Build keyCashFlowFundingDetails
-                    if (section.TreatmentStatus != TreatmentStatus.Applied)
-                    {
-                        var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, "CRS") == crs &&
-                                             _.TreatmentCause == TreatmentCause.SelectedTreatment &&
-                                             _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
-                                             _.AppliedTreatment == section.AppliedTreatment);
-                        if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
-                        {
-                            keyCashFlowFundingDetails.Add(crs, fundingSection.TreatmentConsiderations ?? new());
-                        }
-                    }
+                    _reportHelper.BuildKeyCashFlowFundingDetails(year, section, crs, keyCashFlowFundingDetails);
 
                     // Generate data model                    
                     var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, crs, year, section, keyCashFlowFundingDetails);
@@ -139,14 +128,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
                 decisionsTreatment.Selected = isCashFlowProject ? PAMSAuditReportConstants.CashFlow : (section.AppliedTreatment == treatment ? PAMSAuditReportConstants.Yes : PAMSAuditReportConstants.No);
 
-                // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
-                                              section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                              section.TreatmentConsiderations :
-                                              keyCashFlowFundingDetails[crs] ?? new();                
+                // If CF then use obj from keyCashFlowFundingDetails otherwise from section
+                var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                              section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                              (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                              section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                              (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                              section.TreatmentStatus == TreatmentStatus.Applied)) ?
+                                              keyCashFlowFundingDetails[crs] :
+                                              section.TreatmentConsiderations ?? new();
+
                 var treatmentConsideration = ShouldBundleFeasibleTreatments ?
-                                             treatmentConsiderations.FirstOrDefault() :
-                                             treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                                     treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
+                                        section.AppliedTreatment.Contains(_.TreatmentName)) :
+                                     treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
+                                        _.TreatmentName == section.AppliedTreatment);
+
                 // AllocationMatrix includes cash flow funding of future years.
                 var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
                 var amountSpent = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.
@@ -173,15 +172,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport
                 // Aggregated
                 var decisionsAggregated = new List<PAMSDecisionAggregated>();
 
-                // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                var aggregatedTreatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
-                                                        section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                                        section.TreatmentConsiderations :
-                                                        keyCashFlowFundingDetails[crs] ?? new();
-                var includedBundles = aggregatedTreatmentConsiderations.FirstOrDefault()?.TreatmentName;
-                var aggregatedTreatmentString = aggregatedTreatmentConsiderations.ToString();
-                var aggregatedTreatmentConsideration = aggregatedTreatmentConsiderations.FirstOrDefault();
+                // If CF then use obj from keyCashFlowFundingDetails otherwise from section
+                var aggregatedTreatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                              section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                              (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                              section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                              (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                              section.TreatmentStatus == TreatmentStatus.Applied)) ?
+                                              keyCashFlowFundingDetails[crs] :
+                                              section.TreatmentConsiderations ?? new();
 
+                var aggregatedTreatmentConsideration = aggregatedTreatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                       _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
+                                                       section.AppliedTreatment.Contains(_.TreatmentName));
+
+                var includedBundles = aggregatedTreatmentConsideration?.TreatmentName;
+                
                 // AllocationMatrix includes cash flow funding of future years.
                 var aggregatedAllocationMatrix = aggregatedTreatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
 

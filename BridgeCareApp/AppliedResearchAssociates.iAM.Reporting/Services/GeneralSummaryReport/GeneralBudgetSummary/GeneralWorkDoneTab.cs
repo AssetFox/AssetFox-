@@ -9,7 +9,6 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.FlexibleAuditReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.FlexibileAuditReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.GeneralBudgetSummary
@@ -89,18 +88,27 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                     {
                         continue;
                     }
+                    // TODO this report needs to be revised/enhanced to handle both types of keys throught this report tab. Currently it looks to be partially handling keys.
 
                     // Build keyCashFlowFundingDetails
                     var cashFlowPrimaryKey = CheckGetTextValue(section.ValuePerTextAttribute, primaryKey[0].ToString());
                     if (section.TreatmentStatus != TreatmentStatus.Applied)
                     {
-                        var fundingSection = year.Assets.FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, primaryKey[0].ToString()) == cashFlowPrimaryKey &&
-                                             _.TreatmentCause == TreatmentCause.SelectedTreatment &&
-                                             _.AppliedTreatment.ToLower() != FlexibleAuditReportConstants.NoTreatment &&
-                                             _.AppliedTreatment == section.AppliedTreatment);
-                        if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(cashFlowPrimaryKey))
+                        var fundingSection = year.Assets.
+                                              FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, primaryKey[0].ToString()) == cashFlowPrimaryKey &&
+                                                            _.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                            _.AppliedTreatment.ToLower() != FlexibleAuditReportConstants.NoTreatment &&
+                                                            _.AppliedTreatment == section.AppliedTreatment);
+                        if (fundingSection != null)
                         {
-                            keyCashFlowFundingDetails.Add(cashFlowPrimaryKey, fundingSection?.TreatmentConsiderations ?? new());
+                            if (!keyCashFlowFundingDetails.ContainsKey(cashFlowPrimaryKey))
+                            {
+                                keyCashFlowFundingDetails.Add(cashFlowPrimaryKey, fundingSection.TreatmentConsiderations ?? new());
+                            }
+                            else
+                            {
+                                keyCashFlowFundingDetails[cashFlowPrimaryKey].AddRange(fundingSection.TreatmentConsiderations);
+                            }
                         }
                     }
 
@@ -114,9 +122,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             }
         }
 
-        private FlexibleDecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, string brKey, SimulationYearDetail year, AssetDetail section, Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails)
+        private FlexibleDecisionDataModel GenerateDecisionDataModel(HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, string primaryKeyField, SimulationYearDetail year, AssetDetail section, Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails)
         {
-            var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, brKey, year.Year, section);
+            var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, primaryKeyField, year.Year, section);
 
             // Budget levels
             var budgetsAtDecisionTime = section.TreatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment)?.FundingCalculationInput?.CurrentBudgetsToSpend.Where(_ => _.Year == year.Year).ToList() ??
@@ -151,12 +159,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                 decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
                 decisionsTreatment.Selected = isCashFlowProject ? FlexibleAuditReportConstants.CashFlow : (section.AppliedTreatment == treatment ? FlexibleAuditReportConstants.Yes : FlexibleAuditReportConstants.No);
 
-                // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                              section.TreatmentConsiderations : keyCashFlowFundingDetails[brKey];
+                // If CF then use obj from keyCashFlowFundingDetails otherwise from section
+                var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                              section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                              (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                              section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                              (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                              section.TreatmentStatus == TreatmentStatus.Applied)) ?
+                                              keyCashFlowFundingDetails[primaryKeyField] :
+                                              section.TreatmentConsiderations ?? new();
+                                
                 var treatmentConsideration = ShouldBundleFeasibleTreatments ?
-                                             treatmentConsiderations.FirstOrDefault() :
-                                             treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                                     treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
+                                        section.AppliedTreatment.Contains(_.TreatmentName)) :
+                                     treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
+                                        _.TreatmentName == section.AppliedTreatment);
+
                 // AllocationMatrix includes cash flow funding of future years.
                 var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
                 var amountSpent = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.
@@ -186,13 +206,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                 // Aggregated
                 var decisionsAggregated = new List<FlexibleDecisionAggregated>();
 
-                // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                var aggregatedTreatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                              section.TreatmentConsiderations : keyCashFlowFundingDetails[brKey];
-                var includedBundles = aggregatedTreatmentConsiderations.FirstOrDefault()?.TreatmentName;
-                var aggregatedTreatmentString = aggregatedTreatmentConsiderations.ToString();
-                var aggregatedTreatmentConsideration = aggregatedTreatmentConsiderations.FirstOrDefault();
+                // If CF then use obj from keyCashFlowFundingDetails otherwise from section
+                var aggregatedTreatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                              section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                              (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                              section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                              (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                              section.TreatmentStatus == TreatmentStatus.Applied)) ?
+                                              keyCashFlowFundingDetails[primaryKeyField] :
+                                              section.TreatmentConsiderations ?? new();
 
+                var aggregatedTreatmentConsideration = aggregatedTreatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
+                                        section.AppliedTreatment.Contains(_.TreatmentName));
+
+                var includedBundles = aggregatedTreatmentConsideration?.TreatmentName;                
+                
                 // AllocationMatrix includes cash flow funding of future years.
                 var aggregatedAllocationMatrix = aggregatedTreatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
 

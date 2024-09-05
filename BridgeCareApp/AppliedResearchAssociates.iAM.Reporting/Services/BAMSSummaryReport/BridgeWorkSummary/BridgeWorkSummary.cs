@@ -136,23 +136,27 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         costPerBPNPerYear[yearData.Year].Add(busPlanNetwork, 0);
                     }
 
-                    // Build keyCashFlowFundingDetails
-                    if (section.TreatmentStatus != TreatmentStatus.Applied)
-                    {
-                        var fundingSection = yearData.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment && _.AppliedTreatment == section.AppliedTreatment);
-                        if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(section_BRKEY))
-                        {
-                            keyCashFlowFundingDetails.Add(section_BRKEY, fundingSection?.TreatmentConsiderations ?? new());
-                        }
-                    }
+                    // Build keyCashFlowFundingDetails                    
+                    _reportHelper.BuildKeyCashFlowFundingDetails(yearData, section, section_BRKEY, keyCashFlowFundingDetails);
 
-                    // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied && section.TreatmentCause !=
-                                                  TreatmentCause.CashFlowProject ? section.TreatmentConsiderations :
-                                                  keyCashFlowFundingDetails[section_BRKEY];
+                    // If CF then use obj from keyCashFlowFundingDetails otherwise from section
+                    var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                  section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                  (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                  section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                  (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                  section.TreatmentStatus == TreatmentStatus.Applied)) ?
+                                                  keyCashFlowFundingDetails[section_BRKEY] :
+                                                  section.TreatmentConsiderations ?? new();
+
                     var treatmentConsideration = shouldBundleFeasibleTreatments ?
-                                                        treatmentConsiderations.FirstOrDefault() :
-                                                        treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                    _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                    section.AppliedTreatment.Contains(_.TreatmentName)) :
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                    _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                    _.TreatmentName == section.AppliedTreatment);
+
                     var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
                     var treatmentCategory = appliedTreatment.Contains("Bundle") ? BAMSConstants.Bundled : treatmentCategoryLookup[appliedTreatment];
                     var cost = treatmentConsiderations.

@@ -104,12 +104,3 @@ internal class TreatmentBundle : Treatment
             => new(g.Key, new TreatmentBundle(g.Select(s => s.TreatmentToSchedule)));
     }
 }
-
-internal sealed class CommittedProjectBundle : TreatmentBundle
-{
-    public CommittedProjectBundle(IEnumerable<CommittedProject> bundledTreatments) : base(bundledTreatments)
-    {
-    }
-
-    public IEnumerable<CommittedProject> BundledProjects => BundledTreatments.Cast<CommittedProject>();
-}

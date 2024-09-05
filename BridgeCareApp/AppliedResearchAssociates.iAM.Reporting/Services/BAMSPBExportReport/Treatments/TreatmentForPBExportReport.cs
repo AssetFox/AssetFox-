@@ -102,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
 
         private CurrentCell AddDataHeadersCells(ExcelWorksheet worksheet, List<string> dataHeaders)
         {
-            //assetDetailObject header
+            //section header
             int dataHeaderRow = 1; 
 
             //data header

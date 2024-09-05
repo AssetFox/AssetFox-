@@ -351,7 +351,7 @@ public sealed class SimulationRunner
 
     private IReadOnlyCollection<ConditionActual> DeficientConditionActuals = Array.Empty<ConditionActual>();
 
-    private SimulationMessageBuilder MessageBuilder;
+    internal SimulationMessageBuilder MessageBuilder;
 
     private ICollection<AssetContext> AssetContexts;
 

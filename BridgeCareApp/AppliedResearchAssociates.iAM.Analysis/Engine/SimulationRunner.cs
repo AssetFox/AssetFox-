@@ -506,6 +506,18 @@ public sealed class SimulationRunner
 
         foreach (var g in orderedGroups)
         {
+            if (g.DistinctBy(cp => cp.Year).Count() != g.Count())
+            {
+                var asset = g.First().Asset;
+                MessageBuilder = new("Two or more committed projects in the same year on the same asset with the same treatment.")
+                {
+                    AssetId = asset.Id,
+                    AssetName = asset.AssetName,
+                };
+                var error = SimulationLogMessageBuilders.RuntimeFatal(MessageBuilder, Simulation.Id);
+                Send(error);
+            }
+
             var expectedYear = g.First().Year - 1;
             foreach (var cp in g.Skip(1))
             {

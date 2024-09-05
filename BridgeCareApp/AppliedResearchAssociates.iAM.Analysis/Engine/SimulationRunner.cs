@@ -467,6 +467,11 @@ public sealed class SimulationRunner
                     if (treatment is CommittedProject committedProject)
                     {
                         context.Detail.ProjectSource = committedProject.ProjectSource.ToString();
+
+                        if (!committedProject.ShouldApplyConsequences)
+                        {
+                            context.Detail.TreatmentStatus = TreatmentStatus.Progressed;
+                        }
                     }
 
                     context.Detail.TreatmentCause = treatment is CommittedProject or CommittedProjectBundle

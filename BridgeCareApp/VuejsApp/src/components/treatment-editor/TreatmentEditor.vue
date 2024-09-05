@@ -17,22 +17,6 @@
             </v-select>
             <div class="ghd-md-gray ghd-control-subheader treatment-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
         </v-col>
-        <v-col>
-            <v-select
-            id="TreatmentEditor-treatment-select"
-                :items='treatmentSelectItems'
-                menu-icon=custom:GhdDownSvg
-                class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
-                label='Select a Treatment'
-                variant="outlined"
-                density="compact"
-                item-title="text"
-                item-value="value"
-                v-model='treatmentSelectItemValue'
-                v-show='hasSelectedLibrary || hasScenario'
-            >
-            </v-select>
-        </v-col>
         <v-col class="ghd-blue ghd-button-text ghd-text-padding" v-if='hasSelectedLibrary || hasScenario' style="border-style: solid;border-width: 2px; border-color: lightgray;margin-right: 5px;margin-bottom: 50px;">Treatments<br>
             <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
                 variant = "flat" class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
@@ -84,15 +68,6 @@
                 v-show='hasSelectedLibrary'                        
             >
                 Import Treatment
-            </v-btn>
-            <v-btn
-                @click='onShowConfirmDeleteTreatmentAlert'
-                variant = "outlined"
-                style="margin-right: 5px; margin-left: 5px;"
-                class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding ghd-margin-top'                        
-                v-show='hasSelectedTreatment && !isNoTreatmentSelected'                        
-            >
-                Delete Treatment
             </v-btn>
             <v-btn
                 id="TreatmentEditor-createLibrary-btn"

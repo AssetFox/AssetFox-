@@ -2,6 +2,7 @@
     <v-row>
         <v-col cols="12">            
             <div style="margin-bottom: 10px;">
+                <v-btn id="TreatmentConsequencesTab-AddConsequenceBtn" @click='onAddConsequence' class='ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border ghd-text-padding'>Add Consequence</v-btn>
                 <v-data-table :headers='consequencesGridHeaders' :items='consequencesGridData'
                               id="ConsequencesTab-Consequences-vDataTable"
                               class='elevation-1 fixed-header v-table__overflow'
@@ -110,7 +111,6 @@
                     </template>
                 </v-data-table>
             </div>
-            <v-btn id="TreatmentConsequencesTab-AddConsequenceBtn" @click='onAddConsequence' class='ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border ghd-text-padding'>Add Consequence</v-btn>
         </v-col>
 
         <EquationEditorDialog :dialogData='consequenceEquationEditorDialogData'

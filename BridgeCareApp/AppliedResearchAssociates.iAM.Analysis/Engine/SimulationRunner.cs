@@ -147,6 +147,8 @@ public sealed class SimulationRunner
         });
 
         CommittedProjectsPerAsset = Simulation.CommittedProjects.ToLookup(committedProject => committedProject.Asset);
+        ConfigureAnyCashFlowCommittedProjects();
+
         ConditionsPerBudget = Simulation.InvestmentPlan.BudgetConditions.ToLookup(budgetCondition => budgetCondition.Budget);
         CurvesPerAttribute = Simulation.PerformanceCurves.ToLookup(curve => curve.Attribute);
         NumberAttributeByName = Simulation.Network.Explorer.NumberAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
@@ -485,6 +487,39 @@ public sealed class SimulationRunner
     {
         UpdateConditionActuals(year);
         return ConditionGoalsEvaluator();
+    }
+
+    private void ConfigureAnyCashFlowCommittedProjects()
+    {
+        // Cash-flow committed projects (CPs) are automatically identified by the system. The
+        // pattern is a sequence of CPs in consecutive years where each CP costs more than a fixed
+        // threshold (currently $5m according to stakeholder-SMEs) and each CP is assigned the same
+        // asset and treatment. The effect of identification is that each non-final CP of a
+        // cash-flow CP sequence will have its consequences disabled.
+
+        const double cashFlowCostThreshold = 5_000_000;
+
+        var orderedGroups = Simulation.CommittedProjects
+            .GroupBy(cp => (cp.Asset, cp.TemplateTreatment))
+            .Select(g => g.Where(cp => cp.Cost > cashFlowCostThreshold).OrderByDescending(cp => cp.Year))
+            .Where(g => g.Any());
+
+        foreach (var g in orderedGroups)
+        {
+            var expectedYear = g.First().Year - 1;
+            foreach (var cp in g.Skip(1))
+            {
+                if (cp.Year == expectedYear)
+                {
+                    cp.ShouldApplyConsequences = false;
+                    --expectedYear;
+                }
+                else
+                {
+                    expectedYear = cp.Year - 1;
+                }
+            }
+        }
     }
 
     private void ConsiderTreatmentOptions(IEnumerable<AssetContext> baselineContexts, IEnumerable<TreatmentOption> treatmentOptions, int year)

@@ -4,7 +4,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
-using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using VerifyXunit;
 using Xunit;
@@ -14,6 +13,36 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing.CharacterizationTesting
 [UsesVerify]
 public class SimulationRunnerTests
 {
+    #region facts
+
+    [Fact]
+    public Task CashFlowCommittedProject()
+    {
+        var scenario = InputCreation.CreateExtremelyMinimalInput();
+
+        scenario.CommittedProjects.Add(new()
+        {
+            AssetID = scenario.Network.MaintainableAssets.Find(asset => asset.Name == "LA 1").ID,
+            Year = 2020,
+            NameOfUsableBudget = scenario.InvestmentPlan.Budgets.First().Name,
+            Cost = 6_000_000,
+            Name = "Lovecraftian Horror (Year 1)",
+            NameOfTemplateTreatment = scenario.SelectableTreatments.First(t => t.ForCommittedProjectsOnly).Name,
+        });
+
+        scenario.CommittedProjects.Add(new()
+        {
+            AssetID = scenario.Network.MaintainableAssets.Find(asset => asset.Name == "LA 1").ID,
+            Year = 2021,
+            NameOfUsableBudget = scenario.InvestmentPlan.Budgets.First().Name,
+            Cost = 6_000_000,
+            Name = "Lovecraftian Horror (Year 2)",
+            NameOfTemplateTreatment = scenario.SelectableTreatments.First(t => t.ForCommittedProjectsOnly).Name,
+        });
+
+        return RunTest(scenario);
+    }
+
     [Fact]
     public Task CommittedProjectBeforeAnalysisPeriod()
     {
@@ -31,6 +60,9 @@ public class SimulationRunnerTests
 
         return RunTest(scenario);
     }
+
+    [Fact]
+    public Task ExtremelyMinimalInput() => RunTest(InputCreation.CreateExtremelyMinimalInput());
 
     [Fact]
     public Task MultipleCommittedProjectsForOneAssetYear()
@@ -61,8 +93,9 @@ public class SimulationRunnerTests
         return RunTest(scenario);
     }
 
-    [Fact]
-    public Task ExtremelyMinimalInput() => RunTest(InputCreation.CreateExtremelyMinimalInput());
+    #endregion
+
+    #region theories
 
     [Theory]
     [ClassData(typeof(ScenarioJsonFileNames))]
@@ -90,6 +123,8 @@ public class SimulationRunnerTests
         scenario.AnalysisMethod.SpendingStrategy = strategy;
         return RunTest(scenario, strategy.ToString());
     }
+
+    #endregion
 
     private static Task RunTest(Scenario scenario, string parametersText = null)
     {

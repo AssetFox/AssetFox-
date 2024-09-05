@@ -22,7 +22,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private PostedClosedBridgeWorkSummary _postedClosedBridgeWorkSummary;
         private ProjectsCompletedCount _projectsCompletedCount;
         private ReportHelper _reportHelper;
-        private SummaryReportHelper _summaryReportHelper;
         private readonly IUnitOfWork _unitOfWork;
 
         public BridgeWorkSummary(IList<string> Warnings, IUnitOfWork unitOfWork)
@@ -37,7 +36,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _postedClosedBridgeWorkSummary = new PostedClosedBridgeWorkSummary(workSummaryModel, _unitOfWork);
             _projectsCompletedCount = new ProjectsCompletedCount(Warnings);            
             _reportHelper = new ReportHelper(_unitOfWork);
-            _summaryReportHelper = new SummaryReportHelper();
         }
 
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,

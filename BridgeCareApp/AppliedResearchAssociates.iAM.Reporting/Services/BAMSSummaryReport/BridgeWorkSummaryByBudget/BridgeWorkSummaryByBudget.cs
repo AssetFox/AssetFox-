@@ -26,7 +26,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private ReportHelper _reportHelper;
         private readonly IUnitOfWork _unitOfWork;
         private int TotalSpentRow = 0;
-        private SummaryReportHelper _summaryReportHelper;
 
         public BridgeWorkSummaryByBudget(IUnitOfWork unitOfWork)
         {
@@ -36,7 +35,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _bridgeWorkCost = new BridgeWorkCost();
             _committedProjectCost = new CommittedProjectCost();
             _reportHelper = new ReportHelper(_unitOfWork);
-            _summaryReportHelper = new SummaryReportHelper();
         }
 
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount

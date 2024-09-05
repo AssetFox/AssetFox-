@@ -65,7 +65,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             // and non-culvert bridges
             var costPerBPNPerYear = new Dictionary<int, Dictionary<string, decimal>>();
             var costAndCountPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
-            var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>>();
+            var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, List<CommittedProjectMetaData>>>();
             var countForCompletedProject = new Dictionary<int, Dictionary<string, int>>();
             var countForCompletedCommittedProject = new Dictionary<int, Dictionary<string, int>>();
             FillDataToUseInExcel(reportOutputData, costPerBPNPerYear, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj,
@@ -104,19 +104,23 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private void FillDataToUseInExcel(
          SimulationOutput reportOutputData, Dictionary<int, Dictionary<string, decimal>> costPerBPNPerYear,
          Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costAndCountPerTreatmentPerYear,
-         Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
+         Dictionary<int, Dictionary<string, List<CommittedProjectMetaData>>> yearlyCostCommittedProj,
          Dictionary<int, Dictionary<string, int>> countForCompletedProject,
          Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject,
          Dictionary<string, string> treatmentCategoryLookup,
          List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
          bool shouldBundleFeasibleTreatments)
         {
+
+            // TODO For BUG 25751: extend this obj to consider list of (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)
+            // Good idea to create obj with these props and then add list to replace current behaviour to handle multiple recrods for distinct projectSource.
+
             var isInitialYear = true;
             Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
             foreach (var yearData in reportOutputData.Years)
             {
                 costAndCountPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int bridgeCount)>());
-                yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>();
+                yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, List<CommittedProjectMetaData>>();
                 costPerBPNPerYear.Add(yearData.Year, new Dictionary<string, decimal>());
                 countForCompletedProject.Add(yearData.Year, new Dictionary<string, int>());
                 countForCompletedCommittedProject.Add(yearData.Year, new Dictionary<string, int>());
@@ -161,20 +165,26 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         appliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                     {
                         var committedCost = cost;
+                        var committedProject = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment) &&
+                                                _.Year == yearData.Year && _.ProjectSource.ToString() == section.ProjectSource);
+                        var projectSource = committedProject?.ProjectSource.ToString();
                         if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
-                        {
-                            var committedProject = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment) &&
-                                                _.Year == yearData.Year);
-                            var projectSource = committedProject?.ProjectSource.ToString();                            
-                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (committedCost, 1, projectSource, treatmentCategory));
+                        {                            
+                            var committedProjectMetaData = new List<CommittedProjectMetaData>() {
+                                                                new() { TreatmentCost = committedCost,
+                                                                    ProjectSource = projectSource,                                                                                            TreatmentCategory = treatmentCategory
+                                                                }};
+                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, committedProjectMetaData);
                         }
                         else
                         {
-                            var currentRecord = yearlyCostCommittedProj[yearData.Year][appliedTreatment];
-                            var treatmentCost = currentRecord.treatmentCost + committedCost;  
-                            var bridgeCount = currentRecord.bridgeCount + 1;  
-                            var projectSource = currentRecord.projectSource;
-                            yearlyCostCommittedProj[yearData.Year][appliedTreatment] = (treatmentCost, bridgeCount, projectSource, treatmentCategory);
+                            // TODO bridgeCount will be count of List<CommittedProjectMetaData>()
+                            yearlyCostCommittedProj[yearData.Year][appliedTreatment].Add(new()
+                            {
+                                TreatmentCost = committedCost,
+                                ProjectSource = projectSource,
+                                TreatmentCategory = treatmentCategory // TODO Should this be committed proj's category?
+                            });
                         }
                  
                         costPerBPNPerYear[yearData.Year][busPlanNetwork] += committedCost;

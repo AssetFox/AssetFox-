@@ -793,6 +793,7 @@ import { useRoute } from 'vue-router';
     async function createScenarioAction(payload?: any): Promise<any>{await store.dispatch('createScenario', payload)}
     async function cloneScenarioAction(payload?: any): Promise<any>{await store.dispatch('cloneScenario', payload)}
     async function cloneScenarioWithDestinationNetworkAction(payload?:any): Promise<any>{await store.dispatch('cloneScenarioWithDestinationNetwork',payload)}
+    async function getScenarioSelectableTreatmentsAction(payload?: any): Promise<any> {return await store.dispatch('getScenarioSelectableTreatments', payload)}
 
     async function updateScenarioAction(payload?: any): Promise<any>{await store.dispatch('updateScenario', payload)}
     async function deleteScenarioAction(payload?: any): Promise<any>{await store.dispatch('deleteScenario', payload)}
@@ -1025,6 +1026,7 @@ import { useRoute } from 'vue-router';
     let totalUserScenarios: ShallowRef<number> = shallowRef(0);
 
     let preCheckMessages: any;
+    let emptyTreatmentBudgets: any;
     let preCheckHeading: string;
     let preCheckStatus: any;
 
@@ -1642,6 +1644,15 @@ import { useRoute } from 'vue-router';
                     });
 
                 }
+                
+                // Check which treatments have no budgets and add them to the warning list
+                emptyTreatmentBudgets = await getScenarioSelectableTreatmentsAction({ scenarioId: selectedScenario.id });
+                emptyTreatmentBudgets.forEach((treatment: { budgets: string | any[]; name: any; }) => {
+                    if (!treatment.budgets || treatment.budgets.length === 0) {
+                        preCheckMessages += `Treatment ${treatment.name} has no budgets.`
+                    }
+                });
+
                 secondRunAnalysisModal();
         }
         else if(submit == "continue") {

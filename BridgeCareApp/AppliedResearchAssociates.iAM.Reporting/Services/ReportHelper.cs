@@ -13,6 +13,8 @@ using MoreLinq;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using Newtonsoft.Json.Linq;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services
 {
@@ -361,6 +363,52 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
         {
             var parameterObj = JObject.Parse(parameters);
             return parameterObj.SelectToken("expression")?.ToObject<string>();
+        }
+
+        public void BuildKeyCashFlowFundingDetails(SimulationYearDetail yearData, AssetDetail section, double brKey, Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails)
+        {
+            if (section.TreatmentStatus != TreatmentStatus.Applied)
+            {
+                var fundingSection = yearData.Assets.
+                                      FirstOrDefault(_ => CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == brKey &&
+                                                    _.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                    _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment &&
+                                                    _.AppliedTreatment == section.AppliedTreatment);
+                if (fundingSection != null)
+                {
+                    if (!keyCashFlowFundingDetails.ContainsKey(brKey))
+                    {
+                        keyCashFlowFundingDetails.Add(brKey, fundingSection.TreatmentConsiderations ?? new());
+                    }
+                    else
+                    {
+                        keyCashFlowFundingDetails[brKey].AddRange(fundingSection.TreatmentConsiderations);
+                    }
+                }
+            }
+        }
+
+        public void BuildKeyCashFlowFundingDetails(SimulationYearDetail yearData, AssetDetail section, string crs, Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails)
+        {
+            if (section.TreatmentStatus != TreatmentStatus.Applied)
+            {
+                var fundingSection = yearData.Assets.
+                                      FirstOrDefault(_ => CheckAndGetValue<string>(_.ValuePerTextAttribute, "CRS") == crs &&
+                                                    _.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                    _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
+                                                    _.AppliedTreatment == section.AppliedTreatment);
+                if (fundingSection != null)
+                {
+                    if (!keyCashFlowFundingDetails.ContainsKey(crs))
+                    {
+                        keyCashFlowFundingDetails.Add(crs, fundingSection.TreatmentConsiderations ?? new());
+                    }
+                    else
+                    {
+                        keyCashFlowFundingDetails[crs].AddRange(fundingSection.TreatmentConsiderations);
+                    }
+                }
+            }
         }
     }    
 }

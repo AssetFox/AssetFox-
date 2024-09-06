@@ -313,31 +313,29 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                         previousYearTreatment = prevYearSection.AppliedTreatment;
                     }                    
 
-                    // Work done and cost for the given year
-                    // Build keyCashFlowFundingDetails
+                    // Work done and cost for the given year                    
                     var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
+                    // Build keyCashFlowFundingDetails
+                    _summaryReportHelper.BuildKeyCashFlowFundingDetails(yearlySectionData, section, crs, keyCashFlowFundingDetails);
 
-                    if (section.TreatmentStatus != TreatmentStatus.Applied)
-                    {
-                        var fundingSection = yearlySectionData.Assets.FirstOrDefault
-                                             (_ => _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "CRS") == crs &&
-                                             _.TreatmentCause == TreatmentCause.SelectedTreatment &&
-                                             _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
-                                             _.AppliedTreatment == section.AppliedTreatment);                        
-                        if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(crs))
-                        {
-                            keyCashFlowFundingDetails.Add(crs, fundingSection?.TreatmentConsiderations ?? new());
-                        }
-                    }
+                    // If CF then use obj from keyCashFlowFundingDetails otherwise from section
+                    var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                  section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                  (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                  section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                  (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                  section.TreatmentStatus == TreatmentStatus.Applied)) ?
+                                                  keyCashFlowFundingDetails[crs] :
+                                                  section.TreatmentConsiderations ?? new();
 
-                    // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
-                                                  section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                                  section.TreatmentConsiderations :
-                                                  keyCashFlowFundingDetails[crs] ?? new();
                     var treatmentConsideration = shouldBundleFeasibleTreatments ?
-                                                 treatmentConsiderations.FirstOrDefault() :
-                                                 treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                                         treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                            _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
+                                            section.AppliedTreatment.Contains(_.TreatmentName)) :
+                                         treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                            _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
+                                            _.TreatmentName == section.AppliedTreatment);
+
                     var treatmentName = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
                     var treatmentDone = section.AppliedTreatment.ToLower() == PAMSConstants.NoTreatment ? "--" : treatmentName;
                     worksheet.Cells[row, column].Value = treatmentDone;
@@ -440,14 +438,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                         worksheet.Cells[row, ++column].Value = projectId;
                     }
 
-                    // If TreatmentStatus Applied it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
-                                                  section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                                  section.TreatmentConsiderations :
-                                                  keyCashFlowFundingDetails[crs];
+                    // If CF then use obj from keyCashFlowFundingDetails otherwise from section
+                    var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                  section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                  (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                  section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                  (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                  section.TreatmentStatus == TreatmentStatus.Applied)) ?
+                                                  keyCashFlowFundingDetails[crs] :
+                                                  section.TreatmentConsiderations ?? new();
+
                     var treatmentConsideration = shouldBundleFeasibleTreatments ?
-                                                 treatmentConsiderations.FirstOrDefault() :
-                                                 treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                                         treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                            _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
+                                            section.AppliedTreatment.Contains(_.TreatmentName)) :
+                                         treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                            _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
+                                            _.TreatmentName == section.AppliedTreatment);
+
                     var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
                     var budgetNames = allocationMatrix?.Where(_ => _.AllocatedAmount > 0 && _.Year == yearlySectionData.Year).
                                       Select(_ => _.BudgetName).Distinct().ToList() ?? new();

@@ -80,6 +80,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 
         public static TreatmentCategory GetCategory(TreatmentCategory treatmentCategory) => treatmentCategory == TreatmentCategory.Reconstruction ?
                                                                                              TreatmentCategory.Replacement :
-                                                                                             treatmentCategory;
+                                                                                             treatmentCategory;       
     }
 }

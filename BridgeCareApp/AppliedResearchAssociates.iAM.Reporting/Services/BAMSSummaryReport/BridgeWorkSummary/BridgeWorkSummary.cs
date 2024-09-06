@@ -200,7 +200,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                         // Remove from committedProjectsForWorkOutsideScope
                         // Bundled treatments have many treatment names under AppliedTreatment
-                        var toRemove = committedProjectsForWorkOutsideScope.Where(_ => appliedTreatment.Contains(_.Treatment) && _.Year == yearData.Year && _.ProjectSource.ToString() == section.ProjectSource);
+                        var toRemove = committedProjectsForWorkOutsideScope.Where(_ => appliedTreatment.Contains(_.Treatment) &&
+                                        _.Year == yearData.Year &&
+                                        _.ProjectSource.ToString() == section.ProjectSource &&
+                                        Math.Round(_.Cost, 0) == Convert.ToDouble(cost));
                         if (toRemove != null)
                         {
                             committedProjectsForWorkOutsideScope.RemoveAll(_ => toRemove.Contains(_));

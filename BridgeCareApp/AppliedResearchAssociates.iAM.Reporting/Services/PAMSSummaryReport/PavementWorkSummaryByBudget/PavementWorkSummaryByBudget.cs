@@ -6,10 +6,12 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
+using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.StaticContent;
 using OfficeOpenXml;
+using CurrentCell = AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport.CurrentCell;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummaryByBudget
 {
@@ -31,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             SimulationOutput reportOutputData,
             List<int> simulationYears,
             Dictionary<string, Budget> yearlyBudgetAmount,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int pavementCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
+            Dictionary<int, Dictionary<string, List<CommittedProjectMetaData>>> yearlyCostCommittedProj,
             IReadOnlyCollection<SelectableTreatment> selectableTreatments,
             ICollection<CommittedProject> committedProjects,
             Dictionary<string, string> treatmentCategoryLookup,
@@ -131,7 +133,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     workTypeTotals,                    
                     budgetSummaryModel,
                     reportOutputData,
-                    committedProjectList,
                     committedProjectsForWorkOutsideScope,
                     committedProjects,
                     shouldBundleFeasibleTreatments);
@@ -229,9 +230,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         private void PopulateYearlyCostCommittedProj(
                                 SimulationOutput reportOutputData,
                                 WorkSummaryByBudgetModel summaryModel,
-                                Dictionary<int, Dictionary<string,
-                                (decimal treatmentCost, int pavementCount,
-                                string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
+                                Dictionary<int, Dictionary<string, List<CommittedProjectMetaData>>> yearlyCostCommittedProj,
                                 Dictionary<string, string> treatmentCategoryLookup,
                                 List<BaseCommittedProjectDTO> committedProjectList,
                                 bool shouldBundleFeasibleTreatments)
@@ -243,7 +242,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 // Populating yearlyCostCommittedProj dictionary
                 if (!yearlyCostCommittedProj.ContainsKey(yearData.Year))
                 {
-                    yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, (decimal, int, string, string)>();
+                    yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, List<CommittedProjectMetaData>>();
                 }
 
                 foreach (var section in yearData.Assets)
@@ -281,19 +280,27 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                                 Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.
                                                 Where(_ => _.BudgetName == summaryModel.BudgetName && _.Year == yearData.Year).
                                                 Sum(bu => bu.AllocatedAmount)) ?? 0;
-                            
+
+                            var committedProject = committedProjectList.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment) &&
+                                                _.Year == yearData.Year && _.ProjectSource.ToString() == section.ProjectSource);
+                            var projectSource = committedProject?.ProjectSource.ToString();
                             if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
                             {
-                                var projectSource = committedProjectList.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment))?.ProjectSource.ToString() ?? string.Empty;
-                                yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (committedCost, 1, projectSource, treatmentCategory));
+                                var committedProjectMetaData = new List<CommittedProjectMetaData>() {
+                                                                new() { TreatmentCost = committedCost,
+                                                                    ProjectSource = projectSource,
+                                                                    TreatmentCategory = treatmentCategory
+                                                                }};
+                                yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, committedProjectMetaData);
                             }
                             else
                             {
-                                var currentRecord = yearlyCostCommittedProj[yearData.Year][appliedTreatment];
-                                var treatmentCost = currentRecord.treatmentCost + committedCost;
-                                var pavementCount = currentRecord.pavementCount + 1;
-                                var projectSource = currentRecord.projectSource;
-                                yearlyCostCommittedProj[yearData.Year][appliedTreatment] = (treatmentCost, pavementCount, projectSource, treatmentCategory);
+                                yearlyCostCommittedProj[yearData.Year][appliedTreatment].Add(new()
+                                {
+                                    TreatmentCost = committedCost,
+                                    ProjectSource = projectSource,
+                                    TreatmentCategory = treatmentCategory // TODO Should this be committed proj's category in future?
+                                });
                             }
                         }
                     }

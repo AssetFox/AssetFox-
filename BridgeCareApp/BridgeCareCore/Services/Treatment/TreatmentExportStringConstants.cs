@@ -11,6 +11,7 @@
         public const string YearsBeforeAny = "Years Before Any";
         public const string YearsBeforeSame = "Years Before Same";
         public const string TreatmentDescription = "Treatment Description";
+        public const string IsTreatmentUnselectable = "Is Treatment Unselectable";
         public const string Costs = "Costs";
         public const string Consequences = "Consequences";
         public const string Attribute = "Attribute";

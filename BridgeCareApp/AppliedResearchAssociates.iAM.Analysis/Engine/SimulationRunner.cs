@@ -1062,11 +1062,6 @@ public sealed class SimulationRunner
             }
 
             var lastYearOfCashFlow = year + distributionRule.YearlyPercentages.Count - 1;
-            if (lastYearOfCashFlow > Simulation.InvestmentPlan.LastYearOfAnalysisPeriod)
-            {
-                return ReasonAgainstCashFlow.LastYearOfCashFlowIsOutsideOfAnalysisPeriod;
-            }
-
             var futureYearsOfCashFlow = Static.RangeFromBounds(year + 1, lastYearOfCashFlow);
             var scheduleIsBlocked = futureYearsOfCashFlow.Any(assetContext.EventSchedule.ContainsKey);
             if (scheduleIsBlocked)
@@ -1078,7 +1073,9 @@ public sealed class SimulationRunner
 
             cashFlowConsideration.FundingCalculationInputSupplement = new();
 
-            var costPercentagePerYear = new decimal[distributionRule.YearlyPercentages.Count];
+            var lastYearOfCashFlowInPeriod = Math.Min(lastYearOfCashFlow, Simulation.InvestmentPlan.LastYearOfAnalysisPeriod);
+            var numberOfCashFlowYears = lastYearOfCashFlowInPeriod - year + 1;
+            var costPercentagePerYear = new decimal[numberOfCashFlowYears];
             for (var y = 0; y < costPercentagePerYear.Length; ++y)
             {
                 var costPercentage = distributionRule.YearlyPercentages[y];

@@ -26,6 +26,10 @@ export interface SectionCommittedProjectTableData {
     cost: number;
     errors: string[];
     yearErrors: string[];
+    projectSourceErrors: string[];
+    treatmentErrors: string[];
+    costErrors: string[];
+    budgetErrors: string[];
     category: TreatmentCategory;
     projectSource: string;
     projectId: string;

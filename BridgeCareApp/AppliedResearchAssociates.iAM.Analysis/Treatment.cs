@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Analysis;
 
 public abstract class Treatment : WeakEntity, IValidator
 {
+    public TreatmentCategory Category { get; set; }
+
     public string Name { get; set; }
 
     public abstract IReadOnlyDictionary<NumberAttribute, double> PerformanceCurveAdjustmentFactors { get; }

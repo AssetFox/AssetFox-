@@ -57,6 +57,7 @@
                                         <img class='img-general' :src="getUrl('assets/icons/edit.svg')">
                                     </v-btn>
                                 </td>
+                                <td>{{ props.item.reportStatus }}</td>
                                 <td class="text-xs-left">
                                     <v-btn
                                         @click="onGenerateReport(props.item.id, true)"
@@ -68,9 +69,17 @@
                                     </v-btn>
                                     <v-btn
                                         @click="onDownloadReport(props.item.id)"
+                                        :disabled="!props.item.isGenerated"
                                         flat
                                     >
                                         <img class='img-general' :src="getUrl('assets/icons/download.svg')"/>
+                                    </v-btn>
+                                    <v-btn
+                                        @click="onDeleteReport(props.item.id)"
+                                        :disabled="!props.item.isGenerated"
+                                        flat
+                                    >
+                                        <img class='img-general ' :src="getUrl('assets/icons/trash.svg')"/>
                                     </v-btn>
                                 </td>
                             </tr>
@@ -106,7 +115,7 @@
 </template>
 
 <script setup lang='ts'>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed, watch, inject, onBeforeMount, onBeforeUnmount } from 'vue';
 import { clone, update, find, findIndex, propEq } from 'ramda';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
@@ -118,7 +127,7 @@ import FileDownload from 'js-file-download';
 import {hasValue} from '@/shared/utils/has-value-util';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { SelectItem } from '@/shared/models/vue/select-item';
-import { Report, emptyReport } from '@/shared/models/iAM/reports';
+import { Report, ReportDetails, emptyReport } from '@/shared/models/iAM/reports';
 import {
     InputValidationRules,
     rules as validationRules,
@@ -129,13 +138,17 @@ import Dialog from 'primevue/dialog';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { getUrl } from '@/shared/utils/get-url';
+import mitt, { Emitter, EventType } from 'mitt';
+import { Hub } from '@/connectionHub';
 
     let store = useStore();
-    const router = useRouter(); 
+    const router = useRouter();
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>> 
     const stateSimulationReportNames = computed<string[]>(() => store.state.adminDataModule.simulationReportNames);
     function addErrorNotificationAction(payload?: any) {  store.dispatch('addErrorNotification',payload);} 
     function addSuccessNotificationAction(payload?: any) { store.dispatch('addSuccessNotification',payload);} 
     async function getSimulationReportsAction(payload?: any): Promise<any> { await store.dispatch('getSimulationReports',payload);} 
+    async function updateSimulationReportDetailAction(payload?: any): Promise<any>{await store.dispatch('updateSimulationReportDetail', payload)}
 
     let editShow = ref<boolean>(false);
 
@@ -167,6 +180,14 @@ import { getUrl } from '@/shared/utils/get-url';
             width: '',
         },
         {
+            title: 'Report Status',
+            key: 'reportStatus',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+        {
             title: 'Actions',
             key: 'actions',
             align: 'left',
@@ -175,7 +196,22 @@ import { getUrl } from '@/shared/utils/get-url';
             width: '',
         },
     ];
-    onMounted(() => {
+
+    onBeforeMount(async () => {
+        $emitter.on(
+            Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
+            getReportStatus,
+        );
+    });
+
+    onBeforeUnmount(async () => {
+        $emitter.off(
+            Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
+            getReportStatus,
+        );
+    });
+
+    onMounted(async () => {
 
         selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
         simulationName = router.currentRoute.value.query.scenarioName as string;
@@ -190,26 +226,29 @@ import { getUrl } from '@/shared/utils/get-url';
             }
 
         //selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
-        getSimulationReportsAction();
-        
+        await getSimulationReportsAction();
+        await getReportGenerationStatus();
     });
     watch(stateSimulationReportNames, () => {
         stateSimulationReportNames.value.forEach(reportName => {
             currentPage.value.push({
                 id: getNewGuid(),
                 name: reportName,
-                mergedExpression: ""
+                mergedExpression: "",
+                isGenerated: false
             });
         });
         if(stateSimulationReportNames.value.length > 0)
             selectedReport.value = currentPage.value[0];
 
     });
+    
     const onRowSelect = (event:any) => {
         selectedReport.value = {
             id: event.data.id,
             name: event.data.name,
-            mergedExpression: event.data.mergedExpression
+            mergedExpression: event.data.mergedExpression,
+            isGenerated: event.data.isGenerated
         };
     };
     function showEditDialog(): void {
@@ -307,6 +346,62 @@ import { getUrl } from '@/shared/utils/get-url';
                         'Failed to download the report or output. Make sure the scenario has been run',
                 });
             }
+        });
+    }
+
+    async function getReportGenerationStatus()
+    {
+        const reportDetails: ReportDetails[] = currentPage.value.map(report => {
+        return {
+            simulationId: selectedScenarioId,
+            reportName: report.name,
+            isGenerated: false,
+            };
+        });
+
+        let test = await ReportsService.getReportGenerationStatus(
+            reportDetails
+        ).then((response: AxiosResponse<any>) => {
+            if (hasValue(response, 'data')) {
+                response.data.forEach((updatedReport: ReportDetails) => {
+                    // Find the corresponding report in currentPage.value and update it
+                    const reportIndex = currentPage.value.findIndex(report => 
+                        report.name === updatedReport.reportName);
+                    
+                    if (reportIndex !== -1) {
+                        currentPage.value[reportIndex].isGenerated = updatedReport.isGenerated;
+                    }
+                });
+            }
+        });
+    }
+
+    async function onDeleteReport(reportId: string) {        
+        selectedReport.value = find(
+            propEq('id', reportId),
+            currentPage.value,
+        ) as Report;
+        await ReportsService.deleteReport(
+            selectedScenarioId, selectedReport.value.name
+        ).then((response: AxiosResponse<any>) => {
+            if (hasValue(response, 'data')) {
+                addSuccessNotificationAction({
+                        message: selectedReport.value.name +  ' report has been deleted for ' + simulationName + '.',
+                    });
+                    selectedReport.value.isGenerated = false;
+            } else {
+                addErrorNotificationAction({
+                    message: 'Failed to delete report.',
+                    longMessage:
+                        'Failed to download the report or output. Make sure the scenario has been run',
+                });
+            }
+        });
+    }
+
+    function getReportStatus(data: any) {
+        updateSimulationReportDetailAction({
+            simulationReportDetail: data.simulationReportDetail,
         });
     }
 

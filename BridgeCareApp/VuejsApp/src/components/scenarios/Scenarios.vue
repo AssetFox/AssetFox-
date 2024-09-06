@@ -1381,24 +1381,6 @@ import ReportsService from '@/services/reports.service';
         }
         actionItemsForSharedScenario = [
             {
-                title: 'Run Analysis',
-                action: availableActions.runAnalysis,
-                icon: getUrl("assets/icons/monitor.svg"),
-                isCustomIcon: true
-            },
-            {
-                title: 'Reports',
-                action: availableActions.reports,
-                icon: getUrl("assets/icons/clipboard.svg"),
-                isCustomIcon: true
-            },
-            {
-                title: 'Delete all generated Reports',
-                action: availableActions.deleteReports,
-                icon: getUrl("assets/icons/clipboard.svg"),
-                isCustomIcon: true
-            },
-            {
                 title: 'Settings',
                 action: availableActions.settings,
                 icon: getUrl("assets/icons/gear.svg"),
@@ -1411,11 +1393,17 @@ import ReportsService from '@/services/reports.service';
                 isCustomIcon: true
             },
             {
-                title: 'Convert Output from Json to Relational',
-                action: availableActions.convert,
-                icon: "fas fa-exchange-alt",
-                isCustomIcon: false
+                title: 'Run Analysis',
+                action: availableActions.runAnalysis,
+                icon: getUrl("assets/icons/monitor.svg"),
+                isCustomIcon: true
             },
+            {
+                title: 'Reports',
+                action: availableActions.reports,
+                icon: getUrl("assets/icons/clipboard.svg"),
+                isCustomIcon: true
+            }, 
             {
                 title: 'Clone',
                 action: availableActions.clone,

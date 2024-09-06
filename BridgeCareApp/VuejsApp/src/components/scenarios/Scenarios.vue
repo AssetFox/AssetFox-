@@ -77,17 +77,18 @@
                                             </v-col>
                                             
                                             <v-spacer></v-spacer>
-                                            <v-col>
+                                            <v-col class="d-flex justify-end" style="padding-right: 100px;">
                                                 <v-btn
-                                           id="Scenarios-createScenario-btn"
-                                            @click="
-                                                showCreateScenarioDialog = true
-                                            "
-                                            class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                                            variant="outlined"
-                                        >
-                                            Create new scenario
-                                        </v-btn>
+                                                    id="Scenarios-createScenario-btn"
+                                                    @click="
+                                                        showCreateScenarioDialog = true
+                                                    "
+                                                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                                                    variant="outlined"
+                                                    style="justify-content: end;"
+                                                >
+                                                    Create new scenario
+                                                </v-btn>
                                             </v-col>
                                             
                                         </v-row>
@@ -760,6 +761,7 @@ import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
 import { User } from '@/shared/models/iAM/user';
 import router from '@/router';
 import { useRoute } from 'vue-router';
+import ReportsService from '@/services/reports.service';
 
     let store = useStore(); 
     const $router = useRouter();     
@@ -793,6 +795,7 @@ import { useRoute } from 'vue-router';
     async function createScenarioAction(payload?: any): Promise<any>{await store.dispatch('createScenario', payload)}
     async function cloneScenarioAction(payload?: any): Promise<any>{await store.dispatch('cloneScenario', payload)}
     async function cloneScenarioWithDestinationNetworkAction(payload?:any): Promise<any>{await store.dispatch('cloneScenarioWithDestinationNetwork',payload)}
+    async function getScenarioSelectableTreatmentsAction(payload?: any): Promise<any> {return await store.dispatch('getScenarioSelectableTreatments', payload)}
 
     async function updateScenarioAction(payload?: any): Promise<any>{await store.dispatch('updateScenario', payload)}
     async function deleteScenarioAction(payload?: any): Promise<any>{await store.dispatch('deleteScenario', payload)}
@@ -1025,6 +1028,7 @@ import { useRoute } from 'vue-router';
     let totalUserScenarios: ShallowRef<number> = shallowRef(0);
 
     let preCheckMessages: any;
+    let emptyTreatmentBudgets: any;
     let preCheckHeading: string;
     let preCheckStatus: any;
 
@@ -1363,6 +1367,7 @@ import { useRoute } from 'vue-router';
         availableActions = {
             runAnalysis: 'runAnalysis',
             reports: 'reports',
+            deleteReports: 'deletedReports',
             settings: 'settings',
             share: 'share',
             clone: 'clone',
@@ -1376,18 +1381,6 @@ import { useRoute } from 'vue-router';
         }
         actionItemsForSharedScenario = [
             {
-                title: 'Run Analysis',
-                action: availableActions.runAnalysis,
-                icon: getUrl("assets/icons/monitor.svg"),
-                isCustomIcon: true
-            },
-            {
-                title: 'Reports',
-                action: availableActions.reports,
-                icon: getUrl("assets/icons/clipboard.svg"),
-                isCustomIcon: true
-            },
-            {
                 title: 'Settings',
                 action: availableActions.settings,
                 icon: getUrl("assets/icons/gear.svg"),
@@ -1400,11 +1393,17 @@ import { useRoute } from 'vue-router';
                 isCustomIcon: true
             },
             {
-                title: 'Convert Output from Json to Relational',
-                action: availableActions.convert,
-                icon: "fas fa-exchange-alt",
-                isCustomIcon: false
+                title: 'Run Analysis',
+                action: availableActions.runAnalysis,
+                icon: getUrl("assets/icons/monitor.svg"),
+                isCustomIcon: true
             },
+            {
+                title: 'Reports',
+                action: availableActions.reports,
+                icon: getUrl("assets/icons/clipboard.svg"),
+                isCustomIcon: true
+            }, 
             {
                 title: 'Clone',
                 action: availableActions.clone,
@@ -1642,6 +1641,15 @@ import { useRoute } from 'vue-router';
                     });
 
                 }
+                
+                // Check which treatments have no budgets and add them to the warning list
+                emptyTreatmentBudgets = await getScenarioSelectableTreatmentsAction({ scenarioId: selectedScenario.id });
+                emptyTreatmentBudgets.forEach((treatment: { budgets: string | any[]; name: any; }) => {
+                    if (!treatment.budgets || treatment.budgets.length === 0) {
+                        preCheckMessages += `Treatment ${treatment.name} has no budgets.`
+                    }
+                });
+
                 secondRunAnalysisModal();
         }
         else if(submit == "continue") {
@@ -1773,6 +1781,7 @@ import { useRoute } from 'vue-router';
             },
         });
     }
+    
     function onNavigateToReportsView(localScenario: Scenario) {
         selectScenarioAction({scenarioId: localScenario.id });
         $router.push({
@@ -1785,6 +1794,25 @@ import { useRoute } from 'vue-router';
             }
         });
     }
+
+    async function onDeleteAllGeneratedReports(localScenario: Scenario) {
+        await ReportsService.deleteAllGeneratedReports(
+            localScenario.id,
+        ).then((response: AxiosResponse<any>) => {
+            if (hasValue(response, 'data')) {
+                addSuccessNotificationAction({
+                        message: ' All reports for ' + localScenario.name + ' have been deleted.',
+                    });
+            } else {
+                addErrorNotificationAction({
+                    message: 'Failed to delete report.',
+                    longMessage:
+                        'Failed to download the report or output. Make sure the scenario has been run',
+                });
+            }
+        });
+    }
+
     function onShowShareScenarioDialog(scenario: Scenario) {
         shareScenarioDialogData.value = {
             showDialog: true,
@@ -2154,6 +2182,9 @@ import { useRoute } from 'vue-router';
                 break;
             case availableActions.reports:
                 onNavigateToReportsView(scenario);
+                break;
+            case availableActions.deleteReports:
+            onDeleteAllGeneratedReports(scenario);
                 break;
             case availableActions.settings:
                 if (canModifySharedScenario(scenarioUsers) || isOwner) {

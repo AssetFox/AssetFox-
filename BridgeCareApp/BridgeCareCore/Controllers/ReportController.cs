@@ -14,6 +14,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
@@ -41,6 +42,13 @@ namespace BridgeCareCore.Controllers
             _generator = generator ?? throw new ArgumentNullException(nameof(generator));
             _log = logger ?? throw new ArgumentNullException(nameof(logger));
             _generalWorkQueueService = generalWorkQueService ?? throw new ArgumentNullException(nameof(generalWorkQueService));
+        }
+
+        public class ReportDetails
+        {
+            public Guid simulationId { get; set; }
+            public string reportName { get; set; }
+            public bool isGenerated { get; set; }
         }
 
         #region "API functions"
@@ -187,6 +195,156 @@ namespace BridgeCareCore.Controllers
                 return CreateErrorListing(new List<string>() { e.Message });
             }
             return Ok(result);
+        }
+
+        [HttpPost]
+        [Route("GetReportGenerationStatus")]
+        [Authorize]
+        public async Task<IActionResult> GetReportGenerationStatus([FromBody] List<ReportDetails> reportDetails)
+        {
+            foreach (var report in reportDetails)
+            {
+                if (report.simulationId == Guid.Empty || report.reportName == String.Empty)
+                {
+                    var message = new List<string>() { $"No simulation or report name provided." };
+                    return CreateErrorListing(message);
+                }
+
+                var availableReport = UnitOfWork.ReportIndexRepository.GetAllForScenario(report.simulationId)
+                    .Where(_ => _.Type == report.reportName)
+                    .OrderByDescending(_ => _.CreationDate)
+                    .FirstOrDefault();
+
+                if (availableReport == null)
+                {
+                    report.isGenerated = false;
+                }
+                else
+                {
+                    var reportPath = Path.Combine(Environment.CurrentDirectory, "Reports", reportDetails[0].simulationId.ToString());
+
+                    // Check if the directory exists and if the file exists
+                    if (Directory.Exists(reportPath) && System.IO.File.Exists(availableReport.Result))
+                    {
+                        report.isGenerated = true;
+                    }
+                    else
+                    {
+                        report.isGenerated = false;
+                    }
+                }
+            }
+            return Ok(reportDetails);
+        }
+
+        [HttpGet]
+        [Route("DeleteReport/{simulationId}/{reportName}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteReport(Guid simulationId, string reportName)
+        {
+            var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+            if (simulationId == Guid.Empty || reportName == String.Empty)
+            {
+                var message = new List<string>() { $"No simulation or report name provided." };
+                return CreateErrorListing(message);
+            }
+
+            if (UnitOfWork.SimulationRepo.GetSimulation(simulationId) == null)
+            {
+                var message = new List<string>() { $"A simulation with the ID of {simulationId} is not available in the database." };
+                return CreateErrorListing(message);
+            }
+
+            var report = UnitOfWork.ReportIndexRepository.GetAllForScenario(simulationId)
+                .Where(_ => _.Type == reportName)
+                .OrderByDescending(_ => _.CreationDate)
+                .FirstOrDefault();
+            if (report == null)
+            {
+                var message = new List<string>() { $"No simulations of the specified type ({reportName}) exist for simulation {simulationName}.  Did you run the report?" };
+                return CreateErrorListing(message);
+            }
+
+            // Get path
+            var reportPath = Path.Combine(Environment.CurrentDirectory, report.Result);
+            if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
+            {
+                var message = new List<string>() { $"The report for {simulationName} did not include any results" };
+                return CreateErrorListing(message);
+            }
+
+            // Check if the file path is valid and if the file or directory exists
+            if (!System.IO.File.Exists(reportPath))
+            {
+                var message = new List<string> { $"The report or directory for {simulationName} does not exist." };
+                return CreateErrorListing(message);
+            }
+
+            try
+            {
+                System.IO.File.Delete(reportPath);
+                return Ok($"The report {reportName} for simulation {simulationName} has been successfully deleted.");
+            }
+            catch (Exception e)
+            {
+                var message = new List<string>() { $"The report path {reportPath} does not exist" };
+                return CreateErrorListing(new List<string>() { e.Message });
+            }
+
+        }
+
+        [HttpGet]
+        [Route("DeleteAllGeneratedReports/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteAllGeneratedReports(Guid simulationId)
+        {
+            var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+            if (simulationId == Guid.Empty)
+            {
+                var message = new List<string>() { $"No simulation or report name provided." };
+                return CreateErrorListing(message);
+            }
+
+            if (UnitOfWork.SimulationRepo.GetSimulation(simulationId) == null)
+            {
+                var message = new List<string>() { $"A simulation with the ID of {simulationId} is not available in the database." };
+                return CreateErrorListing(message);
+            }
+
+            // Get path
+            var reportPath = Path.Combine(Environment.CurrentDirectory, "Reports", simulationId.ToString());
+            if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
+            {
+                var message = new List<string>() { $"The report for {simulationName} did not include any results" };
+                return CreateErrorListing(message);
+            }
+
+            // Throw an error if the path does not exist
+            if (!Directory.Exists(reportPath))
+            {
+                var message = new List<string>() { $"The report path for {simulationName} does not exist." };
+                return CreateErrorListing(message);  // Or throw an exception if you prefer
+            }
+
+            try
+            {
+                if (Directory.Exists(reportPath))
+                {
+                    // Delete the directory and all its contents
+                    Directory.Delete(reportPath, true);
+                }
+                else
+                {
+                    var message = new List<string>() { $"The report path {reportPath} does not exist" };
+                    return CreateErrorListing(message);
+                }
+            }
+            catch (Exception e)
+            {
+                return CreateErrorListing(new List<string>() { e.Message });
+            }
+
+            return Ok($"All reports for {simulationName} have been successfully deleted.");
         }
 
         #endregion

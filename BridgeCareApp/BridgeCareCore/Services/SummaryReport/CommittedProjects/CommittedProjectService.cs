@@ -271,7 +271,6 @@ namespace BridgeCareCore.Services
                 throw new ArgumentException($"No simulation was found for the given scenario.");
             }
             var investmentPlan = _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId);
-            var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
 
             if (investmentPlan == null)
             {
@@ -397,6 +396,7 @@ namespace BridgeCareCore.Services
                 }
 
                 // Determine the appropriate budget to assign if any
+                var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
                 var budgetName = worksheet.GetCellValue<string>(row, _keyFields.Count + 5); // Assumes that InitialHeaders stays constant
                 var budgetNameIsEmpty = string.IsNullOrWhiteSpace(budgetName);
                 Guid? budgetId = null;
@@ -424,6 +424,30 @@ namespace BridgeCareCore.Services
                     convertedCategory = TreatmentCategory.Other; 
                 }
 
+                //Handle potentially malformed costs
+                var cost = -1.0; //Default
+                try
+                {
+                    var cellValue = worksheet.GetCellValue<object>(row, _keyFields.Count + 6);// Assumes that InitialHeaders stays constant
+
+                    if (cellValue is double doubleValue)
+                    {
+                        cost = doubleValue;
+                    }
+                    else if (cellValue is string stringValue && double.TryParse(stringValue, out double parsedValue))
+                    {
+                        cost = parsedValue;
+                    }
+                }
+                catch (FormatException)
+                {
+                    cost = -1;
+                }
+                catch (Exception)
+                {
+                    cost = -1;
+                }
+
                 // Build the committed project object
                 var project = new SectionCommittedProjectDTO
                 {
@@ -437,7 +461,7 @@ namespace BridgeCareCore.Services
                     ProjectId = projectIdValue,
                     ShadowForAnyTreatment = worksheet.GetCellValue<int>(row, _keyFields.Count + 3), // Assumes that InitialHeaders stays constant
                     ShadowForSameTreatment = worksheet.GetCellValue<int>(row, _keyFields.Count + 4), // Assumes that InitialHeaders stays constant
-                    Cost = worksheet.GetCellValue<double>(row, _keyFields.Count + 6), // Assumes that InitialHeaders stays constant
+                    Cost = cost,
                     Category = convertedCategory,
                 };
                 // factor needs additional column, so increment by 2

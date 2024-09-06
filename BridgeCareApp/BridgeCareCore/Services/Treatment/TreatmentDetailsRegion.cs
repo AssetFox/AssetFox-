@@ -17,6 +17,7 @@ namespace BridgeCareCore.Services.Treatment
                 YearsBeforeAnyRow(dto),
                 YearsBeforeSameRow(dto),
                 TreatmentDescriptionRow(dto),
+                TreatmentIsUnselectableRow(dto)
             };
             return RowBasedExcelRegionModels.WithRows(rows);
         }
@@ -78,6 +79,12 @@ namespace BridgeCareCore.Services.Treatment
         {
             var description = dto.Description;
             return TitleThenContent(TreatmentExportStringConstants.TreatmentDescription, description);
+        }
+
+        public static ExcelRowModel TreatmentIsUnselectableRow(TreatmentDTO dto)
+        {
+            var isUnselectable = dto.IsUnselectable;
+            return TitleThenContent(TreatmentExportStringConstants.IsTreatmentUnselectable, isUnselectable.ToString());
         }
     }
 }

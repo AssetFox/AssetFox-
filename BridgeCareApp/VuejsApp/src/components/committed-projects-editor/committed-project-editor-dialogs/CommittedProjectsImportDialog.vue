@@ -19,15 +19,15 @@
                                 <v-icon class="px-2 icon-color">fas fa-exclamation-triangle</v-icon>
                                 <h3 class="h3-color">Warning</h3>
                             </v-row>
-                            <p class="Montserrat-font-family">
+                            <p style="font-family: roboto;">
                                 Uploading new committed projects will override ALL previous commitments.
                                 Committed projects may take a few minutes to process.
                             </p>
                         </span>
                     </v-row>
                     <v-row justify="center" style="margin: 5px;">
-                        <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue Montserrat-font-family' variant = "flat">Cancel</v-btn>
-                        <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>
+                        <v-btn @click='onSubmit(false)' style="font-family: roboto;" class='ghd-white-bg ghd-blue' variant = "flat">Cancel</v-btn>
+                        <v-btn @click='onSubmit(true)' style="font-family: roboto;" class='ghd-white-bg ghd-blue ghd-button' variant = "outlined">Upload</v-btn>
                     </v-row>
             </v-row>
         </v-card>

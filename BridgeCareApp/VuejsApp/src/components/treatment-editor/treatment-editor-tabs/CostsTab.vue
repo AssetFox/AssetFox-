@@ -1,7 +1,11 @@
 <template>
     <v-row>
         <v-col cols="12">              
-            <div >                
+            <div >    
+                <v-btn @click="onAddCost" class="ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border ghd-text-padding" id="TreatmentCostsTab-AddCostBtn" >Add Cost</v-btn>            
+                <v-chip class="ma-2 ara-blue" @click="showExampleFunction">
+                    Equation - Use Max(,) to enforce minimum costs
+                </v-chip>  
                 <v-data-table
                     hide-default-header id="CostsTab-vdatatable"
                     :headers="costsGridHeaders"
@@ -87,11 +91,7 @@
                         </tr>
                     </template>
                 </v-data-table>
-            </div>
-            <v-btn flat @click="onAddCost" class="ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border" id="TreatmentCostsTab-AddCostBtn" >Add Cost</v-btn>
-            <v-chip class="ma-2 ara-blue" @click="showExampleFunction">
-                Equation - Use Max(,) to enforce minimum costs
-            </v-chip>            
+            </div>                  
         </v-col>
 
         <EquationEditorDialog

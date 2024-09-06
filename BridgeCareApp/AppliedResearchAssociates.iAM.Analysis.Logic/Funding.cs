@@ -1,6 +1,4 @@
-﻿using Google.OrTools.LinearSolver;
-
-namespace AppliedResearchAssociates.iAM.Analysis.Logic;
+﻿namespace AppliedResearchAssociates.iAM.Analysis.Logic;
 
 public static partial class Funding
 {

@@ -111,10 +111,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
          List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
          bool shouldBundleFeasibleTreatments)
         {
-
-            // TODO For BUG 25751: extend this obj to consider list of (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)
-            // Good idea to create obj with these props and then add list to replace current behaviour to handle multiple recrods for distinct projectSource.
-
             var isInitialYear = true;
             Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
             foreach (var yearData in reportOutputData.Years)
@@ -182,12 +178,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         }
                         else
                         {
-                            // TODO bridgeCount will be count of List<CommittedProjectMetaData>()
                             yearlyCostCommittedProj[yearData.Year][appliedTreatment].Add(new()
                             {
                                 TreatmentCost = committedCost,
                                 ProjectSource = projectSource,
-                                TreatmentCategory = treatmentCategory // TODO Should this be committed proj's category?
+                                TreatmentCategory = treatmentCategory // TODO Should this be committed proj's category in future?
                             });
                         }
                  
@@ -205,7 +200,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                         // Remove from committedProjectsForWorkOutsideScope
                         // Bundled treatments have many treatment names under AppliedTreatment
-                        var toRemove = committedProjectsForWorkOutsideScope.Where(_ => appliedTreatment.Contains(_.Treatment) && _.Year == yearData.Year); 
+                        var toRemove = committedProjectsForWorkOutsideScope.Where(_ => appliedTreatment.Contains(_.Treatment) && _.Year == yearData.Year && _.ProjectSource.ToString() == section.ProjectSource);
                         if (toRemove != null)
                         {
                             committedProjectsForWorkOutsideScope.RemoveAll(_ => toRemove.Contains(_));

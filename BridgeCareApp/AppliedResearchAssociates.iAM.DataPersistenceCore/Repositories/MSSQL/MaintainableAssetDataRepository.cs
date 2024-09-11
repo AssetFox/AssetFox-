@@ -204,7 +204,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         // Ensure the network's key datum field is in the list of key properties
                         foreach (var rawKeyDatumField in rawKeyDatumFieldsNetwork)
                         {
-                            if (!rawKeyDatumFields.Contains(rawKeyDatumField))
+                            if (!rawKeyDatumFields.Contains(rawKeyDatumField) && !KeyProperties.Keys.Any(_ => _.Equals(rawKeyDatumField.Name)))
                             {
                                 rawKeyDatumFields.Add(rawKeyDatumField);
                             }
@@ -243,7 +243,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 var datumValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
                                 rawKeyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, datumValue) });
                             }
+                            if (!KeyProperties.ContainsKey(attribute.Name))
+                            {
                                 KeyProperties.Add(attribute.Name, rawKeyFieldValue);
+                            }
                         }
                     }
                 }

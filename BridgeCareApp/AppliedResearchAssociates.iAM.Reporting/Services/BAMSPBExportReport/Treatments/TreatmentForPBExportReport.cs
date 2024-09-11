@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void Fill(ExcelWorksheet worksheet, Simulation simulationObject, SimulationOutput reportOutputData)
+        public void Fill(ExcelWorksheet worksheet, Simulation simulationObject, SimulationOutput reportOutputData, bool shouldBundleFeasibleTreatments)
         {
             //set default width
             worksheet.DefaultColWidth = 13;
@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
             ExcelHelper.ApplyColor(worksheet.Cells[headerRow, 1, headerRow, worksheet.Dimension.Columns], headerBGColor);
 
             //add data to cells
-            FillDynamicDataForHeaders(worksheet, simulationObject, reportOutputData, currentCell);
+            FillDynamicDataForHeaders(worksheet, simulationObject, reportOutputData, currentCell, shouldBundleFeasibleTreatments);
 
             //autofit columns
             worksheet.Cells.AutoFitColumns();
@@ -118,7 +118,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
             return currentCell;
         }
 
-        private void FillDynamicDataForHeaders(ExcelWorksheet worksheet, Simulation simulationObject, SimulationOutput reportOutputData, CurrentCell currentCell)
+        private void FillDynamicDataForHeaders(ExcelWorksheet worksheet, Simulation simulationObject, SimulationOutput reportOutputData, CurrentCell currentCell, bool shouldBundleFeasibleTreatments)
         {
             var rowNo = currentCell.Row;
             var columnNo = currentCell.Column;
@@ -146,20 +146,28 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSPBExportReport.Tr
                             if (!string.IsNullOrEmpty(bmsID) && !string.IsNullOrWhiteSpace(bmsID)) { bmsID = bmsID.PadLeft(14, '0'); } // chaeck and add padding to BMSID
 
                             // Build keyCashFlowFundingDetails                    
-                            if (assetDetailObject.TreatmentStatus != TreatmentStatus.Applied)
-                            {
-                                var fundingSection = yearObject.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == brKey && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment && _.AppliedTreatment == assetDetailObject.AppliedTreatment);
-                                if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(brKey))
-                                {
-                                    keyCashFlowFundingDetails.Add(brKey, fundingSection?.TreatmentConsiderations ?? new());
-                                }
-                            }
+                            _reportHelper.BuildKeyCashFlowFundingDetails(yearObject, assetDetailObject, brKey, keyCashFlowFundingDetails);
 
                             //get budget usages
-                            // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                            var treatmentConsiderations = assetDetailObject.TreatmentStatus == TreatmentStatus.Applied && assetDetailObject.TreatmentCause != TreatmentCause.CashFlowProject ? assetDetailObject.TreatmentConsiderations : keyCashFlowFundingDetails[brKey];
-                            var appliedTreatmentConsideration = treatmentConsiderations.FirstOrDefault();// _ => _.TreatmentName == assetDetailObject.AppliedTreatment);
-                            var cost = appliedTreatmentConsideration == null ? 0 : Math.Round(appliedTreatmentConsideration.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearObject.Year)?.Sum(b => b.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis
+                            // If CF then use obj from keyCashFlowFundingDetails otherwise from assetDetailObject
+                            var treatmentConsiderations = ((assetDetailObject.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                          assetDetailObject.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                          (assetDetailObject.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                          assetDetailObject.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                          (assetDetailObject.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                          assetDetailObject.TreatmentStatus == TreatmentStatus.Applied)) ?
+                                                          keyCashFlowFundingDetails[brKey] :
+                                                          assetDetailObject.TreatmentConsiderations ?? new();
+
+                            var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                         treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                            _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearObject.Year) &&
+                                                            assetDetailObject.AppliedTreatment.Contains(_.TreatmentName)) :
+                                                         treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                            _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearObject.Year) &&
+                                                            _.TreatmentName == assetDetailObject.AppliedTreatment);
+
+                            var cost = treatmentConsideration == null ? 0 : Math.Round(treatmentConsideration.FundingCalculationOutput?.AllocationMatrix.Where(_ => _.Year == yearObject.Year)?.Sum(b => b.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis
                             var appliedTreatment = assetDetailObject.AppliedTreatment ?? "";
 
                             SelectableTreatment treatment = null;

@@ -45,7 +45,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             foreach (var item in selectableTreatments)
             {
-                simulationTreatments.Add((item.Name, (string)item.AssetCategory, item.Category));
+                var category = SummaryReportHelper.GetCategory(item.Category);
+                simulationTreatments.Add((item.Name, item.AssetCategory, category));
             }
 
             simulationTreatments.Sort((a, b) => a.Name.CompareTo(b.Name));
@@ -67,6 +68,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             worksheet.Cells.AutoFitColumns();
 
             return chartRowsModel;
-        }
+        }        
     }
 }

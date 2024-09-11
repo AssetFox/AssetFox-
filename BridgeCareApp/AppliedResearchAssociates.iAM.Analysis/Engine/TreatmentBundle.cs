@@ -10,6 +10,8 @@ internal class TreatmentBundle : Treatment
 
     public TreatmentBundle(IEnumerable<Treatment> bundledTreatments)
     {
+        Category = DTOs.Enums.TreatmentCategory.Bundled;
+
         BundledTreatments = bundledTreatments?.OrderBy(t => t.Name).ToList()
             ?? throw new ArgumentNullException(nameof(bundledTreatments));
 
@@ -17,8 +19,13 @@ internal class TreatmentBundle : Treatment
         // properties afterward. This is a safe assumption, because this type is only used inside
         // the analysis engine.
 
-        var joinedNames = string.Join('|', BundledTreatments.Select(t => t.Name));
-        Name = $"Bundle[{joinedNames}]";
+        var joinedNamesPerCategory = BundledTreatments.GroupBy(t => t.Category).OrderBy(g => g.Key.ToString()).Select(g =>
+        {
+            var joinedNames = string.Join('|', g.OrderBy(t => t.Name).Select(t => t.Name));
+            return $"[{joinedNames}]";
+        });
+
+        Name = $"Bundle{string.Concat(joinedNamesPerCategory)}";
 
         PerformanceCurveAdjustmentFactors = BundledTreatments
             .SelectMany(t => t.PerformanceCurveAdjustmentFactors)
@@ -63,13 +70,13 @@ internal class TreatmentBundle : Treatment
             {
                 if (g.Key is NumberAttribute target)
                 {
-                    scope.SimulationRunner.Send(new()
+                    /*scope.SimulationRunner.Send(new()
                     {
                         Message = $"Multiple treatments in a bundle are applying consequences to a single number attribute ({g.Key.Name}).",
                         SimulationId = scope.SimulationRunner.Simulation.Id,
                         Status = DTOs.Enums.SimulationLogStatus.Warning,
                         Subject = DTOs.Enums.SimulationLogSubject.Calculation,
-                    });
+                    });*/
 
                     var bestApplicator = target.IsDecreasingWithDeterioration
                         ? applicators.MaxBy(a => a.NewValue)
@@ -79,13 +86,13 @@ internal class TreatmentBundle : Treatment
                 }
                 else
                 {
-                    scope.SimulationRunner.Send(new()
+                    /*scope.SimulationRunner.Send(new()
                     {
                         Message = $"Multiple treatments in a bundle are applying consequences to a single non-number attribute ({g.Key.Name}).",
                         SimulationId = scope.SimulationRunner.Simulation.Id,
                         Status = DTOs.Enums.SimulationLogStatus.Fatal,
                         Subject = DTOs.Enums.SimulationLogSubject.Calculation,
-                    });
+                    });*/
                 }
             }
         }

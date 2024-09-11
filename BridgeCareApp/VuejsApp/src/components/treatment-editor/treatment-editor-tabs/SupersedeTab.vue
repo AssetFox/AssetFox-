@@ -2,6 +2,7 @@
     <v-row>
         <v-col cols="12">            
             <div style="margin-bottom: 10px;">
+                <v-btn id="TreatmentSupersedeRulesTab-AddSupersedeRuleBtn" @click='onAddSupersedeRule' class='ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border ghd-text-padding'>Add Supersede</v-btn>
                 <v-data-table :headers='supersedeRulesGridHeaders' :items='supersedeRulesGridData'
                               id="SupersedeRulesTab-vDataTable"
                               class='elevation-1 fixed-header v-table__overflow'
@@ -70,8 +71,7 @@
                         </tr>
                     </template>
                 </v-data-table>
-            </div>
-            <v-btn id="TreatmentSupersedeRulesTab-AddSupersedeRuleBtn" @click='onAddSupersedeRule' class='ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border ghd-text-padding'>Add Supersede</v-btn>
+            </div>            
         </v-col>
 
         <GeneralCriterionEditorDialog :dialogData='supersedeCriterionEditorDialogData'

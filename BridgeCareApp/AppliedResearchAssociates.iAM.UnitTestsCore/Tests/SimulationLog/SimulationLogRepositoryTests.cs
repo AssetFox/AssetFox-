@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DTOs.Static;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
@@ -22,17 +20,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
             SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
-            var log = SimulationLogDtos.Dto(simulationId);
+            var logs = new List<SimulationLogDTO> { SimulationLogDtos.Dto(simulationId) };
             var before = DateTime.Now;
 
-            TestHelper.UnitOfWork.SimulationLogRepo.CreateLog(log);
+            TestHelper.UnitOfWork.SimulationLogRepo.CreateLog(logs);
 
             var after = DateTime.Now;
             var logsAfter = await TestHelper.UnitOfWork.SimulationLogRepo.GetLog(simulationId);
-            var logAfter = logsAfter.Single();
-            ObjectAssertions.EquivalentExcluding(log, logAfter, l => l.TimeStamp, l => l.Id);
-            Assert.NotEqual(log.Id, logAfter.Id);
-            DateTimeAssertions.Between(before, after, logAfter.TimeStamp, TimeSpan.FromSeconds(1));
+            for (int index = 0;index<logs.Count;index++)
+            {
+                ObjectAssertions.EquivalentExcluding(logs[index], logsAfter[index], l => l.TimeStamp, l => l.Id);
+                Assert.NotEqual(logs[index].Id, logsAfter[index].Id);
+                DateTimeAssertions.Between(before, after, logsAfter[index].TimeStamp, TimeSpan.FromSeconds(1));
+            }            
         }
 
         [Fact]
@@ -42,8 +42,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var simulationId = Guid.NewGuid();
             SimulationTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, simulationId);
-            var log = SimulationLogDtos.Dto(simulationId);
-            TestHelper.UnitOfWork.SimulationLogRepo.CreateLog(log);
+            var logs = new List<SimulationLogDTO> { SimulationLogDtos.Dto(simulationId) };
+            TestHelper.UnitOfWork.SimulationLogRepo.CreateLog(logs);
             var logsBefore = await TestHelper.UnitOfWork.SimulationLogRepo.GetLog(simulationId);
             Assert.Single(logsBefore);
 

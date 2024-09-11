@@ -23,6 +23,7 @@ export default {
                     transport: HttpTransportType.LongPolling,
                 },
             )
+            .withAutomaticReconnect()
             .configureLogging(LogLevel.Information)
             .build();
 

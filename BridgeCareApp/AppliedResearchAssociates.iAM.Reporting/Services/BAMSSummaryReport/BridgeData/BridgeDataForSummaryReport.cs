@@ -351,7 +351,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var row = initialRow; // Data starts here
             var startingRow = row;
             var column = currentCell.Column;
-            var abbreviatedTreatmentNames = ShortNamesForTreatments.GetShortNamesForTreatments();
 
             // making dictionary to remove if else, which was used to enter value for MinC
             _valueForMinC = new Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>>();
@@ -446,60 +445,38 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                     // Work done in a year
                     // Build keyCashFlowFundingDetails                    
-                    if (section.TreatmentStatus != TreatmentStatus.Applied)
-                    {
-                        var fundingSection = yearlySectionData.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment && _.AppliedTreatment == section.AppliedTreatment);
-                        if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(section_BRKEY))
-                        {
-                            keyCashFlowFundingDetails.Add(section_BRKEY, fundingSection?.TreatmentConsiderations ?? new());
-                        }
-                    }
+                    _reportHelper.BuildKeyCashFlowFundingDetails(yearlySectionData, section, section_BRKEY, keyCashFlowFundingDetails);
 
-                    // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
-                                                  section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                                  section.TreatmentConsiderations :
-                                                  keyCashFlowFundingDetails[section_BRKEY] ?? new();
+                    // If CF then use obj from keyCashFlowFundingDetails otherwise from section
+                    var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                  section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                  (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                  section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                  (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                  section.TreatmentStatus == TreatmentStatus.Applied)) ?
+                                                  keyCashFlowFundingDetails[section_BRKEY] :
+                                                  section.TreatmentConsiderations ?? new();
+                    
                     var treatmentConsideration = shouldBundleFeasibleTreatments ?
-                            treatmentConsiderations.FirstOrDefault() :
-                            treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                    _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
+                                                    section.AppliedTreatment.Contains(_.TreatmentName)) :
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                    _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
+                                                    _.TreatmentName == section.AppliedTreatment);
+
                     var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
-                    var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
-                    var cost = Math.Round(allocationMatrix?.Where(_ => _.Year == yearlySectionData.Year).Sum(_ => _.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis                    
-                    var workCell = worksheet.Cells[row, column];
-                    if (abbreviatedTreatmentNames.ContainsKey(appliedTreatment))
-                    {
-                        workCell.Value = abbreviatedTreatmentNames[appliedTreatment];
-                        worksheet.Cells[row, column + 1].Value = cost;
-
-                        if (!isInitialYear && section.TreatmentCause == TreatmentCause.CashFlowProject)
-                        {
-                            if (prevYearSection == null)
-                            {
-                                prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
-                                    .Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY);
-                            }
-                            if (prevYearSection.AppliedTreatment == appliedTreatment)
-                            {
-                                workCell.Value = "--";
-                                worksheet.Cells[row, column + 1].Value = cost;
-                            }
-                        }
-                        worksheet.Cells[row, column + 1].Value = cost;
-                        ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1], ExcelFormatStrings.CurrencyWithoutCents);
-
-                    }
-                    else
-                    {
-                        workCell.Value = appliedTreatment.ToLower() == BAMSConstants.NoTreatment ? "--" : appliedTreatment.ToLower();
-
-                        worksheet.Cells[row, column + 1].Value = cost;
-                        ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1], ExcelFormatStrings.CurrencyWithoutCents);
-                    }
+                    var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();                    
+                    var cost = Math.Round(allocationMatrix?.Where(_ => _.Year == yearlySectionData.Year).Sum(_ => _.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis
+                    var workCell = worksheet.Cells[row, column];                    
+                    workCell.Value = appliedTreatment.ToLower() == BAMSConstants.NoTreatment ? "--" : appliedTreatment.ToLower();
                     if (!workCell.Value.Equals("--"))
                     {
                         workDoneData[i]++;
                     }
+                    worksheet.Cells[row, column + 1].Value = cost;
+                    ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1], ExcelFormatStrings.CurrencyWithoutCents);                                        
+                    
 
                     worksheet.Cells[row, poorOnOffColumnStart].Value = prevYrMinc < 5 ? (thisYrMinc >= 5 ? "Off" : "--") :
                         (thisYrMinc < 5 ? "On" : "--");
@@ -642,14 +619,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         worksheet.Cells[row, ++column].Value = projectId;
                     }
 
-                    // If TreatmentStatus Applied it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                    var treatmentConsiderations = section.TreatmentStatus == TreatmentStatus.Applied &&
-                                                  section.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                                  section.TreatmentConsiderations :
-                                                  keyCashFlowFundingDetails[section_BRKEY] ?? new();
+                    // If CF then use obj from keyCashFlowFundingDetails otherwise from section
+                    var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                  section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                  (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                  section.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                  (section.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                  section.TreatmentStatus == TreatmentStatus.Applied)) ?
+                                                  keyCashFlowFundingDetails[section_BRKEY] :
+                                                  section.TreatmentConsiderations ?? new();
+
                     var treatmentConsideration = shouldBundleFeasibleTreatments ?
-                            treatmentConsiderations.FirstOrDefault() :
-                            treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == section.AppliedTreatment);
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                    _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
+                                                    section.AppliedTreatment.Contains(_.TreatmentName)) :
+                                                 treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                    _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearlySectionData.Year) &&
+                                                    _.TreatmentName == section.AppliedTreatment);
+
                     var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();                    
                     var cost = Math.Round(allocationMatrix?.Where(_ => _.Year == yearlySectionData.Year).Sum(_ => _.AllocatedAmount) ?? 0, 0); // Rounded cost to whole number based on comments from Jeff Davis
                     var recommendedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment; // Recommended Treatment

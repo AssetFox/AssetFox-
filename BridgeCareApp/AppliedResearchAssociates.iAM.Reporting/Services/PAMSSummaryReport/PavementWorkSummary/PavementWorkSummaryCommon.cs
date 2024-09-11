@@ -58,7 +58,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             else
             {   
                 var treatment = simulationTreatments.FirstOrDefault(_ => _.Name.Equals(treatmentName));
-                var assetType = treatment.AssetType;
+                var assetType = treatment.AssetType ?? string.Empty;
                 groupCategory = assetType.ToLower().Equals(PAMSConstants.Asphalt) ?
                                     TreatmentGroupCategory.Bituminous :
                                     (assetType.ToLower().Equals(PAMSConstants.Concrete) ?
@@ -234,12 +234,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
         public List<(string Name, string AssetType, TreatmentCategory Category)> GetAsphaltTreatments(List<(string Name, string AssetType, TreatmentCategory Category)> allTreatments)
         {
-            return allTreatments.Where(treatment => treatment.AssetType.ToString().ToLower() == PAMSConstants.Asphalt).ToList();
+            return allTreatments.Where(treatment => treatment.AssetType?.ToString().ToLower() == PAMSConstants.Asphalt).ToList();
         }
 
         public List<(string Name, string AssetType, TreatmentCategory Category)> GetConcreteTreatments(List<(string Name, string AssetType, TreatmentCategory Category)> allTreatments)
         {
-            return allTreatments.Where(treatment => treatment.AssetType.ToString().ToLower() == PAMSConstants.Concrete).ToList();
+            return allTreatments.Where(treatment => treatment.AssetType?.ToString().ToLower() == PAMSConstants.Concrete).ToList();
         }
 
         public List<(string Name, string AssetType, TreatmentCategory Category)> GetNoTreatments(List<(string Name, string AssetType, TreatmentCategory Category)> allTreatments)

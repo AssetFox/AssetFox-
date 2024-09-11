@@ -1,4 +1,5 @@
 ﻿using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 {
@@ -77,5 +78,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
                 functionalClass is "NN";
         }
 
+        public static TreatmentCategory GetCategory(TreatmentCategory treatmentCategory) => treatmentCategory == TreatmentCategory.Reconstruction ?
+                                                                                             TreatmentCategory.Replacement :
+                                                                                             treatmentCategory;       
     }
 }

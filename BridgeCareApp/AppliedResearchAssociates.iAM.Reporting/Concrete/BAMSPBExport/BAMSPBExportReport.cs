@@ -188,7 +188,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var treatmentsWorksheet = excelPackage.Workbook.Worksheets.Add(PBExportReportTabNames.Treatments);
-            _treatmentForPBExportReportReport.Fill(treatmentsWorksheet, simulationObject, reportOutputData);
+            _treatmentForPBExportReportReport.Fill(treatmentsWorksheet, simulationObject, reportOutputData, simulationObject.ShouldBundleFeasibleTreatments);
 
             if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
             {

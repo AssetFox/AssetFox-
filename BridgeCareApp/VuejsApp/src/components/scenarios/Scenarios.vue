@@ -77,17 +77,18 @@
                                             </v-col>
                                             
                                             <v-spacer></v-spacer>
-                                            <v-col>
+                                            <v-col class="d-flex justify-end" style="padding-right: 100px;">
                                                 <v-btn
-                                           id="Scenarios-createScenario-btn"
-                                            @click="
-                                                showCreateScenarioDialog = true
-                                            "
-                                            class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
-                                            variant="outlined"
-                                        >
-                                            Create new scenario
-                                        </v-btn>
+                                                    id="Scenarios-createScenario-btn"
+                                                    @click="
+                                                        showCreateScenarioDialog = true
+                                                    "
+                                                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                                                    variant="outlined"
+                                                    style="justify-content: end;"
+                                                >
+                                                    Create new scenario
+                                                </v-btn>
                                             </v-col>
                                             
                                         </v-row>
@@ -123,21 +124,15 @@
                                                 size="large"
                                                 lazy
                                                 persistent
-                                                v-model:return-value="
-                                                    nameUpdate
-                                                "
-                                                :initial-name="props.item.name"
+                                                v-model:return-value="nameUpdate"
+                                                :initial-name="nameUpdate"
                                                 @save="
                                                     onEditScenarioName(
                                                         props.item,
                                                         nameUpdate,
                                                     )
                                                 "
-                                                @open="
-                                                    prepareForNameEdit(
-                                                        props.item.name,
-                                                    )
-                                                "
+                                                @open="prepareForNameEdit( props.item.name,)"
                                             >
                                                 {{ props.item.name }}
                                                 <template v-slot:input>
@@ -328,13 +323,12 @@
                                     <template slot="items" slot-scope="props" v-slot:item="props">
                                     <tr>
                                         <td>
-                                            <editDialog
+                                            <editScenarioNameDialog
                                                 size="large"
                                                 lazy
                                                 persistent
-                                                v-model:return-value="
-                                                    props.item.name
-                                                "
+                                                v-model:return-value="nameUpdate"
+                                                :initial-name="props.item.name"
                                                 @save="
                                                     onEditScenarioName(
                                                         props.item,
@@ -357,10 +351,13 @@
                                                             rules[
                                                                 'generalRules'
                                                             ].valueIsNotEmpty,
+                                                            rules[
+                                                                'generalRules'
+                                                            ].valueContainsNoSpecialCharacters,
                                                         ]"
                                                     />
                                                 </template>
-                                            </editDialog>
+                                            </editScenarioNameDialog>
                                         </td>
                                         <td>
                                             {{
@@ -803,6 +800,7 @@ import ReportsService from '@/services/reports.service';
     async function createScenarioAction(payload?: any): Promise<any>{await store.dispatch('createScenario', payload)}
     async function cloneScenarioAction(payload?: any): Promise<any>{await store.dispatch('cloneScenario', payload)}
     async function cloneScenarioWithDestinationNetworkAction(payload?:any): Promise<any>{await store.dispatch('cloneScenarioWithDestinationNetwork',payload)}
+    async function getScenarioSelectableTreatmentsAction(payload?: any): Promise<any> {return await store.dispatch('getScenarioSelectableTreatments', payload)}
 
     async function updateScenarioAction(payload?: any): Promise<any>{await store.dispatch('updateScenario', payload)}
     async function deleteScenarioAction(payload?: any): Promise<any>{await store.dispatch('deleteScenario', payload)}
@@ -1035,6 +1033,7 @@ import ReportsService from '@/services/reports.service';
     let totalUserScenarios: ShallowRef<number> = shallowRef(0);
 
     let preCheckMessages: any;
+    let emptyTreatmentBudgets: any;
     let preCheckHeading: string;
     let preCheckStatus: any;
 
@@ -1418,11 +1417,17 @@ import ReportsService from '@/services/reports.service';
                 isCustomIcon: true
             },
             {
-                title: 'Convert Output from Json to Relational',
-                action: availableActions.convert,
-                icon: "fas fa-exchange-alt",
-                isCustomIcon: false
+                title: 'Run Analysis',
+                action: availableActions.runAnalysis,
+                icon: getUrl("assets/icons/monitor.svg"),
+                isCustomIcon: true
             },
+            {
+                title: 'Reports',
+                action: availableActions.reports,
+                icon: getUrl("assets/icons/clipboard.svg"),
+                isCustomIcon: true
+            }, 
             {
                 title: 'Clone',
                 action: availableActions.clone,
@@ -1660,6 +1665,15 @@ import ReportsService from '@/services/reports.service';
                     });
 
                 }
+                
+                // Check which treatments have no budgets and add them to the warning list
+                emptyTreatmentBudgets = await getScenarioSelectableTreatmentsAction({ scenarioId: selectedScenario.id });
+                emptyTreatmentBudgets.forEach((treatment: { budgets: string | any[]; name: any; }) => {
+                    if (!treatment.budgets || treatment.budgets.length === 0) {
+                        preCheckMessages += `Treatment ${treatment.name} has no budgets.`
+                    }
+                });
+
                 secondRunAnalysisModal();
         }
         else if(submit == "continue") {
@@ -1900,10 +1914,12 @@ import ReportsService from '@/services/reports.service';
                 scenarioId: selectedScenario.id,
             }).then(() => {
                 selectedScenario = clone(emptyScenario)               
-                if(tab.value == '0')
+                if(tab.value == tabItems[0].name) {
                     onUserScenariosPagination();
-                else
+                }
+                else {
                     onSharedScenariosPagination();
+                }
             });
         }
     }

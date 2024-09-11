@@ -417,7 +417,19 @@
                 Save
             </v-btn>
         </v-row>
-
+        <v-dialog v-model="showSuccessPopup" max-width="400px">
+            <v-card>
+                <v-card-text class="text-center">
+                    Successfully uploaded performance curves.
+                </v-card-text>
+                <v-card-actions>
+                    <v-row justify="center" class="w-100">
+                        <v-btn color="primary" variant="text" 
+                        class="ghd-white-bg ghd-blue ghd-button-text" @click="showSuccessPopup = false">OK</v-btn>
+                    </v-row>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
         <Alert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
@@ -592,6 +604,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let hasScenario = ref(false);
     let librarySelectItems  = ref<SelectItem[]>([]);
     let modifiedDate = ref<string>(''); 
+    let showSuccessPopup = ref(false);
     
     let performanceCurveGridHeaders: any[] = [
         {
@@ -1373,12 +1386,13 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         var importComp = data.importComp as importCompletion
         if( importComp.workType === WorkType.ImportScenarioPerformanceCurve && importComp.id === selectedScenarioId ||
             hasSelectedLibrary.value && importComp.workType === WorkType.ImportLibraryPerformanceCurve && importComp.id === selectedPerformanceCurveLibrary.value.id){
-            clearChanges()
+            clearChanges();
             performancePagination.value.page = 1
             onPaginationChanged().then(() => {
                 setAlertMessageAction('');
             })
-        }        
+        }    
+        showSuccessPopup.value = true;    
     }
 
     async function initializePages(){

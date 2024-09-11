@@ -38,11 +38,12 @@ public sealed class CommittedProject : Treatment
 
     public SelectableTreatment TemplateTreatment { get; set; }
 
-    /// <remarks>
-    ///     This property isn't used by the analysis engine. It probably shouldn't exist among the
-    ///     types in this module.
-    /// </remarks>
-    public TreatmentCategory treatmentCategory { get; set; }
+    [Obsolete($"Redundant with base type's \"{nameof(Category)}\" property.")]
+    public TreatmentCategory treatmentCategory
+    {
+        get => Category;
+        set => Category = value;
+    }
 
     public int Year { get; }
 

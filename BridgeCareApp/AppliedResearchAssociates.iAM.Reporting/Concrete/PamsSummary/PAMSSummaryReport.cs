@@ -191,6 +191,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 {
                     SimulationId = simulationId,
                     Status = message,
+                    ReportType = ReportTypeName
                 };
                 UpdateSimulationAnalysisDetail(dto);
             });
@@ -386,7 +387,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportDetailDto = new SimulationReportDetailDTO
             {
                 SimulationId = simulationId,
-                Status = $""
+                Status = $"",
+                ReportType = ReportTypeName
             };
             UpsertSimulationReportDetail(reportDetailDto);
         }

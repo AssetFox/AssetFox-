@@ -425,11 +425,11 @@
                                                         :key="i"
                                                         @click="OnActionTaken(item.action,props.item.users,props.item,false)"
                                                         class="menu-style">
-                                                        <v-list-item-title icon>                                                        
-                                                            <img v-if="item.isCustomIcon" style="padding-right:5px" v-bind:src="item.icon"/>
-                                                            <v-icon v-else class="action-icon-padding">{{ item.icon}}</v-icon>  
-                                                            {{item.title}}
-                                                        </v-list-item-title>
+                                                            <v-list-item-title icon>                                                        
+                                                                <img v-if="item.isCustomIcon" style="padding-right:5px" v-bind:src="item.icon"/>
+                                                                <v-icon v-else class="action-icon-padding">{{ item.icon}}</v-icon>  
+                                                                {{item.title}}
+                                                            </v-list-item-title>
                                                     </v-list-item>
                                                 </v-list>
                                             </v-menu>
@@ -651,6 +651,11 @@
         <Alert
             :dialogData="confirmCancelAlertData"
             @submit="onConfirmCancelAlertSubmit"
+        />
+
+        <Alert
+            :dialogData="confirmDeleteReportsData"
+            @submit="onDeleteAllGeneratedReports"
         />
         
         <CreateScenarioDialog
@@ -1022,7 +1027,7 @@ import ReportsService from '@/services/reports.service';
     let nameUpdate = ref('');
 
     let scenarios: Scenario[] = [];
-
+    let scenarioForReportDeletion = ref<Scenario | null>(null);
     let userScenarios: Scenario[] = [];
     let currentUserScenariosPage = ref<Scenario[]>([])
     const userScenariosPagination: Pagination = shallowReactive(clone(emptyPagination));
@@ -1060,6 +1065,7 @@ import ReportsService from '@/services/reports.service';
     let cloneScenarioDialogData = ref(clone(emptyCloneScenarioDialogData));
     let confirmDeleteAlertData = ref(clone(emptyAlertData));
     let confirmCancelAlertData = ref(clone(emptyAlertData));
+    let confirmDeleteReportsData = ref(clone(emptyAlertData));
     let showCreateScenarioDialog = ref(false);
     let selectedScenario: Scenario = clone(emptyScenario);
     let runAnalysisScenario: Scenario = clone(emptyScenario);
@@ -1393,12 +1399,12 @@ import ReportsService from '@/services/reports.service';
                 icon: getUrl("assets/icons/clipboard.svg"),
                 isCustomIcon: true
             },
-            {
+            ...(hasAdminAccess ? [{
                 title: 'Delete all generated Reports',
                 action: availableActions.deleteReports,
                 icon: getUrl("assets/icons/clipboard.svg"),
                 isCustomIcon: true
-            },
+            }] : []),
             {
                 title: 'Settings',
                 action: availableActions.settings,
@@ -1799,22 +1805,49 @@ import ReportsService from '@/services/reports.service';
         });
     }
 
-    async function onDeleteAllGeneratedReports(localScenario: Scenario) {
-        await ReportsService.deleteAllGeneratedReports(
-            localScenario.id,
-        ).then((response: AxiosResponse<any>) => {
-            if (hasValue(response, 'data')) {
-                addSuccessNotificationAction({
-                        message: ' All reports for ' + localScenario.name + ' have been deleted.',
-                    });
-            } else {
-                addErrorNotificationAction({
-                    message: 'Failed to delete report.',
-                    longMessage:
-                        'Failed to download the report or output. Make sure the scenario has been run',
+    function onDeleteReportsDialog(localScenario: Scenario)
+    {
+        confirmDeleteReportsData.value = {
+            showDialog: true,
+            heading: 'Warning',
+            choice: true,
+            message: 'Are you sure you want to delete all generated reports for ' + localScenario.name + '?',
+        };
+        scenarioForReportDeletion.value = localScenario;
+    }
+    
+    async function onDeleteAllGeneratedReports(submit: boolean) {
+        confirmDeleteReportsData.value = clone(emptyAlertData);
+
+        if(submit === true)
+        {
+            if(scenarioForReportDeletion.value)
+            {
+                await ReportsService.deleteAllGeneratedReports(
+                    scenarioForReportDeletion.value.id,
+                ).then((response: AxiosResponse<any>) => {
+                    if (hasValue(response, 'data')) {
+                        if(scenarioForReportDeletion.value)
+                        {
+                            if(!response.data.includes("No reports exist"))
+                            {
+                                addSuccessNotificationAction({
+                                    message: ' All reports for ' + scenarioForReportDeletion.value.name + ' have been deleted.',
+                                });
+                            }
+                        }
+                    } 
+                    else 
+                    {
+                        addErrorNotificationAction({
+                            message: 'Failed to delete report.',
+                            longMessage:
+                                'Failed to download the report or output. Make sure the scenario has been run',
+                        });
+                    }
                 });
             }
-        });
+        }
     }
 
     function onShowShareScenarioDialog(scenario: Scenario) {
@@ -2186,7 +2219,7 @@ import ReportsService from '@/services/reports.service';
                 onNavigateToReportsView(scenario);
                 break;
             case availableActions.deleteReports:
-            onDeleteAllGeneratedReports(scenario);
+            onDeleteReportsDialog(scenario);
                 break;
             case availableActions.settings:
                 if (canModifySharedScenario(scenarioUsers) || isOwner) {

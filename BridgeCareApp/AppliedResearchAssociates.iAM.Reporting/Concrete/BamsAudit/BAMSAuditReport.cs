@@ -120,7 +120,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportPath = string.Empty;
             try
             {
-                reportPath = GenerateBAMSAuditReport(_networkId, _simulationId, workQueueLog, cancellationToken);
+                reportPath = GenerateBAMSAuditReport(_networkId, _simulationId, ReportTypeName, workQueueLog, cancellationToken);
             }
             catch (Exception e)
             {
@@ -144,7 +144,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return;
         }
 
-        private string GenerateBAMSAuditReport(Guid networkId, Guid simulationId, IWorkQueueLog workQueueLog, CancellationToken? cancellationToken = null)
+        private string GenerateBAMSAuditReport(Guid networkId, Guid simulationId, string ReportTypeName, IWorkQueueLog workQueueLog, CancellationToken? cancellationToken = null)
         {
             if(cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
             {
@@ -154,7 +154,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportDetailDto = new SimulationReportDetailDTO
             {
                 SimulationId = simulationId,
-                Status = $"Generating..."
+                Status = $"Generating...",
+                ReportType = ReportTypeName
             };
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
@@ -282,7 +283,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportDetailDto = new SimulationReportDetailDTO
             {
                 SimulationId = simulationId,
-                Status = $""
+                Status = $"",
+                ReportType = ReportTypeName
             };
             UpsertSimulationReportDetail(reportDetailDto);
         }

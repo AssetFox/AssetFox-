@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    partial class IAMContextModelSnapshot : ModelSnapshot
+    [Migration("20240905202018_simulationReportDetails_ReportType")]
+    partial class simulationReportDetails_ReportType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("Key")
                         .IsUnique();
 
-                    b.ToTable("AdminSettings", (string)null);
+                    b.ToTable("AdminSettings");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AggregatedResultEntity", b =>
@@ -82,7 +84,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("MaintainableAssetId");
 
-                    b.ToTable("AggregatedResult", (string)null);
+                    b.ToTable("AggregatedResult");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AnalysisMaintainableAssetEntity", b =>
@@ -119,7 +121,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SpatialWeightingId");
 
-                    b.ToTable("AnalysisMaintainableAsset", (string)null);
+                    b.ToTable("AnalysisMaintainableAsset");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AnalysisMethodEntity", b =>
@@ -174,7 +176,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("SimulationId")
                         .IsUnique();
 
-                    b.ToTable("AnalysisMethod", (string)null);
+                    b.ToTable("AnalysisMethod");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AnnouncementEntity", b =>
@@ -205,7 +207,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Announcement", (string)null);
+                    b.ToTable("Announcement");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetDetailEntity", b =>
@@ -241,7 +243,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationYearDetailId");
 
-                    b.ToTable("AssetDetail", (string)null);
+                    b.ToTable("AssetDetail");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetDetailValueEntityIntId", b =>
@@ -277,7 +279,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("AssetDetailValueIntId", (string)null);
+                    b.ToTable("AssetDetailValueIntId");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetSummaryDetailEntity", b =>
@@ -301,7 +303,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationOutputId");
 
-                    b.ToTable("AssetSummaryDetail", (string)null);
+                    b.ToTable("AssetSummaryDetail");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AssetSummaryDetailValueEntityIntId", b =>
@@ -337,7 +339,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("AssetSummaryDetailValueIntId", (string)null);
+                    b.ToTable("AssetSummaryDetailValueIntId");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumEntity", b =>
@@ -383,7 +385,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("MaintainableAssetId");
 
-                    b.ToTable("AttributeDatum", (string)null);
+                    b.ToTable("AttributeDatum");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumLocationEntity", b =>
@@ -429,7 +431,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("AttributeDatumId")
                         .IsUnique();
 
-                    b.ToTable("AttributeDatumLocation", (string)null);
+                    b.ToTable("AttributeDatumLocation");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", b =>
@@ -494,7 +496,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Attribute", (string)null);
+                    b.ToTable("Attribute");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEquationCriterionLibraryEntity", b =>
@@ -566,7 +568,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("AttributeId");
 
-                    b.ToTable("Benefit", (string)null);
+                    b.ToTable("Benefit");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BenefitQuantifierEntity", b =>
@@ -596,7 +598,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("NetworkId");
 
-                    b.ToTable("BenefitQuantifier", (string)null);
+                    b.ToTable("BenefitQuantifier");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetDetailEntity", b =>
@@ -623,7 +625,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationYearDetailId");
 
-                    b.ToTable("BudgetDetail", (string)null);
+                    b.ToTable("BudgetDetail");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPercentagePairEntity", b =>
@@ -660,7 +662,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("ScenarioBudgetPriorityId");
 
-                    b.ToTable("BudgetPercentagePair", (string)null);
+                    b.ToTable("BudgetPercentagePair");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetUsageDetailEntity", b =>
@@ -689,7 +691,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("TreatmentConsiderationDetailId");
 
-                    b.ToTable("BudgetUsageDetail", (string)null);
+                    b.ToTable("BudgetUsageDetail");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowConsiderationDetailEntity", b =>
@@ -714,7 +716,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("TreatmentConsiderationDetailId");
 
-                    b.ToTable("CashFlowConsiderationDetail", (string)null);
+                    b.ToTable("CashFlowConsiderationDetail");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectConsequenceEntity", b =>
@@ -754,7 +756,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("CommittedProjectId");
 
-                    b.ToTable("CommittedProjectConsequence", (string)null);
+                    b.ToTable("CommittedProjectConsequence");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectEntity", b =>
@@ -825,7 +827,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationId");
 
-                    b.ToTable("CommittedProject", (string)null);
+                    b.ToTable("CommittedProject");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectLocationEntity", b =>
@@ -871,7 +873,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("CommittedProjectId")
                         .IsUnique();
 
-                    b.ToTable("CommittedProjectLocation", (string)null);
+                    b.ToTable("CommittedProjectLocation");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectSettingsEntity", b =>
@@ -888,7 +890,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("Key")
                         .IsUnique();
 
-                    b.ToTable("CommittedProjectSettings", (string)null);
+                    b.ToTable("CommittedProjectSettings");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectTreatmentEntity", b =>
@@ -905,7 +907,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("Key")
                         .IsUnique();
 
-                    b.ToTable("CommittedProjectTemplates", (string)null);
+                    b.ToTable("CommittedProjectTemplates");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryAnalysisMethodEntity", b =>
@@ -975,7 +977,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CriterionLibrary", (string)null);
+                    b.ToTable("CriterionLibrary");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryUserEntity", b =>
@@ -1032,7 +1034,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("Id");
 
-                    b.ToTable("DataSource", (string)null);
+                    b.ToTable("DataSource");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalDetailEntity", b =>
@@ -1071,7 +1073,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationYearDetailId");
 
-                    b.ToTable("DeficientConditionGoalDetail", (string)null);
+                    b.ToTable("DeficientConditionGoalDetail");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", b =>
@@ -1098,7 +1100,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Equation", (string)null);
+                    b.ToTable("Equation");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ExcelRawDataEntity", b =>
@@ -1133,7 +1135,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("ExcelRawData", (string)null);
+                    b.ToTable("ExcelRawData");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.InvestmentPlanEntity", b =>
@@ -1178,7 +1180,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("SimulationId")
                         .IsUnique();
 
-                    b.ToTable("InvestmentPlan", (string)null);
+                    b.ToTable("InvestmentPlan");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.BudgetAmountEntity", b =>
@@ -1213,7 +1215,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("BudgetId");
 
-                    b.ToTable("BudgetAmount", (string)null);
+                    b.ToTable("BudgetAmount");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.BudgetEntity", b =>
@@ -1248,7 +1250,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("BudgetLibraryId");
 
-                    b.ToTable("Budget", (string)null);
+                    b.ToTable("Budget");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.BudgetLibraryEntity", b =>
@@ -1281,7 +1283,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BudgetLibrary", (string)null);
+                    b.ToTable("BudgetLibrary");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.BudgetLibraryUserEntity", b =>
@@ -1383,7 +1385,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("BudgetPriorityLibraryId");
 
-                    b.ToTable("BudgetPriority", (string)null);
+                    b.ToTable("BudgetPriority");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority.BudgetPriorityLibraryEntity", b =>
@@ -1415,7 +1417,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BudgetPriorityLibrary", (string)null);
+                    b.ToTable("BudgetPriorityLibrary");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority.BudgetPriorityLibraryUserEntity", b =>
@@ -1513,7 +1515,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("CalculatedAttributeLibraryId");
 
-                    b.ToTable("CalculatedAttribute", (string)null);
+                    b.ToTable("CalculatedAttribute");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute.CalculatedAttributeEquationCriteriaPairEntity", b =>
@@ -1577,7 +1579,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CalculatedAttributeLibrary", (string)null);
+                    b.ToTable("CalculatedAttributeLibrary");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute.CalculatedAttributeLibraryUserEntity", b =>
@@ -1709,7 +1711,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("CashFlowRuleId");
 
-                    b.ToTable("CashFlowDistributionRule", (string)null);
+                    b.ToTable("CashFlowDistributionRule");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow.CashFlowRuleEntity", b =>
@@ -1741,7 +1743,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("CashFlowRuleLibraryId");
 
-                    b.ToTable("CashFlowRule", (string)null);
+                    b.ToTable("CashFlowRule");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow.CashFlowRuleLibraryEntity", b =>
@@ -1774,7 +1776,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CashFlowRuleLibrary", (string)null);
+                    b.ToTable("CashFlowRuleLibrary");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow.CashFlowRuleLibraryUserEntity", b =>
@@ -1909,7 +1911,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("DeficientConditionGoalLibraryId");
 
-                    b.ToTable("DeficientConditionGoal", (string)null);
+                    b.ToTable("DeficientConditionGoal");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient.DeficientConditionGoalLibraryEntity", b =>
@@ -1942,7 +1944,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DeficientConditionGoalLibrary", (string)null);
+                    b.ToTable("DeficientConditionGoalLibrary");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient.DeficientConditionGoalLibraryUserEntity", b =>
@@ -2044,7 +2046,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("PerformanceCurveLibraryId");
 
-                    b.ToTable("PerformanceCurve", (string)null);
+                    b.ToTable("PerformanceCurve");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveEquationEntity", b =>
@@ -2108,7 +2110,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PerformanceCurveLibrary", (string)null);
+                    b.ToTable("PerformanceCurveLibrary");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveLibraryUserEntity", b =>
@@ -2211,7 +2213,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("RemainingLifeLimitLibraryId");
 
-                    b.ToTable("RemainingLifeLimit", (string)null);
+                    b.ToTable("RemainingLifeLimit");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit.RemainingLifeLimitLibraryEntity", b =>
@@ -2244,7 +2246,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RemainingLifeLimitLibrary", (string)null);
+                    b.ToTable("RemainingLifeLimitLibrary");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit.RemainingLifeLimitLibraryUserEntity", b =>
@@ -2349,7 +2351,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("TargetConditionGoalLibraryId");
 
-                    b.ToTable("TargetConditionGoal", (string)null);
+                    b.ToTable("TargetConditionGoal");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal.TargetConditionGoalLibraryEntity", b =>
@@ -2382,7 +2384,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TargetConditionGoalLibrary", (string)null);
+                    b.ToTable("TargetConditionGoalLibrary");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal.TargetConditionGoalLibraryUserEntity", b =>
@@ -2450,7 +2452,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SelectableTreatmentId");
 
-                    b.ToTable("TreatmentConsequence", (string)null);
+                    b.ToTable("TreatmentConsequence");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.ConditionalTreatmentConsequenceEquationEntity", b =>
@@ -2654,7 +2656,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("TreatmentLibraryId");
 
-                    b.ToTable("SelectableTreatment", (string)null);
+                    b.ToTable("SelectableTreatment");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentCostEntity", b =>
@@ -2682,7 +2684,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("TreatmentId");
 
-                    b.ToTable("TreatmentCost", (string)null);
+                    b.ToTable("TreatmentCost");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentCostEquationEntity", b =>
@@ -2746,7 +2748,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TreatmentLibrary", (string)null);
+                    b.ToTable("TreatmentLibrary");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentPerformanceFactorEntity", b =>
@@ -2780,7 +2782,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("TreatmentId");
 
-                    b.ToTable("TreatmentPerformanceFactor", (string)null);
+                    b.ToTable("TreatmentPerformanceFactor");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentSchedulingEntity", b =>
@@ -2811,7 +2813,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("TreatmentId");
 
-                    b.ToTable("TreatmentScheduling", (string)null);
+                    b.ToTable("TreatmentScheduling");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentSupersedeRuleEntity", b =>
@@ -2842,7 +2844,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("TreatmentId");
 
-                    b.ToTable("TreatmentSupersedeRule", (string)null);
+                    b.ToTable("TreatmentSupersedeRule");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", b =>
@@ -2876,7 +2878,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("NetworkId");
 
-                    b.ToTable("MaintainableAsset", (string)null);
+                    b.ToTable("MaintainableAsset");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetLocationEntity", b =>
@@ -2922,7 +2924,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("MaintainableAssetId")
                         .IsUnique();
 
-                    b.ToTable("MaintainableAssetLocation", (string)null);
+                    b.ToTable("MaintainableAssetLocation");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkAttributeEntity", b =>
@@ -2949,7 +2951,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("NetworkId");
 
-                    b.ToTable("NetworkAttribute", (string)null);
+                    b.ToTable("NetworkAttribute");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", b =>
@@ -2979,7 +2981,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Network", (string)null);
+                    b.ToTable("Network");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkRollupDetailEntity", b =>
@@ -3007,7 +3009,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("NetworkId")
                         .IsUnique();
 
-                    b.ToTable("NetworkRollupDetail", (string)null);
+                    b.ToTable("NetworkRollupDetail");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NumericAttributeValueHistoryEntity", b =>
@@ -3046,7 +3048,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SectionId");
 
-                    b.ToTable("NumericAttributeValueHistory", (string)null);
+                    b.ToTable("NumericAttributeValueHistory");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ReportIndexEntity", b =>
@@ -3087,7 +3089,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationID");
 
-                    b.ToTable("ReportIndex", (string)null);
+                    b.ToTable("ReportIndex");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget.CriterionLibraryScenarioBudgetEntity", b =>
@@ -3152,7 +3154,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("ScenarioBudgetId");
 
-                    b.ToTable("ScenarioBudgetAmount", (string)null);
+                    b.ToTable("ScenarioBudgetAmount");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget.ScenarioBudgetEntity", b =>
@@ -3193,7 +3195,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationId");
 
-                    b.ToTable("ScenarioBudget", (string)null);
+                    b.ToTable("ScenarioBudget");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority.CriterionLibraryScenarioBudgetPriorityEntity", b =>
@@ -3263,7 +3265,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationId");
 
-                    b.ToTable("ScenarioBudgetPriority", (string)null);
+                    b.ToTable("ScenarioBudgetPriority");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CalculatedAttribute.ScenarioCalculatedAttributeEntity", b =>
@@ -3305,7 +3307,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationId");
 
-                    b.ToTable("ScenarioCalculatedAttribute", (string)null);
+                    b.ToTable("ScenarioCalculatedAttribute");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CalculatedAttribute.ScenarioCalculatedAttributeEquationCriteriaPairEntity", b =>
@@ -3463,7 +3465,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("ScenarioCashFlowRuleId");
 
-                    b.ToTable("ScenarioCashFlowDistributionRule", (string)null);
+                    b.ToTable("ScenarioCashFlowDistributionRule");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity", b =>
@@ -3501,7 +3503,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationId");
 
-                    b.ToTable("ScenarioCashFlowRule", (string)null);
+                    b.ToTable("ScenarioCashFlowRule");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.CriterionLibraryScenarioDeficientConditionGoalEntity", b =>
@@ -3580,7 +3582,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationId");
 
-                    b.ToTable("ScenarioDeficientConditionGoal", (string)null);
+                    b.ToTable("ScenarioDeficientConditionGoal");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve.CriterionLibraryScenarioPerformanceCurveEntity", b =>
@@ -3656,7 +3658,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationId");
 
-                    b.ToTable("ScenarioPerformanceCurve", (string)null);
+                    b.ToTable("ScenarioPerformanceCurve");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve.ScenarioPerformanceCurveEquationEntity", b =>
@@ -3759,7 +3761,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationId");
 
-                    b.ToTable("ScenarioRemainingLifeLimit", (string)null);
+                    b.ToTable("ScenarioRemainingLifeLimit");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal.CriterionLibraryScenarioTargetConditionGoalEntity", b =>
@@ -3838,7 +3840,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationId");
 
-                    b.ToTable("ScenarioTargetConditionGoals", (string)null);
+                    b.ToTable("ScenarioTargetConditionGoals");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.CriterionLibraryScenarioConditionalTreatmentConsequenceEntity", b =>
@@ -3994,7 +3996,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("ScenarioSelectableTreatmentId");
 
-                    b.ToTable("ScenarioConditionalTreatmentConsequences", (string)null);
+                    b.ToTable("ScenarioConditionalTreatmentConsequences");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioConditionalTreatmentConsequenceEquationEntity", b =>
@@ -4084,7 +4086,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationId");
 
-                    b.ToTable("ScenarioSelectableTreatment", (string)null);
+                    b.ToTable("ScenarioSelectableTreatment");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentCostEntity", b =>
@@ -4112,7 +4114,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("ScenarioSelectableTreatmentId");
 
-                    b.ToTable("ScenarioTreatmentCost", (string)null);
+                    b.ToTable("ScenarioTreatmentCost");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentCostEquationEntity", b =>
@@ -4177,7 +4179,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("ScenarioSelectableTreatmentId");
 
-                    b.ToTable("ScenarioTreatmentPerformanceFactor", (string)null);
+                    b.ToTable("ScenarioTreatmentPerformanceFactor");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentSchedulingEntity", b =>
@@ -4208,7 +4210,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("TreatmentId");
 
-                    b.ToTable("ScenarioTreatmentScheduling", (string)null);
+                    b.ToTable("ScenarioTreatmentScheduling");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentSupersedeRuleEntity", b =>
@@ -4239,7 +4241,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("TreatmentId");
 
-                    b.ToTable("ScenarioTreatmentSupersedeRule", (string)null);
+                    b.ToTable("ScenarioTreatmentSupersedeRule");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioSelectableTreatmentScenarioBudgetEntity", b =>
@@ -4302,7 +4304,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("SimulationId")
                         .IsUnique();
 
-                    b.ToTable("SimulationAnalysisDetail", (string)null);
+                    b.ToTable("SimulationAnalysisDetail");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", b =>
@@ -4340,7 +4342,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("NetworkId");
 
-                    b.ToTable("Simulation", (string)null);
+                    b.ToTable("Simulation");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationLogEntity", b =>
@@ -4377,7 +4379,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationId");
 
-                    b.ToTable("SimulationLog", (string)null);
+                    b.ToTable("SimulationLog");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationOutputEntity", b =>
@@ -4411,7 +4413,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationId");
 
-                    b.ToTable("SimulationOutput", (string)null);
+                    b.ToTable("SimulationOutput");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationOutputJsonEntity", b =>
@@ -4454,7 +4456,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationOutputId");
 
-                    b.ToTable("SimulationOutputJson", (string)null);
+                    b.ToTable("SimulationOutputJson");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationReportDetailEntity", b =>
@@ -4485,7 +4487,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("SimulationId")
                         .IsUnique();
 
-                    b.ToTable("SimulationReportDetail", (string)null);
+                    b.ToTable("SimulationReportDetail");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationUserEntity", b =>
@@ -4545,7 +4547,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationOutputId");
 
-                    b.ToTable("SimulationYearDetail", (string)null);
+                    b.ToTable("SimulationYearDetail");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TargetConditionGoalDetailEntity", b =>
@@ -4581,7 +4583,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SimulationYearDetailId");
 
-                    b.ToTable("TargetConditionGoalDetail", (string)null);
+                    b.ToTable("TargetConditionGoalDetail");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TextAttributeValueHistoryEntity", b =>
@@ -4620,7 +4622,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("SectionId");
 
-                    b.ToTable("TextAttributeValueHistory", (string)null);
+                    b.ToTable("TextAttributeValueHistory");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentConsiderationDetailEntity", b =>
@@ -4645,7 +4647,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("TreatmentConsiderationDetail", (string)null);
+                    b.ToTable("TreatmentConsiderationDetail");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentLibraryUserEntity", b =>
@@ -4711,7 +4713,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("TreatmentOptionDetail", (string)null);
+                    b.ToTable("TreatmentOptionDetail");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentRejectionDetailEntity", b =>
@@ -4739,7 +4741,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("TreatmentRejectionDetail", (string)null);
+                    b.ToTable("TreatmentRejectionDetail");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentSchedulingCollisionDetailEntity", b =>
@@ -4761,7 +4763,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("TreatmentSchedulingCollisionDetail", (string)null);
+                    b.ToTable("TreatmentSchedulingCollisionDetail");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserCriteriaFilterEntity", b =>
@@ -4840,7 +4842,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("User", (string)null);
+                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AggregatedResultEntity", b =>

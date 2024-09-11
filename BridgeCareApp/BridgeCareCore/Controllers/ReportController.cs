@@ -22,6 +22,7 @@ using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Graph.Models;
 using Newtonsoft.Json.Linq;
 
@@ -35,6 +36,7 @@ namespace BridgeCareCore.Controllers
         private readonly ILog _log;
         private readonly IGeneralWorkQueueService _generalWorkQueueService;
         public const string ReportError = "Report Error";
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         public ReportController(IReportGenerator generator, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, ILog logger, IGeneralWorkQueueService generalWorkQueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
@@ -42,6 +44,7 @@ namespace BridgeCareCore.Controllers
             _generator = generator ?? throw new ArgumentNullException(nameof(generator));
             _log = logger ?? throw new ArgumentNullException(nameof(logger));
             _generalWorkQueueService = generalWorkQueService ?? throw new ArgumentNullException(nameof(generalWorkQueService));
+            _unitOfWork = unitOfWork;
         }
 
         public class ReportDetails
@@ -49,6 +52,7 @@ namespace BridgeCareCore.Controllers
             public Guid simulationId { get; set; }
             public string reportName { get; set; }
             public bool isGenerated { get; set; }
+            public string reportStatus  { get; set; }
         }
 
         #region "API functions"
@@ -202,6 +206,13 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> GetReportGenerationStatus([FromBody] List<ReportDetails> reportDetails)
         {
+            var simulationIds = reportDetails.Select(report => report.simulationId).Distinct().ToList();
+
+            var simulations = _unitOfWork.Context.Simulation
+                .Include(_ => _.SimulationReportDetail)
+                .Where(_ => simulationIds.Contains(_.Id))
+                .ToList();
+
             foreach (var report in reportDetails)
             {
                 if (report.simulationId == Guid.Empty || report.reportName == String.Empty)
@@ -214,6 +225,14 @@ namespace BridgeCareCore.Controllers
                     .Where(_ => _.Type == report.reportName)
                     .OrderByDescending(_ => _.CreationDate)
                     .FirstOrDefault();
+
+                foreach (var simulation in simulations)
+                {
+                    if(simulation.SimulationReportDetail.ReportType == report.reportName)
+                    {
+                        report.reportStatus = simulation.SimulationReportDetail.Status;
+                    }
+                }
 
                 if (availableReport == null)
                 {
@@ -322,7 +341,7 @@ namespace BridgeCareCore.Controllers
             // Throw an error if the path does not exist
             if (!Directory.Exists(reportPath))
             {
-                var message = new List<string>() { $"The report path for {simulationName} does not exist." };
+                var message = new List<string>() { $"No reports exist for {simulationName}." };
                 return CreateErrorListing(message);  // Or throw an exception if you prefer
             }
 

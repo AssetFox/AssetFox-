@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace AppliedResearchAssociates.iAM.DTOs
 {
@@ -7,5 +8,10 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public Guid SimulationId { get; set; }
 
         public string Status { get; set; }
+
+        public string ReportType { get; set; }
+
+        [Timestamp]
+        public byte[] RowVersion { get; set; }
     }
 }

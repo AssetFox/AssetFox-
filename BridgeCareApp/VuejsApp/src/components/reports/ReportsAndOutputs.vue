@@ -61,6 +61,7 @@
                                 <td class="text-xs-left">
                                     <v-btn
                                         @click="onGenerateReport(props.item.id, true)"
+                                        :disabled="props.item.isGenerated"
                                         class="ghd-blue"
                                         flat
                                     >
@@ -140,6 +141,7 @@ import Column from 'primevue/column';
 import { getUrl } from '@/shared/utils/get-url';
 import mitt, { Emitter, EventType } from 'mitt';
 import { Hub } from '@/connectionHub';
+import { Notification } from '@/shared/models/iAM/notifications';
 
     let store = useStore();
     const router = useRouter();
@@ -149,6 +151,7 @@ import { Hub } from '@/connectionHub';
     function addSuccessNotificationAction(payload?: any) { store.dispatch('addSuccessNotification',payload);} 
     async function getSimulationReportsAction(payload?: any): Promise<any> { await store.dispatch('getSimulationReports',payload);} 
     async function updateSimulationReportDetailAction(payload?: any): Promise<any>{await store.dispatch('updateSimulationReportDetail', payload)}
+    const notifications = computed<Notification[]>(() => store.state.notificationModule.notifications);
 
     let editShow = ref<boolean>(false);
 
@@ -181,7 +184,7 @@ import { Hub } from '@/connectionHub';
         },
         {
             title: 'Report Status',
-            key: 'reportStatus',
+            key: 'status',
             align: 'left',
             sortable: false,
             class: '',
@@ -225,10 +228,10 @@ import { Hub } from '@/connectionHub';
                 router.push('/Scenarios/');
             }
 
-        //selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
         await getSimulationReportsAction();
         await getReportGenerationStatus();
     });
+
     watch(stateSimulationReportNames, () => {
         stateSimulationReportNames.value.forEach(reportName => {
             currentPage.value.push({
@@ -242,7 +245,33 @@ import { Hub } from '@/connectionHub';
             selectedReport.value = currentPage.value[0];
 
     });
-    
+
+    watch(notifications, (newNotifications) => {
+        if (newNotifications.length > 0) {
+            const latestNotification = newNotifications[0];
+            
+            // Check if the message matches the successful report pattern
+            const reportGenerationPattern = /Successfully generated (.+) report for scenario: (.+)/;
+            const match = latestNotification.longMessage.match(reportGenerationPattern);
+            
+            if (match) {
+            const reportName = match[1];
+            const scenarioName = match[2];
+            
+            // Get the report
+            const report = currentPage.value.find(
+                r => r.name === reportName && simulationName === scenarioName
+            );
+
+            if (report) {
+                // Set the report status to "generated"
+                report.isGenerated = true;
+            }
+            }
+        }
+    }, { deep: true, immediate: true });
+
+
     const onRowSelect = (event:any) => {
         selectedReport.value = {
             id: event.data.id,
@@ -251,9 +280,11 @@ import { Hub } from '@/connectionHub';
             isGenerated: event.data.isGenerated
         };
     };
+
     function showEditDialog(): void {
         editShow.value = !editShow.value;
     }
+
     function onShowCriterionEditorDialog(reportId: string) {
         selectedReport.value = find(
             propEq('id', reportId),
@@ -265,6 +296,7 @@ import { Hub } from '@/connectionHub';
             CriteriaExpression: selectedReport.value.mergedExpression,
         };
     }
+
     function onCriterionEditorDialogSubmit(criterionexpression: string) {
         criterionEditorDialogData.value = clone(
             emptyGeneralCriterionEditorDialogData,
@@ -274,6 +306,7 @@ import { Hub } from '@/connectionHub';
                 propEq('id', selectedReport.value.id), currentPage.value), { ...selectedReport.value, mergedExpression: criterionexpression}, currentPage.value,
             );
     }
+    
     async function onDownloadSimulationLog(download: boolean) {
         if (download) {            
             await ReportsService.downloadSimulationLog(
@@ -370,6 +403,7 @@ import { Hub } from '@/connectionHub';
                     
                     if (reportIndex !== -1) {
                         currentPage.value[reportIndex].isGenerated = updatedReport.isGenerated;
+                        currentPage.value[reportIndex].reportStatus = updatedReport.reportStatus;
                     }
                 });
             }
@@ -389,6 +423,7 @@ import { Hub } from '@/connectionHub';
                         message: selectedReport.value.name +  ' report has been deleted for ' + simulationName + '.',
                     });
                     selectedReport.value.isGenerated = false;
+                    selectedReport.value.reportStatus = "Report Deleted";
             } else {
                 addErrorNotificationAction({
                     message: 'Failed to delete report.',
@@ -399,10 +434,15 @@ import { Hub } from '@/connectionHub';
         });
     }
 
-    function getReportStatus(data: any) {
-        updateSimulationReportDetailAction({
-            simulationReportDetail: data.simulationReportDetail,
-        });
+    function getReportStatus(data: any) 
+    {
+        if (data.simulationReportDetail.status) {
+        selectedReport.value = find(
+            propEq('name', data.simulationReportDetail.reportType),
+            currentPage.value,
+        ) as Report
+        selectedReport.value.reportStatus = data.simulationReportDetail.status;
+        } 
     }
 
 </script>

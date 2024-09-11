@@ -151,7 +151,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportDetailDto = new SimulationReportDetailDTO
             {
                 SimulationId = Guid.Empty,
-                Status = $"Generating..."
+                Status = $"Generating...",
+                ReportType = ReportTypeName
+
             };
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             using var excelPackage = new ExcelPackage(new FileInfo("RawDataNetworkExportReportData.xlsx"));

@@ -640,7 +640,42 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
         }
-    }
 
-    
+        public string GetAdminContactEmail()
+        {
+            var existingAdminContactEmail = _unitOfWork.Context.AdminSettings
+                .Where(_ => _.Key == "AdminContactEmail")
+                .FirstOrDefault();
+
+            if (existingAdminContactEmail == null)
+            {
+                return null;
+            }
+
+            return existingAdminContactEmail.Value;
+        }
+
+        public void SetAdminContactEmail(string email)
+        {
+            var existingAdminContactEmail = _unitOfWork.Context.AdminSettings
+                .Where(_ => _.Key == "AdminContactEmail")
+                .FirstOrDefault();
+
+            if (existingAdminContactEmail == null)
+            {
+                _unitOfWork.Context.AdminSettings.Add(new AdminSettingsEntity
+                {
+                    Key = "AdminContactEmail",
+                    Value = email
+                });
+            }
+            else
+            {
+                existingAdminContactEmail.Value = email;
+                _unitOfWork.Context.AdminSettings.Update(existingAdminContactEmail);
+            }
+
+            _unitOfWork.Context.SaveChanges();
+        }
+    }
 }

@@ -62,7 +62,7 @@
                                     <v-btn
                                         @click="onGenerateReport(props.item.id, true)"
                                         :disabled="props.item.isGenerated"
-                                        class="ghd-blue"
+                                        class="ghd-gray"
                                         flat
                                     >
                                         <img class="img-general" :src="getUrl('assets/icons/attributes-dark.svg')"/>
@@ -76,6 +76,7 @@
                                         <img class='img-general' :src="getUrl('assets/icons/download.svg')"/>
                                     </v-btn>
                                     <v-btn
+                                        v-if="hasAdminAccess"
                                         @click="onDeleteReport(props.item.id)"
                                         :disabled="!props.item.isGenerated"
                                         flat
@@ -117,7 +118,7 @@
 
 <script setup lang='ts'>
 import { ref, onMounted, computed, watch, inject, onBeforeMount, onBeforeUnmount } from 'vue';
-import { clone, update, find, findIndex, propEq } from 'ramda';
+import { clone, update, find, findIndex, propEq, isNil } from 'ramda';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import ReportsService from '@/services/reports.service';
@@ -142,6 +143,8 @@ import { getUrl } from '@/shared/utils/get-url';
 import mitt, { Emitter, EventType } from 'mitt';
 import { Hub } from '@/connectionHub';
 import { Notification } from '@/shared/models/iAM/notifications';
+import { queuedWorkStatusUpdate } from '@/shared/models/iAM/queuedWorkStatusUpdate';
+
 
     let store = useStore();
     const router = useRouter();
@@ -152,6 +155,7 @@ import { Notification } from '@/shared/models/iAM/notifications';
     async function getSimulationReportsAction(payload?: any): Promise<any> { await store.dispatch('getSimulationReports',payload);} 
     async function updateSimulationReportDetailAction(payload?: any): Promise<any>{await store.dispatch('updateSimulationReportDetail', payload)}
     const notifications = computed<Notification[]>(() => store.state.notificationModule.notifications);
+    let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
 
     let editShow = ref<boolean>(false);
 
@@ -205,6 +209,10 @@ import { Notification } from '@/shared/models/iAM/notifications';
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
             getReportStatus,
         );
+        $emitter.on(
+            Hub.BroadcastEventType.BroadcastFastWorkQueueStatusUpdateEvent,
+            getFastWorkQueueUpdate,
+        );
     });
 
     onBeforeUnmount(async () => {
@@ -212,7 +220,13 @@ import { Notification } from '@/shared/models/iAM/notifications';
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
             getReportStatus,
         );
+        $emitter.off(
+            Hub.BroadcastEventType.BroadcastFastWorkQueueStatusUpdateEvent,
+            getFastWorkQueueUpdate,
+        );
+
     });
+    
 
     onMounted(async () => {
 
@@ -392,7 +406,7 @@ import { Notification } from '@/shared/models/iAM/notifications';
             };
         });
 
-        let test = await ReportsService.getReportGenerationStatus(
+        await ReportsService.getReportGenerationStatus(
             reportDetails
         ).then((response: AxiosResponse<any>) => {
             if (hasValue(response, 'data')) {
@@ -443,6 +457,14 @@ import { Notification } from '@/shared/models/iAM/notifications';
         ) as Report
         selectedReport.value.reportStatus = data.simulationReportDetail.status;
         } 
+    }
+
+    function getFastWorkQueueUpdate(data: any) {
+            var updatedQueueItem = data.queueItem as queuedWorkStatusUpdate
+            if(isNil(updatedQueueItem))
+                return;
+            var queueItem = currentPage.value.find(_ => _.id === updatedQueueItem.id)
+            selectedReport.value.reportStatus = queueItem?.reportStatus;
     }
 
 </script>

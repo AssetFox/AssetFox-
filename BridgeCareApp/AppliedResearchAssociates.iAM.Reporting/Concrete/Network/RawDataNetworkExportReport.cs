@@ -15,6 +15,7 @@ using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.Reporting.Services.NetworkExportReport;
 using Newtonsoft.Json.Linq;
 using AppliedResearchAssociates.iAM.Reporting.Services;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -116,7 +117,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             {
                 if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                     throw new Exception("Report was cancelled");
-                reportPath = GenerateNetworkExportReport(workQueueLog, maintainableAssets, _networkId, aggregatedResults, cancellationToken);
+                reportPath = GenerateNetworkExportReport(workQueueLog, maintainableAssets, _networkId, aggregatedResults, _scenarioId, cancellationToken);
             }
             catch (Exception e)
             {
@@ -143,19 +144,20 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return;
         }
 
-        private string GenerateNetworkExportReport(IWorkQueueLog workQueueLog, List<MaintainableAsset> maintainableAssets, Guid networkId, Dictionary<Guid, List<AssetAttributeValuePair>> aggregatedResults, CancellationToken? cancellationToken = null)
+        private string GenerateNetworkExportReport(IWorkQueueLog workQueueLog, List<MaintainableAsset> maintainableAssets, Guid networkId, Dictionary<Guid, List<AssetAttributeValuePair>> aggregatedResults, Guid scenarioId, CancellationToken? cancellationToken = null)
         {
             if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                 throw new Exception("Report was cancelled");
             var reportPath = string.Empty;
             var reportDetailDto = new SimulationReportDetailDTO
             {
-                SimulationId = Guid.Empty,
+                SimulationId = scenarioId,
                 Status = $"Generating...",
-                ReportType = ReportTypeName
-
+                ReportType = "RawDataNetworkExportReport"
             };
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+            UpsertSimulationReportDetail(reportDetailDto);
             using var excelPackage = new ExcelPackage(new FileInfo("RawDataNetworkExportReportData.xlsx"));
             var worksheet = excelPackage.Workbook.Worksheets.Add("Aggregated Results");
             var attributeDefaultValuePairs = _unitOfWork.AttributeRepo.GetAttributeDefaultValuePairs(networkId);
@@ -165,6 +167,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 throw new Exception("Report was cancelled");
             reportDetailDto.Status = $"Creating Report file";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);
+            UpsertSimulationReportDetail(reportDetailDto);
             var folderPathForSimulation = $"Reports\\{networkId}";
             Directory.CreateDirectory(folderPathForSimulation);
             reportPath = Path.Combine(folderPathForSimulation, "RawDataNetworkExportReport.xlsx");
@@ -175,10 +179,15 @@ namespace AppliedResearchAssociates.iAM.Reporting
             File.WriteAllBytes(reportPath, bin);
 
             reportDetailDto.Status = $"Report generation completed";
+            UpsertSimulationReportDetail(reportDetailDto);
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);
+
 
             return reportPath;
         }
+
+        private void UpsertSimulationReportDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
 

@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -68,9 +69,18 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 IndicateError();
                 return;
             }
+            var reportDetailDto = new SimulationReportDetailDTO
+            {
+                SimulationId = simulationGuid,
+                Status = $"Generating...",
+                ReportType = ReportTypeName
+            };
+
             SimulationID = simulationGuid;
             Status = "Generating report";
             workQueueLog.UpdateWorkQueueStatus(Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);
+            UpsertSimulationReportDetail(reportDetailDto);
 
             // Check for simulation existence
             string reportFileName;
@@ -94,7 +104,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
            
             // Pull the simulation object
             Status = "Getting simulation output";
+            reportDetailDto.Status = Status;
             workQueueLog.UpdateWorkQueueStatus(Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);
+            UpsertSimulationReportDetail(reportDetailDto);
             Analysis.Engine.SimulationOutput simulationOutput;
             try
             {
@@ -111,7 +124,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             // Save the output to a file
             Status = "Saving output";
+            reportDetailDto.Status = Status;
             workQueueLog.UpdateWorkQueueStatus(Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);
+            UpsertSimulationReportDetail(reportDetailDto);
             try
             {
                 checkCancelled(cancellationToken, simulationGuid);
@@ -131,7 +147,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Results = reportFileName;  // This is not set until here to ensure the file was created correctly
             IsComplete = true;
             Status = "File generated.";
+            reportDetailDto.Status = Status;
             workQueueLog.UpdateWorkQueueStatus(Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);
+            UpsertSimulationReportDetail(reportDetailDto);
             return;
         }
 

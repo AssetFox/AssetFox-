@@ -38,7 +38,7 @@ namespace BridgeCareCore.Controllers
         public const string ReportError = "Report Error";
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public ReportController(IReportGenerator generator, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+        public ReportController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IReportGenerator generator, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, ILog logger, IGeneralWorkQueueService generalWorkQueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _generator = generator ?? throw new ArgumentNullException(nameof(generator));
@@ -206,11 +206,15 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> GetReportGenerationStatus([FromBody] List<ReportDetails> reportDetails)
         {
-            var simulationIds = reportDetails.Select(report => report.simulationId).Distinct().ToList();
+            var simulationId = reportDetails.Select(report => report.simulationId).Distinct().ToList();
 
             var simulations = _unitOfWork.Context.Simulation
                 .Include(_ => _.SimulationReportDetail)
-                .Where(_ => simulationIds.Contains(_.Id))
+                .Where(_ => simulationId.Contains(_.Id))
+                .ToList();
+
+            var simulationReportDetails = _unitOfWork.Context.SimulationReportDetail
+                .Where(_ => simulationId.Contains(_.SimulationId))
                 .ToList();
 
             foreach (var report in reportDetails)
@@ -226,24 +230,27 @@ namespace BridgeCareCore.Controllers
                     .OrderByDescending(_ => _.CreationDate)
                     .FirstOrDefault();
 
-                foreach (var simulation in simulations)
+                if (simulations[0].SimulationReportDetail != null)
                 {
-                    if(simulation.SimulationReportDetail.ReportType == report.reportName)
+                    foreach (var reportDetail in simulationReportDetails)
                     {
-                        report.reportStatus = simulation.SimulationReportDetail.Status;
+                        if (reportDetail.ReportType == report.reportName)
+                        {
+                            report.reportStatus = reportDetail.Status;
+                        }
                     }
                 }
 
-                if (availableReport == null)
-                {
-                    report.isGenerated = false;
-                }
-                else
-                {
-                    var reportPath = Path.Combine(Environment.CurrentDirectory, "Reports", reportDetails[0].simulationId.ToString());
+                var reportGenerationStatus = UnitOfWork.ReportIndexRepository.GetAllForScenario(report.simulationId)
+                    .Where(_ => _.Type == report.reportName)
+                    .OrderByDescending(_ => _.CreationDate)
+                    .FirstOrDefault();
 
-                    // Check if the directory exists and if the file exists
-                    if (Directory.Exists(reportPath) && System.IO.File.Exists(availableReport.Result))
+                if (reportGenerationStatus != null)
+                {
+                    var reportPath = Path.Combine(Environment.CurrentDirectory, reportGenerationStatus.Result);
+
+                    if (System.IO.File.Exists(reportPath)) // Check if the file exists
                     {
                         report.isGenerated = true;
                     }
@@ -251,6 +258,10 @@ namespace BridgeCareCore.Controllers
                     {
                         report.isGenerated = false;
                     }
+                }
+                else
+                {
+                    report.isGenerated = false;
                 }
             }
             return Ok(reportDetails);
@@ -302,6 +313,11 @@ namespace BridgeCareCore.Controllers
             try
             {
                 System.IO.File.Delete(reportPath);
+
+                await _unitOfWork.Context.Database.ExecuteSqlRawAsync(
+                    "UPDATE SimulationReportDetail SET Status = {0} WHERE SimulationId = {1} AND ReportType = {2}",
+                    "Report Deleted", simulationId, reportName);
+
                 return Ok($"The report {reportName} for simulation {simulationName} has been successfully deleted.");
             }
             catch (Exception e)
@@ -351,6 +367,14 @@ namespace BridgeCareCore.Controllers
                 {
                     // Delete the directory and all its contents
                     Directory.Delete(reportPath, true);
+
+                    // Update all reports in the database to "Report Deleted" for the given simulationId
+                    await _unitOfWork.Context.Database.ExecuteSqlRawAsync(
+                        "UPDATE SimulationReportDetail SET Status = {0} WHERE SimulationId = {1}",
+                        "Report Deleted", simulationId);
+
+                    // Save the changes
+                    await _unitOfWork.Context.SaveChangesAsync();
                 }
                 else
                 {

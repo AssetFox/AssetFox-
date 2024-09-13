@@ -190,9 +190,7 @@
                                         <td>
                                             {{ formatDate(props.item.lastRun) }}
                                         </td>
-                                        <td>{{ props.item.status }}</td>
                                         <td>{{ props.item.runTime }}</td>
-                                        <td>{{ props.item.reportStatus }}</td>
                                         <td>
                                             <v-menu  location="left">
                                                 <template
@@ -397,9 +395,7 @@
                                         <td>
                                             {{ formatDate(props.item.lastRun) }}
                                         </td>
-                                        <td>{{ props.item.status }}</td>
                                         <td>{{ props.item.runTime }}</td>
-                                        <td>{{ props.item.reportStatus }}</td>
                                         <td>
                                             <v-menu >
                                                 <template
@@ -883,24 +879,8 @@ import ReportsService from '@/services/reports.service';
             width: '',
         },
         {
-            title: 'Status',
-            key: 'status',
-            align: 'left',
-            sortable: false,
-            class: 'header-border',
-            width: '',
-        },
-        {
             title: 'Run Time',
             key: 'runTime',
-            align: 'left',
-            sortable: false,
-            class: 'header-border',
-            width: '',
-        },
-        {
-            title: 'Report Status',
-            key: 'reportStatus',
             align: 'left',
             sortable: false,
             class: 'header-border',
@@ -988,14 +968,6 @@ import ReportsService from '@/services/reports.service';
             class: 'header-border',
             width: '',
         },        
-        {
-            title: 'Status',
-            key: 'status',
-            align: 'left',
-            sortable: false,
-            class: 'header-border',
-            width: '',
-        },
         {
             title: 'Action',
             key: 'actions',
@@ -1387,24 +1359,6 @@ import ReportsService from '@/services/reports.service';
         }
         actionItemsForSharedScenario = [
             {
-                title: 'Run Analysis',
-                action: availableActions.runAnalysis,
-                icon: getUrl("assets/icons/monitor.svg"),
-                isCustomIcon: true
-            },
-            {
-                title: 'Reports',
-                action: availableActions.reports,
-                icon: getUrl("assets/icons/clipboard.svg"),
-                isCustomIcon: true
-            },
-            ...(hasAdminAccess ? [{
-                title: 'Delete all generated Reports',
-                action: availableActions.deleteReports,
-                icon: getUrl("assets/icons/clipboard.svg"),
-                isCustomIcon: true
-            }] : []),
-            {
                 title: 'Settings',
                 action: availableActions.settings,
                 icon: getUrl("assets/icons/gear.svg"),
@@ -1427,7 +1381,13 @@ import ReportsService from '@/services/reports.service';
                 action: availableActions.reports,
                 icon: getUrl("assets/icons/clipboard.svg"),
                 isCustomIcon: true
-            }, 
+            },
+            ...(hasAdminAccess ? [{
+                title: 'Delete all generated Reports',
+                action: availableActions.deleteReports,
+                icon: getUrl("assets/icons/clipboard.svg"),
+                isCustomIcon: true
+            }] : []), 
             {
                 title: 'Clone',
                 action: availableActions.clone,
@@ -1458,7 +1418,7 @@ import ReportsService from '@/services/reports.service';
             }             
         ];
         actionItems = actionItemsForSharedScenario.slice();
-        actionItems.splice(4, 0, {
+        actionItems.splice(5, 0, {
             title: 'Share',
             action: availableActions.share,
             icon: getUrl("assets/icons/share-geometric.svg"),

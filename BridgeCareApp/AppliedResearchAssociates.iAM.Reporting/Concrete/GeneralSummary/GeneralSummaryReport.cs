@@ -177,8 +177,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, ReportType = ReportTypeName };
             checkCancelled(cancellationToken, simulationId);
             reportDetailDto.Status = $"Generating...";
-
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);
+            UpsertSimulationReportDetail(reportDetailDto);
             var functionReturnValue = "";
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
 
@@ -196,6 +197,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
 
             reportDetailDto.Status = $"Generating Budget Tables";
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);
+            UpsertSimulationReportDetail(reportDetailDto);
             var targetBudgets = _unitOfWork.BudgetRepo.GetBudgetYearsBySimulationId(simulationId);
             currentCell.Column = 1;
             _generalBudgetSummary.FillTargetBudgets(generalWorksheet, reportOutputData, currentCell);
@@ -204,6 +207,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             //Deficient Condition Goals Table
             reportDetailDto.Status = $"Generating Deficient Conditions Table";
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);
+            UpsertSimulationReportDetail(reportDetailDto);
             var deficientConditoinGoals = _unitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
             currentCell.Column = 1;
             GeneralDeficientConditionGoals.Fill(generalWorksheet, reportOutputData, deficientConditoinGoals, currentCell);
@@ -212,6 +217,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             //Target Condition Goals Table
             reportDetailDto.Status = $"Generating Target Condition Table";
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);
+            UpsertSimulationReportDetail(reportDetailDto);
             var targetConditionGoals = _unitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationId);
             currentCell.Column = 1;
             GeneralTargetConditionGoals.Fill(generalWorksheet, reportOutputData, targetConditionGoals, currentCell);
@@ -245,6 +252,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             //HashSet<string> performanceCurvesAttributes = new HashSet<string>(attributeNameLookup.Values);
             var primaryKeyField = _unitOfWork.AdminSettingsRepo.GetKeyFields();
             reportDetailDto.Status = $"Generating Work Done Tab";
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);
+            UpsertSimulationReportDetail(reportDetailDto);
             _generalWorkDoneTab.Fill(workDoneWorksheet, reportOutputData, simulation, performanceCurvesAttributes);
 
             //check and generate folder
@@ -256,6 +265,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             checkCancelled(cancellationToken, simulationId);
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(filePath, bin);
+
+            reportDetailDto.Status = $"Report Generation Completed";
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);
+            UpsertSimulationReportDetail(reportDetailDto);
 
             //set return value
             functionReturnValue = filePath;

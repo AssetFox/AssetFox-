@@ -10,6 +10,8 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public string Status { get; set; }
 
+        public string ReportType { get; set; }
+
         public string RunTime { get; set; }
     }
 }

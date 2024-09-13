@@ -8,6 +8,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("DELETE FROM SimulationReportDetail");
+
             migrationBuilder.AddColumn<string>(
                 name: "ReportType",
                 table: "SimulationReportDetail",

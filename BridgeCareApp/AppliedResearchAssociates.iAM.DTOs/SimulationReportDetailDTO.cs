@@ -10,8 +10,5 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public string Status { get; set; }
 
         public string ReportType { get; set; }
-
-        [Timestamp]
-        public byte[] RowVersion { get; set; }
     }
 }

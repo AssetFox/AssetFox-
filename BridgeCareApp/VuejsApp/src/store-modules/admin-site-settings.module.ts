@@ -6,6 +6,7 @@ const state = {
     agencyLogo: '',
     productLogo: '',
     implementationName: '',
+    adminContactEmail: '',
     isSuccessfulImport: false as boolean,
 };
 
@@ -18,6 +19,9 @@ const mutations = {
     },
     productLogoMutator(state: any, productLogo: string) {
         state.productLogo = productLogo;
+    },
+    setAdminContactEmailMutator(state: any, adminContactEmail: string) {
+        state.adminContactEmail = adminContactEmail;
     },
     isSuccessfulImportMutator(state: any, isSuccessful: boolean) {
         state.isSuccessfulImport = isSuccessful;
@@ -68,14 +72,14 @@ const actions = {
             if (response.status >= 200 && response.status < 300) {
                 const payloadString = payload.toString();
     
-                  commit('implementationNameMutator', payloadString);
-                  commit('isSuccessfulImportMutator', true);
+                commit('implementationNameMutator', payloadString);
+                commit('isSuccessfulImportMutator', true);
                 dispatch('addSuccessNotification', {
                   message: 'Implementation Name imported'
                 });
-              }
-            });
-        },
+            }
+        });
+    },
     async importProductLogo({commit, dispatch}: any, payload: File) {
         await AdminSiteSettingsService.importProductLogo(payload)
         .then(async (response: AxiosResponse) => {
@@ -97,7 +101,27 @@ const actions = {
         const base64 = await convertFileToBase64(productLogo);
         commit('productLogoMutator', base64);
     },
-    
+    async getAdminContactEmail({commit}: any) {
+        const response = await AdminSiteSettingsService.getAdminContactEmail();
+        if (response.status === 200) {
+            commit('setAdminContactEmailMutator', response.data);
+        }
+    },
+    async setAdminContactEmail({commit, dispatch}: any, email: string) {
+        try {
+            const response = await AdminSiteSettingsService.setAdminContactEmail(email)
+            .then((response: AxiosResponse) => {
+                if (response.status >= 200 && response.status < 300) {
+                    commit('setAdminContactEmailMutator', email); 
+                    dispatch('addSuccessNotification',{
+                        message: 'Administrator email saved.'
+                    }); 
+                }
+            })
+        } catch (error) {
+            console.error('Failed to save admin contact email', error);
+        }
+    }
 };
 
 function convertFileToBase64(file: File): Promise<string> {

@@ -175,5 +175,47 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        [HttpGet]
+        [Route("GetAdminContactEmail")]
+        public async Task<IActionResult> GetAdminContactEmail()
+        {
+            try
+            {
+                var email = UnitOfWork.AdminSettingsRepo.GetAdminContactEmail();
+                return Ok(email);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSiteSettingsError}::GetAdminContactEmail - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("SetAdminContactEmail/{email}")]
+        [Authorize(Policy = Policy.ModifyAdminSiteSettings)]
+        public async Task<IActionResult> SetAdminContactEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return BadRequest("Email cannot be empty");
+            }
+
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.AdminSettingsRepo.SetAdminContactEmail(email);
+                });
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, "Successfully Updated Admin Contact Email");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSiteSettingsError}::SetAdminContactEmail - {e.Message}");
+                throw;
+            }
+        }
     }
 }

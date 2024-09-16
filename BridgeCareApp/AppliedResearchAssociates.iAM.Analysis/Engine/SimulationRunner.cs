@@ -147,6 +147,8 @@ public sealed class SimulationRunner
         });
 
         CommittedProjectsPerAsset = Simulation.CommittedProjects.ToLookup(committedProject => committedProject.Asset);
+        ConfigureAnyCashFlowCommittedProjects();
+
         ConditionsPerBudget = Simulation.InvestmentPlan.BudgetConditions.ToLookup(budgetCondition => budgetCondition.Budget);
         CurvesPerAttribute = Simulation.PerformanceCurves.ToLookup(curve => curve.Attribute);
         NumberAttributeByName = Simulation.Network.Explorer.NumberAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
@@ -349,7 +351,7 @@ public sealed class SimulationRunner
 
     private IReadOnlyCollection<ConditionActual> DeficientConditionActuals = Array.Empty<ConditionActual>();
 
-    private SimulationMessageBuilder MessageBuilder;
+    internal SimulationMessageBuilder MessageBuilder;
 
     private ICollection<AssetContext> AssetContexts;
 
@@ -465,6 +467,11 @@ public sealed class SimulationRunner
                     if (treatment is CommittedProject committedProject)
                     {
                         context.Detail.ProjectSource = committedProject.ProjectSource.ToString();
+
+                        if (!committedProject.ShouldApplyConsequences)
+                        {
+                            context.Detail.TreatmentStatus = TreatmentStatus.Progressed;
+                        }
                     }
 
                     context.Detail.TreatmentCause = treatment is CommittedProject or CommittedProjectBundle
@@ -485,6 +492,51 @@ public sealed class SimulationRunner
     {
         UpdateConditionActuals(year);
         return ConditionGoalsEvaluator();
+    }
+
+    private void ConfigureAnyCashFlowCommittedProjects()
+    {
+        // Cash-flow committed projects (CPs) are automatically identified by the system. The
+        // pattern is a sequence of CPs in consecutive years where each CP costs more than a fixed
+        // threshold (currently $5m according to stakeholder-SMEs) and each CP is assigned the same
+        // asset and treatment. The effect of identification is that each non-final CP of a
+        // cash-flow CP sequence will have its consequences disabled.
+
+        const double cashFlowCostThreshold = 5_000_000;
+
+        var orderedGroups = Simulation.CommittedProjects
+            .GroupBy(cp => (cp.Asset, cp.TemplateTreatment))
+            .Select(g => g.Where(cp => cp.Cost > cashFlowCostThreshold).OrderByDescending(cp => cp.Year))
+            .Where(g => g.Any());
+
+        foreach (var g in orderedGroups)
+        {
+            if (g.DistinctBy(cp => cp.Year).Count() != g.Count())
+            {
+                var asset = g.First().Asset;
+                MessageBuilder = new("Two or more committed projects in the same year on the same asset with the same treatment.")
+                {
+                    AssetId = asset.Id,
+                    AssetName = asset.AssetName,
+                };
+                var error = SimulationLogMessageBuilders.RuntimeFatal(MessageBuilder, Simulation.Id);
+                Send(error);
+            }
+
+            var expectedYear = g.First().Year - 1;
+            foreach (var cp in g.Skip(1))
+            {
+                if (cp.Year == expectedYear)
+                {
+                    cp.ShouldApplyConsequences = false;
+                    --expectedYear;
+                }
+                else
+                {
+                    expectedYear = cp.Year - 1;
+                }
+            }
+        }
     }
 
     private void ConsiderTreatmentOptions(IEnumerable<AssetContext> baselineContexts, IEnumerable<TreatmentOption> treatmentOptions, int year)
@@ -1062,11 +1114,6 @@ public sealed class SimulationRunner
             }
 
             var lastYearOfCashFlow = year + distributionRule.YearlyPercentages.Count - 1;
-            if (lastYearOfCashFlow > Simulation.InvestmentPlan.LastYearOfAnalysisPeriod)
-            {
-                return ReasonAgainstCashFlow.LastYearOfCashFlowIsOutsideOfAnalysisPeriod;
-            }
-
             var futureYearsOfCashFlow = Static.RangeFromBounds(year + 1, lastYearOfCashFlow);
             var scheduleIsBlocked = futureYearsOfCashFlow.Any(assetContext.EventSchedule.ContainsKey);
             if (scheduleIsBlocked)
@@ -1078,7 +1125,9 @@ public sealed class SimulationRunner
 
             cashFlowConsideration.FundingCalculationInputSupplement = new();
 
-            var costPercentagePerYear = new decimal[distributionRule.YearlyPercentages.Count];
+            var lastYearOfCashFlowInPeriod = Math.Min(lastYearOfCashFlow, Simulation.InvestmentPlan.LastYearOfAnalysisPeriod);
+            var numberOfCashFlowYears = lastYearOfCashFlowInPeriod - year + 1;
+            var costPercentagePerYear = new decimal[numberOfCashFlowYears];
             for (var y = 0; y < costPercentagePerYear.Length; ++y)
             {
                 var costPercentage = distributionRule.YearlyPercentages[y];

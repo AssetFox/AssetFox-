@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         public void FillBridgesCulvertsWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> workedOnCommitedProjCount,
+            Dictionary<int, Dictionary<string, List<CommittedProjectMetaData>>> workedOnCommitedProjCount,
             List<int> simulationYears,
             List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments)
         {
@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         #region Private methods
 
         private void FillMPMSWorkedOnCount(ExcelWorksheet worksheet, CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> workedOnCommitedProjCount, List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel)
+            Dictionary<int, Dictionary<string, List<CommittedProjectMetaData>>> workedOnCommitedProjCount, List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Number of MPMS Projects Worked On", "MPMS Work Type");
             AddCountOfMPMSCompleted(worksheet, currentCell, workedOnCommitedProjCount, simulationYears, projectRowNumberModel);
@@ -73,7 +73,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
         private void AddCountOfMPMSCompleted(ExcelWorksheet worksheet, CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> workedOnCommitedProjCount, List<int> simulationYears,
+            Dictionary<int, Dictionary<string, List<CommittedProjectMetaData>>> workedOnCommitedProjCount, List<int> simulationYears,
             ProjectRowNumberModel projectRowNumberModel)
         {
             var startYear = simulationYears[0];
@@ -98,7 +98,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, currentCell.Column + 1 + simulationYears.Count].Value = 0;
 
                         var cellToEnterCount = yearlyItem.Key - startYear;
-                        worksheet.Cells[uniqueTreatments[dataKey], column + cellToEnterCount + 2].Value = data.Value.bridgeCount;
+                        worksheet.Cells[uniqueTreatments[dataKey], column + cellToEnterCount + 2].Value = data.Value.Count;
 
                         var keyItem = dataKey + "_" + yearlyItem.Key;
                         if(projectRowNumberModel.TreatmentsCount.ContainsKey(keyItem) == false)
@@ -116,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     else
                     {
                         var cellToEnterCost = yearlyItem.Key - startYear;
-                        worksheet.Cells[uniqueTreatments[dataKey], column + cellToEnterCost + 2].Value = data.Value.bridgeCount;
+                        worksheet.Cells[uniqueTreatments[dataKey], column + cellToEnterCost + 2].Value = data.Value.Count;
 
                         var keyItem = dataKey + "_" + yearlyItem.Key;
                         if (projectRowNumberModel.TreatmentsCount.ContainsKey(keyItem) == false)
@@ -129,7 +129,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             if (_warnings.Contains(warningMessage) == false) { _warnings.Add(warningMessage); }
                         }
                     }
-                    committedTotalCount += data.Value.bridgeCount;
+                    committedTotalCount += data.Value.Count;
                 }
                 TotalCompletedCommittedCount.Add(yearlyItem.Key, committedTotalCount);
             }

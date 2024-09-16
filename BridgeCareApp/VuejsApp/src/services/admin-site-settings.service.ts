@@ -40,4 +40,14 @@ export default class AdminSiteSettingsService {
             {headers: {'Content-Type': 'multipart/form-data'}},
         );
     }
+    static getAdminContactEmail(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.AdminSettings}/GetAdminContactEmail`);
+    }
+    static setAdminContactEmail(email: string): AxiosPromise {
+        return coreAxiosInstance.post(
+          `${API.AdminSettings}/SetAdminContactEmail/` + encodeURIComponent(email),
+          null,
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+    }
 }

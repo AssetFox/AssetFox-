@@ -107,7 +107,7 @@
                                             density="compact"
                                             variant="underlined"
                                             v-model="item.item[header.key]"
-                                            :style="getProjectSourceStyle(item.item)"
+                                            :style="getProjectSourceStyle(item.item[header.key])"
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                                             :error-messages="item.item.projectSourceErrors"
                                             @update:model-value="onEditCommittedProjectProperty(item.item, header.key, item.item.projectSource)"
@@ -161,7 +161,7 @@
                                                 v-maska:[yearMask]
                                                 density="compact"
                                                 variant="underlined"
-                                                :style="getYearStyle(item.item)"
+                                                :style="getYearStyle(item.item[header.key])"
                                                 :rules="[inputRules['committedProjectRules'].hasInvestmentYears([firstYear, lastYear]), inputRules['generalRules'].valueIsNotEmpty, inputRules['generalRules'].valueIsWithinRange(item.item[header.key], [firstYear, lastYear])]"
                                                 :error-messages="item.item.yearErrors"/>
                                                 
@@ -169,7 +169,7 @@
                                                 :model-value='item.item[header.key]'
                                                 density="compact"
                                                 variant="underlined"
-                                                :style="getCostStyle(item.item)"
+                                                :style="getCostStyle(item.item[header.key])"
                                                 :error-messages="item.item.costErrors"
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"/>
 
@@ -380,6 +380,10 @@ import ConfirmDialog from 'primevue/confirmdialog';
     let categories: string[] = [];
     const missingTreatments = ref< string[] >([]);
     const missingTreatmentsValue = ref< string[] >([]);
+    const invalidProjectSources = ref<number[]>([]);
+    const invalidCosts = ref<number[]>([]);
+    const invalidYears = ref<number[]>([]);
+    const invalidTreatments = ref<string[]>([]);
     let allImportedTreatments;
     let scenarioId: string = getBlankGuid();
     let networkId: string = getBlankGuid();
@@ -615,20 +619,17 @@ import ConfirmDialog from 'primevue/confirmdialog';
             checkHasUnsavedChanges();
         });
 
-    watch(investmentYears, () => {
-        //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/min
-        if (investmentYears.value.length > 0) {
-            lastYear = Math.max(...investmentYears.value);
-            firstYear = Math.min(...investmentYears.value);
+    watch(investmentYears, (newYears) => {
+        if (newYears.length > 0) {
+            lastYear = Math.max(...newYears);
+            firstYear = Math.min(...newYears);
         }
     });
 
-    watch(networks, () => {
-        const net: any = networks.value.find(o => o.id == networkId)
-        if(!isNil(network)){
-            network = net? net : undefined;
-        }           
+    watch(networks, (newNetworks) => {
+        network = newNetworks.find(o => o.id === networkId) || clone(emptyNetwork);
     });
+
 
     watch(stateAttributes, () => {
         attributeSelectItems = stateAttributes.value.map(
@@ -680,19 +681,63 @@ import ConfirmDialog from 'primevue/confirmdialog';
            selectedCpItems.value.splice(0,1);
         if(selectedCpItems.value.length === 1)
            selectedCommittedProject.value = selectedCpItems.value[0].id;
-    });
+    },{ immediate: true });
 
     async function onPaginationChanged() {
-        if(isRunning)
-        {
+        if (isRunning) {
             return;
         }
-        missingTreatments.value = [];
+
+        resetValidationArrays();
+
         isRunning = true
         checkHasUnsavedChanges();
+
+        const request = createPaginationRequest();
+
+        if (scenarioId !== uuidNIL) {
+            try {
+                const response = await CommittedProjectsService.getCommittedProjectsPage(scenarioId, request);
+
+                if (response.data) {
+                    const data = response.data as PagingPage<SectionCommittedProject>;
+                    sectionCommittedProjects.value = data.items;
+                    rowCache.value = clone(sectionCommittedProjects.value);
+                    totalItems.value = data.totalItems;
+                    allImportedTreatments = data.items;
+
+                    // Check imported treatments and other validations
+                    validateImportedData(data.items);
+
+                    // Sort missing treatments if any
+                    if (missingTreatments.value.length > 0) {
+                        importedProjectTreatmentBoolean.value = true;
+                        missingTreatmentsValue.value = missingTreatments.value;
+
+                        data.items = sortMissingTreatments(data.items);
+                    } else {
+                        importedProjectTreatmentBoolean.value = false;
+                    }
+
+                    const row = data.items.find(scp => scp.id == selectedCommittedProject.value);
+                    if (isNil(row)) {
+                        selectedCommittedProject.value = '';
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching committed projects:', error);
+            } finally {
+                isRunning = false;
+            }
+        } else {
+            isRunning = false;
+        }
+    }
+
+    function createPaginationRequest(): PagingRequest<SectionCommittedProject> {
         const { sort, descending, page, rowsPerPage } = projectPagination;
 
-        const request: PagingRequest<SectionCommittedProject>= {
+        return {
             page: page,
             rowsPerPage: rowsPerPage,
             syncModel: {
@@ -701,73 +746,60 @@ import ConfirmDialog from 'primevue/confirmdialog';
                 rowsForDeletion: deletionIds.value,
                 addedRows: addedRows.value,
                 isModified: false
-            },           
+            },
             sortColumn: sort != null && !isNil(sort[0]) ? sort[0].key : '',
             isDescending: descending != null ? descending : false,
             search: currentSearch.value
         };
-        if(scenarioId !== uuidNIL)
-            CommittedProjectsService.getCommittedProjectsPage(scenarioId, request).then(response => {
-                if(response.data){
-                    isRunning = false;
-                    let data = response.data as PagingPage<SectionCommittedProject>;
-                    sectionCommittedProjects.value = data.items;
-                    rowCache.value = clone(sectionCommittedProjects.value)
-                    totalItems.value = data.totalItems;
-                    const row = data.items.find(scp => scp.id == selectedCommittedProject.value);
-                    allImportedTreatments = data.items;
+    }
 
-                    checkProjectSources();
+    function resetValidationArrays() {
+        const arraysToReset = [
+            missingTreatments, 
+            invalidProjectSources, 
+            invalidCosts, 
+            invalidYears, 
+            invalidTreatments
+        ];
+        arraysToReset.forEach(arr => arr.value = []);
+    }
 
-                    //Check to see if any imported treatments are missing from the treatment list
-                    for(let i = 0; i < data.items.length; i++)
-                    {
-                        selectedCommittedProject.value;
-                        importedProjectTreatmentName.value = data.items[i].treatment;
-                        if(!treatmentSelectItems.value.includes(importedProjectTreatmentName.value))
-                        {
-                            importedProjectTreatmentBoolean.value = true;
-                            missingTreatments.value.push(importedProjectTreatmentName.value);
-                        }
-                    }
+    function validateImportedData(items: SectionCommittedProject[]) {
+        const treatmentSet = new Set(treatmentSelectItems.value); // Optimize includes check
+        items.forEach(item => {
+            importedProjectTreatmentName.value = item.treatment;
 
-                    //If there are mmissing treatments sort them with the missing at the top
-                    if(missingTreatments.value.length === 0)
-                        {
-                            importedProjectTreatmentBoolean.value = false;
-                        }
-                        else
-                        {
-                            missingTreatmentsValue.value = missingTreatments.value;
+            if (!treatmentSet.has(importedProjectTreatmentName.value)) {
+                missingTreatments.value.push(importedProjectTreatmentName.value);
+            }
 
-                            const n = data.items.length;
+            if (!validProjectSource(item.projectSource)) {
+                invalidProjectSources.value.push(item.projectSource);
+            }
 
-                            for (let i = 0; i < n - 1; i++) {
-                                for (let j = 0; j < n - i - 1; j++) {
-                                    const treatmentA = allImportedTreatments[j].treatment;
-                                    const treatmentB = allImportedTreatments[j + 1].treatment;
+            if (!validCost(item.cost)) {
+                invalidCosts.value.push(item.cost);
+            }
 
-                                    const isInMissingTreatmentsA = missingTreatments.value.includes(treatmentA);
-                                    const isInMissingTreatmentsB = missingTreatments.value.includes(treatmentB);
+            if (!item.year || item.year < firstYear || item.year > lastYear) {
+                invalidYears.value.push(item.year);
+            }
+        });
+    }
 
-                                    if (!isInMissingTreatmentsA && isInMissingTreatmentsB) {
-                                    const temp = allImportedTreatments[j];
-                                    allImportedTreatments[j] = allImportedTreatments[j + 1];
-                                    allImportedTreatments[j + 1] = temp;
-                                    }
-                                }
-                            }
-                            data.items = allImportedTreatments;
-                        }
+    function sortMissingTreatments(items: SectionCommittedProject[]) {
+        return items.sort((a, b) => {
+            const isInMissingTreatmentsA = missingTreatments.value.includes(a.treatment);
+            const isInMissingTreatmentsB = missingTreatments.value.includes(b.treatment);
 
-
-                    if(isNil(row)) {
-                        selectedCommittedProject.value = '';
-                    }
-                } 
-            }); 
-        else
-            isRunning = false;
+            if (isInMissingTreatmentsA && !isInMissingTreatmentsB) {
+                return -1; // a should come first
+            } else if (!isInMissingTreatmentsA && isInMissingTreatmentsB) {
+                return 1; // b should come first
+            } else {
+                return 0; // no change in order
+            }
+        });
     }
 
      watch(deletionIds, () => {
@@ -830,50 +862,49 @@ import ConfirmDialog from 'primevue/confirmdialog';
         onPaginationChanged();   
      }
 
-     function OnSaveClick(){
+     function OnSaveClick() {
         const upsertRequest = {
-                    libraryId: null,
-                    rowsForDeletion: deletionIds.value,
-                    updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
-                    addedRows: addedRows.value,
-                    isModified: false    
-                }
-        if(!committedProjectsAreChanged())
-        {
+            libraryId: null,
+            rowsForDeletion: deletionIds.value,
+            updateRows: Array.from(updatedRowsMap.values()).map(r => r[1]),
+            addedRows: addedRows.value,
+            isModified: false    
+        };
+
+        if (!committedProjectsAreChanged()) {
             updateNoTreatment();
+            return;
         }
-        else if(deletionIds.value.length > 0){
+
+        const performUpsert = () => {
+            CommittedProjectsService.upsertCommittedProjects(scenarioId, upsertRequest).then(handleUpsertResponse);
+        };
+
+        if (deletionIds.value.length > 0) {
             CommittedProjectsService.deleteSpecificCommittedProjects(deletionIds.value).then((response: AxiosResponse) => {
-                if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     deletionIds.value = [];
-                    addSuccessNotificationAction({message:'Deleted committed projects'})              
+                    addSuccessNotificationAction({ message: 'Deleted committed projects' });
                 }
-                CommittedProjectsService.upsertCommittedProjects(scenarioId, upsertRequest).then((response: AxiosResponse) => {
-                    if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                        addSuccessNotificationAction({message:'Committed Projects Updated Successfully'}) 
-                        addedRows.value = [];
-                        updatedRowsMap.clear();
-                    }
-                    if(isNoTreatmentBefore.value != isNoTreatmentBeforeCache.value)
-                        updateNoTreatment()
-                    else
-                        resetPage()
-                });
-            });         
+                performUpsert();
+            });
+        } else {
+            performUpsert();
         }
-        else
-            CommittedProjectsService.upsertCommittedProjects(scenarioId, upsertRequest).then((response: AxiosResponse) => {
-                if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    addSuccessNotificationAction({message:'Committed Projects Updated Successfully'}) 
-                    addedRows.value = [];
-                    updatedRowsMap.clear();
-                }
-                if(isNoTreatmentBefore.value != isNoTreatmentBeforeCache.value)
-                        updateNoTreatment()
-                else
-                    resetPage()
-            })   
-     }
+    }
+
+     function handleUpsertResponse(response: AxiosResponse) {
+        if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+            addSuccessNotificationAction({ message: 'Committed Projects Updated Successfully' });
+            addedRows.value = [];
+            updatedRowsMap.clear();
+            if (isNoTreatmentBefore.value !== isNoTreatmentBeforeCache.value) {
+                updateNoTreatment();
+            } else {
+                resetPage();
+            }
+        }
+    }
 
     function handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
         row.treatment = treatmentName;
@@ -938,30 +969,29 @@ import ConfirmDialog from 'primevue/confirmdialog';
         onPaginationChanged();
      }
 
-      function onEditCommittedProjectProperty(scp: SectionCommittedProjectTableData, property: string, value: any) {
-       let row = sectionCommittedProjects.value.find(o => o.id === scp.id)
-        if(!isNil(row))
-        {
-            if(property === 'treatment'){
-                handleTreatmentChange(scp, value, row);
-                checkTreatments();             
-            }
-            else if(property === 'keyAttr'){
-                handleKeyAttrChange(row, scp, value);               
-            }
-            else if(property === 'budget'){
-                handleBudgetChange(row, scp, value)
-            }
-            else if(property === 'projectId') {
-                handleprojectIdChange(row, scp, value);
-            }
-            else if(property === 'projectSource') {
-                handleProjectSourceChange(row, scp, value);
-                checkProjectSources();
-            }
-            else{
-                updateCommittedProject(row, value, property)
-                onPaginationChanged()
+     function onEditCommittedProjectProperty(scp: SectionCommittedProjectTableData, property: string, value: any) {
+        let row = sectionCommittedProjects.value.find(o => o.id === scp.id);
+        if (!isNil(row)) {
+            switch (property) {
+                case 'treatment':
+                    handleTreatmentChange(scp, value, row);
+                    break;
+                case 'keyAttr':
+                    handleKeyAttrChange(row, scp, value);
+                    break;
+                case 'budget':
+                    handleBudgetChange(row, scp, value);
+                    break;
+                case 'projectId':
+                    handleprojectIdChange(row, scp, value);
+                    break;
+                case 'projectSource':
+                    handleProjectSourceChange(row, scp, value);
+                    break;
+                default:
+                    updateCommittedProject(row, value, property);
+                    onPaginationChanged();
+                    break;
             }
         }
     }
@@ -1075,18 +1105,12 @@ import ConfirmDialog from 'primevue/confirmdialog';
 }
 
 
-    function setCpItems(){
-        currentPage.value = sectionCommittedProjects.value.map(o => 
-        {          
-            const row: SectionCommittedProjectTableData = cpItemFactory(o);
-            return row
-        })
+    function setCpItems() {
+        currentPage.value = sectionCommittedProjects.value.map(cpItemFactory);
         checkExistenceOfAssets();
-        checkYears();
-        checkProjectSources();
-        checkTreatments();
-        checkCosts();
+        validateCommittedProjects();
     }
+
 
     function cpItemFactory(scp: SectionCommittedProject): SectionCommittedProjectTableData {
         const budget: SimpleBudgetDetail = find(
@@ -1145,14 +1169,14 @@ import ConfirmDialog from 'primevue/confirmdialog';
 
     function handleProjectSourceChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, projectSource: string) {
         row.projectSource = projectSource;
-    updateCommittedProject(row, projectSource, 'projectSource');
-    onPaginationChanged();
+        updateCommittedProject(row, projectSource, 'projectSource');
+        onPaginationChanged();
     }
 
     function handleprojectIdChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, projectId: string) {
         row.projectId = projectId;
-    updateCommittedProject(row, projectId, 'projectId');
-    onPaginationChanged();
+        updateCommittedProject(row, projectId, 'projectId');
+        onPaginationChanged();
     }
 
     function onUploadCommittedProjectTemplate(){
@@ -1220,93 +1244,115 @@ import ConfirmDialog from 'primevue/confirmdialog';
                           
     }
 
-    // (value >= range[0] && value <= range[1]) || `Value must be in range ${range[0]} - ${range[1]}`;
+    //Add red boxes round missing treatments
+    const getTreatmentStyle = (treatment: string) => {
+        const isInMissingTreatments = missingTreatmentsValue.value.includes(treatment);
+        return isInMissingTreatments ? { border: '1px solid red', padding: '3px' } : {};
+    };
 
-    function checkYear(scp:SectionCommittedProjectTableData){
-        // Ensure the year value is not empty
+    const getYearStyle = (year: number) => {
+        const isInInvalidYears = invalidYears.value.includes(year);
+        return isInInvalidYears ? { border: '1px solid red', padding: '3px' } : {};
+    };
+
+    const getProjectSourceStyle = (projectSource: string) => {
+        let source = getProjectSourceKeyFromValueMap(projectSourceMap, projectSource);
+        const isInInvalidProjectSources = typeof source === 'number' && invalidProjectSources.value.includes(source);
+        return isInInvalidProjectSources ? { border: '1px solid red', padding: '3px' } : {};
+    };
+    function getProjectSourceKeyFromValueMap(map: Map<number, string>, value: string) {
+        for (let [key, mapValue] of map.entries()) {
+            if (mapValue === value) {
+                return key;
+            }
+        }
+        return undefined;
+    }
+
+    const getCostStyle = (cost: number) => {
+        const isInInvalidCosts = invalidCosts.value.includes(cost);
+        return isInInvalidCosts ? { border: '1px solid red', padding: '3px' } : {};
+    };
+
+    function validYear(year: number) {
+
+    }
+
+    function validTreatmentName(treatment: string) {
+        return treatmentSelectItems.value.includes(treatment);
+    }
+
+    function validProjectSource(source: number | string) {
+        return source !== 0 && source !== 'None'
+    }
+
+    function validCost(cost: number) {
+        return cost !== -1.0 || cost !== -1;
+    }
+
+    function validateCommittedProjects() {
+        currentPage.value.forEach(scp => {
+
+            const errors = {
+                yearErrors: checkYear(scp),
+                treatmentErrors: checkTreatment(scp.treatment),
+                costErrors: checkCost(scp.cost),
+                projectSourceErrors: checkProjectSource(scp.projectSource),
+            };
+
+            scp.yearErrors = errors.yearErrors;
+            scp.treatmentErrors = errors.treatmentErrors;
+            scp.costErrors = errors.costErrors;
+            scp.projectSourceErrors = errors.projectSourceErrors;
+        });
+    }
+
+    function checkYear(scp: SectionCommittedProjectTableData) {
+        const errors = [];
+
         if (!hasValue(scp.year)) {
-            scp.yearErrors = ['Value cannot be empty'];
-            return;
+            errors.push('Year cannot be empty');
+            return errors;
         }
 
-        // Check if investment years are set
-        if (investmentYears.value.length === 0) {
-            scp.yearErrors = ['There are no years in the investment settings'];
-            return;
+        const yearStr = scp.year.toString();
+        if (yearStr.length < 4 || scp.year < 1900) {
+            errors.push('Invalid year value');
         }
 
-        // Ensure the year is a valid four-digit number
-        if (scp.year.toString().length < 4 || scp.year < 1900) {
-            scp.yearErrors = ['Invalid Year value'];
-            return;
-        }
-
-        // Check if the year is within the specified range
-        if (scp.year < firstYear || scp.year > lastYear) {
-            scp.yearErrors = [`Year must be within ${firstYear} - ${lastYear}`];
-            return;
-        }
-
-        // If all checks pass, clear the errors
-        scp.yearErrors = [];
-    }
-    function checkYears()
-    {
-        currentPage.value.forEach(scp => {
-            checkYear(scp);
-        });
-    }
-
-    function checkProjectSources() {
-        currentPage.value.forEach(scp => {
-            checkProjectSource(scp);
-        });
-    }
-    function checkProjectSource(scp: SectionCommittedProjectTableData) {
-        if (scp.projectSource === "None") {
-            scp.projectSourceErrors.push('Select a project source.')
+        if (investmentYears.value.length > 0) {
+            if (scp.year < firstYear || scp.year > lastYear) {
+                errors.push(`Year must be within ${firstYear} - ${lastYear}`);
+            }
         } else {
-            scp.errors = [];
+            errors.push('There are no years in the investment settings');
         }
+
+        return errors;
     }
 
-    function checkTreatments() {
-        currentPage.value.forEach(scp => {
-            checkTreatment(scp);
-        });
-    }
-    function checkTreatment(scp: SectionCommittedProjectTableData) {
-        const treatments = treatmentSelectItems.value;
-        if (!treatments.includes(scp.treatment)) {
-            scp.treatmentErrors.push('Select a correct treatment');
-        } else {
-            scp.errors = [];
+    function checkTreatment(treatment: string) {
+        const errors = [];
+        if (!validTreatmentName(treatment)) {
+            errors.push('Select a valid treatment');
         }
+        return errors;
     }
 
-    function checkCosts() {
-        currentPage.value.forEach(scp => {
-            checkCost(scp);
-        });
-    }
-    function checkCost(scp: SectionCommittedProjectTableData) {
-        let cost = scp.cost;
-        if (cost === -1 || cost === -1.0) {
-            scp.costErrors.push('Fix project cost.')
-        } else {
-            scp.errors = [];
+    function checkCost(cost: number) {
+        const errors = [];
+        if (!validCost(cost)) {
+            errors.push('Fix project cost');
         }
+        return errors;
     }
 
-    function checkBudgets() {
-        currentPage.value.forEach(scp => {
-            checkBudget(scp);
-        });
-    }
-    function checkBudget(scp: SectionCommittedProjectTableData) {
-        if (scp.budget) {
-            scp.budgetErrors.push('Select a correct budget.');
+    function checkProjectSource(source: string) {
+        const errors = [];
+        if (!validProjectSource(source)) {
+            errors.push('Select a valid project source');
         }
+        return errors;
     }
 
     function updateCommittedProject(row: SectionCommittedProject, value: any, property: string){
@@ -1452,35 +1498,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
             })         
         } 
     }   
-
-    //Add red boxes round missing treatments
-    const getTreatmentStyle = (treatment: string) => {
-        const isInMissingTreatments = missingTreatmentsValue.value.includes(treatment);
-        return isInMissingTreatments ? { border: '1px solid red', padding: '3px' } : {};
-    };
-    // Conditional style function for the 'year' field
-    const getYearStyle = (scp: SectionCommittedProjectTableData) => {
-        checkYear(scp);  
-        return scp.yearErrors.some(error => !!error) ? { border: '1px solid red', padding: '3px' } : {};
-    };
-
-    // Conditional style function for the 'budget' field
-    const getBudgetStyle = (scp: SectionCommittedProjectTableData) => {
-        checkBudget(scp);  
-        return scp.budgetErrors.some(error => !!error) ? { border: '1px solid red', padding: '3px' } : {};
-    };
-
-    // Conditional style function for the 'projectSource' field
-    const getProjectSourceStyle = (scp: SectionCommittedProjectTableData) => {
-        checkProjectSource(scp);  
-        return scp.projectSourceErrors.some(error => !!error) ? { border: '1px solid red', padding: '3px' } : {};
-    };
-
-    // Conditional style function for the 'cost' field
-    const getCostStyle = (scp: SectionCommittedProjectTableData) => {
-        checkCost(scp); 
-        return scp.costErrors.some(error => !!error) ? { border: '1px solid red', padding: '3px' } : {};
-    };
 
     async function initializePages(){
         const request: PagingRequest<SectionCommittedProject>= {

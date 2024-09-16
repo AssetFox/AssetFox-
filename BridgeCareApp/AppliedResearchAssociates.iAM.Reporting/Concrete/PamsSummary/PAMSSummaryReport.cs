@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.CountySummary;
@@ -217,7 +218,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 }
             }
 
-            var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int pavementCount, string projectSource, string treatmentCategory)>>();
+            var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, List<CommittedProjectMetaData>>>();
             var simulationYears = new List<int>();
             foreach (var item in reportOutputData.Years) {
                 simulationYears.Add(item.Year);

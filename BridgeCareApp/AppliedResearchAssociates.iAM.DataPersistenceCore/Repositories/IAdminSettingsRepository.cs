@@ -58,4 +58,8 @@ public interface IAdminSettingsRepository
     void SetImplementationLogo(byte[] productLogo);
 
     void DeleteAdminSetting(string settingKey);
+
+    public string GetAdminContactEmail();
+
+    public void SetAdminContactEmail(string email);
 }

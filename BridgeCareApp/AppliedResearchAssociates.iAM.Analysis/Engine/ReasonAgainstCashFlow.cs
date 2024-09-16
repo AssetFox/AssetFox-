@@ -26,16 +26,19 @@ public enum ReasonAgainstCashFlow
     /// <summary>
     ///     Indicates a cash flow rule whose applicable distribution rule is for only one year.
     ///     <em>This kind of distribution used to be automatically rejected. It is no longer
-    ///     automatically rejected. The funding is simply handled as it would be for a typical
-    ///     1-year selection without cash flow.</em>
+    ///     rejected. The funding is simply handled as it would be for a typical 1-year selection
+    ///     without cash flow.</em>
     /// </summary>
-    [Obsolete("One-year distributions are no longer automatically rejected.")]
+    [Obsolete("One-year distributions are no longer rejected.")]
     ApplicableDistributionRuleIsForOnlyOneYear,
 
     /// <summary>
     ///     Indicates a cash flow rule whose applicable distribution rule would have extended the
-    ///     cash flow beyond the end of the analysis period.
+    ///     cash flow beyond the end of the analysis period. <em>This distribution situation used to
+    ///     be automatically rejected. It is no longer rejected. The intra-period funding is
+    ///     calculated and included in the output as it would be for a normal cash flow.</em>
     /// </summary>
+    [Obsolete("Distributions beyond the period are no longer rejected.")]
     LastYearOfCashFlowIsOutsideOfAnalysisPeriod,
 
     /// <summary>

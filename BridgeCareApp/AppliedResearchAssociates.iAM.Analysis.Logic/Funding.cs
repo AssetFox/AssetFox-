@@ -1,6 +1,4 @@
-﻿using Google.OrTools.LinearSolver;
-
-namespace AppliedResearchAssociates.iAM.Analysis.Logic;
+﻿namespace AppliedResearchAssociates.iAM.Analysis.Logic;
 
 public static partial class Funding
 {
@@ -147,18 +145,11 @@ public static partial class Funding
             costPercentagesSum += costPercentage;
         }
 
-        if (costPercentagesSum != 100)
+        if (costPercentagesSum <= 0 || costPercentagesSum > 100)
         {
             throw new ArgumentException(
-                $"Cost percentages sum [{costPercentagesSum}] does not equal 100.",
+                $"Cost percentages sum [{costPercentagesSum}] must be in the interval (0, 100].",
                 nameof(costPercentagePerYear));
-        }
-
-        if (!settings.UnlimitedSpending && amountPerBudgetPerYear.Select(Enumerable.Sum).Sum() < costPerTreatment.Sum())
-        {
-            // Trivially unsolvable.
-            allocationPerBudgetAndTreatmentPerYear = Array.Empty<decimal?[,]>();
-            return false;
         }
 
         // Optimization

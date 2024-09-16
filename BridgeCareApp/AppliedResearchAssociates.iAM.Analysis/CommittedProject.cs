@@ -22,8 +22,6 @@ public sealed class CommittedProject : Treatment
 
     public double Cost { get; set; }
 
-    public ProjectSourceDTO ProjectSource { get; set; }
-
     /// <remarks>
     ///     This property isn't used by the analysis engine. It probably shouldn't exist among the
     ///     types in this module.
@@ -31,6 +29,8 @@ public sealed class CommittedProject : Treatment
     public DateTime LastModifiedDate { get; set; }
 
     public override IReadOnlyDictionary<NumberAttribute, double> PerformanceCurveAdjustmentFactors => TemplateTreatment.PerformanceCurveAdjustmentFactors;
+
+    public ProjectSourceDTO ProjectSource { get; set; }
 
     public override int ShadowForAnyTreatment => TemplateTreatment.ShadowForAnyTreatment;
 
@@ -46,6 +46,8 @@ public sealed class CommittedProject : Treatment
     }
 
     public int Year { get; }
+
+    internal bool ShouldApplyConsequences { get; set; } = true;
 
     public override ValidationResultBag GetDirectValidationResults()
     {
@@ -67,7 +69,7 @@ public sealed class CommittedProject : Treatment
     internal override bool CanUseBudget(Budget budget) => budget == Budget;
 
     internal override IReadOnlyCollection<ConsequenceApplicator> GetConsequenceApplicators(AssetContext scope)
-        => TemplateTreatment.GetConsequenceApplicators(scope);
+        => ShouldApplyConsequences ? TemplateTreatment.GetConsequenceApplicators(scope) : Array.Empty<ConsequenceApplicator>();
 
     internal override double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts) => Cost;
 

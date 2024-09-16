@@ -1,0 +1,70 @@
+﻿{
+  "InitialAssetSummaries": [
+    {
+      "AssetId": "00000000-0000-0000-0000-000000000000",
+      "AssetName": "LA 1",
+      "ValuePerNumericAttribute": {
+        "AREA": 1,
+        "AGE": 25,
+        "HEALTH": 85
+      },
+      "ValuePerTextAttribute": {}
+    }
+  ],
+  "InitialConditionOfNetwork": 85,
+  "LastModifiedDate": "0001-01-01T00:00:00",
+  "RollForwardEvents": [],
+  "Years": [
+    {
+      "Assets": [
+        {
+          "ProjectSource": "None",
+          "AppliedTreatment": "Lovecraftian Horror (Year 1)",
+          "SpatialWeightForOrderingOptions": null,
+          "TreatmentCause": "CommittedProject",
+          "TreatmentConsiderations": [
+            {
+              "BudgetPriorityLevel": null,
+              "CashFlowConsiderations": [],
+              "FundingCalculationInput": null,
+              "FundingCalculationOutput": {
+                "AllocationMatrix": [
+                  {
+                    "Year": 2020,
+                    "BudgetName": "Bag of money",
+                    "TreatmentName": "Lovecraftian Horror (Year 1)",
+                    "AllocatedAmount": 6000000.0
+                  }
+                ]
+              },
+              "TreatmentName": "Lovecraftian Horror (Year 1)"
+            }
+          ],
+          "TreatmentFundingIgnoresSpendingLimit": false,
+          "TreatmentOptions": [],
+          "TreatmentRejections": [],
+          "TreatmentSchedulingCollisions": [],
+          "TreatmentStatus": "Progressed",
+          "AssetId": "00000000-0000-0000-0000-000000000000",
+          "AssetName": "LA 1",
+          "ValuePerNumericAttribute": {
+            "AREA": 1,
+            "AGE": 25,
+            "HEALTH": 84
+          },
+          "ValuePerTextAttribute": {}
+        }
+      ],
+      "Budgets": [
+        {
+          "AvailableFunding": -5000000.0,
+          "BudgetName": "Bag of money"
+        }
+      ],
+      "ConditionOfNetwork": 84,
+      "DeficientConditionGoals": [],
+      "TargetConditionGoals": [],
+      "Year": 2020
+    }
+  ]
+}

@@ -511,6 +511,17 @@ internal sealed class AssetContext : CalculateEvaluateScope
             var numberOfProjects = committedProjects.Count();
             if (numberOfProjects > 1)
             {
+                if (committedProjects.Any(cp => !cp.ShouldApplyConsequences))
+                {
+                    SimulationRunner.MessageBuilder = new("Cash-flow committed project overlaps with non-cash-flow committed project on the same asset.")
+                    {
+                        AssetId = Asset.Id,
+                        AssetName = Asset.AssetName,
+                    };
+                    var error = SimulationLogMessageBuilders.RuntimeFatal(SimulationRunner.MessageBuilder, SimulationRunner.Simulation.Id);
+                    SimulationRunner.Send(error);
+                }
+
                 EventSchedule.Add(year, new CommittedProjectBundle(committedProjects));
             }
             else if (numberOfProjects == 1)

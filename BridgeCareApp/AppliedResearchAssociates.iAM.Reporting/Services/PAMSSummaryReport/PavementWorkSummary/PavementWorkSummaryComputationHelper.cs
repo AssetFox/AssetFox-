@@ -4,6 +4,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.Reporting.Models;
 using static AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary.PavementTreatmentHelper;
 using WorkSummaryByBudgetModel = AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport.WorkSummaryByBudgetModel;
 using YearsData = AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport.YearsData;
@@ -129,7 +130,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         }
 
         internal void FillDataToUseInExcel(SimulationOutput reportOutputData,
-                Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>> yearlyCostCommittedProj,
+                Dictionary<int, Dictionary<string, List<CommittedProjectMetaData>>> yearlyCostCommittedProj,
                 Dictionary<int, Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>> costLengthPerSurfaceIdPerTreatmentPerYear,
                 Dictionary<int, Dictionary<TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
                 Dictionary<string, string> treatmentCategoryLookup,
@@ -142,7 +143,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             {
                 costLengthPerSurfaceIdPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, Dictionary<int, (decimal treatmentCost, decimal compositeTreatmentCost, int length)>>());
                 costAndLengthPerTreatmentGroupPerYear.Add(yearData.Year, new Dictionary<TreatmentGroup, (decimal treatmentCost, int length)>());
-                yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, (decimal treatmentCost, int bridgeCount, string projectSource, string treatmentCategory)>();
+                yearlyCostCommittedProj[yearData.Year] = new Dictionary<string, List<CommittedProjectMetaData>>();
                 foreach (var section in yearData.Assets)
                 {                    
                     var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
@@ -180,24 +181,34 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                         appliedTreatment.ToLower() != PAMSConstants.NoTreatment)
                     {
+                        var committedProject = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment) &&
+                                                _.Year == yearData.Year && _.ProjectSource.ToString() == section.ProjectSource);
+                        var projectSource = committedProject?.ProjectSource.ToString();                        
                         if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(appliedTreatment))
                         {
-                            var projectSource = committedProjectsForWorkOutsideScope.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment) &&
-                                                _.Year == yearData.Year && _.ProjectSource.ToString() == section.ProjectSource)?.ProjectSource.ToString();
-                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, (cost, 1, projectSource, treatmentCategory));
+                            var committedProjectMetaData = new List<CommittedProjectMetaData>() {
+                                                                new() { TreatmentCost = cost,
+                                                                    ProjectSource = projectSource,
+                                                                    TreatmentCategory = treatmentCategory
+                                                                }};
+                            yearlyCostCommittedProj[yearData.Year].Add(appliedTreatment, committedProjectMetaData);
                         }
                         else
                         {
-                            var currentRecord = yearlyCostCommittedProj[yearData.Year][appliedTreatment];
-                            var treatmentCost = currentRecord.treatmentCost + cost;
-                            var bridgeCount = currentRecord.bridgeCount + 1;
-                            var projectSource = currentRecord.projectSource;
-                            yearlyCostCommittedProj[yearData.Year][appliedTreatment] = (treatmentCost, bridgeCount, projectSource, treatmentCategory);
+                            yearlyCostCommittedProj[yearData.Year][appliedTreatment].Add(new()
+                            {
+                                TreatmentCost = cost,
+                                ProjectSource = projectSource,
+                                TreatmentCategory = treatmentCategory // TODO Should this be committed proj's category in future?
+                            });
                         }
 
                         // Remove from committedProjectsForWorkOutsideScope
                         // Bundled has many treatment names under AppliedTreatment
-                        var toRemove = committedProjectsForWorkOutsideScope.Where(_ => appliedTreatment.Contains(_.Treatment) && _.Year == yearData.Year);
+                        var toRemove = committedProjectsForWorkOutsideScope.Where(_ => appliedTreatment.Contains(_.Treatment) &&
+                                        _.Year == yearData.Year &&
+                                        _.ProjectSource.ToString() == section.ProjectSource &&
+                                        Math.Round(_.Cost, 0) == Convert.ToDouble(cost));
                         if (toRemove != null)
                         {
                             committedProjectsForWorkOutsideScope.RemoveAll(_ => toRemove.Contains(_));

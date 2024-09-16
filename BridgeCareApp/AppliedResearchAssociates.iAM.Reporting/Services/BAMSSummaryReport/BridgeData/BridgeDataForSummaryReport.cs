@@ -217,7 +217,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "LeakingJnts"); //Leaking Joints
 
-                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "Scour_Crit_Cat"); // Scour Critical
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "Scour_Crit_Cat"); //Scour Critical
 
                 //--------------------- Funding ---------------------
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "HBRR_ELIG"); //HBRR Elig

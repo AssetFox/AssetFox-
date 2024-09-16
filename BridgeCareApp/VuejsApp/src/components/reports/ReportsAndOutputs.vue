@@ -60,17 +60,19 @@
                                 <td>{{ props.item.reportStatus }}</td>
                                 <td class="text-xs-left">
                                     <v-btn
-                                        @click="onGenerateReport(props.item.id, true)"
-                                        :disabled="props.item.isGenerated"
-                                        class="ghd-gray"
-                                        flat
+                                    @click="onGenerateReport(props.item.id, true)"
+                                    :disabled="props.item.isGenerated"
+                                    :class="props.item.isGenerated ? 'ghd-gray' : 'ghd-green'"
+                                    flat
                                     >
-                                        <img class="img-general" :src="getUrl('assets/icons/attributes-dark.svg')"/>
-
+                                    <img
+                                        :class="props.item.isGenerated ? 'gray-icon' : 'green-icon'"
+                                        class="img-general"
+                                        :src="getUrl('assets/icons/attributes-dark.svg')"
+                                    />
                                     </v-btn>
                                     <v-btn
                                         @click="onDownloadReport(props.item.id)"
-                                        :disabled="!props.item.isGenerated"
                                         flat
                                     >
                                         <img class='img-general' :src="getUrl('assets/icons/download.svg')"/>
@@ -209,10 +211,6 @@ import { queuedWorkStatusUpdate } from '@/shared/models/iAM/queuedWorkStatusUpda
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
             getReportStatus,
         );
-        $emitter.on(
-            Hub.BroadcastEventType.BroadcastFastWorkQueueStatusUpdateEvent,
-            getFastWorkQueueUpdate,
-        );
     });
 
     onBeforeUnmount(async () => {
@@ -220,11 +218,6 @@ import { queuedWorkStatusUpdate } from '@/shared/models/iAM/queuedWorkStatusUpda
             Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
             getReportStatus,
         );
-        $emitter.off(
-            Hub.BroadcastEventType.BroadcastFastWorkQueueStatusUpdateEvent,
-            getFastWorkQueueUpdate,
-        );
-
     });
     
 
@@ -455,18 +448,16 @@ import { queuedWorkStatusUpdate } from '@/shared/models/iAM/queuedWorkStatusUpda
             propEq('name', data.simulationReportDetail.reportType),
             currentPage.value,
         ) as Report
-        selectedReport.value.reportStatus = data.simulationReportDetail.status;
-        } 
-    }
-
-    function getFastWorkQueueUpdate(data: any) {
-            var updatedQueueItem = data.queueItem as queuedWorkStatusUpdate
-            if(isNil(updatedQueueItem))
-                return;
-            var queueItem = currentPage.value.find(_ => _.id === updatedQueueItem.id)
-            selectedReport.value.reportStatus = queueItem?.reportStatus;
+            const reportIndex = currentPage.value.findIndex(report => report.name === data.simulationReportDetail.reportType);
+            if(data.simulationReportDetail.status && reportIndex !== -1)
+            {
+                currentPage.value[reportIndex].reportStatus = data.simulationReportDetail.status;
+            }
+        }
     }
 
 </script>
 <style>
+.green-icon {
+    filter: invert(61%) sepia(70%) saturate(486%) hue-rotate(79deg) brightness(82%) contrast(85%);}
 </style>

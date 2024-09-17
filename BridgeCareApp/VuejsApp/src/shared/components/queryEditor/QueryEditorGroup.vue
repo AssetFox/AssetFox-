@@ -10,8 +10,8 @@
                             v-model="selectedMatch"
                             item-title="text"
                             item-value="value"></v-select>
-                            <v-btn @click="onDeleteClick" v-if="depth !== 0" style="padding-left: 0;" class="ghd-blue" variant="text">
-                                <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
+                            <v-btn @click="onDeleteClick" v-if="depth !== 0" style="padding-left: 0;" class="ghd-red" variant="text">
+                                <TrashCanSvg />
                             </v-btn>
                         </v-row>
                         
@@ -69,6 +69,7 @@ import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { clone, isNil } from 'ramda';
 import { getNewGuid } from '@/shared/utils/uuid-utils';
 import { getuid } from 'process';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
     
 const emit = defineEmits(['update:criteria', 'delete'])
     const matchTypes = ref<SelectItem[]>([{text: 'AND', value:'AND'}, {text: 'OR', value: 'OR'}]);

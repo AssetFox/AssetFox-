@@ -92,17 +92,17 @@
                                     class="ghd-white-bg ghd-blue ghd-button-text"
                                     flat
                                 >
-                                    <v-icon style="font-size:20px !important" class="ghd-blue">fas fa-eraser</v-icon>
+                                    <v-icon style="font-size:20px !important" class="ghd-red">fas fa-eraser</v-icon>
                                 </v-btn>
                                 <v-btn id="TreatmentDetailsTab-EditCriteria-vbtn"
                                     @click="
                                         onShowTreatmentCriterionEditorDialog
                                     "
-                                    class="edit-icon"
+                                    class="edit-icon ghd-green"
                                     flat
-                                    style="left:25px"
+                                    style="left:25px"                                    
                                 >
-                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                    <EditSvg />
                                 </v-btn>   
                             </v-col>                                    
                         </v-row>       
@@ -180,6 +180,7 @@ import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { getUrl } from '@/shared/utils/get-url';
+import EditSvg from '@/shared/icons/EditSvg.vue';
 
     let store = useStore();
     let stateAssetType = computed<string[]>(()=>store.state.adminDataModule.assetType);

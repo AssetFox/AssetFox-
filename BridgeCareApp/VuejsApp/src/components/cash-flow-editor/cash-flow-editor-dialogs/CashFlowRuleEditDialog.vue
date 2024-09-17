@@ -150,10 +150,10 @@
                     <td>
                         <v-btn
                             @click="onDeleteCashFlowDistributionRule(item.item.id)"
-                            class="ghd-blue"
-                            variant="flat"
+                            class="ghd-red"
+                            flat
                             icon>
-                            <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                            <TrashCanSvg />
                         </v-btn>
                     </td>
                     </tr>
@@ -203,6 +203,7 @@ import { getLastPropertyValue } from '@/shared/utils/getter-utils';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { getUrl } from '@/shared/utils/get-url';
 import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 
   const props = defineProps<{showDialog: boolean, selectedCashFlowRule: CashFlowRule}>()
   let showDialogComputed = computed(() => props.showDialog);

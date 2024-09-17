@@ -30,7 +30,7 @@
                                 <td class="text-xs-left">
                                 <v-menu location="left" >
                                     <template v-slot:activator="{ props }">
-                                        <v-btn  v-bind="props" class="ghd-blue" icon variant="flat">
+                                        <v-btn  v-bind="props" class="ghd-blue" flat icon>
                                             <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')">
                                         </v-btn>
                                     </template>
@@ -51,10 +51,11 @@
                                 </v-menu>
                                     <v-btn v-if="props.item.name.includes('Summary')"
                                         @click="onShowCriterionEditorDialog(props.item.id)"
-                                        class="ghd-blue"
+                                        class="ghd-green"
                                         flat
+                                        icon
                                     >
-                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')">
+                                        <EditSvg />
                                     </v-btn>
                                 </td>
                                 <td>{{ props.item.reportStatus }}</td>
@@ -63,6 +64,7 @@
                                         @click="onGenerateReport(props.item.id, true)"
                                         class="ghd-blue"
                                         flat
+                                        icon
                                     >
                                         <img class="img-general" :src="getUrl('assets/icons/attributes-dark.svg')"/>
 
@@ -71,6 +73,7 @@
                                         @click="onDownloadReport(props.item.id)"
                                         :disabled="!props.item.isGenerated"
                                         flat
+                                        icon
                                     >
                                         <img class='img-general' :src="getUrl('assets/icons/download.svg')"/>
                                     </v-btn>
@@ -78,8 +81,10 @@
                                         @click="onDeleteReport(props.item.id)"
                                         :disabled="!props.item.isGenerated"
                                         flat
+                                        icon
+                                        class="ghd-red"
                                     >
-                                        <img class='img-general ' :src="getUrl('assets/icons/trash.svg')"/>
+                                        <TrashCanSvg />
                                     </v-btn>
                                 </td>
                             </tr>
@@ -140,6 +145,8 @@ import Column from 'primevue/column';
 import { getUrl } from '@/shared/utils/get-url';
 import mitt, { Emitter, EventType } from 'mitt';
 import { Hub } from '@/connectionHub';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import EditSvg from '@/shared/icons/EditSvg.vue';
 
     let store = useStore();
     const router = useRouter();

@@ -70,15 +70,17 @@
                                     variant="underlined"
                                     :model-value='props.item.criterionLibrary.mergedCriteriaExpression'>
                                     <template v-slot:append-inner>
-                                        <v-btn id="EditBudgetsDialog-openCriteriaEditor-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)"  class="ghd-blue" flat>
-                                            <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                        <v-btn id="EditBudgetsDialog-openCriteriaEditor-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)"  
+                                            class="ghd-green" flat icon>
+                                            <EditSvg />
                                         </v-btn>                                        
                                     </template>
                                 </v-text-field>
                             </td>
                             <td>
-                                <v-btn id="EditBudgetsDialog-removeBudget-btn" @click="onRemoveBudget(props.item.id)" @mousedown="setCurrentOrder(props.item)" class="ghd-blue" flat>
-                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
+                                <v-btn id="EditBudgetsDialog-removeBudget-btn" @click="onRemoveBudget(props.item.id)" @mousedown="setCurrentOrder(props.item)" 
+                                    class="ghd-red" flat icon>
+                                    <TrashCanSvg />
                                 </v-btn>
                              
                             </td>
@@ -125,6 +127,8 @@ import { emptyCriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ref, onMounted, onBeforeUnmount, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 import { getUrl } from '@/shared/utils/get-url';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import EditSvg from '@/shared/icons/EditSvg.vue';
 
 let store = useStore();
 const emit = defineEmits(['submit'])

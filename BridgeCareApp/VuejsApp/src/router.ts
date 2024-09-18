@@ -1,6 +1,7 @@
 ﻿import EditAnalysisMethod from '@/components/scenarios/EditAnalysisMethod.vue';
 import UnderConstruction from '@/components/UnderConstruction.vue';
 import Logout from '@/components/Logout.vue';
+//import AccessDenied from '@/components/AccessDenied.vue';
 import AuthenticationStart from '@/components/authentication/AuthenticationStart.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
@@ -12,6 +13,7 @@ import {
 } from '@/shared/utils/authentication-utils';
 import { createRouter, createWebHistory } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
+import AuthenticationService from './services/authentication.service';
 
 // Lazily-loaded pages
 const Scenario = () =>
@@ -497,6 +499,11 @@ const router = createRouter({
             name: 'iAM',
             component: Logout,
         },
+        //{
+            //path: '/AccessDenied/',
+            //name: 'AccessDenied',
+            //component: AccessDenied,
+        //},
         {
             path: '/UserCriteria/',
             name: 'UserCriteria',

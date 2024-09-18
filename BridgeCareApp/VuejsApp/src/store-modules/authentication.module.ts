@@ -50,6 +50,9 @@ const mutations = {
     securityTypeMutator(state: any, securityType: string) {
         state.securityType = securityType;
     },
+    setAccessDenied(state: any) {
+        state.accessDenied = false;
+    },
 };
 
 const actions = {
@@ -232,8 +235,8 @@ const actions = {
                     }
                     else
                     {
+                        commit('setAccessDenied', false);
                         setCommits({ commit });
-                        throw new Error('User is not active');
                     }
         } else {
             setCommits({ commit });

@@ -22,8 +22,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
                             Size = new ExcelRangeSize(3, 1)
                         }),
                     ExcelRowModels.Empty,
-                    RowWithTwoColumnsThenOne(ExcelValueModels.String("Posted Condition"), 4.1m),
-                    RowWithTwoColumnsThenOne(ExcelValueModels.String("Closed Condition"), 3m),
+                    RowWithTwoColumnsThenOne(ExcelValueModels.String("Posted Condition <"), 4.1m),
+                    RowWithTwoColumnsThenOne(ExcelValueModels.String("Closed Condition <"), 3m),
                     ExcelRowModels.Empty,
                     ExcelRowModels.WithCells(
                         new RelativeExcelRangeModel {

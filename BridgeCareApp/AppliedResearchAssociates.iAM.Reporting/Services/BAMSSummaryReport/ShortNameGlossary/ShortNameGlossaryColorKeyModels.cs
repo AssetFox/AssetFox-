@@ -19,19 +19,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
                 CenteredHeader("Details Columns"),
                 TwoByOneRow(ColoredText("Bridge project is being cashed flowed.", Color.Red, PureGreen)),
                 TwoByOneRow(ColoredText("MPMS Project selected for consecutive years.", Color.White, Color.Orange)),
-                TwoByOneRow(StackedExcelModels.Stacked(ColoredText("Min Condition is less than or equal to 3.5", Color.White, Color.Purple),
-                                                       ExcelStyleModels.HorizontalCenter)),
+                TwoByOneRow(ColoredText("Min Condition is less than or equal to 3.5", Color.White, Color.Purple)),
                 ExcelRowModels.Empty,
-                ExcelRowModels.WithEntries(ExcelValueModels.Nothing, ItalicYear(2021), ItalicYear(2022), ItalicYear(2023)),
+                ExcelRowModels.Empty,
                 ExcelRowModels.WithEntries(
-                    ExcelValueModels.String("example:"),
+                    ExcelValueModels.String("example:")
+                    ),
+                ExcelRowModels.Empty,
+                ExcelRowModels.WithEntries(ItalicYear(2021), ItalicYear(2022), ItalicYear(2023)),
+                ExcelRowModels.WithEntries(
                     ColoredText("Brdg_Repl", Color.Red, PureGreen),
                     ColoredText("Brdg_Repl ", Color.Red, PureGreen),
                     ColoredText("Brdg_Repl", Color.Red, PureGreen)
                     ),
-                ExcelRowModels.WithEntries(
-                    ExcelValueModels.Nothing,
-                    ExcelValueModels.String("(Bridge being replaced also has a parallel bridge.  Bridge replacement is cash flowed over 3 years.")
+                ExcelRowModels.WithEntries(                    
+                    ExcelValueModels.String("Bridge replacement is cash flowed over 3 years.")
                     )
                 );
 
@@ -67,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
             => new RelativeExcelRangeModel
             {
                 Content = content,
-                Size = new ExcelRangeSize(5, 1)
+                Size = new ExcelRangeSize(2, 1)
             };
 
     }

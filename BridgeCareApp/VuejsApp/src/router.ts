@@ -126,6 +126,11 @@ const AdminData = () =>
 import(
     /*webpackChunkName: "AdminData" */ '@/components/admin-data/AdminData.vue'
 );
+const AccessDenied = () =>
+    import(
+        /*webpackChunkName: "AccessDenied" */ '@/components/AccessDenied.vue'
+    );
+    
 
 const onHandlingUnsavedChanges = (to: any, next: any): void => {
     // @ts-ignore
@@ -499,11 +504,11 @@ const router = createRouter({
             name: 'iAM',
             component: Logout,
         },
-        //{
-            //path: '/AccessDenied/',
-            //name: 'AccessDenied',
-            //component: AccessDenied,
-        //},
+        {
+            path: '/AccessDenied/',
+            name: 'AccessDenied',
+            component: AccessDenied,
+        },
         {
             path: '/UserCriteria/',
             name: 'UserCriteria',

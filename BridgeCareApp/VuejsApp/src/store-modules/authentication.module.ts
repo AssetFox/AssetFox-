@@ -11,6 +11,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import moment from 'moment';
 import { isNil } from 'ramda';
 import { SecurityTypes } from '@/shared/utils/security-types';
+import router from '@/router';
 
 const state = {
     authenticated: false,
@@ -50,9 +51,9 @@ const mutations = {
     securityTypeMutator(state: any, securityType: string) {
         state.securityType = securityType;
     },
-    setAccessDenied(state: any) {
-        state.accessDenied = false;
-    },
+    setAccessDenied(state: any, status: boolean) {
+        state.accessDenied = status;
+    }
 };
 
 const actions = {
@@ -231,6 +232,7 @@ const actions = {
                                 commit('usernameMutator', payload.username);
                                 commit('authenticatedMutator', true);
                                 commit('simulationAccessMutator', false);
+                                commit('setAccessDenied', true);
                         });
                     }
                     else

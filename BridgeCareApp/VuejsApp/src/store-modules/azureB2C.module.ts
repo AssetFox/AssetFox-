@@ -8,6 +8,7 @@ import * as msal from 'msal';
 import { hasValue } from '@/shared/utils/has-value-util';
 import store from '@/store/root-store';
 import router from '@/router';
+import AuthenticationService from '@/services/authentication.service';
 
 const state = {
     authenticatedFromAzure: false,
@@ -31,12 +32,21 @@ const actions = {
                     hasValue(authResponse.account.name)
                 ) {
                     dispatch('getAzureB2CAccessToken', authResponse).then(() =>
-                        dispatch('getAzureAccountDetails').then(() => {
+                        dispatch('getAzureAccountDetails').then(async () => {
                             if (
                                 // @ts-ignore
                                 store.state.authenticationModule.authenticated
                             ) {
                                 router.push('/Scenarios/');
+                            }
+                            else
+                            {
+                                // @ts-ignore
+                                let isAccessDenied = store.state.authenticationModule.accessDenied;
+                                if(isAccessDenied == false)
+                                {
+                                    router.push('/AccessDenied/');
+                                }
                             }
                         }),
                     );

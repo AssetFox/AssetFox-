@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.ShortNameGlossary
@@ -10,26 +6,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Sho
     public static class ShortNameGlossaryModels
     {
         public static List<IExcelWorksheetContentModel> Content
-            => new List<IExcelWorksheetContentModel>
-            {
-                WorkTypesRegion,
-                ExcelWorksheetContentModels.AutoFitColumns(70),
+            => new()
+            {   
                 ColorKeyRegion,
-            };
-
-        public static AnchoredExcelRegionModel WorkTypesRegion
-            => new AnchoredExcelRegionModel
-            {
-                Region = ShortNameGlossaryWorkTypeModels.WorkTypesRows(),
-                StartColumn = 1,
-                StartRow = 1,
-            };
+                ExcelWorksheetContentModels.ColumnWidth(1, 22),
+                ExcelWorksheetContentModels.ColumnWidth(2, 22),
+            };        
 
         public static AnchoredExcelRegionModel ColorKeyRegion
-            => new AnchoredExcelRegionModel
+            => new()
             {
                 Region = ShortNameGlossaryColorKeyModels.ColorKeyRows(),
-                StartRow = 82,
+                StartRow = 1,
                 StartColumn = 1
             };
 

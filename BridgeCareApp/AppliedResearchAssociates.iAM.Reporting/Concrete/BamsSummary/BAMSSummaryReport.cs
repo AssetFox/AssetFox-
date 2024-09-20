@@ -380,13 +380,18 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
 
-            // Create Simluation parameters TAB
+            // Parameters TAB
+            reportDetailDto.Status = $"Creating Parameters TAB";
+            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            // Create
             var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
             checkCancelled(cancellationToken, simulationId);
 
             // Simulation Legend TAB
-            var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.Legend);
-            _summaryReportGlossary.Fill(shortNameWorksheet);
+            var legendWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.Legend);
+            _summaryReportGlossary.Fill(legendWorksheet);
             checkCancelled(cancellationToken, simulationId);
 
             // Bridge Data TAB
@@ -400,10 +405,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
             checkCancelled(cancellationToken, simulationId);
 
             // Fill Simulation parameters TAB
-            reportDetailDto.Status = $"Creating Parameters TAB";
-            workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
-            UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation, reportOutputData);
             checkCancelled(cancellationToken, simulationId);            
 
@@ -466,13 +467,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-            _addGraphsInTabs.Add(excelPackage, bridgeDataWorksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);                       
+            _addGraphsInTabs.Add(excelPackage, bridgeDataWorksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
+            checkCancelled(cancellationToken, simulationId);
 
             //check and generate folder
             var folderPathForSimulation = $"Reports\\{simulationId}";
             Directory.CreateDirectory(folderPathForSimulation);
             var filePath = Path.Combine(folderPathForSimulation, "SummaryReport.xlsx");
-
             checkCancelled(cancellationToken, simulationId);
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(filePath, bin);
@@ -481,7 +482,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
             functionReturnValue = filePath;
 
             reportDetailDto.Status = $"Report generation completed";
-
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);

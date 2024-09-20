@@ -721,7 +721,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     {
                         worksheet.Cells[row, ++column].Value = recommendedTreatment.Contains("Bundle") ? BAMSConstants.Bundled : ""; // FHWA Work Type
                     }
-                    worksheet.Cells[row, ++column].Value = ""; // District Remarks
+                    worksheet.Cells[row, ++column].Value = ""; // Comments
 
                     if (row % 2 == 0)
                     {
@@ -1091,7 +1091,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "Cost",
                 "Superseded Treatments",
                 "FHWA\r\nWork Types",
-                "District Remarks"
+                "Comments"
             };
         }
 

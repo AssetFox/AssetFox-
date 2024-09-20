@@ -74,7 +74,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 "Recommended Treatment",
                 "Cost",
                 "Superseded Treatments",
-                "District Remarks"
+                "Comments"
             };
         }
 
@@ -345,7 +345,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     worksheet.Cells[row, column + 1].Value = sumCoveredCost;
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1]);
 
-                    if (!treatmentDone.Equals("--")) { workDoneData[i]++; } i++;
+                    if (!treatmentDone.Equals("--"))
+                    {
+                        workDoneData[i]++;
+                    }
+                    i++;
+
                     if (row % 2 == 0) {
                         if (section.TreatmentCause != TreatmentCause.CashFlowProject || section.TreatmentCause == TreatmentCause.CommittedProject) {
                             ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.LightGray);
@@ -479,7 +484,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                                                            string.Join(", ", supersededTreatments) :
                                                            string.Empty;
 
-                    worksheet.Cells[row, ++column].Value = ""; // District Remarks
+                    worksheet.Cells[row, ++column].Value = ""; // Comments
 
                     if (row % 2 == 0)
                     {

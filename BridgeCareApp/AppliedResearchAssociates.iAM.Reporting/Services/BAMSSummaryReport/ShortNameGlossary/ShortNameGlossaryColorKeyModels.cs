@@ -14,11 +14,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
                 ExcelRowModels.Empty,
                 CenteredHeader("Work Done Columns"),
                 TwoByOneRow(ColoredText("Bridge project is being cashed flowed.", Color.Red, PureGreen)),
-                TwoByOneRow(ColoredText("MPMS Project being Cach Flowed", Color.White, Color.Orange)),
+                TwoByOneRow(ColoredText("MPMS Project selected for consecutive years.", Color.White, Color.Orange)),
                 TwoByOneRow(ExcelValueModels.Nothing),
                 CenteredHeader("Details Columns"),
                 TwoByOneRow(ColoredText("Bridge project is being cashed flowed.", Color.Red, PureGreen)),
-                TwoByOneRow(ColoredText("MPMS Project being Cach Flowed", Color.White, Color.Orange)),
+                TwoByOneRow(ColoredText("MPMS Project selected for consecutive years.", Color.White, Color.Orange)),
                 TwoByOneRow(StackedExcelModels.Stacked(ColoredText("Min Condition is less than or equal to 3.5", Color.White, Color.Purple),
                                                        ExcelStyleModels.HorizontalCenter)),
                 ExcelRowModels.Empty,
@@ -26,12 +26,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
                 ExcelRowModels.WithEntries(
                     ExcelValueModels.String("example:"),
                     ColoredText("Brdg_Repl", Color.Red, PureGreen),
-                    ColoredText("--", Color.Red, PureGreen),
-                    ColoredText("--", Color.Red, PureGreen)
+                    ColoredText("Brdg_Repl ", Color.Red, PureGreen),
+                    ColoredText("Brdg_Repl", Color.Red, PureGreen)
                     ),
                 ExcelRowModels.WithEntries(
                     ExcelValueModels.Nothing,
-                    ExcelValueModels.String("    (Bridge being replaced also has a parallel bridge.  Bridge replacement is cash flowed over 3 years.")
+                    ExcelValueModels.String("(Bridge being replaced also has a parallel bridge.  Bridge replacement is cash flowed over 3 years.")
                     )
                 );
 
@@ -67,7 +67,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
             => new RelativeExcelRangeModel
             {
                 Content = content,
-                Size = new ExcelRangeSize(4, 1)
+                Size = new ExcelRangeSize(5, 1)
             };
 
     }

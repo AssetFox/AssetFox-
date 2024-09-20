@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.ShortNameGlossary
@@ -15,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Sho
 
                 CenteredHeader("Work Done Columns"),
                 TwoByOneRow(ColoredText("PMS Treatment is being cashed flowed.", Color.Red, PureGreen)),
-                TwoByOneRow(ColoredText("MPMS Project selected for consecutive years", Color.White, Color.Orange)),
+                TwoByOneRow(ColoredText("MPMS Project selected for consecutive years.", Color.White, Color.Orange)),
 
                 TwoByOneRow(ExcelValueModels.Nothing),
                 CenteredHeader("Details Columns"),

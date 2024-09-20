@@ -22,6 +22,11 @@
                         @click="onAddNetworkDialog">
                         Add Network
                     </v-btn>
+                    <v-btn style="margin-top: 2px !important; margin-left: 20px !important" 
+                        id="Networks-addNetwork-vbtn"
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
+                        Edit Network Name
+                    </v-btn>
                 </v-row>
             </v-col>
         </v-col>
@@ -184,6 +189,10 @@
                     Delete
                 </v-btn>
                 <p>&nbsp;&nbsp;&nbsp;</p>
+                <v-btn v-show="!isNewNetwork" id="Networks-DeleteAll-vbtn" @click='onShowconfirmDeleteNetworkData' :disabled='isNewNetwork'  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
+                    Delete Network
+                </v-btn>
+                <p>&nbsp;&nbsp;&nbsp;</p>
                 <v-btn v-show="isNewNetwork" id="Networks-Create-vbtn" @click='createNetwork'  :disabled='disableCrudButtonsCreate()'
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Create
@@ -197,6 +206,10 @@
         />
         <AddNetworkDialog :dialogData='addNetworkDialogData'
                                 @submit='addNetwork' />
+        <Alert
+            :dialogData="confirmDeleteNetworkData"
+            @submit="onSubmitConfirmDeleteNetworkAlertResult"
+        />
         <ConfirmDialog></ConfirmDialog>
     </v-row>
 </template>
@@ -228,6 +241,9 @@ import mitt, { Emitter, EventType } from 'mitt';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { NIL } from 'uuid';
 import { text } from 'stream/consumers';
+import Alert from '@/shared/modals/Alert.vue';
+import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
+import EditNetworkNameDialog from '@/components\networks\networks-dialogs\EditNetworkDialog.vue';
 
     let store = useStore();
     let stateNetworks = computed<Network[]>(()=>store.state.networkModule.networks);
@@ -265,6 +281,7 @@ import { text } from 'stream/consumers';
     let cleanAttributes: Attribute[] = [];
     let attributes: Attribute[] = [];
     let selectedAttributeRows = ref<Attribute[]>([]);
+    const confirmDeleteNetworkData = ref<AlertData>(clone(emptyAlertData));
     let dataSourceSelectValues: SelectItem[] = [
         {text: 'SQL', value: 'SQL'},
         {text: 'Excel', value: 'Excel'},
@@ -279,6 +296,7 @@ import { text } from 'stream/consumers';
     const selectedNetwork = ref<Network>(clone(emptyNetwork));
     const selectNetworkItemValue = ref<string>('');
     const selectDataSourceId = ref<string>('');
+    const editNetworkNameData = ref<string>('');
     const hasSelectedNetwork = ref<boolean>(false);
     const isNewNetwork = ref<boolean>(false);
     const hasStartedAggregation = ref<boolean>(false);
@@ -430,6 +448,31 @@ import { text } from 'stream/consumers';
             selectNetworkItemValue.value = "";
             selectedNetwork.value = clone(emptyNetwork)
         })       
+    }
+
+    function onShowconfirmDeleteNetworkData()
+    {
+        confirmDeleteNetworkData.value = {
+            showDialog: true,
+            heading: 'Warning',
+            choice: true,
+            message: 'Are you sure you want to delete ' +  selectedNetwork.value.name + '?',
+        };
+    }
+
+    function onSubmitConfirmDeleteNetworkAlertResult(submit: boolean)
+    {
+        confirmDeleteNetworkData.value = clone(emptyAlertData);
+    }
+
+    function onNetworkNameSubmit(submit: boolean)
+    {
+
+    }
+
+    function onDeleteNetwork()
+    {
+        
     }
     function disableCrudButtonsCreate() {
         let allValid = rules.value['generalRules'].valueIsNotEmpty(selectedNetwork.value.name) === true

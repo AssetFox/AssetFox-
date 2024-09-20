@@ -76,7 +76,7 @@
                                     </v-btn>
                                     <v-btn
                                         @click="onDeleteReport(props.item.id)"
-                                        :disabled="!props.item.isGenerated"
+                                        :disabled="!props.item.isGenerated || !CanUserDelete(props.item.name)"
                                         flat
                                     >
                                         <img class='img-general ' :src="getUrl('assets/icons/trash.svg')"/>
@@ -149,6 +149,7 @@ import { Hub } from '@/connectionHub';
     function addSuccessNotificationAction(payload?: any) { store.dispatch('addSuccessNotification',payload);} 
     async function getSimulationReportsAction(payload?: any): Promise<any> { await store.dispatch('getSimulationReports',payload);} 
     async function updateSimulationReportDetailAction(payload?: any): Promise<any>{await store.dispatch('updateSimulationReportDetail', payload)}
+    let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess) ;
 
     let editShow = ref<boolean>(false);
 
@@ -156,6 +157,7 @@ import { Hub } from '@/connectionHub';
     let networkName: string = '';
     let networkId: string = getBlankGuid();
     let selectedScenarioId: string = getBlankGuid();
+    const scenarioOutputName: string = "ScenarioOutput"
 
     let rules: InputValidationRules = clone(validationRules);
 
@@ -403,6 +405,13 @@ import { Hub } from '@/connectionHub';
         updateSimulationReportDetailAction({
             simulationReportDetail: data.simulationReportDetail,
         });
+    }
+
+    function CanUserDelete(reportName: string) : boolean{
+        if(reportName === "ScenarioOutput")
+            return hasAdminAccess.value;
+        else 
+            return true
     }
 
 </script>

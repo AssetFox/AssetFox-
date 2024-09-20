@@ -23,7 +23,8 @@
                         Add Network
                     </v-btn>
                     <v-btn style="margin-top: 2px !important; margin-left: 20px !important" 
-                        id="Networks-addNetwork-vbtn"
+                        id="Networks-editNetwork-vbtn"
+                        @click="confirmEditNetworkData.showDialog = true"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                         Edit Network Name
                     </v-btn>
@@ -189,10 +190,6 @@
                     Delete
                 </v-btn>
                 <p>&nbsp;&nbsp;&nbsp;</p>
-                <v-btn v-show="!isNewNetwork" id="Networks-DeleteAll-vbtn" @click='onShowconfirmDeleteNetworkData' :disabled='isNewNetwork'  class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
-                    Delete Network
-                </v-btn>
-                <p>&nbsp;&nbsp;&nbsp;</p>
                 <v-btn v-show="isNewNetwork" id="Networks-Create-vbtn" @click='createNetwork'  :disabled='disableCrudButtonsCreate()'
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                     Create
@@ -205,10 +202,12 @@
             @submit="onSubmitEquationEditorDialogResult"
         />
         <AddNetworkDialog :dialogData='addNetworkDialogData'
-                                @submit='addNetwork' />
-        <Alert
-            :dialogData="confirmDeleteNetworkData"
-            @submit="onSubmitConfirmDeleteNetworkAlertResult"
+         @submit='addNetwork' />
+
+        <EditNetworkNameDialog
+        :dialogData="confirmEditNetworkData"
+        :initialNetworkName="selectedNetwork.name"
+        @submit="onNetworkNameSubmit"
         />
         <ConfirmDialog></ConfirmDialog>
     </v-row>
@@ -220,6 +219,7 @@ import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import Vue, { computed, DeepReadonly, inject, onBeforeUnmount, onMounted, reactive, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
+import EditNetworkNameDialog from '@/components/networks/networks-dialogs/EditNetworkDialog.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
 import {
     emptyEquationEditorDialogData,
@@ -243,7 +243,6 @@ import { NIL } from 'uuid';
 import { text } from 'stream/consumers';
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
-import EditNetworkNameDialog from '@/components\networks\networks-dialogs\EditNetworkDialog.vue';
 
     let store = useStore();
     let stateNetworks = computed<Network[]>(()=>store.state.networkModule.networks);
@@ -259,6 +258,8 @@ import EditNetworkNameDialog from '@/components\networks\networks-dialogs\EditNe
     function selectNetworkAction(payload?: any) { store.dispatch('selectNetwork', payload);}
     async function createNetworkAction(payload?: any): Promise<any> {await store.dispatch('createNetwork', payload);}
     async function deleteNetworkAction(payload?: any): Promise<any> {await store.dispatch('deleteNetwork', payload);}
+    async function EditNetworkNameAction(networkId: string, newNetworkName: string): Promise<any> {const payload = {networkId: networkId, newNetworkName: newNetworkName}; 
+        await store.dispatch('editNetworkName', payload);}
     async function aggregateNetworkAction(payload?: any): Promise<any> {await store.dispatch('aggregateNetworkData', payload);}
     function setHasUnsavedChangesAction(payload?: any) { store.dispatch('setHasUnsavedChanges', payload);}
     async function getUserNameByIdGetter(payload?: any): Promise<any> {await store.dispatch('getUserNameById', payload);}
@@ -282,7 +283,10 @@ import EditNetworkNameDialog from '@/components\networks\networks-dialogs\EditNe
     let attributes: Attribute[] = [];
     let selectedAttributeRows = ref<Attribute[]>([]);
     const confirmDeleteNetworkData = ref<AlertData>(clone(emptyAlertData));
-    let dataSourceSelectValues: SelectItem[] = [
+
+    const confirmEditNetworkData = ref({
+    showDialog: false
+    });    let dataSourceSelectValues: SelectItem[] = [
         {text: 'SQL', value: 'SQL'},
         {text: 'Excel', value: 'Excel'},
         {text: 'None', value: 'None'}
@@ -450,30 +454,18 @@ import EditNetworkNameDialog from '@/components\networks\networks-dialogs\EditNe
         })       
     }
 
-    function onShowconfirmDeleteNetworkData()
-    {
-        confirmDeleteNetworkData.value = {
-            showDialog: true,
-            heading: 'Warning',
-            choice: true,
-            message: 'Are you sure you want to delete ' +  selectedNetwork.value.name + '?',
-        };
+    function onNetworkNameSubmit(newName: string | null) {
+        if (newName && newName != selectedNetwork.value.name) {
+                EditNetworkNameAction(selectedNetwork.value.id, newName).then(() => {
+                hasSelectedNetwork.value = false;
+                selectNetworkItemValue.value = "";
+                selectedNetwork.value = clone(emptyNetwork)
+            })       
+        } else {
+            console.log('Submission cancelled');
+        }
     }
 
-    function onSubmitConfirmDeleteNetworkAlertResult(submit: boolean)
-    {
-        confirmDeleteNetworkData.value = clone(emptyAlertData);
-    }
-
-    function onNetworkNameSubmit(submit: boolean)
-    {
-
-    }
-
-    function onDeleteNetwork()
-    {
-        
-    }
     function disableCrudButtonsCreate() {
         let allValid = rules.value['generalRules'].valueIsNotEmpty(selectedNetwork.value.name) === true
             && rules.value['generalRules'].valueIsNotEmpty(spatialWeightingEquationValue.value.expression) === true

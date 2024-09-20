@@ -151,6 +151,21 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
+        [Route("EditNetworkName/{networkId}/{newNetworkName}")]
+        [ClaimAuthorize("EditNetworkNameAccess")]
+        public async Task<IActionResult> EditNetworkName(Guid networkId, string newNetworkName)
+        {
+            var networkName = "";
+            await Task.Factory.StartNew(() =>
+            {
+                networkName = UnitOfWork.NetworkRepo.GetNetworkName(networkId);
+            });
+
+            return Ok();
+        }
+
+
+        [HttpPost]
         [Route("GetCompatibleNetworks/{networkId}")]
         [ClaimAuthorize("NetworkViewAccess")]
         public async Task<IActionResult> GetCompatibleNetworks(Guid networkId)

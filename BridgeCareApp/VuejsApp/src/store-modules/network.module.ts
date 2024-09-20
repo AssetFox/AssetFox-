@@ -122,6 +122,18 @@ const actions = {
             },
         );
     },
+    async editNetworkName({ dispatch }: any, payload: { networkId: any, newNetworkName: string }) {
+        const { networkId, newNetworkName } = payload;
+        return await NetworkService.EditNetworkName(networkId, newNetworkName)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                    dispatch('addSuccessNotification', {
+                        message: 'Network name successfully updated',
+                    });
+                }
+            });
+    },
+    
     async upsertBenefitQuantifier({dispatch, commit}: any, payload: any) {
         return await NetworkService.upsertBenefitQuantifier(payload.benefitQuantifier)
           .then((response: AxiosResponse) => {

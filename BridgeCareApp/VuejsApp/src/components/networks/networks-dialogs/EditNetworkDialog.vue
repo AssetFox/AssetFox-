@@ -26,24 +26,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
-// Props and emits
 const props = defineProps<{
   dialogData: { showDialog: boolean }
   initialNetworkName: string
 }>();
 const emit = defineEmits(['submit']);
 
-// Dialog visibility and network name
 let showDialog = computed(() => props.dialogData.showDialog);
 let networkName = ref<string>(props.initialNetworkName);
+
+// Watch for changes to the network name and update networkName
+watch(() => props.initialNetworkName, (newName) => {
+  networkName.value = newName;
+});
 
 // Submit function
 function onSubmit(submit: boolean) {
   if (submit) {
     emit('submit', networkName.value); // Emit the new network name
   } else {
+    networkName = ref<string>(props.initialNetworkName);
     emit('submit', null); // Cancel action
   }
   props.dialogData.showDialog = false; // Close the dialog

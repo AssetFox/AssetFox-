@@ -152,7 +152,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportDetailDto = new SimulationReportDetailDTO
             {
                 SimulationId = simulationId,
-                Status = $"Generating..."
+                Status = $"Generating...",
+                ReportType = ReportTypeName
             };
             UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
@@ -265,7 +266,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportDetailDto = new SimulationReportDetailDTO
             {
                 SimulationId = simulationId,
-                Status = $""
+                Status = $"",
+                ReportType = ReportTypeName
             };
             UpsertSimulationReportDetail(reportDetailDto);
         }

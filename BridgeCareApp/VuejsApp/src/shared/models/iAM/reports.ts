@@ -11,18 +11,20 @@ export interface Report {
     name: string;
     mergedExpression: string;
     isGenerated: boolean;
+    reportStatus?: string;
 }
 export const emptyReport: Report = {
     id: getBlankGuid(),
     name: '',
     mergedExpression: '',
-    isGenerated: false
+    isGenerated: false,
 };
 
 export interface ReportDetails {
     simulationId: string;
     reportName: string;
     isGenerated: boolean;
+    reportStatus?: string;
 }
 
 export const reportDetails: ReportDetails = {

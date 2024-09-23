@@ -72,8 +72,8 @@
                                     bg-color="white"></v-select>
                             </div>
                             
-                            <v-btn @click="onDeleteClick" style="padding-left: 0;" class="ghd-blue" variant="text">
-                                <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
+                            <v-btn @click="onDeleteClick" style="padding-left: 10px;" class="ghd-red" variant="text">
+                                <TrashCanSvg />
                             </v-btn>
                         </v-row>
                         
@@ -106,6 +106,7 @@ import { clone, findIndex, isNil, propEq, update } from 'ramda';
 import { useStore } from 'vuex';
 import { AttributeSelectValues } from '@/shared/models/iAM/attribute';
 import { hasValue } from '@/shared/utils/has-value-util';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import { Equation } from '@/shared/models/iAM/equation';
 
     let store = useStore();

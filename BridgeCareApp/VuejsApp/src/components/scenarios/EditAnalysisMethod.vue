@@ -145,10 +145,11 @@ Line 164 Delete,
                                     @click="
                                         onShowCriterionEditorDialog
                                     "
-                                    class="edit-icon ghd-control-label"
+                                    class="edit-icon ghd-control-label ghd-green"
+                                    icon
                                     flat
                                 >
-                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                <EditSvg />
                                 </v-btn>
                                 </v-row>
                                 <v-textarea
@@ -166,23 +167,14 @@ Line 164 Delete,
                         </v-row>
                     </v-row>
                 <v-row justify="center">
-                    <v-btn
-                        id="EditAnalysisMethod-cancel-btn"
-                        @click="onDiscardChanges"
-                        :disabled="!hasUnsavedChanges"
-                        class="ghd-white-bg ghd-blue ghd-button-text ghd-button"
-                        variant = "flat"
-                        >Cancel</v-btn
-                    >
-                    <v-btn
-                        id="EditAnalysisMethod-save-btn"
-                        :disabled="(!valid) || !hasUnsavedChanges"
-                        @click="onUpsertAnalysisMethod"
-                        variant = "flat"
-                        class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
-                        style="margin-left: 5px;"
-                        >Save</v-btn
-                    >
+                    <v-row justify="center">
+                        <CancelSaveButtonGroup
+                            :cancelDisabled="!hasUnsavedChanges"
+                            :saveDisabled="!valid || !hasUnsavedChanges"
+                            @cancel="onDiscardChanges"
+                            @save="onUpsertAnalysisMethod"
+                        />
+                    </v-row>
                 </v-row>
     </v-card>
             <GeneralCriterionEditorDialog
@@ -225,6 +217,8 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router'; 
 import { getUrl } from '@/shared/utils/get-url';
 import ConfirmDialog from 'primevue/confirmdialog';
+import EditSvg from '@/shared/icons/EditSvg.vue';
+import CancelSaveButtonGroup from '@/shared/components/buttons/CancelSaveButtonGroup.vue';
 
     let store = useStore(); 
     const router = useRouter(); 

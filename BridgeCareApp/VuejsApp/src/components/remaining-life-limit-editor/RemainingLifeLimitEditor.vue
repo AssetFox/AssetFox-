@@ -174,13 +174,15 @@
                         <td v-else>-
                         </td>
                         <td class="px-0">
-                            <v-btn id="RemainingLifeLimitEditor-editCriteria-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)" flat>
-                                <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                            <v-btn id="RemainingLifeLimitEditor-editCriteria-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)" 
+                                class="ghd-green" flat icon>
+                                <EditSvg />
                             </v-btn>   
                         </td>
                         <td justify-end>
-                            <v-btn id="RemainingLifeLimitEditor-deleteAttribute-btn" @click="onRemoveRemainingLifeLimitIcon(props.item)" flat>
-                                <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                            <v-btn id="RemainingLifeLimitEditor-deleteAttribute-btn" @click="onRemoveRemainingLifeLimitIcon(props.item)" 
+                                class="ghd-red" flat icon>
+                                <TrashCanSvg />
                             </v-btn>                          
                         </td>
                     </tr>
@@ -246,7 +248,6 @@ import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { clone, isNil, propEq, any, find } from 'ramda';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { SelectItem } from '@/shared/models/vue/select-item';
-import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { Attribute } from '@/shared/models/iAM/attribute';
 import CreateRemainingLifeLimitDialog from '@/components/remaining-life-limit-editor/remaining-life-limit-editor-dialogs/CreateRemainingLifeLimitDialog.vue';
 import {
@@ -284,8 +285,9 @@ import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { computed } from 'vue';
 import { onBeforeUnmount } from 'vue';
-import { createDecipheriv } from 'crypto';
 import { getUrl } from '@/shared/utils/get-url';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import EditSvg from '@/shared/icons/EditSvg.vue';
 
     let store = useStore();
     const confirm = useConfirm();

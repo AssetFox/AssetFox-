@@ -62,8 +62,8 @@
                         <input type ="radio" id="EditAdminDataDialog-primary-radio" v-if="DialogData.settingName == 'InventoryReports'" v-model="setting.networkType" value ="(P)"/>
                         <label v-if="DialogData.settingName == 'InventoryReports'">PRIMARY</label>
                     </v-col>
-                        <v-btn @click="onDeleteSettingClick(setting)"  class="ghd-blue" flat>
-                            <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                        <v-btn @click="onDeleteSettingClick(setting)"  style="margin-right: 15px;" class="ghd-red" flat icon>
+                            <TrashCanSvg />
                         </v-btn>
                     
                         
@@ -73,9 +73,10 @@
             </v-card-text>
             <v-card-actions class="ghd-dialog-box-padding-bottom">
             <v-row justify="center" row>
-                <v-btn id="EditAdminDataDialog-cancel-btn" @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
+                <v-btn id="EditAdminDataDialog-cancel-btn" @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
                 Cancel
                 </v-btn >
+                
                 <v-btn id="EditAdminDataDialog-save-btn" @click="onSubmit(true)" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                 Save
                 </v-btn>         
@@ -98,6 +99,7 @@ import { useRouter } from 'vue-router';
 import { AdminSelectItem } from '@/shared/models/vue/admin-select-item';
 import Dialog from 'primevue/dialog';
 import { getUrl } from '@/shared/utils/get-url';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 
     let InputRules: InputValidationRules = rules;
      const props = defineProps<{

@@ -235,8 +235,8 @@
                                             <v-row justify="center">
                                                 <v-btn 
                                                     id="CommittedProjectsEditor-deleteCommittedProject-vbtn"
-                                                    @click="OnDeleteClick(item.item.id)"  class="ghd-blue" flat>
-                                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                                    @click="OnDeleteClick(item.item.id)"  class="ghd-red" flat icon>
+                                                    <TrashCanSvg />
                                                 </v-btn>
                                             </v-row>
                                         </div>                            
@@ -259,15 +259,13 @@
             class="border-opacity-100"
         ></v-divider>
         <v-col>
-            <v-row justify="center" style="padding-bottom: 40px;">
-                <v-btn 
-                id="CommittedProjectsEditor-cancel-vbtn"
-                @click="onCancelClick" :disabled='!hasUnsavedChanges' class="ghd-white-bg ghd-blue ghd-button-text" variant="text">Cancel</v-btn>    
-                <div style="padding:5px"></div>
-
-                <v-btn 
-                id="CommittedProjectsEditor-save-vbtn"
-                @click="OnSaveClick" :disabled='!hasUnsavedChanges || disableCrudButtons()' class="ghd-blue-bg ghd-white ghd-button">Save</v-btn>    
+            <v-row justify="center" style="padding-bottom: 80px;">
+                <CancelSaveButtonGroup
+                    :cancelDisabled="!hasUnsavedChanges"
+                    :saveDisabled="!hasUnsavedChanges || disableCrudButtons()"
+                    @cancel="onCancelClick"
+                    @save="OnSaveClick"
+                />
             </v-row>
         </v-col> 
         <v-row justify="center">
@@ -355,6 +353,9 @@ import TreatmentService from '@/services/treatment.service';
 import { getUrl } from '@/shared/utils/get-url';
 import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 import ConfirmDialog from 'primevue/confirmdialog';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import CancelSaveButtonGroup from '@/shared/components/buttons/CancelSaveButtonGroup.vue';
+
 
     let store = useStore();
     const $router = useRouter();    

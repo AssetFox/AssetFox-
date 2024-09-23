@@ -206,16 +206,16 @@
                                     <v-btn
                                         id="DeficientConditionGoalEditor-editDeficientConditionGoalCriteria-vbtn"
                                         @click="onShowCriterionLibraryEditorDialog(item.item)"
-                                        class="ghd-blue"
-                                        style="margin-top: 10px;"
-                                        flat>
-                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                        class="ghd-green"
+                                        flat
+                                        icon>
+                                        <EditSvg />
                                     </v-btn>
                                 </v-row>
-                                <div v-if="header.key === 'action'" style="margin-bottom: 10px;">
+                                <div v-if="header.key === 'action'" style="margin-bottom: 8px;">
                                     <v-btn id="DeficientConditionGoalEditor-deleteDeficientConditionGoal-vbtn" @click="onRemoveSelectedDeficientConditionGoal(item.item.id)"
-                                          class="ghd-blue" style="margin-top: 10px;" flat>
-                                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                          class="ghd-red" flat icon>
+                                        <TrashCanSvg />
                                     </v-btn>
                                 </div>                               
                             </div>
@@ -382,6 +382,8 @@ import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import EditSvg from '@/shared/icons/EditSvg.vue';
 
     let store = useStore();
     const confirm = useConfirm();

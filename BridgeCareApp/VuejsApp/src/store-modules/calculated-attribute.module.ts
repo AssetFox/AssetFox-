@@ -3,13 +3,10 @@ import { Attribute } from '@/shared/models/iAM/attribute';
 import {
     CalculatedAttribute,
     CalculatedAttributeLibrary,
-    emptyCalculatedAttribute,
-    emptyCalculatedAttributeLibrary,
-    Timing,
+    emptyCalculatedAttributeLibrary
 } from '@/shared/models/iAM/calculated-attribute';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
-import { getNewGuid } from '@/shared/utils/uuid-utils';
 import { AxiosResponse } from 'axios';
 import {
     any,

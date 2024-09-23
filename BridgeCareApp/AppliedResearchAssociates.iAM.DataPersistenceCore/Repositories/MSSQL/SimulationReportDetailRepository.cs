@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            _unitOfWork.Context.Upsert(dto.ToEntity(), _ => _.SimulationId == dto.SimulationId,
+            _unitOfWork.Context.Upsert(dto.ToEntity(), _ => _.SimulationId == dto.SimulationId && _.ReportType == dto.ReportType,
                 _unitOfWork.UserEntity?.Id);
         }
     }

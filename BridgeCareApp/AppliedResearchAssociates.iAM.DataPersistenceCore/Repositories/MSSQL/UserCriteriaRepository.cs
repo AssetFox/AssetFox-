@@ -124,6 +124,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     Name = dto.Name,
                     Description = dto.Description
                 };
+
+                //Set the new userEntity Active Status to the current active status of the user
+                var user = _unitOfWork.Context.User.SingleOrDefault(_ => _.Id == dto.UserId);
+                userEntity.ActiveStatus = user.ActiveStatus;
+
                 _unitOfWork.Context.UpdateEntity(userEntity, dto.UserId, _unitOfWork.UserEntity?.Id);
             });
         }

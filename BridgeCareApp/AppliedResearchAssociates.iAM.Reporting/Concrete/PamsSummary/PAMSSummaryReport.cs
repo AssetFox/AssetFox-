@@ -9,6 +9,8 @@ using AppliedResearchAssociates.iAM.Common.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Services;
@@ -191,12 +193,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 var dto = new SimulationReportDetailDTO
                 {
                     SimulationId = simulationId,
-                    Status = message,
+                    Status = $"Generating...",
+                    ReportType = ReportTypeName
                 };
                 UpdateSimulationAnalysisDetail(dto);
             });
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
-            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
+            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, ReportType = ReportTypeName, Status = "Generating..." };
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
 
             // reportOutputData will have all assets data, filter it based on criteria expression
             if (!string.IsNullOrEmpty(Criteria))
@@ -207,6 +211,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 {
                     reportDetailDto.Status = "Failed to generate report due to no assets found for given criteria";
                     workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
                     UpdateSimulationAnalysisDetail(reportDetailDto);
 
                     return string.Empty;
@@ -254,6 +259,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 reportDetailDto.Status = $"Checking treatment list";
 
                 workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
                 foreach (var treatmentObject in treatmentList)
                 {
 
@@ -290,6 +296,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Parameters TAB
             reportDetailDto.Status = $"Creating Parameters TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             // Create
             var parametersWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Parameters_Tab);
@@ -305,6 +312,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // PAMS Data TAB
             reportDetailDto.Status = $"Creating Pams Data TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var worksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PAMSData_Tab);            
             var workSummaryModel = _pamsDataForSummaryReport.Fill(worksheet, reportOutputData, simulation.ShouldBundleFeasibleTreatments, committedProjectList);
@@ -317,6 +325,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Pavement Work Summary TAB
             reportDetailDto.Status = $"Creating Pavement Work Summary TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var pamsWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummary_Tab);            
             var chartRowModel = _pavementWorkSummary.Fill(pamsWorkSummaryWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments, simulation.CommittedProjects, treatmentCategoryLookup, committedProjectsForWorkOutsideScope, simulation.ShouldBundleFeasibleTreatments);
@@ -325,6 +334,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Pavement Work Summary By Budget TAB
             reportDetailDto.Status = $"Creating Pavement Work Summary By Budget TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var pavementWorkSummaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummaryByBudget_Tab);
             _pavementWorkSummaryByBudget.Fill(pavementWorkSummaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, yearlyCostCommittedProj, simulation.Treatments, simulation.CommittedProjects, treatmentCategoryLookup, committedProjectList, committedProjectsForWorkOutsideScope, simulation.ShouldBundleFeasibleTreatments);
@@ -333,6 +343,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Unfunded Pavement Projects TAB
             reportDetailDto.Status = $"Unfunded Pavement Projects TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var _unfundedPavementProjectsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.UnfundedPavementProjects_Tab);
             _unfundedPavementProjects.Fill(_unfundedPavementProjectsWorksheet, reportOutputData);
             checkCancelled(cancellationToken, simulationId);
@@ -340,6 +351,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // County Summary TAB
             reportDetailDto.Status = $"County Summary TAB";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var _countySummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.CountySummary_Tab);
             _countySummary.Fill(_countySummaryWorksheet, reportOutputData, simulationYears, simulation);
             checkCancelled(cancellationToken, simulationId);
@@ -347,6 +359,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //Graph TABs
             reportDetailDto.Status = $"Creating Graph TABs";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _addGraphsInTabs.Add(excelPackage, pamsWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
             checkCancelled(cancellationToken, simulationId);
@@ -364,6 +377,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             reportDetailDto.Status = $"Report generation completed";
             workQueueLog.UpdateWorkQueueStatus(reportDetailDto.Status);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             UpdateSimulationAnalysisDetail(reportDetailDto);
 
             //return value
@@ -389,7 +403,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportDetailDto = new SimulationReportDetailDTO
             {
                 SimulationId = simulationId,
-                Status = $""
+                Status = $"",
+                ReportType = ReportTypeName
             };
             UpsertSimulationReportDetail(reportDetailDto);
         }

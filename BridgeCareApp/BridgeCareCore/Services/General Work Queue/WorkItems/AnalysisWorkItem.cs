@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Common.PerformanceMeasurement;
@@ -17,6 +19,7 @@ using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.WorkQueue;
 using AppliedResearchAssociates.Validation;
 using BridgeCareCore.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeCareCore.Services;
@@ -30,6 +33,20 @@ public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserI
     public string UserId => UserInfo.Name;
 
     public string WorkDescription => "Run Simulation";
+
+    private readonly UnitOfDataPersistenceWork _unitOfWork;
+
+    // Constructor that accepts UnitOfDataPersistenceWork and uses the positional parameters constructor
+    public AnalysisWorkItem(
+        Guid networkId,
+        Guid simulationId,
+        UserInfo userInfo,
+        string scenarioName,
+        UnitOfDataPersistenceWork unitOfWork
+    ) : this(networkId, simulationId, userInfo, scenarioName) // Calling the positional parameters constructor
+    {
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+    }
 
     public WorkQueueMetadata Metadata => new()
     {
@@ -248,7 +265,7 @@ public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserI
         };
 
         // resetting the report generation status.
-        var reportDetailDto = new SimulationReportDetailDTO { SimulationId = SimulationId, Status = "" };
+        var reportDetailDto = new SimulationReportDetailDTO { SimulationId = SimulationId, Status = "", ReportType = WorkType.SimulationAnalysis.ToString() };
 
         _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
         _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto);
@@ -322,6 +339,7 @@ public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserI
             _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
             updateStatusOnHandle.Invoke(simulationAnalysisDetail.Status);
         }
+        setSimulationReportDetailStatus(_unitOfWork).Wait();
     }
 
     public void OnFault(IServiceProvider serviceProvider, string errorMessage)
@@ -354,6 +372,28 @@ public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserI
         _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastTaskCompleted, $"Analysis on {ScenarioName} has completed");
     }
 
+    public async Task setSimulationReportDetailStatus(IUnitOfWork unitOfWork)
+    {
+        if (unitOfWork == null) throw new ArgumentNullException(nameof(unitOfWork));
+
+        await ((UnitOfDataPersistenceWork)unitOfWork).Context.Database.ExecuteSqlRawAsync(
+            "DELETE FROM SimulationReportDetail WHERE SimulationId = {0}",
+            SimulationId);
+
+        var reportPath = Path.Combine(Environment.CurrentDirectory, "Reports", SimulationId.ToString());
+
+        if(Directory.Exists(reportPath))
+        {
+            // Delete the directory and all its contents
+            Directory.Delete(reportPath, true);
+
+            var dataPersistenceWork = (UnitOfDataPersistenceWork)unitOfWork;
+
+            // Save the changes
+            await dataPersistenceWork.Context.SaveChangesAsync();
+        }
+    }
+
     public void OnUpdate(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
@@ -364,6 +404,7 @@ public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserI
     private SimulationAnalysisDetailDTO CreateSimulationAnalysisDetailDto(string status, DateTime lastRun) => new()
     {
         SimulationId = SimulationId,
+        ReportType = "SimulationAnalysis",
         LastRun = lastRun,
         Status = status,
     };

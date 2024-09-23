@@ -196,7 +196,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         private string GenerateSummaryReport(Guid networkId, Guid simulationId, IWorkQueueLog workQueueLog, CancellationToken? cancellationToken = null)
         {
-            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
+            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, ReportType = ReportTypeName };
 
             checkCancelled(cancellationToken, simulationId);
             reportDetailDto.Status = $"Generating...";
@@ -516,7 +516,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportDetailDto = new SimulationReportDetailDTO
             {
                 SimulationId = simulationId,
-                Status = $""
+                Status = Status,
+                ReportType = ReportTypeName
             };
             UpsertSimulationReportDetail(reportDetailDto);
         }

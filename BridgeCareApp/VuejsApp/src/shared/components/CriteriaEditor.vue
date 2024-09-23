@@ -233,6 +233,7 @@ const stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.
 const stateAttributesSelectValues = computed<AttributeSelectValues[]>(() => store.state.attributeModule.attributesSelectValues);
 const stateNetworks = computed<Network[]>(() => store.state.networkModule.networks);
 const currentUserCriteriaFilter = computed<UserCriteriaFilter>(() => store.state.userModule.currentUserCriteriaFilter);
+const stateCheckedSelectAttributes = computed<string[]>(() => store.state.attributeModule.checkedSelectAttributes);
 
 async function getAttributesAction(payload?: any): Promise<any> {await store.dispatch('getAttributes', payload);}
 async function getAttributeSelectValuesAction(payload?: any): Promise<any> {await store.dispatch('getAttributeSelectValues',payload);}
@@ -406,6 +407,12 @@ const tab = ref<any>(null);
                 choices: []
             }),
         );
+        queryBuilderRules.value.unshift({
+            type: "NUMBER", 
+            label: "{Add Equation}",
+            operators: ['=', '<>', '<', '<=', '>', '>='],
+            id: "{Add Equation}",
+            choices: []} as CriteriaConfigRule )
     }
 
     function setSubCriteriaClauses(mainCriteria: Criteria) {
@@ -487,14 +494,17 @@ const tab = ref<any>(null);
         subCriteriaClauseIndex: number,
     ) {
         resetSubCriteriaSelectedProperties();
-        setTimeout(() => {
+        setTimeout(async () => {
             selectedSubCriteriaClauseIndex.value = subCriteriaClauseIndex;
             // TODO
             //selectedSubCriteriaClause = parseCriteriaString(subCriteriaClause);
-            selectedSubCriteriaClause.value = convertCriteriaExpressionToCriteriaObject(
+            let convertedCriteria = convertCriteriaExpressionToCriteriaObject(
                 subCriteriaClause,
                 addErrorNotificationAction,
             );
+            if(!isNil(convertedCriteria))
+                await loadCriteriaSelectAttributes(convertedCriteria)
+            selectedSubCriteriaClause.value = convertedCriteria;
             if (selectedSubCriteriaClause.value) {
                 if (!hasValue(selectedSubCriteriaClause.value?.logicalOperator)) {
                     selectedSubCriteriaClause.value!.logicalOperator = 'AND';
@@ -571,7 +581,7 @@ const tab = ref<any>(null);
         activeTab = 'tree-view';
         resetSubCriteriaValidationProperties();
         selectedSubCriteriaClause.value = null;
-        setTimeout(() => {
+        setTimeout(async () => {
              //TODO
             //const parsedRawSubCriteria = parseCriteriaString(selectedRawSubCriteriaClause);
             const parsedRawSubCriteria = convertCriteriaExpressionToCriteriaObject(
@@ -579,6 +589,7 @@ const tab = ref<any>(null);
                 addErrorNotificationAction,
             );
             if (parsedRawSubCriteria && selectedRawSubCriteriaClause.value != '') {
+                await loadCriteriaSelectAttributes(parsedRawSubCriteria);
                 selectedSubCriteriaClause.value = parsedRawSubCriteria;
                 if (!hasValue(selectedSubCriteriaClause.value.logicalOperator)) {
                     selectedSubCriteriaClause.value.logicalOperator = 'OR';
@@ -938,6 +949,31 @@ const tab = ref<any>(null);
         }
 
         return missingAttributes;
+    }
+
+    async function loadCriteriaSelectAttributes(criteria: Criteria){ 
+        let attributesToCheck: string[] = [];
+        loadCriteriaSelectAttributesRecurse(criteria, attributesToCheck) 
+        if(attributesToCheck.length != 0)       
+            await getAttributeSelectValuesAction({attributeNames: Array.from(new Set(attributesToCheck))});
+    }
+
+    async function loadCriteriaSelectAttributesRecurse(criteria: Criteria, attributesToCheck: string[]){
+        if(!isNil(criteria.children))
+        {
+            criteria.children.forEach(async _ =>
+            {
+                if(_.type == queryBuilderTypes.QueryBuilderGroup)
+                loadCriteriaSelectAttributesRecurse(_.query as Criteria, attributesToCheck)
+                else
+                {
+                    if(isNil(stateCheckedSelectAttributes.value.find(__ => __ === (_.query as CriteriaRule).selectedOperand)))
+                    {
+                        attributesToCheck.push((_.query as CriteriaRule).selectedOperand)
+                    }
+                }
+            })
+        }
     }
 
 </script>

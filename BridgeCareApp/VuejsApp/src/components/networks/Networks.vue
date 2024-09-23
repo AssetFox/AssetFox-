@@ -25,7 +25,9 @@
                     <v-btn style="margin-top: 2px !important; margin-left: 20px !important" 
                         id="Networks-editNetwork-vbtn"
                         @click="confirmEditNetworkData.showDialog = true"
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
+                        :disabled="!hasSelectedNetwork"
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        v-if="hasAdminAccess">
                         Edit Network Name
                     </v-btn>
                 </v-row>
@@ -251,6 +253,8 @@ import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
     let stateDataSources = computed<Datasource[]>(() => store.state.datasourceModule.dataSources) ;
     let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
     let isAdmin: boolean = (store.state.authenticationModule.isAdmin) ;
+    let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
+
     
     async function getNetworks(payload?: any): Promise<any> {await store.dispatch('getNetworks', payload);}
     async function getDataSources(payload?: any): Promise<any> {await store.dispatch('getDataSources', payload);}
@@ -455,14 +459,20 @@ import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
     }
 
     function onNetworkNameSubmit(newName: string | null) {
-        if (newName && newName != selectedNetwork.value.name) {
+        if (newName) {
                 EditNetworkNameAction(selectedNetwork.value.id, newName).then(() => {
+                    selectNetworkItems.value.forEach(network => {
+                    if(network.text == selectedNetwork.value.name)
+                    {
+                        network.text= newName;
+                    }
+                });
+                selectedNetwork.value.name = newName;
                 hasSelectedNetwork.value = false;
                 selectNetworkItemValue.value = "";
-                selectedNetwork.value = clone(emptyNetwork)
-            })       
-        } else {
-            console.log('Submission cancelled');
+                selectedNetwork.value = clone(emptyNetwork);
+            });
+            selectNetworkItems.value = stateNetworks.value.map(_ => ({text: _.name, value: _.id}));       
         }
     }
 

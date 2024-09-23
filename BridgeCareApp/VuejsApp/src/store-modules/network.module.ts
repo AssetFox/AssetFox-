@@ -133,7 +133,6 @@ const actions = {
                 }
             });
     },
-    
     async upsertBenefitQuantifier({dispatch, commit}: any, payload: any) {
         return await NetworkService.upsertBenefitQuantifier(payload.benefitQuantifier)
           .then((response: AxiosResponse) => {

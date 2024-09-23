@@ -96,6 +96,7 @@
             public const string NetworkAggregateAccess = "NetworkAggregateAccess";
             public const string NetworkAddAccess = "NetworkAddAccess";
             public const string NetworkDeleteAccess = "NetworkDeleteAccess";
+            public const string EditNetworkNameAccess = "EditNetworkNameAccess";
             public const string NetworkViewAccess = "NetworkViewAccess";
             public const string SimulationUpdateAnyAccess = "SimulationUpdateAnyAccess";
             public const string SimulationDeleteAnyAccess = "SimulationDeleteAnyAccess";

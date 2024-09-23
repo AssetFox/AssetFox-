@@ -5,7 +5,7 @@
             <v-row justify="space-between">
                 <v-col cols = "auto" class="ghd-constant-header">
                     <div style="margin-bottom: 10px;">
-                        <v-subheader class="ghd-control-label ghd-md-gray"><span>Select an Investment library</span></v-subheader><!--class="ghd-md-gray ghd-control-subheader"-->
+                        <v-subheader class="ghd-control-label ghd-md-gray"><span>Select an Investment library</span></v-subheader>
                     </div>
                         <v-select 
                         id="InvestmentEditor-investmentLibrary-select"
@@ -18,7 +18,7 @@
                         variant="outlined"
                         density="compact">
                     </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
+                    <div class="ghd-md-gray ghd-control-subheader-library-used" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
                 </v-col>
 
                 <!-- these are only in library -->
@@ -107,7 +107,7 @@
                         <v-col cols="auto">
                             <v-btn id="InvestmentEditor-editBudgets-btn"
                                 @click='onShowEditBudgetsDialog'
-                                variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                                variant = "outlined" class='ghd-green ghd-button-text ghd-outline-button-padding ghd-button'>
                                 Edit Budgets
                             </v-btn>
                         </v-col>
@@ -115,7 +115,7 @@
                             <v-btn id="InvestmentEditor-addBudgetYearRange-btn"
                                :disabled='currentPage.length === 0'
                                @click='onSubmitAddBudgetYearRange'
-                               class='ghd-right-paired-button ghd-blue ghd-button-text ghd-outline-button-padding ' variant = "outlined">
+                               class='ghd-blue ghd-button-text ghd-outline-button-padding ' variant = "outlined">
                                Add No. Years
                             </v-btn>
                         </v-col>
@@ -220,8 +220,8 @@
                             </div>
 
                             <div v-if="header.key === 'action'">
-                                <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(item.item.year)" class="ghd-blue" flat>
-                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
+                                <v-btn id="InvestmentEditor-removeYear-btn" @click="onRemoveBudgetYear(item.item.year)" class="ghd-red" flat icon>
+                                    <TrashCanSvg />
                                 </v-btn>
                             </div>
                         </td>
@@ -230,7 +230,7 @@
                 </v-data-table-server>
                 <v-btn id="InvestmentEditor-deleteSelected-btn"
                         :disabled='selectedBudgetYears.length === 0' @click='onRemoveBudgetYears'
-                        class='ghd-blue ghd-button' variant = "text">
+                        class='ghd-red ghd-button' variant = "text">
                     Delete Selected
                 </v-btn>
         </v-col>
@@ -252,7 +252,8 @@
             <v-row style="padding-bottom: 40px;" v-show='hasSelectedLibrary || hasScenario' justify="center">
                 <v-spacer></v-spacer>
                     <v-btn id="InvestmentEditor-cancel-btn"
-                        :disabled='!hasUnsavedChanges' @click='onDiscardChanges' variant = "flat" class='ghd-blue ghd-button-text ghd-button'
+                        :disabled='!hasUnsavedChanges' @click='onDiscardChanges' flat class='ghd-blue ghd-button-text ghd-button'
+                        style="margin-right: 10px;"
                         v-show='hasScenario'>
                         Cancel
                     </v-btn>
@@ -264,7 +265,7 @@
                     <v-btn id="InvestmentEditor-createAsNewLibrary-btn"
                         :disabled='disableCrudButton()'
                         @click='onShowCreateBudgetLibraryDialog(true)'
-                        style="margin-left: 5px;"
+                        style="margin-left: 5px; margin-right: 5px;"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                         Create as New Library
                     </v-btn>
@@ -279,8 +280,9 @@
                     <v-btn id="InvestmentEditor-save-btn"
                         :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
                         @click='onUpsertInvestment()'
-                        style="margin-left: 5px;"
+                        style="margin-left: 10px;"
                         class='ghd-blue-bg text-white ghd-button-text ghd-button'
+                        flat
                         v-show='hasScenario'>
                         Save
                     </v-btn>
@@ -405,6 +407,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
 import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 
 let store = useStore();
 const confirm = useConfirm();

@@ -34,7 +34,7 @@
                                     v-if="header.key === 'criterionLibrary'"
                                 >
                                     <template v-slot:activator="{ props }">
-                                        <v-btn v-bind="props" variant="flat" id="TreatmentSupersedeRulesTab-CriteriaView-btn" class="ghd-blue" flat>
+                                        <v-btn v-bind="props" id="TreatmentSupersedeRulesTab-CriteriaView-btn" class="ghd-blue" flat icon>
                                             <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                         </v-btn>
                                     </template>
@@ -58,13 +58,14 @@
                                 </v-menu>
 
                                 <v-btn id="TreatmentSupersedeRulesTab-CriteriaEditorBtn" v-if="header.key === 'criterionLibrary'" @click='onShowSupersedeRuleCriterionEditorDialog(props.item)'
-                                        variant="flat" class='edit-icon' icon>
-                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                        class='edit-icon ghd-green' flat icon>
+                                    <EditSvg />
                                 </v-btn>
                                 
                                 <v-row v-if="header.key === ''" align="start">
-                                    <v-btn variant="flat" id="TreatmentSupersedeTab-DeleteCostBtn" @click='onRemoveSupersedeRule(props.item.id)' icon>
-                                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                    <v-btn id="TreatmentSupersedeTab-DeleteCostBtn" @click='onRemoveSupersedeRule(props.item.id)'
+                                        class="ghd-red" flat icon>
+                                        <TrashCanSvg />
                                     </v-btn>
                                 </v-row>
                             </td>
@@ -91,6 +92,8 @@ import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { getUrl } from '@/shared/utils/get-url';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import EditSvg from '@/shared/icons/EditSvg.vue';
 
     const props = defineProps<{
         selectedTreatmentSupersedeRules: TreatmentSupersedeRule[],

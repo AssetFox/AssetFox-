@@ -34,9 +34,10 @@
                             <template v-slot:append>
                                 <v-btn id="CriteriaEditor-removeSubCriteria-btn"
                                     @click.stop="onRemoveSubCriteria(index)"
-                                    class="ghd-blue"
-                                    flat>
-                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                    class="ghd-red"
+                                    flat
+                                    icon>
+                                    <TrashCanSvg />
                                 </v-btn>
                             </template>
                         </v-textarea>
@@ -221,6 +222,7 @@ import { useRouter } from 'vue-router';
 import { getUrl } from "../utils/get-url";
 import { reactive } from 'vue';
 import QueryEditor from "../components/queryEditor/QueryEditorGroup.vue"
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 
 let store = useStore();
 const $router = useRouter();

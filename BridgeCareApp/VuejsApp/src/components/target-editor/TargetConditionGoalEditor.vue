@@ -142,7 +142,6 @@
                                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                                       </template>
                                 </editDialog>
-                                <!-- <div v-if="header.key === 'criterionLibrary'" > -->
                                 <v-row v-if="header.key === 'criterionLibrary'" style='flex-wrap:nowrap'>    
                                     <v-menu>
                                         <template v-slot:activator>
@@ -157,19 +156,20 @@
                                     <v-btn
                                         id="TargetConditionGoalEditor-editTargetConditionGoalCriteria-vbtn"
                                         @click="onShowCriterionLibraryEditorDialog(item.item)"
-                                        class="ghd-blue" style="margin-top: 10px;"
-                                        flat>
-                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                        class="ghd-green" style="margin-top: 10px;"
+                                        flat
+                                        icon>
+                                        <EditSvg />
                                     </v-btn>
                                 </v-row>    
-                                <!-- </div> -->
                                 <div v-if="header.key === 'actions'">
                                     <v-btn 
                                         id="TargetConditionGoalEditor-deleteTargetConditionGoal-vbtn" 
                                         @click="onRemoveTargetConditionGoalsIcon(item.item)"  
-                                        class="ghd-blue" 
-                                        flat>
-                                            <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                        class="ghd-red" style="margin-top: 10px;"
+                                        flat
+                                        icon>
+                                            <TrashCanSvg />
                                     </v-btn>
                                 </div>
                             </td>
@@ -187,7 +187,7 @@
                 :disabled="selectedTargetConditionGoalIds.length === 0"
                 variant="text"
                 id="TargetConditionGoalEditor-deleteSelected-vbtn"
-                class='ghd-blue ghd-button'
+                class='ghd-red ghd-button'
                 @click="onRemoveTargetConditionGoals"> 
                 Delete Selected 
             </v-btn>
@@ -218,7 +218,7 @@
                 <v-btn :disabled='!hasUnsavedChanges' flat
                     @click="onDiscardChanges"
                     class='ghd-white-bg ghd-blue ghd-button-text'
-                    style="margin-left: 5px;"
+                    style="margin-right: 5px;"
                     v-show="hasScenario"
                     variant="text"
                 >
@@ -229,7 +229,7 @@
                     id="TargetConditionGoalEditor-CreateAsNewLibrary-btn"
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                    style="margin-left: 5px;"
+                    style="margin-left: 5px; margin-right: 5px;"
                     :disabled="disableCrudButtons()"
                 >
                     Create as New Library
@@ -342,6 +342,8 @@ import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import EditSvg from '@/shared/icons/EditSvg.vue';
 
     let store = useStore();
     const $router = useRouter(); 

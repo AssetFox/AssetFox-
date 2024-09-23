@@ -16,6 +16,7 @@ export interface CriteriaRule {
     rule: string;
     selectedOperator?: string;
     selectedOperand: string;
+    isEquation: boolean;
     value?: string;
 }
 

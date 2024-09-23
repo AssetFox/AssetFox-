@@ -22,6 +22,7 @@ using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Graph.Models;
 using Newtonsoft.Json.Linq;
 
@@ -35,13 +36,15 @@ namespace BridgeCareCore.Controllers
         private readonly ILog _log;
         private readonly IGeneralWorkQueueService _generalWorkQueueService;
         public const string ReportError = "Report Error";
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public ReportController(IReportGenerator generator, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+        public ReportController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IReportGenerator generator, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, ILog logger, IGeneralWorkQueueService generalWorkQueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _generator = generator ?? throw new ArgumentNullException(nameof(generator));
             _log = logger ?? throw new ArgumentNullException(nameof(logger));
             _generalWorkQueueService = generalWorkQueService ?? throw new ArgumentNullException(nameof(generalWorkQueService));
+            _unitOfWork = unitOfWork;
         }
 
         public class ReportDetails
@@ -49,6 +52,7 @@ namespace BridgeCareCore.Controllers
             public Guid simulationId { get; set; }
             public string reportName { get; set; }
             public bool isGenerated { get; set; }
+            public string reportStatus  { get; set; }
         }
 
         #region "API functions"
@@ -202,6 +206,17 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> GetReportGenerationStatus([FromBody] List<ReportDetails> reportDetails)
         {
+            var simulationId = reportDetails.Select(report => report.simulationId).Distinct().ToList();
+
+            var simulations = _unitOfWork.Context.Simulation
+                .Include(_ => _.SimulationReportDetail)
+                .Where(_ => simulationId.Contains(_.Id))
+                .ToList();
+
+            var simulationReportDetails = _unitOfWork.Context.SimulationReportDetail
+                .Where(_ => simulationId.Contains(_.SimulationId))
+                .ToList();
+
             foreach (var report in reportDetails)
             {
                 if (report.simulationId == Guid.Empty || report.reportName == String.Empty)
@@ -215,16 +230,27 @@ namespace BridgeCareCore.Controllers
                     .OrderByDescending(_ => _.CreationDate)
                     .FirstOrDefault();
 
-                if (availableReport == null)
+                if (simulations[0].SimulationReportDetail != null)
                 {
-                    report.isGenerated = false;
+                    foreach (var reportDetail in simulationReportDetails)
+                    {
+                        if (reportDetail.ReportType == report.reportName)
+                        {
+                            report.reportStatus = reportDetail.Status;
+                        }
+                    }
                 }
-                else
-                {
-                    var reportPath = Path.Combine(Environment.CurrentDirectory, "Reports", reportDetails[0].simulationId.ToString());
 
-                    // Check if the directory exists and if the file exists
-                    if (Directory.Exists(reportPath) && System.IO.File.Exists(availableReport.Result))
+                var reportGenerationStatus = UnitOfWork.ReportIndexRepository.GetAllForScenario(report.simulationId)
+                    .Where(_ => _.Type == report.reportName)
+                    .OrderByDescending(_ => _.CreationDate)
+                    .FirstOrDefault();
+
+                if (reportGenerationStatus != null)
+                {
+                    var reportPath = Path.Combine(Environment.CurrentDirectory, reportGenerationStatus.Result);
+
+                    if (System.IO.File.Exists(reportPath)) // Check if the file exists
                     {
                         report.isGenerated = true;
                     }
@@ -232,6 +258,10 @@ namespace BridgeCareCore.Controllers
                     {
                         report.isGenerated = false;
                     }
+                }
+                else
+                {
+                    report.isGenerated = false;
                 }
             }
             return Ok(reportDetails);
@@ -283,6 +313,11 @@ namespace BridgeCareCore.Controllers
             try
             {
                 System.IO.File.Delete(reportPath);
+
+                await _unitOfWork.Context.Database.ExecuteSqlRawAsync(
+                    "UPDATE SimulationReportDetail SET Status = {0} WHERE SimulationId = {1} AND ReportType = {2}",
+                    "Report Deleted", simulationId, reportName);
+
                 return Ok($"The report {reportName} for simulation {simulationName} has been successfully deleted.");
             }
             catch (Exception e)
@@ -322,7 +357,7 @@ namespace BridgeCareCore.Controllers
             // Throw an error if the path does not exist
             if (!Directory.Exists(reportPath))
             {
-                var message = new List<string>() { $"The report path for {simulationName} does not exist." };
+                var message = new List<string>() { $"No reports exist for {simulationName}." };
                 return CreateErrorListing(message);  // Or throw an exception if you prefer
             }
 
@@ -332,6 +367,14 @@ namespace BridgeCareCore.Controllers
                 {
                     // Delete the directory and all its contents
                     Directory.Delete(reportPath, true);
+
+                    // Update all reports in the database to "Report Deleted" for the given simulationId
+                    await _unitOfWork.Context.Database.ExecuteSqlRawAsync(
+                        "UPDATE SimulationReportDetail SET Status = {0} WHERE SimulationId = {1}",
+                        "Report Deleted", simulationId);
+
+                    // Save the changes
+                    await _unitOfWork.Context.SaveChangesAsync();
                 }
                 else
                 {

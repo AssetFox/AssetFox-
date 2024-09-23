@@ -11,9 +11,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
                 ConditionRangeRegion,
                 GlossaryRegion,
                 ColorKeyRegion,
-                ExcelWorksheetContentModels.ColumnWidth(1, 20.5),
-                ExcelWorksheetContentModels.ColumnWidth(2, 20.5),
-                ExcelWorksheetContentModels.ColumnWidth(3, 20.5),
+                ExcelWorksheetContentModels.ColumnWidth(1, 19),
+                ExcelWorksheetContentModels.ColumnWidth(2, 19),
+                ExcelWorksheetContentModels.ColumnWidth(3, 19),
             };        
 
         public static AnchoredExcelRegionModel ConditionRangeRegion

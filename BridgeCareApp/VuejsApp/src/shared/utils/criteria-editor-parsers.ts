@@ -7,6 +7,7 @@ import {
 } from '@/shared/models/iAM/criteria';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { getNewGuid } from './uuid-utils';
+import { transformWithEsbuild } from 'vite';
 
 const operators: string[] = ['<=', '>=', '<>', '=', '<', '>'];
 
@@ -111,10 +112,18 @@ function createCriteriaExpression(criteriaRule: CriteriaRule): string {
         typeof criteriaRule.value != 'undefined' &&
         hasValue(criteriaRule.value)
     ) {
+        let expression = '';
+        if(criteriaRule.isEquation){
+            expression = `${criteriaRule.selectedOperand}${criteriaRule.selectedOperator}`
+        }
+        else
+        {
+            expression = `[${criteriaRule.selectedOperand}]${criteriaRule.selectedOperator}`
+        }
         if (criteriaRule.value[0] != '[') {
-            return `[${criteriaRule.selectedOperand}]${criteriaRule.selectedOperator}'${criteriaRule.value}'`;
+            return expression + `'${criteriaRule.value}'`;
         } else {
-            return `[${criteriaRule.selectedOperand}]${criteriaRule.selectedOperator}${criteriaRule.value}`;
+            return expression + `${criteriaRule.value}`;
         }
     } else {
         return '';
@@ -136,7 +145,8 @@ function getCharIndex(
  */
 function createCriteriaRuleObject(clause: string): CriteriaRule {
     let operator: string = '';
-
+    let isEquation = true;
+    clause = clause.replace(/\s/g, "");
     for (
         let operatorIndex = 0;
         operatorIndex < operators.length;
@@ -153,9 +163,16 @@ function createCriteriaRuleObject(clause: string): CriteriaRule {
     }
 
     const operandAndValue: string[] = clause.split(operator);
+    let foo = operandAndValue[0];
+    foo = foo.trim()
     operandAndValue[0] = operandAndValue[0]
         .replace(/\[/g, '')
         .replace(/]/g, '');
+    if(foo.startsWith('[') && foo.endsWith(']') && foo.length - operandAndValue[0].length == 2)
+        isEquation = false
+    else
+        operandAndValue[0] = foo;
+
     operandAndValue[1] = operandAndValue[1]
         .replace(/'/g, '')
         .replace(/\|/g, '');
@@ -165,6 +182,7 @@ function createCriteriaRuleObject(clause: string): CriteriaRule {
         selectedOperator: operator,
         selectedOperand: operandAndValue[0],
         value: operandAndValue[1],
+        isEquation: isEquation
     } as CriteriaRule;
 }
 
@@ -188,10 +206,10 @@ function createCriteriaObject(
 
     let currentClause: string = '';
     let currentCharIndex: number = 0;
-    let currentOpenParentheses: string[] = [];
-    let currentCloseParentheses: string[] = [];
+    
     let loopPasses: number = 0;
     let quotesClosed: boolean = true; // This check is to allow values with spaces in it to pass through the while loop
+    let isInEquation: boolean = false;
     while (currentCharIndex < expression.length) {
         loopPasses++;
         if (loopPasses > expression.length) {
@@ -201,51 +219,58 @@ function createCriteriaObject(
         if(expression[currentCharIndex] == "'"){
             quotesClosed = !quotesClosed;
         }
-        if (expression[currentCharIndex] === '(') {
-            if (hasValue(currentClause)) {
-                criteria.children!.push(
-                    createCriteriaTypeObject(
-                        queryBuilderTypes.QueryBuilderRule,
-                        createCriteriaRuleObject(currentClause),
-                    ),
-                );
-                currentClause = '';
-            }
-
+        if (expression[currentCharIndex] === '(' && !isInEquation) {
             let subCharIndex: number = currentCharIndex;
-            do {
-                if (expression[subCharIndex] === '(') {
-                    currentOpenParentheses.push('(');
-                }
+            if(!isInEquation)
+            {
+                let parenthesesCounter = 0;
+                let operatorFound: boolean = false;
+                do {
+                    if (expression[subCharIndex] === '(') {
+                        parenthesesCounter++;
+                    }
+    
+                    if (expression[subCharIndex] === ')') {
+                        parenthesesCounter--;
+                    }
 
-                if (expression[subCharIndex] === ')') {
-                    currentCloseParentheses.push(')');
-                }
-
-                subCharIndex++;
-            } while (
-                currentOpenParentheses.length !==
-                    currentCloseParentheses.length &&
-                subCharIndex < expression.length
-            );
-
-            criteria.children!.push(
-                createCriteriaTypeObject(
-                    queryBuilderTypes.QueryBuilderGroup,
-                    createCriteriaObject(
-                        expression.substring(
-                            currentCharIndex + 1,
-                            subCharIndex - 1,
+                    if(operators.includes(expression[subCharIndex]))
+                        operatorFound = true;
+                    subCharIndex++;
+                } while (
+                    parenthesesCounter != 0 &&
+                    subCharIndex < expression.length
+                );
+                if(!operatorFound)
+                    isInEquation = true;
+                if(!isInEquation)
+                {
+                    if (hasValue(currentClause)) {
+                        criteria.children!.push(
+                            createCriteriaTypeObject(
+                                queryBuilderTypes.QueryBuilderRule,
+                                createCriteriaRuleObject(currentClause),
+                            ),
+                        );
+                        currentClause = '';
+                    }
+                    criteria.children!.push(
+                        createCriteriaTypeObject(
+                            queryBuilderTypes.QueryBuilderGroup,
+                            createCriteriaObject(
+                                expression.substring(
+                                    currentCharIndex + 1,
+                                    subCharIndex - 1,
+                                ),
+                                clone(emptyCriteria),
+                            ),
                         ),
-                        clone(emptyCriteria),
-                    ),
-                ),
-            );
-
-            currentOpenParentheses = [];
-            currentCloseParentheses = [];
-
-            currentCharIndex = subCharIndex;
+                    );
+                    currentCharIndex = subCharIndex;
+                }
+                
+            }
+                
         } else if (expression[currentCharIndex] === ' ' && quotesClosed) {
             if (
                 expression.substring(
@@ -265,6 +290,7 @@ function createCriteriaObject(
                         ),
                     );
                     currentClause = '';
+                    isInEquation = false;
                 }
 
                 if (
@@ -292,6 +318,8 @@ function createCriteriaObject(
                     );
                 }
             }
+            else
+                currentCharIndex++         
         } else {
             if(quotesClosed){
                 if(!invalidCharRegex.test(expression[currentCharIndex])){
@@ -309,7 +337,7 @@ function createCriteriaObject(
                 hasValue(currentClause) &&
                 currentCharIndex === expression.length
             ) {
-                if(hasAttributeToTest(currentClause, currentCharIndex)){
+                if(hasValue(currentClause)){
                     criteria.children!.push(
                         createCriteriaTypeObject(
                             queryBuilderTypes.QueryBuilderRule,
@@ -318,6 +346,7 @@ function createCriteriaObject(
                     );
                 }
                 currentClause = '';
+                isInEquation = false;
             }
         }
     }

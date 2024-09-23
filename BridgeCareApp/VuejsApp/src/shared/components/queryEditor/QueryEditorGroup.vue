@@ -125,7 +125,10 @@ const emit = defineEmits(['update:criteria', 'delete'])
         let newRule: CriteriaRule = {
             rule: selectedQueryRule.value!.label,
             selectedOperand: selectedQueryRule.value!.label,
+            isEquation: selectedQueryRule.value!.label == "{Add Equation}"
         }
+        if(newRule.isEquation)
+            newRule.selectedOperand = "";
         let newCriteriaType: CriteriaType = {
             type: queryBuilderTypes.QueryBuilderRule,
             query: newRule,

@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.Reporting.Models;
 using MoreLinq;
 using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using OfficeOpenXml.Style;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment
 {
@@ -39,6 +40,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
 
             AddDynamicDataCells(fundedTreatmentWorksheet, simulationOutput, currentCell, shouldBundleFeasibleTreatments);
             fundedTreatmentWorksheet.Calculate();
+
+            // Highlight BRKey column with green
+            var brKeyCells = fundedTreatmentWorksheet.Cells[1, 2, currentCell.Row - 1, 2];
+            brKeyCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
+            brKeyCells.Style.Fill.BackgroundColor.SetColor(Color.Green);
 
             fundedTreatmentWorksheet.Cells.AutoFitColumns();
             _treatmentCommon.PerformPostAutofitAdjustments(fundedTreatmentWorksheet);

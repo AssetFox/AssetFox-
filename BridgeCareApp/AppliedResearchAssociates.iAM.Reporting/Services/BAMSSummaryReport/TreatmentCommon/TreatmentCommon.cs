@@ -26,7 +26,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
             int headerRow = 1;
             var headersRow = GetHeadersRow();
 
-
             worksheet.Cells.Style.WrapText = false;
 
             // Add all Row 1 headers
@@ -149,13 +148,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         }
 
         private const string INTERSTATE = "Interstate";
+        private const string BRKEY = "BRKey\r\n(Hyperlink)";
 
         private static List<string> GetHeadersRow()
         {
             return new List<string>
             {
                 "BridgeID",
-                "BRKey",
+                BRKEY,
                 "District",
                 "County",
                 "MPO/RPO",
@@ -179,6 +179,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         {
             var columnNumber = GetHeadersRow().IndexOf(INTERSTATE) + 1;
             worksheet.Column(columnNumber).SetTrueWidth(9);
+
+            columnNumber = GetHeadersRow().IndexOf(BRKEY) + 1;
+            worksheet.Column(columnNumber).SetTrueWidth(10);
         }
     }
 }

@@ -448,6 +448,7 @@ import mitt, { Emitter, EventType } from 'mitt';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
+import AuthenticationService from '@/services/authentication.service';
 
     const emit = defineEmits(['submit'])    
     const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
@@ -653,7 +654,10 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
     
     beforeRouteEnter();
     async function beforeRouteEnter() {
-        librarySelectItemValue.value = "";
+        const activeStatus = await AuthenticationService.getActiveStatus();
+        if(activeStatus.data == true)
+        {
+            librarySelectItemValue.value = "";
         await getTreatmentLibrariesAction();
         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Treatment) !== -1) {
             selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
@@ -679,6 +683,7 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
                     setAlertMessageAction("A treatment curve has been added to the work queue")
                 }
             })
+        }
         }
     }
 

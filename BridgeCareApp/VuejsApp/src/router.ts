@@ -150,6 +150,11 @@ const onHandlingUnsavedChanges = (to: any, next: any): void => {
 };
 
 const beforeEachFunc = (to: any, from: any, next: any) => {
+    if(to.name == "AuthenticationStart" && from.name == "AccessDenied" || to.name == "Authentication" && from.name == "AccessDenied")
+    {
+        onHandleLogout();
+        next('/AuthenticationStart/');
+    }
     if (UnsecuredRoutePathNames.indexOf(to.name) === -1) {
         const hasAuthInfo: boolean =
             // @ts-ignore
@@ -165,6 +170,13 @@ const beforeEachFunc = (to: any, from: any, next: any) => {
             hasAuthInfo
         ) {            
             isAuthenticatedUser().then((isAuthenticated: boolean | void) => {
+                // @ts-ignore
+                let isAccessDenied = store.state.authenticationModule.accessDenied;
+                if(isAccessDenied == false)
+                {
+                    isAuthenticated = true;
+                }
+                                
                 if (isAuthenticated) {
                     onHandlingUnsavedChanges(to, next);
                 } else {

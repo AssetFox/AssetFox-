@@ -14,6 +14,7 @@
                         id = "EditScenario-navigation-vlistItemGroup"
                         class="settings-list ghd-control-text"
                         :key="navigationTab.tabName"
+                        :disabled="navigationTab.disabled"
                         v-for="navigationTab in visibleNavigationTabs()"
                     >
                         <v-list-item id="EditScenario-tabs-vListTile" :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
@@ -149,6 +150,7 @@ import ScenarioService from '@/services/scenario.service';
     let emptyTreatmentBudgets: any;
     let confirmAnalysisRunAlertData= ref(clone(emptyAlertDataWithButtons));
     let confirmAnalysisPreCheckAlertData= ref(clone(emptyAlertPreChecksData));
+    let randBoolean = true;
     let navigationTabs: NavigationTab[] = [
         {
             tabName: 'Analysis Method',
@@ -163,6 +165,7 @@ import ScenarioService from '@/services/scenario.service';
             navigation: {
                 path: '/InvestmentEditor/Scenario/',
             },
+            disabled: randBoolean,
         },
         {
             tabName: 'Deterioration Model',
@@ -170,6 +173,7 @@ import ScenarioService from '@/services/scenario.service';
             navigation: {
                 path: '/PerformanceCurveEditor/Scenario/',
             },
+            disabled: randBoolean,
         },
         {
             tabName: 'Calculated Attribute',
@@ -177,6 +181,7 @@ import ScenarioService from '@/services/scenario.service';
             navigation: {
                 path: '/CalculatedAttributeEditor/Scenario/',
             },
+            disabled: randBoolean,
         },
         {
             tabName: 'Treatment',
@@ -184,6 +189,7 @@ import ScenarioService from '@/services/scenario.service';
             navigation: {
                 path: '/TreatmentEditor/Scenario/',
             },
+            disabled: randBoolean,
         },
         {
             tabName: 'Budget Priority',
@@ -191,6 +197,7 @@ import ScenarioService from '@/services/scenario.service';
             navigation: {
                 path: '/BudgetPriorityEditor/Scenario/',
             },
+            disabled: randBoolean,
         },
         {
             tabName: 'Target Condition Goal',
@@ -219,6 +226,7 @@ import ScenarioService from '@/services/scenario.service';
             navigation: {
                 path: '/CashFlowEditor/Scenario/',
             },
+            disabled: randBoolean,
         },
         {
             tabName: 'Committed Projects',
@@ -226,6 +234,7 @@ import ScenarioService from '@/services/scenario.service';
             navigation: {
                 path: '/CommittedProjectsEditor/Scenario/',
             },
+            disabled: randBoolean,
         },
         {
             tabName: 'Reports & Outputs',

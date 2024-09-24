@@ -43,7 +43,7 @@
                                 v-if="header.key === 'equation'"
                             >
                                 <template v-slot:activator="{ props }">
-                                    <v-btn v-bind="props" id="TreatmentConsequencesTab-EquationView-btn" class="ghd-blue" flat>
+                                    <v-btn v-bind="props" id="TreatmentConsequencesTab-EquationView-btn" class="ghd-blue" flat icon>
                                         <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                     </v-btn>
                                 </template>
@@ -64,9 +64,9 @@
                                     </v-card-text>
                                 </v-card>
                             </v-menu>     
-                             <v-btn variant="flat" id="TreatmentConsequencesTab-EquationEditorBtn" v-if="header.key === 'equation'" @click='onShowConsequenceEquationEditorDialog(props.item)' class='edit-icon'
-                                    icon>
-                                <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                             <v-btn id="TreatmentConsequencesTab-EquationEditorBtn" v-if="header.key === 'equation'" @click='onShowConsequenceEquationEditorDialog(props.item)' class='edit-icon ghd-green'
+                                    flat icon>
+                                <EditSvg />
                             </v-btn>                       
 
                             <v-menu
@@ -74,7 +74,7 @@
                                 v-if="header.key === 'criterionLibrary'"
                             >
                                 <template v-slot:activator="{ props }">
-                                    <v-btn v-bind="props" variant="flat" id="TreatmentConsequencesTab-CriteriaView-btn" class="ghd-blue" flat>
+                                    <v-btn v-bind="props" id="TreatmentConsequencesTab-CriteriaView-btn" class="ghd-blue" flat icon>
                                         <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                     </v-btn>
                                 </template>
@@ -97,13 +97,14 @@
                                 </v-card>
                             </v-menu>
                             <v-btn id="TreatmentConsequencesTab-CriteriaEditorBtn" v-if="header.key === 'criterionLibrary'" @click='onShowConsequenceCriterionEditorDialog(props.item)'
-                                    variant="flat" class='edit-icon' icon>
-                                <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                    class='edit-icon ghd-green' flat icon>
+                                <EditSvg />
                             </v-btn>
 
                             <v-row v-if="header.key === ''" align="start">
-                                <v-btn variant="flat" id="TreatmentConquencesTab-DeleteCostBtn" @click='onRemoveConsequence(props.item.id)' icon>
-                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                <v-btn id="TreatmentConquencesTab-DeleteCostBtn" @click='onRemoveConsequence(props.item.id)' 
+                                    class="ghd-red" flat icon>
+                                   <TrashCanSvg />
                                 </v-btn>
                             </v-row>
                         </td>
@@ -145,6 +146,8 @@ import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { getUrl } from '@/shared/utils/get-url';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import EditSvg from '@/shared/icons/EditSvg.vue';
 
 const props = defineProps<{
          selectedTreatmentConsequences: TreatmentConsequence[],

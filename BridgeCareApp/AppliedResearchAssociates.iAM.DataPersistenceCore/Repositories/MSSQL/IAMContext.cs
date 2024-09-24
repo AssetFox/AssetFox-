@@ -2284,7 +2284,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<SimulationReportDetailEntity>(entity =>
             {
-                entity.HasKey(e => e.SimulationId);
+                entity.HasKey(e => new {e.SimulationId, e.ReportType});
 
                 entity.HasIndex(e => e.SimulationId).IsUnique();
 

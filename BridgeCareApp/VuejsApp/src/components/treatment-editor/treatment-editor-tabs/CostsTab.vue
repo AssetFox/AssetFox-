@@ -26,10 +26,10 @@
                                                 props.item,
                                             )
                                         "
-                                        class="edit-icon"
+                                        class="edit-icon ghd-green"
                                         flat
                                     >
-                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                        <EditSvg />
                                     </v-btn>                                
                                 </v-row>
                                 <v-row>  
@@ -55,10 +55,10 @@
                                                 props.item,
                                             )
                                         "
-                                        class="edit-icon"
+                                        class="edit-icon ghd-green"
                                         flat
                                     >
-                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                        <EditSvg />
                                     </v-btn>
                                 </v-row> 
                                 <v-row >              
@@ -83,8 +83,11 @@
                                     <v-btn id="TreatmentCostsTab-DeleteCostBtn"
                                         @click="onRemoveCost(props.item.id)"
                                         flat
+                                        icon
+                                        class="ghd-red"
+                                        style="padding-top: 30px;"
                                     >
-                                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                        <TrashCanSvg />
                                     </v-btn>
                                 </v-row>                   
                             </td>
@@ -128,6 +131,8 @@ import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditor
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { ref, onMounted, onBeforeUnmount, watch, toRefs } from 'vue';
 import { getUrl } from '@/shared/utils/get-url';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import EditSvg from '@/shared/icons/EditSvg.vue';
 
     const emit = defineEmits(['submit', 'onAddCost', 'onModifyCost', 'onRemoveCost'])
     const props = defineProps<{

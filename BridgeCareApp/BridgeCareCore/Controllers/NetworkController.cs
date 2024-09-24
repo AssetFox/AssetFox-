@@ -27,6 +27,7 @@ using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.SqlServer.Dac.Model;
 using static BridgeCareCore.Security.SecurityConstants;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace BridgeCareCore.Controllers
 {
@@ -35,12 +36,14 @@ namespace BridgeCareCore.Controllers
     public class NetworkController : BridgeCareCoreBaseController
     {
         public const string NetworkError = "Network Error";
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         private readonly IGeneralWorkQueueService _workQueueService;
         public NetworkController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IGeneralWorkQueueService workQueueService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _workQueueService = workQueueService ?? throw new ArgumentNullException(nameof(workQueueService));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         [HttpGet]
@@ -148,6 +151,29 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::DeleteNetwork - {e.Message}");
                 throw;
             }
+        }
+
+        [HttpPost]
+        [Route("EditNetworkName/{networkId}/{newNetworkName}")]
+        [ClaimAuthorize("EditNetworkNameAccess")]
+        public async Task<IActionResult> EditNetworkName(Guid networkId, string newNetworkName)
+        {
+            // Get the correct entity
+            var entity = _unitOfWork.Context.Network.SingleOrDefault(n => n.Id == networkId);
+
+            // Check if the entity exists
+            if (entity == null)
+            {
+                return NotFound("Network not found");
+            }
+
+            // Update the network's name
+            entity.Name = newNetworkName;
+
+            // Save changes to the database
+            await _unitOfWork.Context.SaveChangesAsync();
+
+            return Ok();
         }
 
         [HttpPost]

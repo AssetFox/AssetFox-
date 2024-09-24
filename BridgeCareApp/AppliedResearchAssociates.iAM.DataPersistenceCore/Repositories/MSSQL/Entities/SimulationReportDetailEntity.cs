@@ -9,6 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public string Status { get; set; }
 
+        public string ReportType { get; set; }
         public virtual SimulationEntity Simulation { get; set; }
     }
 }

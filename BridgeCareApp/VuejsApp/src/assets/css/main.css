@@ -120,6 +120,15 @@
     color: #333333 !important;
 }
 
+.ghd-red {
+    --svg-color: #D9534F; 
+    color: var(--svg-color) !important;
+}
+
+.ghd-green {
+    --svg-color: #5CB85C;
+    color: var(--svg-color) !important;
+}
 
 /* Controls (general) */
 .ghd-control-label {
@@ -128,6 +137,14 @@
     font-family: 'Montserrat', sans-serif !important;
     font-size: 13px !important;
     font-weight: 400 !important;
+}
+
+.ghd-control-subheader-library-used{
+    padding: 0px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    position: relative;
 }
 
 .ghd-control-subheader{

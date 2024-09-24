@@ -1,0 +1,42 @@
+<template>
+    <svg
+        class="img-general"
+        :width="width"
+        :height="height"
+        viewBox="0 0 18 18"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <path
+        d="M8.25 3H3C2.60218 3 2.22064 3.15804 1.93934 3.43934C1.65804 3.72064 1.5 4.10218 1.5 4.5V15C1.5 15.3978 1.65804 15.7794 1.93934 16.0607C2.22064 16.342 2.60218 16.5 3 16.5H13.5C13.8978 16.5 14.2794 16.342 14.5607 16.0607C14.842 15.7794 15 15.3978 15 15V9.75"
+        stroke="var(--svg-color)" 
+        fill="none"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        />
+        <path
+        d="M13.875 1.875C14.1734 1.57663 14.578 1.40901 15 1.40901C15.422 1.40901 15.8266 1.57663 16.125 1.875C16.4234 2.17337 16.591 2.57805 16.591 3C16.591 3.42196 16.4234 3.82663 16.125 4.125L9 11.25L6 12L6.75 9L13.875 1.875Z"
+        stroke="var(--svg-color)" 
+        fill="none"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        />
+    </svg>
+</template>
+
+<script setup>
+    defineProps({
+        width: {
+            type: [String, Number],
+            default: 25, 
+        },
+        height: {
+            type: [String, Number],
+            default: 25, 
+        },
+    });
+</script>
+
+<style scoped>
+</style>

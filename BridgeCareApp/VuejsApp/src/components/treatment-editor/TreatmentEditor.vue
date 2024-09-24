@@ -15,7 +15,7 @@
                 v-model='librarySelectItemValue' 
             >
             </v-select>
-            <div class="ghd-md-gray ghd-control-subheader treatment-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
+            <div class="ghd-md-gray ghd-control-subheader-library-used treatment-parent" v-if='hasScenario'><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
         </v-col>
         <v-col class="ghd-blue ghd-button-text ghd-text-padding" v-if='hasSelectedLibrary || hasScenario' style="border-style: solid;border-width: 2px; border-color: lightgray;margin-right: 5px;margin-bottom: 50px;">Treatments<br>
             <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
@@ -115,8 +115,8 @@
                                         avatar @click='onSetTreatmentSelectItemValue(treatmentSelectItem.value)'>
                                 <v-list-item-content class ="item-content">
                                     <span>{{treatmentSelectItem.text}}</span>
-                                    <v-btn flat style="margin-left: 10px; background-color: transparent;" v-show="treatmentSelectItem.text!='No Treatment'" @click="onShowConfirmDeleteTreatmentAlert" class="ghd-blue">
-                                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                    <v-btn flat icon style="margin-left: 10px; background-color: transparent;" v-show="treatmentSelectItem.text!='No Treatment'" @click="onShowConfirmDeleteTreatmentAlert" class="ghd-red">
+                                        <TrashCanSvg />
                                     </v-btn>
                                 </v-list-item-content>
                             </v-list-item>
@@ -449,6 +449,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
 import AuthenticationService from '@/services/authentication.service';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 
     const emit = defineEmits(['submit'])    
     const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>

@@ -215,9 +215,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SUFF_RATING"); //Suff Rating
                 ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
 
-                worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: Leaking Joints data here
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "LeakingJnts"); //Leaking Joints
 
-                worksheet.Cells[rowNo, columnNo++].Value = ""; // TODO: Scour Critical data here
+                worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "Scour_Crit_Cat"); //Scour Critical
 
                 //--------------------- Funding ---------------------
                 worksheet.Cells[rowNo, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "HBRR_ELIG"); //HBRR Elig
@@ -721,7 +721,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     {
                         worksheet.Cells[row, ++column].Value = recommendedTreatment.Contains("Bundle") ? BAMSConstants.Bundled : ""; // FHWA Work Type
                     }
-                    worksheet.Cells[row, ++column].Value = ""; // District Remarks
+                    worksheet.Cells[row, ++column].Value = ""; // Comments
 
                     if (row % 2 == 0)
                     {
@@ -1091,7 +1091,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "Cost",
                 "Superseded Treatments",
                 "FHWA\r\nWork Types",
-                "District Remarks"
+                "Comments"
             };
         }
 

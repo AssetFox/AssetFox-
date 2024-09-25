@@ -18,7 +18,7 @@
                         density="compact"
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>    
-                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>                       
+                    <div class="ghd-md-gray ghd-control-subheader-library-used budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>                       
                 </v-col>
                 <v-col cols = "auto">
                     <v-row v-show='hasSelectedLibrary || hasScenario'>
@@ -111,18 +111,18 @@
                                         <v-menu >
                                             <template v-slot:activator="{ props }">
                                                     <div style="display: flex; align-items: center;" v-if='stateScenarioSimpleBudgetDetails.length > 5'>
-                                                        <v-btn class='ara-blue ghd-button-text' v-bind="props" flat>
+                                                        <v-btn class='ara-blue ghd-button-text' v-bind="props" flat icon>
                                                             <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                                         </v-btn>
-                                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' flat>
-                                                        <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' class="ghd-green" flat icon>
+                                                        <EditSvg />
                                                     </v-btn>
                                                     </div>
                                                     <div style="display: flex; align-items: center;" v-else class='priority-criteria-output' >
                                                         <v-text-field readonly single-line class='sm-txt' variant="underlined"
                                                                     :model-value='item.item.criteria' />   
-                                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' flat>
-                                                            <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>   
+                                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' class="ghd-green" flat icon>
+                                                            <EditSvg /> 
                                                         </v-btn>                                  
                                                     </div>
                                             </template>
@@ -150,8 +150,8 @@
                                     </editDialog>
                                 </div>
                                 <div v-else>
-                                    <v-btn style="padding-bottom: 5px;" id="BudgetPriorityEditor-deleteBudgetPriority-btn" @click="onRemoveBudgetPriority(item.item.id)" flat>
-                                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                    <v-btn style="padding-bottom: 5px;" id="BudgetPriorityEditor-deleteBudgetPriority-btn" @click="onRemoveBudgetPriority(item.item.id)" class="ghd-red" flat icon>
+                                        <TrashCanSvg />
                                     </v-btn>
                                 </div>
                             </td>
@@ -161,7 +161,7 @@
             <v-btn flat
                 :disabled='selectedBudgetPriorityIds.length === 0'
                 @click='onRemoveBudgetPriorities'
-                class='ghd-blue ghd-button'
+                class='ghd-red ghd-button'
                 variant="text">
                 Delete Selected
             </v-btn>
@@ -276,9 +276,11 @@
     import ShareBudgetPriorityLibraryDialog  from '@/components/budget-priority-editor/budget-priority-editor-dialogs/ShareBudgetPriorityLibraryDialog.vue'
     import { useConfirm } from 'primevue/useconfirm';
     import ConfirmDialog from 'primevue/confirmdialog';
-import { getUrl } from '@/shared/utils/get-url';
-import { faL } from '@fortawesome/free-solid-svg-icons';
-import { vMaska } from "maska"
+    import { getUrl } from '@/shared/utils/get-url';
+    import { faL } from '@fortawesome/free-solid-svg-icons';
+    import { vMaska } from "maska"
+    import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+    import EditSvg from '@/shared/icons/EditSvg.vue';
 
     let store = useStore();
     const confirm = useConfirm();

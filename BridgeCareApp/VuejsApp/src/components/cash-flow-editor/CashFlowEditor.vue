@@ -17,7 +17,7 @@
                         item-value="value"
                         class="ghd-select ghd-text-field ghd-text-field-border" density="compact">
                     </v-select>
-                    <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if='hasScenario'><b>{{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
+                    <div class="ghd-md-gray ghd-control-subheader-library-used budget-parent" v-if='hasScenario'><b>{{parentLibraryName}}<span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>  
                 </v-col>
                 <v-col cols = "auto" >    
                     <v-row v-show='hasSelectedLibrary || hasScenario'>
@@ -150,23 +150,23 @@
                             <v-btn
                                 @click="onEditCashFlowRuleCriterionLibrary(item.item)"
                                 id="CashFlowEditor-editCashFlowRule-btn"
-                                class="ghd-blue"
-                                style="margin-top: 20px;"
-                                variant="flat">
-                                <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/>
+                                class="ghd-green"
+                                style="margin-top: 12px;"
+                                flat
+                                icon>
+                                <EditSvg />
                             </v-btn>
                             </v-row>
-                                                   
                         </td>
                         <td>
                             <v-row>
                                 <v-btn
                                 @click="onDeleteCashFlowRule(item.item.id)"
                                 id="CashFlowEditor-deleteCashFlowRule-btn"
-                                class="ghd-blue"
-                                variant="flat"
+                                class="ghd-red"
+                                flat
                                 icon>
-                                <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                <TrashCanSvg />
                             </v-btn>
                             <v-btn
                                 @click="onSelectCashFlowRule(item.item.id)"
@@ -183,7 +183,7 @@
                 </v-data-table-server>
 
                 <v-btn :disabled='selectedCashRuleGridRows.length === 0' @click='onDeleteSelectedCashFlowRules'
-                    class='ghd-blue ghd-button' variant = "text">
+                    class='ghd-red ghd-button' variant = "text">
                     Delete Selected
                 </v-btn>
             <!-- </div> -->
@@ -327,11 +327,12 @@ import { http2XX } from '@/shared/utils/http-utils';
 import { LibraryUser } from '@/shared/models/iAM/user';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
 import { useConfirm } from 'primevue/useconfirm';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import EditSvg from '@/shared/icons/EditSvg.vue';
+
 let store = useStore();
 const confirm = useConfirm();
 // const stateSimulationReportNames = computed<string[]>(() => store.state.adminDataModule.simulationReportNames);

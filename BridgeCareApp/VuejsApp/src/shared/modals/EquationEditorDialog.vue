@@ -124,8 +124,8 @@
                                             </div>
                                           </div>
                                           <div v-else>
-                                            <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue" flat icon v-if="props.item.timeValue !== 0">
-                                              <img :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
+                                            <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-red" flat icon v-if="props.item.timeValue !== 0">
+                                              <TrashCanSvg />
                                             </v-btn>
                                           </div>
                                         </td>
@@ -190,8 +190,8 @@
                                             </div>
                                           </div>
                                           <div v-else>
-                                            <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue" icon v-if="props.item.timeValue !== 0">
-                                              <img :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
+                                            <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-red" flat icon v-if="props.item.timeValue !== 0">
+                                              <TrashCanSvg />
                                             </v-btn>
                                           </div>
                                         </td>
@@ -389,6 +389,7 @@ import { emptyUserCriteriaFilter } from '../models/iAM/user-criteria-filter';
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 
 let store = useStore();
 const emit = defineEmits(['submit'])

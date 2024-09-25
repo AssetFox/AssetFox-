@@ -11,6 +11,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
                 ConditionRangeRegion,
                 GlossaryRegion,
                 ColorKeyRegion,
+                ExcelWorksheetContentModels.ColumnWidth(1, 19),
+                ExcelWorksheetContentModels.ColumnWidth(2, 19),
+                ExcelWorksheetContentModels.ColumnWidth(3, 19),
             };        
 
         public static AnchoredExcelRegionModel ConditionRangeRegion
@@ -18,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
             {
                 Region = ShortNameGlossaryConditionRangeModels.ConditionRangeContent(),
                 StartRow = 1,
-                StartColumn = 1
+                StartColumn = 5
             };
 
 
@@ -27,16 +30,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
             {
                 Region = ShortNameGlossaryTabDefinitionsModels.GlossaryColumn(),
                 StartRow = 1,
-                StartColumn = 5
+                StartColumn = 9
             };
 
         public static AnchoredExcelRegionModel ColorKeyRegion
             => new()
             {
                 Region = ShortNameGlossaryColorKeyModels.ColorKeyRows(),
-                StartRow = 21,
+                StartRow = 1,
                 StartColumn = 1
             };
-
     }
 }

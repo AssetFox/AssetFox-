@@ -31,8 +31,8 @@
                     <div><strong>{{ formatBytesSize(props.item.size) }}</strong></div>
                 </td>
                 <td>
-                    <v-btn @click="file = null" class="ghd-blue" flat>
-                        <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                    <v-btn @click="file = null" class="ghd-red" flat icon>
+                        <TrashCanSvg />
                     </v-btn>
                 </td>
             </template>
@@ -50,6 +50,7 @@ import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import { formatBytes } from '@/shared/utils/math-utils';
 import { useStore } from 'vuex';
 import { getUrl } from '../utils/get-url';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 
 let store = useStore();
 const emit = defineEmits(['submit','treatment'])

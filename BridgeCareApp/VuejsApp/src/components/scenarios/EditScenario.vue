@@ -187,7 +187,7 @@ import ScenarioService from '@/services/scenario.service';
         },
         {
             tabName: 'Budget Priority',
-            tabIcon: 'fas fa-balance-scale',
+            tabIcon: 'fas clipboard',
             navigation: {
                 path: '/BudgetPriorityEditor/Scenario/',
             },

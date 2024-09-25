@@ -123,11 +123,11 @@
                                 <v-btn
                                     id="CalculatedAttribute-defaultEquationEditor-btn"
                                     @click="onShowEquationEditorDialogForDefaultEquation()"
-                                    class="ghd-blue"
+                                    class="ghd-green"
                                     flat
                                     icon
                                     v-if="hasAdminAccess">
-                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
+                                    <EditSvg />
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -171,11 +171,11 @@
                                 <v-btn
                                     id="CalculatedAttribute-editEquation-btn"
                                     @click="onShowEquationEditorDialog(props.item.id)"
-                                    class="ghd-blue"
+                                    class="ghd-green"
                                     flat
                                     icon
                                     v-if="hasAdminAccess">
-                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
+                                    <EditSvg />
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -191,11 +191,11 @@
                                 <v-btn
                                     id="CalculatedAttribute-changeEquationCriteria-btn"
                                     @click="onEditCalculatedAttributeCriterionLibrary(props.item.id)"
-                                    class="ghd-blue"
+                                    class="ghd-green"
                                     flat
                                     icon
                                     v-if="hasAdminAccess">
-                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
+                                    <EditSvg />
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -205,11 +205,11 @@
                             id="CalculatedAttribute-RemoveEquation-btn"
                             @click="
                                 onRemoveCalculatedAttribute(props.item.id)"
-                            class="ghd-blue"
-                            flat
-                            style="margin-bottom: 20px;"
+                            class="ghd-red"
+                            variant="flat"
+                            icon
                             :disabled="!hasAdminAccess">
-                            <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                            <TrashCanSvg />
                         </v-btn>
                     </td>
                     </tr>
@@ -279,6 +279,7 @@
                     @click="onUpsertScenarioCalculatedAttribute"
                     class='ghd-blue-bg text-white ghd-button-text ghd-button'
                     v-show="hasScenario && hasAdminAccess"
+                    flat
                     :disabled="disableCrudButton() || !hasUnsavedChanges">
                     Save
                 </v-btn> 
@@ -385,6 +386,8 @@ import mitt, { Emitter, EventType } from 'mitt';
 import { computed } from 'vue';
 import { getUrl } from '@/shared/utils/get-url';
 import { TimelineEmits } from 'primevue/timeline';
+import EditSvg from '@/shared/icons/EditSvg.vue';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 
 let store = useStore();
 const confirm = useConfirm();

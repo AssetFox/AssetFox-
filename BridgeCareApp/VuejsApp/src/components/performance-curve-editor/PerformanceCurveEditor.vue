@@ -17,7 +17,7 @@
                     density="compact"
                 >
                 </v-select>
-                <div class="ghd-md-gray ghd-control-subheader budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}                    
+                <div class="ghd-md-gray ghd-control-subheader-library-used budget-parent" v-if="hasScenario"><b>Library Used: {{parentLibraryName}}                    
                     <span v-if="scenarioLibraryIsModified">&nbsp;&nbsp;{{modifiedStatus}}</span></b>              
                 </div>
 
@@ -256,11 +256,11 @@
                                 </v-menu>
                                 <v-btn id="PerformanceCurveEditor-editEquation-vbtn"
                                     @click="onShowEquationEditorDialog(item.item.id) "
-                                    class="ghd-blue"
+                                    class="ghd-green"
                                     variant="flat"
                                     icon
                                 >
-                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')">
+                                <EditSvg />
                                 </v-btn>
                             </td>
                             <td class="text-xs-left">
@@ -299,20 +299,20 @@
                                 <v-btn id="PerformanceCurveEditor-editCriteria-vbtn"
                                     @click="onEditPerformanceCurveCriterionLibrary(item.item.id)"
                                     variant="flat"
-                                    class="ghd-blue"
+                                    class="ghd-green"
                                     icon
                                 >
-                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')">
+                                <EditSvg />
                                 </v-btn>
                             </td>
                             <td class="text-xs-left">
                                 <v-btn id="PerformanceCurveEditor-deleteModel-vbtn"
                                     @click="onRemovePerformanceCurve(item.item.id)"
                                     variant="flat"
-                                    class="ghd-blue"
+                                    class="ghd-red"
                                     icon
                                 >
-                                    <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')"/>
+                                <TrashCanSvg />
                                 </v-btn>
                             </td>
                         </tr>
@@ -325,7 +325,7 @@
                         id="PerformanceCurveEditor-deleteSelected-button"
                         :disabled='selectedPerformanceEquationIds.length === 0 || (!hasLibraryEditPermission && !hasScenario)'
                         @click='onRemovePerformanceEquations'
-                        class='ghd-blue' variant = "text"
+                        class='ghd-red' variant = "text"
                     >
                         Delete Selected
                     </v-btn>                        
@@ -372,7 +372,7 @@
                 :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
                 @click="onDiscardChanges"
                 class="m-2 ghd-white-bg ghd-blue ghd-button-text"
-                variant = "flat"
+                flat
                 v-show="hasScenario"
             >
                 Cancel
@@ -381,7 +381,7 @@
                 id="PerformanceCurveEditor-deleteLibrary-button"
                 @click="onShowConfirmDeleteAlert"
                 class="m-2 ghd-white-bg ghd-blue ghd-button-text"
-                variant = "flat"
+                flat
                 v-show="!hasScenario"
                 :disabled="!hasLibraryEditPermission"
             >
@@ -411,7 +411,7 @@
                 :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
                 @click='onUpsertScenarioPerformanceCurves'
                 class="ghd-blue-bg ghd-white ghd-button-text m-2"
-                variant = "flat"
+                flat
                 v-show='hasScenario'
             >
                 Save
@@ -549,6 +549,8 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import { computed } from 'vue';
 import { getUrl } from '@/shared/utils/get-url';
 import { nextTick } from 'process';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import EditSvg from '@/shared/icons/EditSvg.vue';
 
 const emit = defineEmits(['submit'])
 let store = useStore();

@@ -80,6 +80,7 @@ import {
 import { find, isNil, propEq } from 'ramda';
 
   let store = useStore(); 
+  async function getNetworksAction(payload?: any): Promise<any> { await store.dispatch('getNetworks', payload);}
 
   let rules: InputValidationRules = validationRules;
   const scenarioNameErrors = ref<string[]>([]);
@@ -178,6 +179,7 @@ import { find, isNil, propEq } from 'ramda';
     watch(() => newScenario.value.name, validateScenarioName);
 
     function onSubmit(submit: boolean) {
+        stateNetworks = store.state.networkModule.networks;
         if (submit) {
             newScenario.value.networkId = selectedNetworkId.value;
             newScenario.value.networkName = selectedNetworkName;

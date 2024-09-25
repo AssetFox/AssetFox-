@@ -22,6 +22,7 @@
                 >
                     Cancel
                 </v-btn>
+                <div style="width: 50px;"></div>
                 <v-btn
                     :disabled="!canUpdateOrCreate"
                     class="ghd-blue-bg ghd-white ghd-button-text"

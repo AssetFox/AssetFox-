@@ -3,7 +3,49 @@
             <div style="width: 100%; margin: 10px;">
                 <v-row style="margin: 0;">
                     <v-col cols="12">
-                        <v-row justify="center" style="margin: 0;">
+                        <v-row v-if="criteriaRule!.isEquation" justify="center" style="margin: 0;">
+                            <v-text-field class="ellipsis-text" density="compact" bg-color="white" variant="outlined" readonly
+                                    v-model="selectedOperand"
+                            style="margin-bottom: -15px;"></v-text-field>
+
+                            
+                            <v-menu
+                                    location="left"
+                                    v-show="selectedOperand !== ''"
+                                >
+                                    <template v-slot:activator="{ props }">
+                                        <v-btn  v-bind="props" class="ghd-blue" icon variant="text">
+                                            <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')">
+                                        </v-btn>
+                                    </template>
+                                    <v-card>
+                                        <v-card-text>
+                                            <v-textarea
+                                                id="PerformanceCurveEditor-checkEquation-vtextarea"
+                                                class="sm-txt Montserrat-font-family"
+                                                :model-value="
+                                                    selectedOperand
+                                                "
+                                                full-width
+                                                no-resize
+                                                outline
+                                                readonly
+                                                rows="5"
+                                                style = "min-width: 500px;min-height: 205px;"
+                                            />
+                                        </v-card-text>
+                                    </v-card>
+                                </v-menu>
+                                <v-btn 
+                                    @click="onShowEquationEditorDialog(criteriaValue) "
+                                    class="ghd-blue"
+                                    variant="text"
+                                    icon
+                                >
+                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')">
+                                </v-btn>
+                        </v-row>
+                        <v-row v-else justify="center" style="margin: 0;">
                             <span>{{criteriaRule.selectedOperand }}</span>
                         </v-row>
                         
@@ -30,8 +72,8 @@
                                     bg-color="white"></v-select>
                             </div>
                             
-                            <v-btn @click="onDeleteClick" style="padding-left: 0;" class="ghd-blue" variant="text">
-                                <img class='img-general' :src="getUrl('assets/icons/trash-ghd-blue.svg')" />
+                            <v-btn @click="onDeleteClick" style="padding-left: 10px;" class="ghd-red" variant="text">
+                                <TrashCanSvg />
                             </v-btn>
                         </v-row>
                         
@@ -39,19 +81,33 @@
                 </v-row>
                 
             </div>
+
+            <EquationEditorDialog
+            :dialogData="equationEditorDialogData"
+            :isFromPerformanceCurveEditor=false
+            @submit="onSubmitEquationEditorDialogResult"
+        />
+
         </v-row>
 </template>
 
 <script setup lang="ts">
-    import { toRefs, computed, ref, watch, onBeforeMount, reactive } from 'vue';
+    import { toRefs, computed, ref, watch, onBeforeMount, reactive, shallowRef } from 'vue';
     import { getUrl } from '@/shared/utils/get-url';
 import { SelectItem } from '@/shared/models/vue/select-item';
+import EquationEditorDialog from '../../../shared/modals/EquationEditorDialog.vue';
+import {
+    emptyEquationEditorDialogData,
+    EquationEditorDialogData,
+} from '@/shared/models/modals/equation-editor-dialog-data';
 import { CriteriaConfigRule, CriteriaRule } from '@/shared/models/iAM/criteria';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { clone, findIndex, isNil, propEq, update } from 'ramda';
 import { useStore } from 'vuex';
 import { AttributeSelectValues } from '@/shared/models/iAM/attribute';
 import { hasValue } from '@/shared/utils/has-value-util';
+import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import { Equation } from '@/shared/models/iAM/equation';
 
     let store = useStore();
     async function getAttributeSelectValuesAction(payload?: any): Promise<any> {await store.dispatch('getAttributeSelectValues',payload);}
@@ -60,7 +116,11 @@ import { hasValue } from '@/shared/utils/has-value-util';
     const emit = defineEmits(['update:criteriaRule', 'delete'])
     let selectedOperator = ref<string | null>('=');
     let selectedValue = ref<string | null>(null);
+    let selectedOperand = ref<string | null>(null)
     let queryRule = ref<any>({})
+        let equationEditorDialogData = shallowRef(clone(
+        emptyEquationEditorDialogData,
+    ));
     const props = defineProps<{
         criteriaRule: CriteriaRule,
         depth: number,
@@ -87,7 +147,16 @@ import { hasValue } from '@/shared/utils/has-value-util';
         if(isNil(stateCheckedSelectAttributes.value.find(_ => _ === props.criteriaRule.selectedOperand))){
             await getAttributeSelectValuesAction({attributeNames: [props.criteriaRule.selectedOperand]});
         }
-        queryRule.value = props.queryRules.find(_ => _.label === props.criteriaRule.selectedOperand)!
+        if(props.criteriaRule.isEquation){
+            queryRule.value = {
+                operators: props.queryRules[0].operators,
+                type: "NUMBER",
+
+            } as CriteriaConfigRule
+            selectedOperand.value = criteriaValue.value.selectedOperand;
+        }
+        else
+            queryRule.value = props.queryRules.find(_ => _.label === props.criteriaRule.selectedOperand)!
         
         // Conditionally set the operator
         if (criteriaValue.value.selectedOperator === undefined) {
@@ -97,6 +166,23 @@ import { hasValue } from '@/shared/utils/has-value-util';
             criteriaValue.value.selectedOperator = clone(props.criteriaRule.selectedOperator);
         }
     })
+
+    function onShowEquationEditorDialog(criteriaRule: CriteriaRule) {      
+        if (!isNil(criteriaRule)) {
+
+            equationEditorDialogData.value = {
+                showDialog: true,
+                equation: {expression: criteriaRule.selectedOperand} as Equation,            
+            };
+        }
+    }
+    function onSubmitEquationEditorDialogResult(equation: Equation) {
+        equationEditorDialogData.value = clone(emptyEquationEditorDialogData);
+
+        if (!isNil(equation) ) {
+            selectedOperand.value = equation.expression;
+        }
+    }
 
     watch(selectedOperator, (newVal, oldVal) =>{
         criteriaValue.value = setItemPropertyValue(
@@ -109,6 +195,14 @@ import { hasValue } from '@/shared/utils/has-value-util';
     watch(selectedValue, (newVal, oldVal) =>{
         criteriaValue.value = setItemPropertyValue(
                     'value',
+                    newVal,
+                    criteriaValue.value
+                ) as CriteriaRule
+    })
+
+    watch(selectedOperand, (newVal, oldVal) =>{
+        criteriaValue.value = setItemPropertyValue(
+                    'selectedOperand',
                     newVal,
                     criteriaValue.value
                 ) as CriteriaRule
@@ -149,6 +243,12 @@ import { hasValue } from '@/shared/utils/has-value-util';
         border-bottom-right-radius: 3px;
         border-left: 1px solid #ddd;
         border-right: 1px solid #ddd;
+    }
+
+    .ellipsis-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
     
 </style>

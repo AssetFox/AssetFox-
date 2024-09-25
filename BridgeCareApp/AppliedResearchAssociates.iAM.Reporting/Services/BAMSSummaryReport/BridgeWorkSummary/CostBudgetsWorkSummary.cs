@@ -197,8 +197,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", "BAMS Work Type Totals");
             var initialRow = currentCell.Row;
-            currentCell.Row++;                        
-            var workTypes = EnumExtensions.GetValues<TreatmentCategory>();
+            currentCell.Row++;                                    
+            var workTypes = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement, TreatmentCategory.CapacityAdding, TreatmentCategory.Other, TreatmentCategory.Bundled };
             var numberOfYears = simulationYears.Count;
             worksheet.Cells[initialRow, 3 + numberOfYears].Value = "Total (all years)";
             var totalColumnHeaderRange = worksheet.Cells[initialRow, 3 + numberOfYears];
@@ -208,13 +208,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var startColumnIndex = 3;
             var firstContentRow = currentCell.Row;
             var rowIndex = firstContentRow;
-            for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
+            foreach (var workType in workTypes)
             {
-                if(workType == TreatmentCategory.WorkOutsideScope || workType == TreatmentCategory.Reconstruction)
-                {
-                    continue;
-                }
-                                
                 worksheet.Cells[rowIndex, 1].Value = workType.ToSpreadsheetString();
 
                 // For culvert data
@@ -234,9 +229,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 rowIndex++;
             }
-            var lastContentRow = firstContentRow + workTypes.Count - 2;
-            currentCell.Row += workTypes.Count() - 1;
-            var totalSpentRow = currentCell.Row;
+
+            var lastContentRow = firstContentRow + workTypes.Count;
+            currentCell.Row += workTypes.Count;
+            var totalSpentRow = ++currentCell.Row;
             TotalSpentRow = totalSpentRow;
             worksheet.Cells[totalSpentRow, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(totalSpentRow, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1);
             worksheet.Cells[totalSpentRow, 1].Value = "Total Spent";
@@ -253,13 +249,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             // Adding percentage after the Total (all years)
             rowIndex = firstContentRow;
-            for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
+            foreach (var workType in workTypes)
             {
-                if (workType == TreatmentCategory.WorkOutsideScope || workType == TreatmentCategory.Reconstruction)
-                {
-                    continue;
-                }
-                
                 var col = startColumnIndex + numberOfYears + 1;
                 worksheet.Cells[rowIndex, col].Formula = ExcelFormulas.Percentage(rowIndex, col - 1, totalSpentRow, col - 1);
                 worksheet.Cells[rowIndex, col + 1].Value = $"Percentage Spent on {workType.ToSpreadsheetString().ToUpper()}";

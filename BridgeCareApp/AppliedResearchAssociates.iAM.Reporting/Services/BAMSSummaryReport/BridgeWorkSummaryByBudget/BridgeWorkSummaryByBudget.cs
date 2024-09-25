@@ -229,20 +229,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Cells[initialRow, 3 + numberOfYears].Value = "Total (all years)";
                 var totalColumnHeaderRange = worksheet.Cells[initialRow, 3 + numberOfYears];
                 ExcelHelper.ApplyBorder(totalColumnHeaderRange);
-                ExcelHelper.ApplyStyle(totalColumnHeaderRange);                
-                var workTypes = EnumExtensions.GetValues<TreatmentCategory>();
+                ExcelHelper.ApplyStyle(totalColumnHeaderRange);
+                var workTypes = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement, TreatmentCategory.CapacityAdding, TreatmentCategory.Other, TreatmentCategory.Bundled };
                 currentCell.Row++;
                 var firstContentRow = currentCell.Row;
                 var rowIndex = firstContentRow;
                 var rowTrackerForColoring = firstContentRow;
-                
-                for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
-                {
-                    if (workType == TreatmentCategory.Reconstruction || workType == TreatmentCategory.WorkOutsideScope)
-                    {
-                        continue;
-                    }
-                    
+
+                foreach (var workType in workTypes)
+                {   
                     worksheet.Cells[rowIndex, 1].Value = workType.ToSpreadsheetString();
                     worksheet.Cells[rowIndex, 3, rowIndex, simulationYears.Count + 2].Value = 0.0;
                     currentCell.Row++;
@@ -490,12 +485,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         private void InsertWorkTypeTotals(int startYear, int firstContentRow, ExcelWorksheet worksheet, WorkTypeTotal workTypeTotal)
         {
-            foreach (var item in workTypeTotal.PreservationCostPerYear)
+            foreach (var item in workTypeTotal.MaintenanceCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
             firstContentRow++;
-            foreach (var item in workTypeTotal.CapacityAddingCostPerYear)
+            foreach (var item in workTypeTotal.PreservationCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
@@ -510,7 +505,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
             firstContentRow++;
-            foreach (var item in workTypeTotal.MaintenanceCostPerYear)
+            foreach (var item in workTypeTotal.CapacityAddingCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }

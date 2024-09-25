@@ -74,6 +74,7 @@ import { useStore } from 'vuex';
 
     const stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
     const stateScenarioPerformanceCurves = computed<PerformanceCurve[]>(() => store.state.performanceCurveModule.scenarioPerformanceCurves)
+    const stateDistinctPerformanceFactorAttributes = computed<string[]>(() => store.state.performanceCurveModule.distinctPerformanceFactorAttributes)
 
     const factorGridHeaders: any[] = [
         { title: 'Attribute', key: 'attribute', align: 'left', sortable: false, class: '', width: '175px' },
@@ -100,7 +101,8 @@ import { useStore } from 'vuex';
            buildDataFromCurves(); 
            factorGridData.value.forEach(_ => emit('onModifyPerformanceFactor', clone(_)))
         }
-        else{
+        else
+        {
             factorGridData.value.forEach(data => {
                 let found = false;
                 selectedTreatmentPerformanceFactors.value.forEach(factors => {
@@ -135,18 +137,29 @@ import { useStore } from 'vuex';
     }
 
     function buildDataFromCurves() {
-        if(callFromLibrary.value)
-            return;
         let testStateAttributes:Attribute[] = [];
-        stateScenarioPerformanceCurves.value.forEach(curve => {
-            stateAttributes.value.forEach(state => {
-                if (state.name === curve.attribute) {
-                    if (testStateAttributes.findIndex((o) => { return o.name === curve.attribute }) === -1){
-                        testStateAttributes.push(state);
+        if(callFromLibrary.value){
+            stateDistinctPerformanceFactorAttributes.value.forEach(attr => {
+                stateAttributes.value.forEach(state => {
+                    if (state.name === attr) {
+                        if (testStateAttributes.findIndex((o) => { return o.name === attr }) === -1){
+                            testStateAttributes.push(state);
+                        }
                     }
-                }
+                });
             });
-        });
+        }
+        else{
+            stateScenarioPerformanceCurves.value.forEach(curve => {
+                stateAttributes.value.forEach(state => {
+                    if (state.name === curve.attribute) {
+                        if (testStateAttributes.findIndex((o) => { return o.name === curve.attribute }) === -1){
+                            testStateAttributes.push(state);
+                        }
+                    }
+                });
+            });
+        }
 
         factorGridData.value = testStateAttributes.map(_ => ({
             id: getNewGuid(),

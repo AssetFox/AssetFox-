@@ -198,11 +198,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 }
 
                 currentCell.Column = 1;
-                currentCell.Row += 2;
+                currentCell.Row += 1;                
+                
                 worksheet.Cells[currentCell.Row, currentCell.Column].Value = summaryData.Budget;
                 ExcelHelper.MergeCells(worksheet, currentCell.Row, currentCell.Column, currentCell.Row, simulationYears.Count);
                 ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column, currentCell.Row, simulationYears.Count + 2], Color.Gray);
-                currentCell.Row += 1;
+                var budgetAnalysisRow = currentCell.Row + 2;
+                currentCell.Row += 11;                
 
                 var workTypeTotal = new WorkTypeTotal();
                 var amount = totalSpent.Sum(_ => _.amount);
@@ -304,9 +306,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     Color.FromArgb(255, 230, 153));
                 // End of Cost per BPN
 
-                currentCell.Row += 2;
-                _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Budget Analysis", "");
-                currentCell.Row += 1;
+                var currentRow = currentCell.Row + 1;
+                currentCell.Row = budgetAnalysisRow;
+                _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Budget Analysis", "");                
                 currentCell.Column = 1;
 
                 int startRow, startColumn, row, column;
@@ -360,7 +362,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2],
                     Color.Red);
                 ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row + 1, currentCell.Column + 2, currentCell.Row + 5, simulationYears.Count + 2], Color.FromArgb(248, 203, 173));
-                currentCell.Row += 5;
+                currentCell.Row = currentRow;
             }
 
             worksheet.Calculate();

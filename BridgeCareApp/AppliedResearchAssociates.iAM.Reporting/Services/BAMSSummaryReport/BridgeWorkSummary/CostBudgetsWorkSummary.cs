@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -79,8 +80,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             FillWorkTypeTotalWorkOutsideScope(worksheet, currentCell, simulationYears, workTypeTotalAggregated.WorkTypeTotalWorkOutsideScope);
 
-            var bpnTotalRow = FillBpnSection(worksheet, currentCell, simulationYears, bpnCostPerYear);
+            FillBpnSection(worksheet, currentCell, simulationYears, bpnCostPerYear);
+            
+            var currentRow = currentCell.Row;
+            currentCell.Row = 1;
             FillRemainingBudgetSection(worksheet, simulationYears, currentCell, budgetTotalRow);
+            currentCell.Row = currentRow;
         }
 
         #region Private methods
@@ -323,7 +328,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
         }
 
-        private int FillBpnSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
+        private void FillBpnSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
             Dictionary<int, Dictionary<string, decimal>> bpnCostPerYear)
         {
             // Add budget category headers & year columns
@@ -370,10 +375,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.ApplyBorder(totalRowRange);
             var rowColorRange = worksheet.Cells[currentCell.Row, startColumnIndex, currentCell.Row + bpnCostBudgetNames.Count, startColumnIndex + numberOfYears - 1];
             ExcelHelper.ApplyColor(rowColorRange, Color.FromArgb(255, 230, 153));
-
-            // Return index of next row
+                        
             currentCell.Row += bpnCostBudgetNames.Count() + 1;
-            return currentCell.Row;
+            ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row + 1, 1, currentCell.Row + 1, 2 + numberOfYears], Color.DimGray);
+            // Index of next row
+            currentCell.Row += 2;
         }
 
         private decimal GetCostForBPNCostBudgetName(Dictionary<int, Dictionary<string, decimal>> bpnInfoPerYear, int year, BPNCostBudgetName bpnValue)
@@ -1018,8 +1024,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.Red);
             ExcelHelper.ApplyColor(worksheet.Cells[startRow + 1, fromColumn, row - 1, column], Color.FromArgb(248, 203, 173));
-            _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 2, column);
-            ExcelHelper.ApplyColor(worksheet.Cells[row + 1, startColumn, row + 1, column], Color.DimGray);
+            _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row - 1, column);
         }
 
 

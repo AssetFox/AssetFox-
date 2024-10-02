@@ -110,25 +110,36 @@
         </v-col>
         <!-- Data source combobox -->
         <v-col cols="12" v-if="hasSelectedAttribute">
-            <v-col cols="6">
-                <v-row>
-                    <v-subheader class="ghd-md-gray ghd-control-label">Data Source</v-subheader>
-                </v-row>
-                <v-row column>
-                    <v-select
-                        item-title="text"
-                        item-value="value"
-                        menu-icon=custom:GhdDownSvg
-                        id="Attributes-attributeDataSource-vselect"
-                        variant="outlined"
-                        v-model='selectDatasourceItemValue'
-                        :items='selectDatasourceItems'                     
-                        class="ghd-select ghd-text-field ghd-text-field-border"
-                        density="compact">
-                    </v-select>                           
-                </v-row>
-            </v-col>
+            <v-row align="center">
+                <v-col cols="6">
+                    <v-row>
+                        <v-subheader class="ghd-md-gray ghd-control-label">Data Source</v-subheader>
+                    </v-row>
+                    <v-row column>
+                        <v-select
+                            item-title="text"
+                            item-value="value"
+                            menu-icon=custom:GhdDownSvg
+                            id="Attributes-attributeDataSource-vselect"
+                            variant="outlined"
+                            v-model='selectDatasourceItemValue'
+                            :items='selectDatasourceItems'                     
+                            class="ghd-select ghd-text-field ghd-text-field-border"
+                            density="compact">
+                        </v-select>                           
+                    </v-row>
+                </v-col>
+                <!-- Add the new v-switch here -->
+                <v-col cols="4" style="padding-top:40px;">
+                    <v-row>
+                        <v-switch id="Attributes-setForAllAttributes-vswitch" class='sharing header-text-content' color="#2A578D"
+                            label='Set For All Attributes' v-model='setForAllAttributes'
+                            @update:model-value="onSetForAllAttributesChange($event)"/>
+                    </v-row>
+                </v-col>
+            </v-row>
         </v-col>
+
         <!-- Command text area -->
         <v-col cols="12" v-if="hasSelectedAttribute && selectedAttribute.dataSource.type == 'SQL'">
             <v-row justify-center>
@@ -227,6 +238,7 @@ import { setItemPropertyValue } from '@/shared/utils/setter-utils';
     let ValidationSuccessMessage = ref<string>('');
     let commandIsValid = ref<boolean>(true);
     let checkedCommand = ref<string>('');
+    let setForAllAttributes = ref<boolean>(false);
 
     let aggregationRuleSelectValues = ref<SelectItem[]>([]);    
     let typeSelectValues = ref<SelectItem[]>([
@@ -364,22 +376,34 @@ import { setItemPropertyValue } from '@/shared/utils/setter-utils';
         selectedAttribute.value = clone(stateSelectedAttribute.value);
     }
 
-    async function saveAttribute(){
+    async function saveAttribute() {
         let isInsert = false;
         let selectAttr = clone(selectedAttribute.value);
-        if(selectedAttribute.value.id === getBlankGuid()){
+        if (selectedAttribute.value.id === getBlankGuid()) {
             selectAttr.id = getNewGuid();
             isInsert = true;
         }
-            
-        await upsertAttributeAction(selectAttr)
-        if(!isNil(stateAttributes.value.find(_ => _.id === selectAttr.id))){
-            selectedAttribute.value.id = selectAttr.id
-            if(isInsert)
-                selectAttributeItemValue.value = selectedAttribute.value.id;
-        }
-        
+
+        const createAttributeRequest = {
+            attribute: selectAttr,
+            setForAllAttributes: setForAllAttributes.value, 
+        };
+
+        await upsertAttributeAction(createAttributeRequest);
+
+        if (!isNil(stateAttributes.value.find(_ => _.id === selectAttr.id))) {
+            selectedAttribute.value.id = selectAttr.id;
+            if (isInsert) selectAttributeItemValue.value = selectedAttribute.value.id;
     }
+}
+
+
+    function onSetForAllAttributesChange(value: boolean) {
+        setForAllAttributes.value = value;
+        // Implement any specific logic when the switch is toggled
+        console.log("Set for all attributes toggled:", value);
+    }
+
 
     function disableCrudButtons() {
         let allValid = rules['generalRules'].valueIsNotEmpty(selectedAttribute.value.name) === true

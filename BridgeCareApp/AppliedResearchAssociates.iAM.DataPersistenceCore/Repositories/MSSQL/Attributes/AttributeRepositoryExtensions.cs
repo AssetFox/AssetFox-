@@ -10,7 +10,44 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public static class AttributeRepositoryExtensions
     {
+        // Original method - no bool parameter
         public static void UpsertAttributes(this IAttributeRepository repository, List<AttributeDTO> dtos)
+        {
+            var dataAttributes = MapToDataAttributes(repository, dtos);
+            repository.UpsertAttributes(dataAttributes);
+        }
+
+        // Overloaded method with bool parameter
+        public static void UpsertAttributes(this IAttributeRepository repository, bool setForAllAttributes, List<AttributeDTO> dtos)
+        {
+            var dataAttributes = MapToDataAttributes(repository, dtos);
+
+            if (setForAllAttributes)
+            {
+                Console.WriteLine("Setting for all attributes is enabled.");
+            }
+
+            repository.UpsertAttributes(dataAttributes);
+        }
+
+        // Original method - no bool parameter
+        public static void UpsertAttributes(this IAttributeRepository repository, params AttributeDTO[] dtos)
+        {
+            repository.UpsertAttributes(dtos.ToList());
+        }
+
+        // Overloaded method with bool parameter
+        public static void UpsertAttributes(this IAttributeRepository repository, bool setForAllAttributes, params AttributeDTO[] dtos)
+        {
+            repository.UpsertAttributes(setForAllAttributes, dtos.ToList());
+        }
+
+        // Existing method for the non-DTO version
+        public static void UpsertAttributes(this IAttributeRepository repo, params DataAttribute[] attributes)
+            => repo.UpsertAttributesNonAtomic(attributes.ToList());
+
+        // Helper method to map DTOs to DataAttribute objects
+        private static List<DataAttribute> MapToDataAttributes(IAttributeRepository repository, List<AttributeDTO> dtos)
         {
             var dataAttributes = new List<DataAttribute>();
             foreach (var dto in dtos)
@@ -30,15 +67,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
                     throw new AttributeMappingFailureException($"Invalid attribute {dto.Name}");
                 }
             }
-            repository.UpsertAttributes(dataAttributes);
+            return dataAttributes;
         }
-
-        public static void UpsertAttributes(this IAttributeRepository repository, params AttributeDTO[] dtos)
-        {
-            repository.UpsertAttributes(dtos.ToList());
-        }
-
-        public static void UpsertAttributes(this IAttributeRepository repo, params DataAttribute[] attributes)
-            => repo.UpsertAttributesNonAtomic(attributes.ToList());
     }
 }

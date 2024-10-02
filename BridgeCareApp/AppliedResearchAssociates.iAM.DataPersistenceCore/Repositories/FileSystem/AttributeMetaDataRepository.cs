@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
 {
     public class AttributeMetaDataRepository : IAttributeMetaDataRepository
     {
-        public List<Attribute> GetAllAttributes(Guid dataSourceId)
+         public List<Attribute> GetAllAttributes(Guid dataSourceId)
         {
             // set the attribute meta data json file path
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,

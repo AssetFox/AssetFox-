@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using AppliedResearchAssociates.iAM;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
@@ -25,6 +26,12 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCore.Controllers
 {
+    public class CreateAttributeRequest
+    {
+        public AllAttributeDTO Attribute { get; set; }
+        public bool SetForAllAttributes { get; set; }
+    }
+
     [Route("api/[controller]")]
     [ApiController]
     public class AttributeController : BridgeCareCoreBaseController
@@ -153,6 +160,7 @@ namespace BridgeCareCore.Controllers
                 var setForAllAttributes = request.SetForAllAttributes;
                 var convertedAttributeDto = AttributeService.ConvertAllAttribute(attributeDto);
                 checkAttributeNameValidity(convertedAttributeDto);
+
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributeDto, setForAllAttributes);

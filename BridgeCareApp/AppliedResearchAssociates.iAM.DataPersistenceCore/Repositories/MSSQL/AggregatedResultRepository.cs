@@ -151,6 +151,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _aggregatedResultCache.SaveToCache(returnResult);
                 }
             }
+            _aggregatedResultCache.ClearInvalid();
             return returnList;
         }
 

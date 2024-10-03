@@ -5,12 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
+using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Cache
-{ 
+{
     public class AggregatedSelectValuesResultDtoCache
     {
         public static TimeSpan ValidityDuration = TimeSpan.FromHours(12);
+        public const int CacheEntryLengthLimit = 2000000; // approx. size in bytes
+
         private ConcurrentDictionary<string, AggregatedSelectValuesResultDtoCacheEntry> Cache { get; set; } = new();
 
         public void ClearInvalid()
@@ -19,8 +22,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Cache
             var keys = Cache.Keys;
             foreach (var key in keys)
             {
-                if (Cache.TryGetValue(key, out var value)) {
-                    if (value.ValidUntil > now)
+                if (Cache.TryGetValue(key, out var value))
+                {
+                    if (value.ValidUntil < now)
                     {
                         Cache.Remove(key, out _);
                     }
@@ -48,12 +52,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Cache
         public void SaveToCache(AggregatedSelectValuesResultDTO dto)
         {
             var now = DateTime.Now;
-            var cacheEntry = new AggregatedSelectValuesResultDtoCacheEntry
+            var approximateSize = 26 * dto.Values.Count + 2 * dto.Values.Sum(str => str.Length);  //https://codeblog.jonskeet.uk/2011/04/05/of-memory-and-strings/
+            if (approximateSize < CacheEntryLengthLimit)
             {
-                Dto = dto,
-                ValidUntil = now + ValidityDuration,
-            };
-            var ___ = Cache.AddOrUpdate(dto.Attribute.Name, _ => cacheEntry, (_, __) => cacheEntry);
+                var cacheEntry = new AggregatedSelectValuesResultDtoCacheEntry
+                {
+                    Dto = dto,
+                    ValidUntil = now + ValidityDuration,
+                };
+                var ___ = Cache.AddOrUpdate(dto.Attribute.Name, _ => cacheEntry, (_, __) => cacheEntry);
+            }
         }
     }
 }

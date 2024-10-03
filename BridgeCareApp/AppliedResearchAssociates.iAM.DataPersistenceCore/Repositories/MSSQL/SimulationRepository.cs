@@ -255,6 +255,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return (selectedSimulation == null) ? null : selectedSimulation.Name;
         }
 
+        public bool GetSimulationRunSetting(Guid simulationId)
+        {
+            var result = false;
+            var simulation = _unitOfWork.Context.SimulationAnalysisDetail.AsNoTracking().FirstOrDefault(_ => _.SimulationId == simulationId);
+            if (simulation == null)
+            {
+                result = false;
+            }
+            else if(simulation.Status == "Simulation output saved to database")
+            {
+                result = true;
+            }
+            return result;
+        }
+
         public void UpdateSimulationAndPossiblyUsers(SimulationDTO dto)
         {
             _unitOfWork.AsTransaction(() =>

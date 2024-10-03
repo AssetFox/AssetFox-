@@ -1637,6 +1637,8 @@ import ReportsService from '@/services/reports.service';
                 secondRunAnalysisModal();
         }
         else if(submit == "continue") {
+            store.dispatch('updateSimulationRunSettingName', selectedScenario.name);
+            store.dispatch('updateSimulationRunSettingId', selectedScenario.id);
             if (submit && selectedScenario.id !== getBlankGuid()) {
                 runSimulationAction({
                     networkId: selectedScenario.networkId,
@@ -1693,6 +1695,8 @@ import ReportsService from '@/services/reports.service';
     }
 
     async function onConfirmAnalysisPreCheckAlertSubmit(submit: boolean) {
+        store.dispatch('updateSimulationRunSettingName', selectedScenario.name);
+        store.dispatch('updateSimulationRunSettingId', selectedScenario.id);
         confirmAnalysisPreCheckAlertData.value = clone(emptyAlertPreChecksData);
 
         selectedScenario = runAnalysisScenario;

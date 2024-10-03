@@ -24,6 +24,14 @@ const actions = {
                 }
             });
     },
+    async getSimulationAnalysisSetting({commit}: any, payload: any) {
+        await AnalysisMethodService.getSimulationAnalysisSetting(payload.scenarioId)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit('analysisMethodMutator', response.data as AnalysisMethod);
+                }
+            });
+    },
     async upsertAnalysisMethod({dispatch, commit}: any, payload: any) {
         return await AnalysisMethodService.upsetAnalysisMethod(payload.analysisMethod, payload.scenarioId)
             .then((response: AxiosResponse) => {

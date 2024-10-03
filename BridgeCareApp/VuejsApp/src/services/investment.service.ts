@@ -4,6 +4,11 @@ import { BudgetLibrary, BudgetLibraryUser, Investment } from '@/shared/models/iA
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 import { InvestmentLibraryUpsertPagingRequestModel, InvestmentPagingRequestModel, InvestmentPagingSyncModel } from '@/shared/models/iAM/paging';
 import { LibraryUser } from '@/shared/models/iAM/user';
+import { inject } from 'vue';
+import mitt, { Emitter, EventType } from 'mitt';
+
+const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
+
 
 export default class InvestmentService {
     static getInvestment(scenarioId: string): AxiosPromise {
@@ -27,7 +32,7 @@ export default class InvestmentService {
     }
 
     static getScenarioInvestmentPage(scenarioId: string, data: InvestmentPagingRequestModel): AxiosPromise {
-        return coreAxiosInstance.post(`${API.Investment}/GetScenarioInvestmentPage/${scenarioId}`, data)
+        return coreAxiosInstance.post(`${API.Investment}/GetScenarioInvestmentPage/${scenarioId}`, data);
     }
 
     static getLibraryInvestmentPage(scenarioId: string, data: InvestmentPagingRequestModel): AxiosPromise {

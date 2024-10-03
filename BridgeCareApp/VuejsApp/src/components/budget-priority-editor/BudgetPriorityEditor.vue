@@ -225,7 +225,7 @@
 </template>
 
 <script setup lang='ts'>
-    import { ref, watch, shallowReactive, onBeforeUnmount, ShallowRef, shallowRef, computed } from 'vue';
+    import { ref, watch, shallowReactive, onBeforeUnmount, ShallowRef, shallowRef, computed, inject} from 'vue';
     import editDialog from '@/shared/modals/Edit-Dialog.vue'
     import {
         BudgetPercentagePair,
@@ -281,10 +281,13 @@
     import { vMaska } from "maska"
     import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
     import EditSvg from '@/shared/icons/EditSvg.vue';
+    import mitt, { Emitter, EventType } from 'mitt';
+
 
     let store = useStore();
     const confirm = useConfirm();
     const $router = useRouter();
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
     let stateScenarioSimpleBudgetDetails = computed<SimpleBudgetDetail[]>(() => store.state.investmentModule.scenarioSimpleBudgetDetails);
     let stateBudgetPriorityLibraries = computed<BudgetPriorityLibrary[]>(() => store.state.budgetPriorityModule.budgetPriorityLibraries);
     let stateSelectedBudgetPriorityLibrary = computed<BudgetPriorityLibrary>(() => store.state.budgetPriorityModule.selectedBudgetPriorityLibrary);
@@ -797,6 +800,7 @@
             clearChanges();
             librarySelectItemValue.value = null;
             addSuccessNotificationAction({message: "Modified scenario's budget priorities"});
+            $emitter.emit('BudgetPriorityUpdated');              
             currentPage.value = sortByProperty("priorityLevel", currentPage.value);
             await onPaginationChanged();
         }           

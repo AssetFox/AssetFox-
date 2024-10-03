@@ -22,6 +22,8 @@ const state = {
     fastQueueitems: [] as QueuedWork[],
     currentFastWorkQueuePage: [] as QueuedWork[],
     totalFastQueuedItems: 0 as number,
+    simulationRunSettingId: 0 as number,
+    simulationRunSettingName: '' as string,
 };
 
 const mutations = {
@@ -141,6 +143,12 @@ const mutations = {
             );           
         }
     },
+    setSimulationRunSettingId(state: any, id: any) {
+        state.simulationRunSettingId = id;
+    },
+    setSimulationRunSettingName(state: any, id: any) {
+        state.simulationRunSettingName = id;
+    },
 };
 
 const actions = {
@@ -158,6 +166,12 @@ const actions = {
     },
     updateSimulationReportDetail({commit}: any, payload: any) {
         commit('simulationReportDetailMutator', payload.simulationReportDetail);
+    },
+    updateSimulationRunSettingId({ commit }: any, payload: any) {
+        commit('setSimulationRunSettingId', payload);
+    },
+    updateSimulationRunSettingName({ commit }: any, payload: any) {
+        commit('setSimulationRunSettingName', payload);
     },
     async getScenarios({commit}: any, payload: any) {
         await ScenarioService.getScenarios()
@@ -319,9 +333,23 @@ const actions = {
             );
         }
    },
+   async getSimulationRunSetting({commit}: any, payload: any) {
+    if(state.currentUserOrSharedScenario.id == emptyScenario.id)
+    {
+        await ScenarioService.getSimulationRunSetting(payload.simulationId)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit(response.data as Scenario);
+                }
+            }
+        );
+    }
+},
+
 };
 
-const getters = {};
+const getters = { simulationRunSettingId: (state: { simulationRunSettingId: any; }) => state.simulationRunSettingId,
+                    simulationRunSettingName: (state: { simulationRunSettingName: any; }) => state.simulationRunSettingName,};
 
 export default {
     state,

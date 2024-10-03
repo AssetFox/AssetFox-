@@ -27,7 +27,8 @@ const state = {
     scenarioPerformanceCurves: [] as PerformanceCurve[],
     libraryUsers: [] as LibraryUser[],
     hasPermittedAccess: false,
-    isSharedLibrary: false
+    isSharedLibrary: false,
+    isDeteriorationModelApiRunning: false,
 };
 
 const mutations = {
@@ -84,6 +85,9 @@ const mutations = {
     },
     IsSharedPerformanceCurveLibraryMutator(state: any, status: boolean) {
         state.isSharedLibrary = status;
+    },
+    IsDeteriorationModelApiRunningMutator(state: any, status: boolean) {
+        state.isDeteriorationModelApiRunning = status;
     }
 };
 
@@ -188,6 +192,9 @@ const actions = {
                 commit('IsSharedPerformanceCurveLibraryMutator', response.data as boolean);
             }
         });
+    },
+    async getIsDeteriorationModelApiRunning({ commit }: any, payload: any) {
+        commit('IsDeteriorationModelApiRunningMutator', payload);
     },
     async getHasPermittedAccess({ commit }: any)
     {

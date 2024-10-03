@@ -108,45 +108,48 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     returnList.Add(cached);
                 }
             }
-            var allOfAttributeDTOs = _unitOfWork.Context.AggregatedResult
-                .Include(_ => _.Attribute)
-                .Where(_ => attributesToFetch.Contains(_.Attribute.Name))
-                .Select(e => AggregatedResultMapper.ToDto(e))
-                .AsNoTracking().AsSplitQuery().ToList();
-
-            foreach (var attributeName in attributesToFetch)
+            if (attributesToFetch.Count > 0)
             {
-                var attributeDTO = allOfAttributeDTOs.Where(_ => _.Attribute.Name == attributeName).ToList();
+                var allOfAttributeDTOs = _unitOfWork.Context.AggregatedResult
+                    .Include(_ => _.Attribute)
+                    .Where(_ => attributesToFetch.Contains(_.Attribute.Name))
+                    .Select(e => AggregatedResultMapper.ToDto(e))
+                    .AsNoTracking().AsSplitQuery().ToList();
 
-                if (!attributeDTO.Any())
-                    break;
-
-                var values = new List<string>();
-                bool isNumber = false;
-                if (attributeDTO.All(x => x.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
+                foreach (var attributeName in attributesToFetch)
                 {
-                    values = attributeDTO.Where(_ => _.NumericValue.HasValue).Select(_ => _.NumericValue.Value.ToString()).Distinct().ToList();
-                    isNumber = attributeDTO.Any(_ => _.Attribute.Type == "NUMBER");
+                    var attributeDTO = allOfAttributeDTOs.Where(_ => _.Attribute.Name == attributeName).ToList();
+
+                    if (!attributeDTO.Any())
+                        break;
+
+                    var values = new List<string>();
+                    bool isNumber = false;
+                    if (attributeDTO.All(x => x.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
+                    {
+                        values = attributeDTO.Where(_ => _.NumericValue.HasValue).Select(_ => _.NumericValue.Value.ToString()).Distinct().ToList();
+                        isNumber = attributeDTO.Any(_ => _.Attribute.Type == "NUMBER");
+                    }
+                    else if (attributeDTO.All(x => x.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
+                    {
+                        values = attributeDTO.Where(_ => _.TextValue != null).Select(_ => _.TextValue).Distinct().ToList();
+                        isNumber = attributeDTO.Any(_ => _.Attribute.Type == "NUMBER");
+                    }
+                    else
+                        break;
+
+                    AttributeDTO attr = attributeDTO.Select(_ => _.Attribute).FirstOrDefault();
+                    string resultType = values.Any() ? "success" : "warning";
+                    AggregatedSelectValuesResultDTO returnResult = new()
+                    {
+                        Attribute = attr,
+                        Values = values,
+                        ResultType = resultType,
+                        IsNumber = isNumber
+                    };
+                    returnList.Add(returnResult);
+                    _aggregatedResultCache.SaveToCache(returnResult);
                 }
-                else if (attributeDTO.All(x => x.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
-                {
-                    values = attributeDTO.Where(_ => _.TextValue != null).Select(_ => _.TextValue).Distinct().ToList();
-                    isNumber = attributeDTO.Any(_ => _.Attribute.Type == "NUMBER");
-                }
-                else
-                    break;
-
-                AttributeDTO attr = attributeDTO.Select(_ => _.Attribute).FirstOrDefault();
-                string resultType = values.Any() ? "success" : "warning";
-                AggregatedSelectValuesResultDTO returnResult = new()
-                {
-                    Attribute = attr,
-                    Values = values,
-                    ResultType = resultType,
-                    IsNumber = isNumber
-                };
-                returnList.Add(returnResult);
-                _aggregatedResultCache.SaveToCache(returnResult);
             }
             return returnList;
         }

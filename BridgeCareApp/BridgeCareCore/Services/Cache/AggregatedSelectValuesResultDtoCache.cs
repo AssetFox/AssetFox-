@@ -9,7 +9,7 @@ using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Cache
 {
-    public class AggregatedSelectValuesResultDtoCache
+    public class AggregatedSelectValuesResultDtoCache : IAggregatedSelectValuesResultDtoCache
     {
         public static TimeSpan ValidityDuration = TimeSpan.FromHours(12);
         public const int CacheEntryLengthLimit = 2000000; // approx. size in bytes

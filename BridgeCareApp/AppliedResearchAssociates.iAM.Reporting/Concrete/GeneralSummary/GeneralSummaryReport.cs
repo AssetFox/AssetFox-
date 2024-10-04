@@ -199,9 +199,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             UpdateStatusMessage(workQueueLog, reportDetailDto, simulationId);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);
             UpsertSimulationReportDetail(reportDetailDto);
-            var targetBudgets = _unitOfWork.BudgetRepo.GetBudgetYearsBySimulationId(simulationId);
+            var targetBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
             currentCell.Column = 1;
-            _generalBudgetSummary.FillTargetBudgets(generalWorksheet, reportOutputData, currentCell);
+            _generalBudgetSummary.FillTargetBudgets(generalWorksheet, reportOutputData, currentCell, targetBudgets);
             currentCell.Row += 3;
 
             //Deficient Condition Goals Table

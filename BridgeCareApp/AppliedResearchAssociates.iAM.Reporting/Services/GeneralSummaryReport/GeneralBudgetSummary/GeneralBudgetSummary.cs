@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.FlexibileAuditReport;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.GeneralBudgetSummary
@@ -23,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void FillTargetBudgets(ExcelWorksheet generalSummaryWorksheet, SimulationOutput simulationOutput, CurrentCell currentCell)
+        public void FillTargetBudgets(ExcelWorksheet generalSummaryWorksheet, SimulationOutput simulationOutput, CurrentCell currentCell, List<BudgetDTO> targetBudgets)
         {
             generalSummaryWorksheet.Column(1).SetTrueWidth(20);
             currentCell.Row = currentCell.Row;
@@ -59,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                 ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, startingColumn, currentRow, startingColumn]);
                 currentRow++;
             }
-            generalSummaryWorksheet.Cells[currentRow, startingColumn].Value = "Total Budget Spent";
+            generalSummaryWorksheet.Cells[currentRow, startingColumn].Value = "Total Target Budgets";
             // Reset currentRow and column for writing yearly spent
             currentRow = currentCell.Row + 1;
             startingColumn = 1;
@@ -72,14 +74,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             {
                 int finalRow = 1;
 
-                decimal totalYearlySpent = 0; 
-                foreach (var budget in year.Budgets)
-                {
-                    if (budget.AvailableFunding != null)
+                decimal totalYearlySpent = 0;                
+                foreach (var budget in targetBudgets)
+                {                    
+                    var targetBudgetAmount = budget.BudgetAmounts.FirstOrDefault(_ => _.Year == year.Year);
+                    if (targetBudgetAmount != null)
                     {
                             // Write budget name and spent amount to the worksheet
-                            generalSummaryWorksheet.Cells[currentRow, currentYearColumn].Value = budget.AvailableFunding;
-                            totalYearlySpent += budget.AvailableFunding;
+                            generalSummaryWorksheet.Cells[currentRow, currentYearColumn].Value = targetBudgetAmount.Value;
+                            totalYearlySpent += targetBudgetAmount.Value;
                             ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
 
                         // Move to the next row
@@ -136,7 +139,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                 ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, startingColumn, currentRow, startingColumn]);
                 currentRow++;
             }
-            generalSummaryWorksheet.Cells[currentRow, startingColumn].Value = "Total Target Budgets";
+            generalSummaryWorksheet.Cells[currentRow, startingColumn].Value = "Total Budget Spent";
             ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, 1, currentRow, startingColumn]);
 
             // Reset currentRow for writing yearly spent
@@ -149,7 +152,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             var budgetsList = new HashSet<string>();
             int finalRow = 1;
 
-            Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new Dictionary<double, List<TreatmentConsiderationDetail>>();
+            Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
             // setting up model to store data. This will be used to fill up Bridge Work Summary By
             // Budget TAB
             var workSummaryByBudgets = new List<WorkSummaryByBudgetModel>();
@@ -171,6 +174,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                 });
             }
 
+            var primaryKey = _unitOfWork.AdminSettingsRepo.GetKeyFields();
             foreach (var summaryData in workSummaryByBudgetData)
             {
                 foreach (var yearData in simulationOutput.Years)
@@ -178,10 +182,30 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                     var assets = yearData.Assets.Where(_ => _.TreatmentCause != TreatmentCause.NoSelection);
                     foreach (var section in assets)
                     {
-                        var section_BRKEY = _reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
+                        var primaryKeyValue = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, primaryKey[0].ToString());
+                        if (string.IsNullOrEmpty(primaryKeyValue) && section.ValuePerNumericAttribute != null)
+                        {
+                            primaryKeyValue = section.ValuePerNumericAttribute[primaryKey[0].ToString()].ToString();
+                        }
 
                         // Build keyCashFlowFundingDetails                    
-                        _reportHelper.BuildKeyCashFlowFundingDetails(yearData, section, section_BRKEY, keyCashFlowFundingDetails);
+                        if (section.TreatmentStatus != TreatmentStatus.Applied)
+                        {
+                            var fundingSection = section.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                 section.AppliedTreatment.ToLower() != FlexibleAuditReportConstants.NoTreatment ? section : null;
+
+                            if (fundingSection != null)
+                            {
+                                if (!keyCashFlowFundingDetails.ContainsKey(primaryKeyValue))
+                                {
+                                    keyCashFlowFundingDetails.Add(primaryKeyValue, fundingSection.TreatmentConsiderations ?? new());
+                                }
+                                else
+                                {
+                                    keyCashFlowFundingDetails[primaryKeyValue].AddRange(fundingSection.TreatmentConsiderations);
+                                }
+                            }
+                        }
 
                         // If CF then use obj from keyCashFlowFundingDetails otherwise from section
                         var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
@@ -190,7 +214,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                                                       section.TreatmentStatus == TreatmentStatus.Progressed) ||
                                                       (section.TreatmentCause == TreatmentCause.CashFlowProject &&
                                                       section.TreatmentStatus == TreatmentStatus.Applied)) ?
-                                                      keyCashFlowFundingDetails[section_BRKEY] :
+                                                      keyCashFlowFundingDetails[primaryKeyValue] :
                                                       section.TreatmentConsiderations ?? new();
 
                         // TODO handle shouldBundleFeasibleTreatments later, needs enhancement to this report.
@@ -210,8 +234,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                                                             .Where(b => b.BudgetName == summaryData.Budget)
                                                             .Sum(bu => bu.AllocatedAmount)) ?? 0);
                         var bpnName = _reportHelper.CheckAndGetValue<string>(section?.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
-                        if (section.TreatmentCause == TreatmentCause.CommittedProject &&
-                            appliedTreatment.ToLower() != BAMSConstants.NoTreatment)
+                        if (appliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                         {
                             summaryData.YearlyData.Add(new YearsData
                             {
@@ -222,29 +245,31 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                                 costPerBPN = (bpnName, budgetAmount),
                             });
                         }
-                        }
                     }
+                }
             }
 
             Dictionary<string, List<(decimal AllocatedAmount, int Year)>> listOfBudgetsSpent = new Dictionary<string, List<(decimal, int)>>();
             var simulationYear = simulationOutput.Years.First().Year;
             foreach (var year in simulationOutput.Years)
             {
-                 double totalYearlySpent = 0;
-
+                double totalYearlySpent = 0;                
                 foreach (var item in workSummaryByBudgetData)
                 {
-                    if(item.YearlyData.Count > 0)
-                    {
-                        if (item.YearlyData[0].Year == simulationYear)
-                        {
-                            generalSummaryWorksheet.Cells[currentRow + 1, currentYearColumn].Value = item.YearlyData[0].Amount;
-                            string budgetName = item.YearlyData[0].Treatment;
+                    double amountSpent = 0;
+                    if (item.YearlyData.Count > 0)
+                    {// TODO // Needs to add all amounts for that year, below looks wrong as it just cares abt 1st yr, correct the logic
+                     // if (item.YearlyData[0].Year == simulationYear)
+                        var yearData = item.YearlyData.FindAll(_ => _.Year == year.Year);
+                        
+                        foreach (var yearDataRecord in yearData)
+                        {                            
+                            string budgetName = item.Budget;
                             decimal allocatedAmount = (decimal)item.YearlyData[0].Amount;
                             int itemYear = item.YearlyData[0].Year;
 
                             if (listOfBudgetsSpent.ContainsKey(budgetName))
-                            {
+                            {// TODO check if it gets executed??
                                 // If the budget name exists, add the allocated amount and year to the existing list
                                 listOfBudgetsSpent[budgetName].Add((allocatedAmount, itemYear));
                             }
@@ -253,11 +278,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                                 // If the budget name doesn't exist, create a new list and add the allocated amount and year
                                 listOfBudgetsSpent[budgetName] = new List<(decimal, int)>() { (allocatedAmount, itemYear) };
                             }
-                            totalYearlySpent += item.YearlyData[0].Amount;
+                            var amount = item.YearlyData[0].Amount;
+                            totalYearlySpent += amount;
+                            amountSpent += amount;
                             ExcelHelper.ApplyBorder(generalSummaryWorksheet.Cells[currentRow, currentYearColumn, currentRow, currentYearColumn]);
                         }
 
                     }
+                    generalSummaryWorksheet.Cells[currentRow + 1, currentYearColumn].Value = amountSpent;
                     currentRow++;
                 }
                 generalSummaryWorksheet.Cells[firstRow + simulationOutput.Years[0].Budgets.Count + 1, currentYearColumn].Value = totalYearlySpent;

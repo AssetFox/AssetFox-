@@ -19,6 +19,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
         private const int headerRow1 = 1;
         private const int headerRow2 = 2;
         private List<int> columnNumbersBudgetsUsed;
+        private List<int> columnNumbersCIImprovement;
         private bool ShouldBundleFeasibleTreatments;
         private readonly IUnitOfWork _unitOfWork;
 
@@ -31,6 +32,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
         public void Fill(ExcelWorksheet decisionsWorksheet, SimulationOutput simulationOutput, Simulation simulation, HashSet<string> performanceCurvesAttributes)
         {
             columnNumbersBudgetsUsed = new List<int>();
+            columnNumbersCIImprovement = new();
+
             // Distinct performance curves' attributes
             var currentAttributes = performanceCurvesAttributes;
 
@@ -54,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
 
             decisionsWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
             decisionsWorksheet.Cells.AutoFitColumns();
-            PerformPostAutofitAdjustments(decisionsWorksheet, columnNumbersBudgetsUsed);
+            PerformPostAutofitAdjustments(decisionsWorksheet, columnNumbersBudgetsUsed, columnNumbersCIImprovement);
         }
 
         private void FillDynamicDataInWorkSheet(SimulationOutput simulationOutput, HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, ExcelWorksheet decisionsWorksheet, CurrentCell currentCell)
@@ -451,6 +454,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
                     {
                         columnNumbersBudgetsUsed.Add(column);
                     }
+                    if(treatmentHeader.Equals("CI\r\nImprovement"))
+                    {
+                        columnNumbersCIImprovement.Add(column);
+                    }
                     worksheet.Cells[headerRow2, column++].Value = treatmentHeader;
                 }
 
@@ -498,6 +505,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
                     if (treatmentHeader.Equals("Budget(s)\r\nUsed"))
                     {
                         columnNumbersBudgetsUsed.Add(column);
+                    }
+                    if (treatmentHeader.Equals("CI\r\nImprovement"))
+                    {
+                        columnNumbersCIImprovement.Add(column);
                     }
                     worksheet.Cells[headerRow2, column++].Value = treatmentHeader;
                 }
@@ -561,7 +572,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
         }
 
 
-        public static void PerformPostAutofitAdjustments(ExcelWorksheet worksheet, List<int> columnNumbersBudgetsUsed)
+        public static void PerformPostAutofitAdjustments(ExcelWorksheet worksheet, List<int> columnNumbersBudgetsUsed, List<int> columnNumbersCIImprovement)
         {
             foreach (var columnNumber in columnNumbersBudgetsUsed)
             {
@@ -570,6 +581,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
                 worksheet.Column(columnNumber + 1).SetTrueWidth(35);
                 worksheet.Column(columnNumber + 1).Style.WrapText = true;
             }
+
+            foreach(var columnNumber in columnNumbersCIImprovement)
+            {
+                worksheet.Column(columnNumber).SetTrueWidth(12.15);
+            }
+
+            worksheet.Row(2).Height = 35;
         }
     }
 }

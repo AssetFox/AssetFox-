@@ -28,7 +28,9 @@ namespace BridgeCareCore.Services
         {
             var memos = EventMemoModelLists.GetFreshInstance("BuildCache");
             memos.Mark("start");
-            var unitOfWork = _serviceProvider.GetRequiredService<IUnitOfWork>();
+            using var scope = _serviceProvider.CreateScope();
+            var scopeProvider = scope.ServiceProvider;
+            var unitOfWork = scopeProvider.GetRequiredService<IUnitOfWork>();
             var attributeRepository = unitOfWork.AttributeRepo;
             var aggregatedResultRepository = unitOfWork.AggregatedResultRepo;
             var allAttributes = attributeRepository.GetAttributes();

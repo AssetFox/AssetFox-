@@ -33,9 +33,12 @@ namespace BridgeCareCore.Services
         };
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken) {
+            
             var memos = EventMemoModelLists.GetFreshInstance("BuildCache");
             memos.Mark("start");
-            var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
+            using var scope = serviceProvider.CreateScope();
+            var scopeProvider = scope.ServiceProvider;
+            var unitOfWork = scopeProvider.GetRequiredService<IUnitOfWork>();
             var attributeRepository = unitOfWork.AttributeRepo;
             var aggregatedResultRepository = unitOfWork.AggregatedResultRepo;
             var allAttributes = attributeRepository.GetAttributes();

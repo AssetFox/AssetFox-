@@ -13,8 +13,16 @@ namespace BridgeCareCore.Services
     {
         public static TimeSpan ValidityDuration = TimeSpan.FromHours(12);
         public const int CacheEntryLengthLimit = 2000000; // approx. size in bytes
+        public int InstanceIndex;
+        public static int InstanceCount = 0;
 
         private ConcurrentDictionary<string, AggregatedSelectValuesResultDtoCacheEntry> Cache { get; set; } = new();
+
+        public AggregatedSelectValuesResultDtoCache()
+        {
+            InstanceCount++;
+            InstanceIndex = InstanceCount;
+        }
 
         public void ClearInvalid()
         {

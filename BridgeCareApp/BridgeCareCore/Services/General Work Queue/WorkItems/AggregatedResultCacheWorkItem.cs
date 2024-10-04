@@ -52,6 +52,7 @@ namespace BridgeCareCore.Services
             var text = memos.ToMultilineString();
             File.WriteAllText("BuildCache.txt", text);
         }
+
         public void OnCompletion(IServiceProvider serviceProvider) {
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();

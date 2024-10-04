@@ -22,6 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary;
+using BridgeCareCore.Interfaces;
 
 namespace BridgeCareCore
 {
@@ -150,6 +151,12 @@ namespace BridgeCareCore
                 endpoints.MapHub<BridgeCareHub>("/bridgecarehub");
                 endpoints.MapGraphQL();
             });
+            var workItem = new AggregatedResultCacheWorkItem();
+            using var serviceScope = app.ApplicationServices
+                .GetRequiredService<IServiceScopeFactory>()
+                .CreateScope();
+            var service = serviceScope.ServiceProvider.GetRequiredService<IGeneralWorkQueueService>();
+            service.CreateAndRun(workItem);
         }
 
         private static void UpdateDatabase(IApplicationBuilder app)

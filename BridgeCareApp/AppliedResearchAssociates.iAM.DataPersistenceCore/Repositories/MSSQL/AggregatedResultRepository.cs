@@ -101,7 +101,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var attributeDTO = allOfAttributeDTOs.Where(_ => _.Attribute.Name == attributeName).ToList();
 
                 if (!attributeDTO.Any())
-                    break;
+                    continue;
 
                 var values = new List<string>();
                 bool isNumber = false;
@@ -116,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     isNumber = attributeDTO.Any(_ => _.Attribute.Type == "NUMBER");
                 }
                 else
-                    break;
+                    continue;
 
                 AttributeDTO attr = attributeDTO.Select(_ => _.Attribute).FirstOrDefault();
                 string resultType = values.Any() ? "success" : "warning";

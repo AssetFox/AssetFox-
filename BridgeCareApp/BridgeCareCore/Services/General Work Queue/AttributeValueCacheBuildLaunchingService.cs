@@ -45,7 +45,7 @@ namespace BridgeCareCore.Services
             {
                 difference = difference + TimeSpan.FromHours(12);
             }
-            _cacheRebuildTimer = new Timer(LaunchQueueBuild, null, difference, TimeSpan.FromHours(12));
+            _cacheRebuildTimer = new Timer(LaunchQueueBuild, null, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(10));
         }
     }
 }

@@ -11,7 +11,7 @@ namespace BridgeCareCore.Services
 {
     public class AggregatedSelectValuesResultDtoCache : IAggregatedSelectValuesResultDtoCache
     {
-        public static TimeSpan ValidityDuration = TimeSpan.FromHours(12);
+        public static TimeSpan ValidityDuration = TimeSpan.FromHours(12) + TimeSpan.FromMinutes(30);
         public const int CacheEntryLengthLimit = 2000000; // approx. size in bytes
         public int InstanceIndex;
         public static int InstanceCount = 0;
@@ -57,6 +57,10 @@ namespace BridgeCareCore.Services
             return null;
         }
 
+        private List<string> _AttributesTooBigToCache = new List<string>();
+
+        public List<string> AttributesTooBigToCache => _AttributesTooBigToCache.ToList();
+
         public void SaveToCache(AggregatedSelectValuesResultDTO dto)
         {
             var now = DateTime.Now;
@@ -69,6 +73,9 @@ namespace BridgeCareCore.Services
                     ValidUntil = now + ValidityDuration,
                 };
                 var ___ = Cache.AddOrUpdate(dto.Attribute.Name, _ => cacheEntry, (_, __) => cacheEntry);
+            } else
+            {
+                AttributesTooBigToCache.Add(dto.Attribute.Name);
             }
         }
     }

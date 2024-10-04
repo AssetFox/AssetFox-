@@ -40,7 +40,6 @@ namespace BridgeCareCore.Services
         };
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken) {
-            
             var memos = EventMemoModelLists.GetFreshInstance("BuildCache");
             memos.Mark("start");
             using var scope = serviceProvider.CreateScope();
@@ -50,10 +49,12 @@ namespace BridgeCareCore.Services
             var aggregatedResultRepository = unitOfWork.AggregatedResultRepo;
             var allAttributes = attributeRepository.GetAttributes();
             var allNames = allAttributes.Select(a => a.Name).ToList();
-            memos.Mark("attributes");
-            var allDtos = aggregatedResultRepository.GetAggregatedResultsForAttributeNames(allNames);
-            memos.Mark("aggregated results");
             var cache = serviceProvider.GetRequiredService<AggregatedSelectValuesResultDtoCache>();
+            var tooBig = cache.AttributesTooBigToCache;
+            var attributesToCache = allNames.Except(tooBig).ToList();
+            memos.Mark("attributes");
+            var allDtos = aggregatedResultRepository.GetAggregatedResultsForAttributeNames(attributesToCache);
+            memos.Mark("aggregated results");
             foreach (var dto in allDtos)
             {
                 cache.SaveToCache(dto);

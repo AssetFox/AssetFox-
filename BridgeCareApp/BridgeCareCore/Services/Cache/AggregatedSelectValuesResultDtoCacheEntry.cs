@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DTOs;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Cache
+namespace BridgeCareCore.Services
 {
     public class AggregatedSelectValuesResultDtoCacheEntry
     {

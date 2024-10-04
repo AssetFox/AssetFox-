@@ -12,21 +12,15 @@ using MoreLinq;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using System.Text;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Cache;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AggregatedResultRepository : IAggregatedResultRepository
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        private static AggregatedSelectValuesResultDtoCache _aggregatedResultCache = new();
 
-        public AggregatedResultRepository(
-            UnitOfDataPersistenceWork unitOfWork
-            )
-        {
+        public AggregatedResultRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        }
 
         public void AddAggregatedResults(List<IAggregatedResult> aggregatedResults)
         {
@@ -47,11 +41,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var maintainableAssets = _unitOfWork.Context.MaintainableAsset
                 .Include(_ => _.AggregatedResults)
                 .Where(_ => _.Id == networkId)
-                .ToList();            
+                .ToList();
 
             return !maintainableAssets.Any()
                 ? throw new RowNotInTableException("The network has no maintainable assets for rollup")
-                : maintainableAssets.SelectMany(__ => __.AggregatedResults.ToList().ToDomain(_unitOfWork.EncryptionKey));            
+                : maintainableAssets.SelectMany(__ => __.AggregatedResults.ToList().ToDomain(_unitOfWork.EncryptionKey));
         }
 
         private void DeleteAggregatedResults(Guid networkId)
@@ -96,62 +90,45 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             List<AggregatedSelectValuesResultDTO> returnList = new();
             var uniqueAttributes = attributeNames.Distinct().ToList();
-            var attributesToFetch = new List<string>();
+            var allOfAttributeDTOs = _unitOfWork.Context.AggregatedResult
+                .Include(_ => _.Attribute)
+                .Where(_ => uniqueAttributes.Contains(_.Attribute.Name))
+                .Select(e => AggregatedResultMapper.ToDto(e))
+                .AsNoTracking().AsSplitQuery().ToList();
+
             foreach (var attributeName in uniqueAttributes)
             {
-                var cached = _aggregatedResultCache.TryGetCachedValue(attributeName);
-                if (cached == null)
+                var attributeDTO = allOfAttributeDTOs.Where(_ => _.Attribute.Name == attributeName).ToList();
+
+                if (!attributeDTO.Any())
+                    break;
+
+                var values = new List<string>();
+                bool isNumber = false;
+                if (attributeDTO.All(x => x.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
                 {
-                    attributesToFetch.Add(attributeName);
-                } else
-                {
-                    returnList.Add(cached);
+                    values = attributeDTO.Where(_ => _.NumericValue.HasValue).Select(_ => _.NumericValue.Value.ToString()).Distinct().ToList();
+                    isNumber = attributeDTO.Any(_ => _.Attribute.Type == "NUMBER");
                 }
-            }
-            if (attributesToFetch.Count > 0)
-            {
-                var allOfAttributeDTOs = _unitOfWork.Context.AggregatedResult
-                    .Include(_ => _.Attribute)
-                    .Where(_ => attributesToFetch.Contains(_.Attribute.Name))
-                    .Select(e => AggregatedResultMapper.ToDto(e))
-                    .AsNoTracking().AsSplitQuery().ToList();
-
-                foreach (var attributeName in attributesToFetch)
+                else if (attributeDTO.All(x => x.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
                 {
-                    var attributeDTO = allOfAttributeDTOs.Where(_ => _.Attribute.Name == attributeName).ToList();
-
-                    if (!attributeDTO.Any())
-                        break;
-
-                    var values = new List<string>();
-                    bool isNumber = false;
-                    if (attributeDTO.All(x => x.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
-                    {
-                        values = attributeDTO.Where(_ => _.NumericValue.HasValue).Select(_ => _.NumericValue.Value.ToString()).Distinct().ToList();
-                        isNumber = attributeDTO.Any(_ => _.Attribute.Type == "NUMBER");
-                    }
-                    else if (attributeDTO.All(x => x.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
-                    {
-                        values = attributeDTO.Where(_ => _.TextValue != null).Select(_ => _.TextValue).Distinct().ToList();
-                        isNumber = attributeDTO.Any(_ => _.Attribute.Type == "NUMBER");
-                    }
-                    else
-                        break;
-
-                    AttributeDTO attr = attributeDTO.Select(_ => _.Attribute).FirstOrDefault();
-                    string resultType = values.Any() ? "success" : "warning";
-                    AggregatedSelectValuesResultDTO returnResult = new()
-                    {
-                        Attribute = attr,
-                        Values = values,
-                        ResultType = resultType,
-                        IsNumber = isNumber
-                    };
-                    returnList.Add(returnResult);
-                    _aggregatedResultCache.SaveToCache(returnResult);
+                    values = attributeDTO.Where(_ => _.TextValue != null).Select(_ => _.TextValue).Distinct().ToList();
+                    isNumber = attributeDTO.Any(_ => _.Attribute.Type == "NUMBER");
                 }
+                else
+                    break;
+
+                AttributeDTO attr = attributeDTO.Select(_ => _.Attribute).FirstOrDefault();
+                string resultType = values.Any() ? "success" : "warning";
+                AggregatedSelectValuesResultDTO returnResult = new()
+                {
+                    Attribute = attr,
+                    Values = values,
+                    ResultType = resultType,
+                    IsNumber = isNumber
+                };
+                returnList.Add(returnResult);
             }
-            _aggregatedResultCache.ClearInvalid();
             return returnList;
         }
 

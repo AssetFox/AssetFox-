@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
 using MoreLinq;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Cache
+namespace BridgeCareCore.Services
 {
     public class AggregatedSelectValuesResultDtoCache : IAggregatedSelectValuesResultDtoCache
     {

@@ -19,11 +19,18 @@ namespace BridgeCareCore.Services
     {
         public string UserId => "system";
 
-        public string WorkId => WorkQueueWorkIdFactory.CreateId(Guid.Empty, WorkType.Aggregation);
+        public readonly Guid Id;
+
+        public string WorkId => WorkQueueWorkIdFactory.CreateId(Id, WorkType.Aggregation);
 
         public string WorkDescription => "Rebuild aggregated result cache";
 
         public string WorkName => WorkDescription;
+
+        public AggregatedResultCacheWorkItem()
+        {
+            Id = Guid.NewGuid();
+        }
 
         public WorkQueueMetadata Metadata => new()
         {

@@ -1,4 +1,4 @@
 start              0
-attributes         7,084
-aggregated results 165,389
-done               14
+attributes         3,702
+aggregated results 163,912
+done               12

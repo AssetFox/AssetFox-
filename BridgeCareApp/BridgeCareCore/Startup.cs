@@ -151,12 +151,6 @@ namespace BridgeCareCore
                 endpoints.MapHub<BridgeCareHub>("/bridgecarehub");
                 endpoints.MapGraphQL();
             });
-            var workItem = new AggregatedResultCacheWorkItem();
-            using var serviceScope = app.ApplicationServices
-                .GetRequiredService<IServiceScopeFactory>()
-                .CreateScope();
-            var service = serviceScope.ServiceProvider.GetRequiredService<IGeneralWorkQueueService>();
-            service.CreateAndRun(workItem);
         }
 
         private static void UpdateDatabase(IApplicationBuilder app)

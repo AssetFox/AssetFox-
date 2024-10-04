@@ -44,7 +44,7 @@ namespace BridgeCareCore.Services
                     dtos.Add(cached);
                 }
             }
-            var aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(attributeNames);
+            var aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(attributesToFetch);
             foreach (var result in aggregatedResults)
             {
                 _cache.SaveToCache(result);

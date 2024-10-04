@@ -9,7 +9,7 @@
                     </div>
                         <v-select 
                         id="InvestmentEditor-investmentLibrary-select"
-                        :items='librarySelectItems'
+                        :items='sortAlphabetically(librarySelectItems)'
                         menu-icon=custom:GhdDownSvg
                         item-title="text"
                         item-value="value"
@@ -390,6 +390,7 @@ import { getUserName } from '@/shared/utils/get-user-info';
 import { InvestmentPagingRequestModel, InvestmentLibraryUpsertPagingRequestModel, InvestmentPagingSyncModel, InvestmentPagingPage } from '@/shared/models/iAM/paging';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { http2XX } from '@/shared/utils/http-utils';
+ import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import { LibraryUser } from '@/shared/models/iAM/user';
 import {
     mapToIndexSignature
@@ -911,6 +912,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             ...investmentPlan,
             id: investmentPlan.id === uuidNIL ? getNewGuid() : investmentPlan.id,
         };
+    }
+
+    function sortAlphabetically(items: SelectItem[]) {
+        return sortSelectItemsAlphabetically(items);
     }
 
     function setHasUnsavedChangesFlag() {

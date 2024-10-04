@@ -448,6 +448,7 @@ import mitt, { Emitter, EventType } from 'mitt';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
+import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 
     const emit = defineEmits(['submit'])    

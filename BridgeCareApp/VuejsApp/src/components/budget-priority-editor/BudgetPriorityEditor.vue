@@ -8,7 +8,7 @@
                         <v-subheader class="ghd-md-gray ghd-control-label">Budget Priority Library</v-subheader>
                     </div> 
                     <v-select id="BudgetPriorityEditor-library-vselect"
-                        :items='librarySelectItems'  
+                        :items='sortAlphabetically(librarySelectItems)'  
                         menu-icon=custom:GhdDownSvg                          
                         item-title="text"
                         item-value="value" 
@@ -281,6 +281,7 @@
     import { vMaska } from "maska"
     import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
     import EditSvg from '@/shared/icons/EditSvg.vue';
+    import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 
     let store = useStore();
     const confirm = useConfirm();
@@ -565,6 +566,10 @@
             budgetName: simpleBudgetDetail.name,
             percentage: 100,
         })) as BudgetPercentagePair[];
+    }
+
+    function sortAlphabetically(items: SelectItem[]) {
+        return sortSelectItemsAlphabetically(items);
     }
 
     function setGridCriteriaColumnWidth() {

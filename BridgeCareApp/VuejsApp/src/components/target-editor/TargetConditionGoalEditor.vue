@@ -10,7 +10,7 @@
                     <v-select
                         id="TargetConditionGoalEditor-SelectLibrary-select"
                         class="ghd-select ghd-text-field ghd-text-field-border"
-                        :items="librarySelectItems"
+                        :items="sortAlphabetically(librarySelectItems)"
                         menu-icon=custom:GhdDownSvg
                         item-title="text"
                         item-value="value"
@@ -342,6 +342,7 @@ import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
+import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
 
@@ -738,6 +739,10 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
     ) {
         onUpdateRow(targetConditionGoal.id, clone(targetConditionGoal))
         onPaginationChanged();
+    }
+
+    function sortAlphabetically(items: SelectItem[]) {
+        return sortSelectItemsAlphabetically(items);
     }
 
     function onShowCriterionLibraryEditorDialog(targetConditionGoal: TargetConditionGoal) {

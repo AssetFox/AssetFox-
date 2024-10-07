@@ -98,6 +98,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var attributeIdLookup = getAttributeIdLookUp();
                 networkEntity.MaintainableAssets = GetInitialQuery()
                                                     .Where(_ => _.NetworkId == networkId)
+                                                    // Having the select below, NOT in a separate method, helps performance by reducing the amount of data that is fetched from the database.
                                                     .Select(asset => new MaintainableAssetEntity
                                                     {
                                                         Id = asset.Id,
@@ -128,7 +129,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var assetIdsInCommittedProjectsForSimulation = _unitOfWork.MaintainableAssetRepo.GetAllIdsInCommittedProjectsForSimulation((Guid)simulationId, networkId);
                 networkEntity.MaintainableAssets = GetInitialQuery()
                                                     .Where(_ => assetIdsInCommittedProjectsForSimulation.Contains(_.Id))
-                                                    .Select(asset => GetMaintainableAssetEntity(asset, attributeIdLookup)).AsNoTracking().ToList();
+                                                    // Having the select below, NOT in a separate method, helps performance by reducing the amount of data that is fetched from the database.
+                                                    .Select(asset =>
+                                                    new MaintainableAssetEntity
+                                                    {
+                                                        Id = asset.Id,
+                                                        SpatialWeighting = asset.SpatialWeighting,
+                                                        AssetName = asset.AssetName,
+                                                        MaintainableAssetLocation = new MaintainableAssetLocationEntity
+                                                        {
+                                                            LocationIdentifier = asset.MaintainableAssetLocation.LocationIdentifier
+                                                        },
+                                                        AggregatedResults = asset.AggregatedResults.Select(result => new AggregatedResultEntity
+                                                        {
+                                                            Discriminator = result.Discriminator,
+                                                            Year = result.Year,
+                                                            TextValue = result.TextValue,
+                                                            NumericValue = result.NumericValue,
+                                                            Attribute = new AttributeEntity
+                                                            {
+                                                                Name = attributeIdLookup[result.AttributeId],
+                                                            }
+                                                        }).ToList()
+                                                    })
+                                                    .AsNoTracking()
+                                                    .ToList();
             }
 
             var domain = networkEntity.ToDomain(explorer);
@@ -153,32 +178,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(a => a.AggregatedResults)
                 .AsSplitQuery();
         }
-
-        private static MaintainableAssetEntity GetMaintainableAssetEntity(MaintainableAssetEntity asset, Dictionary<Guid, string> attributeIdLookup)
-        {
-            return new MaintainableAssetEntity
-            {
-                Id = asset.Id,
-                SpatialWeighting = asset.SpatialWeighting,
-                AssetName = asset.AssetName,
-                MaintainableAssetLocation = new MaintainableAssetLocationEntity
-                {
-                    LocationIdentifier = asset.MaintainableAssetLocation.LocationIdentifier
-                },
-                AggregatedResults = asset.AggregatedResults.Select(result => new AggregatedResultEntity
-                {
-                    Discriminator = result.Discriminator,
-                    Year = result.Year,
-                    TextValue = result.TextValue,
-                    NumericValue = result.NumericValue,
-                    Attribute = new AttributeEntity
-                    {
-                        Name = attributeIdLookup[result.AttributeId],
-                    }
-                }).ToList()
-            };
-        }
-
+        
         public void DeleteNetwork(Guid networkId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
             try

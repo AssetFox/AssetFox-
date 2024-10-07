@@ -464,7 +464,10 @@ namespace BridgeCareCore.Controllers
             }
             var fileData = await Task.Factory.StartNew(() => FetchFromFileLocation(reportPath));
             var simulationName = reportIndex.SimulationId != null ? UnitOfWork.SimulationRepo.GetSimulationName((Guid)reportIndex.SimulationId) : String.Empty;
-            var downloadFileName = $"{simulationName} {reportIndex.Type}.xlsx";
+            var fileExtension = Path.GetExtension(reportPath);
+            if (fileExtension == null || fileExtension == string.Empty)
+                fileExtension = ".xlsx";
+            var downloadFileName = $"{simulationName} {reportIndex.Type}{fileExtension}";
             return new FileInfoDTO
             {
                 FileData = Convert.ToBase64String(fileData),

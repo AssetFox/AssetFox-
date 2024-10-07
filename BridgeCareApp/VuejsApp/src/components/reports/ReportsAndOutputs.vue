@@ -82,7 +82,7 @@
                                     <v-btn
                                         v-if="hasAdminAccess"
                                         @click="onDeleteReport(props.item.id)"
-                                        :disabled="!props.item.isGenerated"
+                                        :disabled="!props.item.isGenerated || !CanUserDelete(props.item.name)"
                                         flat
                                         icon
                                         class="ghd-red"
@@ -171,6 +171,7 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
     let networkName: string = '';
     let networkId: string = getBlankGuid();
     let selectedScenarioId: string = getBlankGuid();
+    const scenarioOutputName: string = "ScenarioOutput"
 
     let rules: InputValidationRules = clone(validationRules);
 
@@ -460,6 +461,13 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
                 currentPage.value[reportIndex].reportStatus = data.simulationReportDetail.status;
             }
         }
+    }
+
+    function CanUserDelete(reportName: string) : boolean{
+        if(reportName === "ScenarioOutput")
+            return hasAdminAccess.value;
+        else 
+            return true
     }
 
 </script>

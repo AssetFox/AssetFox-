@@ -97,6 +97,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ICollection<CommittedProject> committedProjects,
             bool shouldBundleFeasibleTreatments)
         {
+            var budgetAnalysisRow = currentCell.Row + 1;
+            currentCell.Row += 11;
+
             ShouldBundleFeasibleTreatments = shouldBundleFeasibleTreatments;
             FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
             FillCostOfMPMSWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
@@ -109,7 +112,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var workTypeTotalsWorkOutsideScope = AddCostOfWorkOutsideScope(committedProjectsForWorkOutsideScope);
             FillWorkTypeTotalsSectionByBudget(worksheet, currentCell, simulationYears, workTypeTotals, workTypeTotalsWorkOutsideScope, yearlyBudgetAmount, out var totalSpendingRow, workSummaryByBudgetModel);
             FillBudgetTotalSectionByBudget(worksheet, currentCell, simulationYears, totalSpendingRow, workSummaryByBudgetModel, reportOutputData, committedProjects);
+
+            var currentRow = currentCell.Row + 1;
+            currentCell.Row = budgetAnalysisRow;
             FillBudgetAnalysisSectionByBudget(worksheet, currentCell, simulationYears, yearlyBudgetAmount, totalSpendingRow, workSummaryByBudgetModel, reportOutputData, committedProjects);
+            currentCell.Row = currentRow;
 
             var chartRowsModel = new ChartRowsModel();
             return chartRowsModel;
@@ -1533,9 +1540,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ICollection<CommittedProject> committedProjects,
             int totalSpendingRow)
         {
+            var currentRow = currentCell.Row;
+            currentCell.Row = 1;
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Budget Analysis", "", "Total Remaining Budget (all years)");
 
             AddDetailsForBudgetAnalysis(worksheet, simulationYears, currentCell, yearlyBudgetAmount, committedProjects, totalSpendingRow);
+            currentCell.Row = currentRow;
         }
 
         private void FillBudgetAnalysisSectionByBudget(ExcelWorksheet worksheet,
@@ -1559,8 +1569,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                         
             var rowTitles = new List<string> { PAMSConstants.RemainingBudget, PAMSConstants.PercentBudgetSpentPAMS, PAMSConstants.PercentBudgetSpentCommitted, PAMSConstants.PercentBudgetSpentMPMS, PAMSConstants.PercentBudgetSpentSAP, PAMSConstants.PercentBudgetSpentProjectBuilder };
             _pavementWorkSummaryCommon.SetPavementTreatmentGroupsExcelString(worksheet, rowTitles, ref row, ref column);
-
-            var pamsRow = startRow;
+                      
             column++;
             var fromColumn = column + 1;
             foreach (var year in simulationYears)

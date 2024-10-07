@@ -289,6 +289,7 @@ namespace BridgeCareCore.Services.Treatment
             bool.TryParse(dictionary.GetValueOrDefault(TreatmentExportStringConstants.IsTreatmentUnselectable.ToLowerInvariant()), out isUnselectable);
             var loadCosts = LoadCosts(worksheet);
             var loadConsequences = LoadConsequences(worksheet);
+            var performanceFactors = LoadPerformanceFactor(worksheet);
             var newTreatment = new TreatmentDTO
             {
                 Name = worksheetName,
@@ -308,6 +309,7 @@ namespace BridgeCareCore.Services.Treatment
                     IsSingleUse = true,
                     Name = "Is from import"
                 } : new CriterionLibraryDTO(),
+                PerformanceFactors = performanceFactors.PerformanceFactors
             };
             var validationMessages = new List<string>();
             validationMessages.AddRange(loadCosts.ValidationMessages);
@@ -324,10 +326,8 @@ namespace BridgeCareCore.Services.Treatment
         {
             var treatmentLoadResult = LoadTreatment(worksheet);
             var loadBudgets = LoadBudgets(worksheet, scenarioBudgets);
-            var performanceFactors = LoadPerformanceFactor(worksheet);
 
             treatmentLoadResult.Treatment.BudgetIds = loadBudgets.budgetIds;
-            treatmentLoadResult.Treatment.PerformanceFactors = performanceFactors.PerformanceFactors;
             treatmentLoadResult.ValidationMessages.AddRange(loadBudgets.ValidationMessages);
 
             return treatmentLoadResult;

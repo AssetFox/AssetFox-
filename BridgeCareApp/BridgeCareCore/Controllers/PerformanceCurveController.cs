@@ -19,6 +19,7 @@ using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Graph.Models;
 using OfficeOpenXml;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
@@ -568,6 +569,25 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        [HttpGet]
+        [Route("GetDistinctScenarioPerformanceFactorAttributeNames")]
+        [Authorize(Policy = Policy.ViewPerformanceCurveFromLibrary)]
+        public async Task<IActionResult> GetDistinctPerformanceFactorAttributes()
+        {
+            var result = new List<string>();
+            try
+            {
+                await Task.Factory.StartNew(() => result = UnitOfWork.PerformanceCurveRepo.GetDistinctScenarioPerformanceFactorAttributeNames());
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetDistinctScenarioPerformanceFactorAttributeNames - {HubService.errorList["Exception"]}");
+                throw;
+            }
+        }
+
         [HttpGet]
         [Route("GetHasPermittedAccess")]
         [Authorize]

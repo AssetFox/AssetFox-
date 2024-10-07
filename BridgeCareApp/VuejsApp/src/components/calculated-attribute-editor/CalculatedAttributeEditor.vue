@@ -7,7 +7,7 @@
                         <v-subheader class="ghd-control-label ghd-md-gray"><span>Calculated Attribute</span></v-subheader>
                         <v-select
                                   id="CalculatedAttribute-CalculatedAttribute-select"
-                                  :items="librarySelectItems"
+                                  :items="sortAlphabetically(librarySelectItems)"
                                   append-icon="ghd-down"
                                   variant="outlined"
                                   menu-icon=custom:GhdDownSvg
@@ -384,6 +384,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { Emitter, EventType } from 'mitt';
 import { computed } from 'vue';
+import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import EditSvg from '@/shared/icons/EditSvg.vue';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 
@@ -926,6 +927,10 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     }
     function setTiming(selectedItem: number) {
          setTimingsMultiSelect(selectedItem);
+    }
+
+    function sortAlphabetically(items: SelectItem[]) {
+        return sortSelectItemsAlphabetically(items);
     }
 
     function getOwnerUserName(): string {

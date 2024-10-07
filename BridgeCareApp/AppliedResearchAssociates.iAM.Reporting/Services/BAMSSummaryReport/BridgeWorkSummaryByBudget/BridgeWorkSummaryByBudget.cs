@@ -198,11 +198,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 }
 
                 currentCell.Column = 1;
-                currentCell.Row += 2;
+                currentCell.Row += 1;                
+                
                 worksheet.Cells[currentCell.Row, currentCell.Column].Value = summaryData.Budget;
                 ExcelHelper.MergeCells(worksheet, currentCell.Row, currentCell.Column, currentCell.Row, simulationYears.Count);
                 ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column, currentCell.Row, simulationYears.Count + 2], Color.Gray);
-                currentCell.Row += 1;
+                var budgetAnalysisRow = currentCell.Row + 2;
+                currentCell.Row += 11;                
 
                 var workTypeTotal = new WorkTypeTotal();
                 var amount = totalSpent.Sum(_ => _.amount);
@@ -229,20 +231,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Cells[initialRow, 3 + numberOfYears].Value = "Total (all years)";
                 var totalColumnHeaderRange = worksheet.Cells[initialRow, 3 + numberOfYears];
                 ExcelHelper.ApplyBorder(totalColumnHeaderRange);
-                ExcelHelper.ApplyStyle(totalColumnHeaderRange);                
-                var workTypes = EnumExtensions.GetValues<TreatmentCategory>();
+                ExcelHelper.ApplyStyle(totalColumnHeaderRange);
+                var workTypes = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement, TreatmentCategory.CapacityAdding, TreatmentCategory.Other, TreatmentCategory.Bundled };
                 currentCell.Row++;
                 var firstContentRow = currentCell.Row;
                 var rowIndex = firstContentRow;
                 var rowTrackerForColoring = firstContentRow;
-                
-                for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
-                {
-                    if (workType == TreatmentCategory.Reconstruction || workType == TreatmentCategory.WorkOutsideScope)
-                    {
-                        continue;
-                    }
-                    
+
+                foreach (var workType in workTypes)
+                {   
                     worksheet.Cells[rowIndex, 1].Value = workType.ToSpreadsheetString();
                     worksheet.Cells[rowIndex, 3, rowIndex, simulationYears.Count + 2].Value = 0.0;
                     currentCell.Row++;
@@ -309,9 +306,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     Color.FromArgb(255, 230, 153));
                 // End of Cost per BPN
 
-                currentCell.Row += 2;
-                _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Budget Analysis", "");
-                currentCell.Row += 1;
+                var currentRow = currentCell.Row + 1;
+                currentCell.Row = budgetAnalysisRow;
+                _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Budget Analysis", "");                
                 currentCell.Column = 1;
 
                 int startRow, startColumn, row, column;
@@ -365,7 +362,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2],
                     Color.Red);
                 ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row + 1, currentCell.Column + 2, currentCell.Row + 5, simulationYears.Count + 2], Color.FromArgb(248, 203, 173));
-                currentCell.Row += 5;
+                currentCell.Row = currentRow;
             }
 
             worksheet.Calculate();
@@ -490,12 +487,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         private void InsertWorkTypeTotals(int startYear, int firstContentRow, ExcelWorksheet worksheet, WorkTypeTotal workTypeTotal)
         {
-            foreach (var item in workTypeTotal.PreservationCostPerYear)
+            foreach (var item in workTypeTotal.MaintenanceCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
             firstContentRow++;
-            foreach (var item in workTypeTotal.CapacityAddingCostPerYear)
+            foreach (var item in workTypeTotal.PreservationCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
@@ -510,7 +507,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
             firstContentRow++;
-            foreach (var item in workTypeTotal.MaintenanceCostPerYear)
+            foreach (var item in workTypeTotal.CapacityAddingCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }

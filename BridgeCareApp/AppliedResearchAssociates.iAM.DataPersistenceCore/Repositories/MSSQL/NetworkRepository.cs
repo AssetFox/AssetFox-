@@ -98,7 +98,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var attributeIdLookup = getAttributeIdLookUp();
                 networkEntity.MaintainableAssets = GetInitialQuery()
                                                     .Where(_ => _.NetworkId == networkId)
-                                                    .Select(asset => GetMaintainableAssetEntity(asset, attributeIdLookup)).AsNoTracking().ToList();
+                                                    .Select(asset => new MaintainableAssetEntity
+                                                    {
+                                                        Id = asset.Id,
+                                                        SpatialWeighting = asset.SpatialWeighting,
+                                                        AssetName = asset.AssetName,
+                                                        MaintainableAssetLocation = new MaintainableAssetLocationEntity
+                                                        {
+                                                            LocationIdentifier = asset.MaintainableAssetLocation.LocationIdentifier
+                                                        },
+                                                        AggregatedResults = asset.AggregatedResults.Select(result => new AggregatedResultEntity
+                                                        {
+                                                            Discriminator = result.Discriminator,
+                                                            Year = result.Year,
+                                                            TextValue = result.TextValue,
+                                                            NumericValue = result.NumericValue,
+                                                            Attribute = new AttributeEntity
+                                                            {
+                                                                Name = attributeIdLookup[result.AttributeId],
+                                                            }
+                                                        }).ToList()
+                                                    }).AsNoTracking().ToList();
             }
 
             if (!areFacilitiesRequired && simulationId != null)

@@ -1050,13 +1050,15 @@ async function getDistinctScenarioPerformanceFactorAttributeNamesAction(payload?
                     hasCreatedLibrary = true;
                     if(!hasScenario.value)
                         librarySelectItemValue.value = library.id;
-                    
                     if(library.treatments.length === 0){
                         clearChanges();
                     }
 
                     addedOrUpdatedTreatmentLibraryMutator(library);
-                    selectedTreatmentLibraryMutator(library.id);
+                    getTreatmentLibrariesAction().then(() => {
+                        // After refreshing, select the new library
+                        selectedTreatmentLibraryMutator(library.id);
+                    });
                     addSuccessNotificationAction({message:'Added treatment library'})
                 }               
             })

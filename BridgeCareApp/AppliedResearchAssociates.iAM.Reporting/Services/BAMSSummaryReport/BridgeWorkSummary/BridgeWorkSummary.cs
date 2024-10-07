@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup,
             List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, bool shouldBundleFeasibleTreatments)
         {
-            var currentCell = new CurrentCell { Row = 1, Column = 1 };
+            var currentCell = new CurrentCell { Row = 10, Column = 1 };
 
             #region Initial work to set some data, which will be used throughout the Work summary TAB
 

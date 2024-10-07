@@ -276,6 +276,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     libraryId);
             }
 
+            if (treatments.Any(_ => _.PerformanceFactors.Any()))
+            {
+                var performancePerTreatmentId = treatments.Where(_ => _.PerformanceFactors.Any()).ToList()
+                .ToDictionary(_ => _.Id, _ => _.PerformanceFactors);
+                _unitOfWork.TreatmentPerformanceFactorRepo.UpsertLibraryTreatmentPerformanceFactors(performancePerTreatmentId, libraryId);
+            }
+
             if (treatments.Any(_ =>
                 _.CriterionLibrary?.Id != null && _.CriterionLibrary.Id != Guid.Empty &&
                 !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
@@ -365,6 +372,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .ToDictionary(_ => _.Id, _ => _.Consequences);
                 _unitOfWork.TreatmentConsequenceRepo.UpsertOrDeleteTreatmentConsequences(consequencesPerTreatmentId,
                     libraryId);
+            }
+
+            if (treatments.Any(_ => _.PerformanceFactors.Any()))
+            {
+                var performancePerTreatmentId = treatments.Where(_ => _.PerformanceFactors.Any()).ToList()
+                .ToDictionary(_ => _.Id, _ => _.PerformanceFactors);
+                _unitOfWork.TreatmentPerformanceFactorRepo.UpsertLibraryTreatmentPerformanceFactors(performancePerTreatmentId, libraryId);
             }
 
             if (treatments.Any(_ =>
@@ -502,6 +516,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.TreatmentConsequences)
                 .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.TreatmentPerformanceFactors)
                 .Include(_ => _.TreatmentConsequences)
                 .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
                 .ThenInclude(_ => _.Equation)
@@ -908,6 +923,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.TreatmentConsequences)
                 .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
                 .ThenInclude(_ => _.Equation)
+                .Include(_ => _.TreatmentPerformanceFactors)
                 .Include(_ => _.TreatmentConsequences)
                 .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
                 .ThenInclude(_ => _.CriterionLibrary)

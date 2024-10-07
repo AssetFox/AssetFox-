@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
             bool shouldBundleFeasibleTreatments)
         {
-            var currentCell = new CurrentCell { Row = 1, Column = 1 };
+            var currentCell = new CurrentCell { Row = 10, Column = 1 };
             var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, List<CommittedProjectMetaData>>>();
             // Getting list of treatments. It will be used in several places throughout this excel TAB
             var simulationTreatments = new List<(string Name, string AssetType, TreatmentCategory Category)>();

@@ -46,9 +46,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 ?? throw new RowNotInTableException("Simulation has no default treatments");
 
             var assets = _unitOfWork.Context.MaintainableAsset
-                .Where(_ => _.NetworkId == simulation.Network.Id)
-                .Include(_ => _.MaintainableAssetLocation)
-                .ToList();
+            .Where(_ => _.NetworkId == simulation.Network.Id)
+            .Include(_ => _.MaintainableAssetLocation)
+            .ToList();
+
+            var investmentPlans = _unitOfWork.Context.InvestmentPlan
+                .Where(_ => _.SimulationId == simulation.Id)
+                .OrderBy(_ => _.FirstYearOfAnalysisPeriod)
+                .ToList() ?? throw new Exception($"No investment plan found for simulation {simulation.Id}");
+            int investmentStartYear = investmentPlans.Min(_ => _.FirstYearOfAnalysisPeriod);
+            int investmentEndYear = investmentPlans.Max(_ => _.FirstYearOfAnalysisPeriod + _.NumberOfYearsInAnalysisPeriod - 1);
 
             var projects = _unitOfWork.Context.CommittedProject
                 .Include(_ => _.CommittedProjectLocation)
@@ -60,6 +67,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             foreach (var project in projects)
             {
+
+                if (project.Year < investmentStartYear || project.Year > investmentEndYear)
+                {
+                    throw new ArgumentOutOfRangeException($"The project year {project.Year} is out of the allowed range ({investmentStartYear}-{investmentEndYear}) for the scenario's investments.");
+                }
+
                 var asset = assets.FirstOrDefault(a => project.CommittedProjectLocation.ToDomain().MatchOn(a.MaintainableAssetLocation.ToDomain()));
                 if (asset != null)
                 {

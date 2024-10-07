@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using Writer = System.Threading.Channels.ChannelWriter<BridgeCareCore.Services.Aggregation.AggregationStatusMemo>;
 
 namespace BridgeCareCore.Services.Aggregation
@@ -43,7 +45,7 @@ namespace BridgeCareCore.Services.Aggregation
                     var maintainableAssets = new List<MaintainableAsset>();
                     var attributeData = new List<IAttributeDatum>();
                     var attributeIdsToBeUpdatedWithAssignedData = new List<Guid>();
-                    if(cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
+                    if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                     {
                         _unitOfWork.Rollback();
                         return;
@@ -77,32 +79,60 @@ namespace BridgeCareCore.Services.Aggregation
                     maintainableAssets = _unitOfWork.MaintainableAssetRepo
                         .GetAllInNetworkWithAssignedDataAndLocations(networkId)
                         .ToList();
+                    Debug.WriteLine("Maintainable Assets Set");
 
                     // Create list of attribute ids we are allowed to update with assigned data.
                     // Could hack it in, but what is the natural way to set it up?
                     var networkAttributeIds = maintainableAssets
                         .Where(_ => _.AssignedData != null && _.AssignedData.Any())
                         .SelectMany(_ => _.AssignedData.Select(__ => __.Attribute.Id).Distinct()).ToList();
+                    Debug.WriteLine("Attribute ID's Set");
 
                     // create list of attribute data from configuration attributes (exclude attributes
                     // that don't have command text as there will be no way to select data for them from
                     // the data source)
+                    // takes 5ish min
+                    // TODO (KE): the reason that GetData is called each loop iteration is that technically, in theory, aggregation
+                    // supports multiple data sources. In practice, however, every attribute's data is pulled from the same data source.
+                    // I propose getting all the data sources and loading their sheets into memory, instead of possbily loading and deserializing
+                    // the same sheet 100+ times.
+
+                    int iter = 0;
                     try
                     {
+                        // Get all dataSources first
+                        var dataConnections = new Dictionary<BaseDataSourceDTO, AttributeConnection>();
                         foreach (var attribute in configurationAttributes)
                         {
+                            var dataSource = attributes.FirstOrDefault(_ => _.Id == attribute.Id)?.DataSource;
+                            if (dataSource == null || dataConnections.Keys.Any(existingDataSource => existingDataSource.Id == dataSource.Id))
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                dataConnections.Add(dataSource, AttributeConnectionBuilder.Build(attribute, dataSource, _unitOfWork));
+                            }
+                        }
+                        // With all dataSources having been fetched, get the data to populate the larger AttributeData list
+                        foreach (var attribute in configurationAttributes)
+                        {
+                            iter++;
                             if (attribute.ConnectionType != ConnectionType.NONE)
                             {
                                 var dataSource = attributes.FirstOrDefault(_ => _.Id == attribute.Id)?.DataSource;
-                                if (dataSource != null)
+                                var connection = dataConnections.FirstOrDefault(kvp => kvp.Key.Id == dataSource.Id).Value;
+                                if (connection != null)
                                 {
-                                    var specificData = AttributeDataBuilder
-                                        .GetData(AttributeConnectionBuilder.Build(attribute, dataSource, _unitOfWork));
+                                    var specificData = AttributeDataBuilder.GetData(connection);
                                     attributeData.AddRange(specificData);
+                                    Debug.WriteLine($"attribute.Name: {attribute.Name}");
+                                    Debug.WriteLine($"iteration {iter}");
                                 }
                             }
                         }
                     }
+
                     catch (Exception e)
                     {
                         var networkName = _unitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
@@ -133,14 +163,16 @@ namespace BridgeCareCore.Services.Aggregation
                     {
                         _unitOfWork.Rollback();
                         return;
-                    } 
+                    }
                     state.Status = "Aggregating";
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
                     // loop over maintainable assets and remove assigned data that has an attribute id
                     // in attributeIdsToBeUpdatedWithAssignedData then assign the new attribute data
                     // that was created
+                    //takes forever - KE
                     foreach (var maintainableAsset in maintainableAssets)
                     {
+                        Debug.WriteLine($"i = {i}");
                         if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                         {
                             _unitOfWork.Rollback();
@@ -153,20 +185,8 @@ namespace BridgeCareCore.Services.Aggregation
                         i++;
                         maintainableAsset.AssignedData.RemoveAll(_ =>
                             attributeIdsToBeUpdatedWithAssignedData.Contains(_.Attribute.Id));
-                        //List<DatumLog> unmatchedDatum = maintainableAsset.AssignAttributeData(attributeData);
+                        // Iterates through entire attributeData list
                         maintainableAsset.AssignAttributeData(attributeData);
-                        //if (unmatchedDatum.Count > 0)
-                        //{
-                        //    isUnmatchedDatum = true;
-                        //    foreach(var datum in unmatchedDatum)
-                        //    {
-                        //        stringBuilder.AppendLine(datum.ToString());
-                        //    }
-                        //    streamWriter.WriteLine(stringBuilder);
-                        //    stringBuilder.Clear();
-                        //}
-
-                        //maintainableAsset.AssignSpatialWeighting(benefitQuantifierEquation.Equation.Expression);
                         try
                         {
                             // aggregate numeric data
@@ -193,7 +213,7 @@ namespace BridgeCareCore.Services.Aggregation
                         }
                         catch (Exception e)
                         {
-                        var networkName = _unitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
+                            var networkName = _unitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
                             var broadcastError = $"Error: Creating aggregation rule(s) for the attributes for {networkName}:: {e.Message}";
                             WriteError(writer, broadcastError);
                             throw;

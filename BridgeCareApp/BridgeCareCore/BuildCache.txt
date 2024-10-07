@@ -1,4 +1,3 @@
-start              0
-attributes         3,702
-aggregated results 163,912
-done               12
+start      0
+attributes 2,921
+done       121,577

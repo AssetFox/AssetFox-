@@ -12,6 +12,8 @@ using AppliedResearchAssociates.iAM.WorkQueue;
 using BridgeCareCore.Models;
 using HotChocolate.Utilities;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Graph.Models;
+using System.Collections.Generic;
 
 namespace BridgeCareCore.Services
 {
@@ -52,12 +54,21 @@ namespace BridgeCareCore.Services
             var cache = serviceProvider.GetRequiredService<AggregatedSelectValuesResultDtoCache>();
             var tooBig = cache.AttributesTooBigToCache;
             var attributesToCache = allNames.Except(tooBig).ToList();
-            memos.Mark("attributes");
-            var allDtos = aggregatedResultRepository.GetAggregatedResultsForAttributeNames(attributesToCache);
-            memos.Mark("aggregated results");
-            foreach (var dto in allDtos)
+            var batches = new List<List<string>>();
+            while(attributesToCache.Any())
             {
-                cache.SaveToCache(dto);
+                var batch = attributesToCache.Take(10).ToList();
+                batches.Add(batch);
+                attributesToCache = attributesToCache.Skip(10).ToList();
+            }
+            memos.Mark("attributes");
+            foreach (var batch in batches)
+            {
+                var allDtos = aggregatedResultRepository.GetAggregatedResultsForAttributeNames(batch);
+                foreach (var dto in allDtos)
+                {
+                    cache.SaveToCache(dto);
+                }
             }
             memos.Mark("done");
             var text = memos.ToMultilineString();

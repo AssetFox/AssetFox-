@@ -38,6 +38,7 @@ namespace BridgeCareCore.Services
 
         private void CreateTimer()
         {
+            // cache rebuild timer should fire at 7am and 7pm every day
             var now = DateTime.Now;
             var sevenAm = new DateTime(now.Year, now.Month, now.Day).AddHours(7);
             var difference = sevenAm - now;

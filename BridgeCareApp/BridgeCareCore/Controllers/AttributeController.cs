@@ -145,10 +145,11 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("CreateAttribute")]
         [Authorize(Policy = Policy.ModifyAttributes)]
-        public async Task<IActionResult> CreateAttribute(AllAttributeDTO attributeDto)
+        public async Task<IActionResult> CreateAttribute(CreateAttributeRequest request)
         {
             try
             {
+                var attributeDto = request.Attribute;
                 var convertedAttributeDto = AttributeService.ConvertAllAttribute(attributeDto);
                 checkAttributeNameValidity(convertedAttributeDto);
                 await Task.Factory.StartNew(() =>
@@ -160,10 +161,11 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttribute {attributeDto.Name} - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttribute {request.Attribute?.Name} - {e.Message}");
                 throw;
             }
         }
+
 
         private void checkAttributeNameValidity(AttributeDTO attr)
         {

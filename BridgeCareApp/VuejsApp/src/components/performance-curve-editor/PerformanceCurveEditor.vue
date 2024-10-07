@@ -8,7 +8,7 @@
                 <v-select
                     id="PerformanceCurveEditor-library-select"
                     class="ghd-control-border ghd-control-text ghd-select "
-                    :items="librarySelectItems"
+                    :items="sortAlphabetically(librarySelectItems)"
                     menu-icon=custom:GhdDownSvg
                     variant="outlined"
                     v-model="librarySelectItemValue"
@@ -549,6 +549,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import { computed } from 'vue';
 import { getUrl } from '@/shared/utils/get-url';
 import { nextTick } from 'process';
+import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
 
@@ -1350,6 +1351,10 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     function resetPage(){
         performancePagination.value.page = 1;
         onPaginationChanged();
+    }
+
+    function sortAlphabetically(items: SelectItem[]) {
+        return sortSelectItemsAlphabetically(items);
     }
 
     function CheckUnsavedDialog(next: any, otherwise: any) {

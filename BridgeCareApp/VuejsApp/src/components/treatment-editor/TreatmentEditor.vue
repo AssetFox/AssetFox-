@@ -447,7 +447,6 @@ import { useRouter } from 'vue-router';
 import mitt, { Emitter, EventType } from 'mitt';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
-import { getUrl } from '@/shared/utils/get-url';
 import AuthenticationService from '@/services/authentication.service';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 

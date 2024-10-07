@@ -249,7 +249,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
             var performanceCurvesAttributes = _reportHelper.GetPerformanceCurvesAttributes(simulation);
-            //HashSet<string> performanceCurvesAttributes = new HashSet<string>(attributeNameLookup.Values);
             var primaryKeyField = _unitOfWork.AdminSettingsRepo.GetKeyFields();
             reportDetailDto.Status = $"Generating Work Done Tab";
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);

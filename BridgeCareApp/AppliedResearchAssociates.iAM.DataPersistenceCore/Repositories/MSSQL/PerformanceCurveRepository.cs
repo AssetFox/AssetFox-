@@ -681,5 +681,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 };
             });
         }
+
+        public List<string> GetDistinctScenarioPerformanceFactorAttributeNames()
+        {
+            var attributeNames = new List<string>();
+
+            attributeNames =  _unitOfWork.Context.ScenarioTreatmentPerformanceFactor.Select(_ => _.Attribute).Distinct().AsSplitQuery().ToList();
+
+            return attributeNames;
+        }
     }
 }

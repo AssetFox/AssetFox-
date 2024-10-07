@@ -204,19 +204,7 @@
                                     />                                    
                                 </v-card-text>
                             </v-card>
-                        </v-window-item>
-                        <v-window-item>
-                            <v-card>
-                                <v-card-text
-                                    class='card-tab-content'
-                                >
-                                <BudgetsTab :selectedTreatmentBudgets='selectedTreatment.budgetIds'
-                                                :addTreatment='selectedTreatment.addTreatment'
-                                                :fromLibrary='hasSelectedLibrary'
-                                                @onModifyBudgets='modifySelectedTreatmentBudgets' />
-                                </v-card-text>
-                            </v-card>
-                        </v-window-item>
+                        </v-window-item>                     
                         <v-window-item>
                             <v-card>
                                 <v-card-text class='card-tab-content'>
@@ -232,7 +220,19 @@
                                     />
                                 </v-card-text>
                             </v-card>
-                        </v-window-item>                       
+                        </v-window-item>   
+                        <v-window-item>
+                            <v-card>
+                                <v-card-text
+                                    class='card-tab-content'
+                                >
+                                <BudgetsTab :selectedTreatmentBudgets='selectedTreatment.budgetIds'
+                                                :addTreatment='selectedTreatment.addTreatment'
+                                                :fromLibrary='hasSelectedLibrary'
+                                                @onModifyBudgets='modifySelectedTreatmentBudgets' />
+                                </v-card-text>
+                            </v-card>
+                        </v-window-item>                    
                     </v-window>
                 </div>                                             
             </v-col>                    
@@ -574,6 +574,10 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
   await store.dispatch('getScenarioPerformanceCurves', payload);
 }
 
+async function getDistinctScenarioPerformanceFactorAttributeNamesAction(payload?: any): Promise<any> {
+  await store.dispatch('getDistinctScenarioPerformanceFactorAttributeNames', payload);
+}
+
  function setAlertMessageAction(payload?: any): void {
    store.dispatch('setAlertMessage', payload);
 }
@@ -598,7 +602,7 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
     let selectedTreatment = ref(clone(emptyTreatment));
     let selectedTreatmentDetails: TreatmentDetails = clone(emptyTreatmentDetails);
     let activeTab = ref(0);
-    let treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Consequences', 'Supersede'];
+    let treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Consequences', 'Supersede', 'Performance Factor'];
     const createTreatmentLibraryDialogData = ref<CreateTreatmentLibraryDialogData>(clone(emptyCreateTreatmentLibraryDialogData));
     let showCreateTreatmentDialog = ref(false);
     const showImportTreatmentDialog = ref<boolean>(false);
@@ -660,6 +664,7 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
         {
             librarySelectItemValue.value = "";
         await getTreatmentLibrariesAction();
+        await getDistinctScenarioPerformanceFactorAttributeNamesAction();
         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.Treatment) !== -1) {
             selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
             loadedScenarioId = selectedScenarioId;
@@ -674,7 +679,7 @@ async function getScenarioPerformanceCurvesAction(payload?: any): Promise<any> {
             await getTreatmentLibraryBySimulationIdAction(selectedScenarioId);
             await getScenarioPerformanceCurvesAction(selectedScenarioId);
             
-            treatmentTabs = [...treatmentTabs, 'Budgets', 'Performance Factor'];
+            treatmentTabs = [...treatmentTabs, 'Budgets'];
             await getScenarioSimpleBudgetDetailsAction({ scenarioId: selectedScenarioId, })
             await getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId})
             selectScenarioAction({ scenarioId: selectedScenarioId });   

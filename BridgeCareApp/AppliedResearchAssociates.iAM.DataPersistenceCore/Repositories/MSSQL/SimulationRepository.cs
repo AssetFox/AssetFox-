@@ -270,6 +270,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return result;
         }
 
+        public List<SimulationAnalysisDetailEntity> GetScenariosReportSettings()
+        {
+            var simulations = _unitOfWork.Context.SimulationAnalysisDetail.AsNoTracking()
+                        .Where(simulation => simulation.Status == "Simulation output saved to database")
+                        .ToList();
+            return simulations;
+        }
+
+
         public void UpdateSimulationAndPossiblyUsers(SimulationDTO dto)
         {
             _unitOfWork.AsTransaction(() =>

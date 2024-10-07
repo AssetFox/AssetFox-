@@ -38,7 +38,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         string GetSimulationName(Guid simulationId);
 
-        bool GetSimulationRunSetting(Guid simulationId);
+        bool GetSimulationRunSetting(Guid simulationId);
+
+        List<SimulationAnalysisDetailEntity> GetScenariosReportSettings();
         SimulationDTO GetCurrentUserOrSharedScenario(Guid simulationId, bool hasAdminAccess, bool hasSimulationAccess);
         
         bool GetNoTreatmentBeforeCommitted(Guid simulationId);

@@ -334,17 +334,25 @@ const actions = {
         }
    },
    async getSimulationRunSetting({commit}: any, payload: any) {
-    if(state.currentUserOrSharedScenario.id == emptyScenario.id)
-    {
-        await ScenarioService.getSimulationRunSetting(payload.simulationId)
+        if(state.currentUserOrSharedScenario.id == emptyScenario.id)
+        {
+            await ScenarioService.getSimulationRunSetting(payload.simulationId)
+                .then((response: AxiosResponse) => {
+                    if (hasValue(response, 'data')) {
+                        commit(response.data as Scenario);
+                    }
+                }
+            );
+        }
+    },
+    async GetSimulationRunSetting({commit}: any, payload: any) {
+        await ScenarioService.getScenariosReportSettings()
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    commit(response.data as Scenario);
+                    commit('scenariosMutator', response.data as Scenario[]);
                 }
-            }
-        );
-    }
-},
+            });
+    },
 
 };
 

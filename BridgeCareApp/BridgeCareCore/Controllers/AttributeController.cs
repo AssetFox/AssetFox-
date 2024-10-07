@@ -150,11 +150,12 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var attributeDto = request.Attribute;
+                var setForAllAttributes = request.SetForAllAttributes;
                 var convertedAttributeDto = AttributeService.ConvertAllAttribute(attributeDto);
                 checkAttributeNameValidity(convertedAttributeDto);
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributeDto);
+                    UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributeDto, setForAllAttributes);
                 });
 
                 return Ok();

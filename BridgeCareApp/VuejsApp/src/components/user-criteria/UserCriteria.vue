@@ -133,7 +133,7 @@
                   <v-icon>fas fa-times-circle</v-icon>
                 </v-btn>
                 <v-btn id="UserCriteria-deactivateUser-btn" @click='onDeactivateUser(item)' class='ara-orange' flat 
-                        title='Delete User'>
+                        title='Deactivate User'>
                   <v-icon>fas fa-trash</v-icon>
                 </v-btn>
               </td>

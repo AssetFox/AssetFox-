@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.Data.Mappers;
@@ -10,39 +11,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public static class AttributeRepositoryExtensions
     {
-        // Original method - no bool parameter
         public static void UpsertAttributes(this IAttributeRepository repository, List<AttributeDTO> dtos)
         {
             var dataAttributes = MapToDataAttributes(repository, dtos);
             repository.UpsertAttributes(dataAttributes);
         }
 
-        // Overloaded method with bool parameter
-        public static void UpsertAttributes(this IAttributeRepository repository, bool setForAllAttributes, List<AttributeDTO> dtos)
-        {
-            var dataAttributes = MapToDataAttributes(repository, dtos);
-
-            if (setForAllAttributes)
-            {
-                Console.WriteLine("Setting for all attributes is enabled.");
-            }
-
-            repository.UpsertAttributes(dataAttributes);
-        }
-
-        // Original method - no bool parameter
         public static void UpsertAttributes(this IAttributeRepository repository, params AttributeDTO[] dtos)
         {
             repository.UpsertAttributes(dtos.ToList());
         }
 
-        // Overloaded method with bool parameter
-        public static void UpsertAttributes(this IAttributeRepository repository, bool setForAllAttributes, params AttributeDTO[] dtos)
-        {
-            repository.UpsertAttributes(setForAllAttributes, dtos.ToList());
-        }
-
-        // Existing method for the non-DTO version
         public static void UpsertAttributes(this IAttributeRepository repo, params DataAttribute[] attributes)
             => repo.UpsertAttributesNonAtomic(attributes.ToList());
 

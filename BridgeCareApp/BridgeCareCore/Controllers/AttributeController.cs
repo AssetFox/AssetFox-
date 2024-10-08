@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 
 namespace BridgeCareCore.Controllers
 {
@@ -161,11 +162,25 @@ namespace BridgeCareCore.Controllers
                 var convertedAttributeDto = AttributeService.ConvertAllAttribute(attributeDto);
                 checkAttributeNameValidity(convertedAttributeDto);
 
-                await Task.Factory.StartNew(() =>
+                if (!setForAllAttributes)
                 {
-                    UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributeDto, setForAllAttributes);
-                });
-
+                    await Task.Factory.StartNew(() =>
+                    {
+                        UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributeDto);
+                    });
+                }
+                else
+                {
+                    var attributeDTOs = UnitOfWork.AttributeRepo.GetAttributes();
+                    var dataSourceToBeCopied = convertedAttributeDto.DataSource;
+                    // Change the data source in every attribute to the dataSource from the attribute that is currently being edited.
+                    attributeDTOs.ForEach(_ => _.DataSource = dataSourceToBeCopied);
+                    attributeDTOs.ForEach(_ => checkAttributeNameValidity(_));
+                    await Task.Factory.StartNew(() =>
+                    {
+                        UnitOfWork.AttributeRepo.UpsertAttributes(attributeDTOs);
+                    });
+                }
                 return Ok();
             }
             catch (Exception e)

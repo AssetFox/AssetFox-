@@ -188,7 +188,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
 
             CurrentCell currentCell = new CurrentCell { Row = 1, Column = 1 };
 
-         
+            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
+            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
+            _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
+            var simulation = network.Simulations.First();
+            _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
+            var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
+            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
+            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
+
             var scenarioName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);            
             generalWorksheet.Cells[currentCell.Row, currentCell.Column].Value = $"{scenarioName} General Summary Report";
             ExcelHelper.MergeCells(generalWorksheet, 1, 1, 1, reportOutputData.Years.Count + 1);
@@ -201,7 +210,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
             UpsertSimulationReportDetail(reportDetailDto);
             var targetBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
             currentCell.Column = 1;
-            _generalBudgetSummary.FillTargetBudgets(generalWorksheet, reportOutputData, currentCell, targetBudgets);
+            _generalBudgetSummary.FillTargetBudgets(generalWorksheet, reportOutputData, currentCell, targetBudgets, simulation.ShouldBundleFeasibleTreatments);
             currentCell.Row += 3;
 
             //Deficient Condition Goals Table
@@ -239,17 +248,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary
                     );
             }
 
-            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
-            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
-            _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
-            var simulation = network.Simulations.First();
-            _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
-            var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
-            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
-            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
-            var performanceCurvesAttributes = _reportHelper.GetPerformanceCurvesAttributes(simulation);
-            var primaryKeyField = _unitOfWork.AdminSettingsRepo.GetKeyFields();
+            var performanceCurvesAttributes = _reportHelper.GetPerformanceCurvesAttributes(simulation);            
             reportDetailDto.Status = $"Generating Work Done Tab";
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, SimulationID);
             UpsertSimulationReportDetail(reportDetailDto);

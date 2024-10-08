@@ -21,6 +21,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
         private int TargetBudgetsYearsRow = 0;
         private int BudgetSpentYearsRow = 0;
         private HashSet<String> workBudgets = new();
+        private bool ShouldBundleFeasibleTreatments;
 
         public GeneralBudgetSummary(IList<string> Warnings, IUnitOfWork unitOfWork)
         {
@@ -28,8 +29,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void FillTargetBudgets(ExcelWorksheet generalSummaryWorksheet, SimulationOutput simulationOutput, CurrentCell currentCell, List<BudgetDTO> targetBudgets)
+        public void FillTargetBudgets(ExcelWorksheet generalSummaryWorksheet, SimulationOutput simulationOutput, CurrentCell currentCell, List<BudgetDTO> targetBudgets, bool shouldBundleFeasibleTreatments)
         {
+            ShouldBundleFeasibleTreatments = shouldBundleFeasibleTreatments;
             generalSummaryWorksheet.Column(1).SetTrueWidth(20);
             currentCell.Row = currentCell.Row;
             generalSummaryWorksheet.Cells[currentCell.Row, 1].Value = "Target Budgets";
@@ -183,10 +185,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                     var assets = yearData.Assets.Where(_ => _.AppliedTreatment != BAMSConstants.NoTreatment);
                     foreach (var section in assets)
                     {
-                        var primaryKeyValue = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, primaryKey[0].ToString());
+                        var primaryKeyValue = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, primaryKey[0]);
                         if (string.IsNullOrEmpty(primaryKeyValue) && section.ValuePerNumericAttribute != null)
                         {
-                            primaryKeyValue = section.ValuePerNumericAttribute[primaryKey[0].ToString()].ToString();
+                            primaryKeyValue = section.ValuePerNumericAttribute[primaryKey[0]].ToString();
                         }
 
                         // Build keyCashFlowFundingDetails                    
@@ -217,11 +219,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                                                       section.TreatmentStatus == TreatmentStatus.Applied)) ?
                                                       keyCashFlowFundingDetails[primaryKeyValue] :
                                                       section.TreatmentConsiderations ?? new();
-
-                        // TODO handle shouldBundleFeasibleTreatments later, needs enhancement to this report.
-                        var shouldBundleFeasibleTreatments = false;
-
-                        var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                                                
+                        var treatmentConsideration = ShouldBundleFeasibleTreatments ?
                                              treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
                                                 _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
                                                 section.AppliedTreatment.Contains(_.TreatmentName)) :

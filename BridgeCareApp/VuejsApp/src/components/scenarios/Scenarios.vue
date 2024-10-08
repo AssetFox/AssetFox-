@@ -1812,29 +1812,7 @@ import ReportsService from '@/services/reports.service';
         {
             if(scenarioForReportDeletion.value)
             {
-                await ReportsService.deleteAllGeneratedReports(
-                    scenarioForReportDeletion.value.id,
-                ).then((response: AxiosResponse<any>) => {
-                    if (hasValue(response, 'data')) {
-                        if(scenarioForReportDeletion.value)
-                        {
-                            if(!response.data.includes("No reports exist"))
-                            {
-                                addSuccessNotificationAction({
-                                    message: ' All reports for ' + scenarioForReportDeletion.value.name + ' have been deleted.',
-                                });
-                            }
-                        }
-                    } 
-                    else 
-                    {
-                        addErrorNotificationAction({
-                            message: 'Failed to delete report.',
-                            longMessage:
-                                'Failed to download the report or output. Make sure the scenario has been run',
-                        });
-                    }
-                });
+                deleteAllReports();
             }
         }
     }
@@ -1952,9 +1930,28 @@ import ReportsService from '@/services/reports.service';
                 scenarioId: selectedScenario.id,
                 scenarioName: selectedScenario.name,
             }).then(async () => {
+                deleteAllReports();
                 selectedScenario = clone(emptyScenario); 
             });
         }
+    }
+
+    async function deleteAllReports() {
+        await ReportsService.deleteAllGeneratedReports(selectedScenario.id)
+            .then((response: AxiosResponse<any>) => {
+                if (hasValue(response, 'data')) {
+                    if (!response.data.includes("No reports exist")) {
+                        addSuccessNotificationAction({
+                            message: 'All reports for ' + selectedScenario.name + ' have been deleted.',
+                        });
+                    }
+                } else {
+                    addErrorNotificationAction({
+                        message: 'Failed to delete reports.',
+                        longMessage: 'Failed to delete the associated reports. Please check if the scenario has generated reports.',
+                    });
+                }
+            });
     }
 
     function onConfirmCancelAlertSubmit(submit: boolean) {

@@ -218,7 +218,8 @@
                                                                 props.item.users,
                                                                 props.item,
                                                                 true) "
-                                                        class="menu-style">
+                                                        class="menu-style"
+                                                        :disabled="item.title === 'Reports' && !checkIfReportExists(props.item.id)">
                                                         <v-list-item-title icon>
                                                             <img v-if="item.isCustomIcon" style="padding-right:5px" v-bind:src="item.icon"/>
                                                             <v-icon v-else class="action-icon-padding">{{ item.icon}}</v-icon> 
@@ -417,8 +418,9 @@
                                                     <v-list-item v-for="(item,i) in actionItemsForSharedScenario"
                                                         :key="i"
                                                         @click="OnActionTaken(item.action,props.item.users,props.item,false)"
-                                                        class="menu-style">
-                                                            <v-list-item-title icon>                                                        
+                                                        class="menu-style"
+                                                        :disabled="item.title === 'Reports' && !checkIfReportExists(props.item.id)">
+                                                                <v-list-item-title icon>                                                        
                                                                 <img v-if="item.isCustomIcon" style="padding-right:5px" v-bind:src="item.icon"/>
                                                                 <v-icon v-else class="action-icon-padding">{{ item.icon}}</v-icon>  
                                                                 {{item.title}}
@@ -781,6 +783,7 @@ import ReportsService from '@/services/reports.service';
     let stateTotalQueuedSimulations = computed<number>(() => store.state.scenarioModule.totalQueuedSimulations) ;
     const stateFastWorkQueuePage = computed<QueuedWork[]>(() => store.state.scenarioModule.currentFastWorkQueuePage);
     let stateTotalFastQueuedItems = computed<number>(() => store.state.scenarioModule.totalFastQueuedItems);
+    let simulationRunSettingId = computed(() => store.state.scenarioModule.simulationRunSettingId);
 
     let authenticated:boolean = (store.state.authenticationModule.authenticated);
     let userId: string = (store.state.authenticationModule.userId);
@@ -1062,6 +1065,7 @@ import ReportsService from '@/services/reports.service';
     let aggragateDialogData: any = { showDialog: false };
     let showFilterScenarioList = ref(false);
     let showSharedFilterScenarioList = ref(false)
+    let availableScenarioIds = ref(['']);
 
     watch(stateNetworks, onstateNetworksChanged) 
     function onstateNetworksChanged() {
@@ -1300,7 +1304,7 @@ import ReportsService from '@/services/reports.service';
         getFastWorkQueuePageAction(workQueueRequest);    
     }
 
-    onBeforeMount(() => {
+    onBeforeMount(async () => {
         const route = useRoute();
         networks = clone(stateNetworks.value);
         if (hasValue(networks) ) {
@@ -1341,6 +1345,13 @@ import ReportsService from '@/services/reports.service';
             Hub.BroadcastEventType.BroadcastSimulationDeletionCompletionEvent,
             importCompleted,
         );
+
+        $emitter.on('SimulationRunSettingUpdated', () => {
+            availableScenarioIds.value.push(simulationRunSettingId.value);
+            checkIfReportExists(simulationRunSettingId);
+        });
+
+        await getScenariosReportSettings();
 
         availableActions = {
             runAnalysis: 'runAnalysis',
@@ -1637,6 +1648,8 @@ import ReportsService from '@/services/reports.service';
                 secondRunAnalysisModal();
         }
         else if(submit == "continue") {
+            store.dispatch('updateSimulationRunSettingName', selectedScenario.name);
+            store.dispatch('updateSimulationRunSettingId', selectedScenario.id);
             if (submit && selectedScenario.id !== getBlankGuid()) {
                 runSimulationAction({
                     networkId: selectedScenario.networkId,
@@ -1693,6 +1706,8 @@ import ReportsService from '@/services/reports.service';
     }
 
     async function onConfirmAnalysisPreCheckAlertSubmit(submit: boolean) {
+        store.dispatch('updateSimulationRunSettingName', selectedScenario.name);
+        store.dispatch('updateSimulationRunSettingId', selectedScenario.id);
         confirmAnalysisPreCheckAlertData.value = clone(emptyAlertPreChecksData);
 
         selectedScenario = runAnalysisScenario;
@@ -2055,6 +2070,21 @@ import ReportsService from '@/services/reports.service';
                     workQueueStatusUpdate: updatedQueueItem
                 })
             }                                
+    }
+
+    async function getScenariosReportSettings()
+    {
+        await ScenarioService.getScenariosReportSettings().then(response => {
+            if(response.data)
+            {
+                availableScenarioIds.value = response.data.map((item: { simulationId: string | number }) => item.simulationId);
+            }  
+        });
+    }
+
+    function checkIfReportExists(scenarioId: any) 
+    {
+        return availableScenarioIds.value.includes(scenarioId);
     }
 
     function importCompleted(data: any){

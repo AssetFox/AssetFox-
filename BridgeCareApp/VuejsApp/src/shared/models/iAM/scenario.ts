@@ -104,7 +104,6 @@ export interface CloneScenarioData {
     scenarioId: string;
     destinationNetworkId: string;
     networkId: string;
-    destinationNetworkId:string;
     scenarioName: string;
 }
 

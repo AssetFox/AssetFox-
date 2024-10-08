@@ -653,7 +653,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         };
         
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL){
-            
             await InvestmentService.getScenarioInvestmentPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
@@ -667,7 +666,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     lastYear = data.lastYear;
                     fillAmounts();
                     syncInvestmentPlanWithBudgets();
-                    
                 }
             });
         }            
@@ -1464,6 +1462,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function onShowCpChangeAlert() {
+        $emitter.emit('InvestmentSettingsUpdated');              
         cpChangedAlertData.value = {
             showDialog: true,
             heading: 'Warning',

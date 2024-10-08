@@ -1099,12 +1099,12 @@ async function getDistinctScenarioPerformanceFactorAttributeNamesAction(payload?
                 }
                 treatmentCache.push(selectedTreatment.value);
                 
-                addSuccessNotificationAction({message: "Modified scenario's treatments"});   
+                addSuccessNotificationAction({message: "Modified scenario's treatments"});
+                $emitter.emit('TreatmentSettingsUpdated');                 
                 
                 checkHasUnsavedChanges();
             }           
         });
-        
     }
 
     function onUpsertTreatmentLibrary() {

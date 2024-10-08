@@ -219,11 +219,14 @@ import { getUrl } from '@/shared/utils/get-url';
 import ConfirmDialog from 'primevue/confirmdialog';
 import EditSvg from '@/shared/icons/EditSvg.vue';
 import CancelSaveButtonGroup from '@/shared/components/buttons/CancelSaveButtonGroup.vue';
+import mitt, { Emitter, EventType } from 'mitt';
 
     let store = useStore(); 
     const router = useRouter(); 
     // ToDo - verify if below is correct. Its used in onUpsertAnalysisMethod()
     const $refs = inject('$refs') as any
+
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
 
     const stateAnalysisMethod = computed<AnalysisMethod>(() => store.state.analysisMethodModule.analysisMethod) ;
     const stateNumericAttributes = computed<Attribute[]>( ()=> store.state.attributeModule.numericAttributes) ;
@@ -439,6 +442,7 @@ import CancelSaveButtonGroup from '@/shared/components/buttons/CancelSaveButtonG
                 analysisMethod: analysisMethod.value,
                 scenarioId: selectedScenarioId.value,
             });
+            $emitter.emit('AnalysisMethodUpdated');              
         }
         // const form: any = $refs.form;
 
@@ -473,6 +477,7 @@ import CancelSaveButtonGroup from '@/shared/components/buttons/CancelSaveButtonG
                 analysisMethod: analysisMethod.value,
                 scenarioId: selectedScenarioId.value,
             });
+            $emitter.emit('AnalysisMethodUpdated');              
         } 
     }
 

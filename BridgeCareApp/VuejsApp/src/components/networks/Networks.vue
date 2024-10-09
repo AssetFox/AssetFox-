@@ -252,7 +252,6 @@ import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
     let stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
     let stateDataSources = computed<Datasource[]>(() => store.state.datasourceModule.dataSources) ;
     let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
-    let isAdmin: boolean = (store.state.authenticationModule.isAdmin) ;
     let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
 
     

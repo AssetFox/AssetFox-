@@ -1,4 +1,5 @@
 import {prop, sort, sortBy} from 'ramda';
+import { SelectItem } from '../models/vue/select-item';
 
 const isNumber = (item: any): item is number => {
     return typeof item === 'number';
@@ -40,3 +41,7 @@ export const sortByProperty = (property: string, items: any[]): any[] => {
     const propSorter = sortBy(prop(property));
     return propSorter(items);
 };
+
+export function sortSelectItemsAlphabetically(items: SelectItem[]): SelectItem[] {
+    return items.sort((a, b) => a.text.localeCompare(b.text));
+}

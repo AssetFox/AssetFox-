@@ -55,7 +55,7 @@ import AuthenticationService from '@/services/authentication.service';
 
             getUserTokensAction({ code: code }).then(async () => {
                 const activeStatus = await AuthenticationService.getActiveStatus();
-                if(activeStatus.data = true)
+                if(activeStatus.data == true)
                 {
                         if (!authenticated.value) {
                         onAuthenticationFailure();
@@ -73,7 +73,7 @@ import AuthenticationService from '@/services/authentication.service';
                 }
                 else
                 {
-                    addErrorNotificationAction({ message: 'User is not Active' });
+                    $router.push('/AccessDenied/');
                 }
             });
         }

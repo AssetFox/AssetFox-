@@ -57,6 +57,12 @@ export default class PerformanceCurveService {
         );
     }
 
+    static GetDistinctScenarioPerformanceFactorAttributeNames(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.PerformanceCurve}/GetDistinctScenarioPerformanceFactorAttributeNames`
+        );
+    }
+
     static importPerformanceCurves(
         file: File,
         id: string,

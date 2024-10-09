@@ -159,16 +159,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                     worksheet.Cells[row, column + 1].Value = cost;
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1], ExcelFormatStrings.CurrencyWithoutCents);
 
-                    //if (row % 2 == 0)
-                    //{
-                    //    var cellColor = worksheet.Cells[row, column, row, column + 1].Style.Fill.BackgroundColor;
-                    //    if (section.TreatmentCause != TreatmentCause.CashFlowProject &&
-                    //        !(section.TreatmentCause == TreatmentCause.CommittedProject && previousYearCause == TreatmentCause.CommittedProject && previousYearTreatment.ToLower() != BAMSConstants.NoTreatment))
-                    //    {
-                    //        ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.LightGray);
-                    //    }                        
-                    //}
-
                     if (section.TreatmentCause == TreatmentCause.CashFlowProject)
                     {
                         ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.FromArgb(0, 255, 0));

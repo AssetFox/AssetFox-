@@ -18,16 +18,8 @@ using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
-using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DTOs.Static;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Utils.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.SqlServer.Dac.Model;
-using static BridgeCareCore.Security.SecurityConstants;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace BridgeCareCore.Controllers
 {
@@ -82,38 +74,45 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("CreateNetwork/{networkName}")]
         [ClaimAuthorize("NetworkAddAccess")]
-        public async Task<IActionResult> CreateNetwork(string networkName, NetworkCreationParameters parameters)
+        public IActionResult CreateNetwork(string networkName, NetworkCreationParameters parameters)
         {
             try
             {
                 var idAttribute = AttributeService.ConvertAllAttribute(parameters.NetworkDefinitionAttribute);
 
                 var attribute = AttributeDtoDomainMapper.ToDomain(idAttribute, UnitOfWork.EncryptionKey);
-                var result = await Task.Factory.StartNew(() =>
+                // throw an exception if not network definition attribute is present
+                if (attribute == null || string.IsNullOrEmpty(parameters.DefaultEquation))
                 {
-                    // throw an exception if not network definition attribute is present
-                    if (attribute == null || string.IsNullOrEmpty(parameters.DefaultEquation))
-                    {
-                        throw new InvalidOperationException("Network definition rules do not exist, or the default equation is not specified");
-                    }
+                    throw new InvalidOperationException("Network definition rules do not exist, or the default equation is not specified");
+                }
 
-                    // create network domain model from attribute data created from the network attribute
-                    var allDataSource = parameters.NetworkDefinitionAttribute.DataSource;
-                    var mappedDataSource = AllDataSourceMapper.ToSpecificDto(allDataSource);
-                    var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
-                        AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute, mappedDataSource, UnitOfWork)), parameters.DefaultEquation);
-                    network.Name = networkName;
-                    network.KeyAttributeId = parameters.NetworkDefinitionAttribute.Id;
+                // create network domain model from attribute data created from the network attribute
+                var allDataSource = parameters.NetworkDefinitionAttribute.DataSource;
+                var mappedDataSource = AllDataSourceMapper.ToSpecificDto(allDataSource);
+                var attributeConnection = AttributeConnectionBuilder.Build(attribute, mappedDataSource, UnitOfWork);
+                var attributeData = AttributeDataBuilder.GetData(attributeConnection);
 
-                    // insert network domain data into the data source
-                    UnitOfWork.NetworkRepo.CreateNetwork(network);
+                if (!attributeData.Any())
+                {
+                    // Send an error message with HubService if attributeData is empty
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError,
+                        $"{NetworkError}::CreateNetwork {networkName} - No data found for the network attributes.");
 
-                    // [TODO] Create DTO to return network information necessary to be stored in the UI
-                    // for future reference.
-                    return network.Id;
-                });
+                    // Return a BadRequest to indicate that network creation is not possible due to missing data
+                    return BadRequest("No data found for the network attributes.");
+                }
 
-                return Ok(result);
+                var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(attributeData, parameters.DefaultEquation);
+                network.Name = networkName;
+                network.KeyAttributeId = parameters.NetworkDefinitionAttribute.Id;
+
+                // insert network domain data into the data source
+                UnitOfWork.NetworkRepo.CreateNetwork(network);
+
+                // [TODO] Create DTO to return network information necessary to be stored in the UI
+                // for future reference.
+                return Ok(network.Id);
             }
             catch (Exception e)
             {

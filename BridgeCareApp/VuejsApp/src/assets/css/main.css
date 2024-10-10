@@ -125,6 +125,13 @@
     color: var(--svg-color) !important;
 }
 
+.ghd-red:disabled, 
+.ghd-red[disabled], 
+.parent-element[disabled] .ghd-red {
+    --svg-color: #999999;
+    background-color: transparent !important;
+}
+
 .ghd-green {
     --svg-color: #5CB85C;
     color: var(--svg-color) !important;

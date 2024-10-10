@@ -51,7 +51,7 @@
                                 </v-menu>
                                     <v-btn v-if="props.item.name.includes('Summary')"
                                         @click="onShowCriterionEditorDialog(props.item.id)"
-                                        class="ghd-green"
+                                        class="criteria-button-blue"
                                         flat
                                         icon
                                     >
@@ -67,13 +67,14 @@
                                     flat
                                     >
                                     <img
-                                        :class="props.item.isGenerated ? 'gray-icon' : 'green-icon'"
+                                        :class="props.item.isGenerated ? 'gray-icon' : 'gray-icon'"
                                         class="img-general"
                                         :src="getUrl('assets/icons/attributes-dark.svg')"
                                     />
                                     </v-btn>
                                     <v-btn
                                         @click="onDownloadReport(props.item.id)"
+                                        :disabled="!props.item.isGenerated"
                                         flat
                                         icon
                                     >
@@ -472,6 +473,9 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
 
 </script>
 <style>
-.green-icon {
-    filter: invert(61%) sepia(70%) saturate(486%) hue-rotate(79deg) brightness(82%) contrast(85%);}
+.criteria-button-blue {
+    --svg-color: #2A578D;
+    color: var(--svg-color) !important;
+}
+
 </style>

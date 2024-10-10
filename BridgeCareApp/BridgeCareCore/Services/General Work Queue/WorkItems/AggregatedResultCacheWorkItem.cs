@@ -42,8 +42,6 @@ namespace BridgeCareCore.Services
         };
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken) {
-            var memos = EventMemoModelLists.GetFreshInstance("BuildCache");
-            memos.Mark("start");
             using var scope = serviceProvider.CreateScope();
             var scopeProvider = scope.ServiceProvider;
             var unitOfWork = scopeProvider.GetRequiredService<IUnitOfWork>();
@@ -61,7 +59,6 @@ namespace BridgeCareCore.Services
                 batches.Add(batch);
                 attributesToCache = attributesToCache.Skip(10).ToList();
             }
-            memos.Mark("attributes");
             foreach (var batch in batches)
             {
                 var allDtos = aggregatedResultRepository.GetAggregatedResultsForAttributeNames(batch);
@@ -70,9 +67,6 @@ namespace BridgeCareCore.Services
                     cache.SaveToCache(dto);
                 }
             }
-            memos.Mark("done");
-            var text = memos.ToMultilineString();
-            File.WriteAllText("BuildCache.txt", text);
         }
 
         public void OnCompletion(IServiceProvider serviceProvider) {

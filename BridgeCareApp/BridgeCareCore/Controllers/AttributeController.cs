@@ -174,6 +174,8 @@ namespace BridgeCareCore.Controllers
                     var attributeDTOs = UnitOfWork.AttributeRepo.GetAttributes();
                     var dataSourceToBeCopied = convertedAttributeDto.DataSource;
                     // Change the data source in every attribute to the dataSource from the attribute that is currently being edited.
+                    // TODO: need to check on the column names
+                    attributeDTOs.ForEach(_ => checkColumnNames(_, convertedAttributeDto));
                     attributeDTOs.ForEach(_ => _.DataSource = dataSourceToBeCopied);
                     attributeDTOs.ForEach(_ => checkAttributeNameValidity(_));
                     await Task.Factory.StartNew(() =>
@@ -187,6 +189,15 @@ namespace BridgeCareCore.Controllers
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttribute {request.Attribute?.Name} - {e.Message}");
                 throw;
+            }
+        }
+
+        private void checkColumnNames(AttributeDTO attributeToCheck, AttributeDTO referenceAttribute)
+        {
+            if (attributeToCheck.Command != referenceAttribute.Command)
+            {
+                throw new MalformedInputException($"Invalid column name {attributeToCheck.Command}. " +
+                    $"To set a data source for all attributes, the column names must match.");
             }
         }
 

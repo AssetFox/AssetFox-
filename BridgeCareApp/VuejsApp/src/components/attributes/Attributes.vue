@@ -400,8 +400,6 @@ import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 
     function onSetForAllAttributesChange(value: boolean) {
         setForAllAttributes.value = value;
-        // Implement any specific logic when the switch is toggled
-        console.log("Set for all attributes toggled:", value);
     }
 
 

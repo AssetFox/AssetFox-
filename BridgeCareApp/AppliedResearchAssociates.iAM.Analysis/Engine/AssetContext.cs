@@ -428,12 +428,22 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     private Func<double> GetCalculator(IGrouping<NumberAttribute, PerformanceCurve> curves)
     {
-        curves.Channel(
-            curve => Evaluate(curve.Criterion),
-            result => result ?? false,
-            result => !result.HasValue,
-            out var applicableCurves,
-            out var defaultCurves);
+        List<PerformanceCurve> applicableCurves = new();
+        List<PerformanceCurve> defaultCurves = new();
+
+        foreach (var curve in curves)
+        {
+            var evaluation = Evaluate(curve.Criterion);
+
+            if (!evaluation.HasValue)
+            {
+                defaultCurves.Add(curve);
+            }
+            else if (evaluation.Value)
+            {
+                applicableCurves.Add(curve);
+            }
+        }
 
         var operativeCurves = applicableCurves.Count > 0 ? applicableCurves : defaultCurves;
 
@@ -463,11 +473,9 @@ internal sealed class AssetContext : CalculateEvaluateScope
             SimulationRunner.Send(logMessage);
         }
 
-        Func<double>
-            calculateMinimum = () => operativeCurves.Min(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value))),
-            calculateMaximum = () => operativeCurves.Max(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value)));
-
-        return curves.Key.IsDecreasingWithDeterioration ? calculateMinimum : calculateMaximum;
+        return curves.Key.IsDecreasingWithDeterioration
+            ? () => operativeCurves.Min(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value)))
+            : () => operativeCurves.Max(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value)));
     }
 
     private IDictionary<string, Func<double>> GetPerformanceCurveCalculatorPerAttribute() => SimulationRunner.CurvesPerAttribute.ToDictionary(curves => curves.Key.Name, GetCalculator);

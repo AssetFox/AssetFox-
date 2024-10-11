@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSAuditReport;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
+using static System.Collections.Specialized.BitVector32;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData
 {
@@ -390,7 +391,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
           
             row = 4; // setting row back to start
-            var initialColumn = column;
+            var initialColumn = column;            
+            _parametersModel.nHSModel.NHS = "N";
+            _parametersModel.nHSModel.NonNHS = "N";
             foreach (var initialSection in outputResults.InitialAssetSummaries)
             {
                 TrackInitialYearDataForParametersTAB(initialSection);
@@ -565,28 +568,29 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             Concrete
         }
 
+        /// <summary>
+        /// If any section has NHS_IND value other than "N" then NHS should be Y
+        /// If any section has NHS_IND value "N" then NON-NHS should be Y
+        /// </summary>
+        /// <param name="initialSection"></param>
         private void TrackInitialYearDataForParametersTAB(AssetSummaryDetail initialSection)
         {
-            // Get NHS record for Parameter TAB
-            if (_parametersModel.nHSModel.NHS == null || _parametersModel.nHSModel.NonNHS == null)
+            // Get NHS record for Parameter TAB            
+            var nhsInd = _summaryReportHelper.checkAndGetValue<string>(initialSection.ValuePerTextAttribute, "NHS_IND");            
+            if (nhsInd != "N")
             {
-                int.TryParse(initialSection.ValuePerTextAttribute["NHS_IND"], out var numericValue);
-                //var numericValue = _summaryReportHelper.checkAndGetValue<int>(initialSection.ValuePerTextAttribute, "NHS_IND");
-                if (numericValue > 0)
-                {
-                    _parametersModel.nHSModel.NHS = "Y";
-                    _parametersModel.nHSModel.NonNHS = "N"; //added by bimal
-                }
-                else
-                {
-                    _parametersModel.nHSModel.NonNHS = "Y";
-                    _parametersModel.nHSModel.NHS = "N"; //added by bimal
-                }
+                _parametersModel.nHSModel.NHS = "Y";
             }
-            // Get BPN data for parameter TAB
-            if (!_parametersModel.BPNValues.Contains(initialSection.ValuePerTextAttribute["BUSIPLAN"]))
+            else
             {
-                _parametersModel.BPNValues.Add(initialSection.ValuePerTextAttribute["BUSIPLAN"]);
+                _parametersModel.nHSModel.NonNHS = "Y";
+            }
+
+            // Get BPN data for parameter TAB
+            var bpn = initialSection.ValuePerTextAttribute["BUSIPLAN"];
+            if (!_parametersModel.BPNValues.Contains(bpn))
+            {
+                _parametersModel.BPNValues.Add(bpn);
             }
         }
 

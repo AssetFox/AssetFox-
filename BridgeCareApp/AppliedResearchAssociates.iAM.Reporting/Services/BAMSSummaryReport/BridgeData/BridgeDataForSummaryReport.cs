@@ -566,6 +566,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             row = initialRow; // setting row back to start
             var initialColumn = column;
+            // default values
+            _parametersModel.nHSModel.NHS = "N";
+            _parametersModel.nHSModel.NonNHS = "N";
             foreach (var intialsection in outputResults.InitialAssetSummaries)
             {
                 TrackInitialYearDataForParametersTAB(intialsection);
@@ -1129,27 +1132,29 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             return column;
         }
 
-        private void TrackInitialYearDataForParametersTAB(AssetSummaryDetail intialsection)
+        /// <summary>
+        /// If any section has NHS_IND value 1 then NHS should be Y
+        /// If any section has NHS_IND value 0/blank then NON-NHS should be Y
+        /// </summary>
+        /// <param name="initialSection"></param>
+        private void TrackInitialYearDataForParametersTAB(AssetSummaryDetail initialSection)
         {
             // Get NHS record for Parameter TAB
-            if (_parametersModel.nHSModel.NHS == null || _parametersModel.nHSModel.NonNHS == null)
+            int.TryParse(initialSection.ValuePerTextAttribute["NHS_IND"], out var numericValue);
+            if (numericValue == 1)
             {
-                int.TryParse(_reportHelper.CheckAndGetValue<string>(intialsection.ValuePerTextAttribute, "NHS_IND"), out var numericValue);
-                if (numericValue > 0)
-                {
-                    _parametersModel.nHSModel.NHS = "Y";
-                    _parametersModel.nHSModel.NonNHS = "N";
-                }
-                else
-                {
-                    _parametersModel.nHSModel.NonNHS = "Y";
-                    _parametersModel.nHSModel.NHS = "N";
-                }
+                _parametersModel.nHSModel.NHS = "Y";
             }
-            // Get BPN data for parameter TAB
-            if (!_parametersModel.BPNValues.Contains(_reportHelper.CheckAndGetValue<string>(intialsection.ValuePerTextAttribute, "BUS_PLAN_NETWORK")))
+            else
             {
-                _parametersModel.BPNValues.Add(_reportHelper.CheckAndGetValue<string>(intialsection.ValuePerTextAttribute, "BUS_PLAN_NETWORK"));
+                _parametersModel.nHSModel.NonNHS = "Y";
+            }
+
+            // Get BPN data for parameter TAB
+            var bpn = initialSection.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
+            if (!_parametersModel.BPNValues.Contains(bpn))
+            {
+                _parametersModel.BPNValues.Add(bpn);
             }
         }
 

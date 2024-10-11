@@ -14,6 +14,7 @@ using BridgeCareCore.Utils.Interfaces;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using System.Data;
 
 namespace BridgeCareCore.Controllers
 {
@@ -25,12 +26,14 @@ namespace BridgeCareCore.Controllers
         public readonly IAnalysisDefaultDataService _analysisDefaultDataService;
         private readonly IClaimHelper _claimHelper;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public AnalysisMethodController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService,
+        public AnalysisMethodController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IAnalysisDefaultDataService analysisDefaultDataService, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {            
             _analysisDefaultDataService = analysisDefaultDataService ?? throw new ArgumentNullException(nameof(analysisDefaultDataService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         private void SetDefaultDataForNewScenario(AnalysisMethodDTO analysisMethodDTO)
@@ -76,6 +79,33 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        [HttpGet]
+        [Route("GetSimulationAnalysisSetting/{simulationId}")]
+        [Authorize(Policy = Policy.ViewAnalysisMethod)]
+        public async Task<IActionResult> SimulationAnalysisSetting(Guid simulationId)
+        {
+
+
+            try
+            {
+                var result = UnitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethodSetting(simulationId);
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::GetSimulationAnalysisMethodSetting for {simulationName} - {HubService.errorList["Unauthorized"]}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::GetSimulationAnalysisMethodSetting for {simulationName} - {e.Message}");
+                throw;
+            }
+        }
+
 
         [HttpPost]
         [Route("UpsertAnalysisMethod/{simulationId}")]

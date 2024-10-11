@@ -99,6 +99,42 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetSimulationRunSetting/{simulationId}")]
+        [Authorize(Policy = Policy.ViewSimulation)]
+        public async Task<IActionResult> GetSimulations(Guid simulationId)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.SimulationRepo.GetSimulationRunSetting(simulationId));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetSimulationRunSetting for simulation {simulationName} - {e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetScenariosReportSettings")]
+        [Authorize(Policy = Policy.ViewSimulation)]
+        public async Task<IActionResult> GetScenariosReportSettings()
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.SimulationRepo.GetScenariosReportSettings());
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetReportRunSetting returned with errors");
+                throw;
+            }
+        }
+
+
         [HttpPost]
         [Route("GetCurrentUserOrSharedScenario/{simulationId}")]
         [Authorize]

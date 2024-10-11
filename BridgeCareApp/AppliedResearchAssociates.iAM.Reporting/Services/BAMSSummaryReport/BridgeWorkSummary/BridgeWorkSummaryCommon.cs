@@ -2,8 +2,6 @@
 using System.Linq;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
-
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary.StaticContent;
 using AppliedResearchAssociates.iAM.DTOs.Enums;

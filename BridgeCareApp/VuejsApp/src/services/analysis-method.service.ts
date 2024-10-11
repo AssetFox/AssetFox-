@@ -7,6 +7,10 @@ export default class AnalysisMethodService {
         return coreAxiosInstance.get(`${API.AnalysisMethod}/GetAnalysisMethod/${scenarioId}`);
     }
 
+    static getSimulationAnalysisSetting(scenarioId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.AnalysisMethod}/GetSimulationAnalysisSetting/${scenarioId}`);
+    }
+
     static upsetAnalysisMethod(data: AnalysisMethod, scenarioId: string): AxiosPromise {
         return coreAxiosInstance.post(`${API.AnalysisMethod}/UpsertAnalysisMethod/${scenarioId}`, data);
     }

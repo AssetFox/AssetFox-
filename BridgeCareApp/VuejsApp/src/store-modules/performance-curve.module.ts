@@ -27,7 +27,9 @@ const state = {
     scenarioPerformanceCurves: [] as PerformanceCurve[],
     libraryUsers: [] as LibraryUser[],
     hasPermittedAccess: false,
-    isSharedLibrary: false
+    isSharedLibrary: false,
+    isDeteriorationModelApiRunning: false,
+    distinctPerformanceFactorAttributes: [] as string[]
 };
 
 const mutations = {
@@ -79,11 +81,20 @@ const mutations = {
     ) {
         state.scenarioPerformanceCurves = clone(performanceCurves);
     },
+    distinctPerformanceFactorAttributesMutator(
+        state: any,
+        distinctAttributes: string[],
+    ) {
+        state.distinctPerformanceFactorAttributes = clone(distinctAttributes);
+    },
     PermittedAccessMutator(state: any, status: boolean) {
         state.hasPermittedAccess = status;
     },
     IsSharedPerformanceCurveLibraryMutator(state: any, status: boolean) {
         state.isSharedLibrary = status;
+    },
+    IsDeteriorationModelApiRunningMutator(state: any, status: boolean) {
+        state.isDeteriorationModelApiRunning = status;
     }
 };
 
@@ -128,6 +139,16 @@ const actions = {
                 dispatch('addSuccessNotification', {
                     message: 'Deleted deterioration model library',
                 });
+            }
+        });
+    },
+    async getDistinctScenarioPerformanceFactorAttributeNames(
+        { commit }: any
+    ) {
+        await PerformanceCurveService.GetDistinctScenarioPerformanceFactorAttributeNames().then((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                const distinctAttributes: string[] = response.data as string[];
+                commit('distinctPerformanceFactorAttributesMutator', distinctAttributes);
             }
         });
     },
@@ -188,6 +209,9 @@ const actions = {
                 commit('IsSharedPerformanceCurveLibraryMutator', response.data as boolean);
             }
         });
+    },
+    async getIsDeteriorationModelApiRunning({ commit }: any, payload: any) {
+        commit('IsDeteriorationModelApiRunningMutator', payload);
     },
     async getHasPermittedAccess({ commit }: any)
     {

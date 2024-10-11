@@ -9,7 +9,7 @@
                     </div>
                     <v-select id="RemainingLifeLimitEditor-lifeLimitLibrary-select"
                             class="ghd-select ghd-text-field ghd-text-field-border vs-style"
-                            :items="selectListItems"
+                            :items="sortAlphabetically(selectListItems)"
                             item-title="text"
                             item-value="value"
                             menu-icon=custom:GhdDownSvg
@@ -285,6 +285,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { computed } from 'vue';
 import { onBeforeUnmount } from 'vue';
+import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import { getUrl } from '@/shared/utils/get-url';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
@@ -587,6 +588,10 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
                 }),
             );
         }
+    }
+
+    function sortAlphabetically(items: SelectItem[]) {
+        return sortSelectItemsAlphabetically(items);
     }
 
     function getOwnerUserName(): string {

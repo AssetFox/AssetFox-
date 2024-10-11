@@ -1,6 +1,7 @@
 ﻿import EditAnalysisMethod from '@/components/scenarios/EditAnalysisMethod.vue';
 import UnderConstruction from '@/components/UnderConstruction.vue';
 import Logout from '@/components/Logout.vue';
+//import AccessDenied from '@/components/AccessDenied.vue';
 import AuthenticationStart from '@/components/authentication/AuthenticationStart.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
@@ -12,6 +13,7 @@ import {
 } from '@/shared/utils/authentication-utils';
 import { createRouter, createWebHistory } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
+import AuthenticationService from './services/authentication.service';
 
 // Lazily-loaded pages
 const Scenario = () =>
@@ -124,6 +126,11 @@ const AdminData = () =>
 import(
     /*webpackChunkName: "AdminData" */ '@/components/admin-data/AdminData.vue'
 );
+const AccessDenied = () =>
+    import(
+        /*webpackChunkName: "AccessDenied" */ '@/components/AccessDenied.vue'
+    );
+    
 
 const onHandlingUnsavedChanges = (to: any, next: any): void => {
     // @ts-ignore
@@ -143,6 +150,11 @@ const onHandlingUnsavedChanges = (to: any, next: any): void => {
 };
 
 const beforeEachFunc = (to: any, from: any, next: any) => {
+    if(to.name == "AuthenticationStart" && from.name == "AccessDenied" || to.name == "Authentication" && from.name == "AccessDenied")
+    {
+        onHandleLogout();
+        next('/AuthenticationStart/');
+    }
     if (UnsecuredRoutePathNames.indexOf(to.name) === -1) {
         const hasAuthInfo: boolean =
             // @ts-ignore
@@ -158,6 +170,13 @@ const beforeEachFunc = (to: any, from: any, next: any) => {
             hasAuthInfo
         ) {            
             isAuthenticatedUser().then((isAuthenticated: boolean | void) => {
+                // @ts-ignore
+                let isAccessDenied = store.state.authenticationModule.accessDenied;
+                if(isAccessDenied == false)
+                {
+                    isAuthenticated = true;
+                }
+                                
                 if (isAuthenticated) {
                     onHandlingUnsavedChanges(to, next);
                 } else {
@@ -496,6 +515,11 @@ const router = createRouter({
             path: '/iAM/',
             name: 'iAM',
             component: Logout,
+        },
+        {
+            path: '/AccessDenied/',
+            name: 'AccessDenied',
+            component: AccessDenied,
         },
         {
             path: '/UserCriteria/',

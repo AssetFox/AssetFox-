@@ -116,7 +116,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     public override double GetNumber(string key)
     {
-        if (GetNumber_ActiveKeysOfCurrentInvocation.Contains(key, StringComparer.OrdinalIgnoreCase))
+        if (!GetNumber_ActiveKeysOfCurrentInvocation.Add(key))
         {
             var loop = GetNumber_ActiveKeysOfCurrentInvocation.SkipWhile(activeKey => !StringComparer.OrdinalIgnoreCase.Equals(activeKey, key)).Append(key);
             var loopText = string.Join(" to ", loop.Select(activeKey => "[" + activeKey + "]"));
@@ -129,8 +129,6 @@ internal sealed class AssetContext : CalculateEvaluateScope
             var logBuilder = SimulationLogMessageBuilders.CalculationFatal(messageBuilder.ToString(), SimulationRunner.Simulation.Id);
             SimulationRunner.Send(logBuilder);
         }
-
-        GetNumber_ActiveKeysOfCurrentInvocation.Push(key);
 
         if (!NumberCache_Override.TryGetValue(key, out var number) && !NumberCache.TryGetValue(key, out number))
         {
@@ -152,7 +150,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
             NumberCache[key] = number;
         }
 
-        _ = GetNumber_ActiveKeysOfCurrentInvocation.Pop();
+        _ = GetNumber_ActiveKeysOfCurrentInvocation.Remove(key);
 
         return number;
     }
@@ -277,7 +275,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     private readonly Dictionary<string, int> FirstUnshadowedYearForSameTreatment = new();
 
-    private readonly Stack<string> GetNumber_ActiveKeysOfCurrentInvocation = new();
+    private readonly HashSet<string> GetNumber_ActiveKeysOfCurrentInvocation = new(StringComparer.OrdinalIgnoreCase);
 
     private readonly Dictionary<Attribute, double> MostRecentAdjustmentFactorsForPerformanceCurves = new();
 

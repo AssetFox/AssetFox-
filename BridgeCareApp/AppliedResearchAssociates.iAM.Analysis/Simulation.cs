@@ -171,7 +171,7 @@ public sealed class Simulation : WeakEntity, IValidator
 
     private readonly List<PerformanceCurve> _PerformanceCurves = new();
     private readonly WeakReference<SimulationOutput> _Results = new(null);
-    private readonly List<SelectableTreatment> _Treatments = new();
+    private readonly HashSet<SelectableTreatment> _Treatments = new();
 
     public static class DefaultSettings
     {

@@ -271,7 +271,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     private static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
 
-    private readonly Dictionary<string, bool?> EvaluationCache = new();
+    private readonly Dictionary<string, bool?> EvaluationCache = new(KeyComparer);
 
     private readonly Dictionary<string, int> FirstUnshadowedYearForSameTreatment = new();
 

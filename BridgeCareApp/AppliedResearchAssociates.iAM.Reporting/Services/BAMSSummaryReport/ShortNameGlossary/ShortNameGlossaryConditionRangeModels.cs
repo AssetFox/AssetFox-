@@ -18,8 +18,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
                             ExcelValueModels.String($"Posted / Closed Bridge Condition Range"),
                             ExcelStyleModels.Bold,
                             ExcelStyleModels.HorizontalCenter,
-                            ExcelStyleModels.WrapText,
-                            ExcelStyleModels.ThinBorder),
+                            ExcelStyleModels.WrapText),
                             Size = new ExcelRangeSize(3, 2)
                         }),
                     ExcelRowModels.Empty,

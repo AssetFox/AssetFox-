@@ -220,6 +220,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import EditSvg from '@/shared/icons/EditSvg.vue';
 import CancelSaveButtonGroup from '@/shared/components/buttons/CancelSaveButtonGroup.vue';
 import mitt, { Emitter, EventType } from 'mitt';
+import AnalysisMethodService from '@/services/analysis-method.service';
 
     let store = useStore(); 
     const router = useRouter(); 
@@ -230,11 +231,13 @@ import mitt, { Emitter, EventType } from 'mitt';
 
     const stateAnalysisMethod = computed<AnalysisMethod>(() => store.state.analysisMethodModule.analysisMethod) ;
     const stateNumericAttributes = computed<Attribute[]>( ()=> store.state.attributeModule.numericAttributes) ;
+    const stateSimulationAnalysisSetting = computed<boolean>( ()=> store.state.analysisMethodModule.simulationAnalysisSetting);
 
     const hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess) ; 
 
     async function getAnalysisMethodAction(payload?: any): Promise<any>{await store.dispatch('getAnalysisMethod', payload)} 
     async function upsertAnalysisMethodAction(payload?: any): Promise<any>{await store.dispatch('upsertAnalysisMethod', payload)} 
+    async function getSimulationAnalysisSettingAction(payload?: any): Promise<any>{await store.dispatch('getSimulationAnalysisSetting', payload)}
 
     function addErrorNotificationAction(payload?: any){ store.dispatch('addErrorNotification', payload)}
     function setHasUnsavedChangesAction(payload?: any){ store.dispatch('setHasUnsavedChanges', payload)} 
@@ -306,12 +309,23 @@ import mitt, { Emitter, EventType } from 'mitt';
                 router.push('/Scenarios/');
             }
 
-            // get the selected scenario's analysisMethod data
-            getAnalysisMethodAction({ scenarioId: selectedScenarioId.value }).then(() => {                       
-                getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId.value}).then(() => {         
-                    selectScenarioAction({ scenarioId: selectedScenarioId.value });        
-                });
-            });
+// Get the selected scenario's analysis method data
+getAnalysisMethodAction({ scenarioId: selectedScenarioId.value })
+    .then(() => {
+        // Get simulation analysis setting
+        return getSimulationAnalysisSettingAction({ scenarioId: selectedScenarioId.value });
+    })
+    .then(() => {
+        // Get current user or shared scenario info
+        return getCurrentUserOrSharedScenarioAction({ simulationId: selectedScenarioId.value });
+    })
+    .then(() => {
+        // Select scenario
+        selectScenarioAction({ scenarioId: selectedScenarioId.value });
+    })
+    .catch(error => {
+        console.error('Error in action chain:', error);
+    });
 
         if (hasValue(stateNumericAttributes.value)) {
             setBenefitAndWeightingAttributes();
@@ -333,15 +347,23 @@ import mitt, { Emitter, EventType } from 'mitt';
 
     // watch(benefit, onAnalysisChanged)
     watch(analysisMethod, onAnalysisChanged)
-    function onAnalysisChanged() {
-        hasUnsavedChanges.value = !equals(analysisMethod.value, stateAnalysisMethod.value)
+     async function onAnalysisChanged() {
+        hasUnsavedChanges.value = !equals(analysisMethod.value, stateAnalysisMethod.value);
+
         setHasUnsavedChangesAction({
             value:
                 hasUnsavedChanges.value
         });
 
-        setBenefitAttributeIfEmpty();        
+         setBenefitAttributeIfEmpty();
     }
+
+    watch(stateSimulationAnalysisSetting, (newVal) => {
+        if(newVal === false)
+        {
+            hasUnsavedChanges.value = true;
+        }
+    });
 
     watch(stateNumericAttributes, () => {
         if (hasValue(stateNumericAttributes.value)) {

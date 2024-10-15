@@ -128,14 +128,38 @@
 .ghd-red:disabled, 
 .ghd-red[disabled], 
 .parent-element[disabled] .ghd-red {
-    --svg-color: #999999;
-    background-color: transparent !important;
+    color: transparent !important;  /* Inherit color from parent */
+    filter: invert(68%) sepia(11%) saturate(17%) hue-rotate(330deg) brightness(88%) contrast(88%);
+    background-color: transparent !important; /* Maintain the background color */
 }
 
 .ghd-green {
-    --svg-color: #5CB85C;
+    height: 25px;
+    filter: invert(61%) sepia(70%) saturate(486%) hue-rotate(79deg) brightness(82%) contrast(85%);
+    background-color: transparent !important; /* Maintain the background color */
     color: var(--svg-color) !important;
 }
+
+.ghd-green:disabled, 
+.ghd-green[disabled], 
+.parent-element[disabled] .ghd-green {
+    filter: invert(68%) sepia(11%) saturate(17%) hue-rotate(330deg) brightness(88%) contrast(88%);
+    color: transparent !important;  /* Inherit color from parent */
+    background-color: transparent !important; /* Maintain the background color */
+}
+
+.ghd-blue-icon {
+    height: 25px;
+}
+
+.ghd-blue-icon:disabled, 
+.ghd-blue-icon[disabled], 
+.parent-element[disabled] ghd-blue-icon {
+    filter: invert(68%) sepia(11%) saturate(17%) hue-rotate(330deg) brightness(88%) contrast(88%);
+    color: transparent !important;  /* Inherit color from parent */
+    background-color: transparent !important; /* Maintain the background color */
+}
+
 
 /* Controls (general) */
 .ghd-control-label {

@@ -21,7 +21,7 @@
                 <v-btn @click='OnExportProjectsClick' 
                     class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" style="margin: 5px;" variant="outlined">Export Projects</v-btn>
                 <v-btn @click='OnDeleteAllClick' 
-                    class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" style="margin: 5px;" variant="outlined">Delete All</v-btn>
+                    class="ghd-red ghd-button-text ghd-outline-button-padding ghd-button" style="margin: 5px;" variant="outlined">Delete All</v-btn>
             </v-col>
         </v-row>
         <v-col>                   
@@ -251,7 +251,7 @@
         <v-divider></v-divider>
         <v-btn id="CommittedProjectsEditor-addCommittedProject-vbtn" 
                         @click="OnAddCommittedProjectClick" v-if="selectedCommittedProject === ''"
-                        class="ghd-white-bg ghd-blue ghd-button btn-style" style="margin:10px" variant = "outlined"
+                        class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" style="margin:10px" variant = "outlined"
                 > Add Committed Project
         </v-btn> 
         <v-divider

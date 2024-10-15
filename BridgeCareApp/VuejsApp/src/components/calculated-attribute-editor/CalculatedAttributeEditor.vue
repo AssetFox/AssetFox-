@@ -253,8 +253,8 @@
                 
                 <v-btn id="CalculatedAttribute-deleteLibrary-btn"
                     @click="onShowConfirmDeleteAlert"
-                    class='ghd-blue ghd-button-text ghd-button'
-                    variant = "flat"
+                    class='ghd-red ghd-button-text ghd-outline-button-padding ghd-button'
+                    variant = "outlined"
                     v-show="!hasScenario"
                     :disabled="!hasSelectedLibrary">
                     Delete Library

@@ -252,27 +252,28 @@
             <v-row style="padding-bottom: 40px;" v-show='hasSelectedLibrary || hasScenario' justify="center">
                 <v-spacer></v-spacer>
                     <v-btn id="InvestmentEditor-cancel-btn"
-                        :disabled='!hasUnsavedChanges' @click='onDiscardChanges' flat class='ghd-blue ghd-button-text ghd-button'
+                        :disabled='!hasUnsavedChanges' @click='onDiscardChanges' 
+                        class='ghd-blue ghd-button-text ghd-button'
                         style="margin-right: 10px;"
                         v-show='hasScenario'>
                         Cancel
                     </v-btn>
                     <v-btn outline id="InvestmentEditor-deleteLibrary-btn"
-                        @click='onShowConfirmDeleteAlert' variant = "text" class='ghd-blue ghd-button-text ghd-button' v-show='!hasScenario'
+                        @click='onShowConfirmDeleteAlert' variant = "outlined" 
+                        class='ghd-red ghd-button-text ghd-outline-button-padding ghd-button' v-show='!hasScenario'                                               
                         :disabled='!hasLibraryEditPermission'>
                         Delete Library
                     </v-btn>
                     <v-btn id="InvestmentEditor-createAsNewLibrary-btn"
                         :disabled='disableCrudButton()'
                         @click='onShowCreateBudgetLibraryDialog(true)'
-                        style="margin-left: 5px; margin-right: 5px;"
+                        style="margin-left: 10px; margin-right: 10px"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
                         Create as New Library
                     </v-btn>
                     <v-btn id="InvestmentEditor-updateLibrary-btn"
                     :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                         @click='onUpsertBudgetLibrary()'
-                        style="margin-left: 5px;"
                         class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show='!hasScenario'>
                         Update Library

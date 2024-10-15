@@ -186,7 +186,12 @@
                        v-show='hasScenario' :disabled='!hasUnsavedChanges' style="margin: 5px;" class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
-                <v-btn id="BudgetPriorityEditor-createAsNewLibrary-vbtn" @click='onShowCreateBudgetPriorityLibraryDialog(true)' style="margin: 5px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                <v-btn id="BudgetPriorityEditor-deleteLibrary-vbtn"  @click='onShowConfirmDeleteAlert' style="margin: 5px;" variant = "outlined" 
+                       v-show='!hasScenario' :disabled='!hasSelectedLibrary' class='ghd-red ghd-button-text ghd-outline-button-padding ghd-button'>
+                    Delete Library
+                </v-btn>  
+                <v-btn id="BudgetPriorityEditor-createAsNewLibrary-vbtn" @click='onShowCreateBudgetPriorityLibraryDialog(true)' 
+                    style="margin-left: 10px; margin-right: 10px; margin: 5px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
                        :disabled='disableCrudButtons()'>
                     Create as New Library
                 </v-btn>
@@ -194,11 +199,7 @@
                        class='ghd-blue-bg text-white ghd-button-text ghd-button' style="margin: 5px;"
                        v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
-                </v-btn>
-                <v-btn id="BudgetPriorityEditor-deleteLibrary-vbtn"  @click='onShowConfirmDeleteAlert' variant = "outlined" style="margin: 5px;"
-                       v-show='!hasScenario' :disabled='!hasSelectedLibrary' class='ghd-blue ghd-button-text ghd-button'>
-                    Delete Library
-                </v-btn>             
+                </v-btn>           
                 <v-btn id="BudgetPriorityEditor-updateLibrary-vbtn" @click='onUpsertBudgetPriorityLibrary'
                        class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button' style="margin: 5px;"
                        v-show='!hasScenario' :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>

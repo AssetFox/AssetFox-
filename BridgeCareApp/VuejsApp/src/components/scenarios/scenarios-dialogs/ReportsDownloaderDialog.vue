@@ -24,7 +24,7 @@
             </v-select>
             <v-chip
                 round
-                color="ara-blue-bg"
+                color="assetFox-blue-bg"
                 text-color="white"
                 @click="onGenerateReport(true)"
                 :disabled="selectedReport === ''"
@@ -32,7 +32,7 @@
                 Generate Report
             </v-chip>
             <v-divider vertical></v-divider>
-            <v-chip color='ara-blue-bg' text-color='white' @click="onDownloadSimulationLog(true)">
+            <v-chip color='assetFox-blue-bg' text-color='white' @click="onDownloadSimulationLog(true)">
                 Simulation Log
             </v-chip>
           </v-row>

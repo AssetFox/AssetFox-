@@ -233,7 +233,7 @@
                                     </template>
                                     <!-- <v-alert
                                         :model-value="hasMineSearch()"
-                                        class="ara-orange-bg"
+                                        class="assetFox-orange-bg"
                                         icon="fas fa-exclamation"
                                         slot="no-data"
                                     >

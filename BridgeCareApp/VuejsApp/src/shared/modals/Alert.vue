@@ -27,7 +27,7 @@
                     </v-btn>
                 </v-row>
                 <v-row justify="center" v-if="!dialogData.choice">
-                    <v-btn @click="onSubmit(true)" class="ara-blue-bg text-white">
+                    <v-btn @click="onSubmit(true)" class="assetFox-blue-bg text-white">
                         OK
                     </v-btn>
                 </v-row>

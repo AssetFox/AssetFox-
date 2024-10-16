@@ -111,7 +111,7 @@
                                         <v-menu >
                                             <template v-slot:activator="{ props }">
                                                     <div style="display: flex; align-items: center;" v-if='stateScenarioSimpleBudgetDetails.length > 5'>
-                                                        <v-btn class='ara-blue ghd-button-text' v-bind="props" flat icon>
+                                                        <v-btn class='assetFox-blue ghd-button-text' v-bind="props" flat icon>
                                                             <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                                         </v-btn>
                                                         <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' class="ghd-green" flat icon>

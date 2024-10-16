@@ -24,11 +24,11 @@
         <v-card-actions>
           <v-row justify-space-between row>
             <v-btn :disabled="newCalculatedAttribute.name === '' || newCalculatedAttribute.attribute === ''"
-                   class="ara-blue-bg text-white"
+                   class="assetFox-blue-bg text-white"
                    @click="onSubmit(true)">
               Save
             </v-btn>
-            <v-btn class="ara-orange-bg text-white"
+            <v-btn class="assetFox-orange-bg text-white"
                    @click="onSubmit(false)">
               Cancel
             </v-btn>

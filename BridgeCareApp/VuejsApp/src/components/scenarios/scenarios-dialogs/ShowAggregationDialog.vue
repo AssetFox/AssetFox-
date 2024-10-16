@@ -42,7 +42,7 @@
                                         min-width="500px"
                                     >
                                         <template v-slot:activator>
-                                            <v-btn class="ara-blue" icon>
+                                            <v-btn class="assetFox-blue" icon>
                                                 <v-icon>fas fa-eye</v-icon>
                                             </v-btn>
                                         </template>

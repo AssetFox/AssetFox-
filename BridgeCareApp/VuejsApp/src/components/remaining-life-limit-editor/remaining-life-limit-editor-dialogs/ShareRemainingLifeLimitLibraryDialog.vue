@@ -47,7 +47,7 @@
               </tr>
               </template>
               <!-- <v-alert :model-value="true"
-                      class="ara-orange-bg"
+                      class="assetFox-orange-bg"
                       icon="fas fa-exclamation"
                       slot="no-results">
                 Your search for "{{ searchTerm }}" found no results.

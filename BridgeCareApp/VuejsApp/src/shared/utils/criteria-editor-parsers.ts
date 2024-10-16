@@ -146,13 +146,13 @@ function getCharIndex(
 function createCriteriaRuleObject(clause: string): CriteriaRule {
     let operator: string = '';
     let isEquation = true;
-    clause = clause.replace(/\s/g, "");
+    const clauseNoSpaces = clause.replace(/\s/g, "");
     for (
         let operatorIndex = 0;
         operatorIndex < operators.length;
         operatorIndex++
     ) {
-        if (clause.indexOf(operators[operatorIndex]) !== -1) {
+        if (clauseNoSpaces.indexOf(operators[operatorIndex]) !== -1) {
             operator = operators[operatorIndex];
             break;
         }
@@ -162,16 +162,18 @@ function createCriteriaRuleObject(clause: string): CriteriaRule {
         throw new Error('The criteria expression is invalid.');
     }
 
-    const operandAndValue: string[] = clause.split(operator);
-    let foo = operandAndValue[0];
-    foo = foo.trim()
+    const operandAndValue: string[] = clauseNoSpaces.split(operator);
+    let potentialEquationRule = operandAndValue[0];
+    potentialEquationRule = potentialEquationRule.trim()
     operandAndValue[0] = operandAndValue[0]
         .replace(/\[/g, '')
         .replace(/]/g, '');
-    if(foo.startsWith('[') && foo.endsWith(']') && foo.length - operandAndValue[0].length == 2)
+    if(potentialEquationRule.startsWith('[') && potentialEquationRule.endsWith(']') && potentialEquationRule.length - operandAndValue[0].length == 2){
         isEquation = false
+        operandAndValue[1] =  clause.split(operator)[1];
+    }
     else
-        operandAndValue[0] = foo;
+        operandAndValue[0] = potentialEquationRule;
 
     operandAndValue[1] = operandAndValue[1]
         .replace(/'/g, '')

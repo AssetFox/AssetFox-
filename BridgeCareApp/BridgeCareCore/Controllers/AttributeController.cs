@@ -171,16 +171,27 @@ namespace BridgeCareCore.Controllers
                 }
                 else
                 {
-                    var attributeDTOs = UnitOfWork.AttributeRepo.GetAttributes();
+                    var targetAttributeDTOs = UnitOfWork.AttributeRepo.GetAttributes();
                     var dataSourceToBeCopied = convertedAttributeDto.DataSource;
-                    // Change the data source in every attribute to the dataSource from the attribute that is currently being edited.
-                    // TODO: need to check on the column names
-                    attributeDTOs.ForEach(_ => checkColumnNames(_, convertedAttributeDto));
-                    attributeDTOs.ForEach(_ => _.DataSource = dataSourceToBeCopied);
-                    attributeDTOs.ForEach(_ => checkAttributeNameValidity(_));
+
+                    // Swapping out the attribute that is being updated via the API, since we are upserting the whole list of attributes
+                    var existingIndex = targetAttributeDTOs.FindIndex(attr => attr.Id == convertedAttributeDto.Id);
+                    if (existingIndex != -1)
+                    {
+                        // Perform a complete swap of the attribute at the found index
+                        targetAttributeDTOs[existingIndex] = convertedAttributeDto;
+                    }
+                    else
+                    {
+                        targetAttributeDTOs.Add(convertedAttributeDto);
+                    }
+
+                    targetAttributeDTOs.ForEach(_ => _.DataSource = dataSourceToBeCopied);
+
+                    targetAttributeDTOs.ForEach(_ => checkAttributeNameValidity(_));
                     await Task.Factory.StartNew(() =>
                     {
-                        UnitOfWork.AttributeRepo.UpsertAttributes(attributeDTOs);
+                        UnitOfWork.AttributeRepo.UpsertAttributes(targetAttributeDTOs);
                     });
                 }
                 return Ok();
@@ -192,13 +203,13 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        private void checkColumnNames(AttributeDTO attributeToCheck, AttributeDTO referenceAttribute)
+        private void checkColumnNames(AttributeDTO attributeToCheck)
         {
-            if (attributeToCheck.Command != referenceAttribute.Command)
+            /*if (attributeToCheck.Command != referenceAttribute.Command)
             {
                 throw new MalformedInputException($"Invalid column name {attributeToCheck.Command}. " +
                     $"To set a data source for all attributes, the column names must match.");
-            }
+            }*/
         }
 
 

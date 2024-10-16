@@ -133,6 +133,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = entity.Id,
             };
 
+        public static AttributeDTO ToColumnDto(this AttributeEntity entity)
+            => new AttributeDTO
+            {
+                Name = entity.Name,
+                Command = entity.Command,
+                Id = entity.Id,
+            };
         public static AttributeDTO ToDto(this AttributeEntity entity, string encryptionKey) =>
             new()
             {

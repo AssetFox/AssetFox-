@@ -14,6 +14,7 @@ using MoreLinq;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Attributes;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -232,7 +233,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
         public Task<List<string>> GetAttributeDataSourceTypes()
         {
-
             var dataSourceTypes = _unitOfWork.Context.DataSource
                 .Select(_ => _.Type)
                 .Distinct()
@@ -304,6 +304,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(a => AttributeMapper.ToAbbreviatedDto(a))
                 .ToList();
             return dtos;
+        }
+        public List<AttributeDTO> GetAllColumnNames()
+        {
+            var dtos = _unitOfWork.Context.Attribute.AsEnumerable()
+                .Select(a => AttributeMapper.ToColumnDto(a))
+                .ToList();
+            return dtos;
+        }
+        public List<AttributeDTO> GetAttributesByDataSource(Guid dataSourceId)
+        {
+            return _unitOfWork.Context.Attribute
+                .Where(attr => attr.DataSourceId == dataSourceId)
+                .Select(a => AttributeMapper.ToColumnDto(a))
+                .ToList();
         }
 
         public void DeleteAttributesShouldNeverBeNeededButSometimesIs(List<Guid> attributeIdsToDelete)

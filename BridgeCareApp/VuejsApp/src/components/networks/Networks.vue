@@ -22,6 +22,14 @@
                         @click="onAddNetworkDialog">
                         Add Network
                     </v-btn>
+                    <v-btn style="margin-top: 2px !important; margin-left: 20px !important" 
+                        id="Networks-editNetwork-vbtn"
+                        @click="confirmEditNetworkData.showDialog = true"
+                        :disabled="!hasSelectedNetwork"
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
+                        v-if="hasAdminAccess">
+                        Edit Network Name
+                    </v-btn>
                 </v-row>
             </v-col>
         </v-col>
@@ -196,7 +204,13 @@
             @submit="onSubmitEquationEditorDialogResult"
         />
         <AddNetworkDialog :dialogData='addNetworkDialogData'
-                                @submit='addNetwork' />
+         @submit='addNetwork' />
+
+        <EditNetworkNameDialog
+        :dialogData="confirmEditNetworkData"
+        :initialNetworkName="selectedNetwork.name"
+        @submit="onNetworkNameSubmit"
+        />
         <ConfirmDialog></ConfirmDialog>
     </v-row>
 </template>
@@ -207,6 +221,7 @@ import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import Vue, { computed, DeepReadonly, inject, onBeforeUnmount, onMounted, reactive, Ref, ref, ShallowRef, shallowRef, watch } from 'vue';
+import EditNetworkNameDialog from '@/components/networks/networks-dialogs/EditNetworkDialog.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
 import {
     emptyEquationEditorDialogData,
@@ -228,6 +243,8 @@ import mitt, { Emitter, EventType } from 'mitt';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { NIL } from 'uuid';
 import { text } from 'stream/consumers';
+import Alert from '@/shared/modals/Alert.vue';
+import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 
     let store = useStore();
     let stateNetworks = computed<Network[]>(()=>store.state.networkModule.networks);
@@ -235,7 +252,8 @@ import { text } from 'stream/consumers';
     let stateAttributes = computed<Attribute[]>(() => store.state.attributeModule.attributes);
     let stateDataSources = computed<Datasource[]>(() => store.state.datasourceModule.dataSources) ;
     let hasUnsavedChanges = computed<boolean>(() => store.state.unsavedChangesFlagModule.hasUnsavedChanges);
-    let isAdmin: boolean = (store.state.authenticationModule.isAdmin) ;
+    let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess);
+
     
     async function getNetworks(payload?: any): Promise<any> {await store.dispatch('getNetworks', payload);}
     async function getDataSources(payload?: any): Promise<any> {await store.dispatch('getDataSources', payload);}
@@ -243,6 +261,8 @@ import { text } from 'stream/consumers';
     function selectNetworkAction(payload?: any) { store.dispatch('selectNetwork', payload);}
     async function createNetworkAction(payload?: any): Promise<any> {await store.dispatch('createNetwork', payload);}
     async function deleteNetworkAction(payload?: any): Promise<any> {await store.dispatch('deleteNetwork', payload);}
+    async function EditNetworkNameAction(networkId: string, newNetworkName: string): Promise<any> {const payload = {networkId: networkId, newNetworkName: newNetworkName}; 
+        await store.dispatch('editNetworkName', payload);}
     async function aggregateNetworkAction(payload?: any): Promise<any> {await store.dispatch('aggregateNetworkData', payload);}
     function setHasUnsavedChangesAction(payload?: any) { store.dispatch('setHasUnsavedChanges', payload);}
     async function getUserNameByIdGetter(payload?: any): Promise<any> {await store.dispatch('getUserNameById', payload);}
@@ -265,7 +285,11 @@ import { text } from 'stream/consumers';
     let cleanAttributes: Attribute[] = [];
     let attributes: Attribute[] = [];
     let selectedAttributeRows = ref<Attribute[]>([]);
-    let dataSourceSelectValues: SelectItem[] = [
+    const confirmDeleteNetworkData = ref<AlertData>(clone(emptyAlertData));
+
+    const confirmEditNetworkData = ref({
+    showDialog: false
+    });    let dataSourceSelectValues: SelectItem[] = [
         {text: 'SQL', value: 'SQL'},
         {text: 'Excel', value: 'Excel'},
         {text: 'None', value: 'None'}
@@ -279,6 +303,7 @@ import { text } from 'stream/consumers';
     const selectedNetwork = ref<Network>(clone(emptyNetwork));
     const selectNetworkItemValue = ref<string>('');
     const selectDataSourceId = ref<string>('');
+    const editNetworkNameData = ref<string>('');
     const hasSelectedNetwork = ref<boolean>(false);
     const isNewNetwork = ref<boolean>(false);
     const hasStartedAggregation = ref<boolean>(false);
@@ -431,6 +456,25 @@ import { text } from 'stream/consumers';
             selectedNetwork.value = clone(emptyNetwork)
         })       
     }
+
+    function onNetworkNameSubmit(newName: string | null) {
+        if (newName) {
+                EditNetworkNameAction(selectedNetwork.value.id, newName).then(() => {
+                    selectNetworkItems.value.forEach(network => {
+                    if(network.text == selectedNetwork.value.name)
+                    {
+                        network.text= newName;
+                    }
+                });
+                selectedNetwork.value.name = newName;
+                hasSelectedNetwork.value = false;
+                selectNetworkItemValue.value = "";
+                selectedNetwork.value = clone(emptyNetwork);
+            });
+            selectNetworkItems.value = stateNetworks.value.map(_ => ({text: _.name, value: _.id}));       
+        }
+    }
+
     function disableCrudButtonsCreate() {
         let allValid = rules.value['generalRules'].valueIsNotEmpty(selectedNetwork.value.name) === true
             && rules.value['generalRules'].valueIsNotEmpty(spatialWeightingEquationValue.value.expression) === true

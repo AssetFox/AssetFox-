@@ -8,7 +8,7 @@
                         <v-subheader class="ghd-md-gray ghd-control-label">Select a Cash Flow Library</v-subheader>
                     </div>
                     <v-select
-                        :items="librarySelectItems"
+                        :items="sortAlphabetically(librarySelectItems)"
                         id="CashFlowEditor-SelectLibrary-vselect"
                         variant="outlined"
                         v-model="librarySelectItemValue"
@@ -330,6 +330,7 @@ import { useRouter } from 'vue-router';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
 import { useConfirm } from 'primevue/useconfirm';
+import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
 
@@ -631,6 +632,10 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
             showDialog: true,
             cashFlowRules: createAsNewLibrary ? currentPage.value : [],
         };
+    }
+
+    function sortAlphabetically(items: SelectItem[]) {
+        return sortSelectItemsAlphabetically(items);
     }
 
     function onSubmitCreateCashFlowRuleLibraryDialogResult(

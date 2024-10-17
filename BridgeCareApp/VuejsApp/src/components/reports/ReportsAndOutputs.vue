@@ -82,9 +82,8 @@
                                     </v-btn>
                                     <ReportsTrashCanButton
                                         v-if="hasAdminAccess"
-                                        :disabled="!props.item.isGenerated"
                                         @click="onDeleteReport(props.item.id)"
-                                        class="ghd-red"
+                                        :disabled="!props.item.isGenerated || !CanUserDelete(props.item.name)"                                                                               
                                     />
                                 </td>
                             </tr>
@@ -169,6 +168,7 @@ import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanBu
     let networkName: string = '';
     let networkId: string = getBlankGuid();
     let selectedScenarioId: string = getBlankGuid();
+    const scenarioOutputName: string = "ScenarioOutput"
 
     let rules: InputValidationRules = clone(validationRules);
 
@@ -458,6 +458,13 @@ import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanBu
                 currentPage.value[reportIndex].reportStatus = data.simulationReportDetail.status;
             }
         }
+    }
+
+    function CanUserDelete(reportName: string) : boolean{
+        if(reportName === "ScenarioOutput")
+            return hasAdminAccess.value;
+        else 
+            return true
     }
 
 </script>

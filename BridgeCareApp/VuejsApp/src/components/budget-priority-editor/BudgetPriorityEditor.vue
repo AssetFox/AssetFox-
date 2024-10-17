@@ -8,7 +8,7 @@
                         <v-subheader class="ghd-md-gray ghd-control-label">Budget Priority Library</v-subheader>
                     </div> 
                     <v-select id="BudgetPriorityEditor-library-vselect"
-                        :items='librarySelectItems'  
+                        :items='sortAlphabetically(librarySelectItems)'  
                         menu-icon=custom:GhdDownSvg                          
                         item-title="text"
                         item-value="value" 
@@ -226,7 +226,7 @@
 </template>
 
 <script setup lang='ts'>
-    import { ref, watch, shallowReactive, onBeforeUnmount, ShallowRef, shallowRef, computed } from 'vue';
+    import { ref, watch, shallowReactive, onBeforeUnmount, ShallowRef, shallowRef, computed, inject} from 'vue';
     import editDialog from '@/shared/modals/Edit-Dialog.vue'
     import {
         BudgetPercentagePair,
@@ -282,10 +282,14 @@
     import { vMaska } from "maska"
     import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
     import EditSvg from '@/shared/icons/EditSvg.vue';
+    import mitt, { Emitter, EventType } from 'mitt';
+
+    import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 
     let store = useStore();
     const confirm = useConfirm();
     const $router = useRouter();
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
     let stateScenarioSimpleBudgetDetails = computed<SimpleBudgetDetail[]>(() => store.state.investmentModule.scenarioSimpleBudgetDetails);
     let stateBudgetPriorityLibraries = computed<BudgetPriorityLibrary[]>(() => store.state.budgetPriorityModule.budgetPriorityLibraries);
     let stateSelectedBudgetPriorityLibrary = computed<BudgetPriorityLibrary>(() => store.state.budgetPriorityModule.selectedBudgetPriorityLibrary);
@@ -568,6 +572,10 @@
         })) as BudgetPercentagePair[];
     }
 
+    function sortAlphabetically(items: SelectItem[]) {
+        return sortSelectItemsAlphabetically(items);
+    }
+
     function setGridCriteriaColumnWidth() {
         let criteriaColumnWidth = '75%';
 
@@ -798,6 +806,7 @@
             clearChanges();
             librarySelectItemValue.value = null;
             addSuccessNotificationAction({message: "Modified scenario's budget priorities"});
+            $emitter.emit('BudgetPriorityUpdated');              
             currentPage.value = sortByProperty("priorityLevel", currentPage.value);
             await onPaginationChanged();
         }           

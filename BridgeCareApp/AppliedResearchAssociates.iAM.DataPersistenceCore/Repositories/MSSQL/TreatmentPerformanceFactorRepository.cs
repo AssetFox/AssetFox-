@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -52,6 +53,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.DeleteAll<ScenarioTreatmentPerformanceFactorEntity>(_ =>
                 _.ScenarioSelectableTreatment.SimulationId == SimulationId && !entityIds.Contains(_.Id));
+        }
+
+        public void UpsertLibraryTreatmentPerformanceFactors(Dictionary<Guid, List<TreatmentPerformanceFactorDTO>> TreatmentPerformanceFactorPerTreatmentId, Guid LibraryId)
+        {
+            var TreatmentPerformanceFactorEntities = TreatmentPerformanceFactorPerTreatmentId
+                .SelectMany(_ => _.Value.Select(factor => factor
+                    .ToLibraryEntity(_.Key)))
+                .ToList();
+
+            var entityIds = TreatmentPerformanceFactorEntities.Select(_ => _.Id).ToList();
+
+            var existingEntityIds = _unitOfWork.Context.TreatmentPerformanceFactor.AsNoTracking()
+                .Where(_ => _.SelectableTreatment.TreatmentLibraryId == LibraryId && entityIds.Contains(_.Id))
+                .Select(_ => _.Id).ToList();
+
+            _unitOfWork.Context.UpdateAll(TreatmentPerformanceFactorEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList());
+            _unitOfWork.Context.AddAll(TreatmentPerformanceFactorEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
         }
     }
 }

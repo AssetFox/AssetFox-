@@ -7,7 +7,7 @@
                         <v-subheader class="ghd-control-label ghd-md-gray"><span>Calculated Attribute</span></v-subheader>
                         <v-select
                                   id="CalculatedAttribute-CalculatedAttribute-select"
-                                  :items="librarySelectItems"
+                                  :items="sortAlphabetically(librarySelectItems)"
                                   append-icon="ghd-down"
                                   variant="outlined"
                                   menu-icon=custom:GhdDownSvg
@@ -17,7 +17,9 @@
                                   class="ghd-select ghd-text-field ghd-text-field-border"
                                   density="compact">
                         </v-select>
-                        <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b></div>
+                        <div class="ghd-md-gray ghd-control-subheader" v-if="hasScenario"><b>Library Used: {{parentLibraryName}} 
+                            <span v-if="scenarioLibraryIsModified">&nbsp;(Modified)</span></b>
+                        </div>
                 </v-col>
                 <v-spacer/>
                 <v-col cols = "6" class="ghd-constant-header" style="margin-right: 10px; margin-top: 15px">
@@ -346,10 +348,9 @@ import {
     emptyCriterionAndEquationSet,
     Timing,
 } from '@/shared/models/iAM/calculated-attribute';
-import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { Attribute } from '@/shared/models/iAM/attribute';
 import { hasValue } from '@/shared/utils/has-value-util';
-import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
+import {emptyAlertData } from '@/shared/models/modals/alert-data';
 import {
     CreateCalculatedAttributeLibraryDialogData,
     emptyCreateCalculatedAttributeLibraryDialogData,
@@ -370,22 +371,20 @@ import { getUserName } from '@/shared/utils/get-user-info';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { CalculatedAttributeLibraryUpsertPagingRequestModel, CalculatedAttributePagingRequestModel, CalculatedAttributePagingSyncModel, calculcatedAttributePagingPageModel} from '@/shared/models/iAM/paging';
 import { mapToIndexSignature } from '@/shared/utils/conversion-utils';
-
 import CalculatedAttributeService from '@/services/calculated-attribute.service';
 import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { LibraryUser } from '@/shared/models/iAM/user';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import {inject, ref, onMounted, onBeforeUnmount, watch} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
-import mitt, { Emitter, EventType } from 'mitt';
+import { Emitter, EventType } from 'mitt';
 import { computed } from 'vue';
-import { getUrl } from '@/shared/utils/get-url';
-import { TimelineEmits } from 'primevue/timeline';
+import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import EditSvg from '@/shared/icons/EditSvg.vue';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 
@@ -490,7 +489,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     let selectedAttribute: CalculatedAttribute = clone(emptyCalculatedAttribute)
     let hasCreatedLibrary: boolean = false;
 
-    let parentLibraryName: string = "None";
+    let parentLibraryName = ref('None');
     let parentLibraryId: string = "";
     let scenarioLibraryIsModified: boolean = false;
     let loadedParentName: string = "";
@@ -530,10 +529,11 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     onMounted(async ()=> {
         librarySelectItemValue.value = '';
         attributeSelectItemValue.value = '';
-        await getCalculatedAttributesAction()
-        await getCalculatedAttributeLibrariesAction()
-        setAttributeSelectItems()
+        await getCalculatedAttributesAction();
+        await getCalculatedAttributeLibrariesAction();
+        setAttributeSelectItems();
         setAttributeTimingSelectItems();
+
         if ($router.currentRoute.value.path.indexOf(ScenarioRoutePaths.CalculatedAttribute) !== -1) {
             
                 selectedScenarioId = $router.currentRoute.value.query.scenarioId as string;
@@ -654,15 +654,15 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
         // Get parent name from library id
         librarySelectItems.value.forEach(library => {
             if (library.value === parentLibraryId) {
-                parentLibraryName = library.text;
+                parentLibraryName.value = library.text;
             }
         });
     }
     watch(currentPage,()=>{
                 // Get parent name from library id
-                librarySelectItems.value.forEach(library => {
+            librarySelectItems.value.forEach(library => {
             if (library.value === parentLibraryId) {
-                parentLibraryName = library.text;
+                parentLibraryName.value = library.text;
             }
         });
     });
@@ -723,10 +723,11 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
             });
         }
         parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value : "";
-        setParentLibraryName(parentLibraryId);
+        // setParentLibraryName(parentLibraryId);
         newLibrarySelection = true;
         librarySelectItemValueAllowedChanged = true;
     })
+
     function onLibrarySelectItemValueChanged() {
         truelibrarySelectItemValue.value = librarySelectItemValue.value;
         selectCalculatedAttributeLibraryAction(
@@ -928,6 +929,10 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
          setTimingsMultiSelect(selectedItem);
     }
 
+    function sortAlphabetically(items: SelectItem[]) {
+        return sortSelectItemsAlphabetically(items);
+    }
+
     function getOwnerUserName(): string {
         if (! hasCreatedLibrary) {
         return  getUserNameByIdGetter( selectedCalculatedAttributeLibrary.value.owner);
@@ -949,8 +954,11 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
     }
 
     function onUpsertScenarioCalculatedAttribute() {
-        if ( selectedCalculatedAttributeLibrary.value.id ===  uuidNIL ||  hasUnsavedChanges.value &&  newLibrarySelection ===false) { scenarioLibraryIsModified = true;}
-        else {  scenarioLibraryIsModified = false; }
+        if ( selectedCalculatedAttributeLibrary.value.id ===  uuidNIL ||  hasUnsavedChanges.value &&  newLibrarySelection ===false) { 
+            scenarioLibraryIsModified = true;
+        } else {  
+            scenarioLibraryIsModified = false; 
+        }
 
         const syncModel: CalculatedAttributePagingSyncModel = {
                 libraryId:  selectedCalculatedAttributeLibrary.value.id ===  uuidNIL ? null :  selectedCalculatedAttributeLibrary.value.id,
@@ -962,16 +970,23 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                 defaultEquations: mapToIndexSignature( defaultEquations.value),
                 isModified:  scenarioLibraryIsModified
         }
+
         CalculatedAttributeService.upsertScenarioCalculatedAttribute(syncModel,  selectedScenarioId).then(((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                 parentLibraryId =  librarySelectItemValue.value ?  librarySelectItemValue.value : "";
-                 getScenarioCalculatedAttributeAction( selectedScenarioId);
-                 clearChanges()
-                 resetPage();
-                 addSuccessNotificationAction({message: "Modified calculated attrbutes"});
-                 librarySelectItemValue.value = ''
+                parentLibraryId =  librarySelectItemValue.value ?  librarySelectItemValue.value : "";
+                getScenarioCalculatedAttributeAction( selectedScenarioId);
+                clearChanges();
+                resetPage();
+                calculatedAttributeLibraryMutator(selectedCalculatedAttributeLibrary.value); 
+                selectCalculatedAttributeLibraryAction(selectedCalculatedAttributeLibrary.value.id);
+                addSuccessNotificationAction({message: "Modified calculated attrbutes"});
+                librarySelectItemValue.value = ''
             }   
         }))
+    }
+
+    function saveSelectedLibraryState(library: string) {
+        store.dispatch('setSelectedLibrary', library); 
     }
 
    function onUpsertCalculatedAttributeLibrary() {
@@ -1308,7 +1323,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
                  resetPage();
             }
         });
-         parentLibraryName =  loadedParentName;
+         parentLibraryName.value =  loadedParentName;
          parentLibraryId =  loadedParentId;
     }
 
@@ -1578,17 +1593,17 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
 
     function setParentLibraryName(libraryId: string) {
         if (libraryId === "None") {
-             parentLibraryName = "None";
+             parentLibraryName.value = "None";
             return;
         }
         let foundLibrary: CalculatedAttributeLibrary = emptyCalculatedAttributeLibrary;
-         stateCalculatedAttributeLibraries.value.forEach(library => {
+        stateCalculatedAttributeLibraries.value.forEach(library => {
             if (library.id === libraryId ) {
                 foundLibrary = clone(library);
             }
         });
-         parentLibraryId = foundLibrary.id;
-         parentLibraryName = foundLibrary.name;
+        parentLibraryId = foundLibrary.id;
+        parentLibraryName.value = foundLibrary.name;
     }
 
     function initializePages(){
@@ -1626,7 +1641,7 @@ let isSharedLibrary = computed<boolean>(() => store.state.calculatedAttributeMod
 
                      setParentLibraryName(data.libraryId);
                      loadedParentId = data.libraryId;
-                     loadedParentName =  parentLibraryName; //store original
+                     loadedParentName =  parentLibraryName.value; //store original
                      scenarioLibraryIsModified = data.isModified;
                 }
                  initializing = false;

@@ -9,7 +9,7 @@
                     </div>
                         <v-select 
                         id="InvestmentEditor-investmentLibrary-select"
-                        :items='librarySelectItems'
+                        :items='sortAlphabetically(librarySelectItems)'
                         menu-icon=custom:GhdDownSvg
                         item-title="text"
                         item-value="value"
@@ -391,6 +391,7 @@ import { getUserName } from '@/shared/utils/get-user-info';
 import { InvestmentPagingRequestModel, InvestmentLibraryUpsertPagingRequestModel, InvestmentPagingSyncModel, InvestmentPagingPage } from '@/shared/models/iAM/paging';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { http2XX } from '@/shared/utils/http-utils';
+ import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import { LibraryUser } from '@/shared/models/iAM/user';
 import {
     mapToIndexSignature
@@ -653,7 +654,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         };
         
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL){
-            
             await InvestmentService.getScenarioInvestmentPage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
@@ -667,7 +667,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     lastYear = data.lastYear;
                     fillAmounts();
                     syncInvestmentPlanWithBudgets();
-                    
                 }
             });
         }            
@@ -914,6 +913,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         };
     }
 
+    function sortAlphabetically(items: SelectItem[]) {
+        return sortSelectItemsAlphabetically(items);
+    }
+
     function setHasUnsavedChangesFlag() {
         if (hasScenario.value) {
             const budgetsHaveUnsavedChanges: boolean = hasUnsavedChangesCore('', currentPage.value, stateScenarioBudgets.value);
@@ -1030,44 +1033,44 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     function onSubmitCreateCreateBudgetLibraryDialogResult(budgetLibrary:BudgetLibrary) {//needs a few things        
         createBudgetLibraryDialogData.value = clone(emptyCreateBudgetLibraryDialogData);
 
-    if (!isNil(budgetLibrary)) {
-        hasCreatedLibrary = true;
-        
-        const libraryUpsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
-            library: budgetLibrary,
-            isNewLibrary: true,
-            syncModel: {
-                libraryId: budgetLibrary.budgets.length === 0 || !hasSelectedLibrary.value ? null : selectedBudgetLibrary.value.id,
-                Investment: investmentPlan.value,
-                budgetsForDeletion: budgetLibrary.budgets.length === 0 ? [] : deletionBudgetIds.value,
-                updatedBudgets: budgetLibrary.budgets.length === 0 ? [] : Array.from(updatedBudgetsMap.value.values()).map(r => r[1]),
-                addedBudgets: budgetLibrary.budgets.length === 0 ? [] : addedBudgets.value,
-                deletionyears: budgetLibrary.budgets.length === 0 ? [] : deletionYears.value,
-                updatedBudgetAmounts: budgetLibrary.budgets.length === 0 ? {} : mapToIndexSignature(updatedBudgetAmounts.value),
-                addedBudgetAmounts: budgetLibrary.budgets.length === 0 ? {} : mapToIndexSignature(addedBudgetAmounts.value),
-                firstYearAnalysisBudgetShift: 0,
-                isModified: false
-            },
-            scenarioId: hasScenario.value ? selectedScenarioId : null
-        }
-        // value in v-currency is not parsed back to a number throwing an silent exception between UI and backend.
-        const parsedMinimumProjectCostLimit: number = parseFloat(investmentPlan.value.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''));
-        let tempInvesmentPlan: InvestmentPlan | null = libraryUpsertRequest.syncModel.Investment;
-        tempInvesmentPlan? tempInvesmentPlan.minimumProjectCostLimit = parsedMinimumProjectCostLimit : 0;
-        libraryUpsertRequest.syncModel.Investment = tempInvesmentPlan;
-        
-        InvestmentService.upsertBudgetLibrary(libraryUpsertRequest).then((response: AxiosResponse) => {
-            if (hasValue(response, 'status') &&http2XX.test(response.status.toString())){
-                if(budgetLibrary.budgets.length === 0){
-                    clearChanges();
-                }
-                    pagination.page = 1;
-                    budgetLibraryMutator(budgetLibrary); // mutation actions
-                    if(!hasScenario.value)
-                        librarySelectItemValue.value = budgetLibrary.id;
-                    addSuccessNotificationAction({ message: 'Added budget library' })
-                }
-            })
+        if (!isNil(budgetLibrary)) {
+            hasCreatedLibrary = true;
+            
+            const libraryUpsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
+                library: budgetLibrary,
+                isNewLibrary: true,
+                syncModel: {
+                    libraryId: budgetLibrary.budgets.length === 0 || !hasSelectedLibrary.value ? null : selectedBudgetLibrary.value.id,
+                    Investment: investmentPlan.value,
+                    budgetsForDeletion: budgetLibrary.budgets.length === 0 ? [] : deletionBudgetIds.value,
+                    updatedBudgets: budgetLibrary.budgets.length === 0 ? [] : Array.from(updatedBudgetsMap.value.values()).map(r => r[1]),
+                    addedBudgets: budgetLibrary.budgets.length === 0 ? [] : addedBudgets.value,
+                    deletionyears: budgetLibrary.budgets.length === 0 ? [] : deletionYears.value,
+                    updatedBudgetAmounts: budgetLibrary.budgets.length === 0 ? {} : mapToIndexSignature(updatedBudgetAmounts.value),
+                    addedBudgetAmounts: budgetLibrary.budgets.length === 0 ? {} : mapToIndexSignature(addedBudgetAmounts.value),
+                    firstYearAnalysisBudgetShift: 0,
+                    isModified: false
+                },
+                scenarioId: hasScenario.value ? selectedScenarioId : null
+            }
+            // value in v-currency is not parsed back to a number throwing an silent exception between UI and backend.
+            const parsedMinimumProjectCostLimit: number = parseFloat(investmentPlan.value.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''));
+            let tempInvesmentPlan: InvestmentPlan | null = libraryUpsertRequest.syncModel.Investment;
+            tempInvesmentPlan? tempInvesmentPlan.minimumProjectCostLimit = parsedMinimumProjectCostLimit : 0;
+            libraryUpsertRequest.syncModel.Investment = tempInvesmentPlan;
+            
+            InvestmentService.upsertBudgetLibrary(libraryUpsertRequest).then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') &&http2XX.test(response.status.toString())){
+                    if(budgetLibrary.budgets.length === 0){
+                        clearChanges();
+                    }
+                        pagination.page = 1;
+                        budgetLibraryMutator(budgetLibrary); // mutation actions
+                        if(!hasScenario.value)
+                            librarySelectItemValue.value = budgetLibrary.id;
+                        addSuccessNotificationAction({ message: 'Added budget library' })
+                    }
+                })
         }
     }
 
@@ -1460,6 +1463,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function onShowCpChangeAlert() {
+        $emitter.emit('InvestmentSettingsUpdated');              
         cpChangedAlertData.value = {
             showDialog: true,
             heading: 'Warning',

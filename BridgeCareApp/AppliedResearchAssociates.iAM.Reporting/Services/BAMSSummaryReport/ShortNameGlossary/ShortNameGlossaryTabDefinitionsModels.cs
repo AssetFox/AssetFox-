@@ -17,9 +17,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
                 TabDefinitions,
                 BoldThenNot("Parameters:", "Summary of simulation data inputs."),
                 BoldThenNot("Bridge Data:", "Complete recommended treatments for all structures throughout the analysis period"),
-                BoldThenNot("Unfunded Treatment \u2014 Final List", "First year of eligible but unfunded treatments by BRKEY."),
-                BoldThenNot("Unfunded Treatments \u2014 Time:", "List of unfunded treatments through time."),
-                BoldThenNot("Bridge Work Summary:", "Summary of projected costs for treatments throughout simulation period for all bridges. Summary of projected condition changes throughout analysis period."),
+                BoldThenNot("Funded Treatment List:", "Provides a list of funded treatments for the analysis period"),
+                BoldThenNot("Unfunded Treatment \u2014 Final List:", "First year of unfunded treatments by BRKEY."),
+                BoldThenNot("Unfunded Treatment \u2014 Time:", "List of unfunded treatments through time."),
+                BoldThenNot("Bridge Work Summary:", "Summary of projected costs for treatments throughout simulation period for all structures. Summary of projected condition changes throughout analysis period."),
                 BoldThenNot("Bridge Work Summary by Budget:", "Summary of projected costs for treatments throughout simulation period for all bridges by specific budget."),
                 BoldThenNot("District Totals:", "Projected spending per district each year throughout analysis period."),
                 BoldThenNot("NHS Count:", "Graph of projected bridge conditions for structures on the NHS by bridge count."),
@@ -31,8 +32,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
                 BoldThenNot("Poor Count:", "Graph showing projected number of structures to be in poor condition throughout analysis period."),
                 BoldThenNot("Poor DA:", "Graph showing projected deck area of structures to be in poor condition throughout analysis period."),
                 BoldThenNot("Poor DA by BPN:", "Graph showing projected deck area of structures to be in poor condition, by BPN, throughout analysis period."),
-                BoldThenNot("Posted BPN Count:", "Graph showing projected number of structures to be posted based on off the GCR Super and not by load capacity calculations. Since it is not possible to perform load calculations ant this level, this can be considered a proxy and should be used only for only long-term evaluation of in change in total quantity."),
-                BoldThenNot("Posted BPN DA:", "Graph showing projected deck area of structures to be posted based on the GCR Super and not by load capacity calculations. Since it is not possible to perform load calculations at this level, this can be considered a proxy and should be used only for long-term evaluation of change in total quantity."),
+                BoldThenNot("Posted BPN Count:", "Graph showing projected number of structures to be posted based on the GCR Super and not by load capacity calculations. Since it is not possible to perform load calculations at this level, this can be considered a proxy and should be used only for only long-term evaluation."),
+                BoldThenNot("Posted BPN DA:", "Graph showing projected deck area of structures to be posted based on the GCR Super and not by load capacity calculations. Since it is not possible to perform load calculations at this level, this can be considered a proxy and should be used only for long-term evaluation."),
+                BoldThenNot("Closed BPN Count:", "Graph showing the projected number of structures to be closed based on the min GCR. In order to be considered closed the Min GCR value must be less than 3"),
+                BoldThenNot("Closed BPN DA:", "Graph showing projected deck area to be closed based on the min GCR. In order to be considered closed the Min GCR value must be less than 3"),
+                BoldThenNot("Combined Posted and Closed:", "Graph showing the combined number of structures that are projected to be closed and posted"),
+                BoldThenNot("$ Needed DA BPN:", "Graph showing the amount of money spent by BPN")
             };
 
 

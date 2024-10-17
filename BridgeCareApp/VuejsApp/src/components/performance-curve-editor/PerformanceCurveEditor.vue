@@ -8,7 +8,7 @@
                 <v-select
                     id="PerformanceCurveEditor-library-select"
                     class="ghd-control-border ghd-control-text ghd-select "
-                    :items="librarySelectItems"
+                    :items="sortAlphabetically(librarySelectItems)"
                     menu-icon=custom:GhdDownSvg
                     variant="outlined"
                     v-model="librarySelectItemValue"
@@ -550,6 +550,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import { computed } from 'vue';
 import { getUrl } from '@/shared/utils/get-url';
 import { nextTick } from 'process';
+import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
 
@@ -566,6 +567,7 @@ let hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.ha
 let currentUserCriteriaFilter = ref<UserCriteriaFilter>(store.state.userModule.currentUserCriteriaFilter);
 let hasPermittedAccess = computed<boolean>(() => store.state.performanceCurveModule.hasPermittedAccess);
 let isSharedLibrary = computed<boolean>(() => store.state.performanceCurveModule.isSharedLibrary);
+let isDeteriorationRunning = computed(() => store.state.performanceCurveModule.getIsDeteriorationModelApiRunning);
 
 async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess', payload);}
 async function getIsSharedLibraryAction(payload?: any): Promise<any> {await store.dispatch('getIsSharedPerformanceCurveLibrary', payload);}
@@ -762,7 +764,6 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         };
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL){
             isRunning = true;
-
             await PerformanceCurveService.getPerformanceCurvePage(selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<PerformanceCurve>;
@@ -1122,6 +1123,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 await onPaginationChanged();
                 addSuccessNotificationAction({message: "Modified scenario's deterioration models"});
                 librarySelectItemValue.value = null
+                $emitter.emit('DeteriorationModelSettingsUpdated');              
             }           
         });
     }
@@ -1353,6 +1355,10 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
         onPaginationChanged();
     }
 
+    function sortAlphabetically(items: SelectItem[]) {
+        return sortSelectItemsAlphabetically(items);
+    }
+
     function CheckUnsavedDialog(next: any, otherwise: any) {
         if (hasUnsavedChanges.value && unsavedDialogAllowed) {
 
@@ -1414,6 +1420,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
             search: ''
         };
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL){
+            store.dispatch('getIsDeteriorationModelApiRunning', true);
             let response = await PerformanceCurveService.getPerformanceCurvePage(selectedScenarioId, request);
             isRunning = false
             if(response.data) {

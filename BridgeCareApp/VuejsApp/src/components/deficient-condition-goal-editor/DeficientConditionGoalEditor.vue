@@ -9,7 +9,7 @@
                     </div>
                     <v-select
                         id="DeficientConditionGoalEditor-librarySelect-vselect"
-                        :items="librarySelectItems"
+                        :items="sortAlphabetically(librarySelectItems)"
                         variant="outlined"
                         v-model="librarySelectItemValue"
                         menu-icon=custom:GhdDownSvg
@@ -380,6 +380,7 @@ import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
+import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
 
@@ -720,6 +721,10 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
         return getUserNameByIdGetter(selectedDeficientConditionGoalLibrary.value.owner);
         }
         return getUserName();
+    }
+
+    function sortAlphabetically(items: SelectItem[]) {
+        return sortSelectItemsAlphabetically(items);
     }
 
     function checkLibraryEditPermission() {

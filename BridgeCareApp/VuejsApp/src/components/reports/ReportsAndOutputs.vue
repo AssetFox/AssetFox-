@@ -65,6 +65,7 @@
                                     :disabled="props.item.isGenerated"
                                     :class="props.item.isGenerated ? 'ghd-gray' : 'ghd-green'"
                                     flat
+                                    icon
                                     >
                                     <img
                                         :class="props.item.isGenerated ? 'gray-icon' : 'green-icon'"
@@ -79,16 +80,12 @@
                                     >
                                         <img class='img-general' :src="getUrl('assets/icons/download.svg')"/>
                                     </v-btn>
-                                    <v-btn
+                                    <ReportsTrashCanButton
                                         v-if="hasAdminAccess"
-                                        @click="onDeleteReport(props.item.id)"
                                         :disabled="!props.item.isGenerated"
-                                        flat
-                                        icon
+                                        @click="onDeleteReport(props.item.id)"
                                         class="ghd-red"
-                                    >
-                                        <TrashCanSvg />
-                                    </v-btn>
+                                    />
                                 </td>
                             </tr>
                             </template>
@@ -152,6 +149,7 @@ import { Notification } from '@/shared/models/iAM/notifications';
 import { queuedWorkStatusUpdate } from '@/shared/models/iAM/queuedWorkStatusUpdate';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
+import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanButton.vue';
 
 
     let store = useStore();
@@ -466,4 +464,29 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
 <style>
 .green-icon {
     filter: invert(61%) sepia(70%) saturate(486%) hue-rotate(79deg) brightness(82%) contrast(85%);}
+
+    .gh-red {
+    --svg-color: #D9534F;
+    color: var(--svg-color) !important;
+}
+
+.ghd-disabled {
+    --svg-color: #B0B0B0; /* Gray color for disabled icon */
+    pointer-events: none; /* Disable hover effects */
+}
+
+::v-deep .v-btn.gh-red[disabled] {
+    background-color: transparent !important; /* Remove any background */
+    box-shadow: none !important; /* Remove any shadow */
+}
+
+::v-deep .v-btn.gh-red[disabled] .v-icon, 
+::v-deep .v-btn.gh-red[disabled] .img-general {
+    color: #B0B0B0 !important; /* Gray color for SVG when disabled */
+    fill: #B0B0B0 !important; /* Gray color for SVG fill */
+}
+
+::v-deep .v-btn.gh-red[disabled]:hover {
+    background-color: transparent !important; /* Ensure no background on hover */
+} 
 </style>

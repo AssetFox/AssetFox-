@@ -79,15 +79,12 @@ namespace BridgeCareCore.Services.Aggregation
                     maintainableAssets = _unitOfWork.MaintainableAssetRepo
                         .GetAllInNetworkWithAssignedDataAndLocations(networkId)
                         .ToList();
-                    Debug.WriteLine("Maintainable Assets Set");
 
                     // Create list of attribute ids we are allowed to update with assigned data.
                     // Could hack it in, but what is the natural way to set it up?
                     var networkAttributeIds = maintainableAssets
                         .Where(_ => _.AssignedData != null && _.AssignedData.Any())
                         .SelectMany(_ => _.AssignedData.Select(__ => __.Attribute.Id).Distinct()).ToList();
-                    Debug.WriteLine("Attribute ID's Set");
-
 
                     // In practice, every attribute's data is pulled from the same data source.
                     // Changed to getting all the data sources and loading their sheets into memory, instead of possbily loading and deserializing
@@ -122,8 +119,6 @@ namespace BridgeCareCore.Services.Aggregation
                                 {
                                     var specificData = AttributeDataBuilder.GetData(connection);
                                     attributeData.AddRange(specificData);
-                                    Debug.WriteLine($"attribute.Name: {attribute.Name}");
-                                    Debug.WriteLine($"iteration {iter}");
                                 }
                             }
                         }
@@ -167,7 +162,6 @@ namespace BridgeCareCore.Services.Aggregation
                     // that was created
                     foreach (var maintainableAsset in maintainableAssets)
                     {
-                        Debug.WriteLine($"i = {i}");
                         if (cancellationToken != null && cancellationToken.Value.IsCancellationRequested)
                         {
                             _unitOfWork.Rollback();

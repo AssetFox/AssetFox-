@@ -305,20 +305,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
             return dtos;
         }
-        public List<AttributeDTO> GetAllColumnNames()
-        {
-            var dtos = _unitOfWork.Context.Attribute.AsEnumerable()
-                .Select(a => AttributeMapper.ToColumnDto(a))
-                .ToList();
-            return dtos;
-        }
-        public List<AttributeDTO> GetAttributesByDataSource(Guid dataSourceId)
-        {
-            return _unitOfWork.Context.Attribute
-                .Where(attr => attr.DataSourceId == dataSourceId)
-                .Select(a => AttributeMapper.ToColumnDto(a))
-                .ToList();
-        }
 
         public void DeleteAttributesShouldNeverBeNeededButSometimesIs(List<Guid> attributeIdsToDelete)
         {

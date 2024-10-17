@@ -45,9 +45,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         string GetAttributeName(Guid attributeId);
         List<AttributeDTO> GetAllAttributesAbbreviated();
-        List<AttributeDTO> GetAllColumnNames();
-        List<AttributeDTO> GetAttributesByDataSource(Guid dataSourceId);
-
         List<AttributeDefaultValuePair> GetAttributeDefaultValuePairs(Guid networkId);
         void UpsertAttributes(List<Attribute> attributes);
     }

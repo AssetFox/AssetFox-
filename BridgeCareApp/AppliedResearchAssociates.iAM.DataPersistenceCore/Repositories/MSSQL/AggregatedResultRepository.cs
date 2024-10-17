@@ -89,14 +89,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public List<AggregatedSelectValuesResultDTO> GetAggregatedResultsForAttributeNames(List<string> attributeNames)
         {
             List<AggregatedSelectValuesResultDTO> returnList = new();
-            var uniqueAttributes = attributeNames.Distinct().ToList();
+            var uniqueAttributeNames = attributeNames.Distinct().ToList();
             var allOfAttributeDTOs = _unitOfWork.Context.AggregatedResult
                 .Include(_ => _.Attribute)
-                .Where(_ => uniqueAttributes.Contains(_.Attribute.Name))
-                .Select(e => AggregatedResultMapper.ToDto(e))
-                .AsNoTracking().AsSplitQuery().ToList();
-
-            foreach (var attributeName in uniqueAttributes)
+                .Where(_ => attributeNames.Contains(_.Attribute.Name))
+                .Select(e => new
+                {
+                    Attribute = AttributeMapper.ToAbbreviatedDto(e.Attribute),
+                    e.Discriminator,
+                    e.TextValue,
+                    e.NumericValue,
+                })
+                .AsNoTracking()
+                .AsSplitQuery()
+                .ToList();
+            foreach (var attributeName in uniqueAttributeNames)
             {
                 var attributeDTO = allOfAttributeDTOs.Where(_ => _.Attribute.Name == attributeName).ToList();
 

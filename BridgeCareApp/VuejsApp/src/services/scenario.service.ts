@@ -21,6 +21,14 @@ export default class ScenarioService {
         return coreAxiosInstance.post(`${API.Scenario}/GetCurrentUserOrSharedScenario/${simulationId}`);
     }
 
+    static getSimulationRunSetting(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Scenario}/GetSimulationRunSetting/${simulationId}`);
+    }
+
+    static getScenariosReportSettings(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Scenario}/GetScenariosReportSettings`);
+    }
+
     static getWorkQueuePage(data:PagingRequest<QueuedWork>): AxiosPromise {
         return coreAxiosInstance.post(`${API.Scenario}/GetWorkQueuePage/`, data);
     }    

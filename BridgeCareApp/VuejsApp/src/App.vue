@@ -314,6 +314,8 @@ import { getUrl } from './shared/utils/get-url';
     let username = computed<string>(() => store.state.authenticationModule.username);
     let hasAdminAccess = computed(() => store.state.authenticationModule.hasAdminAccess);
     const refreshing = computed<boolean>(() => store.state.authenticationModule.refreshing);
+    let simulationRunSettingId = computed(() => store.state.scenarioModule.simulationRunSettingId);
+    let updatedSimulationRunSettingName = computed(() => store.state.scenarioModule.simulationRunSettingName);
     //let navigation = ref<any[]>(store.state.breadcrumbModule.navigation);
     const notifications = computed<Notification[]>(() => store.state.notificationModule.notifications);
     const notificationCounter = computed<number>(() => store.state.notificationModule.counter);
@@ -477,7 +479,7 @@ import { getUrl } from './shared/utils/get-url';
             setAlertMessageAction('');
         }
     }
-    
+        
     function created() {
         packageVersionEnv.value = import.meta.env.VITE_APP_VERSION // declared in .env files
 
@@ -701,6 +703,7 @@ import { getUrl } from './shared/utils/get-url';
 
         if(stringData.includes('Analysis'))
         {
+            $emitter.emit('SimulationRunSettingUpdated');                      
             onShowRunAnalysisCompletedAlert();
         }
     }
@@ -710,7 +713,7 @@ import { getUrl } from './shared/utils/get-url';
             showDialog: true,
             heading: 'Success',
             choice: false,
-            message: `The Analysis on ${selectedScenario.value.name} has been completed`,        
+            message: `The Analysis on ${updatedSimulationRunSettingName.value} has been completed`,        
         };
     }
 

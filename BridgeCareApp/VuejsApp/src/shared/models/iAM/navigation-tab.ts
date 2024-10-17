@@ -3,4 +3,5 @@ export interface NavigationTab {
     tabIcon: string;
     navigation: any;
     visible?: boolean;
+    disabled?: boolean;
 }

@@ -227,7 +227,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.ApplyColor(worksheet.Cells[startOfProjectBuilderBudget, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.DarkSeaGreen);
             ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
             ExcelHelper.SetTextColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.White);
-            currentCell.Row++; 
+            currentCell.Row += 2; 
         }
 
         internal void AddCostOfWorkOutsideScope(WorkTypeTotal workTypeTotal, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, Guid? scenarioBudgetId)

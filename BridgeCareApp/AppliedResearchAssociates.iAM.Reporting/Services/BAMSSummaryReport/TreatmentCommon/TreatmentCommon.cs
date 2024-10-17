@@ -98,8 +98,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "COUNTY");
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "MPO_NAME");
-
-            worksheet.Cells[row, columnNo++].Value = "";
+            worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "TOWN_PLACE"); // City/Town/Place
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "FEATURE_INTERSECTED");
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "FEATURE_CARRIED");
             worksheet.Cells[row, columnNo++].Value = _reportHelper.CheckAndGetValue<string>(section.ValuePerTextAttribute, "LOCATION");

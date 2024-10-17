@@ -4,6 +4,9 @@ import { clearRefreshIntervalID } from '@/shared/utils/refresh-interval-id';
 import router from '@/router';
 import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
 import AuthenticationService from '@/services/authentication.service';
+import { useRouter } from 'vue-router';
+
+const $router = useRouter();
 
 const isAuthenticatedEsecUser = () => {
     return store
@@ -12,7 +15,7 @@ const isAuthenticatedEsecUser = () => {
             // Check user active status via API
             const activeStatus = await AuthenticationService.getActiveStatus();
             
-            if (activeStatus.data = true) {
+            if (activeStatus.data == true) {
                 // User is active, proceed with fetching user info and other data
                 return store.dispatch('getUserInfo').then(() =>
                     store.dispatch('getUserCriteriaFilter').then(() => {
@@ -50,7 +53,12 @@ const isAuthenticatedAzureUser = () => {
                 if (store.state.authenticationModule.authenticated) {
                     return true;
                 } else {
+                    // @ts-ignore
+                let isAccessDenied = store.state.authenticationModule.accessDenied;
+                if(isAccessDenied == true)
+                {
                     throw new Error('Failed to authenticate');
+                }
                 }
             }),
         )

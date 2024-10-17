@@ -14,6 +14,7 @@
                         id = "EditScenario-navigation-vlistItemGroup"
                         class="settings-list ghd-control-text"
                         :key="navigationTab.tabName"
+                        :disabled="navigationTab.disabled"
                         v-for="navigationTab in visibleNavigationTabs()"
                     >
                         <v-list-item id="EditScenario-tabs-vListTile" :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
@@ -39,6 +40,7 @@
                     <v-btn
                         class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border"
                         @click="onShowRunSimulationAlert"
+                        :disabled="isBudgetPrioritySet"
                         block
                         variant = "outlined">
                         Run Scenario
@@ -80,7 +82,7 @@
 
 <script lang="ts" setup>
 import Vue, { ref, shallowReactive, computed, watch, onMounted, onBeforeUnmount, onBeforeMount } from 'vue'; 
-import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
+import { emptyScenario, Scenario, QueuedWork} from '@/shared/models/iAM/scenario';
 import ImportExportCommittedProjectsDialog from '@/components/scenarios/scenarios-dialogs/ImportExportCommittedProjectsDialog.vue';
 import { any, clone, isNil, propEq } from 'ramda';
 import { AxiosResponse } from 'axios';
@@ -113,9 +115,24 @@ import ReportsSvg from '@/shared/icons/ReportsSvg.vue';
 import { useStore } from 'vuex'; 
 import { useRouter } from 'vue-router'; 
 import ScenarioService from '@/services/scenario.service';
+import InvestmentService from '@/services/investment.service';
+import { InvestmentPagingRequestModel} from '@/shared/models/iAM/paging';
+import PerformanceCurveService from '@/services/performance-curve.service';
+import {
+    PerformanceCurve,
+} from '@/shared/models/iAM/performance';
+import { PagingRequest } from '@/shared/models/iAM/paging';
+import TreatmentService from '@/services/treatment.service';
+import BudgetPriorityService from '@/services/budget-priority.service';
+import { BudgetPriority } from '@/shared/models/iAM/budget-priority';
+import { inject } from 'vue';
+import mitt, { Emitter, EventType } from 'mitt';
+import { debounce } from 'lodash';
+import AnalysisMethodService from '@/services/analysis-method.service';
 
     let store = useStore(); 
     const router = useRouter(); 
+    const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
 
     const stateNetworks: Network[] = shallowReactive(store.state.networkModule.networks) ;
     const hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess) ; 
@@ -124,6 +141,7 @@ import ScenarioService from '@/services/scenario.service';
     const stateSelectedScenario = computed<Scenario>(() => store.state.scenarioModule.selectedScenario) ;
     const stateSharedScenariosPage = computed<Scenario[]>(() => store.state.scenarioModule.currentSharedScenariosPage) ;
     const stateUserScenariosPage = computed<Scenario[]>(() =>store.state.scenarioModule.currentUserScenarioPage) ;
+    let simulationRunSettingId = computed(() => store.state.scenarioModule.simulationRunSettingId);
 
     let userId = ref<string>(store.state.authenticationModule.userId);
 
@@ -135,6 +153,10 @@ import ScenarioService from '@/services/scenario.service';
     async function runSimulationAction(payload?: any): Promise<any>{await store.dispatch('runSimulation', payload)}   
     async function runNewSimulationAction(payload?: any): Promise<any>{await store.dispatch('runNewSimulation',payload)}
     async function getScenarioSelectableTreatmentsAction(payload?: any): Promise<any> {return await store.dispatch('getScenarioSelectableTreatments', payload)}
+    async function getSimpleScenarioSelectableTreatmentsAction(payload?: any): Promise<any> {await store.dispatch('getSimpleScenarioSelectableTreatments', payload);}
+    async function getScenarioSimpleBudgetDetailsAction(payload?: any): Promise<any>{await store.dispatch('getScenarioSimpleBudgetDetails', payload)}
+    async function getSimulationRunSettingAction(payload?: any): Promise<any> { await store.dispatch('getSimulationRunSetting', payload);}
+ 
 
     let selectedScenarioId: string = getBlankGuid();
     let showImportExportCommittedProjectsDialog: boolean = false;
@@ -149,96 +171,118 @@ import ScenarioService from '@/services/scenario.service';
     let emptyTreatmentBudgets: any;
     let confirmAnalysisRunAlertData= ref(clone(emptyAlertDataWithButtons));
     let confirmAnalysisPreCheckAlertData= ref(clone(emptyAlertPreChecksData));
-    let navigationTabs: NavigationTab[] = [
-        {
-            tabName: 'Analysis Method',
-            tabIcon: 'fas fa-chart-bar',
-            navigation: {
-                path: '/EditAnalysisMethod/',
-            },
+    let isAnalysisMethodSet = ref(false);
+    let isInvestmentSet = ref(false);
+    let isDeteriorationModelSet = ref(false);
+    let isTreatmentSet = ref(false);
+    let isBudgetPrioritySet = ref(false);
+    let hasScenarioBeenRun = ref(false);
+    let emittedSimulationId: {} | null = null;
+
+    let navigationTabs = ref<NavigationTab[]>([
+    {
+        tabName: 'Analysis Method',
+        tabIcon: 'fas fa-chart-bar',
+        navigation: {
+            path: '/EditAnalysisMethod/',
         },
-        {
-            tabName: 'Investment',
-            tabIcon: 'fas fa-dollar-sign',
-            navigation: {
-                path: '/InvestmentEditor/Scenario/',
-            },
+    },
+    {
+        tabName: 'Investment',
+        tabIcon: 'fas fa-dollar-sign',
+        navigation: {
+            path: '/InvestmentEditor/Scenario/',
         },
-        {
-            tabName: 'Deterioration Model',
-            tabIcon: 'fas fa-chart-line',
-            navigation: {
-                path: '/PerformanceCurveEditor/Scenario/',
-            },
+        disabled: isAnalysisMethodSet.value,
+    },
+    {
+        tabName: 'Deterioration Model',
+        tabIcon: 'fas fa-chart-line',
+        navigation: {
+            path: '/PerformanceCurveEditor/Scenario/',
         },
-        {
-            tabName: 'Calculated Attribute',
-            tabIcon: 'fas fa-plus-square',
-            navigation: {
-                path: '/CalculatedAttributeEditor/Scenario/',
-            },
+        disabled: isInvestmentSet.value,
+    },
+    {
+        tabName: 'Treatment',
+        tabIcon: 'fas fa-tools',
+        navigation: {
+            path: '/TreatmentEditor/Scenario/',
         },
-        {
-            tabName: 'Treatment',
-            tabIcon: 'fas fa-tools',
-            navigation: {
-                path: '/TreatmentEditor/Scenario/',
-            },
+        disabled: isDeteriorationModelSet.value,
+    },
+    {
+        tabName: 'Budget Priority',
+        tabIcon: 'fas clipboard',
+        navigation: {
+            path: '/BudgetPriorityEditor/Scenario/',
         },
-        {
-            tabName: 'Budget Priority',
-            tabIcon: 'fas clipboard',
-            navigation: {
-                path: '/BudgetPriorityEditor/Scenario/',
-            },
+        disabled: isTreatmentSet.value,
+    },
+    {
+        tabName: 'Calculated Attribute',
+        tabIcon: 'fas fa-plus-square',
+        navigation: {
+            path: '/CalculatedAttributeEditor/Scenario/',
         },
-        {
-            tabName: 'Target Condition Goal',
-            tabIcon: 'fas fa-bullseye',
-            navigation: {
-                path: '/TargetConditionGoalEditor/Scenario/',
-            },
+    },
+    {
+        tabName: 'Target Condition Goal',
+        tabIcon: 'fas fa-bullseye',
+        navigation: {
+            path: '/TargetConditionGoalEditor/Scenario/',
         },
-        {
-            tabName: 'Deficient Condition Goal',
-            tabIcon: 'fas fa-level-down-alt',
-            navigation: {
-                path: '/DeficientConditionGoalEditor/Scenario/',
-            },
+    },
+    {
+        tabName: 'Deficient Condition Goal',
+        tabIcon: 'fas fa-level-down-alt',
+        navigation: {
+            path: '/DeficientConditionGoalEditor/Scenario/',
         },
-        {
-            tabName: 'Remaining Life Limit',
-            tabIcon: 'fas fa-battery-half',
-            navigation: {
-                path: '/RemainingLifeLimitEditor/Scenario/',
-            },
+    },
+    {
+        tabName: 'Remaining Life Limit',
+        tabIcon: 'fas fa-battery-half',
+        navigation: {
+            path: '/RemainingLifeLimitEditor/Scenario/',
         },
-        {
-            tabName: 'Cash Flow',
-            tabIcon: 'fas fa-money-bill-wave',
-            navigation: {
-                path: '/CashFlowEditor/Scenario/',
-            },
+    },
+    {
+        tabName: 'Cash Flow',
+        tabIcon: 'fas fa-money-bill-wave',
+        navigation: {
+            path: '/CashFlowEditor/Scenario/',
         },
-        {
-            tabName: 'Committed Projects',
-            tabIcon: 'fas fa-clipboard',
-            navigation: {
-                path: '/CommittedProjectsEditor/Scenario/',
-            },
+    },
+    {
+        tabName: 'Committed Projects',
+        tabIcon: 'fas fa-clipboard',
+        navigation: {
+            path: '/CommittedProjectsEditor/Scenario/',
         },
-        {
-            tabName: 'Reports & Outputs',
-            tabIcon: 'fas fa-clipboard,',
-            navigation: {
-                path: '/ReportsAndOutputs/Scenario/',
-            },
+        disabled: isBudgetPrioritySet.value,
+    },
+    {
+        tabName: 'Reports & Outputs',
+        tabIcon: 'fas fa-clipboard',
+        navigation: {
+            path: '/ReportsAndOutputs/Scenario/',
         },
-    ];
+        disabled: hasScenarioBeenRun.value,
+    },
+    ]);
+
     const alertData = ref<AlertData>(clone(emptyAlertData));
     const alertDataForDeletingCommittedProjects = ref<AlertData>({ ...emptyAlertData });
 
-    onMounted(() => {
+    onMounted(async () => {
+        await ScenarioSettingsUpdated();
+        await getAnalysisMethod();
+        await getTreatments();
+        await getBudgetPriority();
+        await getDeteriorationModel();
+        await getInvestment();
+        await getReportRunStatus();
     });
     onBeforeMount(() => {
         selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
@@ -259,7 +303,7 @@ import ScenarioService from '@/services/scenario.service';
                 });
                 router.push('/Scenarios/');
             } else {                
-                navigationTabs = navigationTabs.map(
+                navigationTabs.value = navigationTabs.value.map(
                     (navTab: NavigationTab) => {
                         const navigationTab = {
                             ...navTab,
@@ -291,11 +335,11 @@ import ScenarioService from '@/services/scenario.service';
                 const hasChildPath = any(
                     (navigationTab: NavigationTab) =>
                         href.indexOf(navigationTab.navigation.path) !== -1,
-                    navigationTabs,
+                    navigationTabs.value,
                 );
                 // if no matching navigation path was found in the href, then route with path of first navigationTabs entry
                 if (!hasChildPath) {
-                    router.push(navigationTabs[0].navigation);
+                    router.push(navigationTabs.value[0].navigation);
                 }                
             }
     }
@@ -414,12 +458,77 @@ import ScenarioService from '@/services/scenario.service';
     }
 
     function visibleNavigationTabs() {
-        return navigationTabs.filter(
+        return navigationTabs.value.filter(
             navigationTab =>
                 navigationTab.visible === undefined || navigationTab.visible,
         );
     }
 
+    async function ScenarioSettingsUpdated()
+    {
+        $emitter.on('AnalysisMethodUpdated', () => {
+            // Update the disabled property of the Investment tab
+            navigationTabs.value.forEach((tab) => {
+                if (tab.tabName === 'Investment') {
+                    tab.disabled = false;
+                }
+            })
+        });
+
+        $emitter.on('InvestmentSettingsUpdated', () => {
+            // Update the disabled property of the Deterioration Model tab
+            navigationTabs.value.forEach((tab) => {
+                if (tab.tabName === 'Deterioration Model') {
+                    tab.disabled = false;
+                }
+            })
+        });
+
+        $emitter.on('DeteriorationModelSettingsUpdated', () => {                
+            // Update the disabled property of the Treatment tab
+            navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Treatment') {
+                        tab.disabled = false;
+                    }
+                });
+        });
+
+        $emitter.on('TreatmentSettingsUpdated', () => {
+            // Update the disabled property of the Budget Priority tab
+            navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Budget Priority') {
+                        tab.disabled = false;
+                    }
+                });
+        });
+
+        $emitter.on('BudgetPriorityUpdated', () => {
+            isBudgetPrioritySet.value = false;
+
+            // Update the disabled property of the Committed Projects tab
+            navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Committed Projects') {
+                        tab.disabled = false;
+                    }
+                });
+        });
+
+        $emitter.on('SimulationRunSettingUpdated', () => {
+            if(String(selectedScenarioId) === String(simulationRunSettingId.value))
+            {
+                hasScenarioBeenRun.value = false;
+
+                // Update the disabled property of the Reports & Outputs tab
+                navigationTabs.value.forEach((tab) => {
+                        if (tab.tabName === 'Reports & Outputs') {
+                            tab.disabled = false;
+                        }
+                    });
+                navigationTabs.value = [...navigationTabs.value];
+            }
+        });
+    }
+    
     /**
      * Shows the Alert
      */
@@ -476,6 +585,8 @@ import ScenarioService from '@/services/scenario.service';
                 secondRunAnalysisModal();
         }
         else if(submit == "continue") {
+            store.dispatch('updateSimulationRunSettingName', simulationName);
+            store.dispatch('updateSimulationRunSettingId', selectedScenarioId);
             if (submit && selectedScenarioId !== getBlankGuid()) {
                 runSimulationAction({
                     networkId: networkId,
@@ -530,6 +641,9 @@ import ScenarioService from '@/services/scenario.service';
     }
 
     function onConfirmAnalysisPreCheckAlertSubmit(submit: boolean) {
+        store.dispatch('updateSimulationRunSettingName', simulationName);
+        store.dispatch('updateSimulationRunSettingId', selectedScenarioId);
+
         confirmAnalysisPreCheckAlertData.value = clone(emptyAlertPreChecksData);
 
         selectedScenario = runAnalysisScenario;
@@ -549,6 +663,7 @@ import ScenarioService from '@/services/scenario.service';
      * @param runScenarioSimulation Alert result
      */
     function onSubmitAlertResult(runScenarioSimulation: boolean) {
+        $emitter.emit('SimulationRunSettingUpdated', selectedScenario.id); 
         alertData.value = clone(emptyAlertData);
 
         if (runScenarioSimulation) {
@@ -559,6 +674,156 @@ import ScenarioService from '@/services/scenario.service';
         }
     }
 
+    async function getAnalysisMethod()
+    {
+        await AnalysisMethodService.getSimulationAnalysisSetting(selectedScenarioId)
+        .then((response: { data: any;}) => {
+            if(typeof response.data === 'boolean')
+            {
+                isAnalysisMethodSet.value = response.data === false;
+                
+                // Update the disabled property
+                navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Investment') {
+                        tab.disabled = isAnalysisMethodSet.value;
+                    }
+                });
+            }
+        });
+    }
+
+    async function getInvestment()
+    {
+            const request: InvestmentPagingRequestModel = {
+            page: 1,
+            rowsPerPage: 5,
+            syncModel: {
+                libraryId: null,
+                updatedBudgets: [],
+                budgetsForDeletion: [],
+                addedBudgets: [],
+                deletionyears: [],
+                updatedBudgetAmounts: {},
+                Investment: null,
+                addedBudgetAmounts: {},
+                firstYearAnalysisBudgetShift: 0,
+                isModified: false
+            },
+            sortColumn: 'year',
+            isDescending: false,
+            search: ''
+        };
+
+        await InvestmentService.getScenarioInvestmentPage(selectedScenarioId, request)
+        .then((response: { data: any; }) => {
+            if (response.data) {
+                isInvestmentSet.value = response.data.firstYear == 0;
+                
+                // Update the disabled property
+                navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Deterioration Model') {
+                        tab.disabled = isInvestmentSet.value;
+                    }
+                });
+            }
+        });
+
+    }
+
+    async function getDeteriorationModel()
+    {
+        const request: PagingRequest<PerformanceCurve>= {
+            page: 1,
+            rowsPerPage: 5,
+            syncModel: {
+                libraryId: null,
+                updateRows: [],
+                rowsForDeletion: [],
+                addedRows: [],
+                isModified: false
+            },           
+            sortColumn: "",
+            isDescending: false,
+            search: ""
+        };
+
+        store.dispatch('getIsDeteriorationModelApiRunning', true);
+        await PerformanceCurveService.getPerformanceCurvePage(selectedScenarioId, request).then(response => {
+            if (response.data) 
+            {
+                isDeteriorationModelSet.value = response.data.items.length == 0;
+                
+                navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Treatment') {
+                        tab.disabled = isDeteriorationModelSet.value;
+                    }
+                });
+            }
+        });
+    }
+
+    async function getTreatments()
+    {
+        await TreatmentService.getSimpleTreatmentsByScenarioId(selectedScenarioId).then(response => {
+            if(response.data)
+            {
+                isTreatmentSet.value = response.data.length == 0;
+                navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Budget Priority') {
+                        tab.disabled = isTreatmentSet.value;
+                    }
+                });
+            }   
+        });
+    }
+
+    async function getBudgetPriority()
+    {
+        const request: PagingRequest<BudgetPriority>= {
+            page: 1,
+            rowsPerPage: 5,
+            syncModel: {
+                libraryId: null,
+                updateRows: [],
+                rowsForDeletion: [],
+                addedRows: [],
+                isModified: false
+            },           
+            sortColumn: "",
+            isDescending: false,
+            search: ""
+        };
+
+        await BudgetPriorityService.getScenarioBudgetPriorityPage(selectedScenarioId, request).then(response => {
+            if(response.data)
+            {
+                isBudgetPrioritySet.value = response.data.items.length == 0;
+                navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Committed Projects') {
+                        tab.disabled = isBudgetPrioritySet.value;
+                    }
+                });
+            }   
+        });
+    }
+
+    async function getReportRunStatus()
+    {
+        await ScenarioService.getSimulationRunSetting(selectedScenarioId).then(response => {
+            if(typeof response.data === 'boolean')
+            {
+                hasScenarioBeenRun.value = response.data === false;
+                
+                // Update the disabled property
+                navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Reports & Outputs') {
+                        tab.disabled = hasScenarioBeenRun.value;
+                    }
+                });
+            }  
+        });
+
+    }
 </script>
 
 <style>

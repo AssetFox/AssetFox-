@@ -10,6 +10,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         AnalysisMethodDTO GetAnalysisMethod(Guid simulationId);
 
+        bool GetSimulationAnalysisMethodSetting(Guid simulationId);
+
         void UpsertAnalysisMethod(Guid simulationId, AnalysisMethodDTO dto);
     }
 }

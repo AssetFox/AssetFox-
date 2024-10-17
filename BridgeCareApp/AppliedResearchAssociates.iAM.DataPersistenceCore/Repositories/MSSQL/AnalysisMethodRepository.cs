@@ -83,6 +83,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             
         }
 
+        public bool GetSimulationAnalysisMethodSetting(Guid simulationId)
+        {
+            return _unitOfWork.Context.AnalysisMethod.Any(_ => _.Simulation.Id == simulationId);
+        }
+
         public AnalysisMethodDTO GetAnalysisMethod(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))

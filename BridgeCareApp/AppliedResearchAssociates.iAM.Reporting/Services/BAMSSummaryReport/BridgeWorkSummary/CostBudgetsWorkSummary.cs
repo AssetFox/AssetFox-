@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -79,8 +80,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             FillWorkTypeTotalWorkOutsideScope(worksheet, currentCell, simulationYears, workTypeTotalAggregated.WorkTypeTotalWorkOutsideScope);
 
-            var bpnTotalRow = FillBpnSection(worksheet, currentCell, simulationYears, bpnCostPerYear);
+            FillBpnSection(worksheet, currentCell, simulationYears, bpnCostPerYear);
+            
+            var currentRow = currentCell.Row;
+            currentCell.Row = 1;
             FillRemainingBudgetSection(worksheet, simulationYears, currentCell, budgetTotalRow);
+            currentCell.Row = currentRow;
         }
 
         #region Private methods
@@ -197,8 +202,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", "BAMS Work Type Totals");
             var initialRow = currentCell.Row;
-            currentCell.Row++;                        
-            var workTypes = EnumExtensions.GetValues<TreatmentCategory>();
+            currentCell.Row++;                                    
+            var workTypes = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement, TreatmentCategory.CapacityAdding, TreatmentCategory.Other, TreatmentCategory.Bundled };
             var numberOfYears = simulationYears.Count;
             worksheet.Cells[initialRow, 3 + numberOfYears].Value = "Total (all years)";
             var totalColumnHeaderRange = worksheet.Cells[initialRow, 3 + numberOfYears];
@@ -208,13 +213,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var startColumnIndex = 3;
             var firstContentRow = currentCell.Row;
             var rowIndex = firstContentRow;
-            for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
+            foreach (var workType in workTypes)
             {
-                if(workType == TreatmentCategory.WorkOutsideScope || workType == TreatmentCategory.Reconstruction)
-                {
-                    continue;
-                }
-                                
                 worksheet.Cells[rowIndex, 1].Value = workType.ToSpreadsheetString();
 
                 // For culvert data
@@ -234,9 +234,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 rowIndex++;
             }
-            var lastContentRow = firstContentRow + workTypes.Count - 2;
-            currentCell.Row += workTypes.Count() - 1;
-            var totalSpentRow = currentCell.Row;
+
+            var lastContentRow = firstContentRow + workTypes.Count;
+            currentCell.Row += workTypes.Count;
+            var totalSpentRow = ++currentCell.Row;
             TotalSpentRow = totalSpentRow;
             worksheet.Cells[totalSpentRow, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(totalSpentRow, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1);
             worksheet.Cells[totalSpentRow, 1].Value = "Total Spent";
@@ -253,13 +254,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             // Adding percentage after the Total (all years)
             rowIndex = firstContentRow;
-            for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
+            foreach (var workType in workTypes)
             {
-                if (workType == TreatmentCategory.WorkOutsideScope || workType == TreatmentCategory.Reconstruction)
-                {
-                    continue;
-                }
-                
                 var col = startColumnIndex + numberOfYears + 1;
                 worksheet.Cells[rowIndex, col].Formula = ExcelFormulas.Percentage(rowIndex, col - 1, totalSpentRow, col - 1);
                 worksheet.Cells[rowIndex, col + 1].Value = $"Percentage Spent on {workType.ToSpreadsheetString().ToUpper()}";
@@ -332,7 +328,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
         }
 
-        private int FillBpnSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
+        private void FillBpnSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
             Dictionary<int, Dictionary<string, decimal>> bpnCostPerYear)
         {
             // Add budget category headers & year columns
@@ -379,10 +375,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.ApplyBorder(totalRowRange);
             var rowColorRange = worksheet.Cells[currentCell.Row, startColumnIndex, currentCell.Row + bpnCostBudgetNames.Count, startColumnIndex + numberOfYears - 1];
             ExcelHelper.ApplyColor(rowColorRange, Color.FromArgb(255, 230, 153));
-
-            // Return index of next row
+                        
             currentCell.Row += bpnCostBudgetNames.Count() + 1;
-            return currentCell.Row;
+            ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row + 1, 1, currentCell.Row + 1, 2 + numberOfYears], Color.DimGray);
+            // Index of next row
+            currentCell.Row += 2;
         }
 
         private decimal GetCostForBPNCostBudgetName(Dictionary<int, Dictionary<string, decimal>> bpnInfoPerYear, int year, BPNCostBudgetName bpnValue)
@@ -1027,8 +1024,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.Red);
             ExcelHelper.ApplyColor(worksheet.Cells[startRow + 1, fromColumn, row - 1, column], Color.FromArgb(248, 203, 173));
-            _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 2, column);
-            ExcelHelper.ApplyColor(worksheet.Cells[row + 1, startColumn, row + 1, column], Color.DimGray);
+            _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row - 1, column);
         }
 
 

@@ -4,8 +4,6 @@ using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Threading.Tasks;
-using System.Linq;
-using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -13,8 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Services;
 using System.Data;
 using OfficeOpenXml;
-using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
-using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
+
 
 namespace BridgeCareCore.Controllers
 {
@@ -25,16 +22,18 @@ namespace BridgeCareCore.Controllers
         public const string RawDataError = "Raw Data Error";
 
         private readonly IExcelRawDataImportService _excelSpreadsheetImportService;
-
+        private readonly IExcelRawDataLoadService _excelRawDataLoadService;
         public RawDataController(
             IEsecSecurity esecSecurity,
             IUnitOfWork unitOfWork,
             IHubService hubService,
             IHttpContextAccessor contextAccessor,
-            IExcelRawDataImportService excelSpreadsheetImportService
+            IExcelRawDataImportService excelSpreadsheetImportService,
+            IExcelRawDataLoadService excelRawDataLoadService
             ) : base(esecSecurity, unitOfWork, hubService, contextAccessor)
         {
             _excelSpreadsheetImportService = excelSpreadsheetImportService;
+            _excelRawDataLoadService = excelRawDataLoadService;
         }
 
         [HttpPost]
@@ -80,42 +79,11 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> GetExcelSpreadsheetColumnHeaders(Guid dataSourceId)
         {
-            try {
+            try
+            {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    var dataSource = UnitOfWork.DataSourceRepo.GetDataSource(dataSourceId);
-                    string warningMessage = null;
-                    if (dataSource == null)
-                    {
-                        warningMessage = $"No dataSource found with id {dataSourceId}";
-                    }
-                    else if (dataSource.Type.ToUpperInvariant()!="EXCEL")
-                    {
-                        warningMessage = @$"DataSource found. Its type was {dataSource.Type}. Expected the type to be ""EXCEL""";
-                    }
-                    
-                    if (warningMessage!=null)
-                    {
-                        return new GetRawDataSpreadsheetColumnHeadersResultDTO
-                        {
-                            WarningMessage = warningMessage,
-                        };
-                    }
-                    var excelSpreadsheet = UnitOfWork.ExcelWorksheetRepository.GetExcelRawDataByDataSourceId(dataSourceId);
-                    if (excelSpreadsheet == null)
-                    {
-                        warningMessage = $@"Found a DataSource with id {dataSourceId}. The DataSource was of type ""EXCEL"". However, we did not find an ExcelRawData with DataSourceId {dataSourceId}. This is unexpected.";
-                        return new GetRawDataSpreadsheetColumnHeadersResultDTO
-                        {
-                            WarningMessage = warningMessage,
-                        };
-                    }
-                    var worksheet = ExcelRawDataSpreadsheetSerializer.Deserialize(excelSpreadsheet.SerializedWorksheetContent);
-                    var columnHeaders = worksheet.Worksheet.Columns.Select(c => c.Entries[0].ObjectValue().ToString()).ToList();
-                    return new GetRawDataSpreadsheetColumnHeadersResultDTO
-                    {
-                        ColumnHeaders = columnHeaders,
-                    };
+                    return _excelRawDataLoadService.GetSpreadsheetColumnHeaders(dataSourceId);
                 });
 
                 if (result.WarningMessage != null)
@@ -130,5 +98,6 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
     }
 }

@@ -24,6 +24,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace BridgeCareCore.Controllers
 {
@@ -39,14 +41,17 @@ namespace BridgeCareCore.Controllers
     {
         public const string AttributeError = "Attribute Error";
         private readonly AttributeService _attributeService;
+        private readonly IExcelRawDataLoadService _excelRawDataLoadService;
 
-        public AttributeController(AttributeService attributeService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+        public AttributeController(AttributeService attributeService, IExcelRawDataLoadService excelRawDataLoadService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _attributeService = attributeService ?? throw new ArgumentNullException(nameof(attributeService));
+            _excelRawDataLoadService = excelRawDataLoadService ?? throw new ArgumentNullException(nameof(attributeService));
+
         }
 
-        [HttpGet]
+    [HttpGet]
         [Route("GetAttributes")]
         [ClaimAuthorize("AttributesViewAccess")]
         public async Task<IActionResult> Attributes()
@@ -174,6 +179,8 @@ namespace BridgeCareCore.Controllers
                     var targetAttributeDTOs = UnitOfWork.AttributeRepo.GetAttributes();
                     var dataSourceToBeCopied = convertedAttributeDto.DataSource;
 
+                    checkColumnNames(targetAttributeDTOs, dataSourceToBeCopied.Id);
+
                     // Swapping out the attribute that is being updated via the API, since we are upserting the whole list of attributes
                     var existingIndex = targetAttributeDTOs.FindIndex(attr => attr.Id == convertedAttributeDto.Id);
                     if (existingIndex != -1)
@@ -185,6 +192,8 @@ namespace BridgeCareCore.Controllers
                     {
                         targetAttributeDTOs.Add(convertedAttributeDto);
                     }
+
+                    // Checking to see if the column names match between data sources
 
                     targetAttributeDTOs.ForEach(_ => _.DataSource = dataSourceToBeCopied);
 
@@ -203,14 +212,53 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        private void checkColumnNames(AttributeDTO attributeToCheck)
+        private void checkColumnNames(List<AttributeDTO> attributes, Guid targetDataSourceId)
         {
-            /*if (attributeToCheck.Command != referenceAttribute.Command)
+            try
             {
-                throw new MalformedInputException($"Invalid column name {attributeToCheck.Command}. " +
-                    $"To set a data source for all attributes, the column names must match.");
-            }*/
+                var dataSourcesToCheck = new Dictionary<Guid, BaseDataSourceDTO>();
+                // First, we need to get the data sources that will be loaded and checked. This saves time by not loading the same source and deserializing it multiple times.
+                foreach (var attribute in attributes)
+                {
+                    var dataSource = attributes.FirstOrDefault(_ => _.Id == attribute.Id)?.DataSource;
+                    if (dataSource == null || dataSourcesToCheck.Keys.Any(existingDataSource => existingDataSource == dataSource.Id))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        dataSourcesToCheck.Add(dataSource.Id, dataSource);
+                    }
+                }
+
+                foreach (var dataSource in dataSourcesToCheck)
+                {
+                    var originalHeaders = _excelRawDataLoadService.GetSpreadsheetColumnHeaders(dataSource.Key);
+                    var targetHeaders = _excelRawDataLoadService.GetSpreadsheetColumnHeaders(targetDataSourceId);
+                    if (targetHeaders.WarningMessage != null)
+                    {
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, targetHeaders.WarningMessage);
+                    }
+
+                    var originalColumnNames = originalHeaders.ColumnHeaders;
+                    var targetColumnNames = targetHeaders.ColumnHeaders;
+
+
+                    bool areEqual = new HashSet<string>(originalColumnNames).SetEquals(targetColumnNames);
+
+                    if (!areEqual)
+                    {
+                        throw new InvalidOperationException("The original column names do not match the target column names from the spreadsheet.");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"RawDataError::GetExcelSpreadsheetColumnHeaders - {e.Message}");
+                throw;
+            }
         }
+
 
 
         private void checkAttributeNameValidity(AttributeDTO attr)

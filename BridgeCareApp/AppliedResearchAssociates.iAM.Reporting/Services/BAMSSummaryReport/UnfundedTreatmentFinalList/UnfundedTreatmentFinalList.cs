@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using System.Drawing;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentFinalList
 {
@@ -59,7 +60,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             // facilityId, year, section, treatment
             var treatmentsPerSection = new SortedDictionary<int, Tuple<SimulationYearDetail, AssetDetail, TreatmentOptionDetail>>();
             var validFacilityIds = new List<int>(); // It will keep the Ids which has gone unfunded for all the years
-            var firstYear = true;
+            var firstYear = true;           
+            
             foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
             {
                 var untreatedSections = _reportHelper.GetSectionsWithUnfundedTreatments(year);
@@ -81,7 +83,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 foreach (var section in untreatedSections)
                 {
                     var facilityId = Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_"));
-                    if (!treatmentsPerSection.ContainsKey(facilityId)) // skip if we already have a treatment for this section
+                    if (!treatmentsPerSection.ContainsKey(facilityId)) // skip if we already have a treatment for this section // TODO do we still want to keep same way?
                     {
                         var treatmentOptions = section.TreatmentOptions.
                             Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
@@ -103,15 +105,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 
             currentCell.Row += 1; // Data starts here
             currentCell.Column = 1;
-
+            var color = Color.White;
             foreach (var facilityTuple in treatmentsPerSection.Values)
             {
                 var section = facilityTuple.Item2;
                 var year = facilityTuple.Item1;
                 var treatment = facilityTuple.Item3;
-                _unfundedTreatmentCommon.FillDataInWorkSheet(worksheet, currentCell, section, year.Year, treatment);
+                //Shade the BRKeys group
+                _unfundedTreatmentCommon.FillDataInWorkSheet(worksheet, currentCell, section, year.Year, treatment, color);
                 currentCell.Row++;
                 currentCell.Column = 1;
+                color = color == Color.White ? Color.LightGray : Color.White;
             }
         }
 

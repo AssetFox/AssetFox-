@@ -88,13 +88,9 @@ namespace BridgeCareCore.Services.Aggregation
                         .SelectMany(_ => _.AssignedData.Select(__ => __.Attribute.Id).Distinct()).ToList();
                     Debug.WriteLine("Attribute ID's Set");
 
-                    // create list of attribute data from configuration attributes (exclude attributes
-                    // that don't have command text as there will be no way to select data for them from
-                    // the data source)
-                    // takes 5ish min
-                    // TODO (KE): the reason that GetData is called each loop iteration is that technically, in theory, aggregation
-                    // supports multiple data sources. In practice, however, every attribute's data is pulled from the same data source.
-                    // I propose getting all the data sources and loading their sheets into memory, instead of possbily loading and deserializing
+
+                    // In practice, every attribute's data is pulled from the same data source.
+                    // Changed to getting all the data sources and loading their sheets into memory, instead of possbily loading and deserializing
                     // the same sheet 100+ times.
 
                     int iter = 0;
@@ -169,7 +165,6 @@ namespace BridgeCareCore.Services.Aggregation
                     // loop over maintainable assets and remove assigned data that has an attribute id
                     // in attributeIdsToBeUpdatedWithAssignedData then assign the new attribute data
                     // that was created
-                    //takes forever - KE
                     foreach (var maintainableAsset in maintainableAssets)
                     {
                         Debug.WriteLine($"i = {i}");

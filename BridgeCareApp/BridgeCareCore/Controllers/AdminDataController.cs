@@ -49,8 +49,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetKeyFields - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::GetKeyFields - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -69,8 +69,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetKeyFields - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::SetKeyFields - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -86,8 +86,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetRawDataKeyFields - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::GetRawDataKeyFields - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -106,8 +106,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetRawDataKeyFields - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::SetRawDataKeyFields - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -124,8 +124,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetAssetType - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::GetAssetType - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -144,8 +144,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetAssetType - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::SetAssetType - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -164,8 +164,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetPrimaryNetwork - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::GetPrimaryNetwork - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -183,8 +183,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetRawDataNetwork - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::GetRawDataNetwork - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -203,7 +203,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetPrimaryNetwork - {e.Message}");
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::SetPrimaryNetwork - {e.Message}", e);
                 return BadRequest($"{AdminSettingError}::SetPrimaryNetwork - {e.Message}");
             }
         }
@@ -223,9 +223,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetRawDataNetwork - {e.Message}");
-                return BadRequest($"{AdminSettingError}::SetRawDataNetwork - {e.Message}");
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::SetRawDataNetwork - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -240,8 +240,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetSimulationReportNames - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::GetSimulationReportNames - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -261,8 +261,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetAvailableReports - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name,  $"{AdminSettingError}::GetAvailableReports - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -299,10 +299,10 @@ namespace BridgeCareCore.Controllers
                     }
                     catch (Exception e)
                     {
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetInventoryReports - {e.Message}");
-                        return BadRequest($"{AdminSettingError}::SetInventoryReports - {e.Message}");
+                        HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::SetInventoryReports - {e.Message}", e);
                     }
-                    
+                    return Ok();
+
                 };
                 //If all reports in list exist and use the right type, save to database.
                 if (reportCriteriaCheck)
@@ -313,9 +313,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetInventoryReports - {e.Message}");
-                return BadRequest($"{AdminSettingError}::SetInventoryReports - {e.Message}");
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::SetInventoryReports - {e.Message}", e);
             }
+            return Ok();
         }
 
 
@@ -331,9 +331,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetInventoryReportNames - {e.Message}");
-                return BadRequest();
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::GetInventoryReportNames - {e.Message}", e);
             }
+            return Ok();
         }
 
 
@@ -356,8 +356,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetAttributeName - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name,  $"{AdminSettingError}::GetAttributeName - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -392,9 +392,9 @@ namespace BridgeCareCore.Controllers
                     }
                     catch (Exception e)
                     {
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetSimulationReports - {e.Message}");
-                        return BadRequest($"{AdminSettingError}::SetSimulationReports - {e.Message}");
+                        HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::SetSimulationReports - {e.Message}", e);
                     }
+                    return Ok();
 
                 };
                 //If all reports in list exist and use the right type, save to database.
@@ -406,9 +406,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetSimulationReports - {e.Message}");
-                return BadRequest($"{AdminSettingError}::SetSimulationReports - {e.Message}");
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::SetSimulationReports - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -422,8 +422,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::GetConstraintType - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::GetConstraintType - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -439,8 +439,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AdminSettingError}::SetConstraintType - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AdminSettingError}::SetConstraintType - {e.Message}", e);
+                return Ok();
             }
         }
 

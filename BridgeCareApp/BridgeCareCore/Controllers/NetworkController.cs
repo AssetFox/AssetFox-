@@ -58,10 +58,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::AllNetworks - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{NetworkError}::AllNetworks - {e.Message}", e);
+                return Ok();
             }
-
 
             foreach (var network in result)
             {
@@ -117,9 +116,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::CreateNetwork {networkName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{NetworkError}::CreateNetwork {networkName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -141,16 +140,15 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::DeleteNetwork - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{NetworkError}::DeleteNetwork - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::DeleteNetwork - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{NetworkError}::DeleteNetwork - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -211,9 +209,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::GetCompatibleNetworks - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{NetworkError}::GetCompatibleNetworks - {e.Message}", e);
             }
+            return Ok();
         }
         [HttpPost]
         [Route("UpsertBenefitQuantifier")]
@@ -231,9 +229,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::UpsertBenefitQuantifier - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{NetworkError}::UpsertBenefitQuantifier - {e.Message}", e);
             }
+            return Ok();
         }
     }
 }

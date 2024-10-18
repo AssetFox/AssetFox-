@@ -901,7 +901,7 @@ import ReportsService from '@/services/reports.service';
             title: '',
             key: '',
             align: 'left',
-            sortable: false,
+            sortable: false, 
             class: 'header-border',
             width: '',
         },

@@ -57,8 +57,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError} ::GetLibraryCashFlowRulePage - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError} ::GetLibraryCashFlowRulePage - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -78,12 +78,12 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Investment error::{e.Message}", e);
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Investment error::{e.Message}", e);
                 throw;
             }
         }
@@ -104,18 +104,17 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::GetScenarioCashFlowRulePage for {simulationName} - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::GetScenarioCashFlowRulePage for {simulationName} - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::GetScenarioCashFlowRulePage for {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::GetScenarioCashFlowRulePage for {simulationName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -139,9 +138,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::GetCashFlowRuleLibraries - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::GetCashFlowRuleLibraries - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -160,18 +159,17 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::GetScenarioCashFlowRules for {simulationName} - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::GetScenarioCashFlowRules for {simulationName} - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::GetScenarioCashFlowRules for {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::GetScenarioCashFlowRules for {simulationName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -201,16 +199,15 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::UpsertCashFlowRuleLibrary - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::UpsertCashFlowRuleLibrary - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::UpsertCashFlowRuleLibrary - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::UpsertCashFlowRuleLibrary - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -232,18 +229,17 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::UpsertScenarioCashFlowRules for {simulationName} - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::UpsertScenarioCashFlowRules for {simulationName} - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::UpsertScenarioCashFlowRules for {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::UpsertScenarioCashFlowRules for {simulationName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpDelete]
@@ -269,16 +265,15 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::DeleteCashFlowRuleLibrary - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::DeleteCashFlowRuleLibrary - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::DeleteCashFlowRuleLibrary - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::DeleteCashFlowRuleLibrary - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -312,9 +307,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::GetIsSharedLibrary - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::GetIsSharedLibrary - {e.Message}", e);
             }
+            return Ok();
         }
         [HttpGet]
         [Route("GetCashFlowRuleLibraryUsers/{libraryId}")]
@@ -334,14 +329,13 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::GetCashFlowRuleLibraryUsers - {e.Message}");
-                return Ok();
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::GetCashFlowRuleLibraryUsers - {e.Message}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::GetCashFlowRuleLibraryUsers - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::GetCashFlowRuleLibraryUsers - {e.Message}", e);
             }
+            return Ok();
         }
         [HttpPost]
         [Route("UpsertOrDeleteCashFlowRuleLibraryUsers/{libraryId}")]
@@ -360,19 +354,17 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::UpsertOrDeleteCashFlowRuleLibraryUsers - {e.Message}");
-                return Ok();
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::UpsertOrDeleteCashFlowRuleLibraryUsers - {e.Message}", e);
             }
             catch (InvalidOperationException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::UpsertOrDeleteCashFlowRuleLibraryUsers - {e.Message}");
-                return BadRequest();
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::UpsertOrDeleteCashFlowRuleLibraryUsers - {e.Message}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CashFlowError}::UpsertOrDeleteCashFlowRuleLibraryUsers - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CashFlowError}::UpsertOrDeleteCashFlowRuleLibraryUsers - {e.Message}", e);
             }
+            return Ok();
         }
         private List<CashFlowRuleLibraryDTO> GetAllCashFlowRuleLibraries()
         {

@@ -93,15 +93,15 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AggregationError}::NetworkAggregateAccess - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name,  $"{AggregationError}::NetworkAggregateAccess - {HubService.errorList["Unauthorized"]}", e);
+                return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AggregationError}::NetworkAggregateAccess - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AggregationError}::NetworkAggregateAccess - {e.Message}", e);
+                return Ok();
             }
         }
 

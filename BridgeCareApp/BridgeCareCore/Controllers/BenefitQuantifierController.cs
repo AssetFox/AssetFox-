@@ -36,8 +36,8 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var networkName = UnitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BenefitQuantifierError}::GetBenefitQuantifier for {networkName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{BenefitQuantifierError}::GetBenefitQuantifier for {networkName} - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -58,8 +58,8 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var expression = dto?.Equation?.Expression ?? "null";
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BenefitQuantifierError}::UpsertBenefitQuantifier {expression} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{BenefitQuantifierError}::UpsertBenefitQuantifier {expression} - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -80,8 +80,8 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var networkName = UnitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BenefitQuantifierError}::DeleteBenefitQuantifier {networkName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{BenefitQuantifierError}::DeleteBenefitQuantifier {networkName} - {e.Message}", e);
+                return Ok();
             }
         }
     }

@@ -66,9 +66,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError,
-                    $"{CalculatedAttributeError}::{nameof(GetEmptyCalculatedAttributesByLibraryId)} - {HubService.errorList["Exception"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CalculatedAttributeError}::{nameof(GetEmptyCalculatedAttributesByLibraryId)} - {HubService.errorList["Exception"]}", e);
+                return Ok();
             }
         }
 
@@ -88,13 +87,13 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Investment error::{e.Message}", e);
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Investment error::{e.Message}", e);
+                return Ok();
             }
         }
 
@@ -110,9 +109,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError,
-                    $"{CalculatedAttributeError}::{nameof(GetEmptyCalculatedAttributesByScenarioId)} - {HubService.errorList["Exception"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CalculatedAttributeError}::{nameof(GetEmptyCalculatedAttributesByScenarioId)} - {HubService.errorList["Exception"]}", e);
+                return Ok();
             }
         }
 
@@ -144,8 +142,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::GetScenarioCalculatedAttributePage - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CalculatedAttributeError}::GetScenarioCalculatedAttributePage - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -161,8 +159,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::GetLibraryCalculatedAttributePage - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CalculatedAttributeError}::GetLibraryCalculatedAttributePage - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -208,7 +206,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::UpsertCalculatedAttributeLibrary - {e.Message}");
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CalculatedAttributeError}::UpsertCalculatedAttributeLibrary - {e.Message}", e);
                 throw;
             }
         }
@@ -227,8 +225,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::UpsertScenarioAttribute for {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CalculatedAttributeError}::UpsertScenarioAttribute for {simulationName} - {e.Message}", e);
             }
             return Ok();
         }
@@ -255,8 +252,8 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::UpsertScenarioAttributes for {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CalculatedAttributeError}::UpsertScenarioAttributes for {simulationName} - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -272,8 +269,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::DeleteLibrary - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CalculatedAttributeError}::DeleteLibrary - {e.Message}", e);
             } 
             return Ok();
         }
@@ -301,8 +297,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::GetIsSharedLibrary - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CalculatedAttributeError}::GetIsSharedLibrary - {e.Message}", e);
+                return Ok();
             }
         }
         [HttpGet]
@@ -323,13 +319,13 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::GetCalculatedAttributeLibraryUsers - {e.Message}");
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CalculatedAttributeError}::GetCalculatedAttributeLibraryUsers - {e.Message}", e);
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::GetCalculatedAttributeLibraryUsers - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CalculatedAttributeError}::GetCalculatedAttributeLibraryUsers - {e.Message}", e);
+                return Ok();
             }
         }
         [HttpPost]
@@ -349,19 +345,17 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::UpsertOrDeleteCalculatedAttributeLibraryUsers - {e.Message}");
-                return Ok();
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CalculatedAttributeError}::UpsertOrDeleteCalculatedAttributeLibraryUsers - {e.Message}", e);
             }
             catch (InvalidOperationException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::UpsertOrDeleteCalculatedAttributeLibraryUsers - {e.Message}");
-                return BadRequest();
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CalculatedAttributeError}::UpsertOrDeleteCalculatedAttributeLibraryUsers - {e.Message}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::UpsertOrDeleteCalculatedAttributeLibraryUsers - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CalculatedAttributeError}::UpsertOrDeleteCalculatedAttributeLibraryUsers - {e.Message}", e);
             }
+            return Ok();
         }
         // Helpers
         private Dictionary<Guid, string> LibraryIdList() =>

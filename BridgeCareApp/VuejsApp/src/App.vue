@@ -131,7 +131,7 @@
                                     <template v-slot:activator>                                        
                                         <v-list-tile id="App-notification-vListTile">
                                             <v-row justify="end">
-                                                <v-col cols ="9">
+                                                <v-col cols ="7">
                                                     <v-icon class="notificationIcon"
                                                             :color="notification.iconColor">
                                                         {{ notification.icon }}
@@ -140,16 +140,25 @@
                                                         {{ notification.shortMessage }}                                            
                                                     </v-list-item-content>
                                                 </v-col>
-                                                <v-col> 
-                                                    <v-btn icon size="16" position="absolute" style="margin-left:15%;">
+                                                <v-col v-if="hasAdminAccess && !isNil(notification.stackTrace)" align-self="center"> 
+                                                    <v-btn size="small" variant="text" @click.stop="onStackTraceClick(index)">
+                                                            Show Stack
+                                                    </v-btn>
+                                                </v-col>
+                                                <v-col align-self="center"> 
+                                                    <v-row justify="end" align="center">
+                                                        <v-btn icon size="16" >
                                                             <v-icon size="small"
                                                                     @click="onRemoveNotification(notification.id)"
                                                                 >fas fa-times-circle
                                                             </v-icon>
-                                                    </v-btn>
+                                                        </v-btn>
+                                                    </v-row>
+                                                    
                                                 </v-col>
+                                                
                                             </v-row>
-                                        </v-list-tile>
+                                        </v-list-tile>                                  
                                         <v-list-tile class="notification-long-message" v-if="notification.active">
                                             <v-list-item-title class="text-wrap">
                                                 {{ notification.longMessage }}
@@ -258,6 +267,7 @@
             <Spinner />
             <Alert :dialog-data="alertDialogData" @submit="onAlertResult" />
             <Alert :dialogData="ConfirmRunAnalysisCompleted" @submit="onConfirmRunAnalysisCompletedSubmit"/>
+            <Alert :dialog-data="stackTraceAlert" @submit="onStackTraceSubmit" />
             <NewsDialog :showDialog="showNewsDialog" @close="onCloseNewsDialog()" />
         </v-main>
     </v-app>
@@ -337,6 +347,7 @@ import { getUrl } from './shared/utils/get-url';
     function addSuccessNotificationAction(payload?: any) { store.dispatch('addSuccessNotification', payload);}
     function addWarningNotificationAction(payload?: any) { store.dispatch('addWarningNotification', payload);}
     function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification', payload);} 
+    function addErrorNotificationWithStackTraceAction(payload?: any) { store.dispatch('addErrorNotificationWithStackTrace', payload);} 
     function addInfoNotificationAction(payload?: any) { store.dispatch('addInfoNotification', payload);} 
     function addTaskCompletedNotificationAction(payload: any) { store.dispatch('addTaskCompletedNotification', payload)}
     function removeNotificationAction(payload?: any) { store.dispatch('removeNotification', payload);}
@@ -362,6 +373,7 @@ import { getUrl } from './shared/utils/get-url';
     let latestNewsDate: string = '0001-01-01';
     let currentUserLastNewsAccessDate: string = '0001-01-01';
     let alertDialogData: AlertData = clone(emptyAlertData);
+    let stackTraceAlert = ref<AlertData>(clone(emptyAlertData));
     let pushRouteUpdate: boolean = false;
     let route: any = {};
     const selectedScenario = ref<Scenario>(clone(emptyScenario));
@@ -656,16 +668,19 @@ import { getUrl } from './shared/utils/get-url';
 
     function onAddErrorNotification(data: any) {
         let errorNotification:string = data.error.toString();
+        let stackTrace: string = data.stackTrace.toString();
         let spl = errorNotification.split('::');
         if (spl.length > 0 ) {
-            addErrorNotificationAction( {
+            addErrorNotificationWithStackTraceAction( {
                 message: spl[0],
-                longMessage: spl.length>1 ? spl[1] : 'Unknown Error'
+                longMessage: spl.length>1 ? spl[1] : 'Unknown Error',
+                stackTrace: stackTrace
             });
         } else {
-            addErrorNotificationAction( {
+            addErrorNotificationWithStackTraceAction( {
                 message: 'Server Error',
-                longMessage: data.error
+                longMessage: data.error,
+                stackTrace: stackTrace
             });
         }
     }
@@ -804,6 +819,19 @@ import { getUrl } from './shared/utils/get-url';
 
     function onCloseNewsDialog() {
         showNewsDialog.value = false;
+    }
+
+    function onStackTraceClick(index: number){
+        stackTraceAlert.value = {
+            showDialog: true,
+            heading: 'Stack Trace',
+            choice: false,
+            message: notifications.value[index].stackTrace!,        
+        };
+        
+    }
+    function onStackTraceSubmit(submit: boolean) {
+        stackTraceAlert.value.showDialog = false;
     }
 
     function checkLastNewsAccessDate () {

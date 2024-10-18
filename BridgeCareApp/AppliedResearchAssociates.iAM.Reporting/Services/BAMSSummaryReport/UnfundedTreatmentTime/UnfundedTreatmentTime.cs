@@ -49,10 +49,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             var treatmentsPerSection = new SortedDictionary<int, List<Tuple<SimulationYearDetail, AssetDetail, TreatmentOptionDetail>>>();
             var validFacilityIds = new List<int>(); // It will keep the Ids which has gone unfunded for all the years
             var firstYear = true;
-            //Resort the list by BRKey and year 
-            //Shade the BRKeys group
-            //Group 1 – no shading / White
-            //Group 2 – light gray
             foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
             {
                 var untreatedSections = _reportHelper.GetSectionsWithUnfundedTreatments(year);

@@ -47,7 +47,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             unfundedTreatmentTimeWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
 
             AddDynamicDataCells(unfundedTreatmentTimeWorksheet, simulationOutput, currentCell);
-            //unfundedTreatmentTimeWorksheet.Calculate();  // calculation is set to manual, so force calculation of the total now
 
             unfundedTreatmentTimeWorksheet.Cells.AutoFitColumns();
             _unfundedTreatmentCommon.PerformPostAutofitAdjustments(unfundedTreatmentTimeWorksheet);
@@ -83,7 +82,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 foreach (var section in untreatedSections)
                 {
                     var facilityId = Convert.ToInt32(_reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_"));
-                    if (!treatmentsPerSection.ContainsKey(facilityId)) // skip if we already have a treatment for this section // TODO do we still want to keep same way?
+                    if (!treatmentsPerSection.ContainsKey(facilityId)) // skip if we already have a treatment for this section
                     {
                         var treatmentOptions = section.TreatmentOptions.
                             Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();

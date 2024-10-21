@@ -5,7 +5,7 @@
     "private": true,
     "description": "BridgeCare",
     "author": {
-        "name": "Applied Research Associates"
+        "name": "Asset Fox"
     },
     "scripts": {
         "dev": "vite",

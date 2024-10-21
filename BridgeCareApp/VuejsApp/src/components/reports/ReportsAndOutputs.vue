@@ -51,7 +51,7 @@
                                 </v-menu>
                                     <v-btn v-if="props.item.name.includes('Summary')"
                                         @click="onShowCriterionEditorDialog(props.item.id)"
-                                        class="ghd-green"
+                                        class="criteria-button-blue"
                                         flat
                                         icon
                                     >
@@ -63,21 +63,22 @@
                                     <v-btn
                                     @click="onGenerateReport(props.item.id, true)"
                                     :disabled="props.item.isGenerated"
-                                    :class="props.item.isGenerated ? 'ghd-gray' : 'ghd-green'"
+                                    class="ghd-green"
                                     flat
                                     >
                                     <img
-                                        :class="props.item.isGenerated ? 'gray-icon' : 'green-icon'"
-                                        class="img-general"
+                                    style="height: 25px"
                                         :src="getUrl('assets/icons/attributes-dark.svg')"
                                     />
                                     </v-btn>
                                     <v-btn
                                         @click="onDownloadReport(props.item.id)"
+                                        :disabled="!props.item.isGenerated"
+                                        class='ghd-blue-icon'
                                         flat
                                         icon
                                     >
-                                        <img class='img-general' :src="getUrl('assets/icons/download.svg')"/>
+                                        <img :src="getUrl('assets/icons/download.svg')"/>
                                     </v-btn>
                                     <v-btn
                                         v-if="hasAdminAccess"
@@ -472,6 +473,20 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
 
 </script>
 <style>
+.criteria-button-blue {
+    --svg-color: #2A578D;
+    color: var(--svg-color) !important;
+}
+
 .green-icon {
-    filter: invert(61%) sepia(70%) saturate(486%) hue-rotate(79deg) brightness(82%) contrast(85%);}
+    filter: invert(61%) sepia(70%) saturate(486%) hue-rotate(79deg) brightness(82%) contrast(85%);
+}
+
+.green-icon.disabled {
+    color: transparent !important;  /* Inherit color from parent */
+    --svg-color: #999999;
+    background-color: transparent !important; /* Maintain the background color */
+
+}
+
 </style>

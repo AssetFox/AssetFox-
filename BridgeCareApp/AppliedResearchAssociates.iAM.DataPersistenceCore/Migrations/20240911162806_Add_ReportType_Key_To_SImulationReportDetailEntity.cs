@@ -12,6 +12,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "PK_SimulationReportDetail",
                 table: "SimulationReportDetail");
 
+            migrationBuilder.DropIndex(
+                        name: "IX_SimulationReportDetail_SimulationId",
+                        table: "SimulationReportDetail");
+
             migrationBuilder.AlterColumn<string>(
                 name: "ReportType",
                 table: "SimulationReportDetail",
@@ -26,6 +30,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "PK_SimulationReportDetail",
                 table: "SimulationReportDetail",
                 columns: new[] { "SimulationId", "ReportType" });
+
+            // Add a new unique composite index on SimulationId and ReportType
+            migrationBuilder.CreateIndex(
+                name: "IX_SimulationReportDetail_SimulationId_ReportType",
+                table: "SimulationReportDetail",
+                columns: new[] { "SimulationId", "ReportType" },
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -33,6 +44,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
             migrationBuilder.DropPrimaryKey(
                 name: "PK_SimulationReportDetail",
                 table: "SimulationReportDetail");
+
+            migrationBuilder.DropIndex(
+                        name: "IX_SimulationReportDetail_SimulationId",
+                        table: "SimulationReportDetail");
 
             migrationBuilder.AlterColumn<string>(
                 name: "ReportType",
@@ -46,6 +61,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "PK_SimulationReportDetail",
                 table: "SimulationReportDetail",
                 column: "SimulationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SimulationReportDetail_SimulationId",
+                table: "SimulationReportDetail",
+                column: "SimulationId",
+                unique: true);
         }
     }
 }

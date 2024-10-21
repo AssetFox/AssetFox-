@@ -160,14 +160,14 @@
                     id="CriteriaEditor-save-btn"
                     :disabled="cannotSubmit"
                     @click="onSubmitCriteriaEditorResult(true)"
-                    class="ara-blue-bg text-white"
+                    class="assetFox-blue-bg text-white"
                 >
                     Save
                 </v-btn>
                 <v-btn
                     id="CriteriaEditor-cancel-btn"
                     @click="onSubmitCriteriaEditorResult(false)"
-                    class="ara-orange-bg text-white"
+                    class="assetFox-orange-bg text-white"
                     >Cancel</v-btn>
             </v-row>
         </v-col>

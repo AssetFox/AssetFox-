@@ -1351,8 +1351,6 @@ import ReportsService from '@/services/reports.service';
             checkIfReportExists(simulationRunSettingId);
         });
 
-        await getScenariosReportSettings();
-
         availableActions = {
             runAnalysis: 'runAnalysis',
             reports: 'reports',
@@ -2067,16 +2065,6 @@ import ReportsService from '@/services/reports.service';
                     workQueueStatusUpdate: updatedQueueItem
                 })
             }                                
-    }
-
-    async function getScenariosReportSettings()
-    {
-        await ScenarioService.getScenariosReportSettings().then(response => {
-            if(response.data)
-            {
-                availableScenarioIds.value = response.data.map((item: { simulationId: string | number }) => item.simulationId);
-            }  
-        });
     }
 
     function checkIfReportExists(scenarioId: any) 

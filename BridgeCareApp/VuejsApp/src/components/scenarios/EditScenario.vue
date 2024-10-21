@@ -32,13 +32,29 @@
                                     <CommittedProjectSvg style="height: 32px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Committed Projects'"/>  
                                     <ReportsSvg style="height: 38px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Reports & Outputs'"/>  
                             </template>
-                            <v-list-item-title style="width: auto; padding-left: 5px;" v-text="navigationTab.tabName"></v-list-item-title>
+                            <v-list-item-title style="display: flex; justify-content: space-between; align-items: center; padding-left: 5px; width: 100%;">
+    <span>{{ navigationTab.tabName }}</span>
+    <i 
+        :class="[navigationTab.validationIcon, { 
+            'green-icon': navigationTab.validationIcon === 'fas fa-check-circle', 
+            'red-icon': navigationTab.validationIcon === 'fas fa-times-circle', 
+            'yellow-icon': navigationTab.validationIcon === 'fas fa-exclamation-circle' 
+        }]" 
+        v-if="navigationTab.validationIcon" 
+        style="margin-left: 30px;"
+        v-b-tooltip.hover
+        :title="getTooltipText(navigationTab.validationIcon, navigationTab.tabName)">
+    </i>
+</v-list-item-title>
                         </v-list-item>
                     </v-list-item>
                 </v-list>
                 <div style="margin: 10px;">
                     <v-btn
-                        class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border"
+                        :class="{
+                            'ghd-white-bg green-icon ghd-button-text': !isBudgetPrioritySet,
+                            'ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border': isBudgetPrioritySet
+                        }"
                         @click="onShowRunSimulationAlert"
                         :disabled="isBudgetPrioritySet"
                         block
@@ -111,6 +127,7 @@ import TargetConditionGoalSvg from '@/shared/icons/TargetConditionGoalSvg.vue';
 import TreatmentSvg from '@/shared/icons/TreatmentSvg.vue';
 import CalculatedAttributeSvg from '@/shared/icons/CalculatedAttributeSvg.vue';
 import CommittedProjectSvg from '@/shared/icons/CommittedProjectSvg.vue';
+import { SectionCommittedProject } from '@/shared/models/iAM/committed-projects';
 import ReportsSvg from '@/shared/icons/ReportsSvg.vue';
 import { useStore } from 'vuex'; 
 import { useRouter } from 'vue-router'; 
@@ -127,8 +144,8 @@ import BudgetPriorityService from '@/services/budget-priority.service';
 import { BudgetPriority } from '@/shared/models/iAM/budget-priority';
 import { inject } from 'vue';
 import mitt, { Emitter, EventType } from 'mitt';
-import { debounce } from 'lodash';
 import AnalysisMethodService from '@/services/analysis-method.service';
+import CashFlowService from '@/services/cash-flow.service';
 
     let store = useStore(); 
     const router = useRouter(); 
@@ -176,13 +193,15 @@ import AnalysisMethodService from '@/services/analysis-method.service';
     let isDeteriorationModelSet = ref(false);
     let isTreatmentSet = ref(false);
     let isBudgetPrioritySet = ref(false);
+    let isCashFlowSet = ref(false);
+    let isCommittedProjectsSet = ref(false);
     let hasScenarioBeenRun = ref(false);
-    let emittedSimulationId: {} | null = null;
 
     let navigationTabs = ref<NavigationTab[]>([
     {
         tabName: 'Analysis Method',
         tabIcon: 'fas fa-chart-bar',
+        validationIcon: '',
         navigation: {
             path: '/EditAnalysisMethod/',
         },
@@ -190,6 +209,7 @@ import AnalysisMethodService from '@/services/analysis-method.service';
     {
         tabName: 'Investment',
         tabIcon: 'fas fa-dollar-sign',
+        validationIcon: '',
         navigation: {
             path: '/InvestmentEditor/Scenario/',
         },
@@ -198,6 +218,7 @@ import AnalysisMethodService from '@/services/analysis-method.service';
     {
         tabName: 'Deterioration Model',
         tabIcon: 'fas fa-chart-line',
+        validationIcon: '',
         navigation: {
             path: '/PerformanceCurveEditor/Scenario/',
         },
@@ -206,6 +227,7 @@ import AnalysisMethodService from '@/services/analysis-method.service';
     {
         tabName: 'Treatment',
         tabIcon: 'fas fa-tools',
+        validationIcon: '',
         navigation: {
             path: '/TreatmentEditor/Scenario/',
         },
@@ -214,6 +236,7 @@ import AnalysisMethodService from '@/services/analysis-method.service';
     {
         tabName: 'Budget Priority',
         tabIcon: 'fas clipboard',
+        validationIcon: '',
         navigation: {
             path: '/BudgetPriorityEditor/Scenario/',
         },
@@ -250,12 +273,15 @@ import AnalysisMethodService from '@/services/analysis-method.service';
     {
         tabName: 'Cash Flow',
         tabIcon: 'fas fa-money-bill-wave',
+        validationIcon: '',
         navigation: {
             path: '/CashFlowEditor/Scenario/',
         },
+        disabled: isBudgetPrioritySet.value,
     },
     {
         tabName: 'Committed Projects',
+        validationIcon: '',
         tabIcon: 'fas fa-clipboard',
         navigation: {
             path: '/CommittedProjectsEditor/Scenario/',
@@ -280,10 +306,13 @@ import AnalysisMethodService from '@/services/analysis-method.service';
         await getAnalysisMethod();
         await getTreatments();
         await getBudgetPriority();
-        await getDeteriorationModel();
         await getInvestment();
+        await getDeteriorationModel();
         await getReportRunStatus();
+        await getCashFlow();
+        await getCommittedProjects();
     });
+    
     onBeforeMount(() => {
         selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
     });
@@ -472,6 +501,10 @@ import AnalysisMethodService from '@/services/analysis-method.service';
                 if (tab.tabName === 'Investment') {
                     tab.disabled = false;
                 }
+                else if(tab.tabName === 'Analysis Method')
+                {
+                    tab.validationIcon = 'fas fa-check-circle';
+                }
             })
         });
 
@@ -480,6 +513,10 @@ import AnalysisMethodService from '@/services/analysis-method.service';
             navigationTabs.value.forEach((tab) => {
                 if (tab.tabName === 'Deterioration Model') {
                     tab.disabled = false;
+                }
+                else if(tab.tabName === 'Investment')
+                {
+                    tab.validationIcon = 'fas fa-check-circle';
                 }
             })
         });
@@ -490,6 +527,10 @@ import AnalysisMethodService from '@/services/analysis-method.service';
                     if (tab.tabName === 'Treatment') {
                         tab.disabled = false;
                     }
+                    else if(tab.tabName === 'Deterioration Model')
+                    {
+                        tab.validationIcon = 'fas fa-check-circle';
+                    }
                 });
         });
 
@@ -499,6 +540,10 @@ import AnalysisMethodService from '@/services/analysis-method.service';
                     if (tab.tabName === 'Budget Priority') {
                         tab.disabled = false;
                     }
+                    else if(tab.tabName === 'Treatment')
+                    {
+                        tab.validationIcon = 'fas fa-check-circle';
+                    }
                 });
         });
 
@@ -507,8 +552,34 @@ import AnalysisMethodService from '@/services/analysis-method.service';
 
             // Update the disabled property of the Committed Projects tab
             navigationTabs.value.forEach((tab) => {
-                    if (tab.tabName === 'Committed Projects') {
+                    if (tab.tabName === 'Committed Projects' || tab.tabName === 'Cash Flow') {
                         tab.disabled = false;
+                    }
+                    else if(tab.tabName === 'Budget Priority')
+                    {
+                        tab.validationIcon = 'fas fa-check-circle';
+                    }
+                });
+        });
+
+        $emitter.on('CashFlowUpdated', () => {
+            isCashFlowSet.value = false;
+
+            // Update the icon of the Cash Flow tab
+            navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Cash Flow') {
+                        tab.validationIcon = 'fas fa-check-circle';
+                    }
+                });
+        });
+
+        $emitter.on('CommittedProjectsUpdated', () => {
+            isCashFlowSet.value = false;
+
+            // Update the icon of the Committed Projects tab
+            navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Committed Projects') {
+                        tab.validationIcon = 'fas fa-check-circle';
                     }
                 });
         });
@@ -681,6 +752,17 @@ import AnalysisMethodService from '@/services/analysis-method.service';
             if(typeof response.data === 'boolean')
             {
                 isAnalysisMethodSet.value = response.data === false;
+
+                navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Analysis Method') {
+                        if(isAnalysisMethodSet.value === true)
+                        {
+                            tab.validationIcon = "fas fa-times-circle";
+                        }
+                        else
+                        tab.validationIcon = "fas fa-check-circle";
+                    }
+                });
                 
                 // Update the disabled property
                 navigationTabs.value.forEach((tab) => {
@@ -718,6 +800,17 @@ import AnalysisMethodService from '@/services/analysis-method.service';
         .then((response: { data: any; }) => {
             if (response.data) {
                 isInvestmentSet.value = response.data.firstYear == 0;
+
+                navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Investment') {
+                        if(isInvestmentSet.value === true)
+                        {
+                            tab.validationIcon = "fas fa-times-circle";
+                        }
+                        else
+                        tab.validationIcon = "fas fa-check-circle";
+                    }
+                });
                 
                 // Update the disabled property
                 navigationTabs.value.forEach((tab) => {
@@ -752,6 +845,18 @@ import AnalysisMethodService from '@/services/analysis-method.service';
             if (response.data) 
             {
                 isDeteriorationModelSet.value = response.data.items.length == 0;
+
+                navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Deterioration Model') {
+                        if(isDeteriorationModelSet.value === true)
+                        {
+                            tab.validationIcon = "fas fa-times-circle";
+                        }
+                        else
+                        tab.validationIcon = "fas fa-check-circle";
+                    }
+                });
+
                 
                 navigationTabs.value.forEach((tab) => {
                     if (tab.tabName === 'Treatment') {
@@ -768,6 +873,18 @@ import AnalysisMethodService from '@/services/analysis-method.service';
             if(response.data)
             {
                 isTreatmentSet.value = response.data.length == 0;
+
+                navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Treatment') {
+                        if(isTreatmentSet.value === true)
+                        {
+                            tab.validationIcon = "fas fa-times-circle";
+                        }
+                        else
+                        tab.validationIcon = "fas fa-check-circle";
+                    }
+                });
+
                 navigationTabs.value.forEach((tab) => {
                     if (tab.tabName === 'Budget Priority') {
                         tab.disabled = isTreatmentSet.value;
@@ -798,14 +915,110 @@ import AnalysisMethodService from '@/services/analysis-method.service';
             if(response.data)
             {
                 isBudgetPrioritySet.value = response.data.items.length == 0;
+
                 navigationTabs.value.forEach((tab) => {
-                    if (tab.tabName === 'Committed Projects') {
+                    if (tab.tabName === 'Budget Priority') {
+                        if(isBudgetPrioritySet.value === true)
+                        {
+                            tab.validationIcon = "fas fa-times-circle";
+                        }
+                        else
+                        tab.validationIcon = "fas fa-check-circle";
+                    }
+                });
+
+                navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Committed Projects' || tab.tabName === 'Cash Flow') {
                         tab.disabled = isBudgetPrioritySet.value;
                     }
                 });
             }   
         });
     }
+
+    async function getCashFlow()
+    {
+        await CashFlowService.getScenarioCashFlowRules(selectedScenarioId).then(response => {
+            if(response.data)
+            {
+                isCashFlowSet.value = response.data.length == 0;
+
+                navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Cash Flow') {
+                        if(isCashFlowSet.value === false)
+                        {
+                            tab.validationIcon = "fas fa-check-circle";
+                        }
+                        else
+                        tab.validationIcon = "fas fa-exclamation-circle";
+                    }
+                });
+            }   
+        });
+    }
+
+    async function getCommittedProjects()
+    {
+        const request: PagingRequest<SectionCommittedProject>= {
+            page: 1,
+            rowsPerPage: 5,
+            syncModel: {
+                libraryId: null,
+                updateRows: [],
+                rowsForDeletion: [],
+                addedRows: [],
+                isModified: false
+            },           
+            sortColumn: "",
+            isDescending: false,
+            search: ""
+        };
+
+        await CommittedProjectsService.getCommittedProjectsPage(selectedScenarioId, request).then(response => {
+            if(response.data)
+            {
+                isCommittedProjectsSet.value = response.data.items.length == 0;
+
+                navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Committed Projects') {
+                        if(isCommittedProjectsSet.value === true)
+                        {
+                            tab.validationIcon = "fas fa-exclamation-circle";
+                        }
+                        else
+                        tab.validationIcon = "fas fa-check-circle";
+                    }
+                });
+            }   
+
+        })
+    }
+
+    function getTooltipText(validationIcon: string, tabName: string) 
+    {
+        // Map each name and message to a record
+        const tabNameMessages: Record<string, string> = {
+            'Analysis Method': 'Analysis Method must be saved before continuing',
+            'Investment': 'Investment must be saved before continuing',
+            'Deterioration Model': 'Deterioration Model must be saved before continuing',
+            'Treatment': 'Treatment must be saved before continuing',
+            'Budget Priority': 'Budget Priority must be saved before continuing',
+            'Cash Flow': 'Warning: Cash flow has not been set',
+            'Committed Projects': 'Warning: Committed Projects have not been set'
+        };
+
+        // Set the validation for each item
+        if (validationIcon === 'fas fa-check-circle') {
+            return 'All validations passed';
+        } else if (validationIcon === 'fas fa-times-circle' && tabName in tabNameMessages) {
+            return tabNameMessages[tabName];
+        } else if (validationIcon === 'fas fa-exclamation-circle' && tabName in tabNameMessages) {
+            return tabNameMessages[tabName];
+        } else {
+            return '';
+        }
+    }
+
 
     async function getReportRunStatus()
     {
@@ -855,5 +1068,18 @@ import AnalysisMethodService from '@/services/analysis-method.service';
 .scenario-icon-stroke {
     stroke: #999999 !important;
 }
+
+.green-icon {
+  color: green;
+}
+
+.red-icon {
+  color: red;
+}
+
+.yellow-icon {
+    color: #ffd32c;
+}
+
 
 </style>

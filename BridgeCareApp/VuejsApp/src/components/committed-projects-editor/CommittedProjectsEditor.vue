@@ -892,6 +892,7 @@ import CancelSaveButtonGroup from '@/shared/components/buttons/CancelSaveButtonG
         } else {
             performUpsert();
         }
+        $emitter.emit('CommittedProjectsUpdated');
     }
 
      function handleUpsertResponse(response: AxiosResponse) {

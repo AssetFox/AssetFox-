@@ -333,9 +333,13 @@ import { useConfirm } from 'primevue/useconfirm';
 import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
+import { inject } from 'vue';
+import mitt, { Emitter, EventType } from 'mitt';
+
 
 let store = useStore();
 const confirm = useConfirm();
+const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
 // const stateSimulationReportNames = computed<string[]>(() => store.state.adminDataModule.simulationReportNames);
 
 const stateCashFlowRuleLibraries = computed<CashFlowRuleLibrary[]>(() => store.state.cashFlowModule.cashFlowRuleLibraries);
@@ -826,6 +830,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
                 libraryImported = false;
             }           
         });
+        $emitter.emit('CashFlowUpdated');
     }
 
     function onUpsertCashFlowRuleLibrary() {

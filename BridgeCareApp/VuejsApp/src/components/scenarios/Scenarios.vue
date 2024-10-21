@@ -233,7 +233,7 @@
                                     </template>
                                     <!-- <v-alert
                                         :model-value="hasMineSearch()"
-                                        class="ara-orange-bg"
+                                        class="assetFox-orange-bg"
                                         icon="fas fa-exclamation"
                                         slot="no-data"
                                     >
@@ -1351,8 +1351,6 @@ import ReportsService from '@/services/reports.service';
             checkIfReportExists(simulationRunSettingId);
         });
 
-        await getScenariosReportSettings();
-
         availableActions = {
             runAnalysis: 'runAnalysis',
             reports: 'reports',
@@ -1812,7 +1810,7 @@ import ReportsService from '@/services/reports.service';
         {
             if(scenarioForReportDeletion.value)
             {
-                deleteAllReports();
+                deleteAllReports(scenarioForReportDeletion.value);
             }
         }
     }
@@ -1930,19 +1928,19 @@ import ReportsService from '@/services/reports.service';
                 scenarioId: selectedScenario.id,
                 scenarioName: selectedScenario.name,
             }).then(async () => {
-                deleteAllReports();
+                deleteAllReports(selectedScenario.id);
                 selectedScenario = clone(emptyScenario); 
             });
         }
     }
 
-    async function deleteAllReports() {
-        await ReportsService.deleteAllGeneratedReports(selectedScenario.id)
+    async function deleteAllReports(_scenario: any) {
+        await ReportsService.deleteAllGeneratedReports(_scenario.id)
             .then((response: AxiosResponse<any>) => {
                 if (hasValue(response, 'data')) {
                     if (!response.data.includes("No reports exist")) {
                         addSuccessNotificationAction({
-                            message: 'All reports for ' + selectedScenario.name + ' have been deleted.',
+                            message: 'All reports for ' + _scenario.name + ' have been deleted.',
                         });
                     }
                 } else {
@@ -2067,16 +2065,6 @@ import ReportsService from '@/services/reports.service';
                     workQueueStatusUpdate: updatedQueueItem
                 })
             }                                
-    }
-
-    async function getScenariosReportSettings()
-    {
-        await ScenarioService.getScenariosReportSettings().then(response => {
-            if(response.data)
-            {
-                availableScenarioIds.value = response.data.map((item: { simulationId: string | number }) => item.simulationId);
-            }  
-        });
     }
 
     function checkIfReportExists(scenarioId: any) 

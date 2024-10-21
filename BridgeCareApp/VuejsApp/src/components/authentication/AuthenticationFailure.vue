@@ -7,7 +7,7 @@
                         <v-card-title>
                             <h3>Authentication Failed</h3>
                         </v-card-title>
-                        <v-btn @click="onAttemptAuthentication" class="v-btn theme--light ara-blue-bg text-white">
+                        <v-btn @click="onAttemptAuthentication" class="v-btn theme--light assetFox-blue-bg text-white">
                             Try Again
                         </v-btn>
                     </v-card>

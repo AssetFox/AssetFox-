@@ -105,7 +105,7 @@
                 <p class="p-success Montserrat-font-family" v-if="sqlValid && showSqlMessage">Test Connection: {{sqlResponse}}</p>
                 <p class="p-fail Montserrat-font-family" v-if="!sqlValid && showSqlMessage">Test Connection: {{sqlResponse}}</p>
                 <p class="p-success Montserrat-font-family" v-if="showSaveMessage">Successfully saved.</p>
-                <p class="ara-blue Montserrat-font-family" v-if="isNewDataSource && showExcel">Save new data source before loading file.</p>
+                <p class="assetFox-blue Montserrat-font-family" v-if="isNewDataSource && showExcel">Save new data source before loading file.</p>
                 <p class="p-fail Montserrat-font-family" v-if="false">Error! {{invalidColumn}} Column is invalid</p>
             </v-col>
             <v-row justify="center" style="margin-left: 2%; margin-top: 4%;" class="text-center">

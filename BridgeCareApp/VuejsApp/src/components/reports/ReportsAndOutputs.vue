@@ -51,7 +51,7 @@
                                 </v-menu>
                                     <v-btn v-if="props.item.name.includes('Summary')"
                                         @click="onShowCriterionEditorDialog(props.item.id)"
-                                        class="ghd-green"
+                                        class="criteria-button-blue"
                                         flat
                                         icon
                                     >
@@ -63,28 +63,34 @@
                                     <v-btn
                                     @click="onGenerateReport(props.item.id, true)"
                                     :disabled="props.item.isGenerated"
-                                    :class="props.item.isGenerated ? 'ghd-gray' : 'ghd-green'"
+                                    class="ghd-green"
                                     flat
                                     icon
                                     >
                                     <img
-                                        :class="props.item.isGenerated ? 'gray-icon' : 'green-icon'"
-                                        class="img-general"
+                                    style="height: 25px"
                                         :src="getUrl('assets/icons/attributes-dark.svg')"
                                     />
                                     </v-btn>
                                     <v-btn
                                         @click="onDownloadReport(props.item.id)"
+                                        :disabled="!props.item.isGenerated"
+                                        class='ghd-blue-icon'
                                         flat
                                         icon
                                     >
-                                        <img class='img-general' :src="getUrl('assets/icons/download.svg')"/>
+                                        <img :src="getUrl('assets/icons/download.svg')"/>
                                     </v-btn>
-                                    <ReportsTrashCanButton
+                                    <v-btn
                                         v-if="hasAdminAccess"
                                         @click="onDeleteReport(props.item.id)"
-                                        :disabled="!props.item.isGenerated || !CanUserDelete(props.item.name)"                                                                               
-                                    />
+                                        :disabled="!props.item.isGenerated || !CanUserDelete(props.item.name)"
+                                        flat
+                                        icon
+                                        class="ghd-red"
+                                    >
+                                        <TrashCanSvg />
+                                    </v-btn>
                                 </td>
                             </tr>
                             </template>
@@ -469,31 +475,20 @@ import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanBu
 
 </script>
 <style>
-.green-icon {
-    filter: invert(61%) sepia(70%) saturate(486%) hue-rotate(79deg) brightness(82%) contrast(85%);}
-
-    .gh-red {
-    --svg-color: #D9534F;
+.criteria-button-blue {
+    --svg-color: #2A578D;
     color: var(--svg-color) !important;
 }
 
-.ghd-disabled {
-    --svg-color: #B0B0B0; /* Gray color for disabled icon */
-    pointer-events: none; /* Disable hover effects */
+.green-icon {
+    filter: invert(61%) sepia(70%) saturate(486%) hue-rotate(79deg) brightness(82%) contrast(85%);
 }
 
-::v-deep .v-btn.gh-red[disabled] {
-    background-color: transparent !important; /* Remove any background */
-    box-shadow: none !important; /* Remove any shadow */
+.green-icon.disabled {
+    color: transparent !important;  /* Inherit color from parent */
+    --svg-color: #999999;
+    background-color: transparent !important; /* Maintain the background color */
+
 }
 
-::v-deep .v-btn.gh-red[disabled] .v-icon, 
-::v-deep .v-btn.gh-red[disabled] .img-general {
-    color: #B0B0B0 !important; /* Gray color for SVG when disabled */
-    fill: #B0B0B0 !important; /* Gray color for SVG fill */
-}
-
-::v-deep .v-btn.gh-red[disabled]:hover {
-    background-color: transparent !important; /* Ensure no background on hover */
-} 
 </style>

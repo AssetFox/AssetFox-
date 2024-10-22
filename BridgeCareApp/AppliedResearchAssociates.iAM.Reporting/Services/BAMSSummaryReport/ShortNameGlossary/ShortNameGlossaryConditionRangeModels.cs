@@ -11,37 +11,45 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
             {
                 Rows = new List<ExcelRowModel>
                 {
+                    ExcelRowModels.Empty,
                     ExcelRowModels.WithCells(
                         new RelativeExcelRangeModel {
-                            Content =
-                        StackedExcelModels.Stacked(
-                            ExcelValueModels.String($"Posted / Closed Bridge Condition\r\n Range"),
+                            Content = StackedExcelModels.Stacked(
+                            ExcelValueModels.String($"Posted / Closed Bridge Condition Range"),
                             ExcelStyleModels.Bold,
                             ExcelStyleModels.HorizontalCenter,
                             ExcelStyleModels.WrapText),
-                            Size = new ExcelRangeSize(3, 1)
+                            Size = new ExcelRangeSize(3, 2)
                         }),
                     ExcelRowModels.Empty,
-                    RowWithTwoColumnsThenOne(ExcelValueModels.String("Posted Condition <"), 4.1m),
-                    RowWithTwoColumnsThenOne(ExcelValueModels.String("Closed Condition <"), 3m),
+                    RowWithTwoColumnsThenOne(StackedExcelModels.Stacked(
+                        ExcelValueModels.String("Posted Condition <"),
+                        ExcelStyleModels.ThinBorder),
+                        4.1m),
+                    RowWithTwoColumnsThenOne(StackedExcelModels.Stacked(
+                        ExcelValueModels.String("Closed Condition <"),
+                        ExcelStyleModels.ThinBorder),
+                        3m),
+                    ExcelRowModels.Empty,
                     ExcelRowModels.Empty,
                     ExcelRowModels.WithCells(
                         new RelativeExcelRangeModel {
                             Content = StackedExcelModels.Stacked(
                                 ExcelValueModels.String("Condition Limits"),
                                 ExcelStyleModels.Bold,
-                                ExcelStyleModels.HorizontalCenter),
+                                ExcelStyleModels.HorizontalCenter,
+                                ExcelStyleModels.ThinBorder),                            
                             Size = new ExcelRangeSize(3, 1)
                         }),
-
-                    ExcelRowModels.Empty,
                     RowWithTwoColumnsThenOne(StackedExcelModels.Stacked(
                         ExcelValueModels.String("Good Min Cond >"),
-                        ExcelStyleModels.HorizontalCenter),
+                        ExcelStyleModels.HorizontalCenter,
+                        ExcelStyleModels.ThinBorder),
                         7),
                     RowWithTwoColumnsThenOne(StackedExcelModels.Stacked(
                         ExcelValueModels.String("Poor Min Cond <"),
-                        ExcelStyleModels.HorizontalCenter),
+                        ExcelStyleModels.HorizontalCenter,
+                        ExcelStyleModels.ThinBorder),
                         5),
                 }
             };
@@ -57,7 +65,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Sho
                 {
                     Content = StackedExcelModels.Stacked(
                         ExcelValueModels.Decimal(number),
-                        ExcelStyleModels.Right
+                        ExcelStyleModels.Right,
+                        ExcelStyleModels.ThinBorder
                         )
                 });
 

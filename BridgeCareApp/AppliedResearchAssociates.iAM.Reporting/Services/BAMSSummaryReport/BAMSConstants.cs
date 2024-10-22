@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
+﻿namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 {
     public static class BAMSConstants
     {
@@ -21,11 +15,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         public const string BridgeCare = "Bridge Care";
         public const string BridgeTotal = "Bridge Total";
         public const string Unspecified_Budget = "Unspecified";
-        public const string CashNeededByBPN = "Cash Needed By BPN";
+        public const string CashNeededByBPN = "Investment Needed By BPN / Deck Area";
         public const string Closed = "Closed";
-        public const string ClosedBridgeCountByBPN = "Close BPN Count";
-        public const string ClosedBridgeDeckAreaByBPN = "Closed BPN DA";
-        public const string CombinedPostedAndClosed = "Combined Posted and Closed";
+        public const string ClosedBridgeCountByBPN = "Close BPN Bridge Count";
+        public const string ClosedBridgeDeckAreaByBPN = "Closed BPN Deck Area";
+        public const string CombinedPostedAndClosed = "Combined Posted and Closed Bridges";
         public const string CombineNHSNonNHSConditionByBridgeCount = "Combine NHS and Non-NHS Condition By Bridge Count";
         public const string CombineNHSNonNHSConditionByDeckArea = "Combine NHS and Non-NHS Without Committed Projects\nCombine NHS and Non-NHS Without Committed Projects\nCondition By Deck Area";
         public const string CommittedTotal = "Committed Total";
@@ -52,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         public const string Graph_NHSConditionByBridgeCount_Tab = "NHS Count";
         public const string Graph_NHSConditionByBridgeCount_Title = "NHS Condition By Bridge Count";
         public const string Graph_NHSConditionByDeckArea_Tab = "NHS DA";
-        public const string Graph_NHSConditionByDeckArea_Title = "NHS Condition By DA";
+        public const string Graph_NHSConditionByDeckArea_Title = "NHS Condition By Deck Area";
         public const string Graph_NonNHSConditionByBridgeCount_Tab = "Non NHS Count";
         public const string Graph_NonNHSConditionByBridgeCount_Title = "Non-NHS Condition By Bridge Count";
         public const string Graph_NonNHSConditionByDeckArea_Tab = "Non NHS DA";
@@ -78,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         public const string PoorDeckAreaByBPN = "Poor Deck Area By BPN";
         public const string Posted = "Posted";
         public const string PostedBridgeCountByBPN = "Posted Bridge Count By BPN";
-        public const string PostedBridgeDeckAreaByBPN = "Posted BPN DA";
+        public const string PostedBridgeDeckAreaByBPN = "Posted BPN Deck Area";
         public const string RemainingBudget = "Remaining Budget";
         public const string SubDurationN = "SUB_DURATION_N";
         public const string SubSeeded = "SUB_SEEDED";

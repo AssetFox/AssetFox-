@@ -5,7 +5,7 @@
             @click="onCancel"
             :disabled="cancelDisabled"
             flat
-            class="ghd-white-bg ghd-blue ghd-button-text ghd-button"
+            class="ghd-white-bg ghd-blue ghd-button-text ghd-button ghd-outline-button-padding"
         >
         Cancel
         </v-btn>
@@ -17,7 +17,7 @@
             @click="onSave"
             :disabled="saveDisabled"
             flat
-            class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
+            class="ghd-blue-bg ghd-white ghd-button-text ghd-button ghd-outline-button-padding"
         >
         Save
         </v-btn>

@@ -44,7 +44,7 @@
                         </v-btn>
                         <v-btn @click="onShowCreateCashFlowRuleLibraryDialog(false)"
                             id="CashFlowEditor-addCashFlowLibrary-btn"
-                            style="margin-left: 5px;"
+                            style="margin-left: 10px;"
                             variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario">
                             Create New Library
@@ -209,7 +209,7 @@
                 <v-btn variant = "outlined"
                     @click="onDeleteCashFlowRuleLibrary"
                     id="CashFlowEditor-deleteLibrary-btn"
-                    class='m-2 ghd-blue ghd-button-text ghd-button'
+                    class='m-2 ghd-red ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission">
                     Delete Library

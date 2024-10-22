@@ -38,15 +38,16 @@
                 <v-col cols = "auto" class="ghd-constant-header">     
                     <v-btn 
                         id="RemainingLifeLimitEditor-addRemainingLifeLimit-btn"
-                        class="ghd-white-bg ghd-blue ghd-button"
+                        class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button"
                         @click="onShowCreateRemainingLifeLimitDialog"
+                        style="margin-right: 5px;"
                         v-show="librarySelectItemValue != null || hasScenario"
                         variant = "outlined">Add Remaining Life Limit
                     </v-btn>
                     <v-btn
                         id="RemainingLifeLimitEditor-createNewLibrary-vbtn"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                        style="margin: 5px;"
+                        style="margin: 5px; margin-left: 5px;"
                         @click="onShowCreateRemainingLifeLimitLibraryDialog(false)"
                         v-show="!hasScenario"
                         variant = "outlined">Create New Library
@@ -203,10 +204,10 @@
         <v-col>
             <v-row v-show="hasSelectedLibrary || hasScenario" style="padding-bottom: 40px;" align-content="center" justify="center">
                 <v-btn id="RemainingLifeLimitEditor-cancel-btn" style="margin: 5px;" class="ghd-blue" variant = "outlined" v-show="hasScenario" @click="onDiscardChanges" :disabled="!hasUnsavedChanges">Cancel</v-btn>
-                <v-btn id="RemainingLifeLimitEditor-deleteLibrary-btn" style="margin: 5px;" class="ghd-blue" variant = "outlined" v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
-                <v-btn id="RemainingLifeLimitEditor-createAsNewLibrary-btn" style="margin: 5px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" variant = "outlined">Create as New Library</v-btn>
+                <v-btn id="RemainingLifeLimitEditor-deleteLibrary-btn" style="margin: 5px;" class="ghd-white-bg ghd-red ghd-button-text ghd-outline-button-padding" variant = "outlined" v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
+                <v-btn id="RemainingLifeLimitEditor-createAsNewLibrary-btn" style="margin: 5px; margin-left: 10px; margin-right: 10px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" variant = "outlined">Create as New Library</v-btn>
                 <v-btn id="RemainingLifeLimitEditor-save-btn" style="margin: 5px;" class="ghd-blue-bg ghd-white ghd-button" v-show="hasScenario" @click="onUpsertScenarioRemainingLifeLimits" :disabled="disableCrudButton() || !hasUnsavedChanges">Save</v-btn>
-                <v-btn id="RemainingLifeLimitEditor-updateLibrary-btn" style="margin: 5px;" class="ghd-blue-bg ghd-white ghd-button" v-show="!hasScenario" :disabled="disableCrudButton() || !hasUnsavedChanges" @click="onUpsertRemainingLifeLimitLibrary">Update Library</v-btn>
+                <v-btn id="RemainingLifeLimitEditor-updateLibrary-btn" style="margin: 5px;" class="ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button" v-show="!hasScenario" :disabled="disableCrudButton() || !hasUnsavedChanges" @click="onUpsertRemainingLifeLimitLibrary">Update Library</v-btn>
             </v-row>
         </v-col>     
         <!-- <ConfirmDeleteAlert -->

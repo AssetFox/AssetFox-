@@ -65,6 +65,7 @@
                                     :disabled="props.item.isGenerated"
                                     class="ghd-green"
                                     flat
+                                    icon
                                     >
                                     <img
                                     style="height: 25px"
@@ -153,6 +154,7 @@ import { Notification } from '@/shared/models/iAM/notifications';
 import { queuedWorkStatusUpdate } from '@/shared/models/iAM/queuedWorkStatusUpdate';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
+import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanButton.vue';
 
 
     let store = useStore();

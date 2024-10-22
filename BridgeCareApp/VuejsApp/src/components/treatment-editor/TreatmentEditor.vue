@@ -267,9 +267,10 @@
                     >
                         Cancel
                     </v-btn>
-                    <v-btn id='TreatmentEditor-deleteLibrary-btn' variant = "text"
+                    <v-btn id='TreatmentEditor-deleteLibrary-btn'
                         @click='onShowConfirmDeleteAlert'
-                        class='ghd-white-bg ghd-blue ghd-button-text'
+                        class='ghd-white-bg ghd-red ghd-button-text ghd-outline-button-padding'
+                        variant = "outlined"
                         v-show='!hasScenario'
                         :disabled='!hasLibraryEditPermission'
                     >
@@ -279,7 +280,7 @@
                         @click='onShowCreateTreatmentLibraryDialog(true)'
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         variant = "outlined"
-                        style="margin-left: 5px;margin-right: 5px;"
+                        style="margin-left: 10px;margin-right: 10px;"
                         :disabled='disableCrudButtons()'
                     >
                         Create as New Library

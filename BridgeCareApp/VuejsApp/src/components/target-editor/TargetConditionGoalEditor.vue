@@ -53,7 +53,7 @@
                     <v-btn variant = "outlined"
                             id="TargetConditionGoalEditor-addTargetConditionGoal-btn"
                             @click="showCreateTargetConditionGoalDialog = true"
-                            class="ghd-control-border ghd-blue"
+                            class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button"
                             style="margin: 5px;"
                             v-show="hasSelectedLibrary || hasScenario" 
                         >Add Target Condition Goal</v-btn>              
@@ -209,7 +209,8 @@
                 <v-btn flat
                     id="TargetConditionGoalEditor-deleteLibrary-btn"
                     @click="onShowConfirmDeleteAlert"
-                    class='ghd-white-bg ghd-blue ghd-button-text'
+                    class='ghd-white-bg ghd-red ghd-button-text ghd-outline-button-padding'
+                    variant="outlined"
                     v-show="!hasScenario"
                     :disabled="!hasSelectedLibrary"
                 >
@@ -229,7 +230,7 @@
                     id="TargetConditionGoalEditor-CreateAsNewLibrary-btn"
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                    style="margin-left: 5px; margin-right: 5px;"
+                    style="margin-left: 10px; margin-right: 10px;"
                     :disabled="disableCrudButtons()"
                 >
                     Create as New Library
@@ -246,8 +247,7 @@
                 <v-btn
                     id="TargetConditionGoalEditor-UpdateLibrary-btn"
                     @click="onUpsertTargetConditionGoalLibrary"
-                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
-                    style="margin-left: 5px;"
+                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'                    
                     v-show="!hasScenario"
                     :disabled="disableCrudButtons() || !hasUnsavedChanges || !hasLibraryEditPermission"
                 >

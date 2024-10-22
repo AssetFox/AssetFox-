@@ -264,11 +264,10 @@
                 <v-btn
                     id="DeficientConditionGoalEditor-deleteLibrary-vbtn"
                     @click="onShowConfirmDeleteAlert"
-                    class='ghd-blue ghd-button-text ghd-button'
-                    style="margin-right: 5px;"
+                    class='ghd-red ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission"
-                    variant = "text">
+                    variant = "outlined">
                     Delete Library
                 </v-btn>    
                 <v-btn
@@ -276,7 +275,7 @@
                     @click="onShowCreateDeficientConditionGoalLibraryDialog(true)"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     :disabled="disableCrudButtons()"
-                    style="margin-right: 5px; margin-left: 5px;"
+                    style="margin-right: 10px; margin-left: 10px;"
                     variant = "outlined">
                     Create as New Library
                 </v-btn>
@@ -293,8 +292,7 @@
                     @click="onUpsertDeficientConditionGoalLibrary"
                     class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario"
-                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
-                    style="margin-left: 5px;">
+                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges">
                     Update Library
                 </v-btn>               
                        

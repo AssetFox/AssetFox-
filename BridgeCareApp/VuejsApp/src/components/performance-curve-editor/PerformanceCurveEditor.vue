@@ -380,7 +380,8 @@
             <v-btn
                 id="PerformanceCurveEditor-deleteLibrary-button"
                 @click="onShowConfirmDeleteAlert"
-                class="m-2 ghd-white-bg ghd-blue ghd-button-text"
+                class="m-2 ghd-red ghd-button-text ghd-outline-button-padding"
+                variant = "outlined"
                 flat
                 v-show="!hasScenario"
                 :disabled="!hasLibraryEditPermission"
@@ -392,7 +393,7 @@
                 :disabled="disableCrudButtons()"
                 @click="onShowCreatePerformanceCurveLibraryDialog(true)"
                 class='m-2 ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                variant = "outlined"                  
+                variant = "outlined"               
             >
                 Create as New Library
             </v-btn>

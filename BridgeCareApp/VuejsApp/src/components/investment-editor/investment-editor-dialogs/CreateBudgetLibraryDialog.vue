@@ -33,15 +33,14 @@
       </v-card-text>
 
       <v-card-actions class="ghd-dialog-box-padding-bottom">
-        <v-row justify="center">   
-          <v-btn id="CreateBudgetLibraryDialog-cancel-btn" @click="onSubmit(false)"
-                 class='ghd-blue ghd-button-text ghd-button' variant="outlined">
-            Cancel
-          </v-btn>
-          <v-btn id="CreateBudgetLibraryDialog-save-btn" :disabled="canDisableSave()" @click="onSubmit(true)"
-                 class='ghd-blue ghd-button-text ghd-button' variant="outlined">
-            Save
-          </v-btn>
+        <v-row justify="center">  
+          <CancelButton 
+            @cancel="onSubmit(false)"
+          />
+          <SaveButton 
+            @save="onSubmit(true)"
+            :disabled="canDisableSave()"
+          />           
         </v-row>
       </v-card-actions>
     </v-card>
@@ -49,7 +48,6 @@
 </template>
 
 <script setup lang="ts">
-import Vue from 'vue';
 import {contains} from 'ramda';
 import {CreateBudgetLibraryDialogData} from '@/shared/models/modals/create-budget-library-dialog-data';
 import {Budget, BudgetAmount, BudgetLibrary, emptyBudgetLibrary} from '@/shared/models/iAM/investment';
@@ -58,7 +56,8 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { getUserName } from '@/shared/utils/get-user-info';
 import { ref, computed, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
 
 let store = useStore();
 

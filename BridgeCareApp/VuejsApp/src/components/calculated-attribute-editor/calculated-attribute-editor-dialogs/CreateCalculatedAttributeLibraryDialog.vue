@@ -35,19 +35,13 @@
             </v-card-text>
             <v-card-actions class="ghd-dialog-box-padding-bottom">
                 <v-spacer></v-spacer>
-                    <v-btn id="CreateCalculatedAttributeLibraryDialog-cancel-btn"
-                    variant = "outlined" 
-                        class='ghd-blue ghd-button-text ghd-button'
-                        @click="onSubmit(false)">
-                        Cancel
-                    </v-btn>
-                    <v-btn id="CreateCalculatedAttributeLibraryDialog-save-btn"
+                    <CancelButton 
+                        @cancel="onSubmit(false)"
+                    />
+                    <SaveButton 
+                        @save="onSubmit(true)"
                         :disabled="newCalculatedAttributeLibrary.name === ''"
-                        variant = "outlined" 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                        @click="onSubmit(true)">
-                        Save
-                    </v-btn> 
+                    />
                     <v-spacer></v-spacer>
             </v-card-actions>
         </v-card>
@@ -70,6 +64,8 @@ import {
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref, toRefs} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
 
 const emit = defineEmits(['submit'])
 const props = defineProps<{

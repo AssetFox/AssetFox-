@@ -69,27 +69,22 @@
             >
                 Import Treatment
             </v-btn>
-            <v-btn
-                id="TreatmentEditor-createLibrary-btn"
-                @click='onShowCreateTreatmentLibraryDialog(false)'
-                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-margin-top'
+            <CreateNewLibraryButton 
+                @createNewLibrary="onShowCreateTreatmentLibraryDialog(false)"
+                :show="!hasScenario"
+                class="ghd-margin-top"
                 style="margin-left: 5px;"
-                v-show="!hasScenario"
-                variant = "outlined"
-            >
-                Create New Library
-            </v-btn>                                                          
+            />                                                         
         </v-col>
     </v-row>
         <v-col cols="auto">
             <v-row v-if='hasSelectedLibrary && !hasScenario' style="margin-top: 10px; !important">
                 <div class="header-text-content owner-padding">
-                    Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}   
-                    <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)'
-                        style=" margin-left: 10px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
-                        v-show='!hasScenario'>
-                        Share Library
-                    </v-btn>
+                    Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}  
+                    <ShareLibraryButton 
+                        @shareLibrary="onShowTreatmentLibraryDialog(selectedTreatmentLibrary)"
+                        :show="!hasScenario"
+                    />
                 </div>  
             </v-row>
         </v-col>
@@ -258,53 +253,29 @@
         ></v-divider>
             <v-row style="padding-bottom: 100px;" justify="center" v-show="(hasSelectedLibrary || hasScenario) ">
                 <v-col cols="6">
-                    <v-btn :disabled='!hasUnsavedChanges'
-                        @click='onDiscardChanges'
-                        class='ghd-white-bg ghd-blue ghd-button-text'
-                        variant = "flat"
-                        v-show='hasScenario'
-                        style="margin-right: 5px;"
-                    >
-                        Cancel
-                    </v-btn>
-                    <v-btn id='TreatmentEditor-deleteLibrary-btn'
-                        @click='onShowConfirmDeleteAlert'
-                        class='ghd-white-bg ghd-red ghd-button-text ghd-outline-button-padding'
-                        variant = "outlined"
-                        v-show='!hasScenario'
+                    <CancelButton 
+                        @cancel="onDiscardChanges"
+                        :show="hasScenario"
+                    />
+                    <DeleteLibraryButton 
+                        @deleteLibrary="onShowConfirmDeleteAlert"
                         :disabled='!hasLibraryEditPermission'
-                    >
-                        Delete Library
-                    </v-btn>
-                    <v-btn
-                        @click='onShowCreateTreatmentLibraryDialog(true)'
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                        variant = "outlined"
-                        style="margin-left: 10px;margin-right: 10px;"
+                        :show="!hasScenario"
+                    />
+                    <CreateAsNewLibraryButton 
+                        @createAsNewLibrary="onShowCreateTreatmentLibraryDialog(true)"
                         :disabled='disableCrudButtons()'
-                    >
-                        Create as New Library
-                    </v-btn>
-                    <v-btn justify-center
-                        @click='onUpsertScenarioTreatments'
-                        id="TreatmentEditor-SaveScenarioTreatments-btn"
-                        class='ghd-blue-bg ghd-white ghd-button-text'
-                        variant = "flat"
-                        v-show='hasScenario'
-                        style="margin-left: 5px;"
-                        :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
-                        Save
-                    </v-btn>
-                    <v-btn
-                        id="TreatmentEditor-updateLibrary-btn"
-                        @click='onUpsertTreatmentLibrary'
-                        class='ghd-blue-bg ghd-white ghd-button-text  ghd-text-padding'
-                        variant = "flat"
-                        v-show='!hasScenario'
+                    />
+                    <SaveButton 
+                        @save="onUpsertScenarioTreatments"
+                        :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
+                        :show="hasScenario"
+                    />
+                    <UpdateLibraryButton 
+                        @updateLibrary="onUpsertTreatmentLibrary"
                         :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
-                    >
-                        Update Library
-                    </v-btn>
+                        :show="!hasScenario"
+                    />
                 </v-col>
             </v-row>
     </v-col>
@@ -450,6 +421,14 @@ import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import AuthenticationService from '@/services/authentication.service';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import CreateAsNewLibraryButton from '@/shared/components/buttons/CreateAsNewLibraryButton.vue';
+import UpdateLibraryButton from '@/shared/components/buttons/UpdateLibraryButton.vue';
+import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton.vue';
+import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
+import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
+import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
 
     const emit = defineEmits(['submit'])    
     const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>

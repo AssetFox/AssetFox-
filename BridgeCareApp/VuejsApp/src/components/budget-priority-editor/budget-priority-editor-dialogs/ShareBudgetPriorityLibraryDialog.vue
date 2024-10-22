@@ -54,10 +54,8 @@
       </v-card-text>
       <v-card-actions>
         <v-row justify="center">
-          <v-btn id="ShareBudgetPriorityLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant="outlined">Cancel</v-btn>
-          <v-btn id="ShareBudgetPriorityLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding" variant="outlined">
-            Save
-          </v-btn>
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SaveButton @save="onSubmit(true)"/>          
         </v-row>
       </v-card-actions>
     </v-card>
@@ -78,6 +76,8 @@ import {BudgetPriorityLibraryUserGridRow, ShareBudgetPriorityLibraryDialogData }
 import BudgetPriorityService from '@/services/budget-priority.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
 
   let store = useStore();
   const stateUsers  = computed<User[]>(()=>store.state.userModule.users);

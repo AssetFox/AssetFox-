@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using Microsoft.AspNetCore.SignalR;
@@ -31,6 +33,33 @@ namespace AppliedResearchAssociates.iAM.Hubs.Services
         }
 
         Dictionary<string, string> IHubService.errorList => _errorList;//throw new System.NotImplementedException();
+
+        public void SendRealTimeErrorMessage(string username, string arg, Exception e)
+        {
+            if (string.IsNullOrEmpty(username))
+            {
+                _hubContext?.Clients?.All?.SendAsync(HubConstant.BroadcastError, arg, e.StackTrace);
+            }
+            else
+            {
+                _hubContext?.Clients?.Group(username)?.SendAsync(HubConstant.BroadcastError, arg, e.StackTrace);
+            }
+            var edi = ExceptionDispatchInfo.Capture(e);
+            edi.Throw();
+        }
+        public void SendRealTimeErrorMessage(string username, string arg1, string arg2, Exception e)
+        {
+            if (string.IsNullOrEmpty(username))
+            {
+                _hubContext?.Clients?.All?.SendAsync(HubConstant.BroadcastError, arg1, e.StackTrace, arg2);               
+            }
+            else
+            {
+                _hubContext?.Clients?.Group(username)?.SendAsync(HubConstant.BroadcastError, arg1, e.StackTrace, arg2);
+            }
+            var edi = ExceptionDispatchInfo.Capture(e);
+            edi.Throw();
+        }
 
         public void SendRealTimeMessage(string username, string method, object arg)
         {

@@ -76,9 +76,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetUserScenariosPage - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::GetUserScenariosPage - {e.Message}", e);
             }
+            return Ok();
 
         }
 
@@ -94,9 +94,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetSharedScenariosPage - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::GetSharedScenariosPage - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -112,9 +112,9 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetSimulationRunSetting for simulation {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::GetSimulationRunSetting for simulation {simulationName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -129,9 +129,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetReportRunSetting returned with errors");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::GetReportRunSetting returned with errors", e);
             }
+            return Ok();
         }
 
 
@@ -148,9 +148,9 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetCurrentUserOrSharedScenario for simulation {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::GetCurrentUserOrSharedScenario for simulation {simulationName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -170,9 +170,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetSimulations - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::GetSimulations - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -187,9 +187,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetWorkQueuePage - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::GetWorkQueuePage - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -204,9 +204,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetFastWorkQueuePage - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::GetFastWorkQueuePage - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -221,9 +221,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetQueuedWorkByDomainIdAndWorkType - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::GetQueuedWorkByDomainIdAndWorkType - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -238,9 +238,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetFastQueuedWorkByDomainIdAndWorkType - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::GetFastQueuedWorkByDomainIdAndWorkType - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -260,9 +260,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::CreateSimulation {dto.Name} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::CreateSimulation {dto.Name} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -304,9 +304,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::CloneSimulation - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::CloneSimulation - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPut]
@@ -326,16 +326,15 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::UpdateSimulation {simulationName} - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::UpdateSimulation {simulationName} - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::UpdateSimulation {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::UpdateSimulation {simulationName} - {e.Message}", e);
             }
+            return Ok();
         }
 
 
@@ -360,16 +359,15 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::DeleteSimulation {simulationName} - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::DeleteSimulation {simulationName} - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::DeleteSimulation {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::DeleteSimulation {simulationName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -403,10 +401,9 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::RunSimulation - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::RunSimulation - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
@@ -415,14 +412,14 @@ namespace BridgeCareCore.Controllers
                 {
                     var logDto = SimulationLogDtos.GenericException(simulationId, e);
                     UnitOfWork.SimulationLogRepo.CreateLog(new List<SimulationLogDTO> { logDto });
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::RunSimulation {simulationName} - {e.Message}");
+                    HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::RunSimulation {simulationName} - {e.Message}", e);
                 }
                 else
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::RunSimulation {simulationName} - {e.Message}");
+                    HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::RunSimulation {simulationName} - {e.Message}", e);
                 }
-                throw;
             }
+            return Ok();
         }
 
         [HttpDelete]
@@ -473,16 +470,15 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(workId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Current user role does not have permission to cancel analysis for {simulationName} ::{e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Current user role does not have permission to cancel analysis for {simulationName} ::{e.Message}", e);
             }
             catch (Exception e)
             {
 
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(workId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling simulation analysis for {simulationName}::{e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Error canceling simulation analysis for {simulationName}::{e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpDelete]
@@ -510,16 +506,15 @@ namespace BridgeCareCore.Controllers
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(workId);
 
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Current user role does not have permission to cancel work queue processes ::{e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Current user role does not have permission to cancel work queue processes ::{e.Message}", e);
             }
             catch (Exception e)
             {
 
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(workId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling simulation analysis for {simulationName}::{e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Error canceling simulation analysis for {simulationName}::{e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -538,14 +533,13 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Setting NoTreatmentBeforeCommitted::{e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Error Setting NoTreatmentBeforeCommitted::{e.Message}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Setting NoTreatmentBeforeCommitted::{e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Error Setting NoTreatmentBeforeCommitted::{e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -564,14 +558,13 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Removing NoTreatmentBeforeCommitted::{e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Error Removing NoTreatmentBeforeCommitted::{e.Message}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Removing NoTreatmentBeforeCommitted::{e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Error Removing NoTreatmentBeforeCommitted::{e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -592,15 +585,14 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Getting NoTreatmentBeforeCommitted for {simulationName} ::{e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Error Getting NoTreatmentBeforeCommitted for {simulationName} ::{e.Message}", e);
             }
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Getting NoTreatmentBeforeCommitted for {simulationName} ::{e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Error Getting NoTreatmentBeforeCommitted for {simulationName} ::{e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -625,14 +617,13 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Converting Simulation Output from Json to Relational::{e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Error Converting Simulation Output from Json to Relational::{e.Message}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Converting Simulation Output from Json to Relationa::{e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Error Converting Simulation Output from Json to Relationa::{e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -665,10 +656,9 @@ namespace BridgeCareCore.Controllers
                 
                 return Ok(preChecksValidationResults);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::ValidateSimulation - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::ValidateSimulation - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
@@ -677,14 +667,14 @@ namespace BridgeCareCore.Controllers
                 {
                     var logDto = SimulationLogDtos.GenericException(simulationId, e);
                     UnitOfWork.SimulationLogRepo.CreateLog(new List<SimulationLogDTO> { logDto });
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::ValidateSimulation {simulationName} - {e.Message}");
+                    HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::ValidateSimulation {simulationName} - {e.Message}", e);
                 }
                 else
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::ValidateSimulation {simulationName} - {e.Message}");
+                    HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{SimulationError}::ValidateSimulation {simulationName} - {e.Message}", e);
                 }
-                throw;
             }
+            return Ok();
         }
 
         private static void GetPreChecksValidationResults(List<PreChecksValidationResult> validationResults, List<ValidationResult> validationResultList) =>

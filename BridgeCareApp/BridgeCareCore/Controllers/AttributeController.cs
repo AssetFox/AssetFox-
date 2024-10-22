@@ -50,8 +50,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::GetAttributes - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AttributeError}::GetAttributes - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -67,8 +67,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::GetAggregationRuleTypes - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AttributeError}::GetAggregationRuleTypes - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -84,8 +84,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::GetAttributeDataSourceTypes - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AttributeError}::GetAttributeDataSourceTypes - {e.Message}", e);
+                return Ok();
             }
         }
         
@@ -103,8 +103,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::GetAttributesSelectValues - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AttributeError}::GetAttributesSelectValues - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -128,17 +128,17 @@ namespace BridgeCareCore.Controllers
             {
                 if (e is InvalidAttributeUpsertException)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttributes - {e.Message}");
+                    HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AttributeError}::CreateAttributes - {e.Message}", e);
                 }
                 else if (e is InvalidAttributeException)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttributes - {e.Message}");
+                    HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AttributeError}::CreateAttributes - {e.Message}", e);
                 }
                 else
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttributes - {e.Message}");
+                    HubService.SendRealTimeErrorMessage(UserInfo.Name,  $"{AttributeError}::CreateAttributes - {e.Message}", e);
                 }
-                throw;
+                return Ok();
             }
         }
 
@@ -160,8 +160,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttribute {attributeDto.Name} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AttributeError}::CreateAttribute - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -196,8 +196,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CheckCommand - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AttributeError}::CheckCommand - {e.Message}", e);
+                return Ok();
             }
         }
     }

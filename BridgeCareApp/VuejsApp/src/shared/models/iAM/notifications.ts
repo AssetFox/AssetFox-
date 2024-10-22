@@ -5,4 +5,5 @@ export interface Notification {
     active: boolean;
     shortMessage: string;
     longMessage: string;
+    stackTrace?: string;
 }

@@ -63,9 +63,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _log.Error(e.Message);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AuthenticationError}::GetUserInfo - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{AuthenticationError}::GetUserInfo - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -142,9 +141,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _log.Error(e.Message);
-                HubService.SendRealTimeMessage(UserInfo?.Name, HubConstant.BroadcastError, $"{AuthenticationError}::GetUserTokens - The authorization system is not available at the moment: {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo?.Name, $"{AuthenticationError}::GetUserTokens - The authorization system is not available at the moment: {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -187,9 +185,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _log.Error(e.Message);
-                HubService.SendRealTimeMessage(UserInfo?.Name, HubConstant.BroadcastError, $"{AuthenticationError}::GetRefreshToken - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo?.Name, $"{AuthenticationError}::GetRefreshToken - {e.Message}", e);
+                return Ok();
             }
 
         }
@@ -240,9 +237,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _log.Error(e.Message);
-                HubService.SendRealTimeMessage(UserInfo?.Name, HubConstant.BroadcastError, $"{AuthenticationError}::RevokeToken - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo?.Name, $"{AuthenticationError}::RevokeToken - {e.Message}", e);
+                return Ok();
             }
         }
 
@@ -268,9 +264,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _log.Error(e.Message);
-                HubService.SendRealTimeMessage(UserInfo?.Name, HubConstant.BroadcastError, $"{AuthenticationError}::RevokeToken - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo?.Name, $"{AuthenticationError}::RevokeToken - {e.Message}", e);
+                return Ok();
             }
         }
 

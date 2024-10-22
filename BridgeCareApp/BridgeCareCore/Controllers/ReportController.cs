@@ -109,9 +109,9 @@ namespace BridgeCareCore.Controllers
 
                 // Return a meaningful error message to the client
                 var errorMessage = $"An error occurred while retrieving the report names. Error: {ex.Message}";
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, errorMessage);
-                return BadRequest();
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, errorMessage, ex);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -142,16 +142,15 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ReportError}::GetFile - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{ReportError}::GetFile - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ReportError}::GetFile - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{ReportError}::GetFile - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]

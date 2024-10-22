@@ -32,9 +32,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CriterionLibraryError}::CriterionLibraries - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name,  $"{CriterionLibraryError}::CriterionLibraries - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -63,9 +63,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CriterionLibraryError}::UpsertCriterionLibrary {dto.MergedCriteriaExpression} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CriterionLibraryError}::UpsertCriterionLibrary {dto.MergedCriteriaExpression} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpDelete]
@@ -84,9 +84,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CriterionLibraryError}::DeleteCriterionLibrary - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CriterionLibraryError}::DeleteCriterionLibrary - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]

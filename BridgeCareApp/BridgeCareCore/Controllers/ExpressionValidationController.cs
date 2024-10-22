@@ -42,13 +42,13 @@ namespace BridgeCareCore.Controllers
             {
                 if (e is CalculateEvaluateException)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetEquationValidationResult - {e.Message}");
+                    HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{ExpressionValidationError}::GetEquationValidationResult - {e.Message}", e);
                 } else
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetEquationValidationResult - {e.Message}");
+                    HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{ExpressionValidationError}::GetEquationValidationResult - {e.Message}", e);
                 }
-                throw;
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -64,9 +64,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetCriterionValidationResult - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{ExpressionValidationError}::GetCriterionValidationResult - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -82,9 +82,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetCriterionValidationResultNoCount - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{ExpressionValidationError}::GetCriterionValidationResultNoCount - {e.Message}", e);
             }
+            return Ok();
         }
     }
 }

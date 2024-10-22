@@ -89,16 +89,15 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ImportCommittedProjects - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::ImportCommittedProjects - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ImportCommittedProjects - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::ImportCommittedProjects - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -116,18 +115,17 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ExportCommittedProjects for {simulationName} - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::ExportCommittedProjects for {simulationName} - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ExportCommittedProjects for {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::ExportCommittedProjects for {simulationName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -142,9 +140,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"::Unable to DownloadedTemplate - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"::Unable to DownloadedTemplate - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -164,9 +162,9 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var networkName = network.Name ?? "null";
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ValidateAssetExistence for {networkName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::ValidateAssetExistence for {networkName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -186,9 +184,9 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var networkName = UnitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ValidateExistenceOfAssets for {networkName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::ValidateExistenceOfAssets for {networkName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -215,9 +213,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::FillTreatmentValues - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::FillTreatmentValues - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -247,9 +245,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"::Unable to Upload Template - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"::Unable to Upload Template - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -283,9 +281,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"::Unable to Upload Template - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"::Unable to Upload Template - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -300,9 +298,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"::Unable to DownloadedTemplate - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name,$"::Unable to DownloadedTemplate - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpDelete]
@@ -320,11 +318,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::DeleteSimulationCommittedProjects for {simulationName} - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::DeleteSimulationCommittedProjects for {simulationName} - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (RowNotInTableException)
             {
@@ -333,9 +330,9 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::DeleteSimulationCommittedProjects for {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::DeleteSimulationCommittedProjects for {simulationName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -353,10 +350,9 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::DeleteSpecificCommittedProjects - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::DeleteSpecificCommittedProjects - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (RowNotInTableException)
             {
@@ -364,9 +360,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::DeleteSpecificCommittedProjects - {e.Message}");
-                throw;
-            }            
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::DeleteSpecificCommittedProjects - {e.Message}", e);
+            }
+            return Ok();
         }
 
         [HttpGet]
@@ -384,10 +380,9 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetCommittedProjects - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::GetCommittedProjects - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (RowNotInTableException)
             {
@@ -396,9 +391,9 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetCommittedProjects for {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::GetCommittedProjects for {simulationName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -418,10 +413,9 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetCommittedProjectsPage - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::GetCommittedProjectsPage - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (RowNotInTableException)
             {
@@ -430,9 +424,9 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetCommittedProjectsPage for {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::GetCommittedProjectsPage for {simulationName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -451,10 +445,9 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::UpsertCommittedProjects - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::UpsertCommittedProjects - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (RowNotInTableException)
             {
@@ -463,9 +456,9 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::UpsertCommittedProjects for {simulationName} - {e.Message}");
-                throw;
-            }            
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{CommittedProjectError}::UpsertCommittedProjects for {simulationName} - {e.Message}", e);
+            }
+            return Ok();
         }
 
         private void CheckDeletePermit(List<Guid> projectIds)

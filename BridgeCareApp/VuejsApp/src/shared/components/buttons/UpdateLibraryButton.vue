@@ -4,7 +4,9 @@
         id="UpdateLibraryButton-btn"
         @click="onUpdateLibrary"
         :disabled="disabled"
-        class="ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button"
+        variant="outlined"
+        style="margin-left: 10px;"
+        class="ghd-blue-bg ghd-white ghd-button-text ghd-button ghd-outline-button-padding"
     >
         Update Library
     </v-btn>
@@ -12,20 +14,20 @@
   
 <script setup>
 const props = defineProps({
-disabled: {
-    type: Boolean,
-    default: false,
-},
-show: {
-    type: Boolean,
-    default: true, 
-},
+    disabled: {
+        type: Boolean,
+        default: false,
+    },
+    show: {
+        type: Boolean,
+        default: true, 
+    },
 });
 
 const emit = defineEmits(['updateLibrary']);
 
 const onUpdateLibrary = () => {
-emit('updateLibrary');
+    emit('updateLibrary');
 };
 </script>
   

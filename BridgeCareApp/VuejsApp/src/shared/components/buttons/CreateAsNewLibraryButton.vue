@@ -13,16 +13,16 @@
   
 <script setup>
 const props = defineProps({
-disabled: {
-    type: Boolean,
-    default: false,
-}
+    disabled: {
+        type: Boolean,
+        default: false,
+    }
 });
 
 const emit = defineEmits(['createAsNewLibrary']);
 
 const onCreateAsNewLibrary = () => {
-emit('createAsNewLibrary');
+    emit('createAsNewLibrary');
 };
 </script>
 

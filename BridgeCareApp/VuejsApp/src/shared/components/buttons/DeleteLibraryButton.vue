@@ -5,6 +5,7 @@
       @click="onDeleteLibrary"
       :disabled="disabled"
       variant="outlined"
+      style="margin-right: 10px;"
       class="ghd-red ghd-button-text ghd-outline-button-padding ghd-button"
     >
       Delete Library
@@ -13,20 +14,20 @@
   
 <script setup>
 const props = defineProps({
-disabled: {
-    type: Boolean,
-    default: false,
-},
-show: {
-    type: Boolean,
-    default: true, 
-},
+    disabled: {
+        type: Boolean,
+        default: false,
+    },
+    show: {
+        type: Boolean,
+        default: true, 
+    },
 });
 
 const emit = defineEmits(['deleteLibrary']);
 
 const onDeleteLibrary = () => {
-emit('deleteLibrary');
+    emit('deleteLibrary');
 };
 </script>
   

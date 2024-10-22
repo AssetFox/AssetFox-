@@ -3,8 +3,10 @@
     <v-card>
       <v-card-title>
         <v-row justify="space-between" style="margin-top: 10px;">
-          <h5>Performance Curve Library Sharing</h5>
-          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
+          <v-spacer></v-spacer>
+          <h3>Performance Curve Library Sharing</h3>
+          <v-spacer></v-spacer>
+          <v-btn @click="onSubmit(false)" variant="text" class="ghd-close-button">
             X
           </v-btn>
         </v-row>
@@ -52,10 +54,8 @@
       </v-card-text>
       <v-card-actions>
         <v-row justify="center">
-          <v-btn id="SharePerformanceCurveLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
-          <v-btn id="SharePerformanceCurveLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
-            Save
-          </v-btn>
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SaveButton @save="onSubmit(true)"/>
         </v-row>
       </v-card-actions>
     </v-card>
@@ -75,6 +75,8 @@ import {PerformanceCurveLibraryUserGridRow, SharePerformanceCurveLibraryDialogDa
 import PerformanceCurveService from '@/services/performance-curve.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
 
 const emit = defineEmits(['submit'])
 let store = useStore();

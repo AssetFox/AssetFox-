@@ -13,16 +13,16 @@
 
 <script setup>
 const props = defineProps({
-show: {
-    type: Boolean,
-    default: true,
-}
+    show: {
+        type: Boolean,
+        default: true,
+    }
 });
 
 const emit = defineEmits(['shareLibrary']);
 
 const onShareLibrary = () => {
-emit('shareLibrary'); 
+    emit('shareLibrary'); 
 };
 </script>
 

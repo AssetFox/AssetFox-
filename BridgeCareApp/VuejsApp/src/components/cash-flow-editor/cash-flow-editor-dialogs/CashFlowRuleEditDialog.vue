@@ -167,15 +167,11 @@
                             
       <v-card-actions>
         <v-row justify="center">
-            <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined" id="CashFlowRuleEditDialog-cancel-btn">
-            Cancel
-          </v-btn>
-          <v-btn @click="onSubmit(true)"
-                 :disabled="!hasUnsavedChanges || !isDataValid"
-                 id="CashFlowRuleEditDialog-submit-btn"
-                 class='ghd-blue hd-button-text ghd-button' variant = "flat">
-            Submit
-          </v-btn>         
+            <CancelButton @cancel="onSubmit(false)"/>
+            <SaveButton 
+                @save="onSubmit(true)"
+                :disabled="!hasUnsavedChanges || !isDataValid" 
+            />        
         </v-row>
       </v-card-actions>
     </v-card>
@@ -204,6 +200,8 @@ import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper
 import { getUrl } from '@/shared/utils/get-url';
 import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue'; 
 
   const props = defineProps<{showDialog: boolean, selectedCashFlowRule: CashFlowRule}>()
   let showDialogComputed = computed(() => props.showDialog);

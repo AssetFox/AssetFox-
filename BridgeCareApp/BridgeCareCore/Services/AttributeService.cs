@@ -13,20 +13,47 @@ namespace BridgeCareCore.Services
     public class AttributeService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly AggregatedSelectValuesResultDtoCache _cache;
         public const string ValuesForAttribute = "Values for attribute";
         public const string IsANumberUseTextInput = "is a number; use text input";
 
-        public AttributeService(IUnitOfWork unitOfWork) => _unitOfWork =
+        public AttributeService(
+            IUnitOfWork unitOfWork,
+            AggregatedSelectValuesResultDtoCache cache
+            )
+        {
+            _unitOfWork =
             unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+        }
         public List<AttributeSelectValuesResult> GetAttributeSelectValues(List<string> attributeNames)
         {
-            var aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(attributeNames);
-            if (aggregatedResults.Count == 0)
+            List<AttributeSelectValuesResult> returnList = new();
+            var dtos = new List<AggregatedSelectValuesResultDTO>();
+            var uniqueAttributes = attributeNames.Distinct().ToList();
+            var attributesToFetch = new List<string>();
+            foreach (var attributeName in uniqueAttributes)
+            {
+                var cached = _cache.TryGetCachedValue(attributeName);
+                if (cached == null)
+                {
+                    attributesToFetch.Add(attributeName);
+                }
+                else
+                {
+                    dtos.Add(cached);
+                }
+            }
+            var aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForAttributeNames(attributesToFetch);
+            foreach (var result in aggregatedResults)
+            {
+                _cache.SaveToCache(result);
+            }
+            dtos.AddRange(aggregatedResults);
+            if (dtos.Count == 0)
                 return new();
 
-            List<AttributeSelectValuesResult> returnList = new();
-            foreach (var result in aggregatedResults)
+            foreach (var result in dtos)
             {
                 var returnValue = new AttributeSelectValuesResult
                 {

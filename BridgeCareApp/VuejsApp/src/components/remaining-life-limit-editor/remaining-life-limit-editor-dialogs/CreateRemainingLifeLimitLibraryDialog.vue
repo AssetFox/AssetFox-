@@ -36,12 +36,11 @@
       </v-card-text>
       <v-card-actions class="py-0">
         <v-row justify="center" row class="ghd-dialog-padding-bottom-buttons">
-          <v-btn id="CreateRemainingLifeLimitLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-button" variant = "outlined">Cancel</v-btn>
-          <v-btn id="CreateRemainingLifeLimitLibraryDialog-save-vbtn" :disabled="newRemainingLifeLimitLibrary.name === ''"
-                 @click="onSubmit(true)"
-                 class="ghd-white-bg ghd-blue ghd-button" variant = "outlined">
-            Save
-          </v-btn>
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SaveButton 
+            @save="onSubmit(true)"
+            :disabled="newRemainingLifeLimitLibrary.name === ''"  
+          />
         </v-row>
       </v-card-actions>
     </v-card>
@@ -59,6 +58,8 @@ import {
 import {rules as validationRules, InputValidationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
 
   const props = defineProps<{
     dialogData: CreateRemainingLifeLimitLibraryDialogData

@@ -41,10 +41,11 @@
 
       <v-card-actions>    
         <v-row justify="center" class="ghd-dialog-padding-bottom-buttons">
-          <v-btn id="CreateRemainingLifeLimitDialog-cancel-btn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button" variant = "outlined">Cancel</v-btn>
-          <v-btn id="CreateRemainingLifeLimitDialog-save-btn" :disabled="disableSubmitAction()" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button" variant = "outlined">
-            Save
-          </v-btn>
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SaveButton 
+            @save="onSubmit(true)"
+            :disabled="disableSubmitAction()"
+          />
         </v-row>
       </v-card-actions>
 
@@ -60,6 +61,8 @@ import {InputValidationRules, rules as validationRules} from '@/shared/utils/inp
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {clone} from 'ramda';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
 
   const props = defineProps<{
     dialogData: CreateRemainingLifeLimitDialogData

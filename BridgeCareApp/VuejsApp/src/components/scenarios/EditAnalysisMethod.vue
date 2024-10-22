@@ -145,11 +145,11 @@ Line 164 Delete,
                                     @click="
                                         onShowCriterionEditorDialog
                                     "
-                                    class="edit-icon ghd-control-label ghd-green"
+                                    class="edit-icon ghd-control-label ghd-blue"
                                     icon
                                     flat
                                 >
-                                <EditSvg />
+                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/> 
                                 </v-btn>
                                 </v-row>
                                 <v-textarea

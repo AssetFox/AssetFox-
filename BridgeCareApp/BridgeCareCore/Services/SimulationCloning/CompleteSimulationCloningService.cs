@@ -77,7 +77,8 @@ namespace BridgeCareCore.Services
             // do the clone
             var ownerId = _unitOfWork.CurrentUser?.Id ?? Guid.Empty;
             var baseEntityProperties = new BaseEntityProperties { CreatedBy = ownerId, LastModifiedBy = ownerId };
-            var ownerName = _unitOfWork.CurrentUser?.Username;
+            var ownerName = _unitOfWork.CurrentUser?.Username;                       
+
             var cloneSimulation = CompleteSimulationCloner.Clone(sourceSimulation, dto, ownerId, ownerName);
             //Make sure the destination Network Id is not empty
             if (dto.DestinationNetworkId != Guid.Empty)

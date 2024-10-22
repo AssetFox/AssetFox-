@@ -42,6 +42,10 @@ namespace BridgeCareCore.Services
             {
                 users.Add(user);
             }
+
+            // TODO SimulationOutputJson: create DTO n map
+            var cloneSimulationOutputJsonDTO = new SimulationOutputJsonDTO();
+
             var clone = new CompleteSimulationDTO
             {
                 NoTreatmentBeforeCommittedProjects = completeSimulation.NoTreatmentBeforeCommittedProjects,
@@ -63,6 +67,7 @@ namespace BridgeCareCore.Services
                 CommittedProjects = cloneBaseCommittedProject,
                 Id = Guid.NewGuid(),
                 Users = users,
+                SimulationOutputJson = cloneSimulationOutputJsonDTO
             };
             return clone;
 

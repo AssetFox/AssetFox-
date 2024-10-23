@@ -116,17 +116,35 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     public override double GetNumber(string key)
     {
-        if (!GetNumber_ActiveKeysOfCurrentInvocation.Add(key))
+        if (!GetNumber_ActiveKeysOfCurrentInvocation.TryAdd(key, GetNumber_ActiveKeysOfCurrentInvocation.Count))
         {
-            var loop = GetNumber_ActiveKeysOfCurrentInvocation.SkipWhile(activeKey => !StringComparer.OrdinalIgnoreCase.Equals(activeKey, key)).Append(key);
-            var loopText = string.Join(" to ", loop.Select(activeKey => "[" + activeKey + "]"));
+            var previousInvocationIndex = GetNumber_ActiveKeysOfCurrentInvocation[key];
 
-            var messageBuilder = new SimulationMessageBuilder("Loop encountered during number calculation: " + loopText)
+            var invocationStack =
+                GetNumber_ActiveKeysOfCurrentInvocation
+                .OrderBy(kv => kv.Value)
+                .Select(kv => kv.Key)
+                .Append(key)
+                .Select(k => $"[{k}]")
+                .ToArray();
+
+            static void emphasize(ref string key) => key = $"**{key}**";
+
+            emphasize(ref invocationStack[previousInvocationIndex]);
+            emphasize(ref invocationStack[^1]);
+
+            var invocationText = string.Join(" to ", invocationStack);
+
+            var messageBuilder = new SimulationMessageBuilder("Loop encountered during number calculation: " + invocationText)
             {
                 AssetName = Asset.AssetName,
                 AssetId = Asset.Id,
             };
-            var logBuilder = SimulationLogMessageBuilders.CalculationFatal(messageBuilder.ToString(), SimulationRunner.Simulation.Id);
+
+            var logBuilder = SimulationLogMessageBuilders.CalculationFatal(
+                messageBuilder.ToString(),
+                SimulationRunner.Simulation.Id);
+
             SimulationRunner.Send(logBuilder);
         }
 
@@ -275,7 +293,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     private readonly Dictionary<string, int> FirstUnshadowedYearForSameTreatment = new();
 
-    private readonly HashSet<string> GetNumber_ActiveKeysOfCurrentInvocation = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, int> GetNumber_ActiveKeysOfCurrentInvocation = new(StringComparer.OrdinalIgnoreCase);
 
     private readonly Dictionary<Attribute, double> MostRecentAdjustmentFactorsForPerformanceCurves = new();
 

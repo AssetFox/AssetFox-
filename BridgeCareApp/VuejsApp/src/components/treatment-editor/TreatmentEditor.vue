@@ -1496,6 +1496,7 @@ async function getDistinctScenarioPerformanceFactorAttributeNamesAction(payload?
                 setAlertMessageAction('');             
             })
             showSuccessPopup.value = true;
+            $emitter.emit('TreatmentSettingsUpdated');                 
         }        
     }
 

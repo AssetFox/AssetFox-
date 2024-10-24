@@ -1401,7 +1401,8 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 setAlertMessageAction('');
             })
         }    
-        showSuccessPopup.value = true;    
+        showSuccessPopup.value = true;
+        $emitter.emit('DeteriorationModelSettingsUpdated');                  
     }
 
     async function initializePages(){

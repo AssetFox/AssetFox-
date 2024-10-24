@@ -464,7 +464,6 @@ getAnalysisMethodAction({ scenarioId: selectedScenarioId.value })
                 analysisMethod: analysisMethod.value,
                 scenarioId: selectedScenarioId.value,
             });
-            $emitter.emit('AnalysisMethodUpdated');              
         }
         // const form: any = $refs.form;
 
@@ -489,17 +488,19 @@ getAnalysisMethodAction({ scenarioId: selectedScenarioId.value })
         };
     }
 
-    function onConfirmEmptyCriteriaAlertSubmit(submit: boolean) {
+    async function onConfirmEmptyCriteriaAlertSubmit(submit: boolean) {
         ConfirmEmptyCriteria.value = clone(emptyAlertData);
 
         if (submit) {
             if(analysisMethod.value.benefit.id === getBlankGuid())
             analysisMethod.value.benefit.id = getNewGuid();
-        upsertAnalysisMethodAction({
-                analysisMethod: analysisMethod.value,
-                scenarioId: selectedScenarioId.value,
-            });
-            $emitter.emit('AnalysisMethodUpdated');              
+
+            const responseData = await store.dispatch('upsertAnalysisMethod', { analysisMethod: analysisMethod.value, scenarioId: selectedScenarioId.value});
+            
+            if(responseData === "Analysis Method successfully updated")
+            {
+                $emitter.emit('AnalysisMethodUpdated');              
+            }
         } 
     }
 

@@ -4,6 +4,11 @@ import {hasValue} from '@/shared/utils/has-value-util';
 import AnalysisMethodService from '@/services/analysis-method.service';
 import {AnalysisMethod, emptyAnalysisMethod} from '@/shared/models/iAM/analysis-method';
 import {http2XX} from '@/shared/utils/http-utils';
+import mitt, { Emitter, EventType } from 'mitt';
+import Vue, { computed, ref, shallowReactive, shallowRef, watch, onMounted, onBeforeUnmount, inject } from 'vue'; 
+
+
+const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>;
 
 const state = {
     analysisMethod: clone(emptyAnalysisMethod) as AnalysisMethod,
@@ -44,7 +49,7 @@ const actions = {
             commit('simulationAnalysisMethodMutator', false); 
         }
     },
-            async upsertAnalysisMethod({dispatch, commit}: any, payload: any) {
+    async upsertAnalysisMethod({dispatch, commit}: any, payload: any) {
         return await AnalysisMethodService.upsetAnalysisMethod(payload.analysisMethod, payload.scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
@@ -53,6 +58,7 @@ const actions = {
                         message: 'Upserted analysis method',
                 });
                 }
+                return response.data;
             });
     }
 };

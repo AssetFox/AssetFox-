@@ -1679,7 +1679,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
                 }
             })
-            showSuccessPopup.value = true;  
+            showSuccessPopup.value = true;
+            $emitter.emit('InvestmentSettingsUpdated');                
         }        
     }
 

@@ -460,10 +460,12 @@ getAnalysisMethodAction({ scenarioId: selectedScenarioId.value })
         {
             if(analysisMethod.value.benefit.id === getBlankGuid())
             analysisMethod.value.benefit.id = getNewGuid();
-        upsertAnalysisMethodAction({
-                analysisMethod: analysisMethod.value,
-                scenarioId: selectedScenarioId.value,
-            });
+            const responseData = await store.dispatch('upsertAnalysisMethod', { analysisMethod: analysisMethod.value, scenarioId: selectedScenarioId.value});
+            
+            if(responseData === "Analysis Method successfully updated")
+            {
+                $emitter.emit('AnalysisMethodUpdated');              
+            }
         }
         // const form: any = $refs.form;
 

@@ -260,11 +260,13 @@
         ></v-divider>
         <v-col>
             <v-row justify="center" style="padding-bottom: 80px;">
-                <CancelSaveButtonGroup
-                    :cancelDisabled="!hasUnsavedChanges"
-                    :saveDisabled="!hasUnsavedChanges || disableCrudButtons()"
+                <CancelButton 
                     @cancel="onCancelClick"
+                    :disabled="!hasUnsavedChanges"
+                />
+                <SaveButton 
                     @save="OnSaveClick"
+                    :disabled="!hasUnsavedChanges || disableCrudButtons()"
                 />
             </v-row>
         </v-col> 
@@ -354,7 +356,9 @@ import { getUrl } from '@/shared/utils/get-url';
 import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 import ConfirmDialog from 'primevue/confirmdialog';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
-import CancelSaveButtonGroup from '@/shared/components/buttons/CancelSaveButtonGroup.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import UploadButton from '@/shared/components/buttons/UploadButton.vue';
 
 
     let store = useStore();

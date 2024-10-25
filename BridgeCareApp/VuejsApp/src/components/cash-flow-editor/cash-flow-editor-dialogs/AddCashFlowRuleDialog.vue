@@ -4,9 +4,7 @@
       <v-card-title class="ghd-dialog-padding-top-title">
         <v-row justify="space-between">
           <div class="ghd-control-dialog-header"><h5>New Cash Flow Rule Library</h5></div>
-          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-              X
-            </v-btn>
+          <XButton @click="onSubmit(false)"/>
         </v-row>
       </v-card-title>
 
@@ -25,8 +23,8 @@
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-row justify="center">
           <CancelButton @cancel="onSubmit(false)"/>
-          <SaveButton 
-            @save="onSubmit(true)"
+          <UploadButton 
+            @upload="onSubmit(true)"
             :disabled="newCashRule.name === ''"
           />       
         </v-row>
@@ -43,8 +41,9 @@ import {
 } from '@/shared/models/iAM/cash-flow';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
-import SaveButton from '@/shared/components/buttons/SaveButton.vue';
 import CancelButton from '@/shared/components/buttons/CancelButton.vue'; 
+import UploadButton from '@/shared/components/buttons/UploadButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
 const props = defineProps<{showDialog: boolean}>()
 const emit = defineEmits(['submit']);

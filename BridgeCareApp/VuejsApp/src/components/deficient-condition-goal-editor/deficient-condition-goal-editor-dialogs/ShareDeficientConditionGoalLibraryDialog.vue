@@ -4,9 +4,7 @@
       <v-card-title>
         <v-row  justify="space-between" align="center" style="padding: 10px;">
           <h5>Deficient Condition Goal Library Sharing</h5>
-          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-            X
-          </v-btn>
+          <XButton @click="onSubmit(false)"/>
         </v-row>
       </v-card-title>
       <v-card-text>
@@ -77,6 +75,7 @@ import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
 import SaveButton from '@/shared/components/buttons/SaveButton.vue';
 import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
 let store = useStore();
 

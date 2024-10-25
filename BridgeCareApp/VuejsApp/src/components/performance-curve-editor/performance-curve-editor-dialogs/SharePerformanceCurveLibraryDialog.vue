@@ -6,9 +6,7 @@
           <v-spacer></v-spacer>
           <h3>Performance Curve Library Sharing</h3>
           <v-spacer></v-spacer>
-          <v-btn @click="onSubmit(false)" variant="text" class="ghd-close-button">
-            X
-          </v-btn>
+          <XButton @click="onSubmit(false)"/>
         </v-row>
       </v-card-title>
       <v-card-text>
@@ -77,6 +75,7 @@ import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
 import CancelButton from '@/shared/components/buttons/CancelButton.vue';
 import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
 const emit = defineEmits(['submit'])
 let store = useStore();

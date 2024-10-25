@@ -4,9 +4,7 @@
       <v-card-title class="ghd-dialog-padding-top-title">
          <v-row justify="space-between">
             <div class="ghd-control-dialog-header"><h5>New Investment Library</h5></div>
-            <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-              X
-            </v-btn>
+            <XButton @click="onSubmit(false)"/>
           </v-row>
         </v-card-title>     
 
@@ -58,6 +56,7 @@ import { ref, computed, toRefs, watch } from 'vue';
 import { useStore } from 'vuex';
 import SaveButton from '@/shared/components/buttons/SaveButton.vue';
 import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
 let store = useStore();
 

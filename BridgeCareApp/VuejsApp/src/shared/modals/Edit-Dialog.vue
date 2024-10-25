@@ -17,10 +17,10 @@
 
                 <slot style="cursor:pointer;" name="input"></slot>          
                 <v-row >
-                    <v-col align="center">
-                        <v-btn variant = "outlined" class='pa-2 ma-2 ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' @click="onCancel">Cancel</v-btn>
-                    <v-btn variant = "outlined" class='pa-2 ma-2 ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' @click="onSave">Save</v-btn>
-                    </v-col>                   
+                  <v-col align="center">
+                    <CancelButton @cancel="onCancel" />
+                    <SaveButton @save="onSave" />                      
+                  </v-col>                   
                 </v-row>
                 </v-col>
                 
@@ -34,6 +34,8 @@
 
 import { clone } from 'ramda';
 import { computed, ref, watch } from 'vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
     const emit = defineEmits(['save','open', 'update:returnValue'])
     let dialog = ref(false)
     let prevVal:any;

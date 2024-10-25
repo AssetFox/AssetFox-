@@ -5,9 +5,7 @@
         <v-card-title class="ghd-dialog-box-padding-top">
          <v-row justify="space-between" align="center">
             <div class="ghd-control-dialog-header">Add New Deficient Condition Goal</div>
-            <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-              X
-            </v-btn>
+            <XButton @click="onSubmit(false)"/>
           </v-row>
         </v-card-title>
         <v-card-text class="ghd-dialog-box-padding-center">
@@ -70,6 +68,7 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { useStore } from 'vuex';
 import SaveButton from '@/shared/components/buttons/SaveButton.vue';
 import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
   let store = useStore();
   const props = defineProps<{

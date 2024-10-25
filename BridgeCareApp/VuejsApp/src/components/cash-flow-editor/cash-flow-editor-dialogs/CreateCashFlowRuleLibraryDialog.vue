@@ -4,11 +4,7 @@
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-row justify="space-between" align-center>
           <div class="ghd-control-dialog-header">New Cash Flow Rule Library</div>
-          <v-btn @click="onSubmit(false)" variant = "flat" 
-              id="CreateCashFlowRuleLibraryDialog-Close-vbtn"
-              class="ghd-close-button">
-              X
-            </v-btn>
+          <XButton @click="onSubmit(false)"/>
         </v-row>
       </v-card-title>
       <v-card-text class="ghd-dialog-box-padding-center">
@@ -33,8 +29,8 @@
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-row justify="center">
           <CancelButton @cancel="onSubmit(false)"/>
-          <SaveButton 
-            @save="onSubmit(true)"
+          <SubmitButton 
+            @submit="onSubmit(true)"
             :disabled="newCashFlowRuleLibrary.name === ''"  
           />       
         </v-row>
@@ -58,8 +54,9 @@ import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules
 import {clone} from 'ramda';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { useStore } from 'vuex';
-import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import SubmitButton from '@/shared/components/buttons/SubmitButton.vue';
 import CancelButton from '@/shared/components/buttons/CancelButton.vue'; 
+import XButton from '@/shared/components/buttons/XButton.vue';
 
   let store = useStore();
 

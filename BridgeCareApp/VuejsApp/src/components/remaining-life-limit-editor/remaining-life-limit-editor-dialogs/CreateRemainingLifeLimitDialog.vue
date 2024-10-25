@@ -3,11 +3,8 @@
     <v-card>
       <v-card-title class="ghd-dialog-padding-top-title">
         <v-row justify="space-between">
-          <div class="dialog-header"><h5>Add New Remaining Life Limit</h5></div>
-          <!-- <v-spacer></v-spacer> -->
-          <v-btn id="CreateRemainingLifeLimitDialog-x-btn" @click="onSubmit(false)" flat>
-                      <i class="fas fa-times fa-2x"></i>
-          </v-btn>
+          <div class="dialog-header"><h5>Add New Remaining Life Limit</h5></div>          
+          <XButton @click="onSubmit(false)"/>
         </v-row>
       </v-card-title>
 
@@ -63,6 +60,7 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {clone} from 'ramda';
 import SaveButton from '@/shared/components/buttons/SaveButton.vue';
 import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
   const props = defineProps<{
     dialogData: CreateRemainingLifeLimitDialogData

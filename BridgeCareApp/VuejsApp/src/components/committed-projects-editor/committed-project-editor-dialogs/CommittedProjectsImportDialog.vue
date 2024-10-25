@@ -26,8 +26,8 @@
                         </span>
                     </v-row>
                     <v-row justify="center" style="margin: 5px;">
-                        <v-btn @click='onSubmit(false)' style="font-family: roboto;" class='ghd-white-bg ghd-blue' variant = "flat">Cancel</v-btn>
-                        <v-btn @click='onSubmit(true)' style="font-family: roboto;" class='ghd-white-bg ghd-blue ghd-button' variant = "outlined">Upload</v-btn>
+                        <CancelButton @cancel="onSubmit(false)"/>
+                        <UploadButton @upload="onSubmit(true)"/>
                     </v-row>
             </v-row>
         </v-card>
@@ -41,6 +41,8 @@ import CommittedProjectsFileSelector from '@/shared/components/FileSelector.vue'
 import { hasValue } from '@/shared/utils/has-value-util';
 import { clone } from 'ramda';
 import { useStore } from 'vuex';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import UploadButton from '@/shared/components/buttons/UploadButton.vue';
 
     let store = useStore();
     const props = defineProps<{showDialog: boolean}>();

@@ -140,17 +140,17 @@ Line 164 Delete,
                                     Criteria
                                 </v-subheader>
                                 <v-btn
-                                    id="EditAnalysisMethod-criteriaEditor-btn"
-                                    style="padding-right:30px; padding-bottom: 5px; margin-bottom: 5px; !important;"
-                                    @click="
-                                        onShowCriterionEditorDialog
-                                    "
-                                    class="edit-icon ghd-control-label ghd-green"
-                                    icon
-                                    flat
+                                id="EditAnalysisMethod-criteriaEditor-btn"
+                                style="padding-right:30px; padding-bottom: 5px; margin-bottom: 5px; !important;"
+                                @click="
+                                onShowCriterionEditorDialog
+                                "
+                                class="edit-icon ghd-control-label ghd-blue"
+                                icon
+                                flat
                                 >
-                                <EditSvg />
-                                </v-btn>
+                                <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/> 
+                                </v-btn>                                
                                 </v-row>
                                 <v-textarea
                                     id="EditAnalysisMethod-criteria-textArea"

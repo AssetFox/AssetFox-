@@ -52,7 +52,7 @@
                 <div style="margin: 10px;">
                     <v-btn
                         :class="{
-                            'ghd-white-bg green-icon ghd-button-text': !isBudgetPrioritySet,
+                            'ghd-white-bg blue-run-icon ghd-button-text': !isBudgetPrioritySet,
                             'ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border': isBudgetPrioritySet
                         }"
                         @click="onShowRunSimulationAlert"
@@ -598,6 +598,16 @@ import CashFlowService from '@/services/cash-flow.service';
                 navigationTabs.value = [...navigationTabs.value];
             }
         });
+
+        $emitter.on('switchedToNewInvestmentLibrary', () => {
+            navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Committed Projects') {
+                        if(tab.validationIcon === 'fas fa-check-circle')
+                        tab.validationIcon = 'fas fa-times-circle';
+                    }
+                });
+        });
+        
     }
     
     /**
@@ -959,6 +969,7 @@ import CashFlowService from '@/services/cash-flow.service';
 
     async function getCommittedProjects()
     {
+        let hasUnsetBudgets = false;
         const request: PagingRequest<SectionCommittedProject>= {
             page: 1,
             rowsPerPage: 5,
@@ -979,11 +990,23 @@ import CashFlowService from '@/services/cash-flow.service';
             {
                 isCommittedProjectsSet.value = response.data.items.length == 0;
 
+                if (response?.data?.items) {
+                    response.data.items.forEach((item: { scenarioBudgetId: any; }) => {
+                        if (!item.scenarioBudgetId || item.scenarioBudgetId === '') {
+                            hasUnsetBudgets = true;
+                        }
+                    });
+                }
+
                 navigationTabs.value.forEach((tab) => {
                     if (tab.tabName === 'Committed Projects') {
                         if(isCommittedProjectsSet.value === true)
                         {
                             tab.validationIcon = "fas fa-exclamation-circle";
+                        }
+                        else if(hasUnsetBudgets == true)
+                        {
+                            tab.validationIcon = "fas fa-times-circle";
                         }
                         else
                         tab.validationIcon = "fas fa-check-circle";
@@ -1069,8 +1092,8 @@ import CashFlowService from '@/services/cash-flow.service';
     stroke: #999999 !important;
 }
 
-.green-icon {
-  color: green;
+.blue-run-icon {
+    filter: invert(24%) sepia(96%) saturate(584%) hue-rotate(177deg) brightness(97%) contrast(84%);
 }
 
 .red-icon {

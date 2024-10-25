@@ -98,11 +98,11 @@
                                     @click="
                                         onShowTreatmentCriterionEditorDialog
                                     "
-                                    class="edit-icon ghd-green"
+                                    class="edit-icon ghd-blue"
                                     flat
                                     style="left:25px"                                    
                                 >
-                                    <EditSvg />
+                                <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>   
                             </v-col>                                    
                         </v-row>       

@@ -206,10 +206,10 @@
                                     <v-btn
                                         id="DeficientConditionGoalEditor-editDeficientConditionGoalCriteria-vbtn"
                                         @click="onShowCriterionLibraryEditorDialog(item.item)"
-                                        class="ghd-green"
+                                        class="ghd-blue"
                                         flat
                                         icon>
-                                        <EditSvg />
+                                        <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-row>
                                 <div v-if="header.key === 'action'" style="margin-bottom: 8px;">

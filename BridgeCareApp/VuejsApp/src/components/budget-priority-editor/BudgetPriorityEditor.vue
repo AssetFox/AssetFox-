@@ -114,15 +114,15 @@
                                                         <v-btn class='assetFox-blue ghd-button-text' v-bind="props" flat icon>
                                                             <img class='img-general' :src="getUrl('assets/icons/eye-ghd-blue.svg')"/>
                                                         </v-btn>
-                                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' class="ghd-green" flat icon>
-                                                        <EditSvg />
+                                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' class="ghd-blue" flat icon>
+                                                            <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/> 
                                                     </v-btn>
                                                     </div>
                                                     <div style="display: flex; align-items: center;" v-else class='priority-criteria-output' >
                                                         <v-text-field readonly single-line class='sm-txt' variant="underlined"
                                                                     :model-value='item.item.criteria' />   
-                                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' class="ghd-green" flat icon>
-                                                            <EditSvg /> 
+                                                        <v-btn id="BudgetPriorityEditor-editCriteria-vbtn" @click='onShowCriterionLibraryEditorDialog(item.item)' class="ghd-blue" flat icon>
+                                                            <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/> 
                                                         </v-btn>                                  
                                                     </div>
                                             </template>

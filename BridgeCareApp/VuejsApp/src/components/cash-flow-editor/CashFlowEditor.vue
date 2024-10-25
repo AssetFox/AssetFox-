@@ -150,11 +150,11 @@
                             <v-btn
                                 @click="onEditCashFlowRuleCriterionLibrary(item.item)"
                                 id="CashFlowEditor-editCashFlowRule-btn"
-                                class="ghd-green"
+                                class="ghd-blue"
                                 style="margin-top: 12px;"
                                 flat
                                 icon>
-                                <EditSvg />
+                                <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                             </v-btn>
                             </v-row>
                         </td>

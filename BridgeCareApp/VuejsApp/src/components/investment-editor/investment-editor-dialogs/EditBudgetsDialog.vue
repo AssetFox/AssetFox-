@@ -71,8 +71,8 @@
                                     :model-value='props.item.criterionLibrary.mergedCriteriaExpression'>
                                     <template v-slot:append-inner>
                                         <v-btn id="EditBudgetsDialog-openCriteriaEditor-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)"  
-                                            class="ghd-green" flat icon>
-                                            <EditSvg />
+                                            class="ghd-blue" flat icon>
+                                            <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                         </v-btn>                                        
                                     </template>
                                 </v-text-field>

@@ -256,11 +256,11 @@
                                 </v-menu>
                                 <v-btn id="PerformanceCurveEditor-editEquation-vbtn"
                                     @click="onShowEquationEditorDialog(item.item.id) "
-                                    class="ghd-green"
+                                    class="ghd-blue"
                                     variant="flat"
                                     icon
                                 >
-                                <EditSvg />
+                                <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </td>
                             <td class="text-xs-left">
@@ -299,10 +299,10 @@
                                 <v-btn id="PerformanceCurveEditor-editCriteria-vbtn"
                                     @click="onEditPerformanceCurveCriterionLibrary(item.item.id)"
                                     variant="flat"
-                                    class="ghd-green"
+                                    class="ghd-blue"
                                     icon
                                 >
-                                <EditSvg />
+                                <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </td>
                             <td class="text-xs-left">

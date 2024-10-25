@@ -361,7 +361,7 @@ public record AnalysisWorkItem(Guid NetworkId, Guid SimulationId, UserInfo UserI
         }
         catch (Exception ex)
         {
-            _hubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Scenario Error::RunSimulation - {ex.Message}");
+            _hubService.SendRealTimeErrorMessage(UserInfo.Name, $"Scenario Error::RunSimulation - {ex.Message}", ex);
         }     
     }
 

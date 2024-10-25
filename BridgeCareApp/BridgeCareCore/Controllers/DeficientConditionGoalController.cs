@@ -65,9 +65,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::DeficientConditionGoalLibraries - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::DeficientConditionGoalLibraries - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -86,14 +86,13 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
-                return Ok();
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Investment error::{e.Message}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Investment error::{e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -112,18 +111,17 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::GetScenarioDeficientConditionGoals for {simulationName} - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::GetScenarioDeficientConditionGoals for {simulationName} - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::GetScenarioDeficientConditionGoals for {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::GetScenarioDeficientConditionGoals for {simulationName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -145,15 +143,14 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::GetScenarioDeficientConditionGoalPage for {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::GetScenarioDeficientConditionGoalPage for {simulationName} - {e.Message}", e);
             }
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::GetScenarioDeficientConditionGoalPage for {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::GetScenarioDeficientConditionGoalPage for {simulationName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -173,14 +170,13 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError} ::GetLibraryDeficientConditionGoalPage - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError} ::GetLibraryDeficientConditionGoalPage - {e.Message}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError} ::GetLibraryDeficientConditionGoalPage - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError} ::GetLibraryDeficientConditionGoalPage - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -210,16 +206,15 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::UpsertDeficientConditionGoalLibrary - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::UpsertDeficientConditionGoalLibrary - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::UpsertDeficientConditionGoalLibrary - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::UpsertDeficientConditionGoalLibrary - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -241,18 +236,17 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::UpsertDeficientConditionGoalLibrary for {simulationName} - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::UpsertDeficientConditionGoalLibrary for {simulationName} - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
                 var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::UpsertDeficientConditionGoalLibrary for {simulationName} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::UpsertDeficientConditionGoalLibrary for {simulationName} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpDelete]
@@ -278,16 +272,15 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::DeleteDeficientConditionGoalLibrary - {HubService.errorList["Unauthorized"]}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::DeleteDeficientConditionGoalLibrary - {HubService.errorList["Unauthorized"]}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::DeleteDeficientConditionGoalLibrary - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::DeleteDeficientConditionGoalLibrary - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -314,9 +307,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::GetIsSharedLibrary - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::GetIsSharedLibrary - {e.Message}", e);
             }
+            return Ok();
         }
         [HttpGet]
         [Route("GetDeficientConditionGoalLibraryUsers/{libraryId}")]
@@ -336,14 +329,13 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::GetDeficientConditionGoalLibraryUsers - {e.Message}");
-                return Ok();
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::GetDeficientConditionGoalLibraryUsers - {e.Message}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::GetDeficientConditionGoalLibraryUsers - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::GetDeficientConditionGoalLibraryUsers - {e.Message}", e);
             }
+            return Ok();
         }
         [HttpPost]
         [Route("UpsertOrDeleteDeficientConditionGoalLibraryUsers/{libraryId}")]
@@ -362,19 +354,17 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::UpsertOrDeleteDeleteConditionGoalLibraryUsers - {e.Message}");
-                return Ok();
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::UpsertOrDeleteDeleteConditionGoalLibraryUsers - {e.Message}", e);
             }
             catch (InvalidOperationException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::UpsertOrDeleteDeleteConditionGoalLibraryUsers - {e.Message}");
-                return BadRequest();
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::UpsertOrDeleteDeleteConditionGoalLibraryUsers - {e.Message}", e);
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::UpsertOrDeleteDeleteConditionGoalLibraryUsers - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{DeficientConditionGoalError}::UpsertOrDeleteDeleteConditionGoalLibraryUsers - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]

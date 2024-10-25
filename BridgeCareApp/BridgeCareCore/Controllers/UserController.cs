@@ -34,9 +34,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::GetAllUsers - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"User error::GetAllUsers - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -51,9 +51,10 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::GetUserByUserName - {e.Message}");
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"User error::GetUserByUserName - {e.Message}", e);
                 throw;
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -71,9 +72,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::UpdateLastNewsAccessDate - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"User error::UpdateLastNewsAccessDate - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPut]
@@ -88,9 +89,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::UpdateUser {username} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"User error::UpdateUser {username} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpDelete]
@@ -104,9 +105,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::DeleteUser {username} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"User error::DeleteUser {username} - {e.Message}", e);
             }
+            return Ok();
         }
     }
 }

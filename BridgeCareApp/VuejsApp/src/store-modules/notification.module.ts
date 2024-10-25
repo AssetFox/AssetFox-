@@ -60,6 +60,18 @@ const actions = {
                 payload.longMessage || 'No further information provided.',
         };
         commit('addNotificationMutator', notification);
+    },addErrorNotificationWithStackTrace({ commit }: any, payload: any) {
+        let notification: Notification = {
+            id: state.totalNotifications + 1,
+            icon: 'fas fa-exclamation-circle',
+            iconColor: 'red',
+            active: false,
+            shortMessage: payload.message,
+            longMessage:
+                payload.longMessage || 'No further information provided.',
+            stackTrace: payload.stackTrace
+        };
+        commit('addNotificationMutator', notification);
     },
     addInfoNotification({ commit }: any, payload: any) {
         let notification: Notification = {

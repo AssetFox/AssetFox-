@@ -22,6 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Reporting.Concrete.GeneralSummary;
+using BridgeCareCore.Interfaces;
 
 namespace BridgeCareCore
 {
@@ -61,6 +62,7 @@ namespace BridgeCareCore
 
             services.AddSecurityConfig(Configuration);
             services.AddSingleton<IClaimsTransformation, ClaimsTransformation>();
+            services.AddSingleton<AggregatedSelectValuesResultDtoCache>();
 
             services.AddSingleton(Configuration);
             services.AddControllers().AddNewtonsoftJson();

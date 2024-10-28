@@ -258,6 +258,7 @@
                                     @click="onShowEquationEditorDialog(item.item.id) "
                                     class="ghd-blue"
                                     variant="flat"
+                                    style="padding-top: 15px"
                                     icon
                                 >
                                 <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
@@ -300,6 +301,7 @@
                                     @click="onEditPerformanceCurveCriterionLibrary(item.item.id)"
                                     variant="flat"
                                     class="ghd-blue"
+                                    style="padding-top: 15px"
                                     icon
                                 >
                                 <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>

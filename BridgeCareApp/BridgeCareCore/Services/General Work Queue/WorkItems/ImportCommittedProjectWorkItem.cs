@@ -37,7 +37,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _committedProjectService = scope.ServiceProvider.GetRequiredService<ICommittedProjectService>();
             var _queueLogger = new FastWorkQueueLogger(_hubService, UserId, updateStatusOnHandle, WorkId);
-            _committedProjectService.ImportCommittedProjectFiles(SimulationId, ExcelPackage, Filename, cancellationToken, _queueLogger);       
+            _committedProjectService.ImportCommittedProjectFiles(SimulationId, ExcelPackage, Filename, UserId, cancellationToken, _queueLogger);       
         }
 
         public void OnFault(IServiceProvider serviceProvider, string errorMessage)

@@ -36,7 +36,7 @@ namespace BridgeCareCore.Controllers
         public async Task<FileResult> GetSimulationLog(Guid networkId, Guid simulationId)
         {
 
-            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "Generating" };
+            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "Generating", ReportType = "SimulationLog" };
             var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
 
             try

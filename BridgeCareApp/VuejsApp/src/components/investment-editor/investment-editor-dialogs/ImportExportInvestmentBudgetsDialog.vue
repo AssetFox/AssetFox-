@@ -32,9 +32,9 @@
                         <h6 class="ghd-control-label">Budgets have been replaced.  Please update budget priorities</h6>
                     </v-row>
                 </v-card-title>
-                <v-card-actions class="bottom-portion-padding">
+                <v-card-actions>
                     <v-row justify="center">
-                        <v-btn @click="successSubmit()" variant = "outlined" class="ghd-blue ghd-button-text">Ok</v-btn>
+                        <OkButton @ok="successSubmit()"/>
                     </v-row>
                 </v-card-actions>
                 
@@ -54,6 +54,7 @@ import { useRouter } from 'vue-router';
 import CancelButton from '@/shared/components/buttons/CancelButton.vue';
 import UploadButton from '@/shared/components/buttons/UploadButton.vue';
 import XButton from '@/shared/components/buttons/XButton.vue';
+import OkButton from '@/shared/components/buttons/OkButton.vue';
 
 let store = useStore();
 const emit = defineEmits(['submit', 'submitSuccessImport'])

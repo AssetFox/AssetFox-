@@ -279,19 +279,10 @@
                 </v-col>
             </v-row>
     </v-col>
-    <v-dialog v-model="showSuccessPopup" max-width="400px">
-        <v-card>
-            <v-card-text class="text-center">
-                Successfully uploaded treatments.
-            </v-card-text>
-            <v-card-actions>
-                <v-row justify="center" class="w-100">
-                    <v-btn color="primary" variant="text" 
-                    class='ghd-white-bg ghd-blue ghd-button-text' @click="showSuccessPopup = false">OK</v-btn>
-                </v-row>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    <SuccessfulUploadDialog 
+        v-model="showSuccessPopup"
+        :message="importSuccessMessage"
+    />
 
 </v-card>
     <ConfirmDeleteAlert
@@ -428,7 +419,7 @@ import UpdateLibraryButton from '@/shared/components/buttons/UpdateLibraryButton
 import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton.vue';
 import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
 import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
-import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
+import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUploadDialog.vue';
 
     const emit = defineEmits(['submit'])    
     const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
@@ -634,6 +625,7 @@ async function getDistinctScenarioPerformanceFactorAttributeNamesAction(payload?
     let newLibrarySelection: boolean = false;
     let newTreatment: Treatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
     const showSuccessPopup = ref(false);
+    const importSuccessMessage = ref('Successfully uploaded treatments.');
 
     
     beforeRouteEnter();
@@ -1461,21 +1453,35 @@ async function getDistinctScenarioPerformanceFactorAttributeNamesAction(payload?
 
     function importCompleted(data: any){
         var importComp = data.importComp as importCompletion
-        if( importComp.workType === WorkType.ImportScenarioTreatment && importComp.id === selectedScenarioId ||
-            hasSelectedLibrary.value && importComp.workType === WorkType.ImportLibraryTreatment && importComp.id === selectedTreatmentLibrary.value.id){
-            clearChanges()
+
+        const treatmentSuccessMsg = "Successfully uploaded treatments."
+        const superseedSuccessMsg = "Successfully uploaded treatment supersedes."
+        const workTypeSuccessMessages: { [key in WorkType]?: string } = {
+            [WorkType.ImportScenarioTreatment]: treatmentSuccessMsg,
+            [WorkType.ImportLibraryTreatment]: treatmentSuccessMsg,
+            [WorkType.ImportScenarioTreatmentSupersedeRule]: superseedSuccessMsg,
+            [WorkType.ImportLibraryTreatmentSupersedeRule]: superseedSuccessMsg
+        };
+
+        const isRelevantImport = (hasScenario.value && importComp.id === selectedScenarioId) ||
+            (hasSelectedLibrary.value && importComp.id === selectedTreatmentLibrary.value.id);
+        const message = workTypeSuccessMessages[importComp.workType];
+
+        if (isRelevantImport && message) {
+            clearChanges();
             getTreatmentLibrariesAction().then(async () => {
                 if(hasScenario.value){
                     await getSimpleScenarioSelectableTreatmentsAction(selectedScenarioId);
                     onDiscardChanges();
-                }  
-                else{
+                } else {
                     await getSimpleSelectableTreatmentsAction(selectedTreatmentLibrary.value.id);
-                }  
-                setAlertMessageAction('');             
-            })
+                }
+                setAlertMessageAction('');
+            });
+            // Set the success message and show the popup
+            importSuccessMessage.value = message;
             showSuccessPopup.value = true;
-        }        
+        }
     }
 
     //paging

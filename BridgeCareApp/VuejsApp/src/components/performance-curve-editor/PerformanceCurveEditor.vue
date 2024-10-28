@@ -379,19 +379,11 @@
                 :show="hasScenario"
             />
         </v-row>
-        <v-dialog v-model="showSuccessPopup" max-width="400px">
-            <v-card>
-                <v-card-text class="text-center">
-                    Successfully uploaded performance curves.
-                </v-card-text>
-                <v-card-actions>
-                    <v-row justify="center" class="w-100">
-                        <v-btn color="primary" variant="text" 
-                        class="ghd-white-bg ghd-blue ghd-button-text" @click="showSuccessPopup = false">OK</v-btn>
-                    </v-row>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+
+        <SuccessfulUploadDialog 
+            v-model="showSuccessPopup"
+            message="Successfully uploaded performance curves."
+        />
         <Alert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
@@ -521,6 +513,7 @@ import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton
 import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
 import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
 import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
+import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUploadDialog.vue';
 
 const emit = defineEmits(['submit'])
 let store = useStore();
@@ -577,7 +570,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let hasScenario = ref(false);
     let librarySelectItems  = ref<SelectItem[]>([]);
     let modifiedDate = ref<string>(''); 
-    let showSuccessPopup = ref(false);
+    const showSuccessPopup = ref(false);
     
     let performanceCurveGridHeaders: any[] = [
         {

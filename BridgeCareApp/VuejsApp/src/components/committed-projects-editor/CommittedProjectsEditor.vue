@@ -294,7 +294,11 @@
         />
         <ConfirmDialog></ConfirmDialog>
     </v-div>
-    <v-dialog v-model="showSuccessPopup" max-width="400px">
+    <SuccessfulUploadDialog 
+        v-model="showSuccessPopup"
+        message="Successfully uploaded committed projects."
+    />
+    <!-- <v-dialog v-model="showSuccessPopup" max-width="400px">
         <v-card>
             <v-card-text class="text-center">
                 Successfully uploaded committed projects.
@@ -306,7 +310,7 @@
                 </v-row>
             </v-card-actions>
         </v-card>
-    </v-dialog>
+    </v-dialog> -->
 </v-card>
 </template>
 <script setup lang="ts">
@@ -358,7 +362,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import SaveButton from '@/shared/components/buttons/SaveButton.vue';
 import CancelButton from '@/shared/components/buttons/CancelButton.vue';
-import UploadButton from '@/shared/components/buttons/UploadButton.vue';
+import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUploadDialog.vue';
 
 
     let store = useStore();

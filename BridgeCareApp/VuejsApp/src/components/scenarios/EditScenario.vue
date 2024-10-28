@@ -301,16 +301,16 @@ import CashFlowService from '@/services/cash-flow.service';
     const alertData = ref<AlertData>(clone(emptyAlertData));
     const alertDataForDeletingCommittedProjects = ref<AlertData>({ ...emptyAlertData });
 
-    onMounted(async () => {
-        await ScenarioSettingsUpdated();
-        await getAnalysisMethod();
-        await getTreatments();
-        await getBudgetPriority();
-        await getInvestment();
-        await getReportRunStatus();
-        await getCashFlow();
-        await getDeteriorationModel();
-        await getCommittedProjects();
+    onMounted(() => {
+        ScenarioSettingsUpdated()
+        .then(() => getAnalysisMethod())
+        .then(() => getTreatments())
+        .then(() => getBudgetPriority())
+        .then(() => getReportRunStatus())
+        .then(() => getCashFlow())
+        .then(() => getDeteriorationModel())
+        .then(() => getInvestment())
+        .then(() => getCommittedProjects())
     });
     
     onBeforeMount(() => {

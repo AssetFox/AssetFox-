@@ -709,26 +709,41 @@ import { getUrl } from './shared/utils/get-url';
     }
 
     function onAddTaskCompletedNotification(data: any) {
+
+        const taskMessage = data.task;
         addTaskCompletedNotificationAction({
             message: 'Task Completed',
-            longMessage: data.task
+            longMessage: taskMessage
         });
 
         const stringData = JSON.stringify(data);
 
-        if(stringData.includes('Analysis'))
-        {
-            $emitter.emit('SimulationRunSettingUpdated');                      
-            onShowRunAnalysisCompletedAlert();
+        if (taskMessage.includes('Analysis')) {
+            $emitter.emit('SimulationRunSettingUpdated');
+
+            // Extract the simulation name from data.task
+            const simulationName = extractSimulationName(taskMessage);
+
+            onShowRunAnalysisCompletedAlert(simulationName);
         }
     }
 
-    function onShowRunAnalysisCompletedAlert() {
+    function extractSimulationName(taskMessage: string): string {
+        // Assuming taskMessage is in the format "Analysis on [Simulation Name] has completed"
+        const regex = /^Analysis on (.+?) has completed$/;
+        const match = taskMessage.match(regex);
+        if (match && match[1]) {
+            return match[1].trim();
+        }
+        return 'Unknown Simulation';
+    }
+
+    function onShowRunAnalysisCompletedAlert(simulationName:string) {
         ConfirmRunAnalysisCompleted.value = {
             showDialog: true,
             heading: 'Success',
             choice: false,
-            message: `The Analysis on ${updatedSimulationRunSettingName.value} has been completed`,        
+            message: `The Analysis on ${simulationName} has been completed`,        
         };
     }
 

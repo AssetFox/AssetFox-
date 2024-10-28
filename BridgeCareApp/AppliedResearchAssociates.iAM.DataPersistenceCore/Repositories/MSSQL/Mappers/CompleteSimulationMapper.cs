@@ -176,6 +176,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 userJoins.Add(userJoin);
             }
 
+            var SimulationOutputJsonEntities = new List<SimulationOutputJsonEntity>();
+            foreach(var simulationOutputJson in dto.SimulationOutputJsons)
+            {
+                var simulationOutputJsonEntity = simulationOutputJson.ToEntity(dto.Id);
+                SimulationOutputJsonEntities.Add(simulationOutputJsonEntity);
+            }
+
             var entity = new SimulationEntity
             {
                 Name = dto.Name,
@@ -196,6 +203,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 CommittedProjects = committedProjectEntities,
                 SelectableTreatments = scenarioSelectableTreatmentEntities,
                 SimulationUserJoins = userJoins,
+                SimulationOutputJsons = SimulationOutputJsonEntities
             };
             BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
             return entity;

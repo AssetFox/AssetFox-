@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Services.SimulationCloning;
 
 namespace BridgeCareCore.Services
 {
@@ -42,9 +43,8 @@ namespace BridgeCareCore.Services
             {
                 users.Add(user);
             }
-
-            // TODO SimulationOutputJson: create DTO n map
-            var cloneSimulationOutputJsonDTO = new SimulationOutputJsonDTO();
+                        
+            var cloneSimulationOutputJsons = SimulationOutputJsonCloner.CloneList(completeSimulation.SimulationOutputJsons, ownerId);
 
             var clone = new CompleteSimulationDTO
             {
@@ -67,7 +67,7 @@ namespace BridgeCareCore.Services
                 CommittedProjects = cloneBaseCommittedProject,
                 Id = Guid.NewGuid(),
                 Users = users,
-                SimulationOutputJson = cloneSimulationOutputJsonDTO
+                SimulationOutputJsons = cloneSimulationOutputJsons
             };
             return clone;
 

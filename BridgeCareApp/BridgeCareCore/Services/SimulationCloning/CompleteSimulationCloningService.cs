@@ -45,7 +45,7 @@ namespace BridgeCareCore.Services
             fullSimulation.RemainingLifeLimits = _unitOfWork.RemainingLifeLimitRepo.GetScenarioRemainingLifeLimits(simulationGuid);
             fullSimulation.CashFlowRules = _unitOfWork.CashFlowRuleRepo.GetScenarioCashFlowRules(simulationGuid);
             fullSimulation.PerformanceCurves = _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationGuid);
-
+            fullSimulation.SimulationOutputJsons = _unitOfWork.SimulationOutputJsonRepo.GetSimulationOutputViaJson(simulationGuid);
 
             return fullSimulation;
         }

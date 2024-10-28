@@ -4,9 +4,7 @@
             <v-card class="div-padding">
                     <v-row justify="space-between" style="margin-bottom: 10px;">
                         <h4 style="padding-top: 10px; padding-left: 10px;" class="Montserrat-font-family">Investment Budgets Upload</h4>
-                        <v-btn @click="onSubmit(false)" icon variant="flat">
-                            <i class="fas fa-times fa-2x"></i>
-                        </v-btn>
+                        <XButton @click="onSubmit(false)"/>
                     </v-row>
                     
                 <v-card-text >
@@ -21,8 +19,8 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-row justify="center">
-                        <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "flat">Cancel</v-btn>
-                        <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>
+                        <CancelButton @cancel="onSubmit(false)"/>
+                        <UploadButton @upload="onSubmit(true)"/>
                     </v-row>
                 </v-card-actions>
             </v-card>
@@ -34,9 +32,9 @@
                         <h6 class="ghd-control-label">Budgets have been replaced.  Please update budget priorities</h6>
                     </v-row>
                 </v-card-title>
-                <v-card-actions class="bottom-portion-padding">
+                <v-card-actions>
                     <v-row justify="center">
-                        <v-btn @click="successSubmit()" variant = "outlined" class="ghd-blue ghd-button-text">Ok</v-btn>
+                        <OkButton @ok="successSubmit()"/>
                     </v-row>
                 </v-card-actions>
                 
@@ -53,6 +51,10 @@ import InvestmentBudgetsFileSelector from '@/shared/components/FileSelector.vue'
 import {inject, reactive, ref, toRefs, onMounted, onBeforeUnmount, watch, computed, Ref,shallowRef} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import UploadButton from '@/shared/components/buttons/UploadButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
+import OkButton from '@/shared/components/buttons/OkButton.vue';
 
 let store = useStore();
 const emit = defineEmits(['submit', 'submitSuccessImport'])

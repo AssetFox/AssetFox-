@@ -168,10 +168,12 @@ Line 164 Delete,
                     </v-row>
                 <v-row justify="center">
                     <v-row justify="center">
-                        <CancelSaveButtonGroup
-                            :cancelDisabled="!hasUnsavedChanges"
-                            :saveDisabled="!valid || !hasUnsavedChanges"
+                        <CancelButton 
+                            :disabled="!hasUnsavedChanges"
                             @cancel="onDiscardChanges"
+                        />
+                        <SaveButton 
+                            :disabled="!valid || !hasUnsavedChanges"
                             @save="onUpsertAnalysisMethod"
                         />
                     </v-row>
@@ -218,7 +220,8 @@ import { useRouter } from 'vue-router';
 import { getUrl } from '@/shared/utils/get-url';
 import ConfirmDialog from 'primevue/confirmdialog';
 import EditSvg from '@/shared/icons/EditSvg.vue';
-import CancelSaveButtonGroup from '@/shared/components/buttons/CancelSaveButtonGroup.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
 import mitt, { Emitter, EventType } from 'mitt';
 import AnalysisMethodService from '@/services/analysis-method.service';
 

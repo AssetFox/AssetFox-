@@ -22,7 +22,7 @@
                                     <TreatmentSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Treatment'"/>  
                                     <TargetConditionGoalSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Target Condition Goal'"/>  
                                     <RemainingLifeLimitSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Remaining Life Limit'"/>  
-                                    <PerformanceCurveSvg style="height: 34px; width: 36px"  class="scenario-icon" v-if="navigationTab.tabName === 'Deterioration Model'"/>  
+                                    <PerformanceCurveSvg style="height: 34px; width: 36px;"  class="scenario-icon" v-if="navigationTab.tabName === 'Deterioration Model'"/>  
                                     <DeficientConditionGoalSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Deficient Condition Goal'"/>  
                                     <InvestmentSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Investment'"/>  
                                     <CashFlowSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Cash Flow'"/>  
@@ -32,8 +32,8 @@
                                     <CommittedProjectSvg style="height: 32px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Committed Projects'"/>  
                                     <ReportsSvg style="height: 38px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Reports & Outputs'"/>  
                             </template>
-                            <v-list-item-title style="display: flex; justify-content: space-between; align-items: center; padding-left: 5px; width: 100%;">
-    <span>{{ navigationTab.tabName }}</span>
+                        <v-list-item-title style="display: flex; justify-content: space-between; align-items: center; padding-left: 5px; width: 100%;">
+    <span style="font-size: 1.1rem !important;">{{ navigationTab.tabName }}</span>
     <i 
         :class="[navigationTab.validationIcon, { 
             'green-icon': navigationTab.validationIcon === 'fas fa-check-circle', 
@@ -41,7 +41,7 @@
             'yellow-icon': navigationTab.validationIcon === 'fas fa-exclamation-circle' 
         }]" 
         v-if="navigationTab.validationIcon" 
-        style="margin-left: 30px;"
+        style="margin-left: 30px; font-size: 1.3rem;"
         v-b-tooltip.hover
         :title="getTooltipText(navigationTab.validationIcon, navigationTab.tabName)">
     </i>
@@ -52,7 +52,7 @@
                 <div style="margin: 10px;">
                     <v-btn
                         :class="{
-                            'ghd-white-bg blue-run-icon ghd-button-text': !isBudgetPrioritySet,
+                            'blue-run-icon ghd-button-text': !isBudgetPrioritySet,
                             'ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border': isBudgetPrioritySet
                         }"
                         @click="onShowRunSimulationAlert"
@@ -307,9 +307,9 @@ import CashFlowService from '@/services/cash-flow.service';
         await getTreatments();
         await getBudgetPriority();
         await getInvestment();
-        await getDeteriorationModel();
         await getReportRunStatus();
         await getCashFlow();
+        await getDeteriorationModel();
         await getCommittedProjects();
     });
     
@@ -1093,7 +1093,8 @@ import CashFlowService from '@/services/cash-flow.service';
 }
 
 .blue-run-icon {
-    filter: invert(24%) sepia(96%) saturate(584%) hue-rotate(177deg) brightness(97%) contrast(84%);
+    background-color: #002E6C;
+    color: white;
 }
 
 .red-icon {

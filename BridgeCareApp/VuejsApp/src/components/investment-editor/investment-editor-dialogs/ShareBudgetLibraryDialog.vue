@@ -3,8 +3,10 @@
     <v-card>
       <v-card-title>
         <v-row justify="space-between" style="margin-top: 10px;">
+          <v-spacer></v-spacer>
           <h3>Budget Library Sharing</h3>
-          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
+          <v-spacer></v-spacer>
+          <v-btn @click="onSubmit(false)" variant="text" class="ghd-close-button">
             X
           </v-btn>
         </v-row>
@@ -43,21 +45,13 @@
             </td>
           </tr>
           </template>
-          <!-- <v-alert :model-value="true"
-                   class="assetFox-orange-bg"
-                   icon="fas fa-exclamation"
-                   slot="no-results">
-            Your search for "{{ searchTerm }}" found no results.
-          </v-alert> -->
         </v-data-table>
       </v-card-text>
       <v-card-actions>
         <v-row>
-          <v-spacer></v-spacer>
-          <v-btn id="ShareBudgetLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-blue">Cancel</v-btn>
-          <v-btn id="ShareBudgetLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-blue-bg text-white">
-            Save
-          </v-btn>
+          <v-spacer></v-spacer>          
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SaveButton @save="onSubmit(true)"/>
           <v-spacer></v-spacer>
         </v-row>
       </v-card-actions>
@@ -73,14 +67,13 @@ import {User} from '@/shared/models/iAM/user';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getUserName} from '@/shared/utils/get-user-info';
 import {setItemPropertyValueInList} from '@/shared/utils/setter-utils';
-import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import { BudgetLibraryUserGridRow, ShareBudgetLibraryDialogData } from '@/shared/models/modals/share-budget-library-dialog-data';
 import InvestmentService from '@/services/investment.service';
-    import { AxiosResponse } from 'axios';
-    import { http2XX } from '@/shared/utils/http-utils';
-import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, toRefs, computed} from 'vue';
+import { http2XX } from '@/shared/utils/http-utils';
+import {ref, watch, toRefs, computed} from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
 
 let store = useStore();
 const props = defineProps<{dialogData: ShareBudgetLibraryDialogData}>()

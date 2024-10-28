@@ -11,8 +11,8 @@
                 <FileSelector :closed='closed' :useTreatment="false" @submit='onFileSelectorChange' />
             </v-row>
             <v-row justify="center">
-                <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "flat">Cancel</v-btn>
-                <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>                    
+                <CancelButton @cancel="onSubmit(false)"/>
+                <UploadButton @upload="onSubmit(true)"/>                     
             </v-row>
         </v-card>
     </v-dialog>
@@ -25,6 +25,8 @@ import { ImportSupersedeDialogResult } from '@/shared/models/modals/import-super
 import {clone} from 'ramda';
 import { useStore } from 'vuex';
 import FileSelector from '@/shared/components/FileSelector.vue';
+import UploadButton from '@/shared/components/buttons/UploadButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
 
     const props = defineProps<{showDialog: boolean}>()
     const { showDialog } = toRefs(props);

@@ -27,21 +27,19 @@
                         <div class="header-text-content invest-owner-padding">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
                         </div>
-                        <v-btn id="InvestmentEditor-ShareLibrary-vbtn" @click='onShowShareBudgetLibraryDialog(selectedBudgetLibrary)'
-                                style="margin-left: 10px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
-                               v-show='!hasScenario'>
-                            Share Library
-                        </v-btn>
+                        <ShareLibraryButton
+                            @shareLibrary="onShowShareBudgetLibraryDialog(selectedBudgetLibrary)"
+                            :selectedLibrary="selectedBudgetLibrary"
+                            :show="!hasScenario"
+                        />
                     </v-row>
                 </v-col>
                 <v-col cols = "auto" v-if='!hasScenario' class="ghd-constant-header">
                     <v-row align-end justify-end class="header-alignment-padding-center">
-                        <!-- <v-spacer></v-spacer> -->
-                        <v-btn id="InvestmentEditor-CreateNewLibrary-vbtn" @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                        v-show="!hasScenario"
-                        variant = "outlined">
-                            Create New Library
-                        </v-btn>
+                        <CreateNewLibraryButton 
+                            :show="!hasScenario"
+                            @createNewLibrary="onShowCreateBudgetLibraryDialog(false)"
+                        />
                     </v-row>
                 </v-col>
             </v-row>
@@ -228,11 +226,10 @@
                     </tr>
                     </template>
                 </v-data-table-server>
-                <v-btn id="InvestmentEditor-deleteSelected-btn"
-                        :disabled='selectedBudgetYears.length === 0' @click='onRemoveBudgetYears'
-                        class='ghd-red ghd-button' variant = "text">
-                    Delete Selected
-                </v-btn>
+                <DeleteSelectedButton
+                    :disabled="selectedBudgetYears.length === 0"
+                    @deleteSelected="onRemoveBudgetYears"
+                />
         </v-col>
     
         <v-col v-show='hasSelectedLibrary && !hasScenario' cols = "12">
@@ -251,42 +248,30 @@
         <v-col cols="12">          
             <v-row style="padding-bottom: 40px;" v-show='hasSelectedLibrary || hasScenario' justify="center">
                 <v-spacer></v-spacer>
-                    <v-btn id="InvestmentEditor-cancel-btn"
-                        :disabled='!hasUnsavedChanges' @click='onDiscardChanges' 
-                        class='ghd-blue ghd-button-text ghd-button'
-                        style="margin-right: 10px;"
-                        v-show='hasScenario'>
-                        Cancel
-                    </v-btn>
-                    <v-btn outline id="InvestmentEditor-deleteLibrary-btn"
-                        @click='onShowConfirmDeleteAlert' variant = "outlined" 
-                        class='ghd-red ghd-button-text ghd-outline-button-padding ghd-button' v-show='!hasScenario'                                               
-                        :disabled='!hasLibraryEditPermission'>
-                        Delete Library
-                    </v-btn>
-                    <v-btn id="InvestmentEditor-createAsNewLibrary-btn"
-                        :disabled='disableCrudButton()'
-                        @click='onShowCreateBudgetLibraryDialog(true)'
-                        style="margin-left: 10px; margin-right: 10px"
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined">
-                        Create as New Library
-                    </v-btn>
-                    <v-btn id="InvestmentEditor-updateLibrary-btn"
-                    :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
-                        @click='onUpsertBudgetLibrary()'
-                        class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
-                        v-show='!hasScenario'>
-                        Update Library
-                    </v-btn>
-                    <v-btn id="InvestmentEditor-save-btn"
-                        :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
-                        @click='onUpsertInvestment()'
-                        style="margin-left: 10px;"
-                        class='ghd-blue-bg text-white ghd-button-text ghd-button'
-                        flat
-                        v-show='hasScenario'>
-                        Save
-                    </v-btn>
+                    <CancelButton
+                        :disabled="!hasUnsavedChanges"
+                        @cancel="onDiscardChanges"
+                        :show="hasScenario"
+                    />
+                    <DeleteLibraryButton
+                        @deleteLibrary="onShowConfirmDeleteAlert"
+                        :disabled="!hasLibraryEditPermission"
+                        :show="!hasScenario"
+                    />
+                    <CreateAsNewLibraryButton 
+                        :disabled="disableCrudButton()"
+                        @createAsNewLibrary="onShowCreateBudgetLibraryDialog(true)"
+                    />
+                    <UpdateLibraryButton
+                        :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
+                        @updateLibrary="onUpsertBudgetLibrary"
+                        :show="!hasScenario"
+                    />
+                    <SaveButton 
+                        :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
+                        @save="onUpsertInvestment()"
+                        :show="hasScenario"
+                    />
                 <v-spacer></v-spacer>
             </v-row>
         </v-col>
@@ -317,19 +302,10 @@
                                              @submit='onSubmitImportExportInvestmentBudgetsDialogResult' 
                                              @submit-success-import="onSuccessImportSubmit"/>
     </v-row>
-    <v-dialog v-model="showSuccessPopup" max-width="400px">
-        <v-card>
-            <v-card-text class="text-center">
-                Successfully uploaded budgets.
-            </v-card-text>
-            <v-card-actions>
-                <v-row justify="center" class="w-100">
-                    <v-btn color="primary" variant="text" 
-                    class="ghd-white-bg ghd-blue ghd-button-text" @click="showSuccessPopup = false">OK</v-btn>
-                </v-row>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    <SuccessfulUploadDialog 
+        v-model="showSuccessPopup"
+        message="Successfully uploaded investment budgets."
+    />
 </v-card>
     <ConfirmDialog></ConfirmDialog>
 </template>
@@ -410,6 +386,15 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import { getUrl } from '@/shared/utils/get-url';
 import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CreateAsNewLibraryButton from '@/shared/components/buttons/CreateAsNewLibraryButton.vue';
+import UpdateLibraryButton from '@/shared/components/buttons/UpdateLibraryButton.vue';
+import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton.vue';
+import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
+import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
+import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
+import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUploadDialog.vue';
 import { BudgetPriority, BudgetPriorityLibrary } from '@/shared/models/iAM/budget-priority';
 import BudgetPriorityService from '@/services/budget-priority.service';
 import TreatmentService from '@/services/treatment.service';

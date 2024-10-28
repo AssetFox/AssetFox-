@@ -52,10 +52,8 @@
       </v-card-text>
       <v-card-actions>
         <v-row justify="center">
-          <v-btn id="ShareCashFlowRuleLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
-          <v-btn id="ShareCashFlowRuleLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding" variant="outlined">
-            Save
-          </v-btn>
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SaveButton @save="onSubmit(true)"/>
         </v-row>
       </v-card-actions>
     </v-card>
@@ -75,6 +73,8 @@ import {CashFlowRuleLibraryUserGridRow, ShareCashFlowRuleLibraryDialogData } fro
 import CashFlowRuleService from '@/services/cash-flow.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue'; 
 
   let store = useStore();
   const props = defineProps<{dialogData: ShareCashFlowRuleLibraryDialogData}>()

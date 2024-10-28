@@ -4,9 +4,7 @@
       <v-card-title class="ghd-dialog-padding-top-title">
         <v-row justify="space-between">
           <div class="ghd-control-dialog-header"><h5>New Budget Priority Library</h5></div>
-          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-            X
-          </v-btn>
+          <XButton @click="onSubmit(false)"/>
         </v-row>
       </v-card-title>
 
@@ -32,18 +30,12 @@
       </v-card-text>
       
       <v-card-actions class="ghd-dialog-box-padding-bottom">
-        <v-row justify="center">       
-          <v-btn id="CreateBudgetPriorityLibraryDialog-cancel-vbtn"
-                 @click="onSubmit(false)" 
-                 class='ghd-blue ghd-button-text ghd-button' variant = "outlined">
-              Cancel
-           </v-btn>
-          <v-btn id="CreateBudgetPriorityLibraryDialog-save-vbtn"
-                 :disabled="newBudgetPriorityLibrary.name === ''"
-                 @click="onSubmit(true)"
-                 class='ghd-blue ghd-button-text ghd-button' variant = "outlined" >
-            Save
-          </v-btn>
+        <v-row justify="center"> 
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SaveButton 
+            @save="onSubmit(true)"
+            :disabled="newBudgetPriorityLibrary.name === ''"
+          />
         </v-row>
       </v-card-actions>
     </v-card>
@@ -64,6 +56,9 @@ import {InputValidationRules, rules as validationRules} from '@/shared/utils/inp
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { nextTick } from 'process';
 import { useStore } from 'vuex';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
   let store = useStore();
   const props = defineProps<{

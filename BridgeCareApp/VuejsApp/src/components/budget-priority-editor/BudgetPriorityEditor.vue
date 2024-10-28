@@ -25,14 +25,10 @@
                         <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content owner-padding" style="margin-top:6px;">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
-                        <!-- <v-divider class="owner-shared-divider" vertical
-                            v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
-                        </v-divider> -->
-                        <v-btn id="BudgetPriorityEditor-shareLibrary-vbtn" @click='onShowShareBudgetPriorityLibraryDialog(selectedBudgetPriorityLibrary)'
-                             style="margin: 10px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
-                            v-show='!hasScenario'>
-                            Share Library
-                        </v-btn>
+                        <ShareLibraryButton 
+                            @shareLibrary="onShowShareBudgetPriorityLibraryDialog(selectedBudgetPriorityLibrary)"
+                            :show="!hasScenario"
+                        />
                     </v-row>                               
                 </v-col>
                 <v-col cols = "auto">
@@ -40,10 +36,10 @@
                         <v-btn id="BudgetPriorityEditor-addBudgetPriority-vbtn" @click='showCreateBudgetPriorityDialog = true' style="margin: 5px;" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                         v-show='hasSelectedLibrary || hasScenario'>Add Budget Priority</v-btn>
                         
-                        <v-btn id="BudgetPriorityEditor-createNewLibrary-vbtn" @click='onShowCreateBudgetPriorityLibraryDialog(false)' style="margin: 5px;" variant = "outlined"
-                            v-show='!hasScenario' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' > 
-                            Create New Library
-                        </v-btn>
+                        <CreateNewLibraryButton 
+                            @createNewLibrary="onShowCreateBudgetPriorityLibraryDialog(false)"
+                            :show="!hasScenario"
+                        />
                 </v-col>
             </v-row>
         </v-col>
@@ -158,13 +154,10 @@
                         </tr>
                     </template>
                 </v-data-table-server>
-            <v-btn flat
+            <DeleteSelectedButton 
+                @deleteSelected="onRemoveBudgetPriorities"
                 :disabled='selectedBudgetPriorityIds.length === 0'
-                @click='onRemoveBudgetPriorities'
-                class='ghd-red ghd-button'
-                variant="text">
-                Delete Selected
-            </v-btn>
+            />
         </v-col>
         <v-divider
             :thickness="2"
@@ -182,29 +175,30 @@
                 Each item must have a unique priority level.
             </div>        
             <v-row style="padding-bottom: 40px;" justify="center" v-show='hasSelectedLibrary || hasScenario'>
-                <v-btn  variant = "flat" @click='onDiscardChanges'
-                       v-show='hasScenario' :disabled='!hasUnsavedChanges' style="margin: 5px;" class='ghd-blue ghd-button-text ghd-button'>
-                    Cancel
-                </v-btn>  
-                <v-btn id="BudgetPriorityEditor-deleteLibrary-vbtn"  @click='onShowConfirmDeleteAlert' style="margin: 5px;" variant = "outlined" 
-                       v-show='!hasScenario' :disabled='!hasSelectedLibrary' class='ghd-red ghd-button-text ghd-outline-button-padding ghd-button'>
-                    Delete Library
-                </v-btn>  
-                <v-btn id="BudgetPriorityEditor-createAsNewLibrary-vbtn" @click='onShowCreateBudgetPriorityLibraryDialog(true)' 
-                    style="margin-left: 10px; margin-right: 10px; margin: 5px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
-                       :disabled='disableCrudButtons()'>
-                    Create as New Library
-                </v-btn>
-                <v-btn @click='onUpsertScenarioBudgetPriorities'
-                       class='ghd-blue-bg text-white ghd-button-text ghd-button' style="margin: 5px;"
-                       v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
-                    Save
-                </v-btn>           
-                <v-btn id="BudgetPriorityEditor-updateLibrary-vbtn" @click='onUpsertBudgetPriorityLibrary'
-                       class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button' style="margin: 5px;"
-                       v-show='!hasScenario' :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
-                    Update Library
-                </v-btn>
+                <CancelButton 
+                    @cancel="onDiscardChanges"
+                    :disabled='!hasUnsavedChanges'
+                    :show="hasScenario"
+                />
+                <DeleteLibraryButton 
+                    @deleteLibrary="onShowConfirmDeleteAlert"
+                    :disabled='!hasSelectedLibrary'
+                    :show="!hasScenario"
+                />
+                <CreateAsNewLibraryButton 
+                    @createAsNewLibrary="onShowCreateBudgetPriorityLibraryDialog(true)"
+                    :disabled='disableCrudButtons()'
+                />
+                <SaveButton 
+                    @save="onUpsertScenarioBudgetPriorities"
+                    :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
+                    :show="hasScenario"
+                />
+                <UpdateLibraryButton 
+                    @updateLibrary="onUpsertBudgetPriorityLibrary"
+                    :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
+                    :show="!hasScenario"
+                />
             </v-row>
         </v-col>
         <ShareBudgetPriorityLibraryDialog 
@@ -283,8 +277,15 @@
     import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
     import EditSvg from '@/shared/icons/EditSvg.vue';
     import mitt, { Emitter, EventType } from 'mitt';
-
     import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
+    import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+    import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+    import CreateAsNewLibraryButton from '@/shared/components/buttons/CreateAsNewLibraryButton.vue';
+    import UpdateLibraryButton from '@/shared/components/buttons/UpdateLibraryButton.vue';
+    import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton.vue';
+    import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
+    import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
+    import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
 
     let store = useStore();
     const confirm = useConfirm();

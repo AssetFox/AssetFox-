@@ -1428,7 +1428,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             }           
         });
         $emitter.emit('InvestmentSettingsUpdated');
-        $emitter.emit('switchedToNewInvestmentLibrary');
+        $emitter.emit('switchedToNewInvestmentLibrary', sync);
     }
 
     async function updateTreatmentBudgetsAndPriority()

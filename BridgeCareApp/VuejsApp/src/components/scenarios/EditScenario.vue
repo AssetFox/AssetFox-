@@ -53,10 +53,10 @@
                     <v-btn
                         :class="{
                             'blue-run-icon ghd-button-text': !isBudgetPrioritySet,
-                            'ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border': isBudgetPrioritySet
+                            'ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border': !isCommittedProjectsBudgetsUnset
                         }"
                         @click="onShowRunSimulationAlert"
-                        :disabled="isBudgetPrioritySet"
+                        :disabled="isBudgetPrioritySet || !isCommittedProjectsBudgetsUnset"
                         block
                         variant = "outlined">
                         Run Scenario
@@ -196,6 +196,7 @@ import CashFlowService from '@/services/cash-flow.service';
     let isCashFlowSet = ref(false);
     let isCommittedProjectsSet = ref(false);
     let hasScenarioBeenRun = ref(false);
+    let isCommittedProjectsBudgetsUnset = ref(true);
 
     let navigationTabs = ref<NavigationTab[]>([
     {
@@ -575,7 +576,7 @@ import CashFlowService from '@/services/cash-flow.service';
 
         $emitter.on('CommittedProjectsUpdated', () => {
             isCashFlowSet.value = false;
-
+            isCommittedProjectsBudgetsUnset.value = true;
             // Update the icon of the Committed Projects tab
             navigationTabs.value.forEach((tab) => {
                     if (tab.tabName === 'Committed Projects') {
@@ -606,6 +607,11 @@ import CashFlowService from '@/services/cash-flow.service';
                         tab.validationIcon = 'fas fa-times-circle';
                     }
                 });
+
+                if(isCommittedProjectsSet.value === false)
+                {
+                    isCommittedProjectsBudgetsUnset.value = false;
+                }
         });
         
     }
@@ -1003,13 +1009,19 @@ import CashFlowService from '@/services/cash-flow.service';
                         if(isCommittedProjectsSet.value === true)
                         {
                             tab.validationIcon = "fas fa-exclamation-circle";
+                            isCommittedProjectsBudgetsUnset.value = true;
                         }
                         else if(hasUnsetBudgets == true)
                         {
                             tab.validationIcon = "fas fa-times-circle";
+                            isCommittedProjectsBudgetsUnset.value = false;
                         }
                         else
-                        tab.validationIcon = "fas fa-check-circle";
+                        {
+                            tab.validationIcon = "fas fa-check-circle";
+                            isCommittedProjectsBudgetsUnset.value = true;
+
+                        }
                     }
                 });
             }   

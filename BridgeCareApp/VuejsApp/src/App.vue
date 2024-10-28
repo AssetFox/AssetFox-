@@ -274,7 +274,7 @@
 </template>
 
 <script setup lang="ts">
-import {inject, reactive, computed, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import {inject, reactive, computed, ref, onMounted, onBeforeUnmount, watch, Ref, provide} from 'vue';
 import NotificationBell from 'vue-notification-bell';
 import Notifications from '@kyvg/vue3-notification'
 import Spinner from './shared/modals/Spinner.vue';
@@ -404,6 +404,7 @@ import { getUrl } from './shared/utils/get-url';
     let alert: Ref<boolean> = ref(false);
 
     const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
+    provide('emitter', $emitter);
     
     created();
 

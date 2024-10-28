@@ -1481,7 +1481,8 @@ async function getDistinctScenarioPerformanceFactorAttributeNamesAction(payload?
             // Set the success message and show the popup
             importSuccessMessage.value = message;
             showSuccessPopup.value = true;
-        }
+            $emitter.emit('TreatmentSettingsUpdated');                 
+        }        
     }
 
     //paging

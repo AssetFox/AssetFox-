@@ -22,7 +22,7 @@
                                     <TreatmentSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Treatment'"/>  
                                     <TargetConditionGoalSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Target Condition Goal'"/>  
                                     <RemainingLifeLimitSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Remaining Life Limit'"/>  
-                                    <PerformanceCurveSvg style="height: 34px; width: 36px"  class="scenario-icon" v-if="navigationTab.tabName === 'Deterioration Model'"/>  
+                                    <PerformanceCurveSvg style="height: 34px; width: 36px;"  class="scenario-icon" v-if="navigationTab.tabName === 'Deterioration Model'"/>  
                                     <DeficientConditionGoalSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Deficient Condition Goal'"/>  
                                     <InvestmentSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Investment'"/>  
                                     <CashFlowSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Cash Flow'"/>  
@@ -32,8 +32,8 @@
                                     <CommittedProjectSvg style="height: 32px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Committed Projects'"/>  
                                     <ReportsSvg style="height: 38px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Reports & Outputs'"/>  
                             </template>
-                            <v-list-item-title style="display: flex; justify-content: space-between; align-items: center; padding-left: 5px; width: 100%;">
-    <span>{{ navigationTab.tabName }}</span>
+                        <v-list-item-title style="display: flex; justify-content: space-between; align-items: center; padding-left: 5px; width: 100%;">
+    <span style="font-size: 1.1rem !important;">{{ navigationTab.tabName }}</span>
     <i 
         :class="[navigationTab.validationIcon, { 
             'green-icon': navigationTab.validationIcon === 'fas fa-check-circle', 
@@ -41,7 +41,7 @@
             'yellow-icon': navigationTab.validationIcon === 'fas fa-exclamation-circle' 
         }]" 
         v-if="navigationTab.validationIcon" 
-        style="margin-left: 30px;"
+        style="margin-left: 30px; font-size: 1.3rem;"
         v-b-tooltip.hover
         :title="getTooltipText(navigationTab.validationIcon, navigationTab.tabName)">
     </i>
@@ -52,11 +52,11 @@
                 <div style="margin: 10px;">
                     <v-btn
                         :class="{
-                            'ghd-white-bg green-icon ghd-button-text': !isBudgetPrioritySet,
-                            'ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border': isBudgetPrioritySet
+                            'blue-run-icon ghd-button-text': !isBudgetPrioritySet,
+                            'ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border': !isCommittedProjectsBudgetsUnset
                         }"
                         @click="onShowRunSimulationAlert"
-                        :disabled="isBudgetPrioritySet"
+                        :disabled="isBudgetPrioritySet || !isCommittedProjectsBudgetsUnset"
                         block
                         variant = "outlined">
                         Run Scenario
@@ -196,6 +196,7 @@ import CashFlowService from '@/services/cash-flow.service';
     let isCashFlowSet = ref(false);
     let isCommittedProjectsSet = ref(false);
     let hasScenarioBeenRun = ref(false);
+    let isCommittedProjectsBudgetsUnset = ref(true);
 
     let navigationTabs = ref<NavigationTab[]>([
     {
@@ -301,16 +302,16 @@ import CashFlowService from '@/services/cash-flow.service';
     const alertData = ref<AlertData>(clone(emptyAlertData));
     const alertDataForDeletingCommittedProjects = ref<AlertData>({ ...emptyAlertData });
 
-    onMounted(async () => {
-        await ScenarioSettingsUpdated();
-        await getAnalysisMethod();
-        await getTreatments();
-        await getBudgetPriority();
-        await getInvestment();
-        await getDeteriorationModel();
-        await getReportRunStatus();
-        await getCashFlow();
-        await getCommittedProjects();
+    onMounted(() => {
+        ScenarioSettingsUpdated()
+        .then(() => getAnalysisMethod())
+        .then(() => getTreatments())
+        .then(() => getBudgetPriority())
+        .then(() => getReportRunStatus())
+        .then(() => getCashFlow())
+        .then(() => getDeteriorationModel())
+        .then(() => getInvestment())
+        .then(() => getCommittedProjects())
     });
     
     onBeforeMount(() => {
@@ -575,7 +576,7 @@ import CashFlowService from '@/services/cash-flow.service';
 
         $emitter.on('CommittedProjectsUpdated', () => {
             isCashFlowSet.value = false;
-
+            isCommittedProjectsBudgetsUnset.value = true;
             // Update the icon of the Committed Projects tab
             navigationTabs.value.forEach((tab) => {
                     if (tab.tabName === 'Committed Projects') {
@@ -598,6 +599,21 @@ import CashFlowService from '@/services/cash-flow.service';
                 navigationTabs.value = [...navigationTabs.value];
             }
         });
+
+        $emitter.on('switchedToNewInvestmentLibrary', () => {
+            navigationTabs.value.forEach((tab) => {
+                    if (tab.tabName === 'Committed Projects') {
+                        if(tab.validationIcon === 'fas fa-check-circle')
+                        tab.validationIcon = 'fas fa-times-circle';
+                    }
+                });
+
+                if(isCommittedProjectsSet.value === false)
+                {
+                    isCommittedProjectsBudgetsUnset.value = false;
+                }
+        });
+        
     }
     
     /**
@@ -959,6 +975,7 @@ import CashFlowService from '@/services/cash-flow.service';
 
     async function getCommittedProjects()
     {
+        let hasUnsetBudgets = false;
         const request: PagingRequest<SectionCommittedProject>= {
             page: 1,
             rowsPerPage: 5,
@@ -979,14 +996,32 @@ import CashFlowService from '@/services/cash-flow.service';
             {
                 isCommittedProjectsSet.value = response.data.items.length == 0;
 
+                if (response?.data?.items) {
+                    response.data.items.forEach((item: { scenarioBudgetId: any; }) => {
+                        if (!item.scenarioBudgetId || item.scenarioBudgetId === '') {
+                            hasUnsetBudgets = true;
+                        }
+                    });
+                }
+
                 navigationTabs.value.forEach((tab) => {
                     if (tab.tabName === 'Committed Projects') {
                         if(isCommittedProjectsSet.value === true)
                         {
                             tab.validationIcon = "fas fa-exclamation-circle";
+                            isCommittedProjectsBudgetsUnset.value = true;
+                        }
+                        else if(hasUnsetBudgets == true)
+                        {
+                            tab.validationIcon = "fas fa-times-circle";
+                            isCommittedProjectsBudgetsUnset.value = false;
                         }
                         else
-                        tab.validationIcon = "fas fa-check-circle";
+                        {
+                            tab.validationIcon = "fas fa-check-circle";
+                            isCommittedProjectsBudgetsUnset.value = true;
+
+                        }
                     }
                 });
             }   
@@ -1069,8 +1104,9 @@ import CashFlowService from '@/services/cash-flow.service';
     stroke: #999999 !important;
 }
 
-.green-icon {
-  color: green;
+.blue-run-icon {
+    background-color: #002E6C;
+    color: white;
 }
 
 .red-icon {

@@ -364,7 +364,7 @@ import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 import { getUserName } from '@/shared/utils/get-user-info';
-import { InvestmentPagingRequestModel, InvestmentLibraryUpsertPagingRequestModel, InvestmentPagingSyncModel, InvestmentPagingPage } from '@/shared/models/iAM/paging';
+import { InvestmentPagingRequestModel, InvestmentLibraryUpsertPagingRequestModel, InvestmentPagingSyncModel, InvestmentPagingPage, PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { http2XX } from '@/shared/utils/http-utils';
  import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
@@ -395,6 +395,10 @@ import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.v
 import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
 import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
 import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUploadDialog.vue';
+import { BudgetPriority, BudgetPriorityLibrary } from '@/shared/models/iAM/budget-priority';
+import BudgetPriorityService from '@/services/budget-priority.service';
+import TreatmentService from '@/services/treatment.service';
+import { Treatment } from '@/shared/models/iAM/treatment';
 
 let store = useStore();
 const confirm = useConfirm();
@@ -405,6 +409,10 @@ const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
 const stateBudgetLibraries = computed<BudgetLibrary[]>(() => store.state.investmentModule.budgetLibraries) ;  
 
 const stateSelectedBudgetLibrary = computed<BudgetLibrary>(() => store.state.investmentModule.selectedBudgetLibrary);
+let stateSelectedBudgetPriorityLibrary = computed<BudgetPriorityLibrary>(() => store.state.budgetPriorityModule.selectedBudgetPriorityLibrary);
+let stateBudgetPriorityLibraries = computed<BudgetPriorityLibrary[]>(() => store.state.budgetPriorityModule.budgetPriorityLibraries);
+let stateScenarioBudgetPriorities = computed<BudgetPriority[]>(() => store.state.budgetPriorityModule.scenarioBudgetPriorities);
+
 let stateInvestmentPlan = computed<InvestmentPlan>(() => store.state.investmentModule.investmentPlan);
 let stateScenarioBudgets = ref<Budget[]>(store.state.investmentModule.scenarioBudgets);
 const hasUnsavedChanges = computed<boolean>(() => (store.state.unsavedChangesFlagModule.hasUnsavedChanges));
@@ -422,6 +430,7 @@ async function upsertInvestmentAction(payload?: any): Promise<any> {await store.
 async function upsertBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('upsertBudgetLibrary', payload);}
 async function deleteBudgetLibraryAction(payload?: any): Promise<any> {await store.dispatch('deleteBudgetLibrary', payload);}
 async function upsertOrDeleteBudgetLibraryUsersAction(payload: any): Promise<any> {await store.dispatch('upsertOrDeleteBudgetLibraryUsers', payload);}
+async function getScenarioSimpleBudgetDetailsAction(payload?: any): Promise<any>{await store.dispatch('getScenarioSimpleBudgetDetails', payload)} 
 function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification', payload);}
 function setHasUnsavedChangesAction(payload?: any) { store.dispatch('setHasUnsavedChanges', payload);}
 async function importScenarioInvestmentBudgetsFileAction(payload?: any): Promise<any> {await store.dispatch('importScenarioInvestmentBudgetsFile', payload);}
@@ -500,11 +509,16 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let showReminder: boolean = false;
     let range: number = 1;
     let parentLibraryName = ref<string>("None");
+    let initialLibraryName = ref<string>("None");
     let parentLibraryId: string = "";
     let scenarioLibraryIsModified = ref<boolean>(false);
     let loadedParentName: string = "";
     let loadedParentId: string = "";
     let newLibrarySelection: boolean = false;
+    let investmentPageForUpdating: InvestmentPagingPage;
+    let updatedTreatmentsWithBudgets: PaginSync<Treatment>;
+    let budgetPrioritytoUpsert: PaginSync<BudgetPriority>;
+    let hasInvestmentJustBeenSaved = false;
 
     let editValue = ref<number | null>(0);
 
@@ -641,6 +655,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         if((!hasSelectedLibrary.value || hasScenario.value) && selectedScenarioId !== uuidNIL){
             await InvestmentService.getScenarioInvestmentPage(selectedScenarioId, request).then(response => {
                 if(response.data){
+                    investmentPageForUpdating = response.data;
                     let data = response.data as InvestmentPagingPage;
                     firstYear = data.firstYear;
                     currentPage.value = data.items.sort((a, b) => a.budgetOrder - b.budgetOrder);
@@ -752,7 +767,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         selectedBudgetLibrary.value = clone(stateSelectedBudgetLibrary.value);
     });
 
-    watch(selectedBudgetLibrary,()=> {     
+    watch(selectedBudgetLibrary, async()=> {     
         hasSelectedLibrary.value = selectedBudgetLibrary.value.id !== uuidNIL;
         if (hasSelectedLibrary.value) {
             checkLibraryEditPermission();
@@ -765,8 +780,13 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     setAlertMessageAction("");
             })
         }
-        clearChanges()
-       onPaginationChanged()
+        clearChanges();
+       onPaginationChanged();
+       if(hasInvestmentJustBeenSaved === true)
+       {
+            await updateTreatmentBudgetsAndPriority();
+            hasInvestmentJustBeenSaved = false;
+       }
     });
 
     watch(stateInvestmentPlan,() => {
@@ -787,6 +807,10 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 parentLibraryName.value = library.text;
             }
         });
+        if(initialLibraryName.value === "None")
+        {
+            initialLibraryName.value = parentLibraryName.value;
+        }
     });
 
     watch(investmentPlan,() => {
@@ -1351,8 +1375,9 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         investmentPlan.value = setItemPropertyValue(property, value, investmentPlan.value);
     }
 
-    function onUpsertInvestment() {
+    async function onUpsertInvestment() {
         const investmentPlanUpsert: InvestmentPlan = clone(investmentPlan.value);
+        let currentLibraryName = selectedBudgetLibrary.value.name;
 
         if (selectedBudgetLibrary.value.id === uuidNIL || hasUnsavedChanges.value && newLibrarySelection ===false) {scenarioLibraryIsModified.value = true;}
         else { scenarioLibraryIsModified.value = false; }
@@ -1383,9 +1408,82 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     onShowCpChangeAlert();
                 clearChanges();                                            
                 addSuccessNotificationAction({message: "Modified investment"});
-                librarySelectItemValue.value = null;               
+                librarySelectItemValue.value = null;
+                hasInvestmentJustBeenSaved = true;               
             }           
         });
+        $emitter.emit('InvestmentSettingsUpdated');
+        $emitter.emit('switchedToNewInvestmentLibrary', sync);
+    }
+
+    async function updateTreatmentBudgetsAndPriority()
+    {
+        const request: PagingRequest<BudgetPriority>= {
+            page: 1,
+            rowsPerPage: 5,
+            syncModel: {
+                libraryId: null,
+                updateRows: [],
+                rowsForDeletion: [],
+                addedRows: [],
+                isModified: false
+            },           
+            sortColumn: "",
+            isDescending: false,
+            search: ""
+        };
+
+        await BudgetPriorityService.getScenarioBudgetPriorityPage(selectedScenarioId, request).then(response => {
+            if(response.data)
+            {
+                budgetPrioritytoUpsert = response.data;
+            }   
+        });
+
+        await BudgetPriorityService.upsertScenarioBudgetPriorities(budgetPrioritytoUpsert, selectedScenarioId);
+
+        
+        
+        await TreatmentService.getScenarioSelectedTreatments(selectedScenarioId).then(response => {
+            if(response.data)
+            {
+                const nameIdPairs = investmentPageForUpdating.items.map((item) => ({
+                    name: item.name,
+                    id: item.id
+                }));
+
+                response.data.forEach((item: { budgetIds: string[]; budgets: { id: string; name: string }[] }) => {
+                    item.budgetIds = item.budgetIds || [];
+                    item.budgets = item.budgets || [];
+
+                    nameIdPairs.forEach(({ id, name }) => {
+                        item.budgetIds.push(id);
+                        item.budgets.push({ id, name });
+
+                    // Check for duplicates
+                    if (!item.budgets.some(budget => budget.id === id && budget.name === name)) {
+                        item.budgets.push({ id, name });
+                    }
+                    });
+                });
+
+                updatedTreatmentsWithBudgets = {
+                    libraryId: null,
+                    isModified: true,
+                    rowsForDeletion: [],
+                    updateRows: response.data,
+                    addedRows: []
+                };
+            }   
+        });
+
+        await TreatmentService.upsertScenarioSelectedTreatments({
+            libraryId: updatedTreatmentsWithBudgets.libraryId,
+            rowsForDeletion: [],
+            updateRows: updatedTreatmentsWithBudgets.updateRows,
+            addedRows: [],
+            isModified: true,
+        }, selectedScenarioId);
     }
 
     function onUpsertBudgetLibrary() {
@@ -1448,7 +1546,9 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function onShowCpChangeAlert() {
-        $emitter.emit('InvestmentSettingsUpdated');              
+        console.log(stateInvestmentPlan.value);
+        console.log(selectedBudgetLibrary.value);
+              
         cpChangedAlertData.value = {
             showDialog: true,
             heading: 'Warning',
@@ -1664,7 +1764,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
 
                 }
             })
-            showSuccessPopup.value = true;  
+            showSuccessPopup.value = true;
+            $emitter.emit('InvestmentSettingsUpdated');                
         }        
     }
 

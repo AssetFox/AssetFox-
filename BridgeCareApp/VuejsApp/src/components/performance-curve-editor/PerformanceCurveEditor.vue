@@ -250,11 +250,12 @@
                                 </v-menu>
                                 <v-btn id="PerformanceCurveEditor-editEquation-vbtn"
                                     @click="onShowEquationEditorDialog(item.item.id) "
-                                    class="ghd-green"
+                                    class="ghd-blue"
                                     variant="flat"
+                                    style="padding-top: 15px"
                                     icon
                                 >
-                                <EditSvg />
+                                <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </td>
                             <td class="text-xs-left">
@@ -293,10 +294,11 @@
                                 <v-btn id="PerformanceCurveEditor-editCriteria-vbtn"
                                     @click="onEditPerformanceCurveCriterionLibrary(item.item.id)"
                                     variant="flat"
-                                    class="ghd-green"
+                                    class="ghd-blue"
+                                    style="padding-top: 15px"
                                     icon
                                 >
-                                <EditSvg />
+                                <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </td>
                             <td class="text-xs-left">
@@ -1362,7 +1364,8 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 setAlertMessageAction('');
             })
         }    
-        showSuccessPopup.value = true;    
+        showSuccessPopup.value = true;
+        $emitter.emit('DeteriorationModelSettingsUpdated');                  
     }
 
     async function initializePages(){

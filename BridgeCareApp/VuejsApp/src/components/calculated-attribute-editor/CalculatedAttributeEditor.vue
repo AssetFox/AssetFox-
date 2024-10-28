@@ -121,11 +121,11 @@
                                 <v-btn
                                     id="CalculatedAttribute-defaultEquationEditor-btn"
                                     @click="onShowEquationEditorDialogForDefaultEquation()"
-                                    class="ghd-green"
+                                    class="ghd-blue"
                                     flat
                                     icon
                                     v-if="hasAdminAccess">
-                                    <EditSvg />
+                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -169,11 +169,11 @@
                                 <v-btn
                                     id="CalculatedAttribute-editEquation-btn"
                                     @click="onShowEquationEditorDialog(props.item.id)"
-                                    class="ghd-green"
+                                    class="ghd-blue"
                                     flat
                                     icon
                                     v-if="hasAdminAccess">
-                                    <EditSvg />
+                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -189,11 +189,11 @@
                                 <v-btn
                                     id="CalculatedAttribute-changeEquationCriteria-btn"
                                     @click="onEditCalculatedAttributeCriterionLibrary(props.item.id)"
-                                    class="ghd-green"
+                                    class="ghd-blue"
                                     flat
                                     icon
                                     v-if="hasAdminAccess">
-                                    <EditSvg />
+                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -374,6 +374,7 @@ import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton
 import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
 import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
 import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
+import { getUrl } from '@/shared/utils/get-url';
 
 let store = useStore();
 const confirm = useConfirm();

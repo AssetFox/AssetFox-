@@ -169,8 +169,8 @@
                         </td>
                         <td class="px-0">
                             <v-btn id="RemainingLifeLimitEditor-editCriteria-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)" 
-                                class="ghd-green" flat icon>
-                                <EditSvg />
+                                class="ghd-blue" flat icon>
+                                <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                             </v-btn>   
                         </td>
                         <td justify-end>

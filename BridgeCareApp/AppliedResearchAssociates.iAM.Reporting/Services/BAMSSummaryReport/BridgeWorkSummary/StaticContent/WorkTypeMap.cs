@@ -10,14 +10,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             new Dictionary<string, TreatmentCategory>
             {
                 // MPMS
-                {"Preservation", TreatmentCategory.Preservation },
+                { "Preservation", TreatmentCategory.Preservation },
                 { "Capacity Adding", TreatmentCategory.CapacityAdding },
-                {"Rehabilitation", TreatmentCategory.Rehabilitation },
-                { "Reconstruction", TreatmentCategory.Reconstruction },
+                { "Rehabilitation", TreatmentCategory.Rehabilitation },
+                { "Reconstruction", TreatmentCategory.Replacement },
+                { "Replacement",TreatmentCategory.Replacement },
                 { "Maintenance", TreatmentCategory.Maintenance },
                 { "Other", TreatmentCategory.Other },
                 { "Work Outside Scope/Jurisdiction", TreatmentCategory.WorkOutsideScope },
-                { "Bundled", TreatmentCategory.Bundled }
+                { "Bundled", TreatmentCategory.Bundled },                
             };
     }
 }

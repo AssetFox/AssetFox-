@@ -151,10 +151,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 {
                     foreach (var section in yearData.Assets)
                     {
-                        var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
+                        var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");                        
                         // Build keyCashFlowFundingDetails
                         _summaryReportHelper.BuildKeyCashFlowFundingDetails(yearData, section, crs, keyCashFlowFundingDetails);
-
+                        
                         // If CF then use obj from keyCashFlowFundingDetails otherwise from section
                         var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
                                                       section.TreatmentStatus == TreatmentStatus.Progressed) ||
@@ -167,16 +167,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
                         var treatmentConsideration = shouldBundleFeasibleTreatments ?
                                              treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year &&
+                                                _.BudgetName == summaryModel.BudgetName) &&
                                                 section.AppliedTreatment.Contains(_.TreatmentName)) :
                                              treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year &&
+                                                _.BudgetName == summaryModel.BudgetName) &&
                                                 _.TreatmentName == section.AppliedTreatment);
 
                         var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
-                        var budgetAmount = (double)treatmentConsiderations.
-                                           Where(_ => _.TreatmentName?.ToLower() != PAMSConstants.NoTreatment && _.TreatmentName == appliedTreatment).
-                                           Sum(_ => _.FundingCalculationOutput?.AllocationMatrix?.
+                        var budgetAmount = (double)(treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix?.
                                            Where(_ => _.BudgetName == summaryModel.BudgetName && _.Year == yearData.Year).
                                            Sum(b => b.AllocatedAmount) ?? 0);
                         budgetAmount = Math.Round(budgetAmount, 0);
@@ -260,27 +260,25 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                                                   section.TreatmentConsiderations ?? new();                    
                     if (treatmentConsiderations.Any(tc => tc.FundingCalculationOutput != null && tc.FundingCalculationOutput.AllocationMatrix.Any(bu => bu.BudgetName == summaryModel.BudgetName)))
                     {
-
                         var treatmentConsideration = shouldBundleFeasibleTreatments ?
                                              treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year &&
+                                                _.BudgetName == summaryModel.BudgetName) &&
                                                 section.AppliedTreatment.Contains(_.TreatmentName)) :
                                              treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year &&
+                                                _.BudgetName == summaryModel.BudgetName) &&
                                                 _.TreatmentName == section.AppliedTreatment);
 
                         var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
-
+                        
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                             appliedTreatment.ToLower() != PAMSConstants.NoTreatment)
                         {
                             var treatmentCategory = appliedTreatment.Contains("Bundle") ? PAMSConstants.Bundled : treatmentCategoryLookup[appliedTreatment];
-                            var committedCost = treatmentConsiderations.
-                                                Where(_=> _.TreatmentName == appliedTreatment).
-                                                Sum(_ => _.FundingCalculationOutput?.AllocationMatrix.
+                            var committedCost = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.
                                                 Where(_ => _.BudgetName == summaryModel.BudgetName && _.Year == yearData.Year).
-                                                Sum(bu => bu.AllocatedAmount)) ?? 0;
-
+                                                Sum(bu => bu.AllocatedAmount) ?? 0;
                             var committedProject = committedProjectList.FirstOrDefault(_ => appliedTreatment.Contains(_.Treatment) &&
                                                 _.Year == yearData.Year && _.ProjectSource.ToString() == section.ProjectSource);
                             var projectSource = committedProject?.ProjectSource.ToString();

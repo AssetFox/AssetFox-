@@ -6,16 +6,6 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
 {
     public class CalculateEvaluateCompilerTests
     {
-        private static void AssertFalse(bool b)
-        {
-            Assert.False(b);
-        }
-
-        private static void AssertTrue(bool b)
-        {
-            Assert.True(b);
-        }
-
         [Fact]
         public void BadLex() => Assert.Throws<CalculateEvaluateLexingException>(() => ParameterlessCalculation("2 # 2", 4));
 
@@ -84,83 +74,59 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
 
         [Fact]
         [Trait("Category", CATEGORY_EVALUATE)]
-        public void CompareWithNumberOperand() => SingleNumberParameterEvaluation($"[param]={n1}", AssertFalse);
+        public void CompareWithNumberOperand() => SingleNumberParameterEvaluation($"[param]={n1}", Assert.False);
 
         [Fact]
         [Trait("Category", CATEGORY_EVALUATE)]
-        public void CompareWithReferenceOperand() => MultipleNumberParameterEvaluation($"[param0]=param1", AssertFalse, n0, n1);
+        public void CompareWithReferenceOperand() => MultipleNumberParameterEvaluation($"[param0]=param1", Assert.False, n0, n1);
 
         [Fact]
         [Trait("Category", CATEGORY_EVALUATE)]
-        public void EvaluationAssociativity() => MultipleNumberParameterEvaluation($"param0='{n0}' or [param0]='{n1}' and [param1]='{n0}'", AssertTrue, n0, n1);
+        public void EvaluationAssociativity() => MultipleNumberParameterEvaluation($"param0='{n0}' or [param0]='{n1}' and [param1]='{n0}'", Assert.True, n0, n1);
 
         [Fact]
         [Trait("Category", CATEGORY_EVALUATE)]
-        public void EvaluationGrouping() => MultipleNumberParameterEvaluation($"(param0='{n0}' or [param0]='{n1}') and [param1]='{n0}'", AssertFalse, n0, n1);
+        public void EvaluationGrouping() => MultipleNumberParameterEvaluation($"(param0='{n0}' or [param0]='{n1}') and [param1]='{n0}'", Assert.False, n0, n1);
 
         [Fact]
         [Trait("Category", CATEGORY_EVALUATE)]
-        public void LogicalConjunction() => MultipleNumberParameterEvaluation($"[param0]='{n0}' and param1='{n0}'", AssertFalse, n0, n1);
+        public void LogicalConjunction() => MultipleNumberParameterEvaluation($"[param0]='{n0}' and param1='{n0}'", Assert.False, n0, n1);
 
         [Fact]
         [Trait("Category", CATEGORY_EVALUATE)]
-        public void LogicalDisjunction() => MultipleNumberParameterEvaluation($"[param0]='{n0}' or param1='{n0}'", AssertTrue, n0, n1);
+        public void LogicalDisjunction() => MultipleNumberParameterEvaluation($"[param0]='{n0}' or param1='{n0}'", Assert.True, n0, n1);
 
         [Fact]
         [Trait("Category", CATEGORY_EVALUATE)]
-        public void NumberEqual() => SingleNumberParameterEvaluation($"[param]='{n1}'", AssertFalse);
+        public void NumberEqual() => SingleNumberParameterEvaluation($"[param]='{n1}'", Assert.False);
 
         [Fact]
         [Trait("Category", CATEGORY_EVALUATE)]
-        public void NumberGreaterThan() => SingleNumberParameterEvaluation($"[param]>|{n1}|", AssertFalse);
+        public void NumberGreaterThan() => SingleNumberParameterEvaluation($"[param]>|{n1}|", Assert.False);
 
         [Fact]
         [Trait("Category", CATEGORY_EVALUATE)]
-        public void NumberGreaterThanOrEqual() => SingleNumberParameterEvaluation($"[param]>=|{n1}|", AssertFalse);
+        public void NumberGreaterThanOrEqual() => SingleNumberParameterEvaluation($"[param]>=|{n1}|", Assert.False);
 
         [Fact]
         [Trait("Category", CATEGORY_EVALUATE)]
-        public void NumberLessThan() => SingleNumberParameterEvaluation($"[param]<|{n1}|", AssertTrue);
+        public void NumberLessThan() => SingleNumberParameterEvaluation($"[param]<|{n1}|", Assert.True);
 
         [Fact]
         [Trait("Category", CATEGORY_EVALUATE)]
-        public void NumberLessThanOrEqual() => SingleNumberParameterEvaluation($"[param]<=|{n1}|", AssertTrue);
+        public void NumberLessThanOrEqual() => SingleNumberParameterEvaluation($"[param]<=|{n1}|", Assert.True);
 
         [Fact]
         [Trait("Category", CATEGORY_EVALUATE)]
-        public void NumberNotEqual() => SingleNumberParameterEvaluation($"[param]<>|{n1}|", AssertTrue);
+        public void NumberNotEqual() => SingleNumberParameterEvaluation($"[param]<>|{n1}|", Assert.True);
 
         [Fact]
         [Trait("Category", CATEGORY_EVALUATE)]
-        public void TextEqual() => SingleTextParameterEvaluation($"[param]=''", AssertFalse);
+        public void TextEqual() => SingleTextParameterEvaluation($"[param]=''", Assert.False);
 
         [Fact]
         [Trait("Category", CATEGORY_EVALUATE)]
-        public void TextNotEqual() => SingleTextParameterEvaluation($"[param]<>|{s1}|", AssertTrue);
-
-        [Fact]
-        [Trait("Category", CATEGORY_EVALUATE)]
-        public void TimestampEqual() => SingleTimestampParameterEvaluation($"[param]='{d1}'", AssertFalse);
-
-        [Fact]
-        [Trait("Category", CATEGORY_EVALUATE)]
-        public void TimestampGreaterThan() => SingleTimestampParameterEvaluation($"[param]>|{d1}|", AssertFalse);
-
-        [Fact]
-        [Trait("Category", CATEGORY_EVALUATE)]
-        public void TimestampGreaterThanOrEqual() => SingleTimestampParameterEvaluation($"[param]>=|{d1}|", AssertFalse);
-
-        [Fact]
-        [Trait("Category", CATEGORY_EVALUATE)]
-        public void TimestampLessThan() => SingleTimestampParameterEvaluation($"[param]<|{d1}|", AssertTrue);
-
-        [Fact]
-        [Trait("Category", CATEGORY_EVALUATE)]
-        public void TimestampLessThanOrEqual() => SingleTimestampParameterEvaluation($"[param]<=|{d1}|", AssertTrue);
-
-        [Fact]
-        [Trait("Category", CATEGORY_EVALUATE)]
-        public void TimestampNotEqual() => SingleTimestampParameterEvaluation($"[param]<>|{d1}|", AssertTrue);
+        public void TextNotEqual() => SingleTextParameterEvaluation($"[param]<>|{s1}|", Assert.True);
 
         #endregion "Evaluate"
 
@@ -171,8 +137,6 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
         private const double n0 = 19.123, n1 = 23.456;
 
         private const string s0 = "foo", s1 = "bar";
-
-        private static readonly DateTime d0 = new DateTime(2000, 1, 1), d1 = new DateTime(2020, 1, 1);
 
         private static void MultipleNumberParameterEvaluation(string inputExpression, Action<bool> assert, params double[] parameterValues)
         {
@@ -236,17 +200,6 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             var calculator = compiler.GetEvaluator(inputExpression);
             var scope = new CalculateEvaluateScope();
             scope.SetText("PaRaM", s0);
-            var result = calculator.Delegate(scope);
-            assert(result);
-        }
-
-        private static void SingleTimestampParameterEvaluation(string inputExpression, Action<bool> assert)
-        {
-            var compiler = new CalculateEvaluateCompiler();
-            compiler.ParameterTypes["PARAM"] = CalculateEvaluateParameterType.Timestamp;
-            var calculator = compiler.GetEvaluator(inputExpression);
-            var scope = new CalculateEvaluateScope();
-            scope.SetTimestamp("PaRaM", d0);
             var result = calculator.Delegate(scope);
             assert(result);
         }

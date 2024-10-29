@@ -22,8 +22,6 @@ internal sealed class CalculateEvaluateCompilerVisitor : CalculateEvaluateParser
 
     private static readonly ValueTypeInfo Text = ValueTypeInfo.Create(nameof(CalculateEvaluateScope.GetText), static _ => _);
 
-    private static readonly ValueTypeInfo Timestamp = ValueTypeInfo.Create(nameof(CalculateEvaluateScope.GetTimestamp), Convert.ToDateTime);
-
     private readonly IReadOnlyDictionary<string, CalculateEvaluateParameterType> ParameterTypes;
 
     private CalculateEvaluateParameterType? ComparisonOperandType;
@@ -58,7 +56,6 @@ internal sealed class CalculateEvaluateCompilerVisitor : CalculateEvaluateParser
     {
         CalculateEvaluateParameterType.Number => Number,
         CalculateEvaluateParameterType.Text => Text,
-        CalculateEvaluateParameterType.Timestamp => Timestamp,
         _ => throw new Exception("Invalid value type.")
     };
 

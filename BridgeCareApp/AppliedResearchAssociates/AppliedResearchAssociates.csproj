@@ -5,40 +5,4 @@
     <Configurations>Debug;Release;MsSqlDebug;Test</Configurations>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\AppliedResearchAssociates.Zip\AppliedResearchAssociates.Zip.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Static.Channel.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Static.Channel.tt.cs</LastGenOutput>
-    </None>
-    <None Update="Inaction.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Inaction.tt.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Static.Channel.tt.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Static.Channel.tt</DependentUpon>
-    </Compile>
-    <Compile Update="Inaction.tt.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Inaction.tt</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
 </Project>

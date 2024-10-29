@@ -14,7 +14,7 @@ namespace BridgeCareCore.Interfaces
 
         FileInfoDTO CreateCommittedProjectTemplate(Guid networkId);
 
-        void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
+        void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, string UserId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null);
 
         double GetTreatmentCost(string assetKeyData, Guid treatmentId, Guid networkId);
 

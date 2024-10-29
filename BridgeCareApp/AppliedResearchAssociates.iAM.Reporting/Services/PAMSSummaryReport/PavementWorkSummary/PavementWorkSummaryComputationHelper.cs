@@ -151,7 +151,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                     // Build keyCashFlowFundingDetails
                     _summaryReportHelper.BuildKeyCashFlowFundingDetails(yearData, section, crs, keyCashFlowFundingDetails);
 
-                    // If CF then use obj from keyCashFlowFundingDetails otherwise from section
+                    // If CF then use obj from keyCashFlowFundingDetails otherwise from section                    
                     var treatmentConsiderations = ((section.TreatmentCause == TreatmentCause.SelectedTreatment &&
                                                   section.TreatmentStatus == TreatmentStatus.Progressed) ||
                                                   (section.TreatmentCause == TreatmentCause.CashFlowProject &&
@@ -171,12 +171,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
                     var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
                     var treatmentCategory = appliedTreatment.Contains("Bundle") ? PAMSConstants.Bundled : treatmentCategoryLookup[appliedTreatment];
-                    var cost = treatmentConsiderations.
-                               Where(_ => _.TreatmentName?.ToLower() != PAMSConstants.NoTreatment && _.TreatmentName == appliedTreatment).
-                               Sum(_ => _.FundingCalculationOutput?.AllocationMatrix?.
+                    var cost = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix?.
                                Where(_ => _.Year == yearData.Year).
-                               Sum(b => b.AllocatedAmount) ?? 0);
-                    cost = Math.Round(cost, 0);                                                         
+                               Sum(b => b.AllocatedAmount) ?? 0;
+                    cost = Math.Round(cost, 0);
 
                     if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                         appliedTreatment.ToLower() != PAMSConstants.NoTreatment)
@@ -258,7 +256,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             int segmentLength = 0;
             var year = yearsData.Year;
             var appliedTreatment = yearsData.TreatmentName;
-            var surfaceId = yearsData.SurfaceId;
+            var surfaceId = yearsData.SurfaceId;            
             var cost = (decimal)yearsData.Amount;
             var compositeTreatmentCost = surfaceId == 62 ? cost : 0;
             if (!costLengthPerSurfaceIdPerTreatmentPerYear[yearsData.Year].ContainsKey(yearsData.TreatmentName))

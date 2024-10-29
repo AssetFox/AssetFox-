@@ -53,12 +53,22 @@ public sealed class CalculatedField : Attribute, INumericAttribute, IValidator
 
     internal double Calculate(AssetContext scope)
     {
-        ValueSources.Channel(
-            source => scope.Evaluate(source.Criterion),
-            result => result ?? false,
-            result => !result.HasValue,
-            out var applicableSources,
-            out var defaultSources);
+        List<CalculatedFieldValueSource> applicableSources = new();
+        List<CalculatedFieldValueSource> defaultSources = new();
+
+        foreach (var source in _ValueSources)
+        {
+            var evaluation = scope.Evaluate(source.Criterion);
+
+            if (!evaluation.HasValue)
+            {
+                defaultSources.Add(source);
+            }
+            else if (evaluation.Value)
+            {
+                applicableSources.Add(source);
+            }
+        }
 
         var operativeSources = applicableSources.Count > 0 ? applicableSources : defaultSources;
 

@@ -13,7 +13,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
 using BridgeCareCore.Utils;
 using MoreLinq;
 using OfficeOpenXml;
@@ -23,6 +26,7 @@ namespace BridgeCareCore.Services
     public class CommittedProjectService : ICommittedProjectService
     {
         private static IUnitOfWork _unitOfWork;
+        private readonly IHubService _hubService;
         public const string UnknownBudgetName = "Unknown";
 
         // TODO: Determine based on associated network
@@ -47,9 +51,10 @@ namespace BridgeCareCore.Services
 
         private static readonly string NoTreatment = "No Treatment";
 
-        public CommittedProjectService(IUnitOfWork unitOfWork)
+        public CommittedProjectService(IUnitOfWork unitOfWork, IHubService hubService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _hubService = hubService;
         }
 
         /**
@@ -262,7 +267,7 @@ namespace BridgeCareCore.Services
          * Creates CommittedProjectDTO data for Committed Project Import
          */
         private List<SectionCommittedProjectDTO> CreateSectionCommittedProjectsForImport(Guid simulationId,
-            ExcelPackage excelPackage, string filename)
+            ExcelPackage excelPackage, string filename, string UserId)
         {
             // First, get the simulation
             var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -359,6 +364,7 @@ namespace BridgeCareCore.Services
             // Create the output lookup
             var projectsPerLocationIdentifierYearAndTreatmentTuple = new Dictionary<(string, int, string), SectionCommittedProjectDTO>();
 
+            var invalidLocationIdentifiers = new List<string>();
             // Read in the data by row
             for (var row = 2; row <= end.Row; row++)
             {
@@ -382,13 +388,20 @@ namespace BridgeCareCore.Services
                 // Get the location information of the project.  This must include the maintainable asset ID using the "ID" key
                 var locationInformation = new Dictionary<string, string>();
                 var locationIdentifier = worksheet.GetCellValue<string>(row, keyColumn);
-                if (maintainableAssetIdsPerLocationIdentifier.Keys.ToList().Contains(locationIdentifier))
+                if (!maintainableAssetIdsPerLocationIdentifier.Keys.ToList().Contains(locationIdentifier))
                 {
                     // The location matches an asset in the network
-                    locationInformation["ID"] = Guid.NewGuid().ToString();
+                    //locationInformation["ID"] = Guid.NewGuid().ToString();
+                    invalidLocationIdentifiers.Add(locationIdentifier);
                 }
-                else
-                    throw new RowNotInTableException($"An asset with the location identifier '{locationIdentifier}' does not exist");
+                /*else
+                {
+                    invalidLocationIdentifiers.Add(locationIdentifier);
+                    //throw new RowNotInTableException($"An asset with the location identifier '{locationIdentifier}' does not exist");
+                }*/
+
+                // The location matches an asset in the network
+                locationInformation["ID"] = Guid.NewGuid().ToString();
 
                 for (var column = 1; column <= _keyFields.Count; column++)
                 {
@@ -473,10 +486,16 @@ namespace BridgeCareCore.Services
                 projectsPerLocationIdentifierYearAndTreatmentTuple.Add((locationIdentifier, projectYear, treatment), project);
             }
 
+            if (invalidLocationIdentifiers.Any())
+            {
+                var invalidIdsMessage = $"The following location identifiers do not match any asset in the network: {string.Join(", ", invalidLocationIdentifiers)}";
+                _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastWarning, invalidIdsMessage);
+            }
+
             return projectsPerLocationIdentifierYearAndTreatmentTuple.Values.ToList();
         }
 
-        public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
+        public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, string UserId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
         {
             queueLog ??= new DoNothingWorkQueueLog();
             _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
@@ -487,7 +506,7 @@ namespace BridgeCareCore.Services
                 return;
             queueLog.UpdateWorkQueueStatus("Creating Committed Projects");
             var committedProjectDTOs =
-              CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename);
+              CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, UserId);
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
                 return;
             queueLog.UpdateWorkQueueStatus("Deleting Old Committed Projects");

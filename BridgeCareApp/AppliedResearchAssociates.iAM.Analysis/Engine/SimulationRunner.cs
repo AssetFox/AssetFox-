@@ -139,7 +139,7 @@ public sealed class SimulationRunner
                     .Of(levelPriorities.SingleOrDefault(p => p.Year == year))
                     .Coalesce(() => levelPriorities.SingleOrDefault(p => p.Year == null));
 
-                priority.Handle(applicablePriorities.Add, Inaction.Delegate);
+                priority.Handle(applicablePriorities.Add, static () => { });
             }
 
             applicablePriorities.Sort(BudgetPriorityComparer);

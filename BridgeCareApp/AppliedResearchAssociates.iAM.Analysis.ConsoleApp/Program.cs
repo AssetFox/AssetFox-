@@ -15,14 +15,17 @@ rootCommand.SetHandler(static inputArgumentValue =>
     var input = readInput(inputArgumentValue);
     var inputToRun = input.ConvertOut();
 
-    Console.WriteLine($"{timer.Elapsed} - Input complete.");
+    var elapsedBeforeRun = timer.Elapsed;
+    Console.WriteLine($"{elapsedBeforeRun} - Input complete.");
 
     var runner = new SimulationRunner(inputToRun);
     runner.Progress += (sender, eventArgs) => Console.WriteLine(eventArgs);
     runner.SimulationLog += (sender, eventArgs) => Console.WriteLine(eventArgs.MessageBuilder.ToString());
     runner.Run();
 
-    Console.WriteLine($"{timer.Elapsed} - Analysis complete.");
+    var elapsedThroughRun = timer.Elapsed;
+    var elapsedDuringRun = elapsedThroughRun - elapsedBeforeRun;
+    Console.WriteLine($"{elapsedThroughRun} - Analysis complete. Duration: {elapsedDuringRun}");
 
     var output = inputToRun.Results;
     var outputPath = Path.ChangeExtension(inputArgumentValue.FullName, $"output.{DateTime.Now:yyyy-MM-dd-HHmmssfff}.json");

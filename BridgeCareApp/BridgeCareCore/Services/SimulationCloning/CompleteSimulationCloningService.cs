@@ -27,6 +27,9 @@ namespace BridgeCareCore.Services
                 NetworkId = coreSimulation.NetworkId,
                 ReportStatus = coreSimulation.ReportStatus,
                 Id = simulationGuid,
+                Creator = coreSimulation.Creator,
+
+
             };
 
             fullSimulation.AnalysisMethod = _unitOfWork.AnalysisMethodRepo.GetAnalysisMethod(simulationGuid);
@@ -75,9 +78,9 @@ namespace BridgeCareCore.Services
 
             // do the clone
             var ownerId = _unitOfWork.CurrentUser?.Id ?? Guid.Empty;
-            var baseEntityProperties = new BaseEntityProperties { CreatedBy = ownerId, LastModifiedBy = ownerId };
-            var ownerName = _unitOfWork.CurrentUser?.Username;                       
-
+            var creatorId = _unitOfWork.UserRepo.GetUserByUserName(sourceSimulation.Creator).Result.Id;
+            var baseEntityProperties = new BaseEntityProperties { CreatedBy = creatorId, LastModifiedBy = ownerId };
+            var ownerName = _unitOfWork.CurrentUser?.Username;
             var cloneSimulation = CompleteSimulationCloner.Clone(sourceSimulation, dto, ownerId, ownerName);
             //Make sure the destination Network Id is not empty
             if (dto.DestinationNetworkId != Guid.Empty)

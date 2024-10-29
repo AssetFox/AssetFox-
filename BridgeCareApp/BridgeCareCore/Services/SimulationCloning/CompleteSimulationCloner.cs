@@ -12,7 +12,7 @@ namespace BridgeCareCore.Services
             var cloneAnalysisMethod = AnalysisMethodCloner.Clone(completeSimulation.AnalysisMethod, ownerId);            
             var cloneCashFlowFule = CashFlowRuleCloner.CloneList(completeSimulation.CashFlowRules, ownerId);
             var cloneInvestmentPlan = InvestmentPlanCloner.Clone(completeSimulation.InvestmentPlan);
-            var cloneReportIndex = ReportIndexCloner.CloneList(completeSimulation.ReportIndexes);
+            var cloneReportIndex = new List<ReportIndexDTO>(); // ReportIndexCloner.CloneList(completeSimulation.ReportIndexes); // commenting for now, need to fix the report paths and handle actual coping of report files
             var clonePerformanceCurves = PerformanceCurvesCloner.CloneListNullPropagating(completeSimulation.PerformanceCurves, ownerId);
             var cloneCalculatedAttribute = CalculatedAttributeCloner.CloneList(completeSimulation.CalculatedAttributes, ownerId);
          

@@ -26,10 +26,10 @@
                                                 props.item,
                                             )
                                         "
-                                        class="edit-icon ghd-green"
+                                        class="edit-icon ghd-blue"
                                         flat
                                     >
-                                        <EditSvg />
+                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                     </v-btn>                                
                                 </v-row>
                                 <v-row>  
@@ -55,10 +55,10 @@
                                                 props.item,
                                             )
                                         "
-                                        class="edit-icon ghd-green"
+                                        class="edit-icon ghd-blue"
                                         flat
                                     >
-                                        <EditSvg />
+                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-row> 
                                 <v-row >              

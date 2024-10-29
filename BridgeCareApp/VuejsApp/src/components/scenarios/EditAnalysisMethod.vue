@@ -145,11 +145,11 @@ Line 164 Delete,
                                     @click="
                                         onShowCriterionEditorDialog
                                     "
-                                    class="edit-icon ghd-control-label ghd-green"
+                                    class="edit-icon ghd-control-label ghd-blue"
                                     icon
                                     flat
                                 >
-                                <EditSvg />
+                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/> 
                                 </v-btn>
                                 </v-row>
                                 <v-textarea
@@ -168,10 +168,12 @@ Line 164 Delete,
                     </v-row>
                 <v-row justify="center">
                     <v-row justify="center">
-                        <CancelSaveButtonGroup
-                            :cancelDisabled="!hasUnsavedChanges"
-                            :saveDisabled="!valid || !hasUnsavedChanges"
+                        <CancelButton 
+                            :disabled="!hasUnsavedChanges"
                             @cancel="onDiscardChanges"
+                        />
+                        <SaveButton 
+                            :disabled="!valid || !hasUnsavedChanges"
                             @save="onUpsertAnalysisMethod"
                         />
                     </v-row>
@@ -218,7 +220,8 @@ import { useRouter } from 'vue-router';
 import { getUrl } from '@/shared/utils/get-url';
 import ConfirmDialog from 'primevue/confirmdialog';
 import EditSvg from '@/shared/icons/EditSvg.vue';
-import CancelSaveButtonGroup from '@/shared/components/buttons/CancelSaveButtonGroup.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
 import mitt, { Emitter, EventType } from 'mitt';
 import AnalysisMethodService from '@/services/analysis-method.service';
 
@@ -460,11 +463,12 @@ getAnalysisMethodAction({ scenarioId: selectedScenarioId.value })
         {
             if(analysisMethod.value.benefit.id === getBlankGuid())
             analysisMethod.value.benefit.id = getNewGuid();
-        upsertAnalysisMethodAction({
-                analysisMethod: analysisMethod.value,
-                scenarioId: selectedScenarioId.value,
-            });
-            $emitter.emit('AnalysisMethodUpdated');              
+            const responseData = await store.dispatch('upsertAnalysisMethod', { analysisMethod: analysisMethod.value, scenarioId: selectedScenarioId.value});
+            
+            if(responseData === "Analysis Method successfully updated")
+            {
+                $emitter.emit('AnalysisMethodUpdated');              
+            }
         }
         // const form: any = $refs.form;
 
@@ -489,17 +493,19 @@ getAnalysisMethodAction({ scenarioId: selectedScenarioId.value })
         };
     }
 
-    function onConfirmEmptyCriteriaAlertSubmit(submit: boolean) {
+    async function onConfirmEmptyCriteriaAlertSubmit(submit: boolean) {
         ConfirmEmptyCriteria.value = clone(emptyAlertData);
 
         if (submit) {
             if(analysisMethod.value.benefit.id === getBlankGuid())
             analysisMethod.value.benefit.id = getNewGuid();
-        upsertAnalysisMethodAction({
-                analysisMethod: analysisMethod.value,
-                scenarioId: selectedScenarioId.value,
-            });
-            $emitter.emit('AnalysisMethodUpdated');              
+
+            const responseData = await store.dispatch('upsertAnalysisMethod', { analysisMethod: analysisMethod.value, scenarioId: selectedScenarioId.value});
+            
+            if(responseData === "Analysis Method successfully updated")
+            {
+                $emitter.emit('AnalysisMethodUpdated');              
+            }
         } 
     }
 

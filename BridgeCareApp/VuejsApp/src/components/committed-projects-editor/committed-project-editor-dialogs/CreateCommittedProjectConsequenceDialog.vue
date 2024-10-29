@@ -38,12 +38,11 @@
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-row justify-center row>
-          <v-btn @click="onSubmit(false)" variant = "flat" class='ghd-blue ghd-button-text ghd-button'>
-            Cancel
-          </v-btn >
-          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
-            Save
-          </v-btn>         
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SaveButton 
+            @save="onSubmit(true)"
+            :disabled="disableSubmitButton()"
+          />       
         </v-row>
       </v-card-actions>
     </v-card>
@@ -60,6 +59,8 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { createDecipheriv } from 'crypto';
 import { useStore } from 'vuex';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
 
   let store = useStore();
   const emit = defineEmits(['submit']);

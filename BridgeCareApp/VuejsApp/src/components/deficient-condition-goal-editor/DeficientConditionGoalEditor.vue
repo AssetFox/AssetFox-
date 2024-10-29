@@ -34,23 +34,18 @@
                         <div v-if="!hasScenario && hasSelectedLibrary" class="header-text-content owner-padding" align="center"                        >
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
-                        <v-btn 
-                            id="DeficientConditionGoalEditor-shareLibrary-vbtn" 
-                            @click='onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)' 
-                            class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-left: 10px"
-                            variant = "outlined"
-                            v-show='!hasScenario && hasSelectedLibrary'>
-                        Share Library
-                        </v-btn>
+                        <ShareLibraryButton 
+                            @shareLibrary="onShowShareDeficientConditionGoalLibraryDialog(selectedDeficientConditionGoalLibrary)"
+                            :show="!hasScenario && hasSelectedLibrary"
+                        />
                     </v-row>
                 </v-col>
                 <v-col cols = "auto">
-                    <v-btn id="DeficientConditionGoalEditor-createNewLibrary-vbtn" @click="onShowCreateDeficientConditionGoalLibraryDialog(false)"
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin: 5px;"
-                        v-show="!hasScenario"
-                        variant = "outlined">    
-                        Create New Library        
-                    </v-btn>
+                    <CreateNewLibraryButton 
+                        @createNewLibrary="onShowCreateDeficientConditionGoalLibraryDialog(false)"
+                        :show="!hasScenario"
+                        style="margin: 5px;"
+                    />
                 </v-col>
         
                 <v-col cols="auto" >
@@ -206,10 +201,10 @@
                                     <v-btn
                                         id="DeficientConditionGoalEditor-editDeficientConditionGoalCriteria-vbtn"
                                         @click="onShowCriterionLibraryEditorDialog(item.item)"
-                                        class="ghd-green"
+                                        class="ghd-blue"
                                         flat
                                         icon>
-                                        <EditSvg />
+                                        <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-row>
                                 <div v-if="header.key === 'action'" style="margin-bottom: 8px;">
@@ -252,50 +247,30 @@
         </v-col>
         <v-col v-show="hasSelectedLibrary || hasScenario">
             <v-row justify="center" style="padding-bottom: 40px;">
-                <v-btn
-                    @click="onDiscardChanges"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                    v-show="hasScenario"
-                    style="margin-right: 5px;"
+                <CancelButton 
+                    @cancel="onDiscardChanges"
                     :disabled="!hasUnsavedChanges"
-                    variant = "text">
-                    Cancel
-                </v-btn>
-                <v-btn
-                    id="DeficientConditionGoalEditor-deleteLibrary-vbtn"
-                    @click="onShowConfirmDeleteAlert"
-                    class='ghd-red ghd-button-text ghd-outline-button-padding ghd-button'
-                    v-show="!hasScenario"
+                    :show="hasScenario"
+                />
+                <DeleteLibraryButton 
+                    @deleteLibrary="onShowConfirmDeleteAlert"
                     :disabled="!hasLibraryEditPermission"
-                    variant = "outlined">
-                    Delete Library
-                </v-btn>    
-                <v-btn
-                    id="DeficientConditionGoalEditor-createAsNewLibrary-vbtn"
-                    @click="onShowCreateDeficientConditionGoalLibraryDialog(true)"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                    :show="!hasScenario"
+                />
+                <CreateAsNewLibraryButton 
+                    @createAsNewLibrary="onShowCreateDeficientConditionGoalLibraryDialog(true)"
                     :disabled="disableCrudButtons()"
-                    style="margin-right: 10px; margin-left: 10px;"
-                    variant = "outlined">
-                    Create as New Library
-                </v-btn>
-                <v-btn
-                    @click="onUpsertScenarioDeficientConditionGoals"
-                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
-                    v-show="hasScenario"
-                    style="margin-left: 5px;"
-                    :disabled="disableCrudButtonsResult || !hasUnsavedChanges">
-                    Save
-                </v-btn>
-                <v-btn
-                    id="DeficientConditionGoalEditor-updateLibrary-vbtn"
-                    @click="onUpsertDeficientConditionGoalLibrary"
-                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
-                    v-show="!hasScenario"
-                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges">
-                    Update Library
-                </v-btn>               
-                       
+                />
+                <SaveButton 
+                    @save="onUpsertScenarioDeficientConditionGoals"
+                    :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
+                    :show="hasScenario"
+                />
+                <UpdateLibraryButton 
+                    @updateLibrary="onUpsertDeficientConditionGoalLibrary"
+                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
+                    :show="!hasScenario"
+                />       
             </v-row>
         </v-col>
 </v-card>
@@ -383,6 +358,14 @@ import { getUrl } from '@/shared/utils/get-url';
 import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import CreateAsNewLibraryButton from '@/shared/components/buttons/CreateAsNewLibraryButton.vue';
+import UpdateLibraryButton from '@/shared/components/buttons/UpdateLibraryButton.vue';
+import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton.vue';
+import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
+import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
+import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
 
     let store = useStore();
     const confirm = useConfirm();

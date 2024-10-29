@@ -49,14 +49,10 @@
             <v-col cols = "auto" v-show='!hasScenario'>
                 <v-subheader class="ghd-control-label ghd-md-gray"> </v-subheader>
                 <v-row align="end" justify="end">
-                    <v-btn
-                        id="PerformanceCurveEditor-createNewLibrary-button"
-                        @click='onShowCreatePerformanceCurveLibraryDialog(false)'
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                    <CreateNewLibraryButton 
+                        @createNewLibrary="onShowCreatePerformanceCurveLibraryDialog(false)"
                         style="margin-top: 45px;"
-                        variant = "outlined">
-                        Create New Library
-                    </v-btn>
+                    />
                 </v-row>
             </v-col>                    
         </v-row>
@@ -68,13 +64,11 @@
                             class="header-text-content owner-padding"
                         > 
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
-                        <v-btn
-                            id="PerformanceCurveEditor-shareLibrary-button"
-                            @click='onShowSharePerformanceCurveLibraryDialog(selectedPerformanceCurveLibrary)'
-                            style="margin-left: 10px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
-                            v-show='!hasScenario'>
-                            Share Library
-                        </v-btn>
+                        
+                        <ShareLibraryButton 
+                            @shareLibrary="onShowSharePerformanceCurveLibraryDialog(selectedPerformanceCurveLibrary)"
+                            :show="!hasScenario"
+                        />                        
                         </div>
                 </v-row>
             </v-col>
@@ -256,11 +250,12 @@
                                 </v-menu>
                                 <v-btn id="PerformanceCurveEditor-editEquation-vbtn"
                                     @click="onShowEquationEditorDialog(item.item.id) "
-                                    class="ghd-green"
+                                    class="ghd-blue"
                                     variant="flat"
+                                    style="padding-top: 15px"
                                     icon
                                 >
-                                <EditSvg />
+                                <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </td>
                             <td class="text-xs-left">
@@ -299,10 +294,11 @@
                                 <v-btn id="PerformanceCurveEditor-editCriteria-vbtn"
                                     @click="onEditPerformanceCurveCriterionLibrary(item.item.id)"
                                     variant="flat"
-                                    class="ghd-green"
+                                    class="ghd-blue"
+                                    style="padding-top: 15px"
                                     icon
                                 >
-                                <EditSvg />
+                                <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </td>
                             <td class="text-xs-left">
@@ -317,19 +313,12 @@
                             </td>
                         </tr>
                         </template>
-                        <!-- <template v-slot:body.append-inner>
-                        <v-btn>Append button</v-btn>
-                        </template>                                -->
                     </v-data-table-server>
-                    <v-btn style="margin-top:-84px"
-                        id="PerformanceCurveEditor-deleteSelected-button"
+                    <DeleteSelectedButton 
+                        @deleteSelected="onRemovePerformanceEquations"
                         :disabled='selectedPerformanceEquationIds.length === 0 || (!hasLibraryEditPermission && !hasScenario)'
-                        @click='onRemovePerformanceEquations'
-                        class='ghd-red' variant = "text"
-                    >
-                        Delete Selected
-                    </v-btn>                        
-                <!-- </v-card> -->
+                        style="margin-top:-84px"
+                    />
             </v-col>
         </v-row>
         <v-row class="header-height" justify="start" style="margin-bottom: 15px;" v-show="hasSelectedLibrary || hasScenario">
@@ -367,70 +356,36 @@
             row
             v-show='hasSelectedLibrary || hasScenario'
         >
-            <v-btn
-                id="PerformanceCurveEditor-cancel-button"
+            <CancelButton 
+                @cancel="onDiscardChanges"
                 :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
-                @click="onDiscardChanges"
-                class="m-2 ghd-white-bg ghd-blue ghd-button-text"
-                flat
-                v-show="hasScenario"
-            >
-                Cancel
-            </v-btn>
-            <v-btn
-                id="PerformanceCurveEditor-deleteLibrary-button"
-                @click="onShowConfirmDeleteAlert"
-                class="m-2 ghd-red ghd-button-text ghd-outline-button-padding"
-                variant = "outlined"
-                flat
-                v-show="!hasScenario"
+                :show="hasScenario"
+            />  
+            <DeleteLibraryButton 
+                @deleteLibrary="onShowConfirmDeleteAlert" 
                 :disabled="!hasLibraryEditPermission"
-            >
-                Delete Library
-            </v-btn>                
-            <v-btn
-                id="PerformanceCurveEditor-createAsNewLibrary-button"
-                :disabled="disableCrudButtons()"
-                @click="onShowCreatePerformanceCurveLibraryDialog(true)"
-                class='m-2 ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                variant = "outlined"               
-            >
-                Create as New Library
-            </v-btn>
-            <v-btn
-                id="PerformanceCurveEditor-updateLibrary-button"
+                :show="!hasScenario"           
+            />
+            <CreateAsNewLibraryButton 
+                @createAsNewLibrary="onShowCreatePerformanceCurveLibraryDialog(true)"
+                :disabled="disableCrudButtons()"                
+            />  
+            <UpdateLibraryButton 
+                @updateLibrary="onUpsertPerformanceCurveLibrary"
                 :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
-                @click='onUpsertPerformanceCurveLibrary'
-                class="m-2 ghd-blue-bg ghd-white ghd-button-text ghd-button-border ghd-outline-button-padding"
-                variant = "outlined"
-                v-show='!hasScenario'
-            >
-                Update Library
-            </v-btn>
-            <v-btn
-                id="PerformanceCurveEditor-save-button"
+                :show="!hasScenario"
+            />
+            <SaveButton 
+                @save="onUpsertScenarioPerformanceCurves"
                 :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
-                @click='onUpsertScenarioPerformanceCurves'
-                class="ghd-blue-bg ghd-white ghd-button-text m-2"
-                flat
-                v-show='hasScenario'
-            >
-                Save
-            </v-btn>
+                :show="hasScenario"
+            />
         </v-row>
-        <v-dialog v-model="showSuccessPopup" max-width="400px">
-            <v-card>
-                <v-card-text class="text-center">
-                    Successfully uploaded performance curves.
-                </v-card-text>
-                <v-card-actions>
-                    <v-row justify="center" class="w-100">
-                        <v-btn color="primary" variant="text" 
-                        class="ghd-white-bg ghd-blue ghd-button-text" @click="showSuccessPopup = false">OK</v-btn>
-                    </v-row>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+
+        <SuccessfulUploadDialog 
+            v-model="showSuccessPopup"
+            message="Successfully uploaded performance curves."
+        />
         <Alert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
@@ -549,10 +504,18 @@ import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { computed } from 'vue';
 import { getUrl } from '@/shared/utils/get-url';
-import { nextTick } from 'process';
 import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import CreateAsNewLibraryButton from '@/shared/components/buttons/CreateAsNewLibraryButton.vue';
+import UpdateLibraryButton from '@/shared/components/buttons/UpdateLibraryButton.vue';
+import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton.vue';
+import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
+import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
+import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
+import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUploadDialog.vue';
 
 const emit = defineEmits(['submit'])
 let store = useStore();
@@ -609,7 +572,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let hasScenario = ref(false);
     let librarySelectItems  = ref<SelectItem[]>([]);
     let modifiedDate = ref<string>(''); 
-    let showSuccessPopup = ref(false);
+    const showSuccessPopup = ref(false);
     
     let performanceCurveGridHeaders: any[] = [
         {
@@ -1401,7 +1364,8 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
                 setAlertMessageAction('');
             })
         }    
-        showSuccessPopup.value = true;    
+        showSuccessPopup.value = true;
+        $emitter.emit('DeteriorationModelSettingsUpdated');                  
     }
 
     async function initializePages(){

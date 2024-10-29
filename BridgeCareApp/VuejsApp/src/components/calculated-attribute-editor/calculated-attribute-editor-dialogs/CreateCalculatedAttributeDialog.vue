@@ -23,15 +23,13 @@
         </v-card-text>
         <v-card-actions>
           <v-row justify-space-between row>
-            <v-btn :disabled="newCalculatedAttribute.name === '' || newCalculatedAttribute.attribute === ''"
-                   class="assetFox-blue-bg text-white"
-                   @click="onSubmit(true)">
-              Save
-            </v-btn>
-            <v-btn class="assetFox-orange-bg text-white"
-                   @click="onSubmit(false)">
-              Cancel
-            </v-btn>
+            <CancelButton 
+              @cancel="onSubmit(false)"
+            />
+            <SaveButton 
+              @cancel="onSubmit(true)"
+              :disabled="newCalculatedAttribute.name === '' || newCalculatedAttribute.attribute === ''"
+            />            
           </v-row>
         </v-card-actions>
       </v-card>
@@ -51,6 +49,8 @@ import { CalculatedAttribute, emptyCalculatedAttribute } from '@/shared/models/i
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
 
   let showDialog : boolean = false;
   let store = useStore();

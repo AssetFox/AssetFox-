@@ -3,16 +3,14 @@
         <v-card class="div-padding">
             <v-row justify="space-between" style="margin-bottom: 10px;">
                 <h3 class="Montserrat-font-family">Treatments Upload</h3>
-                <v-btn @click="onSubmit(false)" variant="flat">
-                <i class="fas fa-times fa-2x"></i>
-            </v-btn>
+                <XButton @click="onSubmit(false)"/>
             </v-row>
             <v-row >
                 <TreatmentsFileSelector :closed='closed' :use-treatment="true" @submit='onFileSelectorChange' />                    
             </v-row>
             <v-row justify="center">
-                <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "flat">Cancel</v-btn>
-                <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>                    
+                <CancelButton @cancel="onSubmit(false)"/>
+                <UploadButton @upload="onSubmit(true)"/>                     
             </v-row>
         </v-card>
     </v-dialog>
@@ -25,6 +23,9 @@ import { ImportExportTreatmentsDialogResult } from '@/shared/models/modals/impor
 import {clone} from 'ramda';
 import { useStore } from 'vuex';
 import TreatmentsFileSelector from '@/shared/components/FileSelector.vue';
+import UploadButton from '@/shared/components/buttons/UploadButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
     const props = defineProps<{showDialog: boolean}>()
     const { showDialog } = toRefs(props);

@@ -63,7 +63,7 @@
                                     <v-btn
                                     @click="onGenerateReport(props.item.id, true)"
                                     :disabled="props.item.isGenerated"
-                                    class="ghd-green"
+                                    class="ghd-blue-icon"
                                     flat
                                     icon
                                     >
@@ -75,7 +75,7 @@
                                     <v-btn
                                         @click="onDownloadReport(props.item.id)"
                                         :disabled="!props.item.isGenerated"
-                                        class='ghd-blue-icon'
+                                        class='ghd-green'
                                         flat
                                         icon
                                     >

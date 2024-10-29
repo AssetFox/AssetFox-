@@ -691,7 +691,7 @@
 
 <script lang="ts" setup>
 import { getUrl } from '@/shared/utils/get-url';
-import { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, computed, reactive, inject } from 'vue'; 
+import { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, computed, reactive, inject, onMounted } from 'vue'; 
 import moment from 'moment';
 import {
     emptyScenario,
@@ -1527,6 +1527,7 @@ import ReportsService from '@/services/reports.service';
         await getSharedScenariosPageAction(request)
         await getUserScenariosPageAction(request)
         await getWorkQueuePageAction(workQueueRequest)
+        await getScenariosReportSettings();
         await getFastWorkQueuePageAction(workQueueRequest)
         initializing = false;
         initializingWorkQueue = false;
@@ -2065,6 +2066,16 @@ import ReportsService from '@/services/reports.service';
                     workQueueStatusUpdate: updatedQueueItem
                 })
             }                                
+    }
+
+    async function getScenariosReportSettings()
+    {
+        await ScenarioService.getScenariosReportSettings().then(response => {
+            if(response.data)
+            {
+                availableScenarioIds.value = response.data.map((item: { simulationId: string | number }) => item.simulationId);
+            }  
+        });
     }
 
     function checkIfReportExists(scenarioId: any) 

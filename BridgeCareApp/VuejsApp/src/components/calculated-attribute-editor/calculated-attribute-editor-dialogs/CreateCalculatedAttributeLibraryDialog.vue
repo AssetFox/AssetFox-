@@ -5,9 +5,7 @@
                 <v-row justify-space-between align-center >
                     <div class="ghd-control-dialog-header">New Calculated Attribute Library</div>
                     <v-spacer></v-spacer>
-                    <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-                        X
-                    </v-btn>
+                    <XButton @click="onSubmit(false)"/>
                 </v-row>
             </v-card-title>
             <v-card-text class="ghd-dialog-box-padding-center">
@@ -35,19 +33,11 @@
             </v-card-text>
             <v-card-actions class="ghd-dialog-box-padding-bottom">
                 <v-spacer></v-spacer>
-                    <v-btn id="CreateCalculatedAttributeLibraryDialog-cancel-btn"
-                    variant = "outlined" 
-                        class='ghd-blue ghd-button-text ghd-button'
-                        @click="onSubmit(false)">
-                        Cancel
-                    </v-btn>
-                    <v-btn id="CreateCalculatedAttributeLibraryDialog-save-btn"
+                    <CancelButton @cancel="onSubmit(false)"/>
+                    <SaveButton 
+                        @save="onSubmit(true)"
                         :disabled="newCalculatedAttributeLibrary.name === ''"
-                        variant = "outlined" 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                        @click="onSubmit(true)">
-                        Save
-                    </v-btn> 
+                    />
                     <v-spacer></v-spacer>
             </v-card-actions>
         </v-card>
@@ -70,6 +60,9 @@ import {
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref, toRefs} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
 const emit = defineEmits(['submit'])
 const props = defineProps<{

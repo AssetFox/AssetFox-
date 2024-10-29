@@ -1,17 +1,23 @@
 <template>
     <v-app class="paper-white-bg">
         <v-main style="font-family: roboto;">
-            <v-toolbar app class="paper-white-bg elevation-2">
-                <v-toolbar-title  >
-                    <v-row  >
-                        <v-col><v-img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')"/></v-col>                    
-                    </v-row>
+            <v-toolbar app class="paper-white-bg elevation-2">                
+                <v-toolbar-title style="flex: 1;">
+                <v-img
+                    :src="agencyLogo"
+                    @click="onNavigate('/Scenarios/')"
+                    class="toolbar-image"
+                    contain
+                />
                 </v-toolbar-title>
 
-                <v-toolbar-title >
-                    <v-row justify="start">
-                        <v-col><img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')"/></v-col>
-                    </v-row>
+                <v-toolbar-title style="flex: 1;">
+                <v-img
+                    :src="productLogo"
+                    @click="onNavigate('/Scenarios/')"
+                    class="toolbar-image"
+                    contain
+                />
                 </v-toolbar-title>
                 <v-toolbar-items >
                     <v-btn-toggle style="height: 100%;">
@@ -924,4 +930,11 @@ html {
     max-height: 100%;
     overflow: hidden;
   }
+
+.toolbar-image {
+  max-height: 60px; /* Adjust as needed */
+  max-width: 100%;
+  height: auto;
+  cursor: pointer;
+}
 </style>

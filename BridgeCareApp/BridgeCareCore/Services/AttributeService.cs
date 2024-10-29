@@ -13,13 +13,13 @@ namespace BridgeCareCore.Services
     public class AttributeService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly AggregatedSelectValuesResultDtoCache _cache;
+        private readonly IAggregatedSelectValuesResultDtoCache _cache;
         public const string ValuesForAttribute = "Values for attribute";
         public const string IsANumberUseTextInput = "is a number; use text input";
 
         public AttributeService(
             IUnitOfWork unitOfWork,
-            AggregatedSelectValuesResultDtoCache cache
+            IAggregatedSelectValuesResultDtoCache cache
             )
         {
             _unitOfWork =

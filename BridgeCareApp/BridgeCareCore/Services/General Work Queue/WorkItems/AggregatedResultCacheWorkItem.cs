@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -14,6 +14,7 @@ using HotChocolate.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Graph.Models;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace BridgeCareCore.Services
 {
@@ -43,21 +44,22 @@ namespace BridgeCareCore.Services
 
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken) {
             using var scope = serviceProvider.CreateScope();
-            var scopeProvider = scope.ServiceProvider;
-            var unitOfWork = scopeProvider.GetRequiredService<IUnitOfWork>();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var attributeRepository = unitOfWork.AttributeRepo;
             var aggregatedResultRepository = unitOfWork.AggregatedResultRepo;
             var allAttributes = attributeRepository.GetAttributes();
             var allNames = allAttributes.Select(a => a.Name).ToList();
-            var cache = serviceProvider.GetRequiredService<AggregatedSelectValuesResultDtoCache>();
+            var cache = serviceProvider.GetRequiredService<IAggregatedSelectValuesResultDtoCache>();
             var tooBig = cache.AttributesTooBigToCache;
             var attributesToCache = allNames.Except(tooBig).ToList();
             var batches = new List<List<string>>();
+            var batchSize = 10;
             while(attributesToCache.Any())
             {
-                var batch = attributesToCache.Take(10).ToList();
+                var batch = attributesToCache.Take(batchSize)
+                    .ToList();
                 batches.Add(batch);
-                attributesToCache = attributesToCache.Skip(10).ToList();
+                attributesToCache = attributesToCache.Skip(batchSize).ToList();
             }
             foreach (var batch in batches)
             {
@@ -67,14 +69,15 @@ namespace BridgeCareCore.Services
                     cache.SaveToCache(dto);
                 }
             }
+            int x = 666;
         }
 
         public void OnCompletion(IServiceProvider serviceProvider) {
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var message = $"Attribute value cache rebuilt {DateTime.Now}";
-            Debug.WriteLine(message);
             _hubService.SendRealTimeMessage("system", HubConstant.BroadcastTaskCompleted, message);
+            int x = 666;
         }
 
         public void OnFault(IServiceProvider serviceProvider, string errorMessage)

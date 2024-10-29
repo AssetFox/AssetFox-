@@ -24,6 +24,5 @@ public static class SimulationOutputJsonMapper
         };
         
         return entity;
-
     }
 }

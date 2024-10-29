@@ -80,5 +80,10 @@ namespace AppliedResearchAssociates.iAM.DTOs
         /// SimulationOutputJson of a simulation
         /// </summary>
         public IList<SimulationOutputJsonDTO> SimulationOutputJsons { get; set; }
+
+        /// <summary>
+        /// SimulationAnalysisDetail of a simulation
+        /// </summary>
+        public SimulationAnalysisDetailDTO SimulationAnalysisDetail { get; set; }
     }
 }

@@ -176,18 +176,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 userJoins.Add(userJoin);
             }
 
-            var SimulationOutputJsonEntities = new List<SimulationOutputJsonEntity>();
+            var simulationOutputJsonEntities = new List<SimulationOutputJsonEntity>();
             foreach(var simulationOutputJson in dto.SimulationOutputJsons)
             {
                 var simulationOutputJsonEntity = simulationOutputJson.ToEntity(dto.Id);
-                SimulationOutputJsonEntities.Add(simulationOutputJsonEntity);
+                simulationOutputJsonEntities.Add(simulationOutputJsonEntity);
+            }
+
+            var simulationAnalysisDetail = new SimulationAnalysisDetailEntity();
+            if (dto.SimulationAnalysisDetail != null)
+            {
+                simulationAnalysisDetail = dto.SimulationAnalysisDetail?.ToEntity();
+                simulationAnalysisDetail.SimulationId = dto.Id;
             }
 
             var entity = new SimulationEntity
             {
                 Name = dto.Name,
                 Id = dto.Id,
-                NetworkId = dto.NetworkId,             
+                NetworkId = dto.NetworkId,
                 NumberOfYearsOfTreatmentOutlook = 100,
                 AnalysisMethod = analysisMethod,
                 InvestmentPlan = investmentPlan,
@@ -203,11 +210,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 CommittedProjects = committedProjectEntities,
                 SelectableTreatments = scenarioSelectableTreatmentEntities,
                 SimulationUserJoins = userJoins,
-                SimulationOutputJsons = SimulationOutputJsonEntities
+                SimulationOutputJsons = simulationOutputJsonEntities,
+                SimulationAnalysisDetail = simulationAnalysisDetail
             };
             BaseEntityPropertySetter.SetBaseEntityProperties(entity, baseEntityProperties);
             return entity;
         }
-
     }
 }

@@ -44,7 +44,9 @@ namespace BridgeCareCore.Services
                 users.Add(user);
             }
                         
-            var cloneSimulationOutputJsons = SimulationOutputJsonCloner.CloneList(completeSimulation.SimulationOutputJsons, ownerId);
+            var cloneSimulationOutputJsons = SimulationOutputJsonCloner.CloneList(completeSimulation.SimulationOutputJsons);
+            
+            var simulationAnalysisDetail = SimulationAnalysisDetailCloner.Clone(completeSimulation.SimulationAnalysisDetail);
 
             var clone = new CompleteSimulationDTO
             {
@@ -67,11 +69,11 @@ namespace BridgeCareCore.Services
                 CommittedProjects = cloneBaseCommittedProject,
                 Id = Guid.NewGuid(),
                 Users = users,
-                SimulationOutputJsons = cloneSimulationOutputJsons
+                SimulationOutputJsons = cloneSimulationOutputJsons,
+                SimulationAnalysisDetail = simulationAnalysisDetail
             };
-            return clone;
 
-        }
-        
+            return clone;
+        }        
     }
 }

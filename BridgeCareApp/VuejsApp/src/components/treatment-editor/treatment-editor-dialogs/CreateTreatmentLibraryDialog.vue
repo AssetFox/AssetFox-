@@ -4,9 +4,7 @@
             <v-card class="ghd-padding">
                     <v-row justify="space-between" style="margin: 10px;">
                         <h3 class="ghd-title">Create New Treatment Library</h3>
-                        <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-                        X
-                    </v-btn>
+                        <XButton @click="onSubmit(false)"/> 
                     </v-row>
                     <v-col>
                         <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
@@ -24,17 +22,11 @@
                         </v-textarea>
                     </v-col>
                     <v-row justify="center" style="margin-bottom: 10px;">
-                        <v-btn outline @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat"
-                            >Cancel</v-btn
-                        >
-                        <v-btn
-                            id="CreateTreatmentLibraryDialog-addLibrary-btn"
+                        <CancelButton @cancel="onSubmit(false)"/>
+                        <SaveButton 
+                            @save="onSubmit(true)"
                             :disabled="newTreatmentLibrary.name === ''"
-                            @click="onSubmit(true)"
-                            class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding"
-                        >
-                            Save
-                        </v-btn>                        
+                        />                        
                     </v-row>
             </v-card>
         </v-dialog>
@@ -55,6 +47,9 @@ import {
 import { getUserName } from '@/shared/utils/get-user-info';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { useStore } from 'vuex';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
     const props = defineProps<{dialogData: CreateTreatmentLibraryDialogData}>()
     const { dialogData } = toRefs(props);

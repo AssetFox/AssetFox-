@@ -43,13 +43,40 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            _unitOfWork.Context.ScenarioPerformanceCurve.AsNoTracking()
+            _unitOfWork.Context.ScenarioPerformanceCurve
+                .AsNoTracking()
                 .Include(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.ScenarioPerformanceCurveEquationJoin)
                 .ThenInclude(_ => _.Equation)
                 .AsSplitQuery()
                 .Where(_ => _.SimulationId == simulation.Id)
+                .Select(spc => new ScenarioPerformanceCurveEntity
+                {
+                    Id = spc.Id,
+                    AttributeId = spc.AttributeId,
+                    Name = spc.Name,
+                    Shift = spc.Shift,
+                    ScenarioPerformanceCurveEquationJoin = spc.ScenarioPerformanceCurveEquationJoin == null
+                    ? null
+                    :
+                    new ScenarioPerformanceCurveEquationEntity
+                    {
+                        Equation = new EquationEntity
+                        {
+                            Expression = spc.ScenarioPerformanceCurveEquationJoin.Equation.Expression,
+                        }
+                    },
+                    CriterionLibraryScenarioPerformanceCurveJoin = spc.CriterionLibraryScenarioPerformanceCurveJoin == null
+                    ? null
+                    : new CriterionLibraryScenarioPerformanceCurveEntity
+                    {
+                        CriterionLibrary = new CriterionLibraryEntity
+                        {
+                            MergedCriteriaExpression = spc.CriterionLibraryScenarioPerformanceCurveJoin.CriterionLibrary.MergedCriteriaExpression
+                        }
+                    },
+                })
                 .ToList()
                 .ForEach(_ => _.CreatePerformanceCurve(simulation, attributeNameLookupDictionary));
         }

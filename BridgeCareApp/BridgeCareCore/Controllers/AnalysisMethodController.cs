@@ -120,7 +120,7 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.AnalysisMethodRepo.UpsertAnalysisMethod(simulationId, dto);                    
                 });
 
-                return Ok();
+                return Ok("Analysis Method successfully updated");
             }
             catch (UnauthorizedAccessException e)
             {

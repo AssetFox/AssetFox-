@@ -25,29 +25,17 @@
                         <div v-if="hasSelectedLibrary && !hasScenario" class="header-text-content owner-padding">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
-                        <!-- <v-divider vertical 
-                            class="owner-shared-divider"
-                            v-if="hasSelectedLibrary && !hasScenario"
-                        >
-                        </v-divider> -->
-                        <v-btn @click='onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)'
-                            style="margin-left: 10px" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
-                            v-show='!hasScenario'>
-                            Share Library
-                        </v-btn>
+                        <ShareLibraryButton 
+                            @shareLibrary="onShowShareTargetConditionGoalLibraryDialog(selectedTargetConditionGoalLibrary)"
+                            :show="!hasScenario"
+                        />
                     </v-row>
                 </v-col>
                 <v-col cols = "auto">
-                    <v-btn 
-                        id="TargetConditionGoalEditor=CreateLibrary-btn"
-                        @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                        style="margin:5px"
-                        v-show="!hasScenario"
-                        variant = "outlined"
-                        >
-                        Create New Library
-                    </v-btn>
+                    <CreateNewLibraryButton 
+                        @createNewLibrary="onShowCreateTargetConditionGoalLibraryDialog(false)"
+                        :show="!hasScenario"                        
+                    />
                 </v-col>
                 <v-col cols="auto">
                     <v-btn variant = "outlined"
@@ -156,7 +144,7 @@
                                     <v-btn
                                         id="TargetConditionGoalEditor-editTargetConditionGoalCriteria-vbtn"
                                         @click="onShowCriterionLibraryEditorDialog(item.item)"
-                                        class="ghd-green" style="margin-top: 10px;"
+                                        class="ghd-blue" style="margin-top: 10px;"
                                         flat
                                         icon>
                                         <EditSvg />
@@ -206,53 +194,30 @@
         </v-col>
         <v-col>
             <v-row v-show="hasSelectedLibrary || hasScenario" style="padding-bottom: 40px;" justify="center">
-                <v-btn flat
-                    id="TargetConditionGoalEditor-deleteLibrary-btn"
-                    @click="onShowConfirmDeleteAlert"
-                    class='ghd-white-bg ghd-red ghd-button-text ghd-outline-button-padding'
-                    variant="outlined"
-                    v-show="!hasScenario"
+                <CancelButton 
+                    @cancel="onDiscardChanges"
+                    :disabled='!hasUnsavedChanges'
+                    :show="hasScenario"
+                />
+                <DeleteLibraryButton 
+                    @deleteLibrary="onShowConfirmDeleteAlert"
                     :disabled="!hasSelectedLibrary"
-                >
-                    Delete Library
-                </v-btn>
-                <v-btn :disabled='!hasUnsavedChanges' flat
-                    @click="onDiscardChanges"
-                    class='ghd-white-bg ghd-blue ghd-button-text'
-                    style="margin-right: 5px;"
-                    v-show="hasScenario"
-                    variant="text"
-                >
-                    Cancel
-                </v-btn>
-                <v-btn
-                    variant="outlined"
-                    id="TargetConditionGoalEditor-CreateAsNewLibrary-btn"
-                    @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                    style="margin-left: 10px; margin-right: 10px;"
+                    :show="!hasScenario"
+                />
+                <CreateAsNewLibraryButton 
+                    @createAsNewLibrary="onShowCreateTargetConditionGoalLibraryDialog(true)"
                     :disabled="disableCrudButtons()"
-                >
-                    Create as New Library
-                </v-btn>
-                <v-btn
-                    @click="onUpsertScenarioTargetConditionGoals"
-                    class='ghd-blue-bg ghd-white ghd-button-text'
-                    v-show="hasScenario"
-                    style="margin-left: 5px;"
+                />
+                <SaveButton 
+                    @save="onUpsertScenarioTargetConditionGoals"
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
-                >
-                    Save
-                </v-btn>
-                <v-btn
-                    id="TargetConditionGoalEditor-UpdateLibrary-btn"
-                    @click="onUpsertTargetConditionGoalLibrary"
-                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'                    
-                    v-show="!hasScenario"
+                    :show="hasScenario"
+                />
+                <UpdateLibraryButton 
+                    @updateLibrary="onUpsertTargetConditionGoalLibrary"
                     :disabled="disableCrudButtons() || !hasUnsavedChanges || !hasLibraryEditPermission"
-                >
-                    Update Library
-                </v-btn>
+                    :show="!hasScenario"
+                />
             </v-row>
         </v-col>
         <Alert
@@ -345,6 +310,14 @@ import { getUrl } from '@/shared/utils/get-url';
 import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import CreateAsNewLibraryButton from '@/shared/components/buttons/CreateAsNewLibraryButton.vue';
+import UpdateLibraryButton from '@/shared/components/buttons/UpdateLibraryButton.vue';
+import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton.vue';
+import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
+import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
+import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
 
     let store = useStore();
     const $router = useRouter(); 

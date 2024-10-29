@@ -260,11 +260,13 @@
         ></v-divider>
         <v-col>
             <v-row justify="center" style="padding-bottom: 80px;">
-                <CancelSaveButtonGroup
-                    :cancelDisabled="!hasUnsavedChanges"
-                    :saveDisabled="!hasUnsavedChanges || disableCrudButtons()"
+                <CancelButton 
                     @cancel="onCancelClick"
+                    :disabled="!hasUnsavedChanges"
+                />
+                <SaveButton 
                     @save="OnSaveClick"
+                    :disabled="!hasUnsavedChanges || disableCrudButtons()"
                 />
             </v-row>
         </v-col> 
@@ -292,7 +294,11 @@
         />
         <ConfirmDialog></ConfirmDialog>
     </v-div>
-    <v-dialog v-model="showSuccessPopup" max-width="400px">
+    <SuccessfulUploadDialog 
+        v-model="showSuccessPopup"
+        message="Successfully uploaded committed projects."
+    />
+    <!-- <v-dialog v-model="showSuccessPopup" max-width="400px">
         <v-card>
             <v-card-text class="text-center">
                 Successfully uploaded committed projects.
@@ -304,7 +310,7 @@
                 </v-row>
             </v-card-actions>
         </v-card>
-    </v-dialog>
+    </v-dialog> -->
 </v-card>
 </template>
 <script setup lang="ts">
@@ -354,7 +360,9 @@ import { getUrl } from '@/shared/utils/get-url';
 import  currencyTextbox  from '@/shared/components/CurrencyTextbox.vue';
 import ConfirmDialog from 'primevue/confirmdialog';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
-import CancelSaveButtonGroup from '@/shared/components/buttons/CancelSaveButtonGroup.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUploadDialog.vue';
 
 
     let store = useStore();

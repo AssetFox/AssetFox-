@@ -40,14 +40,11 @@
                                 variant = "outlined" @click="onSearchClick()">
                                 Search
                             </v-btn>
-                            <v-btn id="CalculatedAttribute-createNewLibrary-btn"
-                                @click="onShowCreateCalculatedAttributeLibraryDialog(false)"
-                                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                                variant = "outlined"
-                                v-show="!hasScenario"
-                                style=" margin-left: 10px">
-                                Create New Library
-                            </v-btn>
+                            <CreateNewLibraryButton 
+                                @createNewLibrary="onShowCreateCalculatedAttributeLibraryDialog(false)"
+                                :show="!hasScenario"
+                                style=" margin-left: 10px"
+                            />
                         </v-col>
                     </v-row>
                 </v-col>
@@ -58,11 +55,10 @@
                 <div class="header-text-content owner-padding">
                      Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ modifiedDate }}
                 </div>
-                <!-- <v-divider class="owner-shared-divider" inset vertical></v-divider> -->
-                    <v-btn id="CalculatedAttribute-shareLibrary-btn" @click='onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"
-                        style="margin-left: 10px" v-show='!hasScenario'>
-                    Share Library
-                    </v-btn>
+                <ShareLibraryButton 
+                    @shareLibrary="onShowShareCalculatedAttributeLibraryDialog(selectedCalculatedAttributeLibrary)"
+                    :show="!hasScenario"
+                />
             </v-row>
         </v-col>
         <!-- attributes and timing -->
@@ -125,11 +121,11 @@
                                 <v-btn
                                     id="CalculatedAttribute-defaultEquationEditor-btn"
                                     @click="onShowEquationEditorDialogForDefaultEquation()"
-                                    class="ghd-green"
+                                    class="ghd-blue"
                                     flat
                                     icon
                                     v-if="hasAdminAccess">
-                                    <EditSvg />
+                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -173,11 +169,11 @@
                                 <v-btn
                                     id="CalculatedAttribute-editEquation-btn"
                                     @click="onShowEquationEditorDialog(props.item.id)"
-                                    class="ghd-green"
+                                    class="ghd-blue"
                                     flat
                                     icon
                                     v-if="hasAdminAccess">
-                                    <EditSvg />
+                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -193,11 +189,11 @@
                                 <v-btn
                                     id="CalculatedAttribute-changeEquationCriteria-btn"
                                     @click="onEditCalculatedAttributeCriterionLibrary(props.item.id)"
-                                    class="ghd-green"
+                                    class="ghd-blue"
                                     flat
                                     icon
                                     v-if="hasAdminAccess">
-                                    <EditSvg />
+                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -243,48 +239,31 @@
         <!-- buttons -->
         <v-col cols = "12" v-show="hasSelectedLibrary || hasScenario">
             <v-row justify="center" style="padding-bottom: 40px;" v-show='hasSelectedLibrary || hasScenario'>
-                <v-btn
+                <CancelButton 
+                    @cancel="onDiscardChanges"
                     :disabled="!hasUnsavedChanges"
+                    :show="hasSelectedLibrary || hasScenario"
                     v-if="hasAdminAccess && hasScenario"
-                    @click="onDiscardChanges"
-                    class='ghd-blue ghd-button-text ghd-button'
-                    variant = "text"
-                    v-show="hasSelectedLibrary || hasScenario">
-                    Cancel
-                </v-btn>
-                
-                <v-btn id="CalculatedAttribute-deleteLibrary-btn"
-                    @click="onShowConfirmDeleteAlert"
-                    class='ghd-red ghd-button-text ghd-outline-button-padding ghd-button'
-                    variant = "outlined"
-                    v-show="!hasScenario"
-                    :disabled="!hasSelectedLibrary">
-                    Delete Library
-                </v-btn>
-                <v-btn id="CalculatedAttribute-createAsNewLibrary-btn"
+                />
+                <DeleteLibraryButton 
+                    @deleteLibrary="onShowConfirmDeleteAlert"
+                    :disabled="!hasSelectedLibrary"
+                    :show="!hasScenario"
+                />
+                <CreateAsNewLibraryButton 
+                    @createAsNewLibrary="onShowCreateCalculatedAttributeLibraryDialog(true)"
                     :disabled="disableCrudButton()"
-                    v-if="hasAdminAccess"
-                    @click="onShowCreateCalculatedAttributeLibraryDialog(true)"
-                    variant = "outlined"
-                    style="margin-left: 10px; margin-right: 10px"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
-                    Create as New Library
-                </v-btn>
-                <v-btn id="CalculatedAttribute-updateLibrary-btn"
+                />
+                <UpdateLibraryButton 
+                    @updateLibrary="onUpsertCalculatedAttributeLibrary"
                     :disabled="disableCrudButton() || !hasUnsavedChanges"
-                    @click="onUpsertCalculatedAttributeLibrary"
-                    class='ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
-                    v-show="!hasScenario">
-                    Update Library
-                </v-btn>
-                <v-btn
-                    @click="onUpsertScenarioCalculatedAttribute"
-                    class='ghd-blue-bg text-white ghd-button-text ghd-button'
-                    v-show="hasScenario && hasAdminAccess"
-                    flat
-                    :disabled="disableCrudButton() || !hasUnsavedChanges">
-                    Save
-                </v-btn> 
+                    :show="!hasScenario"
+                />
+                <SaveButton 
+                    @save="onUpsertScenarioCalculatedAttribute"
+                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    :show="hasScenario && hasAdminAccess"
+                />
             </v-row>
         </v-col>
      
@@ -387,6 +366,15 @@ import { computed } from 'vue';
 import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import EditSvg from '@/shared/icons/EditSvg.vue';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import CreateAsNewLibraryButton from '@/shared/components/buttons/CreateAsNewLibraryButton.vue';
+import UpdateLibraryButton from '@/shared/components/buttons/UpdateLibraryButton.vue';
+import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton.vue';
+import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
+import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
+import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
+import { getUrl } from '@/shared/utils/get-url';
 
 let store = useStore();
 const confirm = useConfirm();

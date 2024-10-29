@@ -4,10 +4,7 @@
        <v-card-title class="ghd-dialog-padding-top-title">
         <v-row justify="space-between">
           <div class="dialog-header"><h5>Create New Remaining Life Limit Library</h5></div>        
-          <!-- <v-spacer></v-spacer> -->
-          <v-btn @click="onSubmit(false)" flat>
-                      <i class="fas fa-times fa-2x"></i>
-          </v-btn>
+          <XButton @click="onSubmit(false)"/>
         </v-row>
       </v-card-title>
       <v-card-text class="ghd-dialog-text-field-padding">
@@ -36,12 +33,11 @@
       </v-card-text>
       <v-card-actions class="py-0">
         <v-row justify="center" row class="ghd-dialog-padding-bottom-buttons">
-          <v-btn id="CreateRemainingLifeLimitLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-button" variant = "outlined">Cancel</v-btn>
-          <v-btn id="CreateRemainingLifeLimitLibraryDialog-save-vbtn" :disabled="newRemainingLifeLimitLibrary.name === ''"
-                 @click="onSubmit(true)"
-                 class="ghd-white-bg ghd-blue ghd-button" variant = "outlined">
-            Save
-          </v-btn>
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SaveButton 
+            @save="onSubmit(true)"
+            :disabled="newRemainingLifeLimitLibrary.name === ''"  
+          />
         </v-row>
       </v-card-actions>
     </v-card>
@@ -59,6 +55,9 @@ import {
 import {rules as validationRules, InputValidationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
   const props = defineProps<{
     dialogData: CreateRemainingLifeLimitLibraryDialogData

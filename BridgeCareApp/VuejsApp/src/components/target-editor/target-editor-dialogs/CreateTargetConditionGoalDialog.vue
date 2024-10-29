@@ -50,23 +50,11 @@
       </v-card-text>
       <v-card-actions style="margin-left: 10px; padding-left: 10px;">
         <v-row justify="center" class="ghd-dialog-padding-bottom-buttons">
-          <v-btn 
-            id="CreateTargetConditionGoalDialog-cancel-vbtn" 
-            @click="onSubmit(false)" 
-            class="ghd-white-bg ghd-blue" 
-            variant = "outlined"
-            rounded="0">
-            Cancel
-          </v-btn>
-          <v-btn 
-            id="CreateTargetConditionGoalDialog-save-vbtn" 
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SaveButton 
+            @save="onSubmit(true)"
             :disabled="disableSubmitButton()" 
-            @click="onSubmit(true)" 
-            class="ghd-white-bg ghd-blue" 
-            variant = "outlined"
-            rounded="0">
-            Save
-          </v-btn>
+          />
         </v-row>
       </v-card-actions>
     </v-card>
@@ -84,6 +72,8 @@ import {InputValidationRules, rules as validationRules,} from '@/shared/utils/in
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {isEqual} from '@/shared/utils/has-unsaved-changes-helper';
 import { useStore } from 'vuex';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
 
   const props = defineProps<{
           showDialog: boolean,

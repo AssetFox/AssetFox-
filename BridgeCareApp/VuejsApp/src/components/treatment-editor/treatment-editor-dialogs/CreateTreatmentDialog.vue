@@ -3,13 +3,10 @@
     <v-dialog max-width="450px" persistent v-model="showDialogComputed">
       <v-card class="ghd-padding">
         <v-card-title>
-            <v-row justify="space-between">
-              <h3 class="ghd-title">Create New Treatment</h3>
-              <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
-              X
-            </v-btn>  
-            </v-row>
-                    
+          <v-row justify="space-between">
+            <h3 class="ghd-title">Create New Treatment</h3>
+            <XButton @click="onSubmit(false)"/> 
+          </v-row>                    
         </v-card-title>
         <v-card-text>
           <v-row column>
@@ -19,16 +16,11 @@
         </v-card-text>
         <v-card-actions>
           <v-row justify="center">
-            <v-btn
-              id="CreateTreatmentDialog-cancel-btn"
-              @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "flat">Cancel
-            </v-btn>
-            <v-btn 
-              id="CreateTreatmentDialog-save-btn"
+            <CancelButton @cancel="onSubmit(false)"/>
+            <SaveButton 
+              @save="onSubmit(true)"
               :disabled="newTreatment.name === ''" 
-              @click="onSubmit(true)" 
-              class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">Save
-            </v-btn>            
+            />           
           </v-row>
         </v-card-actions>
       </v-card>
@@ -42,6 +34,9 @@ import { inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vu
 import { useStore } from 'vuex';
 import {emptyTreatment, Treatment} from '@/shared/models/iAM/treatment';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
+import XButton from '@/shared/components/buttons/XButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
 
 const props = defineProps<{showDialog: boolean}>()
 let showDialogComputed = computed(() => props.showDialog);

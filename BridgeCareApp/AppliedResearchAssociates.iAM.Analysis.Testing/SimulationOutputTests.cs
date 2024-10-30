@@ -1,6 +1,5 @@
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using Newtonsoft.Json;
-using Xunit;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Testing;
 

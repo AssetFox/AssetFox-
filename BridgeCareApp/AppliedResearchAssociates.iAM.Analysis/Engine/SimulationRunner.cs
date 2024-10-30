@@ -16,7 +16,6 @@ using System.Threading;
 using AppliedResearchAssociates.iAM.Analysis.Logic;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.Validation;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine;
 

@@ -110,7 +110,14 @@
             class="border-opacity-100"
         ></v-divider>
                 <v-row style="margin:5px;">
-                    <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" variant = "flat">Simulation Log</v-btn>
+                    <!-- <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" variant = "flat">Simulation Log</v-btn> -->
+                    <SimulationLogButton
+                        :networkId="networkId"
+                        :selectedScenarioId="selectedScenarioId"
+                        :simulationName="simulationName"
+                        @success="handleSuccess"
+                        @error="handleError"
+                    />
                 </v-row>
             </v-col>
 
@@ -155,6 +162,7 @@ import { queuedWorkStatusUpdate } from '@/shared/models/iAM/queuedWorkStatusUpda
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
 import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanButton.vue';
+import SimulationLogButton from '@/shared/components/buttons/SimulationLogButton.vue';
 
 
     let store = useStore();
@@ -170,11 +178,15 @@ import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanBu
 
     let editShow = ref<boolean>(false);
 
-    let simulationName: string;
+    //let simulationName: string;
     let networkName: string = '';
-    let networkId: string = getBlankGuid();
-    let selectedScenarioId: string = getBlankGuid();
+    //let networkId: string = getBlankGuid();
+    // let selectedScenarioId: string = getBlankGuid();
     const scenarioOutputName: string = "ScenarioOutput"
+
+    const networkId = ref('');
+    const selectedScenarioId = ref('');
+    const simulationName = ref('');
 
     let rules: InputValidationRules = clone(validationRules);
 
@@ -233,11 +245,11 @@ import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanBu
 
     onMounted(async () => {
 
-        selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
-        simulationName = router.currentRoute.value.query.scenarioName as string;
+        selectedScenarioId.value = router.currentRoute.value.query.scenarioId as string;
+        simulationName.value = router.currentRoute.value.query.scenarioName as string;
         networkName = router.currentRoute.value.query.networkName as string;
-        networkId = router.currentRoute.value.query.networkId as string;
-        if (selectedScenarioId === getBlankGuid()) {
+        networkId.value = router.currentRoute.value.query.networkId as string;
+        if (selectedScenarioId.value === getBlankGuid()) {
                 // set 'no selected scenario' error message, then redirect user to Scenarios UI
                 addErrorNotificationAction({
                     message: 'Found no selected scenario for edit',
@@ -277,7 +289,7 @@ import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanBu
             
             // Get the report
             const report = currentPage.value.find(
-                r => r.name === reportName && simulationName === scenarioName
+                r => r.name === reportName && simulationName.value === scenarioName
             );
 
             if (report) {
@@ -302,6 +314,14 @@ import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanBu
         editShow.value = !editShow.value;
     }
 
+    function handleSuccess(payload: any) {
+        store.dispatch('addSuccessNotification', payload);
+    }
+
+    function handleError(payload: any) {
+        store.dispatch('addErrorNotification', payload);
+    }
+
     function onShowCriterionEditorDialog(reportId: string) {
         selectedReport.value = find(
             propEq('id', reportId),
@@ -324,30 +344,6 @@ import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanBu
             );
     }
     
-    async function onDownloadSimulationLog(download: boolean) {
-        if (download) {            
-            await ReportsService.downloadSimulationLog(
-                networkId,
-                selectedScenarioId,
-            ).then((response: AxiosResponse<any>) => {
-                if (hasValue(response, 'data')) {
-                    addSuccessNotificationAction({
-                        message: 'Report downloaded',
-                    });
-                    FileDownload(
-                        response.data,
-                        `Simulation Log ${simulationName}.txt`,
-                    );
-                } else {
-                    addErrorNotificationAction({
-                        message: 'Failed to download simulation log.',
-                        longMessage:
-                            'Failed to download simulation log. Please try generating and downloading the log again.',
-                    });
-                }
-            });
-        } 
-    }
     async function onGenerateReport(reportId: string, download: boolean) {
         if (download) {            
             // Get the selected report
@@ -357,7 +353,7 @@ import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanBu
             ) as Report;
             // Generate report with selected one from table
             await ReportsService.generateReportWithCriteria(
-                selectedScenarioId, selectedReport.value.mergedExpression, selectedReport.value.name
+                selectedScenarioId.value, selectedReport.value.mergedExpression, selectedReport.value.name
             ).then((response: AxiosResponse<any>) => {
                 if (response.status == 200) {
                     if (hasValue(response, 'data')) {
@@ -384,7 +380,7 @@ import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanBu
             currentPage.value,
         ) as Report;
         await ReportsService.downloadReport(
-            selectedScenarioId, selectedReport.value.name
+            selectedScenarioId.value, selectedReport.value.name
         ).then((response: AxiosResponse<any>) => {
             if (hasValue(response, 'data')) {
                 const fileInfo: FileInfo = response.data as FileInfo;
@@ -403,7 +399,7 @@ import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanBu
     {
         const reportDetails: ReportDetails[] = currentPage.value.map(report => {
         return {
-            simulationId: selectedScenarioId,
+            simulationId: selectedScenarioId.value,
             reportName: report.name,
             isGenerated: false,
             };
@@ -433,7 +429,7 @@ import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanBu
             currentPage.value,
         ) as Report;
         await ReportsService.deleteReport(
-            selectedScenarioId, selectedReport.value.name
+            selectedScenarioId.value, selectedReport.value.name
         ).then((response: AxiosResponse<any>) => {
             if (hasValue(response, 'data')) {
                 addSuccessNotificationAction({

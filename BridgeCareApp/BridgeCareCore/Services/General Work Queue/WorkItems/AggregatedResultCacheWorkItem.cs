@@ -42,19 +42,25 @@ namespace BridgeCareCore.Services
             DomainId = Guid.Empty,
         };
 
-        public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken) {
+        public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
+        {
             using var scope = serviceProvider.CreateScope();
+            DoWorkInner(scope);
+        }
+
+        private static void DoWorkInner(IServiceScope scope)
+        {
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var attributeRepository = unitOfWork.AttributeRepo;
             var aggregatedResultRepository = unitOfWork.AggregatedResultRepo;
             var allAttributes = attributeRepository.GetAttributes();
             var allNames = allAttributes.Select(a => a.Name).ToList();
-            var cache = serviceProvider.GetRequiredService<IAggregatedSelectValuesResultDtoCache>();
+            var cache = scope.ServiceProvider.GetRequiredService<IAggregatedSelectValuesResultDtoCache>();
             var tooBig = cache.AttributesTooBigToCache;
             var attributesToCache = allNames.Except(tooBig).ToList();
             var batches = new List<List<string>>();
             var batchSize = 10;
-            while(attributesToCache.Any())
+            while (attributesToCache.Any())
             {
                 var batch = attributesToCache.Take(batchSize)
                     .ToList();
@@ -72,7 +78,8 @@ namespace BridgeCareCore.Services
             int x = 666;
         }
 
-        public void OnCompletion(IServiceProvider serviceProvider) {
+        public void OnCompletion(IServiceProvider serviceProvider)
+        {
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var message = $"Attribute value cache rebuilt {DateTime.Now}";
@@ -89,7 +96,8 @@ namespace BridgeCareCore.Services
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"{cacheRebuildError}::NetworkAggregateAccess - {errorMessage}");
 
         }
-        public void OnUpdate(IServiceProvider serviceProvider) {
+        public void OnUpdate(IServiceProvider serviceProvider)
+        {
             using var scope = serviceProvider.CreateScope();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastWorkQueueUpdate, WorkId);

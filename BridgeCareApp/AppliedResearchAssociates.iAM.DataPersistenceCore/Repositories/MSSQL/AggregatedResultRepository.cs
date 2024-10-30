@@ -104,6 +104,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     e.TextValue,
                     e.NumericValue,
                 })
+                .Distinct()
                 .AsNoTracking()
                 .AsSplitQuery()
                 .ToList();

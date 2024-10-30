@@ -121,6 +121,15 @@ public sealed class Simulation : WeakEntity, IValidator
             }
         }
 
+        if (CommittedProjects.GroupBy(cp => (cp.Asset, cp.Year, cp.TemplateTreatment)).Any(g => g.Count() > 1))
+        {
+            results.Add(
+                ValidationStatus.Error,
+                "There are at least two committed projects with the same treatment applied to the same asset in the same year.",
+                this,
+                nameof(CommittedProjects));
+        }
+
         return results;
     }
 

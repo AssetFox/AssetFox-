@@ -537,7 +537,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
             {
                 if (committedProjects.Any(cp => !cp.ShouldApplyConsequences))
                 {
-                    SimulationRunner.MessageBuilder = new("Cash-flow committed project overlaps with non-cash-flow committed project on the same asset.")
+                    SimulationRunner.MessageBuilder = new("Cash-flow committed project overlaps with another committed project on the same asset.")
                     {
                         AssetId = Asset.Id,
                         AssetName = Asset.AssetName,

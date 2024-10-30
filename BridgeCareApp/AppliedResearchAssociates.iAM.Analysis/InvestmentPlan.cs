@@ -92,7 +92,38 @@ public sealed class InvestmentPlan : WeakEntity, IValidator
             results.Add(ValidationStatus.Error, "Number of years in analysis period is less than one.", this, nameof(NumberOfYearsInAnalysisPeriod));
         }
 
+        var defaultCashFlowRules = CashFlowRules.Where(cf => cf.Criterion.ExpressionIsBlank).ToList();
+        if (defaultCashFlowRules.Count != 1)
+        {
+            addWarningForCfcpRequirement();
+        }
+        else
+        {
+            var oneYearDistributions = defaultCashFlowRules[0].DistributionRules.Where(d => d.YearlyPercentages.Count == 1).ToList();
+            if (oneYearDistributions.Count != 1)
+            {
+                addWarningForCfcpRequirement();
+            }
+            else
+            {
+                var cashFlowCommittedProjectCostThreshold = oneYearDistributions[0].CostCeiling;
+                if (cashFlowCommittedProjectCostThreshold is null)
+                {
+                    addWarningForCfcpRequirement();
+                }
+            }
+        }
+
         return results;
+
+        void addWarningForCfcpRequirement()
+        {
+            results.Add(
+                ValidationStatus.Warning,
+                "Cash-flow committed projects identification will be disabled due to an unmet requirement: (a) exactly one default cash-flow rule, (b) with exactly one 1-year distribution, (c) with an explicit cost-ceiling value.",
+                this,
+                nameof(CashFlowRules));
+        }
     }
 
     /// <summary>

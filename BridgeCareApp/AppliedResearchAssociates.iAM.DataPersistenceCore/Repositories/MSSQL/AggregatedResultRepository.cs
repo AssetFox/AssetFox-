@@ -110,7 +110,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
             foreach (var attributeName in uniqueAttributeNames)
             {
-                var abbreviatedAttributeDtos = abbreviatedAttributes.Single(a => a.Name == attributeName);
+                var abbreviatedAttributeDto = abbreviatedAttributes.FirstOrDefault(a => a.Name == attributeName);
+                if (abbreviatedAttributeDto == null)
+                {
+                    continue;
+                }
                 var thisAttributeValueDtos = allAttributeValueDtos.Where(_ => _.AttributeName == attributeName).ToList();
 
                 if (!thisAttributeValueDtos.Any())

@@ -66,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             var committedTreatments = new HashSet<string>();
             var map = WorkTypeMap.Map;
-            Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new Dictionary<double, List<TreatmentConsiderationDetail>>();
+            var keyCashFlowFundingDetails = new Dictionary<double, List<TreatmentConsiderationDetail>>();
             foreach (var summaryData in workSummaryByBudgetData)
             {
                 foreach (var yearData in reportOutputData.Years)
@@ -91,18 +91,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                         var treatmentConsideration = shouldBundleFeasibleTreatments ?
                                                      treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year &&
+                                                        _.BudgetName == summaryData.Budget) &&
                                                         section.AppliedTreatment.Contains(_.TreatmentName)) :
                                                      treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year &&
+                                                        _.BudgetName == summaryData.Budget) &&
                                                         _.TreatmentName == section.AppliedTreatment);
 
                         var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
-                        var budgetAmount = (double)treatmentConsiderations.Sum(_ =>
-                                           _.FundingCalculationOutput?.AllocationMatrix?.
-                                           Where(_ => _.Year == yearData.Year).
-                                           Where(b => b.BudgetName == summaryData.Budget).
-                                           Sum(bu => bu.AllocatedAmount) ?? 0);
+                        var budgetAmount = (double)(treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix?.
+                                           Where(_ => _.BudgetName == summaryData.Budget && _.Year == yearData.Year).
+                                           Sum(b => b.AllocatedAmount) ?? 0);
                         budgetAmount = Math.Round(budgetAmount, 0);
                         var bpnName = _reportHelper.CheckAndGetValue<string>(section?.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&

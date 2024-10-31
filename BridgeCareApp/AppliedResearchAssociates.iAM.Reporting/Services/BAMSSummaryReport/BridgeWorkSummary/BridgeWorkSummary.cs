@@ -155,11 +155,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                     var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
                     var treatmentCategory = appliedTreatment.Contains("Bundle") ? BAMSConstants.Bundled : treatmentCategoryLookup[appliedTreatment];
-                    var cost = treatmentConsiderations.
-                                Where(_ => _.TreatmentName?.ToLower() != BAMSConstants.NoTreatment && _.TreatmentName == appliedTreatment).
-                                Sum(_ => _.FundingCalculationOutput?.AllocationMatrix?.
-                                Where(_ => _.Year == yearData.Year).
-                                Sum(b => b.AllocatedAmount) ?? 0);
+                    var cost = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix?.
+                               Where(_ => _.Year == yearData.Year).
+                               Sum(b => b.AllocatedAmount) ?? 0;
                     cost = Math.Round(cost, 0);
                     if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                         appliedTreatment.ToLower() != BAMSConstants.NoTreatment)

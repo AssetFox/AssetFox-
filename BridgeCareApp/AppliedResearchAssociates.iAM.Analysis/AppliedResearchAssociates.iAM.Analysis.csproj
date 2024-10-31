@@ -29,6 +29,7 @@
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DTOs\AppliedResearchAssociates.iAM.DTOs.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.Option\AppliedResearchAssociates.Option.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.Validation\AppliedResearchAssociates.Validation.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.Zip\AppliedResearchAssociates.Zip.csproj" />
   </ItemGroup>
 
 </Project>

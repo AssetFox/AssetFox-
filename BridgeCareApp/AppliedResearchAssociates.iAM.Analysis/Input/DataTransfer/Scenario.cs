@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 
@@ -144,6 +143,7 @@ public sealed class Scenario
     private static CommittedProject Convert(Analysis.CommittedProject source) => new()
     {
         AssetID = source.Asset.Id,
+        Category = source.Category,
         Cost = source.Cost,
         Name = source.Name,
         NameOfUsableBudget = source.Budget.Name,
@@ -238,6 +238,7 @@ public sealed class Scenario
 
     private static SelectableTreatment Convert(Analysis.SelectableTreatment source) => new()
     {
+        Category = source.Category,
         Consequences = source.Consequences.Select(Convert).ToList(),
         Costs = source.Costs.Select(Convert).ToList(),
         FeasibilityCriterionExpressions = source.FeasibilityCriteria.Select(criterion => criterion.Expression).ToList(),
@@ -338,6 +339,7 @@ public sealed class Scenario
             var result = target.AddTreatment();
 
             result.Name = source.Name;
+            result.Category = source.Category;
             result.SetShadowForAnyTreatment(source.ShadowForAnyTreatment);
             result.SetShadowForSameTreatment(source.ShadowForSameTreatment);
             result.ForCommittedProjectsOnly = source.ForCommittedProjectsOnly;
@@ -565,6 +567,7 @@ public sealed class Scenario
             var result = new Analysis.CommittedProject(AssetByID[source.AssetID], source.Year)
             {
                 Budget = BudgetByName[source.NameOfUsableBudget],
+                Category = source.Category,
                 Cost = source.Cost,
                 Name = source.Name,
                 TemplateTreatment = TreatmentByName[source.NameOfTemplateTreatment],

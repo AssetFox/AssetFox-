@@ -48,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         /// <summary>
         /// Allows multiple treatment selection
         /// </summary>
-        public bool shouldAllowMultipleTreatments { get; set; }
+        public bool ShouldAllowMultipleTreatments { get; set; }
 
         /// <summary>
         /// Describes the attribute used to determine the benefit based

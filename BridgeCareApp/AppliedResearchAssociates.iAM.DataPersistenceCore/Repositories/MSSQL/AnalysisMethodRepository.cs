@@ -105,7 +105,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     ShouldApplyMultipleFeasibleCosts = false,
                     ShouldDeteriorateDuringCashFlow = false,
                     ShouldUseExtraFundsAcrossBudgets = false,
-                    shouldAllowMultipleTreatments = false,
+                    ShouldAllowMultipleTreatments = false,
                     Benefit = new BenefitDTO(),
                     CriterionLibrary = new CriterionLibraryDTO()
                 };

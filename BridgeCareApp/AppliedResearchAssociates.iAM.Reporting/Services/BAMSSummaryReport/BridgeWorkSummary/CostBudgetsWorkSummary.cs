@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -41,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
             Dictionary<int, Dictionary<string, List<CommittedProjectMetaData>>> yearlyCostCommittedProjects,
             List<int> simulationYears,
-            Dictionary<string, Budget> yearlyBudgetAmount,
+            Dictionary<string, BudgetDTO> yearlyBudgets,
             Dictionary<int, Dictionary<string, decimal>> bpnCostPerYear,
             List<(string Name, string AssetType, TreatmentCategory Category)> simulationTreatments,
             List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope,
@@ -76,7 +77,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 WorkTypeTotalCommitted = workTypeTotalCommitted
             };
             
-            var budgetTotalRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, yearlyBudgetAmount, workTypeTotalAggregated, shouldBundleFeasibleTreatments);
+            var budgetTotalRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, yearlyBudgets, workTypeTotalAggregated, shouldBundleFeasibleTreatments);
 
             FillWorkTypeTotalWorkOutsideScope(worksheet, currentCell, simulationYears, workTypeTotalAggregated.WorkTypeTotalWorkOutsideScope);
 
@@ -196,7 +197,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelWorksheet worksheet,
             CurrentCell currentCell,
             List<int> simulationYears,
-            Dictionary<string, Budget> yearlyBudgetAmount,
+            Dictionary<string, BudgetDTO> yearlyBudgetAmount,
             WorkTypeTotalAggregated workTypeTotalAggregated,
             bool shouldBundleFeasibleTreatments)
         {
@@ -283,7 +284,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 var yearIndex = year - simulationYears[0];
                 var columnIndex = yearIndex + 3;
-                var budgetTotal = yearlyBudgetAmount.Sum(x => x.Value.YearlyAmounts[yearIndex].Value);
+                var budgetTotal = yearlyBudgetAmount.Sum(x => x.Value.BudgetAmounts[yearIndex].Value);
                 worksheet.Cells[currentCell.Row, columnIndex].Value = budgetTotal;
                 averageAnnualBudget += budgetTotal;
             }

@@ -361,11 +361,11 @@ import SimulationLogButton from '@/shared/components/buttons/SimulationLogButton
                         //reportIndexID = resultId;
                     }
                     addSuccessNotificationAction({
-                        message: selectedReport.value.name +  ' report generation started for ' + simulationName + '.',
+                        message: selectedReport.value.name +  ' report generation started for ' + simulationName.value + '.',
                     });
                 } else {
                     addErrorNotificationAction({
-                        message: 'Failed to generate apricot for ' + simulationName + '.',
+                        message: 'Failed to generate apricot for ' + simulationName.value + '.',
                         longMessage:
                             'Failed to generate the report or output. Make sure the scenario has been run',
                     });
@@ -433,7 +433,7 @@ import SimulationLogButton from '@/shared/components/buttons/SimulationLogButton
         ).then((response: AxiosResponse<any>) => {
             if (hasValue(response, 'data')) {
                 addSuccessNotificationAction({
-                        message: selectedReport.value.name +  ' report has been deleted for ' + simulationName + '.',
+                        message: selectedReport.value.name +  ' report has been deleted for ' + simulationName.value + '.',
                     });
                     selectedReport.value.isGenerated = false;
                     selectedReport.value.reportStatus = "Report Deleted";

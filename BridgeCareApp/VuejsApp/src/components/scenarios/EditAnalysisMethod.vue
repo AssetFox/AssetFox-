@@ -113,7 +113,6 @@ Line 164 Delete,
                             class="ghd-checkbox"
                             color="#2A578D"
                             label="Allow Multiple Treatments"
-                            :disabled="!hasAdminAccess"
                             v-model="analysisMethod.shouldAllowMultipleTreatments"
                             @update:model-value='onSetAnalysisMethodProperty("shouldAllowMultipleTreatments",$event)'/>
                         </v-col>

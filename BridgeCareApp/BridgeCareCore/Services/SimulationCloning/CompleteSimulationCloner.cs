@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Services.SimulationCloning;
 
 namespace BridgeCareCore.Services
 {
@@ -11,7 +12,7 @@ namespace BridgeCareCore.Services
             var cloneAnalysisMethod = AnalysisMethodCloner.Clone(completeSimulation.AnalysisMethod, ownerId);            
             var cloneCashFlowFule = CashFlowRuleCloner.CloneList(completeSimulation.CashFlowRules, ownerId);
             var cloneInvestmentPlan = InvestmentPlanCloner.Clone(completeSimulation.InvestmentPlan);
-            var cloneReportIndex = ReportIndexCloner.CloneList(completeSimulation.ReportIndexes);
+            var cloneReportIndex = new List<ReportIndexDTO>(); // ReportIndexCloner.CloneList(completeSimulation.ReportIndexes); // commenting for now, need to fix the report paths and handle actual coping of report files
             var clonePerformanceCurves = PerformanceCurvesCloner.CloneListNullPropagating(completeSimulation.PerformanceCurves, ownerId);
             var cloneCalculatedAttribute = CalculatedAttributeCloner.CloneList(completeSimulation.CalculatedAttributes, ownerId);
          
@@ -42,6 +43,11 @@ namespace BridgeCareCore.Services
             {
                 users.Add(user);
             }
+                        
+            var cloneSimulationOutputJsons = SimulationOutputJsonCloner.CloneList(completeSimulation.SimulationOutputJsons);
+            
+            var simulationAnalysisDetail = SimulationAnalysisDetailCloner.Clone(completeSimulation.SimulationAnalysisDetail);
+
             var clone = new CompleteSimulationDTO
             {
                 NoTreatmentBeforeCommittedProjects = completeSimulation.NoTreatmentBeforeCommittedProjects,
@@ -63,10 +69,11 @@ namespace BridgeCareCore.Services
                 CommittedProjects = cloneBaseCommittedProject,
                 Id = Guid.NewGuid(),
                 Users = users,
+                SimulationOutputJsons = cloneSimulationOutputJsons,
+                SimulationAnalysisDetail = simulationAnalysisDetail
             };
-            return clone;
 
-        }
-        
+            return clone;
+        }        
     }
 }

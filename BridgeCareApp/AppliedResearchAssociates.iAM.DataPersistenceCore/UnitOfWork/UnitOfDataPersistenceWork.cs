@@ -74,6 +74,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private IAnnouncementRepository _announcementRepo;
         private IDataSourceRepository _dataSourceRepo;
         private ITreatmentLibraryUserRepository _treatmentLibraryUserRepo; 
+        private ISimulationOutputJsonRepository _simulationOutputJsonRepo;
 
         public ITreatmentLibraryUserRepository TreatmentLibraryUserRepo => _treatmentLibraryUserRepo ??= new TreatmentLibraryUserRepository(this);
         public IAggregatedResultRepository AggregatedResultRepo => _aggregatedResultRepo ??= new AggregatedResultRepository(this);
@@ -158,11 +159,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IDataSourceRepository DataSourceRepo => _dataSourceRepo ??= new DataSourceRepository(this);
 
+        public ISimulationOutputJsonRepository SimulationOutputJsonRepo => _simulationOutputJsonRepo ??= new SimulationOutputJsonRepository(this);
+
         public UserDTO CurrentUser => UserEntity?.ToDto();
 
         public UserEntity UserEntity { get; private set; }
 
-        public IDbContextTransaction DbContextTransaction { get; private set; }
+        public IDbContextTransaction DbContextTransaction { get; private set; }        
 
         /// <summary><inheritdoc cref="IUnitOfWork.BeginTransaction"/></summary>
         public void BeginTransaction() => DbContextTransaction = Context.Database.BeginTransaction();

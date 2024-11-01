@@ -6,6 +6,8 @@
     <IsPackable>false</IsPackable>
 
     <Configurations>Debug;Release;Test</Configurations>
+
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>

@@ -147,7 +147,7 @@ public sealed class SimulationRunner
         });
 
         CommittedProjectsPerAsset = Simulation.CommittedProjects.ToLookup(committedProject => committedProject.Asset);
-        ConfigureAnyCashFlowCommittedProjects();
+        ConfigureCashFlowCommittedProjects();
 
         ConditionsPerBudget = Simulation.InvestmentPlan.BudgetConditions.ToLookup(budgetCondition => budgetCondition.Budget);
         CurvesPerAttribute = Simulation.PerformanceCurves.ToLookup(curve => curve.Attribute);
@@ -494,48 +494,102 @@ public sealed class SimulationRunner
         return ConditionGoalsEvaluator();
     }
 
-    private void ConfigureAnyCashFlowCommittedProjects()
+    private void ConfigureCashFlowCommittedProjects()
     {
-        // Cash-flow committed projects (CPs) are automatically identified by the system. The
-        // pattern is a sequence of CPs in consecutive years where each CP costs more than a fixed
-        // threshold (currently $5m according to stakeholder-SMEs) and each CP is assigned the same
-        // asset and treatment. The effect of identification is that each non-final CP of a
-        // cash-flow CP sequence will have its consequences disabled.
+        // This feature currently requires that there be exactly one cash-flow rule whose criterion
+        // is blank, i.e. exactly one "default" cash-flow rule. In addition, that rule must have
+        // exactly one 1-year distribution, and that distribution must have a definite cost ceiling.
 
-        const double cashFlowCostThreshold = 5_000_000;
+        var defaultCashFlowRules =
+            Simulation.InvestmentPlan.CashFlowRules.Where(cf => cf.Criterion.ExpressionIsBlank).ToList();
 
-        var orderedGroups = Simulation.CommittedProjects
-            .GroupBy(cp => (cp.Asset, cp.TemplateTreatment))
-            .Select(g => g.Where(cp => cp.Cost > cashFlowCostThreshold).OrderByDescending(cp => cp.Year))
-            .Where(g => g.Any());
-
-        foreach (var g in orderedGroups)
+        if (defaultCashFlowRules.Count != 1)
         {
-            if (g.DistinctBy(cp => cp.Year).Count() != g.Count())
-            {
-                var asset = g.First().Asset;
-                MessageBuilder = new("Two or more committed projects in the same year on the same asset with the same treatment.")
-                {
-                    AssetId = asset.Id,
-                    AssetName = asset.AssetName,
-                };
-                var error = SimulationLogMessageBuilders.RuntimeFatal(MessageBuilder, Simulation.Id);
-                Send(error);
-            }
+            disabledCfcpWarning();
+            return;
+        }
 
-            var expectedYear = g.First().Year - 1;
-            foreach (var cp in g.Skip(1))
+        var oneYearDistributions =
+            defaultCashFlowRules[0].DistributionRules.Where(d => d.YearlyPercentages.Count == 1).ToList();
+
+        if (oneYearDistributions.Count != 1)
+        {
+            disabledCfcpWarning();
+            return;
+        }
+
+        var costCeiling = oneYearDistributions[0].CostCeiling;
+
+        if (costCeiling is null)
+        {
+            disabledCfcpWarning();
+            return;
+        }
+
+        var cashFlowCostThreshold = (double)costCeiling.Value;
+
+        // Cash-flow committed projects (CFCPs) are automatically identified by the system. The
+        // pattern is a sequence of CPs in consecutive years on the same asset using the same
+        // treatment where the total cost of the sequence is more than a given threshold (determined
+        // by the cost ceiling value on the 1-year distribution on the default cash-flow rule). The
+        // effect of identification is that each non-final CP of a cash-flow CP sequence will have
+        // its consequences disabled.
+
+        var cpGroups = Simulation.CommittedProjects
+            .GroupBy(cp => (cp.Asset, cp.TemplateTreatment))
+            .Select(g => g.OrderBy(cp => cp.Year).ToList())
+            .ToList();
+
+        foreach (var g in cpGroups)
+        {
+            var cpSequence = new List<CommittedProject>();
+            var expectedYear = g[0].Year;
+
+            foreach (var cp in g)
             {
                 if (cp.Year == expectedYear)
                 {
-                    cp.ShouldApplyConsequences = false;
-                    --expectedYear;
+                    cpSequence.Add(cp);
+                    ++expectedYear;
                 }
                 else
                 {
-                    expectedYear = cp.Year - 1;
+                    // Process current sequence.
+                    process(cpSequence, cashFlowCostThreshold);
+
+                    // Gather new sequence.
+                    cpSequence.Clear();
+                    cpSequence.Add(cp);
+                    expectedYear = cp.Year + 1;
                 }
             }
+
+            // Process last sequence.
+            process(cpSequence, cashFlowCostThreshold);
+        }
+
+        static void process(List<CommittedProject> cpSequence, double cashFlowCostThreshold)
+        {
+            var totalCost = cpSequence.Sum(cp => cp.Cost);
+            if (totalCost > cashFlowCostThreshold)
+            {
+                foreach (var cfcp in cpSequence.SkipLast(1))
+                {
+                    cfcp.ShouldApplyConsequences = false;
+                }
+            }
+        }
+
+        void disabledCfcpWarning()
+        {
+            MessageBuilder = new SimulationMessageBuilder($"Cash-flow committed projects identification is disabled; input requirements not met.")
+            {
+                ItemId = Simulation.InvestmentPlan.Id,
+                ItemName = nameof(Simulation.InvestmentPlan),
+            };
+
+            var warning = SimulationLogMessageBuilders.RuntimeWarning(MessageBuilder, Simulation.Id);
+            Send(warning);
         }
     }
 

@@ -4,9 +4,7 @@
       <v-card-title class="ghd-dialog-padding-top-title">
         <v-row justify="space-between">
           <div class="ghd-control-dialog-header"><h5>New Budget Priority</h5></div>
-          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-              X
-          </v-btn>
+          <XButton @click="onSubmit(false)"/>
         </v-row>
       </v-card-title>
 
@@ -31,17 +29,11 @@
 
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-row justify="center">
-          <v-btn id="CreateBudgetPriorityDialog-cancel-vbtn"
-                 @click="onSubmit(false)"
-                 class='ghd-blue ghd-button-text ghd-button' variant = "outlined">
-            Cancel
-          </v-btn >
-          <v-btn id="CreateBudgetPriorityDialog-save-vbtn"
-                 :disabled="disableSubmitButton()"
-                 @click="onSubmit(true)"
-                 class='ghd-blue ghd-button-text ghd-button' variant = "outlined" >
-            Save
-          </v-btn>         
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SaveButton 
+            @save="onSubmit(true)"
+            :disabled="disableSubmitButton()"
+          />        
         </v-row>
       </v-card-actions>
 
@@ -54,6 +46,9 @@ import Vue, { toRefs, ref } from 'vue';
 import {BudgetPriority, emptyBudgetPriority} from '@/shared/models/iAM/budget-priority';
 import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
   const props = defineProps({
     showDialog: Boolean

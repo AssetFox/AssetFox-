@@ -21,6 +21,8 @@ namespace BridgeCareCore.StartupExtension
             services.AddSingleton<FastSequentialworkQueue<WorkQueueMetadata>>();
             services.AddHostedService<SequentialWorkBackgroundService>();
             services.AddHostedService<FastSequentialWorkBackgroundService>();
+            services.AddHostedService<AttributeValueCacheBuildLaunchingService>();
+
             services.AddScoped<IGeneralWorkQueueService, GeneralWorkQueueService>();
             services.AddScoped<AttributeService>();
             services.AddScoped<IExcelRawDataImportService, ExcelRawDataImportService>();

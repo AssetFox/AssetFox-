@@ -121,6 +121,15 @@ public sealed class Simulation : WeakEntity, IValidator
             }
         }
 
+        if (CommittedProjects.GroupBy(cp => (cp.Asset, cp.Year, cp.TemplateTreatment)).Any(g => g.Count() > 1))
+        {
+            results.Add(
+                ValidationStatus.Error,
+                "There are at least two committed projects with the same treatment applied to the same asset in the same year.",
+                this,
+                nameof(CommittedProjects));
+        }
+
         return results;
     }
 
@@ -171,7 +180,7 @@ public sealed class Simulation : WeakEntity, IValidator
 
     private readonly List<PerformanceCurve> _PerformanceCurves = new();
     private readonly WeakReference<SimulationOutput> _Results = new(null);
-    private readonly List<SelectableTreatment> _Treatments = new();
+    private readonly HashSet<SelectableTreatment> _Treatments = new();
 
     public static class DefaultSettings
     {

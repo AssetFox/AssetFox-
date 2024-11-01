@@ -27,42 +27,27 @@
                         <!-- <v-divider class="owner-shared-divider" inset vertical
                             v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
                         </v-divider> -->
-                        <v-btn id="CashFlowEditor-shareLibrary-btn" @click='onShowShareCashFlowRuleLibraryDialog(selectedCashFlowRuleLibrary)'
-                             class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-left: 10px" variant = "outlined"
-                            v-show='!hasScenario'>
-                            Share Library
-                        </v-btn>
+                        <ShareLibraryButton 
+                            @shareLibrary="onShowShareCashFlowRuleLibraryDialog(selectedCashFlowRuleLibrary)"
+                            :show="!hasScenario"
+                        />
                     </v-row>  
                 </v-col>
-                <v-col cols = "auto" class="ghd-constant-header">                   
-                    <!-- <v-row> -->
-                        <!-- <v-spacer></v-spacer> -->
-                        <v-btn @click="showAddCashFlowRuleDialog = true" v-show="hasSelectedLibrary || hasScenario"
-                            id="CashFlowEditor-addCashFlowRule-btn" 
-                            variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
-                            Add Cash Flow Rule
-                        </v-btn>
-                        <v-btn @click="onShowCreateCashFlowRuleLibraryDialog(false)"
-                            id="CashFlowEditor-addCashFlowLibrary-btn"
-                            style="margin-left: 5px;"
-                            variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                            v-show="!hasScenario">
-                            Create New Library
-                        </v-btn>
-                    <!-- </v-row> -->
+                <v-col cols = "auto" class="ghd-constant-header">   
+                    <v-btn @click="showAddCashFlowRuleDialog = true" v-show="hasSelectedLibrary || hasScenario"
+                        id="CashFlowEditor-addCashFlowRule-btn" 
+                        variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                        Add Cash Flow Rule
+                    </v-btn>
+                    <CreateNewLibraryButton 
+                        @createNewLibrary="onShowCreateCashFlowRuleLibraryDialog(false)"
+                        :show="!hasScenario"
+                        style="margin-left: 10px"
+                    />
                 </v-col>
-                <!-- <v-col>
-                        <v-btn @click="showAddCashFlowRuleDialog = true" v-show="hasSelectedLibrary || hasScenario"
-                            id="CashFlowEditor-addCashFlowRule-btn" 
-                            style="margin-left: 5px;"
-                            variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
-                            Add Cash Flow Rule
-                        </v-btn>
-                </v-col> -->
             </v-row>
         </v-col>
         <v-col v-show="hasSelectedLibrary || hasScenario" cols="12">
-            <!-- <div> -->
                 <v-data-table-server
                     id="CashFlowEditor-cashFlowRules-table"
                     :headers="cashFlowRuleGridHeaders"
@@ -150,11 +135,11 @@
                             <v-btn
                                 @click="onEditCashFlowRuleCriterionLibrary(item.item)"
                                 id="CashFlowEditor-editCashFlowRule-btn"
-                                class="ghd-green"
+                                class="ghd-blue"
                                 style="margin-top: 12px;"
                                 flat
                                 icon>
-                                <EditSvg />
+                                <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                             </v-btn>
                             </v-row>
                         </td>
@@ -181,12 +166,10 @@
                         </tr>
                     </template>
                 </v-data-table-server>
-
-                <v-btn :disabled='selectedCashRuleGridRows.length === 0' @click='onDeleteSelectedCashFlowRules'
-                    class='ghd-red ghd-button' variant = "text">
-                    Delete Selected
-                </v-btn>
-            <!-- </div> -->
+                <DeleteSelectedButton 
+                    @deleteSelected="onDeleteSelectedCashFlowRules"
+                    :disabled='selectedCashRuleGridRows.length === 0'
+                />
         </v-col>
         <v-col v-show="hasSelectedLibrary && !hasScenario" cols="12">
             <v-row justify-center>
@@ -206,41 +189,30 @@
         </v-col>
         <v-col cols = "12">
             <v-row justify="center" style="padding-bottom: 40px;" v-show="hasSelectedLibrary || hasScenario">
-                <v-btn variant = "outlined"
-                    @click="onDeleteCashFlowRuleLibrary"
-                    id="CashFlowEditor-deleteLibrary-btn"
-                    class='m-2 ghd-blue ghd-button-text ghd-button'
-                    v-show="!hasScenario"
-                    :disabled="!hasLibraryEditPermission">
-                    Delete Library
-                </v-btn>   
-                <v-btn
-                    @click="onDiscardChanges"
-                    v-show="hasScenario"
-                    :disabled="!hasUnsavedChanges" variant = "flat" class='m-2 ghd-blue ghd-button-text ghd-button'>
-                    Cancel
-                </v-btn>
-                <v-btn
+                <DeleteLibraryButton 
+                    @deleteLibrary="onDeleteCashFlowRuleLibrary"
+                    :disabled="!hasLibraryEditPermission"
+                    :show="!hasScenario"
+                />
+                <CancelButton 
+                    @cancel="onDiscardChanges"
+                    :disabled="!hasUnsavedChanges"
+                    :show="hasScenario"
+                />
+                <CreateAsNewLibraryButton 
+                    @createAsNewLibrary="onShowCreateCashFlowRuleLibraryDialog(true)"
                     :disabled="disableCrudButtons()"
-                    @click="onShowCreateCashFlowRuleLibraryDialog(true)"
-                    class='m-2 ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' variant = "outlined"> 
-                    Create as New Library
-                </v-btn>
-                <v-btn
-                    id="CashFlowEditor-save-btn"
+                />
+                <SaveButton 
+                    @save="onUpsertScenarioCashFlowRules"
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
-                    @click="onUpsertScenarioCashFlowRules"
-                    class='m-2 ghd-blue-bg text-white ghd-button-text ghd-button'
-                    v-show="hasScenario">
-                    Save
-                </v-btn>
-                <v-btn
+                    :show="hasScenario"
+                />
+                <UpdateLibraryButton 
+                    @updateLibrary="onUpsertCashFlowRuleLibrary"
                     :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
-                    @click="onUpsertCashFlowRuleLibrary"
-                    class='m-2 ghd-blue-bg text-white ghd-button-text ghd-outline-button-padding ghd-button'
-                    v-show="!hasScenario">
-                    Update Library
-                </v-btn>                                       
+                    :show="!hasScenario"
+                />                                     
             </v-row>
         </v-col>
 
@@ -333,9 +305,21 @@ import { useConfirm } from 'primevue/useconfirm';
 import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
+import { inject } from 'vue';
+import mitt, { Emitter, EventType } from 'mitt';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import CreateAsNewLibraryButton from '@/shared/components/buttons/CreateAsNewLibraryButton.vue';
+import UpdateLibraryButton from '@/shared/components/buttons/UpdateLibraryButton.vue';
+import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton.vue';
+import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
+import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
+import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
+
 
 let store = useStore();
 const confirm = useConfirm();
+const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
 // const stateSimulationReportNames = computed<string[]>(() => store.state.adminDataModule.simulationReportNames);
 
 const stateCashFlowRuleLibraries = computed<CashFlowRuleLibrary[]>(() => store.state.cashFlowModule.cashFlowRuleLibraries);
@@ -826,6 +810,7 @@ function selectedCashFlowRuleLibraryMutator(payload: any){store.commit('selected
                 libraryImported = false;
             }           
         });
+        $emitter.emit('CashFlowUpdated');
     }
 
     function onUpsertCashFlowRuleLibrary() {

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
@@ -75,6 +73,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
                     ShadowForSameTreatment = entity.ShadowForSameTreatment,
                     Category = convertedCategory,
+                    LastModifiedDate = entity.LastModifiedDate,
                     LocationKeys = entity.CommittedProjectLocation?.ToLocationKeys(networkKeyAttribute)
                 };
                 return commit;
@@ -98,6 +97,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Year = dto.Year,
                 ProjectSource = dto.ProjectSource.ToString(),
                 ProjectId = dto.ProjectId,
+                LastModifiedDate = dto.LastModifiedDate
             };
 
             if (dto is SectionCommittedProjectDTO)

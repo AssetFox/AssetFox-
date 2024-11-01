@@ -38,9 +38,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::GetUserCriteria - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{UserCriteriaError}::GetUserCriteria - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpGet]
@@ -55,9 +55,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::GetAllUserCriteria - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{UserCriteriaError}::GetAllUserCriteria - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -77,9 +77,9 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var username = userCriteria?.UserName ?? "null";
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::UpsertUserCriteria for {username} - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{UserCriteriaError}::UpsertUserCriteria for {username} - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpDelete]
@@ -98,9 +98,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::RevokeUserAccess - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{UserCriteriaError}::RevokeUserAccess - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpDelete]
@@ -119,9 +119,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::DeactivateUser - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{UserCriteriaError}::DeactivateUser - {e.Message}", e);
             }
+            return Ok();
         }
 
         [HttpPost]
@@ -140,9 +140,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::ReactivateUser - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{UserCriteriaError}::ReactivateUser - {e.Message}", e);
             }
+            return Ok();
         }
     }
 }

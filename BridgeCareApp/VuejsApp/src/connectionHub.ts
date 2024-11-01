@@ -114,9 +114,9 @@ export default {
             });
         });
 
-        connection.on(Hub.BroadcastType.BroadcastError, error => {
+        connection.on(Hub.BroadcastType.BroadcastError, (error, stackTrace) => {
             emitter.emit(Hub.BroadcastEventType.BroadcastErrorEvent, {
-                error,
+                error, stackTrace
             });
         });
 

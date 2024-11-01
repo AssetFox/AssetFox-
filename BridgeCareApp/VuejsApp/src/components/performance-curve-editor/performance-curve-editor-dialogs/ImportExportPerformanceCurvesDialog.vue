@@ -8,9 +8,7 @@
                     </v-col>
                     <v-spacer/>
                     <v-col class="pt-0" align="end">
-                        <v-btn @click="onSubmit(false)" icon variant="flat">
-                            <i class="fas fa-times fa-2x"></i>
-                        </v-btn>
+                        <XButton @click="onSubmit(false)"/>
                     </v-col> 
                 </v-row>              
             </v-card-title>
@@ -21,8 +19,8 @@
             </v-card-text>
             <v-card-actions>
                 <v-row justify="center">
-                    <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue Montserrat-font-family' variant = "flat">Cancel</v-btn>
-                    <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' variant = "outlined">Upload</v-btn>
+                    <CancelButton @cancel="onSubmit(false)"/>
+                    <UploadButton @upload="onSubmit(true)"/>
                 </v-row>
             </v-card-actions>
         </v-card>
@@ -38,6 +36,9 @@ import PerformanceCurvesFileSelector from '@/shared/components/FileSelector.vue'
 import {inject, reactive, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import UploadButton from '@/shared/components/buttons/UploadButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
 const emit = defineEmits(['submit'])
 let store = useStore();

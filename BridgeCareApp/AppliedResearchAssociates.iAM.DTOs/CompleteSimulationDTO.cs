@@ -75,5 +75,15 @@ namespace AppliedResearchAssociates.iAM.DTOs
         /// The Cash Flow Rule repository of a simulation.
         /// </summary>
         public IList<CashFlowRuleDTO> CashFlowRules { get; set; }
+
+        /// <summary>
+        /// SimulationOutputJson of a simulation
+        /// </summary>
+        public IList<SimulationOutputJsonDTO> SimulationOutputJsons { get; set; }
+
+        /// <summary>
+        /// SimulationAnalysisDetail of a simulation
+        /// </summary>
+        public SimulationAnalysisDetailDTO SimulationAnalysisDetail { get; set; }
     }
 }

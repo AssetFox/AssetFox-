@@ -4,6 +4,5 @@
     {
         Number,
         Text,
-        Timestamp,
     }
 }

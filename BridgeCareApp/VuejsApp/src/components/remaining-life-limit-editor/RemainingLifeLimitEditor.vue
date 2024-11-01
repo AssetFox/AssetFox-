@@ -25,32 +25,26 @@
                         <div class="header-text-content owner-padding" style="padding-top: 8px;">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }} | Date Modified: {{ dateModified }}
                         </div>
-                        <!-- <v-divider vertical 
-                            v-if="hasSelectedLibrary && !hasScenario">
-                        </v-divider> -->
-                        <v-btn id="RemainingLifeLimitEditor-shareLibrary-vbtn" @click='onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)'
-                             class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' style="margin-left: 10px" variant = "outlined"
-                            v-show='!hasScenario'>
-                            Share Library
-                        </v-btn>
+                        <ShareLibraryButton 
+                            @shareLibrary="onShowShareRemainingLifeLimitLibraryDialog(selectedRemainingLifeLimitLibrary)"
+                            :show="!hasScenario"
+                        />
                     </v-row>
                 </v-col>
                 <v-col cols = "auto" class="ghd-constant-header">     
                     <v-btn 
                         id="RemainingLifeLimitEditor-addRemainingLifeLimit-btn"
-                        class="ghd-white-bg ghd-blue ghd-button"
+                        class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button"
                         @click="onShowCreateRemainingLifeLimitDialog"
+                        style="margin-right: 5px;"
                         v-show="librarySelectItemValue != null || hasScenario"
                         variant = "outlined">Add Remaining Life Limit
                     </v-btn>
-                    <v-btn
-                        id="RemainingLifeLimitEditor-createNewLibrary-vbtn"
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                        style="margin: 5px;"
-                        @click="onShowCreateRemainingLifeLimitLibraryDialog(false)"
-                        v-show="!hasScenario"
-                        variant = "outlined">Create New Library
-                    </v-btn>
+                    <CreateNewLibraryButton 
+                        @createNewLibrary="onShowCreateRemainingLifeLimitLibraryDialog(false)"
+                        :show="!hasScenario"
+                        style="margin-left: 5px;"
+                    />
                 </v-col>
             </v-row>
         </v-col>
@@ -175,8 +169,8 @@
                         </td>
                         <td class="px-0">
                             <v-btn id="RemainingLifeLimitEditor-editCriteria-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)" 
-                                class="ghd-green" flat icon>
-                                <EditSvg />
+                                class="ghd-blue" flat icon>
+                                <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                             </v-btn>   
                         </td>
                         <td justify-end>
@@ -202,11 +196,28 @@
         </v-col>
         <v-col>
             <v-row v-show="hasSelectedLibrary || hasScenario" style="padding-bottom: 40px;" align-content="center" justify="center">
-                <v-btn id="RemainingLifeLimitEditor-cancel-btn" style="margin: 5px;" class="ghd-blue" variant = "outlined" v-show="hasScenario" @click="onDiscardChanges" :disabled="!hasUnsavedChanges">Cancel</v-btn>
-                <v-btn id="RemainingLifeLimitEditor-deleteLibrary-btn" style="margin: 5px;" class="ghd-blue" variant = "outlined" v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
-                <v-btn id="RemainingLifeLimitEditor-createAsNewLibrary-btn" style="margin: 5px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" variant = "outlined">Create as New Library</v-btn>
-                <v-btn id="RemainingLifeLimitEditor-save-btn" style="margin: 5px;" class="ghd-blue-bg ghd-white ghd-button" v-show="hasScenario" @click="onUpsertScenarioRemainingLifeLimits" :disabled="disableCrudButton() || !hasUnsavedChanges">Save</v-btn>
-                <v-btn id="RemainingLifeLimitEditor-updateLibrary-btn" style="margin: 5px;" class="ghd-blue-bg ghd-white ghd-button" v-show="!hasScenario" :disabled="disableCrudButton() || !hasUnsavedChanges" @click="onUpsertRemainingLifeLimitLibrary">Update Library</v-btn>
+                <CancelButton 
+                    @cancel="onDiscardChanges"
+                    :disabled="!hasUnsavedChanges"
+                    :show="hasScenario"
+                />
+                <DeleteLibraryButton 
+                    @deleteLibrary="onShowConfirmDeleteAlert"
+                    :show="!hasScenario"
+                />
+                <CreateAsNewLibraryButton 
+                    @createAsNewLibrary="onShowCreateRemainingLifeLimitLibraryDialog(true)"
+                />
+                <SaveButton 
+                    @save="onUpsertScenarioRemainingLifeLimits"
+                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    :show="hasScenario"
+                />
+                <UpdateLibraryButton 
+                    @updateLibrary="onUpsertRemainingLifeLimitLibrary"
+                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    :show="!hasScenario"
+                />
             </v-row>
         </v-col>     
         <!-- <ConfirmDeleteAlert -->
@@ -289,6 +300,14 @@ import { sortSelectItemsAlphabetically } from '@/shared/utils/sorter-utils'
 import { getUrl } from '@/shared/utils/get-url';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import CreateAsNewLibraryButton from '@/shared/components/buttons/CreateAsNewLibraryButton.vue';
+import UpdateLibraryButton from '@/shared/components/buttons/UpdateLibraryButton.vue';
+import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton.vue';
+import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
+import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
+import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
 
     let store = useStore();
     const confirm = useConfirm();

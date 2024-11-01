@@ -67,6 +67,19 @@ namespace BridgeCareCore.Services.Treatment
             return defaultValue;
         }
 
+        private static bool ParseBool(string s, bool defaulValue = false)
+        {
+            if(bool.TryParse(s, out var returnValue))
+            {
+                return returnValue;
+            }
+            if (int.TryParse(s, out var returnValueInt))
+            {
+                return returnValueInt != 0;
+            }
+            return defaulValue;
+        }
+
         private static string ValidationLocation(string worksheetName, int row, int column)
         {
             var columnName = ExcelCellAddress.GetColumnLetter(column);
@@ -285,8 +298,7 @@ namespace BridgeCareCore.Services.Treatment
             var assetTypeString = dictionary.GetValueOrDefault(TreatmentExportStringConstants.AssetType.ToLowerInvariant());
             var assetType = assetTypeString;
             var criterion = dictionary.GetValueOrDefault(TreatmentExportStringConstants.Criterion.ToLowerInvariant());
-            var isUnselectable = false;
-            bool.TryParse(dictionary.GetValueOrDefault(TreatmentExportStringConstants.IsTreatmentUnselectable.ToLowerInvariant()), out isUnselectable);
+            var isUnselectable = ParseBool(dictionary.GetValueOrDefault(TreatmentExportStringConstants.IsTreatmentUnselectable.ToLowerInvariant()));
             var loadCosts = LoadCosts(worksheet);
             var loadConsequences = LoadConsequences(worksheet);
             var performanceFactors = LoadPerformanceFactor(worksheet);

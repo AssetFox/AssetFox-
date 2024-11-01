@@ -4,9 +4,7 @@
       <v-card-title class="ghd-dialog-padding-top-title">
         <v-row justify="space-between">
           <h5>Remaining Life Limit Library Sharing</h5>
-          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-            X
-          </v-btn>
+          <XButton @click="onSubmit(false)"/>
         </v-row>
       </v-card-title>
       <v-card-text>
@@ -47,7 +45,7 @@
               </tr>
               </template>
               <!-- <v-alert :model-value="true"
-                      class="ara-orange-bg"
+                      class="assetFox-orange-bg"
                       icon="fas fa-exclamation"
                       slot="no-results">
                 Your search for "{{ searchTerm }}" found no results.
@@ -59,12 +57,8 @@
 
       <v-card-actions>
         <v-row justify="center" class="ghd-dialog-padding-bottom-buttons">
-          <v-btn id="ShareRemainingLifeLimitLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-blue ghd-button" variant="text">
-            Cancel
-          </v-btn>
-          <v-btn id="ShareRemainingLifeLimitLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button" variant="outlined">
-            Save
-          </v-btn>
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SaveButton @save="onSubmit(true)"/>
         </v-row>
       </v-card-actions>
     </v-card>
@@ -84,6 +78,9 @@ import {RemainingLifeLimitLibraryUserGridRow, ShareRemainingLifeLimitLibraryDial
 import RemainingLifeLimitService from '@/services/remaining-life-limit.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
   const props = defineProps<{
     dialogData: ShareRemainingLifeLimitLibraryDialogData

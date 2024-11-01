@@ -37,8 +37,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount
-            , IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectList, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, bool shouldBundleFeasibleTreatments, List<SimpleBudgetDetailDTO> scenarioSimpleBudgets)
+        public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, List<int> simulationYears, Dictionary<string, BudgetDTO> yearlyBudgets
+            , List<TreatmentDTO> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectList, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, bool shouldBundleFeasibleTreatments, List<SimpleBudgetDetailDTO> scenarioSimpleBudgets)
         {
             var startYear = simulationYears[0];
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
@@ -66,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             var committedTreatments = new HashSet<string>();
             var map = WorkTypeMap.Map;
-            Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new Dictionary<double, List<TreatmentConsiderationDetail>>();
+            var keyCashFlowFundingDetails = new Dictionary<double, List<TreatmentConsiderationDetail>>();
             foreach (var summaryData in workSummaryByBudgetData)
             {
                 foreach (var yearData in reportOutputData.Years)
@@ -91,18 +91,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                         var treatmentConsideration = shouldBundleFeasibleTreatments ?
                                                      treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year &&
+                                                        _.BudgetName == summaryData.Budget) &&
                                                         section.AppliedTreatment.Contains(_.TreatmentName)) :
                                                      treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year) &&
+                                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == yearData.Year &&
+                                                        _.BudgetName == summaryData.Budget) &&
                                                         _.TreatmentName == section.AppliedTreatment);
 
                         var appliedTreatment = treatmentConsideration?.TreatmentName ?? section.AppliedTreatment;
-                        var budgetAmount = (double)treatmentConsiderations.Sum(_ =>
-                                           _.FundingCalculationOutput?.AllocationMatrix?.
-                                           Where(_ => _.Year == yearData.Year).
-                                           Where(b => b.BudgetName == summaryData.Budget).
-                                           Sum(bu => bu.AllocatedAmount) ?? 0);
+                        var budgetAmount = (double)(treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix?.
+                                           Where(_ => _.BudgetName == summaryData.Budget && _.Year == yearData.Year).
+                                           Sum(b => b.AllocatedAmount) ?? 0);
                         budgetAmount = Math.Round(budgetAmount, 0);
                         var bpnName = _reportHelper.CheckAndGetValue<string>(section?.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&
@@ -137,7 +137,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             Amount = budgetAmount,
                             costPerBPN = (bpnName, budgetAmount),
                             TreatmentCategory = appliedTreatment.Contains("Bundle") ? TreatmentCategory.Bundled : treatmentData.Category,
-                            AssetType = treatmentData.AssetCategory
+                            AssetType = treatmentData.AssetType
                         });
                     }
                 }
@@ -258,9 +258,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 currentCell.Column = 1;
                 worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.TotalBridgeCareBudget;
                 var budgetTotalRow = currentCell.Row;
-                var budgetDetails = yearlyBudgetAmount[summaryData.Budget];
+                var budgetDetails = yearlyBudgets[summaryData.Budget];
                 var yearTracker = 0;
-                foreach (var item in budgetDetails.YearlyAmounts)
+                foreach (var item in budgetDetails.BudgetAmounts)
                 {
                     var cellFortotalBudget = yearTracker;
                     var currValue = worksheet.Cells[currentCell.Row, currentCell.Column + cellFortotalBudget + 2].Value;
@@ -322,7 +322,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 var fromColumn = column + 1;
                 yearTracker = 0;
-                foreach (var budgetData in budgetDetails.YearlyAmounts)
+                foreach (var budgetData in budgetDetails.BudgetAmounts)
                 {
                     row = startRow;
                     column = ++column;

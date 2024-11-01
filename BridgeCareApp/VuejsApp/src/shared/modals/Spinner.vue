@@ -4,7 +4,7 @@
             <v-container>
                 <v-row   justify="center">
                     <v-col align="center">
-                        <v-progress-circular :size="70" :width="7" class="ara-blue-pantone-281" indeterminate></v-progress-circular>
+                        <v-progress-circular :size="70" :width="7" class="assetFox-blue-pantone-281" indeterminate></v-progress-circular>
                         <h1>Please wait</h1>
                     </v-col>
                     

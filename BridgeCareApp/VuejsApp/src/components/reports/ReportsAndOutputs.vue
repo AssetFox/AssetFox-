@@ -51,7 +51,7 @@
                                 </v-menu>
                                     <v-btn v-if="props.item.name.includes('Summary')"
                                         @click="onShowCriterionEditorDialog(props.item.id)"
-                                        class="ghd-green"
+                                        class="criteria-button-blue"
                                         flat
                                         icon
                                     >
@@ -63,21 +63,23 @@
                                     <v-btn
                                     @click="onGenerateReport(props.item.id, true)"
                                     :disabled="props.item.isGenerated"
-                                    :class="props.item.isGenerated ? 'ghd-gray' : 'ghd-green'"
+                                    class="ghd-blue-icon"
                                     flat
+                                    icon
                                     >
                                     <img
-                                        :class="props.item.isGenerated ? 'gray-icon' : 'green-icon'"
-                                        class="img-general"
+                                    style="height: 25px"
                                         :src="getUrl('assets/icons/attributes-dark.svg')"
                                     />
                                     </v-btn>
                                     <v-btn
                                         @click="onDownloadReport(props.item.id)"
+                                        :disabled="!props.item.isGenerated"
+                                        class='ghd-green'
                                         flat
                                         icon
                                     >
-                                        <img class='img-general' :src="getUrl('assets/icons/download.svg')"/>
+                                        <img :src="getUrl('assets/icons/download.svg')"/>
                                     </v-btn>
                                     <v-btn
                                         v-if="hasAdminAccess"
@@ -108,7 +110,14 @@
             class="border-opacity-100"
         ></v-divider>
                 <v-row style="margin:5px;">
-                    <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" variant = "flat">Simulation Log</v-btn>
+                    <!-- <v-btn class="ghd-white-bg ghd-blue ghd-button-text ghd-button" @click="onDownloadSimulationLog(true)" variant = "flat">Simulation Log</v-btn> -->
+                    <SimulationLogButton
+                        :networkId="networkId"
+                        :selectedScenarioId="selectedScenarioId"
+                        :simulationName="simulationName"
+                        @success="handleSuccess"
+                        @error="handleError"
+                    />
                 </v-row>
             </v-col>
 
@@ -152,6 +161,8 @@ import { Notification } from '@/shared/models/iAM/notifications';
 import { queuedWorkStatusUpdate } from '@/shared/models/iAM/queuedWorkStatusUpdate';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
+import ReportsTrashCanButton from '@/shared/components/buttons/ReportsTrashCanButton.vue';
+import SimulationLogButton from '@/shared/components/buttons/SimulationLogButton.vue';
 
 
     let store = useStore();
@@ -167,11 +178,15 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
 
     let editShow = ref<boolean>(false);
 
-    let simulationName: string;
+    //let simulationName: string;
     let networkName: string = '';
-    let networkId: string = getBlankGuid();
-    let selectedScenarioId: string = getBlankGuid();
+    //let networkId: string = getBlankGuid();
+    // let selectedScenarioId: string = getBlankGuid();
     const scenarioOutputName: string = "ScenarioOutput"
+
+    const networkId = ref('');
+    const selectedScenarioId = ref('');
+    const simulationName = ref('');
 
     let rules: InputValidationRules = clone(validationRules);
 
@@ -230,11 +245,11 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
 
     onMounted(async () => {
 
-        selectedScenarioId = router.currentRoute.value.query.scenarioId as string;
-        simulationName = router.currentRoute.value.query.scenarioName as string;
+        selectedScenarioId.value = router.currentRoute.value.query.scenarioId as string;
+        simulationName.value = router.currentRoute.value.query.scenarioName as string;
         networkName = router.currentRoute.value.query.networkName as string;
-        networkId = router.currentRoute.value.query.networkId as string;
-        if (selectedScenarioId === getBlankGuid()) {
+        networkId.value = router.currentRoute.value.query.networkId as string;
+        if (selectedScenarioId.value === getBlankGuid()) {
                 // set 'no selected scenario' error message, then redirect user to Scenarios UI
                 addErrorNotificationAction({
                     message: 'Found no selected scenario for edit',
@@ -274,7 +289,7 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
             
             // Get the report
             const report = currentPage.value.find(
-                r => r.name === reportName && simulationName === scenarioName
+                r => r.name === reportName && simulationName.value === scenarioName
             );
 
             if (report) {
@@ -299,6 +314,14 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
         editShow.value = !editShow.value;
     }
 
+    function handleSuccess(payload: any) {
+        store.dispatch('addSuccessNotification', payload);
+    }
+
+    function handleError(payload: any) {
+        store.dispatch('addErrorNotification', payload);
+    }
+
     function onShowCriterionEditorDialog(reportId: string) {
         selectedReport.value = find(
             propEq('id', reportId),
@@ -321,30 +344,6 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
             );
     }
     
-    async function onDownloadSimulationLog(download: boolean) {
-        if (download) {            
-            await ReportsService.downloadSimulationLog(
-                networkId,
-                selectedScenarioId,
-            ).then((response: AxiosResponse<any>) => {
-                if (hasValue(response, 'data')) {
-                    addSuccessNotificationAction({
-                        message: 'Report downloaded',
-                    });
-                    FileDownload(
-                        response.data,
-                        `Simulation Log ${simulationName}.txt`,
-                    );
-                } else {
-                    addErrorNotificationAction({
-                        message: 'Failed to download simulation log.',
-                        longMessage:
-                            'Failed to download simulation log. Please try generating and downloading the log again.',
-                    });
-                }
-            });
-        } 
-    }
     async function onGenerateReport(reportId: string, download: boolean) {
         if (download) {            
             // Get the selected report
@@ -354,7 +353,7 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
             ) as Report;
             // Generate report with selected one from table
             await ReportsService.generateReportWithCriteria(
-                selectedScenarioId, selectedReport.value.mergedExpression, selectedReport.value.name
+                selectedScenarioId.value, selectedReport.value.mergedExpression, selectedReport.value.name
             ).then((response: AxiosResponse<any>) => {
                 if (response.status == 200) {
                     if (hasValue(response, 'data')) {
@@ -381,7 +380,7 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
             currentPage.value,
         ) as Report;
         await ReportsService.downloadReport(
-            selectedScenarioId, selectedReport.value.name
+            selectedScenarioId.value, selectedReport.value.name
         ).then((response: AxiosResponse<any>) => {
             if (hasValue(response, 'data')) {
                 const fileInfo: FileInfo = response.data as FileInfo;
@@ -400,7 +399,7 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
     {
         const reportDetails: ReportDetails[] = currentPage.value.map(report => {
         return {
-            simulationId: selectedScenarioId,
+            simulationId: selectedScenarioId.value,
             reportName: report.name,
             isGenerated: false,
             };
@@ -430,7 +429,7 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
             currentPage.value,
         ) as Report;
         await ReportsService.deleteReport(
-            selectedScenarioId, selectedReport.value.name
+            selectedScenarioId.value, selectedReport.value.name
         ).then((response: AxiosResponse<any>) => {
             if (hasValue(response, 'data')) {
                 addSuccessNotificationAction({
@@ -472,6 +471,20 @@ import EditSvg from '@/shared/icons/EditSvg.vue';
 
 </script>
 <style>
+.criteria-button-blue {
+    --svg-color: #2A578D;
+    color: var(--svg-color) !important;
+}
+
 .green-icon {
-    filter: invert(61%) sepia(70%) saturate(486%) hue-rotate(79deg) brightness(82%) contrast(85%);}
+    filter: invert(61%) sepia(70%) saturate(486%) hue-rotate(79deg) brightness(82%) contrast(85%);
+}
+
+.green-icon.disabled {
+    color: transparent !important;  /* Inherit color from parent */
+    --svg-color: #999999;
+    background-color: transparent !important; /* Maintain the background color */
+
+}
+
 </style>

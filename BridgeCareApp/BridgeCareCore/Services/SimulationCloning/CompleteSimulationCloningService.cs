@@ -21,12 +21,13 @@ namespace BridgeCareCore.Services
         {
             var simulationGuid = new Guid(simulationId);
             var coreSimulation = _unitOfWork.SimulationRepo.GetSimulation(simulationGuid);
-            var fullSimulation = new CompleteSimulationDTO()
+            var fullSimulation = new CompleteSimulationDTO
             {
                 Name = coreSimulation.Name,
                 NetworkId = coreSimulation.NetworkId,
                 ReportStatus = coreSimulation.ReportStatus,
                 Id = simulationGuid,
+                Creator = coreSimulation.Creator,
 
 
             };
@@ -45,7 +46,8 @@ namespace BridgeCareCore.Services
             fullSimulation.RemainingLifeLimits = _unitOfWork.RemainingLifeLimitRepo.GetScenarioRemainingLifeLimits(simulationGuid);
             fullSimulation.CashFlowRules = _unitOfWork.CashFlowRuleRepo.GetScenarioCashFlowRules(simulationGuid);
             fullSimulation.PerformanceCurves = _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationGuid);
-
+            fullSimulation.SimulationOutputJsons = _unitOfWork.SimulationOutputJsonRepo.GetSimulationOutputViaJson(simulationGuid);
+            fullSimulation.SimulationAnalysisDetail = _unitOfWork.SimulationAnalysisDetailRepo.GetSimulationAnalysisDetail(simulationGuid);
 
             return fullSimulation;
         }
@@ -76,7 +78,8 @@ namespace BridgeCareCore.Services
 
             // do the clone
             var ownerId = _unitOfWork.CurrentUser?.Id ?? Guid.Empty;
-            var baseEntityProperties = new BaseEntityProperties { CreatedBy = ownerId, LastModifiedBy = ownerId };
+            var creatorId = _unitOfWork.UserRepo.GetUserByUserName(sourceSimulation.Creator).Result.Id;
+            var baseEntityProperties = new BaseEntityProperties { CreatedBy = creatorId, LastModifiedBy = ownerId };
             var ownerName = _unitOfWork.CurrentUser?.Username;
             var cloneSimulation = CompleteSimulationCloner.Clone(sourceSimulation, dto, ownerId, ownerName);
             //Make sure the destination Network Id is not empty

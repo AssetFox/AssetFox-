@@ -65,8 +65,7 @@ namespace BridgeCareCore.Controllers.BaseController
             }
             catch (Exception exception)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BridgeCareCoreBaseError}::SetUserInfo - {exception.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{BridgeCareCoreBaseError}::SetUserInfo - {exception.Message}", exception);
             }
         }
 

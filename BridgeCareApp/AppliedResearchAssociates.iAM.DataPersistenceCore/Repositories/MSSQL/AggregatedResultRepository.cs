@@ -41,11 +41,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var maintainableAssets = _unitOfWork.Context.MaintainableAsset
                 .Include(_ => _.AggregatedResults)
                 .Where(_ => _.Id == networkId)
-                .ToList();            
+                .ToList();
 
             return !maintainableAssets.Any()
                 ? throw new RowNotInTableException("The network has no maintainable assets for rollup")
-                : maintainableAssets.SelectMany(__ => __.AggregatedResults.ToList().ToDomain(_unitOfWork.EncryptionKey));            
+                : maintainableAssets.SelectMany(__ => __.AggregatedResults.ToList().ToDomain(_unitOfWork.EncryptionKey));
         }
 
         private void DeleteAggregatedResults(Guid networkId)
@@ -90,42 +90,52 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             List<AggregatedSelectValuesResultDTO> returnList = new();
             var uniqueAttributeNames = attributeNames.Distinct().ToList();
-            var allOfAttributeDTOs = _unitOfWork.Context.AggregatedResult
+            var abbreviatedAttributes = _unitOfWork.Context.Attribute.Where(a => uniqueAttributeNames.Contains(a.Name))
+                .Select(AttributeMapper.ToAbbreviatedDto)
+                .ToList();
+            var abbreviatedAttributeDtoDictionary = abbreviatedAttributes.ToDictionary(a => a.Name, a => a);
+            var allAttributeValueDtos = _unitOfWork.Context.AggregatedResult
                 .Include(_ => _.Attribute)
                 .Where(_ => attributeNames.Contains(_.Attribute.Name))
                 .Select(e => new
                 {
-                    Attribute = AttributeMapper.ToAbbreviatedDto(e.Attribute),
+                    AttributeName = e.Attribute.Name,
                     e.Discriminator,
                     e.TextValue,
                     e.NumericValue,
                 })
+                .Distinct()
                 .AsNoTracking()
                 .AsSplitQuery()
                 .ToList();
             foreach (var attributeName in uniqueAttributeNames)
             {
-                var attributeDTO = allOfAttributeDTOs.Where(_ => _.Attribute.Name == attributeName).ToList();
+                var abbreviatedAttributeDto = abbreviatedAttributes.FirstOrDefault(a => a.Name == attributeName);
+                if (abbreviatedAttributeDto == null)
+                {
+                    continue;
+                }
+                var thisAttributeValueDtos = allAttributeValueDtos.Where(_ => _.AttributeName == attributeName).ToList();
 
-                if (!attributeDTO.Any())
-                    break;
+                if (!thisAttributeValueDtos.Any())
+                    continue;
 
                 var values = new List<string>();
                 bool isNumber = false;
-                if (attributeDTO.All(x => x.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
+                if (thisAttributeValueDtos.All(x => x.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
                 {
-                    values = attributeDTO.Where(_ => _.NumericValue.HasValue).Select(_ => _.NumericValue.Value.ToString()).Distinct().ToList();
-                    isNumber = attributeDTO.Any(_ => _.Attribute.Type == "NUMBER");
+                    values = thisAttributeValueDtos.Where(_ => _.NumericValue.HasValue).Select(_ => _.NumericValue.Value.ToString()).Distinct().ToList();
+                    isNumber = thisAttributeValueDtos.Any(_ => abbreviatedAttributeDtoDictionary[_.AttributeName].Type == "NUMBER");
                 }
-                else if (attributeDTO.All(x => x.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
+                else if (thisAttributeValueDtos.All(x => x.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
                 {
-                    values = attributeDTO.Where(_ => _.TextValue != null).Select(_ => _.TextValue).Distinct().ToList();
-                    isNumber = attributeDTO.Any(_ => _.Attribute.Type == "NUMBER");
+                    values = thisAttributeValueDtos.Where(_ => _.TextValue != null).Select(_ => _.TextValue).Distinct().ToList();
+                    isNumber = thisAttributeValueDtos.Any(_ => abbreviatedAttributeDtoDictionary[_.AttributeName].Type == "NUMBER");
                 }
                 else
-                    break;
+                    continue;
 
-                AttributeDTO attr = attributeDTO.Select(_ => _.Attribute).FirstOrDefault();
+                AttributeDTO attr = thisAttributeValueDtos.Select(_ => abbreviatedAttributeDtoDictionary[_.AttributeName]).FirstOrDefault();
                 string resultType = values.Any() ? "success" : "warning";
                 AggregatedSelectValuesResultDTO returnResult = new()
                 {
@@ -136,6 +146,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 };
                 returnList.Add(returnResult);
             }
+
             return returnList;
         }
 

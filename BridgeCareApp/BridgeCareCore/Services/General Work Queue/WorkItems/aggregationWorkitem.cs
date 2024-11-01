@@ -59,8 +59,7 @@ namespace BridgeCareCore.Services
                 _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(NetworkId, state.Status);
                 _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastAssignDataStatus,
                     new NetworkRollupDetailDTO { NetworkId = NetworkId, Status = state.Status }, 0.0);
-                _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastError, $"{AggregationError}::AggregateNetworkData - {e.Message}");
-                throw;
+                _hubService.SendRealTimeErrorMessage(UserId, $"{AggregationError}::AggregateNetworkData - {e.Message}", e);
             }
             finally
             {

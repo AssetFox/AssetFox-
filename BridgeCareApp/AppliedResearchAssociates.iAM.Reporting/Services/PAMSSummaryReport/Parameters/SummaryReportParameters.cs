@@ -75,7 +75,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Par
             worksheet.Cells[currentCell.Row + 2, currentCell.Column + 4].Value = lastRun.ToShortDateString();
             ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row + 2, currentCell.Column + 3, currentCell.Row + 2, currentCell.Column + 4]);
 
-            currentCell.Row += 5; // moving on to the "NHS" block
+            currentCell.Row += 5;
+
+            worksheet.Cells[currentCell.Row, currentCell.Column].Value = "Parameters are based on the criteria editor inputs";
+
+            currentCell.Row += 1; // moving on to the "NHS" block
 
             ExcelHelper.MergeCells(worksheet, currentCell.Row, currentCell.Column, currentCell.Row, currentCell.Column + 1);
             ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column, currentCell.Row, currentCell.Column + 1], Color.Gray);

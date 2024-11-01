@@ -36,7 +36,7 @@ namespace BridgeCareCore.Controllers
         public async Task<FileResult> GetSimulationLog(Guid networkId, Guid simulationId)
         {
 
-            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "Generating" };
+            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "Generating", ReportType = "SimulationLog" };
             var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
 
             try
@@ -66,10 +66,10 @@ namespace BridgeCareCore.Controllers
             {
                 reportDetailDto.Status = $"Failed to generate";
                 UpdateSimulationAnalysisDetail(reportDetailDto);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Summary Report Error::GetSimulationLog for {simulationName} - {e.Message}");
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastReportGenerationStatus, reportDetailDto);
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"Summary Report Error::GetSimulationLog for {simulationName} - {e.Message}", e);
             }
+            return null;
         }
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) =>

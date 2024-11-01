@@ -13,7 +13,7 @@
         <v-container style="padding:0%">
             <v-row no-gutters>
                 <v-col>
-                    <v-icon v-if='isEditingAnnouncement()' class='ara-orange'
+                    <v-icon v-if='isEditingAnnouncement()' class='assetFox-orange'
                             style='padding-right: 1em; padding-left: 1em;'
                             title='Stop Editing'
                             @click='onStopEditing()'>
@@ -26,7 +26,7 @@
                         </v-card-text>
                     </v-col>
                 </v-col>
-                <v-btn @click='onSendAnnouncement' class='ara-blue' flat
+                <v-btn @click='onSendAnnouncement' class='assetFox-blue' flat
                            tabindex='3' title='Send Announcement'>
                         <v-icon>fas fa-paper-plane</v-icon>
                 </v-btn>
@@ -44,7 +44,7 @@
         </v-container>
     </v-card>
     <div style='display: flex; align-items: center; justify-content: center'>
-        <v-btn @click='seeNewerAnnouncements()' class='ara-blue-bg text-white' round
+        <v-btn @click='seeNewerAnnouncements()' class='assetFox-blue-bg text-white' round
                style='margin-top: 10px; margin-bottom: 0'
                v-if='announcementListOffset > 0'>
             See Newer Announcements
@@ -54,7 +54,7 @@
             <v-card style="padding: 10px; margin: 10px;">
                 <v-row justify="space-between" no-gutters>
                     <v-card-title class='announcement-title'>
-                        <v-icon @click='onStopEditing()' class='ara-orange'
+                        <v-icon @click='onStopEditing()' class='assetFox-orange'
                                 style='padding: 1em'
                                 title='Stop Editing'
                                 v-if='isEditingAnnouncement(announcement)'>
@@ -63,12 +63,12 @@
                     {{ announcement.title }}
                     </v-card-title>
                     <div style="padding: 10px;">
-                        <v-btn @click='onSetAnnouncementForEdit(announcement)' class='ara-blue'
+                        <v-btn @click='onSetAnnouncementForEdit(announcement)' class='assetFox-blue'
                                    flat
                                    title='Edit Announcement' v-if='hasAdminAccess'>
                                 <v-icon>fas fa-edit</v-icon>
                         </v-btn>
-                        <v-btn @click='onDeleteAnnouncement(announcement.id)' class='ara-orange'
+                        <v-btn @click='onDeleteAnnouncement(announcement.id)' class='assetFox-orange'
                                    flat
                                    title='Delete Announcement' v-if='hasAdminAccess'>
                                 <v-icon>fas fa-trash</v-icon>
@@ -82,7 +82,7 @@
             </v-card>
         </div>
     <div style='display: flex; align-items: center; justify-content: center;'>
-            <v-btn @click='seeOlderAnnouncements()' class='ara-blue-bg text-white' round
+            <v-btn @click='seeOlderAnnouncements()' class='assetFox-blue-bg text-white' round
                    style='margin-top: 0; margin-bottom: 10px'
                    v-if='announcementListOffset < announcements.length - (hasAdminAccess ? 9 : 10)'>
                 See Older Announcements

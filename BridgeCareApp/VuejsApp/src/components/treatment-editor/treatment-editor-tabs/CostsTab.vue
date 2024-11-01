@@ -3,7 +3,7 @@
         <v-col cols="12">              
             <div >    
                 <v-btn @click="onAddCost" class="ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border ghd-text-padding" id="TreatmentCostsTab-AddCostBtn" >Add Cost</v-btn>            
-                <v-chip class="ma-2 ara-blue" @click="showExampleFunction">
+                <v-chip class="ma-2 assetFox-blue" @click="showExampleFunction">
                     Equation - Use Max(,) to enforce minimum costs
                 </v-chip>  
                 <v-data-table
@@ -26,10 +26,10 @@
                                                 props.item,
                                             )
                                         "
-                                        class="edit-icon ghd-green"
+                                        class="edit-icon ghd-blue"
                                         flat
                                     >
-                                        <EditSvg />
+                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                     </v-btn>                                
                                 </v-row>
                                 <v-row>  
@@ -55,10 +55,10 @@
                                                 props.item,
                                             )
                                         "
-                                        class="edit-icon ghd-green"
+                                        class="edit-icon ghd-blue"
                                         flat
                                     >
-                                        <EditSvg />
+                                    <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-row> 
                                 <v-row >              

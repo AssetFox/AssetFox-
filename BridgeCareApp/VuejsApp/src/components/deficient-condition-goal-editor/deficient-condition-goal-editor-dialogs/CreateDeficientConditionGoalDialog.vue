@@ -5,9 +5,7 @@
         <v-card-title class="ghd-dialog-box-padding-top">
          <v-row justify="space-between" align="center">
             <div class="ghd-control-dialog-header">Add New Deficient Condition Goal</div>
-            <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-              X
-            </v-btn>
+            <XButton @click="onSubmit(false)"/>
           </v-row>
         </v-card-title>
         <v-card-text class="ghd-dialog-box-padding-center">
@@ -46,20 +44,11 @@
         </v-card-text>
         <v-card-actions class="ghd-dialog-box-padding-bottom">
           <v-row justify="center">
-            <v-btn 
-              id="CreateDeficientConditionGoalDialog-cancel-vbtn" 
-              @click="onSubmit(false)" 
-              variant = "flat" 
-              class='ghd-blue ghd-button-text ghd-button'>
-              Cancel
-            </v-btn>
-            <v-btn 
-              id="CreateDeficientConditionGoalDialog-save-vbtn" 
+            <CancelButton @cancel="onSubmit(false)"/>
+            <SaveButton 
+              @save="onSubmit(true)"
               :disabled="disableSubmitBtn()" 
-              @click="onSubmit(true)" 
-              variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
-              Save
-            </v-btn>           
+            />          
           </v-row>
         </v-card-actions>
       </v-card>
@@ -77,6 +66,9 @@ import {hasValue} from '@/shared/utils/has-value-util';
 import {InputValidationRules, rules as validationRules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { useStore } from 'vuex';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
   let store = useStore();
   const props = defineProps<{

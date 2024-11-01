@@ -6,9 +6,7 @@
                     <v-row justify-space-between align-center>
                         <div class="ghd-control-dialog-header">Edit Budget Criteria</div>
                         <v-spacer></v-spacer>
-                        <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-                            X
-                        </v-btn>
+                        <XButton @click="onSubmit(false)"/>
                     </v-row>
                 </v-card-title>
                 <div style='height: 500px; max-width:900px; margin-top:20px;' class="ghd-dialog-box-padding-center">
@@ -71,8 +69,8 @@
                                     :model-value='props.item.criterionLibrary.mergedCriteriaExpression'>
                                     <template v-slot:append-inner>
                                         <v-btn id="EditBudgetsDialog-openCriteriaEditor-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)"  
-                                            class="ghd-green" flat icon>
-                                            <EditSvg />
+                                            class="ghd-blue" flat icon>
+                                            <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                         </v-btn>                                        
                                     </template>
                                 </v-text-field>
@@ -95,12 +93,12 @@
                     </v-row>
                 </div>
                 <v-card-actions class="ghd-dialog-box-padding-bottom">
-                    <v-row justify="center">                 
-                        <v-btn id="EditBudgetsDialog-cancel-btn" @click='onSubmit(false)' class='ghd-blue ghd-button-text ghd-button' variant = "outlined">Cancel</v-btn>
-                        <v-btn id="EditBudgetsDialog-save-btn" @click='onSubmit(true)' class='ghd-blue ghd-button-text ghd-button' variant = "outlined"
-                               :disabled='disableSubmitButton()'>
-                            Save
-                        </v-btn>
+                    <v-row justify="center">
+                        <CancelButton @cancel="onSubmit(false)"/>
+                        <SaveButton 
+                            @save="onSubmit(true)"
+                            :disabled='disableSubmitButton()'
+                        />
                     </v-row>                    
                 </v-card-actions>
             </v-card>
@@ -129,6 +127,9 @@ import { useStore } from 'vuex';
 import { getUrl } from '@/shared/utils/get-url';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import EditSvg from '@/shared/icons/EditSvg.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
 let store = useStore();
 const emit = defineEmits(['submit'])

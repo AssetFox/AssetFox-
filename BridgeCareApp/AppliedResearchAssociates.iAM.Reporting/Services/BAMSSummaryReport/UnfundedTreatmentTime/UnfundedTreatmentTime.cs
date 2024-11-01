@@ -5,6 +5,9 @@ using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using System.ComponentModel;
+using System.Text.RegularExpressions;
+using System.Drawing;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentTime
 {
@@ -94,17 +97,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             currentCell.Column = 1;
 
             var totalYears = simulationOutput.Years.Count;
+            var color = Color.White;
             foreach (var facilityList in treatmentsPerSection.Values)
             {
-                foreach (var facilityTuple in facilityList)
+                foreach (var facilityTuple in facilityList.OrderBy(_=>_.Item1.Year))
                 {
                     var section = facilityTuple.Item2;
                     var year = facilityTuple.Item1;
                     var treatment = facilityTuple.Item3;
-                    _unfundedTreatmentCommon.FillDataInWorkSheet(worksheet, currentCell, section, year.Year, treatment);
+                    _unfundedTreatmentCommon.FillDataInWorkSheet(worksheet, currentCell, section, year.Year, treatment, color);
                     currentCell.Row++;
-                    currentCell.Column = 1;
+                    currentCell.Column = 1;                    
                 }
+                color = color == Color.White ? Color.LightGray : Color.White;
             }
         }
 

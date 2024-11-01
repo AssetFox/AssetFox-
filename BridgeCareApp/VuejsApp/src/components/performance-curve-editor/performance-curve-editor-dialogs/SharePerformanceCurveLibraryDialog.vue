@@ -3,10 +3,10 @@
     <v-card>
       <v-card-title>
         <v-row justify="space-between" style="margin-top: 10px;">
-          <h5>Performance Curve Library Sharing</h5>
-          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-            X
-          </v-btn>
+          <v-spacer></v-spacer>
+          <h3>Performance Curve Library Sharing</h3>
+          <v-spacer></v-spacer>
+          <XButton @click="onSubmit(false)"/>
         </v-row>
       </v-card-title>
       <v-card-text>
@@ -43,7 +43,7 @@
           </tr>
           </template>
           <!-- <v-alert :model-value="true"
-                   class="ara-orange-bg"
+                   class="assetFox-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
@@ -52,10 +52,8 @@
       </v-card-text>
       <v-card-actions>
         <v-row justify="center">
-          <v-btn id="SharePerformanceCurveLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-blue ghd-button-text" variant = "flat">Cancel</v-btn>
-          <v-btn id="SharePerformanceCurveLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
-            Save
-          </v-btn>
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SaveButton @save="onSubmit(true)"/>
         </v-row>
       </v-card-actions>
     </v-card>
@@ -75,6 +73,9 @@ import {PerformanceCurveLibraryUserGridRow, SharePerformanceCurveLibraryDialogDa
 import PerformanceCurveService from '@/services/performance-curve.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
 const emit = defineEmits(['submit'])
 let store = useStore();

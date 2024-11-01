@@ -19,6 +19,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
         private const int headerRow1 = 1;
         private const int headerRow2 = 2;
         private List<int> columnNumbersBudgetsUsed;
+        private List<int> columnNumbersCIImprovement;
         private bool ShouldBundleFeasibleTreatments;
         private readonly IUnitOfWork _unitOfWork;
 
@@ -31,6 +32,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
         public void Fill(ExcelWorksheet decisionsWorksheet, SimulationOutput simulationOutput, Simulation simulation, HashSet<string> performanceCurvesAttributes)
         {
             columnNumbersBudgetsUsed = new List<int>();
+            columnNumbersCIImprovement = new();
+
             // Distinct performance curves' attributes
             var currentAttributes = performanceCurvesAttributes;
 
@@ -54,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
 
             decisionsWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
             decisionsWorksheet.Cells.AutoFitColumns();
-            PerformPostAutofitAdjustments(decisionsWorksheet, columnNumbersBudgetsUsed);
+            PerformPostAutofitAdjustments(decisionsWorksheet, columnNumbersBudgetsUsed, columnNumbersCIImprovement);
         }
 
         private void FillDynamicDataInWorkSheet(SimulationOutput simulationOutput, HashSet<string> currentAttributes, HashSet<string> budgets, List<string> treatments, ExcelWorksheet decisionsWorksheet, CurrentCell currentCell)
@@ -65,64 +68,60 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
             foreach (var initialAssetSummary in simulationOutput.InitialAssetSummaries)
             {
 
-                var primaryKeyField = _reportHelper.CheckAndGetValue<string>(initialAssetSummary.ValuePerTextAttribute, primaryKey[0].ToString());
+                var primaryKeyValue = _reportHelper.CheckAndGetValue<string>(initialAssetSummary.ValuePerTextAttribute, primaryKey[0].ToString());
 
-                if (string.IsNullOrEmpty(primaryKeyField) && initialAssetSummary.ValuePerNumericAttribute != null)
+                if (string.IsNullOrEmpty(primaryKeyValue) && initialAssetSummary.ValuePerNumericAttribute != null)
                 {
-                        primaryKeyField = initialAssetSummary.ValuePerNumericAttribute[primaryKey[0].ToString()].ToString();
+                        primaryKeyValue = initialAssetSummary.ValuePerNumericAttribute[primaryKey[0].ToString()].ToString();
                 }
                 var years = simulationOutput.Years.OrderBy(yr => yr.Year);
 
                 // Year 0
-                var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, primaryKeyField, years.FirstOrDefault().Year - 1, initialAssetSummary);
+                var decisionDataModel = GetInitialDecisionDataModel(currentAttributes, primaryKeyValue, years.FirstOrDefault().Year - 1, initialAssetSummary);
                 FillInitialDataInWorksheet(decisionsWorksheet, decisionDataModel, currentAttributes, currentCell.Row, 1);
 
                 var yearZeroRow = currentCell.Row++;
                 foreach (var year in years)
-                {
+                {                    
                     var section = year.Assets.FirstOrDefault(_ =>
                     {
                         var textValue = _reportHelper.CheckAndGetValue<string>(_.ValuePerTextAttribute, primaryKey[0].ToString());
-                        if (textValue == primaryKeyField)
+                        if (textValue == primaryKeyValue)
                         {
                             return true;
                         }
                         else
                         {
                             var numericValue = _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, primaryKey[0].ToString());
-                            return numericValue == Convert.ToDouble(primaryKeyField);
+                            return numericValue == Convert.ToDouble(primaryKeyValue);
                         }
                     });
                     if (section.TreatmentCause == TreatmentCause.CommittedProject)
                     {
                         continue;
                     }
-                    // TODO this report needs to be revised/enhanced to handle both types of keys throught the report. Currently it looks to be partially handling keys.
-
+                    
                     // Build keyCashFlowFundingDetails
-                    var cashFlowPrimaryKey = CheckGetTextValue(section.ValuePerTextAttribute, primaryKey[0].ToString());
                     if (section.TreatmentStatus != TreatmentStatus.Applied)
                     {
-                        var fundingSection = year.Assets.
-                                              FirstOrDefault(_ => CheckGetTextValue(_.ValuePerTextAttribute, primaryKey[0].ToString()) == cashFlowPrimaryKey &&
-                                                            _.TreatmentCause == TreatmentCause.SelectedTreatment &&
-                                                            _.AppliedTreatment.ToLower() != FlexibleAuditReportConstants.NoTreatment &&
-                                                            _.AppliedTreatment == section.AppliedTreatment);
+                        var fundingSection = section.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                             section.AppliedTreatment.ToLower() != FlexibleAuditReportConstants.NoTreatment ? section : null;
+                                             
                         if (fundingSection != null)
                         {
-                            if (!keyCashFlowFundingDetails.ContainsKey(cashFlowPrimaryKey))
+                            if (!keyCashFlowFundingDetails.ContainsKey(primaryKeyValue))
                             {
-                                keyCashFlowFundingDetails.Add(cashFlowPrimaryKey, fundingSection.TreatmentConsiderations ?? new());
+                                keyCashFlowFundingDetails.Add(primaryKeyValue, fundingSection.TreatmentConsiderations ?? new());
                             }
                             else
                             {
-                                keyCashFlowFundingDetails[cashFlowPrimaryKey].AddRange(fundingSection.TreatmentConsiderations);
+                                keyCashFlowFundingDetails[primaryKeyValue].AddRange(fundingSection.TreatmentConsiderations);
                             }
                         }
                     }
 
                     // Generate data model                    
-                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, primaryKeyField, year, section, keyCashFlowFundingDetails);
+                    var decisionsDataModel = GenerateDecisionDataModel(currentAttributes, budgets, treatments, primaryKeyValue, year, section, keyCashFlowFundingDetails);
 
                     // Fill in excel
                     currentCell = FillDataInWorksheet(decisionsWorksheet, decisionsDataModel, budgets.Count, currentAttributes, currentCell);
@@ -159,9 +158,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
             {
                 var decisionsTreatment = new FlexibleDecisionTreatment();
                 var treatmentRejection = section.TreatmentRejections.FirstOrDefault(_ => _.TreatmentName == treatment);
-                decisionsTreatment.Feasible = isCashFlowProject ? "-" : (treatmentRejection == null ? FlexibleAuditReportConstants.Yes : FlexibleAuditReportConstants.No);
                 var currentCIImprovement = Convert.ToDouble(decisionDataModel.CurrentAttributesValues.Last());
                 var treatmentOption = section.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == treatment);
+                decisionsTreatment.Feasible = isCashFlowProject ? "-" : (treatmentOption != null ? FlexibleAuditReportConstants.Yes : FlexibleAuditReportConstants.No);                
                 decisionsTreatment.CIImprovement = treatmentOption?.ConditionChange;
                 decisionsTreatment.Cost = treatmentOption != null ? treatmentOption.Cost : 0;
                 decisionsTreatment.BCRatio = treatmentOption != null ? treatmentOption.Benefit / treatmentOption.Cost : 0;
@@ -178,29 +177,31 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
                                               section.TreatmentConsiderations ?? new();
 
                 var treatmentConsideration = ShouldBundleFeasibleTreatments ?
-                                     treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
-                                        section.AppliedTreatment.Contains(_.TreatmentName)) :
-                                     treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
-                                        _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
-                                        _.TreatmentName == section.AppliedTreatment);
+                                             treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
+                                                section.AppliedTreatment.Contains(_.TreatmentName)) :
+                                             treatmentConsiderations.FirstOrDefault(_ => _.FundingCalculationOutput != null &&
+                                                _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
+                                                _.TreatmentName == section.AppliedTreatment);
+                                
+                if (decisionsTreatment.Selected == FlexibleAuditReportConstants.Yes)
+                {
+                    // AllocationMatrix includes cash flow funding of future years.
+                    var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
 
-                // AllocationMatrix includes cash flow funding of future years.
-                var allocationMatrix = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
-                var amountSpent = treatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.
-                                                Where(_ => _.Year == year.Year).Sum(_ => _.AllocatedAmount)
-                                                ?? 0;
-                decisionsTreatment.AmountSpent = amountSpent;
+                    var amountSpent = allocationMatrix?.Where(_ => _.Year == year.Year).Sum(_ => _.AllocatedAmount) ?? 0;
+                    decisionsTreatment.AmountSpent = amountSpent;
 
-                var budgetsUsed = allocationMatrix.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year)
-                                .Select(_ => _.BudgetName).Distinct().ToList()
-                                ?? new();
-                decisionsTreatment.BudgetsUsed = string.Join(", ", budgetsUsed);
-
-                var budgetStatuses = allocationMatrix.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year)
-                                    .Select(_ => treatmentConsideration.GetBudgetUsageStatus(_.Year, _.BudgetName, _.TreatmentName).ToString()).Distinct().ToList()
+                    var budgetsUsed = allocationMatrix.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year)
+                                    .Select(_ => _.BudgetName).Distinct().ToList()
                                     ?? new();
-                decisionsTreatment.BudgetUsageStatuses = string.Join(", ", budgetStatuses);
+                    decisionsTreatment.BudgetsUsed = string.Join(", ", budgetsUsed);
+
+                    var budgetStatuses = allocationMatrix.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year)
+                                        .Select(_ => treatmentConsideration.GetBudgetUsageStatus(_.Year, _.BudgetName, _.TreatmentName).ToString()).Distinct().ToList()
+                                        ?? new();
+                    decisionsTreatment.BudgetUsageStatuses = string.Join(", ", budgetStatuses);
+                }
 
                 decisionsTreatments.Add(decisionsTreatment);
             }
@@ -225,10 +226,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
                                         _.FundingCalculationOutput.AllocationMatrix.Any(_ => _.Year == year.Year) &&
                                         section.AppliedTreatment.Contains(_.TreatmentName));
 
-                var includedBundles = aggregatedTreatmentConsideration?.TreatmentName;
-
-                // AllocationMatrix includes cash flow funding of future years.
-                var aggregatedAllocationMatrix = aggregatedTreatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
+                var includedBundles = aggregatedTreatmentConsideration?.TreatmentName;                
 
                 var decisionsAggregate = new FlexibleDecisionAggregated();
                 var aggregatedTreatmentRejection = section.TreatmentRejections;
@@ -258,21 +256,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
                 decisionsAggregate.Cost = aggregatedTreatmentOption != null ? aggregatedTreatmentOption.Cost : 0;
                 decisionsAggregate.BCRatio = aggregatedTreatmentOption != null ? aggregatedTreatmentOption.Benefit / aggregatedTreatmentOption.Cost : 0;
 
-                var aggregatedAmountSpent = aggregatedTreatmentConsideration?.FundingCalculationOutput?.AllocationMatrix.
-                                    Where(_ => _.Year == year.Year).Sum(_ => _.AllocatedAmount)
-                                    ?? 0;
-                decisionsAggregate.AmountSpent = aggregatedAmountSpent;
+                if (decisionsAggregate.Selected == FlexibleAuditReportConstants.Yes)
+                {
+                    // AllocationMatrix includes cash flow funding of future years.
+                    var aggregatedAllocationMatrix = aggregatedTreatmentConsideration?.FundingCalculationOutput?.AllocationMatrix ?? new();
+                    var aggregatedAmountSpent = aggregatedAllocationMatrix?.Where(_ => _.Year == year.Year).Sum(_ => _.AllocatedAmount) ?? 0;
+                    decisionsAggregate.AmountSpent = aggregatedAmountSpent;
 
-                var aggregatedBudgetsUsed = aggregatedAllocationMatrix.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year)
-                                .Select(_ => _.BudgetName).Distinct().ToList()
-                                ?? new();
-                decisionsAggregate.BudgetsUsed = string.Join(", ", aggregatedBudgetsUsed);
+                    var aggregatedBudgetsUsed = aggregatedAllocationMatrix.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year)
+                                                .Select(_ => _.BudgetName).Distinct().ToList()
+                                                ?? new();
+                    decisionsAggregate.BudgetsUsed = string.Join(", ", aggregatedBudgetsUsed);
 
-                var aggregatedBudgetStatuses = aggregatedAllocationMatrix.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year)
-                                    .Select(_ => aggregatedTreatmentConsideration.GetBudgetUsageStatus(_.Year, _.BudgetName, _.TreatmentName).ToString()).Distinct().ToList()
-                                    ?? new();
-                decisionsAggregate.BudgetUsageStatuses = string.Join(", ", aggregatedBudgetStatuses);
-
+                    var aggregatedBudgetStatuses = aggregatedAllocationMatrix.Where(_ => _.AllocatedAmount > 0 && _.Year == year.Year)
+                                                   .Select(_ => aggregatedTreatmentConsideration.GetBudgetUsageStatus(_.Year, _.BudgetName, _.TreatmentName).
+                                                   ToString()).Distinct().ToList()
+                                                   ?? new();
+                    decisionsAggregate.BudgetUsageStatuses = string.Join(", ", aggregatedBudgetStatuses);
+                }
 
                 decisionsAggregated.Add(decisionsAggregate);
                 decisionDataModel.DecisionsAggregated = decisionsAggregated;
@@ -453,6 +454,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
                     {
                         columnNumbersBudgetsUsed.Add(column);
                     }
+                    if(treatmentHeader.Equals("CI\r\nImprovement"))
+                    {
+                        columnNumbersCIImprovement.Add(column);
+                    }
                     worksheet.Cells[headerRow2, column++].Value = treatmentHeader;
                 }
 
@@ -500,6 +505,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
                     if (treatmentHeader.Equals("Budget(s)\r\nUsed"))
                     {
                         columnNumbersBudgetsUsed.Add(column);
+                    }
+                    if (treatmentHeader.Equals("CI\r\nImprovement"))
+                    {
+                        columnNumbersCIImprovement.Add(column);
                     }
                     worksheet.Cells[headerRow2, column++].Value = treatmentHeader;
                 }
@@ -563,7 +572,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
         }
 
 
-        public static void PerformPostAutofitAdjustments(ExcelWorksheet worksheet, List<int> columnNumbersBudgetsUsed)
+        public static void PerformPostAutofitAdjustments(ExcelWorksheet worksheet, List<int> columnNumbersBudgetsUsed, List<int> columnNumbersCIImprovement)
         {
             foreach (var columnNumber in columnNumbersBudgetsUsed)
             {
@@ -572,6 +581,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.FlexibleAuditReport
                 worksheet.Column(columnNumber + 1).SetTrueWidth(35);
                 worksheet.Column(columnNumber + 1).Style.WrapText = true;
             }
+
+            foreach(var columnNumber in columnNumbersCIImprovement)
+            {
+                worksheet.Column(columnNumber).SetTrueWidth(12.15);
+            }
+
+            worksheet.Row(2).Height = 35;
         }
     }
 }

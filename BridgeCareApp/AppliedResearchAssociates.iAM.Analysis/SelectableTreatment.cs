@@ -146,33 +146,48 @@ public sealed class SelectableTreatment : Treatment
 
     internal override IReadOnlyCollection<ConsequenceApplicator> GetConsequenceApplicators(AssetContext scope)
     {
-        return ConsequencesPerAttribute.SelectMany(getConsequenceApplicator).ToArray();
+        List<ConsequenceApplicator> applicators = new();
 
-        ConsequenceApplicator[] getConsequenceApplicator(IGrouping<Attribute, ConditionalTreatmentConsequence> consequences)
+        foreach (var consequences in ConsequencesPerAttribute)
         {
-            consequences.Channel(
-                consequence => scope.Evaluate(consequence.Criterion),
-                result => result ?? false,
-                result => !result.HasValue,
-                out var applicableConsequences,
-                out var defaultConsequences);
+            List<ConditionalTreatmentConsequence> applicableConsequences = new();
+            List<ConditionalTreatmentConsequence> defaultConsequences = new();
 
-            var operativeConsequences = applicableConsequences.Count > 0
+            foreach (var consequence in consequences)
+            {
+                var evaluation = scope.Evaluate(consequence.Criterion);
+
+                if (!evaluation.HasValue)
+                {
+                    defaultConsequences.Add(consequence);
+                }
+                else if (evaluation.Value)
+                {
+                    applicableConsequences.Add(consequence);
+                }
+            }
+
+            var activeConsequences = applicableConsequences.Count > 0
                 ? applicableConsequences
                 : defaultConsequences;
 
-            var consequenceApplicators = operativeConsequences
-                .SelectMany(consequence => consequence.GetConsequenceApplicators(scope, this))
-                .ToArray();
+            List<ConsequenceApplicator> activeApplicators = new();
 
-            if (consequenceApplicators.Length == 0)
+            foreach (var consequence in activeConsequences)
             {
-                return Array.Empty<ConsequenceApplicator>();
+                var applicatorsOfThisConsequence = consequence.GetConsequenceApplicators(scope, this);
+                activeApplicators.AddRange(applicatorsOfThisConsequence);
             }
 
-            if (consequenceApplicators.Length == 1)
+            if (activeApplicators.Count == 0)
             {
-                return consequenceApplicators;
+                continue;
+            }
+
+            if (activeApplicators.Count == 1)
+            {
+                applicators.Add(activeApplicators[0]);
+                continue;
             }
 
             if (consequences.Key is not NumberAttribute numberAttribute)
@@ -188,12 +203,14 @@ public sealed class SelectableTreatment : Treatment
                 throw new SimulationException(messageBuilder.ToString());
             }
 
-            var worstConsequenceApplicator = numberAttribute.IsDecreasingWithDeterioration
-                ? consequenceApplicators.MinBy(static ca => ca.NewValue.Value)
-                : consequenceApplicators.MaxBy(static ca => ca.NewValue.Value);
+            var applicatorOfWorstConsequence = numberAttribute.IsDecreasingWithDeterioration
+                ? activeApplicators.MinBy(static ca => ca.NewValue.Value)
+                : activeApplicators.MaxBy(static ca => ca.NewValue.Value);
 
-            return new[] { worstConsequenceApplicator };
+            applicators.Add(applicatorOfWorstConsequence);
         }
+
+        return applicators;
     }
 
     internal override double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts)
@@ -201,8 +218,7 @@ public sealed class SelectableTreatment : Treatment
         var feasibleCosts = Costs.Where(cost => cost.Criterion.EvaluateOrDefault(scope)).ToArray();
         if (feasibleCosts.Length == 0)
         {
-            // [REVIEW] This doesn't look right. Ask about this no later than the PR. (In other
-            // words, don't let this comment through a PR.)
+            // [REVIEW] Is it correct to default to zero-cost when there are no feasible cost equations?
             return 0;
         }
 

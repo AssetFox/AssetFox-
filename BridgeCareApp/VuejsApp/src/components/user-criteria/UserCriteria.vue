@@ -21,7 +21,7 @@
               </v-col>
               <v-col style='padding: 0' cols="3">
                 <v-row align-center>               
-                <v-btn id="UserCriteria-assignUnassignedUserCriteria-btn" @click='onGiveUnrestrictedAccess(user)'  class='ara-blue-bg text-white' 
+                <v-btn id="UserCriteria-assignUnassignedUserCriteria-btn" @click='onGiveUnrestrictedAccess(user)'  class='assetFox-blue-bg text-white' 
                           title='Allow All Assets'>
                           <v-icon size='1.5em' style='padding-right: 0.5em'>fas fa-lock-open</v-icon>                   
                     Allow All Assets
@@ -30,7 +30,7 @@
               </v-col>
               <v-col style='padding: 0' cols="3">
                 <v-row align-center>
-                  <v-btn id="UserCriteria-assignUnassignedUserCriteria-btn" @click='onEditCriteria(user)'  class='ara-blue-bg text-white' 
+                  <v-btn id="UserCriteria-assignUnassignedUserCriteria-btn" @click='onEditCriteria(user)'  class='assetFox-blue-bg text-white' 
                           title='Give the user limited access to the asset inventory'>
                     <v-icon size='1.5em' style='padding-right: 0.5em'>fas fa-edit</v-icon>
                     Assign Criteria Filter
@@ -39,7 +39,7 @@
               </v-col>
               <v-col justify-center style='padding: 0' xs2>
                 <v-row align-center>
-                  <v-btn @click='onDeactivateUser(user)' class='ara-orange' flat title='Delete User'>
+                  <v-btn @click='onDeactivateUser(user)' class='assetFox-orange' flat title='Delete User'>
                     <v-icon size='1.5em'>fas fa-trash</v-icon>
                   </v-btn>
                 </v-row>
@@ -118,21 +118,21 @@
                 </v-row>
               </td>
               <td class='d-flex'>
-                <v-btn id="UserCriteria-restrictUserAccess-btn" @click='onEditCriteria(item)'  class='ara-blue' flat 
+                <v-btn id="UserCriteria-restrictUserAccess-btn" @click='onEditCriteria(item)'  class='assetFox-blue' flat 
                         title='Restrict Access with Criteria Filter' 
                         v-if='!item.hasCriteria'>
                   <v-icon>fas fa-lock</v-icon>
                 </v-btn>
-                <v-btn id="UserCriteria-allowUserAllAccess-btn" @click='onGiveUnrestrictedAccess(item)' class='ara-blue' flat 
+                <v-btn id="UserCriteria-allowUserAllAccess-btn" @click='onGiveUnrestrictedAccess(item)' class='assetFox-blue' flat 
                         title='Allow All Assets' 
                         v-if='item.hasCriteria'>
                   <v-icon>fas fa-lock-open</v-icon>
                 </v-btn>
-                <v-btn id="UserCriteria-revokeUserAccess-btn" @click='onRevokeAccess(item)' class='ara-orange' flat 
+                <v-btn id="UserCriteria-revokeUserAccess-btn" @click='onRevokeAccess(item)' class='assetFox-orange' flat 
                         title='Revoke Access'>
                   <v-icon>fas fa-times-circle</v-icon>
                 </v-btn>
-                <v-btn id="UserCriteria-deactivateUser-btn" @click='onDeactivateUser(item)' class='ara-orange' flat 
+                <v-btn id="UserCriteria-deactivateUser-btn" @click='onDeactivateUser(item)' class='assetFox-orange' flat 
                         title='Deactivate User'>
                   <v-icon>fas fa-trash</v-icon>
                 </v-btn>
@@ -243,17 +243,17 @@
                 </v-row>
               </td>
               <td class='d-flex'>
-                <v-btn id="UserCriteria-restrictUserAccess-btn" @click='onEditCriteria(item)'  class='ara-blue' flat 
+                <v-btn id="UserCriteria-restrictUserAccess-btn" @click='onEditCriteria(item)'  class='assetFox-blue' flat 
                         title='Restrict Access with Criteria Filter' 
                         v-if='!item.hasCriteria'>
                   <v-icon>fas fa-lock</v-icon>
                 </v-btn>
-                <v-btn id="UserCriteria-allowUserAllAccess-btn" @click='onGiveUnrestrictedAccess(item)' class='ara-blue' flat 
+                <v-btn id="UserCriteria-allowUserAllAccess-btn" @click='onGiveUnrestrictedAccess(item)' class='assetFox-blue' flat 
                         title='Allow All Assets' 
                         v-if='item.hasCriteria'>
                   <v-icon>fas fa-lock-open</v-icon>
                 </v-btn>
-                <v-btn id="UserCriteria-revokeUserAccess-btn" @click='onReactivateUser(item)' class='ara-orange' flat 
+                <v-btn id="UserCriteria-revokeUserAccess-btn" @click='onReactivateUser(item)' class='assetFox-orange' flat 
                         title='Reactivate User'>
                   <v-icon>fas fa-check-circle</v-icon>
                 </v-btn>

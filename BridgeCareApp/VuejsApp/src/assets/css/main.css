@@ -61,31 +61,31 @@
     background-color: #FFFFFF !important;
 }
 
-.ara-blue-pantone-289-bg {
+.assetFox-blue-pantone-289-bg {
     background-color: #00204B !important;
 }
 
-.ara-blue-bg {
+.assetFox-blue-bg {
     background-color: #008FCA !important;
 }
 
-.ara-orange-bg {
+.assetFox-orange-bg {
     background-color: #F05632 !important;
 }
 
-.ara-blue {
+.assetFox-blue {
     color: #008FCA !important;
 }
 
-.ara-orange {
+.assetFox-orange {
     color: #F05632 !important;
 }
 
-.ara-blue-pantone-281 {
+.assetFox-blue-pantone-281 {
     color: #002E6C !important;
 }
 
-.ara-black {
+.assetFox-black {
     color: #000000 !important;
 }
 
@@ -104,6 +104,9 @@
     color: #2A578D !important;
 }
 
+.green-icon {
+    color: green;
+}
 .ghd-blue-bg {
     background-color: #2A578D !important;
 }
@@ -125,10 +128,41 @@
     color: var(--svg-color) !important;
 }
 
+.ghd-red:disabled, 
+.ghd-red[disabled], 
+.parent-element[disabled] .ghd-red {
+    color: transparent !important;  /* Inherit color from parent */
+    filter: invert(68%) sepia(11%) saturate(17%) hue-rotate(330deg) brightness(88%) contrast(88%);
+    background-color: transparent !important; /* Maintain the background color */
+}
+
 .ghd-green {
-    --svg-color: #5CB85C;
+    height: 25px;
+    filter: invert(61%) sepia(70%) saturate(486%) hue-rotate(79deg) brightness(82%) contrast(85%);
+    background-color: transparent !important; /* Maintain the background color */
     color: var(--svg-color) !important;
 }
+
+.ghd-green:disabled, 
+.ghd-green[disabled], 
+.parent-element[disabled] .ghd-green {
+    filter: invert(68%) sepia(11%) saturate(17%) hue-rotate(330deg) brightness(88%) contrast(88%);
+    color: transparent !important;  /* Inherit color from parent */
+    background-color: transparent !important; /* Maintain the background color */
+}
+
+.ghd-blue-icon {
+    height: 25px;
+}
+
+.ghd-blue-icon:disabled, 
+.ghd-blue-icon[disabled], 
+.parent-element[disabled] ghd-blue-icon {
+    filter: invert(68%) sepia(11%) saturate(17%) hue-rotate(330deg) brightness(88%) contrast(88%);
+    color: transparent !important;  /* Inherit color from parent */
+    background-color: transparent !important; /* Maintain the background color */
+}
+
 
 /* Controls (general) */
 .ghd-control-label {

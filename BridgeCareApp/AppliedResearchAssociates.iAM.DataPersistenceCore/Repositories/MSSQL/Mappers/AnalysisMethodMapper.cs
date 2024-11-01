@@ -84,7 +84,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShouldApplyMultipleFeasibleCosts = dto.ShouldApplyMultipleFeasibleCosts,
                 ShouldDeteriorateDuringCashFlow = dto.ShouldDeteriorateDuringCashFlow,
                 ShouldUseExtraFundsAcrossBudgets = dto.ShouldUseExtraFundsAcrossBudgets,
-                shouldAllowMultipleTreatments = dto.shouldAllowMultipleTreatments,
+                shouldAllowMultipleTreatments = dto.ShouldAllowMultipleTreatments,
                 AttributeId = attributeId,
 
             };            
@@ -116,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 SpendingStrategy = entity.SpendingStrategy,
                 ShouldApplyMultipleFeasibleCosts = entity.ShouldApplyMultipleFeasibleCosts,
                 ShouldDeteriorateDuringCashFlow = entity.ShouldDeteriorateDuringCashFlow,
-                shouldAllowMultipleTreatments = entity.shouldAllowMultipleTreatments,
+                ShouldAllowMultipleTreatments = entity.shouldAllowMultipleTreatments,
                 ShouldUseExtraFundsAcrossBudgets = entity.ShouldUseExtraFundsAcrossBudgets,
                 Attribute = entity.Attribute?.Name ?? string.Empty,
                 Benefit = entity.Benefit?.ToDto() ?? new BenefitDTO(),

@@ -233,7 +233,7 @@
                                     </template>
                                     <!-- <v-alert
                                         :model-value="hasMineSearch()"
-                                        class="ara-orange-bg"
+                                        class="assetFox-orange-bg"
                                         icon="fas fa-exclamation"
                                         slot="no-data"
                                     >
@@ -691,7 +691,7 @@
 
 <script lang="ts" setup>
 import { getUrl } from '@/shared/utils/get-url';
-import { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, computed, reactive, inject } from 'vue'; 
+import { Ref, ref, shallowReactive, shallowRef, ShallowRef, watch, onBeforeUnmount, computed, reactive, inject, onMounted } from 'vue'; 
 import moment from 'moment';
 import {
     emptyScenario,
@@ -765,6 +765,7 @@ import { User } from '@/shared/models/iAM/user';
 import router from '@/router';
 import { useRoute } from 'vue-router';
 import ReportsService from '@/services/reports.service';
+import { downloadSimulationLog } from '@/shared/utils/simulation-log-utils';
 
     let store = useStore(); 
     const $router = useRouter();     
@@ -901,7 +902,7 @@ import ReportsService from '@/services/reports.service';
             title: '',
             key: '',
             align: 'left',
-            sortable: false,
+            sortable: false, 
             class: 'header-border',
             width: '',
         },
@@ -1351,8 +1352,6 @@ import ReportsService from '@/services/reports.service';
             checkIfReportExists(simulationRunSettingId);
         });
 
-        await getScenariosReportSettings();
-
         availableActions = {
             runAnalysis: 'runAnalysis',
             reports: 'reports',
@@ -1362,7 +1361,8 @@ import ReportsService from '@/services/reports.service';
             clone: 'clone',
             delete: 'delete',
             commitedProjects: 'commitedProjects',
-            convert:'convert'
+            convert:'convert',
+            simulationLog: 'simulationLog',
         };
         availableSimulationActions = {
             cancel: 'cancel',
@@ -1409,6 +1409,12 @@ import ReportsService from '@/services/reports.service';
                 title: 'Delete',
                 action: availableActions.delete,
                 icon: getUrl("assets/icons/trash.svg"),
+                isCustomIcon: true
+            },
+            {
+                title: 'Simulation Log',
+                action: availableActions.simulationLog,
+                icon: getUrl("assets/icons/clipboard.svg"),
                 isCustomIcon: true
             }           
         ];
@@ -1529,6 +1535,7 @@ import ReportsService from '@/services/reports.service';
         await getSharedScenariosPageAction(request)
         await getUserScenariosPageAction(request)
         await getWorkQueuePageAction(workQueueRequest)
+        await getScenariosReportSettings();
         await getFastWorkQueuePageAction(workQueueRequest)
         initializing = false;
         initializingWorkQueue = false;
@@ -1605,6 +1612,16 @@ import ReportsService from '@/services/reports.service';
                 'executed in the order in which it was received.',
             buttons: []
         };
+    }
+
+    async function onDownloadSimulationLog(scenario: Scenario) {
+        await downloadSimulationLog(
+            scenario.networkId,
+            scenario.id,
+            scenario.name,
+            addSuccessNotificationAction,
+            addErrorNotificationAction,
+        );
     }
 
     async function onConfirmAnalysisRunAlertSubmit(submit: string) {
@@ -1812,7 +1829,7 @@ import ReportsService from '@/services/reports.service';
         {
             if(scenarioForReportDeletion.value)
             {
-                deleteAllReports();
+                deleteAllReports(scenarioForReportDeletion.value);
             }
         }
     }
@@ -1930,19 +1947,19 @@ import ReportsService from '@/services/reports.service';
                 scenarioId: selectedScenario.id,
                 scenarioName: selectedScenario.name,
             }).then(async () => {
-                deleteAllReports();
+                deleteAllReports(selectedScenario.id);
                 selectedScenario = clone(emptyScenario); 
             });
         }
     }
 
-    async function deleteAllReports() {
-        await ReportsService.deleteAllGeneratedReports(selectedScenario.id)
+    async function deleteAllReports(_scenario: any) {
+        await ReportsService.deleteAllGeneratedReports(_scenario.id)
             .then((response: AxiosResponse<any>) => {
                 if (hasValue(response, 'data')) {
                     if (!response.data.includes("No reports exist")) {
                         addSuccessNotificationAction({
-                            message: 'All reports for ' + selectedScenario.name + ' have been deleted.',
+                            message: 'All reports for ' + _scenario.name + ' have been deleted.',
                         });
                     }
                 } else {
@@ -2245,6 +2262,9 @@ import ReportsService from '@/services/reports.service';
                 break;
             case availableActions.convert:
                 onShowConfirmConvertJsonToRelationalAlert(scenario);
+            case availableActions.simulationLog:
+                onDownloadSimulationLog(scenario);
+                break;
         }
     }
 

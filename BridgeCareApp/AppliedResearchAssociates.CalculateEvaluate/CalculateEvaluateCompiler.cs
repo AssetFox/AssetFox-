@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
 
         public static IEnumerable<NumberFunctionDescription> NumberFunctionDescriptions => CalculateEvaluateCompilerVisitor.NumberFunctionDescriptions;
 
-        public Dictionary<string, CalculateEvaluateParameterType> ParameterTypes { get; } = new Dictionary<string, CalculateEvaluateParameterType>(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, CalculateEvaluateParameterType> ParameterTypes { get; } = new(StringComparer.OrdinalIgnoreCase);
 
         public Calculator GetCalculator(string expression) => (Calculator)Compile(expression, () => new Calculator());
 
@@ -24,7 +24,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
 
         private static readonly IEqualityComparer<IEnumerable<(int, string)>> CacheComparer = SequenceEqualityComparer.Create(ValueTupleEqualityComparer.Create<int, string>(comparer2: StringComparer.OrdinalIgnoreCase));
 
-        private readonly ConcurrentDictionary<(int, string)[], WeakReference<FinalActor<object>>> Cache = new ConcurrentDictionary<(int, string)[], WeakReference<FinalActor<object>>>(CacheComparer);
+        private readonly ConcurrentDictionary<(int, string)[], WeakReference<FinalActor<object>>> Cache = new(CacheComparer);
 
         private CalculateEvaluateDelegateWrapper<T> Compile<T>(string expression, Func<CalculateEvaluateDelegateWrapper<T>> createDelegateWrapper)
         {

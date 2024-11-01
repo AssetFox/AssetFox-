@@ -116,21 +116,37 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     public override double GetNumber(string key)
     {
-        if (GetNumber_ActiveKeysOfCurrentInvocation.Contains(key, StringComparer.OrdinalIgnoreCase))
+        if (!GetNumber_ActiveKeysOfCurrentInvocation.TryAdd(key, GetNumber_ActiveKeysOfCurrentInvocation.Count))
         {
-            var loop = GetNumber_ActiveKeysOfCurrentInvocation.SkipWhile(activeKey => !StringComparer.OrdinalIgnoreCase.Equals(activeKey, key)).Append(key);
-            var loopText = string.Join(" to ", loop.Select(activeKey => "[" + activeKey + "]"));
+            var previousInvocationIndex = GetNumber_ActiveKeysOfCurrentInvocation[key];
 
-            var messageBuilder = new SimulationMessageBuilder("Loop encountered during number calculation: " + loopText)
+            var invocationStack =
+                GetNumber_ActiveKeysOfCurrentInvocation
+                .OrderBy(kv => kv.Value)
+                .Select(kv => kv.Key)
+                .Append(key)
+                .Select(k => $"[{k}]")
+                .ToArray();
+
+            static void emphasize(ref string key) => key = $"**{key}**";
+
+            emphasize(ref invocationStack[previousInvocationIndex]);
+            emphasize(ref invocationStack[^1]);
+
+            var invocationText = string.Join(" to ", invocationStack);
+
+            var messageBuilder = new SimulationMessageBuilder("Loop encountered during number calculation: " + invocationText)
             {
                 AssetName = Asset.AssetName,
                 AssetId = Asset.Id,
             };
-            var logBuilder = SimulationLogMessageBuilders.CalculationFatal(messageBuilder.ToString(), SimulationRunner.Simulation.Id);
+
+            var logBuilder = SimulationLogMessageBuilders.CalculationFatal(
+                messageBuilder.ToString(),
+                SimulationRunner.Simulation.Id);
+
             SimulationRunner.Send(logBuilder);
         }
-
-        GetNumber_ActiveKeysOfCurrentInvocation.Push(key);
 
         if (!NumberCache_Override.TryGetValue(key, out var number) && !NumberCache.TryGetValue(key, out number))
         {
@@ -152,7 +168,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
             NumberCache[key] = number;
         }
 
-        _ = GetNumber_ActiveKeysOfCurrentInvocation.Pop();
+        _ = GetNumber_ActiveKeysOfCurrentInvocation.Remove(key);
 
         return number;
     }
@@ -277,7 +293,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     private readonly Dictionary<string, int> FirstUnshadowedYearForSameTreatment = new();
 
-    private readonly Stack<string> GetNumber_ActiveKeysOfCurrentInvocation = new();
+    private readonly Dictionary<string, int> GetNumber_ActiveKeysOfCurrentInvocation = new(StringComparer.OrdinalIgnoreCase);
 
     private readonly Dictionary<Attribute, double> MostRecentAdjustmentFactorsForPerformanceCurves = new();
 
@@ -430,12 +446,22 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     private Func<double> GetCalculator(IGrouping<NumberAttribute, PerformanceCurve> curves)
     {
-        curves.Channel(
-            curve => Evaluate(curve.Criterion),
-            result => result ?? false,
-            result => !result.HasValue,
-            out var applicableCurves,
-            out var defaultCurves);
+        List<PerformanceCurve> applicableCurves = new();
+        List<PerformanceCurve> defaultCurves = new();
+
+        foreach (var curve in curves)
+        {
+            var evaluation = Evaluate(curve.Criterion);
+
+            if (!evaluation.HasValue)
+            {
+                defaultCurves.Add(curve);
+            }
+            else if (evaluation.Value)
+            {
+                applicableCurves.Add(curve);
+            }
+        }
 
         var operativeCurves = applicableCurves.Count > 0 ? applicableCurves : defaultCurves;
 
@@ -465,11 +491,9 @@ internal sealed class AssetContext : CalculateEvaluateScope
             SimulationRunner.Send(logMessage);
         }
 
-        Func<double>
-            calculateMinimum = () => operativeCurves.Min(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value))),
-            calculateMaximum = () => operativeCurves.Max(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value)));
-
-        return curves.Key.IsDecreasingWithDeterioration ? calculateMinimum : calculateMaximum;
+        return curves.Key.IsDecreasingWithDeterioration
+            ? () => operativeCurves.Min(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value)))
+            : () => operativeCurves.Max(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value)));
     }
 
     private IDictionary<string, Func<double>> GetPerformanceCurveCalculatorPerAttribute() => SimulationRunner.CurvesPerAttribute.ToDictionary(curves => curves.Key.Name, GetCalculator);
@@ -513,7 +537,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
             {
                 if (committedProjects.Any(cp => !cp.ShouldApplyConsequences))
                 {
-                    SimulationRunner.MessageBuilder = new("Cash-flow committed project overlaps with non-cash-flow committed project on the same asset.")
+                    SimulationRunner.MessageBuilder = new("Cash-flow committed project overlaps with another committed project on the same asset.")
                     {
                         AssetId = Asset.Id,
                         AssetName = Asset.AssetName,

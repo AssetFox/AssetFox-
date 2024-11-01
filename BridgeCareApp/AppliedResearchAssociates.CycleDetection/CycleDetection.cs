@@ -6,7 +6,10 @@ namespace AppliedResearchAssociates
 {
     public static class CycleDetection
     {
-        public static List<List<T>> FindAllCycles<T>(IEnumerable<T> vertexValues, Func<T, IEnumerable<T>> getAdjacentValues, IEqualityComparer<T> equalityComparer = null)
+        public static List<List<T>> FindAllCycles<T>(
+            IEnumerable<T> vertexValues,
+            Func<T, IEnumerable<T>> getAdjacentValues,
+            IEqualityComparer<T> equalityComparer = null)
         {
             equalityComparer = equalityComparer ?? EqualityComparer<T>.Default;
 

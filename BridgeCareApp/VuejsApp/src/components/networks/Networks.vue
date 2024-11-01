@@ -113,7 +113,7 @@
                     </v-row>
                     <v-row v-show="hasStartedAggregation">
                         <v-col>
-                            <v-subheader class="ghd-control-label ara-black" v-text="networkDataAssignmentStatus" ></v-subheader>
+                            <v-subheader class="ghd-control-label assetFox-black" v-text="networkDataAssignmentStatus" ></v-subheader>
                             <v-progress-linear
                                             v-model="networkDataAssignmentPercentage"
                                             height="25"

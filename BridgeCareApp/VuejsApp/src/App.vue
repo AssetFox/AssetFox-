@@ -1,24 +1,30 @@
 <template>
     <v-app class="paper-white-bg">
         <v-main style="font-family: roboto;">
-            <v-toolbar app class="paper-white-bg elevation-2">
-                <v-toolbar-title  >
-                    <v-row  >
-                        <v-col><v-img v-bind:src="agencyLogo" @click="onNavigate('/Scenarios/')"/></v-col>                    
-                    </v-row>
+            <v-toolbar app class="paper-white-bg elevation-2">                
+                <v-toolbar-title style="flex: 1;">
+                <v-img
+                    :src="agencyLogo"
+                    @click="onNavigate('/Scenarios/')"
+                    class="toolbar-image"
+                    contain
+                />
                 </v-toolbar-title>
 
-                <v-toolbar-title >
-                    <v-row justify="start">
-                        <v-col><img v-bind:src="productLogo" @click="onNavigate('/Scenarios/')"/></v-col>
-                    </v-row>
+                <v-toolbar-title style="flex: 1;">
+                <v-img
+                    :src="productLogo"
+                    @click="onNavigate('/Scenarios/')"
+                    class="toolbar-image"
+                    contain
+                />
                 </v-toolbar-title>
                 <v-toolbar-items >
                     <v-btn-toggle style="height: 100%;">
                         <v-btn
                             id="App-scenarios-btn"
                             @click="onNavigate('/Scenarios/')"
-                            class="ara-blue-pantone-281"
+                            class="assetFox-blue-pantone-281"
                             variant = "flat"                     
                         >
                             Scenarios
@@ -26,7 +32,7 @@
                         <v-btn
                             id="App-libraries-btn"
                             @click="onNavigate('/EditLibrary/')"
-                            class="ara-blue-pantone-281"
+                            class="assetFox-blue-pantone-281"
                             variant = "flat"
                         >
                             Libraries
@@ -34,7 +40,7 @@
                         <v-btn
                             id="App-rawData-btn"
                             @click="onNavigate('/EditRawData/')"
-                            class="ara-blue-pantone-281"
+                            class="assetFox-blue-pantone-281"
                             variant = "flat"
                             v-if="hasAdminAccess"
                             
@@ -44,7 +50,7 @@
                         <v-btn
                             id="App-administration-btn"
                             @click="onNavigate('/EditAdmin/')"
-                            class="ara-blue-pantone-281"
+                            class="assetFox-blue-pantone-281"
                             variant = "flat"
                             v-if="hasAdminAccess"
                         >
@@ -53,7 +59,7 @@
                         <v-btn
                             id="App-inventory-btn"
                             @click="onNavigate('/Inventory/')"
-                            class="ara-blue-pantone-281"
+                            class="assetFox-blue-pantone-281"
                             variant = "flat"
                         >
                             Inventory
@@ -61,7 +67,7 @@
                         <v-btn
                             id="App-news-btn"
                             @click="onShowNewsDialog()"
-                            class="ara-blue-pantone-281"
+                            class="assetFox-blue-pantone-281"
                             variant = "flat"
                         >
                             News
@@ -131,7 +137,7 @@
                                     <template v-slot:activator>                                        
                                         <v-list-tile id="App-notification-vListTile">
                                             <v-row justify="end">
-                                                <v-col cols ="9">
+                                                <v-col cols ="7">
                                                     <v-icon class="notificationIcon"
                                                             :color="notification.iconColor">
                                                         {{ notification.icon }}
@@ -140,16 +146,25 @@
                                                         {{ notification.shortMessage }}                                            
                                                     </v-list-item-content>
                                                 </v-col>
-                                                <v-col> 
-                                                    <v-btn icon size="16" position="absolute" style="margin-left:15%;">
+                                                <v-col v-if="hasAdminAccess && !isNil(notification.stackTrace)" align-self="center"> 
+                                                    <v-btn size="small" variant="text" @click.stop="onStackTraceClick(index)">
+                                                            Show Stack
+                                                    </v-btn>
+                                                </v-col>
+                                                <v-col align-self="center"> 
+                                                    <v-row justify="end" align="center">
+                                                        <v-btn icon size="16" >
                                                             <v-icon size="small"
                                                                     @click="onRemoveNotification(notification.id)"
                                                                 >fas fa-times-circle
                                                             </v-icon>
-                                                    </v-btn>
+                                                        </v-btn>
+                                                    </v-row>
+                                                    
                                                 </v-col>
+                                                
                                             </v-row>
-                                        </v-list-tile>
+                                        </v-list-tile>                                  
                                         <v-list-tile class="notification-long-message" v-if="notification.active">
                                             <v-list-item-title class="text-wrap">
                                                 {{ notification.longMessage }}
@@ -258,13 +273,14 @@
             <Spinner />
             <Alert :dialog-data="alertDialogData" @submit="onAlertResult" />
             <Alert :dialogData="ConfirmRunAnalysisCompleted" @submit="onConfirmRunAnalysisCompletedSubmit"/>
+            <Alert :dialog-data="stackTraceAlert" @submit="onStackTraceSubmit" />
             <NewsDialog :showDialog="showNewsDialog" @close="onCloseNewsDialog()" />
         </v-main>
     </v-app>
 </template>
 
 <script setup lang="ts">
-import {inject, reactive, computed, ref, onMounted, onBeforeUnmount, watch, Ref} from 'vue';
+import {inject, reactive, computed, ref, onMounted, onBeforeUnmount, watch, Ref, provide} from 'vue';
 import NotificationBell from 'vue-notification-bell';
 import Notifications from '@kyvg/vue3-notification'
 import Spinner from './shared/modals/Spinner.vue';
@@ -337,6 +353,7 @@ import { getUrl } from './shared/utils/get-url';
     function addSuccessNotificationAction(payload?: any) { store.dispatch('addSuccessNotification', payload);}
     function addWarningNotificationAction(payload?: any) { store.dispatch('addWarningNotification', payload);}
     function addErrorNotificationAction(payload?: any) { store.dispatch('addErrorNotification', payload);} 
+    function addErrorNotificationWithStackTraceAction(payload?: any) { store.dispatch('addErrorNotificationWithStackTrace', payload);} 
     function addInfoNotificationAction(payload?: any) { store.dispatch('addInfoNotification', payload);} 
     function addTaskCompletedNotificationAction(payload: any) { store.dispatch('addTaskCompletedNotification', payload)}
     function removeNotificationAction(payload?: any) { store.dispatch('removeNotification', payload);}
@@ -362,6 +379,7 @@ import { getUrl } from './shared/utils/get-url';
     let latestNewsDate: string = '0001-01-01';
     let currentUserLastNewsAccessDate: string = '0001-01-01';
     let alertDialogData: AlertData = clone(emptyAlertData);
+    let stackTraceAlert = ref<AlertData>(clone(emptyAlertData));
     let pushRouteUpdate: boolean = false;
     let route: any = {};
     const selectedScenario = ref<Scenario>(clone(emptyScenario));
@@ -392,6 +410,7 @@ import { getUrl } from './shared/utils/get-url';
     let alert: Ref<boolean> = ref(false);
 
     const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
+    provide('emitter', $emitter);
     
     created();
 
@@ -656,16 +675,19 @@ import { getUrl } from './shared/utils/get-url';
 
     function onAddErrorNotification(data: any) {
         let errorNotification:string = data.error.toString();
+        let stackTrace: string = data.stackTrace.toString();
         let spl = errorNotification.split('::');
         if (spl.length > 0 ) {
-            addErrorNotificationAction( {
+            addErrorNotificationWithStackTraceAction( {
                 message: spl[0],
-                longMessage: spl.length>1 ? spl[1] : 'Unknown Error'
+                longMessage: spl.length>1 ? spl[1] : 'Unknown Error',
+                stackTrace: stackTrace
             });
         } else {
-            addErrorNotificationAction( {
+            addErrorNotificationWithStackTraceAction( {
                 message: 'Server Error',
-                longMessage: data.error
+                longMessage: data.error,
+                stackTrace: stackTrace
             });
         }
     }
@@ -694,26 +716,41 @@ import { getUrl } from './shared/utils/get-url';
     }
 
     function onAddTaskCompletedNotification(data: any) {
+
+        const taskMessage = data.task;
         addTaskCompletedNotificationAction({
             message: 'Task Completed',
-            longMessage: data.task
+            longMessage: taskMessage
         });
 
         const stringData = JSON.stringify(data);
 
-        if(stringData.includes('Analysis'))
-        {
-            $emitter.emit('SimulationRunSettingUpdated');                      
-            onShowRunAnalysisCompletedAlert();
+        if (taskMessage.includes('Analysis')) {
+            $emitter.emit('SimulationRunSettingUpdated');
+
+            // Extract the simulation name from data.task
+            const simulationName = extractSimulationName(taskMessage);
+
+            onShowRunAnalysisCompletedAlert(simulationName);
         }
     }
 
-    function onShowRunAnalysisCompletedAlert() {
+    function extractSimulationName(taskMessage: string): string {
+        // Assuming taskMessage is in the format "Analysis on [Simulation Name] has completed"
+        const regex = /^Analysis on (.+?) has completed$/;
+        const match = taskMessage.match(regex);
+        if (match && match[1]) {
+            return match[1].trim();
+        }
+        return 'Unknown Simulation';
+    }
+
+    function onShowRunAnalysisCompletedAlert(simulationName:string) {
         ConfirmRunAnalysisCompleted.value = {
             showDialog: true,
             heading: 'Success',
             choice: false,
-            message: `The Analysis on ${updatedSimulationRunSettingName.value} has been completed`,        
+            message: `The Analysis on ${simulationName} has been completed`,        
         };
     }
 
@@ -806,6 +843,19 @@ import { getUrl } from './shared/utils/get-url';
         showNewsDialog.value = false;
     }
 
+    function onStackTraceClick(index: number){
+        stackTraceAlert.value = {
+            showDialog: true,
+            heading: 'Stack Trace',
+            choice: false,
+            message: notifications.value[index].stackTrace!,        
+        };
+        
+    }
+    function onStackTraceSubmit(submit: boolean) {
+        stackTraceAlert.value.showDialog = false;
+    }
+
     function checkLastNewsAccessDate () {
         hasUnreadNewsItem = newsAccessDateComparison(latestNewsDate, currentUserLastNewsAccessDate);
     }
@@ -880,4 +930,11 @@ html {
     max-height: 100%;
     overflow: hidden;
   }
+
+.toolbar-image {
+  max-height: 60px; /* Adjust as needed */
+  max-width: 100%;
+  height: auto;
+  cursor: pointer;
+}
 </style>

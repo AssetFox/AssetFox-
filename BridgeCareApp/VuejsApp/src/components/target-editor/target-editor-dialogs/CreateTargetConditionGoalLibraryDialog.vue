@@ -35,21 +35,11 @@
       </v-card-text>
       <v-card-actions class="py-0">
         <v-row justify="center">
-          <v-btn 
-            @click="onSubmit(false)"
-            id="CreateTargetConditionGoalLibraryDialog-Cancel-btn"
-            class="ghd-white-bg ghd-blue" 
-            variant = "outlined">
-            Cancel
-          </v-btn>
-          <v-btn 
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SaveButton 
+            @save="onSubmit(true)"
             :disabled="newTargetConditionGoalLibrary.name ===''" 
-            @click="onSubmit(true)" 
-            variant = "outlined"
-            class="ghd-white-bg ghd-blue"
-            id="CreateTargetConditionGoalLibraryDialog-Save-btn">
-            Save
-          </v-btn>
+          />
         </v-row>
       </v-card-actions>
     </v-card>
@@ -70,6 +60,8 @@ import {InputValidationRules, rules as validationRules,} from '@/shared/utils/in
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
 import { useStore } from 'vuex';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
 
   let store = useStore();
   const emit = defineEmits(['submit'])

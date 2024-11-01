@@ -113,7 +113,6 @@ Line 164 Delete,
                             class="ghd-checkbox"
                             color="#2A578D"
                             label="Allow Multiple Treatments"
-                            :disabled="!hasAdminAccess"
                             v-model="analysisMethod.shouldAllowMultipleTreatments"
                             @update:model-value='onSetAnalysisMethodProperty("shouldAllowMultipleTreatments",$event)'/>
                         </v-col>
@@ -145,11 +144,11 @@ Line 164 Delete,
                                     @click="
                                         onShowCriterionEditorDialog
                                     "
-                                    class="edit-icon ghd-control-label ghd-green"
+                                    class="edit-icon ghd-control-label ghd-blue"
                                     icon
                                     flat
                                 >
-                                <EditSvg />
+                                    <img class='img-general' :src="getUrl('assets/icons/edit.svg')"/> 
                                 </v-btn>
                                 </v-row>
                                 <v-textarea
@@ -168,10 +167,12 @@ Line 164 Delete,
                     </v-row>
                 <v-row justify="center">
                     <v-row justify="center">
-                        <CancelSaveButtonGroup
-                            :cancelDisabled="!hasUnsavedChanges"
-                            :saveDisabled="!valid || !hasUnsavedChanges"
+                        <CancelButton 
+                            :disabled="!hasUnsavedChanges"
                             @cancel="onDiscardChanges"
+                        />
+                        <SaveButton 
+                            :disabled="!valid || !hasUnsavedChanges"
                             @save="onUpsertAnalysisMethod"
                         />
                     </v-row>
@@ -218,8 +219,10 @@ import { useRouter } from 'vue-router';
 import { getUrl } from '@/shared/utils/get-url';
 import ConfirmDialog from 'primevue/confirmdialog';
 import EditSvg from '@/shared/icons/EditSvg.vue';
-import CancelSaveButtonGroup from '@/shared/components/buttons/CancelSaveButtonGroup.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
 import mitt, { Emitter, EventType } from 'mitt';
+import AnalysisMethodService from '@/services/analysis-method.service';
 
     let store = useStore(); 
     const router = useRouter(); 
@@ -230,11 +233,13 @@ import mitt, { Emitter, EventType } from 'mitt';
 
     const stateAnalysisMethod = computed<AnalysisMethod>(() => store.state.analysisMethodModule.analysisMethod) ;
     const stateNumericAttributes = computed<Attribute[]>( ()=> store.state.attributeModule.numericAttributes) ;
+    const stateSimulationAnalysisSetting = computed<boolean>( ()=> store.state.analysisMethodModule.simulationAnalysisSetting);
 
     const hasAdminAccess = computed<boolean>(() => store.state.authenticationModule.hasAdminAccess) ; 
 
     async function getAnalysisMethodAction(payload?: any): Promise<any>{await store.dispatch('getAnalysisMethod', payload)} 
     async function upsertAnalysisMethodAction(payload?: any): Promise<any>{await store.dispatch('upsertAnalysisMethod', payload)} 
+    async function getSimulationAnalysisSettingAction(payload?: any): Promise<any>{await store.dispatch('getSimulationAnalysisSetting', payload)}
 
     function addErrorNotificationAction(payload?: any){ store.dispatch('addErrorNotification', payload)}
     function setHasUnsavedChangesAction(payload?: any){ store.dispatch('setHasUnsavedChanges', payload)} 
@@ -306,12 +311,23 @@ import mitt, { Emitter, EventType } from 'mitt';
                 router.push('/Scenarios/');
             }
 
-            // get the selected scenario's analysisMethod data
-            getAnalysisMethodAction({ scenarioId: selectedScenarioId.value }).then(() => {                       
-                getCurrentUserOrSharedScenarioAction({simulationId: selectedScenarioId.value}).then(() => {         
-                    selectScenarioAction({ scenarioId: selectedScenarioId.value });        
-                });
-            });
+// Get the selected scenario's analysis method data
+getAnalysisMethodAction({ scenarioId: selectedScenarioId.value })
+    .then(() => {
+        // Get simulation analysis setting
+        return getSimulationAnalysisSettingAction({ scenarioId: selectedScenarioId.value });
+    })
+    .then(() => {
+        // Get current user or shared scenario info
+        return getCurrentUserOrSharedScenarioAction({ simulationId: selectedScenarioId.value });
+    })
+    .then(() => {
+        // Select scenario
+        selectScenarioAction({ scenarioId: selectedScenarioId.value });
+    })
+    .catch(error => {
+        console.error('Error in action chain:', error);
+    });
 
         if (hasValue(stateNumericAttributes.value)) {
             setBenefitAndWeightingAttributes();
@@ -333,15 +349,23 @@ import mitt, { Emitter, EventType } from 'mitt';
 
     // watch(benefit, onAnalysisChanged)
     watch(analysisMethod, onAnalysisChanged)
-    function onAnalysisChanged() {
-        hasUnsavedChanges.value = !equals(analysisMethod.value, stateAnalysisMethod.value)
+     async function onAnalysisChanged() {
+        hasUnsavedChanges.value = !equals(analysisMethod.value, stateAnalysisMethod.value);
+
         setHasUnsavedChangesAction({
             value:
                 hasUnsavedChanges.value
         });
 
-        setBenefitAttributeIfEmpty();        
+         setBenefitAttributeIfEmpty();
     }
+
+    watch(stateSimulationAnalysisSetting, (newVal) => {
+        if(newVal === false)
+        {
+            hasUnsavedChanges.value = true;
+        }
+    });
 
     watch(stateNumericAttributes, () => {
         if (hasValue(stateNumericAttributes.value)) {
@@ -438,11 +462,12 @@ import mitt, { Emitter, EventType } from 'mitt';
         {
             if(analysisMethod.value.benefit.id === getBlankGuid())
             analysisMethod.value.benefit.id = getNewGuid();
-        upsertAnalysisMethodAction({
-                analysisMethod: analysisMethod.value,
-                scenarioId: selectedScenarioId.value,
-            });
-            $emitter.emit('AnalysisMethodUpdated');              
+            const responseData = await store.dispatch('upsertAnalysisMethod', { analysisMethod: analysisMethod.value, scenarioId: selectedScenarioId.value});
+            
+            if(responseData === "Analysis Method successfully updated")
+            {
+                $emitter.emit('AnalysisMethodUpdated');              
+            }
         }
         // const form: any = $refs.form;
 
@@ -467,17 +492,19 @@ import mitt, { Emitter, EventType } from 'mitt';
         };
     }
 
-    function onConfirmEmptyCriteriaAlertSubmit(submit: boolean) {
+    async function onConfirmEmptyCriteriaAlertSubmit(submit: boolean) {
         ConfirmEmptyCriteria.value = clone(emptyAlertData);
 
         if (submit) {
             if(analysisMethod.value.benefit.id === getBlankGuid())
             analysisMethod.value.benefit.id = getNewGuid();
-        upsertAnalysisMethodAction({
-                analysisMethod: analysisMethod.value,
-                scenarioId: selectedScenarioId.value,
-            });
-            $emitter.emit('AnalysisMethodUpdated');              
+
+            const responseData = await store.dispatch('upsertAnalysisMethod', { analysisMethod: analysisMethod.value, scenarioId: selectedScenarioId.value});
+            
+            if(responseData === "Analysis Method successfully updated")
+            {
+                $emitter.emit('AnalysisMethodUpdated');              
+            }
         } 
     }
 

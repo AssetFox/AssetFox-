@@ -24,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year, TreatmentOptionDetail treatment)
+        public void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year, TreatmentOptionDetail treatment, Color color)
         {
             _treatmentCommon.FillDataInWorkSheet(worksheet, currentCell, section, Year);
 
@@ -113,10 +113,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = @"_($* #,##0_);_($*  #,##0);_($* "" - ""??_);(@_)";
             worksheet.Cells[row, columnNo++].Value = treatment?.Cost;
 
-            if (row % 2 == 0)
-            {
-                ExcelHelper.ApplyColor(worksheet.Cells[row, 1, row, columnNo - 1], Color.LightGray);
-            }
+            ExcelHelper.ApplyColor(worksheet.Cells[row, 1, row, columnNo - 1], color);            
             ExcelHelper.ApplyBorder(worksheet.Cells[row, 1, row, columnNo - 1]);
 
             currentCell.Column = columnNo;

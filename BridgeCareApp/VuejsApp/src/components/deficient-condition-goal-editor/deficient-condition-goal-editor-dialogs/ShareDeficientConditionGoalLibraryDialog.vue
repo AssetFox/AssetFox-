@@ -4,9 +4,7 @@
       <v-card-title>
         <v-row  justify="space-between" align="center" style="padding: 10px;">
           <h5>Deficient Condition Goal Library Sharing</h5>
-          <v-btn @click="onSubmit(false)" variant = "flat" class="ghd-close-button">
-            X
-          </v-btn>
+          <XButton @click="onSubmit(false)"/>
         </v-row>
       </v-card-title>
       <v-card-text>
@@ -44,7 +42,7 @@
           </tr>
           </template>
           <!-- <v-alert :model-value="true"
-                   class="ara-orange-bg"
+                   class="assetFox-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
@@ -53,10 +51,8 @@
       </v-card-text>
       <v-card-actions>
         <v-row justify="center">
-          <v-btn id="ShareDeficientConditionGoalLibraryDialog-cancel-vbtn" @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" variant = "text">Cancel</v-btn>
-          <v-btn id="ShareDeficientConditionGoalLibraryDialog-save-vbtn" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding" variant="outlined">
-            Save
-          </v-btn>
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SaveButton @save="onSubmit(true)"/>
         </v-row>
       </v-card-actions>
     </v-card>
@@ -77,6 +73,9 @@ import {DeficientConditionGoalLibraryUserGridRow, ShareDeficientConditionGoalLib
 import DeficientConditionGoalService from '@/services/deficient-condition-goal.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
+import XButton from '@/shared/components/buttons/XButton.vue';
 
 let store = useStore();
 

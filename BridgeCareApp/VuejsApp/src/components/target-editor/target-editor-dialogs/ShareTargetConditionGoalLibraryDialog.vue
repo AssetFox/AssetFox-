@@ -45,7 +45,7 @@
           </tr>
           </template>
           <!-- <v-alert value="true"
-                   class="ara-orange-bg"
+                   class="assetFox-orange-bg"
                    icon="fas fa-exclamation"
                    slot="no-results">
             Your search for "{{ searchTerm }}" found no results.
@@ -54,21 +54,9 @@
       </v-card-text>
         <v-row justify="center">
           <div style="margin: 10px; padding: 10px;">
-          <v-btn
-            id="ShareTargetConditionGoalLibraryDialog-cancel-vbtn" 
-            @click="onSubmit(false)" 
-            class="ghd-white-bg ghd-blue ghd-button-text" 
-            flat>
-              Cancel
-          </v-btn>
-          <v-btn 
-            id="ShareTargetConditionGoalLibraryDialog-save-vbtn"
-            variant="outlined"
-            @click="onSubmit(true)" 
-            class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
-            Save
-          </v-btn>
-        </div>
+            <CancelButton @cancel="onSubmit(false)"/>
+            <SaveButton @save="onSubmit(true)"/> 
+          </div>
         </v-row>
     </v-card>
   </v-dialog>
@@ -87,6 +75,8 @@ import {TargetConditionGoalLibraryUserGridRow, ShareTargetConditionGoalLibraryDi
 import TargetConditionGoalService from '@/services/target-condition-goal.service';
 import { http2XX } from '@/shared/utils/http-utils';
 import { useStore } from 'vuex';
+import SaveButton from '@/shared/components/buttons/SaveButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue';
 
   let store = useStore();
   const emit = defineEmits(['submit'])

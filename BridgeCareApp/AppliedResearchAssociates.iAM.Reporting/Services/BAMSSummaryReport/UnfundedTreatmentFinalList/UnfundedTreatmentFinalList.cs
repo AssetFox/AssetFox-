@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using System.Drawing;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentFinalList
 {
@@ -46,7 +47,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             unfundedTreatmentTimeWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
 
             AddDynamicDataCells(unfundedTreatmentTimeWorksheet, simulationOutput, currentCell);
-            //unfundedTreatmentTimeWorksheet.Calculate();  // calculation is set to manual, so force calculation of the total now
 
             unfundedTreatmentTimeWorksheet.Cells.AutoFitColumns();
             _unfundedTreatmentCommon.PerformPostAutofitAdjustments(unfundedTreatmentTimeWorksheet);
@@ -59,7 +59,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             // facilityId, year, section, treatment
             var treatmentsPerSection = new SortedDictionary<int, Tuple<SimulationYearDetail, AssetDetail, TreatmentOptionDetail>>();
             var validFacilityIds = new List<int>(); // It will keep the Ids which has gone unfunded for all the years
-            var firstYear = true;
+            var firstYear = true;           
+            
             foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
             {
                 var untreatedSections = _reportHelper.GetSectionsWithUnfundedTreatments(year);
@@ -103,15 +104,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 
             currentCell.Row += 1; // Data starts here
             currentCell.Column = 1;
-
+            var color = Color.White;
             foreach (var facilityTuple in treatmentsPerSection.Values)
             {
                 var section = facilityTuple.Item2;
                 var year = facilityTuple.Item1;
                 var treatment = facilityTuple.Item3;
-                _unfundedTreatmentCommon.FillDataInWorkSheet(worksheet, currentCell, section, year.Year, treatment);
+                //Shade the BRKeys group
+                _unfundedTreatmentCommon.FillDataInWorkSheet(worksheet, currentCell, section, year.Year, treatment, color);
                 currentCell.Row++;
                 currentCell.Column = 1;
+                color = color == Color.White ? Color.LightGray : Color.White;
             }
         }
 

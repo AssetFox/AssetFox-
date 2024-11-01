@@ -70,9 +70,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{RawDataError}::ImportExcelSpreadsheet - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{RawDataError}::ImportExcelSpreadsheet - {e.Message}", e);
             }
+            return Ok();
         }
         [HttpGet]
         [Route("GetExcelSpreadsheetColumnHeaders/{dataSourceId}")]
@@ -94,9 +94,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{RawDataError}::GetExcelSpreadsheetColumnHeaders - {e.Message}");
-                throw;
+                HubService.SendRealTimeErrorMessage(UserInfo.Name, $"{RawDataError}::GetExcelSpreadsheetColumnHeaders - {e.Message}", e);
             }
+            return Ok();
         }
 
     }

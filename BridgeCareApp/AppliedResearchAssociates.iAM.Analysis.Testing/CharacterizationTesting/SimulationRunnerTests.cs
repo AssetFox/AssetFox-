@@ -1,17 +1,14 @@
-﻿using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Analysis.Input.DataTransfer;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
-using VerifyXunit;
-using Xunit;
+using AppliedResearchAssociates.Validation;
+using Xunit.Abstractions;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Testing.CharacterizationTesting;
 
 [UsesVerify]
-public class SimulationRunnerTests
+public class SimulationRunnerTests(ITestOutputHelper outputHelper)
 {
     #region facts
 
@@ -38,6 +35,22 @@ public class SimulationRunnerTests
             Cost = 6_000_000,
             Name = "Lovecraftian Horror (Year 2)",
             NameOfTemplateTreatment = scenario.SelectableTreatments.First(t => t.ForCommittedProjectsOnly).Name,
+        });
+
+        scenario.InvestmentPlan.CashFlowRules.Add(new()
+        {
+            Name = "Default Cash Flow Rule",
+            DistributionRules =
+            {
+                new()
+                {
+                    CostCeiling = 5_000_000,
+                    YearlyPercentages =
+                    {
+                        100
+                    },
+                },
+            },
         });
 
         return RunTest(scenario);
@@ -126,14 +139,23 @@ public class SimulationRunnerTests
 
     #endregion
 
-    private static Task RunTest(Scenario scenario, string parametersText = null)
+    private Task RunTest(Scenario scenario, string parametersText = null)
     {
         var input = scenario.ConvertOut();
+
+        foreach (var validationResult in input.GetAllValidationResults([]))
+        {
+            outputHelper.WriteLine($"[{validationResult.Status}] {validationResult.Message}");
+        }
+
         var runner = new SimulationRunner(input);
+        runner.Progress += (sender, e) => outputHelper.WriteLine(e.ToString());
+        runner.SimulationLog += (sender, e) => outputHelper.WriteLine(e.MessageBuilder.ToString());
         runner.Run();
+
         var output = input.Results;
         var outputJson = JsonSerializer.Serialize(output, Serialization.Options);
-        var result = Verifier.Verify(outputJson, "json").UseDirectory("Outputs");
+        var result = Verify(outputJson, "json").UseDirectory("Outputs");
         return parametersText is null ? result : result.UseTextForParameters(parametersText);
     }
 }

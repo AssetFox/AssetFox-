@@ -4,11 +4,7 @@
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-row justify="space-between" align-center>
           <div class="ghd-control-dialog-header">New Cash Flow Rule Library</div>
-          <v-btn @click="onSubmit(false)" variant = "flat" 
-              id="CreateCashFlowRuleLibraryDialog-Close-vbtn"
-              class="ghd-close-button">
-              X
-            </v-btn>
+          <XButton @click="onSubmit(false)"/>
         </v-row>
       </v-card-title>
       <v-card-text class="ghd-dialog-box-padding-center">
@@ -32,16 +28,11 @@
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-row justify="center">
-          <v-btn @click="onSubmit(false)" variant = "outlined" 
-                 id="CreateCashFlowRuleLibraryDialog-Cancel-vbtn"
-                 class='ghd-blue ghd-button-text ghd-button'>
-            Cancel
-          </v-btn>
-          <v-btn :disabled="newCashFlowRuleLibrary.name === ''" @click="onSubmit(true)"
-          variant = "outlined" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                 id="CreateCashFlowRuleLibraryDialog-Create-vbtn">
-            Submit
-          </v-btn>        
+          <CancelButton @cancel="onSubmit(false)"/>
+          <SubmitButton 
+            @submit="onSubmit(true)"
+            :disabled="newCashFlowRuleLibrary.name === ''"  
+          />       
         </v-row>
       </v-card-actions>
     </v-card>
@@ -63,6 +54,9 @@ import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules
 import {clone} from 'ramda';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { useStore } from 'vuex';
+import SubmitButton from '@/shared/components/buttons/SubmitButton.vue';
+import CancelButton from '@/shared/components/buttons/CancelButton.vue'; 
+import XButton from '@/shared/components/buttons/XButton.vue';
 
   let store = useStore();
 

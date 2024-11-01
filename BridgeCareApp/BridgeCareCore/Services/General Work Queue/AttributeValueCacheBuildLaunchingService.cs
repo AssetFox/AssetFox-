@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.WorkQueue;
@@ -46,7 +46,7 @@ namespace BridgeCareCore.Services
             {
                 difference = difference + TimeSpan.FromHours(12);
             }
-            _cacheRebuildTimer = new Timer(LaunchQueueBuild, null, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(10));
+            _cacheRebuildTimer = new Timer(LaunchQueueBuild, null, difference, TimeSpan.FromHours(12));
         }
     }
 }

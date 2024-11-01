@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
@@ -44,7 +45,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         string GetAttributeName(Guid attributeId);
         List<AttributeDTO> GetAllAttributesAbbreviated();
-
         List<AttributeDefaultValuePair> GetAttributeDefaultValuePairs(Guid networkId);
         void UpsertAttributes(List<Attribute> attributes);
     }

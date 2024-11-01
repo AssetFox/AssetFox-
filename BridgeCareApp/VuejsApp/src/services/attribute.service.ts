@@ -12,10 +12,10 @@ export default class AttributeService {
         return coreAxiosInstance.post(`${API.Attribute}/GetAttributesSelectValues`, attributeNames);
     }
 
-    static upsertAttribute(data: Attribute){
+    static upsertAttribute(data: { attribute: Attribute, setForAllAttributes: boolean }) {
         return coreAxiosInstance.post(
             `${API.Attribute}/CreateAttribute`,
-            data
+            data 
         );
     }
 

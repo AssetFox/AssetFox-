@@ -13,6 +13,7 @@ export interface Attribute {
     maximum: number | null;
     isCalculated: boolean;
     isAscending: boolean;
+    setForAllAttributes: boolean;
     dataSource: Datasource;
 }
 
@@ -50,5 +51,6 @@ export const emptyAttribute: Attribute = {
     maximum: 0,
     name: '',
     type: 'STRING',
+    setForAllAttributes: false,
     dataSource: clone(emptyDatasource)
 }

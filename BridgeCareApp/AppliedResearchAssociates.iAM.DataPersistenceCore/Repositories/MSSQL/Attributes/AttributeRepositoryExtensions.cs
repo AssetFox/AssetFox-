@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.Data.Mappers;
@@ -11,6 +12,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     public static class AttributeRepositoryExtensions
     {
         public static void UpsertAttributes(this IAttributeRepository repository, List<AttributeDTO> dtos)
+        {
+            var dataAttributes = MapToDataAttributes(repository, dtos);
+            repository.UpsertAttributes(dataAttributes);
+        }
+
+        public static void UpsertAttributes(this IAttributeRepository repository, params AttributeDTO[] dtos)
+        {
+            repository.UpsertAttributes(dtos.ToList());
+        }
+
+        public static void UpsertAttributes(this IAttributeRepository repo, params DataAttribute[] attributes)
+            => repo.UpsertAttributesNonAtomic(attributes.ToList());
+
+        // Helper method to map DTOs to DataAttribute objects
+        private static List<DataAttribute> MapToDataAttributes(IAttributeRepository repository, List<AttributeDTO> dtos)
         {
             var dataAttributes = new List<DataAttribute>();
             foreach (var dto in dtos)
@@ -30,15 +46,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
                     throw new AttributeMappingFailureException($"Invalid attribute {dto.Name}");
                 }
             }
-            repository.UpsertAttributes(dataAttributes);
+            return dataAttributes;
         }
-
-        public static void UpsertAttributes(this IAttributeRepository repository, params AttributeDTO[] dtos)
-        {
-            repository.UpsertAttributes(dtos.ToList());
-        }
-
-        public static void UpsertAttributes(this IAttributeRepository repo, params DataAttribute[] attributes)
-            => repo.UpsertAttributesNonAtomic(attributes.ToList());
     }
 }

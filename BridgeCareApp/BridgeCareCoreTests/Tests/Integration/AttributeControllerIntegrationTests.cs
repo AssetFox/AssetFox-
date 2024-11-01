@@ -21,11 +21,13 @@ namespace BridgeCareCoreTests.Tests.Integration
         private AttributeController CreateController()
         {
             var attributeService = new AttributeService(TestHelper.UnitOfWork);
+            var excelDataLoadService = new ExcelRawDataLoadService(TestHelper.UnitOfWork);
             var security = EsecSecurityMocks.Admin;
             var hubService = HubServiceMocks.Default();
             var contextAccessor = HttpContextAccessorMocks.Default();
             var controller = new AttributeController(
                 attributeService,
+                excelDataLoadService,
                 security,
                 TestHelper.UnitOfWork,
                 hubService,

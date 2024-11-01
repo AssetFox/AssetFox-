@@ -66,9 +66,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             var committedTreatments = new HashSet<string>();
             var map = WorkTypeMap.Map;
-            var keyCashFlowFundingDetails = new Dictionary<double, List<TreatmentConsiderationDetail>>();
-            foreach (var summaryData in workSummaryByBudgetData)
+            
+            foreach (var budgetSummaryData in workSummaryByBudgetData)
             {
+                var summaryData = budgetSummaryData;
+                var keyCashFlowFundingDetails = new Dictionary<double, List<TreatmentConsiderationDetail>>();
+
                 foreach (var yearData in reportOutputData.Years)
                 {
                     var assets = yearData.Assets.Where(_ => _.TreatmentCause != TreatmentCause.NoSelection);
@@ -141,10 +144,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         });
                     }
                 }
-            }            
-                        
-            foreach (var summaryData in workSummaryByBudgetData)
-            {
+
                 //Filtering treatments for the given budget             
                 var costForCulvertBudget = summaryData.YearlyData
                                             .Where(_ => _.AssetType == "Culvert" && !_.isCommitted);

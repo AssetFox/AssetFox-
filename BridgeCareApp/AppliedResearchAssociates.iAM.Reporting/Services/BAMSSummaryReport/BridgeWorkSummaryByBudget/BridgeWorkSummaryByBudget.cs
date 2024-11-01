@@ -37,8 +37,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _reportHelper = new ReportHelper(_unitOfWork);
         }
 
-        public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount
-            , IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectList, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, bool shouldBundleFeasibleTreatments, List<SimpleBudgetDetailDTO> scenarioSimpleBudgets)
+        public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, List<int> simulationYears, Dictionary<string, BudgetDTO> yearlyBudgets
+            , List<TreatmentDTO> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup, List<BaseCommittedProjectDTO> committedProjectList, List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, bool shouldBundleFeasibleTreatments, List<SimpleBudgetDetailDTO> scenarioSimpleBudgets)
         {
             var startYear = simulationYears[0];
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
@@ -137,7 +137,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             Amount = budgetAmount,
                             costPerBPN = (bpnName, budgetAmount),
                             TreatmentCategory = appliedTreatment.Contains("Bundle") ? TreatmentCategory.Bundled : treatmentData.Category,
-                            AssetType = treatmentData.AssetCategory
+                            AssetType = treatmentData.AssetType
                         });
                     }
                 }
@@ -258,9 +258,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 currentCell.Column = 1;
                 worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.TotalBridgeCareBudget;
                 var budgetTotalRow = currentCell.Row;
-                var budgetDetails = yearlyBudgetAmount[summaryData.Budget];
+                var budgetDetails = yearlyBudgets[summaryData.Budget];
                 var yearTracker = 0;
-                foreach (var item in budgetDetails.YearlyAmounts)
+                foreach (var item in budgetDetails.BudgetAmounts)
                 {
                     var cellFortotalBudget = yearTracker;
                     var currValue = worksheet.Cells[currentCell.Row, currentCell.Column + cellFortotalBudget + 2].Value;
@@ -322,7 +322,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 var fromColumn = column + 1;
                 yearTracker = 0;
-                foreach (var budgetData in budgetDetails.YearlyAmounts)
+                foreach (var budgetData in budgetDetails.BudgetAmounts)
                 {
                     row = startRow;
                     column = ++column;

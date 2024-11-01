@@ -369,7 +369,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var poorOnOffColumnStart = (outputResults.Years.Count * 2) + column + 3;
             var index = 1; // to track the initial section from rest of the years
             var isInitialYear = true;
-
+            var lastYear = outputResults.Years.Last().Year;
             Dictionary<double, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails = new();
             foreach (var yearlySectionData in outputResults.Years)
             {
@@ -475,8 +475,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         workDoneData[i]++;
                     }
                     worksheet.Cells[row, column + 1].Value = cost;
-                    ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1], ExcelFormatStrings.CurrencyWithoutCents);                                        
-                    
+                    ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1], ExcelFormatStrings.CurrencyWithoutCents);
 
                     worksheet.Cells[row, poorOnOffColumnStart].Value = prevYrMinc < 5 ? (thisYrMinc >= 5 ? "Off" : "--") :
                         (thisYrMinc < 5 ? "On" : "--");
@@ -516,6 +515,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         ExcelHelper.ApplyColor(worksheet.Cells[row, poorOnOffColumnStart], Color.LightGray);
                     }
 
+                    // Cash flow coloring
                     if (section.TreatmentCause == TreatmentCause.CashFlowProject)
                     {
                         ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.FromArgb(0, 255, 0));
@@ -524,6 +524,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         // Color the previous year project also
                         ExcelHelper.ApplyColor(worksheet.Cells[row, column - 2, row, column - 1], Color.FromArgb(0, 255, 0));
                         ExcelHelper.SetTextColor(worksheet.Cells[row, column - 2, row, column - 1], Color.FromArgb(255, 0, 0));
+                    }
+                    if (yearlySectionData.Year == lastYear &&
+                        section.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                        section.TreatmentStatus == TreatmentStatus.Progressed)
+                    {
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, column, row, column + 1], Color.FromArgb(255, 0, 0));
                     }
 
                     ExcelHelper.ApplyLeftBorder(worksheet.Cells[row, column]);

@@ -20,7 +20,7 @@ namespace BridgeCareCore.Services
                 ShouldApplyMultipleFeasibleCosts = analysisMethod.ShouldApplyMultipleFeasibleCosts,
                 ShouldDeteriorateDuringCashFlow = analysisMethod.ShouldDeteriorateDuringCashFlow,
                 ShouldUseExtraFundsAcrossBudgets = analysisMethod.ShouldUseExtraFundsAcrossBudgets,
-                shouldAllowMultipleTreatments = analysisMethod.shouldAllowMultipleTreatments,
+                ShouldAllowMultipleTreatments = analysisMethod.ShouldAllowMultipleTreatments,
                 SpendingStrategy = analysisMethod.SpendingStrategy,
 
             };

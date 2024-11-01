@@ -78,6 +78,8 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         /// </summary>
         public int ShadowForSameTreatment { get; set; }
 
+        public DateTime LastModifiedDate { get; set; }
+
         /// <summary>
         /// Verifies the LocationsKeys provided result in a valid location for the network type
         /// </summary>

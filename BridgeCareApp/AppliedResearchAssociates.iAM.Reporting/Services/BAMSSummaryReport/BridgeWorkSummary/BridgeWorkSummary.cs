@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Analysis;
 using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -39,8 +39,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
-            List<int> simulationYears, WorkSummaryModel workSummaryModel, Dictionary<string, Budget> yearlyBudgetAmount,
-            IReadOnlyCollection<SelectableTreatment> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup,
+            List<int> simulationYears, WorkSummaryModel workSummaryModel, Dictionary<string, BudgetDTO> yearlyBudgets,
+            List<TreatmentDTO> selectableTreatments, Dictionary<string, string> treatmentCategoryLookup,
             List<BaseCommittedProjectDTO> committedProjectsForWorkOutsideScope, bool shouldBundleFeasibleTreatments)
         {
             var currentCell = new CurrentCell { Row = 10, Column = 1 };
@@ -57,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 if (item.Name.ToLower() == BAMSConstants.NoTreatment) continue;
                 var category = SummaryReportHelper.GetCategory(item.Category);
-                simulationTreatments.Add((item.Name, item.AssetCategory, category));
+                simulationTreatments.Add((item.Name, item.AssetType, category));
             }
             simulationTreatments.Sort((a, b) => a.Item1.CompareTo(b.Item1));
 
@@ -74,7 +74,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             #endregion Initial work to set some data, which will be used throughout the Work summary TAB
 
             _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj,
-                simulationYears, yearlyBudgetAmount, costPerBPNPerYear, simulationTreatments, committedProjectsForWorkOutsideScope, shouldBundleFeasibleTreatments);
+                simulationYears, yearlyBudgets, costPerBPNPerYear, simulationTreatments, committedProjectsForWorkOutsideScope, shouldBundleFeasibleTreatments);
 
             _bridgesCulvertsWorkSummary.FillBridgesCulvertsWorkSummarySections(worksheet, currentCell, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj, simulationYears, simulationTreatments);
             _projectsCompletedCount.FillProjectCompletedCountSection(worksheet, currentCell, countForCompletedProject, countForCompletedCommittedProject, simulationYears, simulationTreatments);

@@ -39,13 +39,10 @@ namespace BridgeCareCore.Services
         {
             "TREATMENT",
             "YEAR",
-            "YEARANY",
-            "YEARSAME",
             "BUDGET",
             "COST",
             "PROJECTSOURCE",
-            "PROJECTSOURCEID",
-            "AREA",
+            "PROJECTSOURCEID",            
             "CATEGORY"
         };
 
@@ -369,14 +366,16 @@ namespace BridgeCareCore.Services
             for (var row = 2; row <= end.Row; row++)
             {
                 // Get the project year for this work
-                var projectYear = worksheet.GetCellValue<int>(row, _keyFields.Count + 2);  // Assumes that InitialHeaders stays constant
-                var treatment = worksheet.GetCellValue<string>(row, _keyFields.Count + 1);  // Assumes that InitialHeaders stays constant
+                var projectYearIndex = headers.IndexOf("YEAR") + 1;
+                var projectYear = worksheet.GetCellValue<int>(row, projectYearIndex);
+                var treatmentIndex = headers.IndexOf("TREATMENT") + 1;
+                var treatment = worksheet.GetCellValue<string>(row, treatmentIndex);  // Assumes that InitialHeaders stays constant
 
                 //Get project source 
                 var projectSourceValue = worksheet.Cells[row, projectSourceIndex].Text;
 
                 //Get Project Id
-                var projectIdValue = worksheet.GetCellValue<string>(row, _keyFields.Count + 8);
+                var projectIdValue = worksheet.GetCellValue<string>(row, projectSourceIdIndex);
 
                 // Attempt to convert the string to enum
                 ProjectSourceDTO projectSource;
@@ -410,7 +409,8 @@ namespace BridgeCareCore.Services
 
                 // Determine the appropriate budget to assign if any
                 var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
-                var budgetName = worksheet.GetCellValue<string>(row, _keyFields.Count + 5); // Assumes that InitialHeaders stays constant
+                var budgetIndex = headers.IndexOf("BUDGET") + 1;
+                var budgetName = worksheet.GetCellValue<string>(row, budgetIndex); // Assumes that InitialHeaders stays constant
                 var budgetNameIsEmpty = string.IsNullOrWhiteSpace(budgetName);
                 Guid? budgetId = null;
 
@@ -438,10 +438,11 @@ namespace BridgeCareCore.Services
                 }
 
                 //Handle potentially malformed costs
+                var costIndex = headers.IndexOf("COST") + 1;
                 var cost = -1.0; //Default
                 try
                 {
-                    var cellValue = worksheet.GetCellValue<object>(row, _keyFields.Count + 6);// Assumes that InitialHeaders stays constant
+                    var cellValue = worksheet.GetCellValue<object>(row, costIndex);// Assumes that InitialHeaders stays constant
 
                     if (cellValue is double doubleValue)
                     {
@@ -468,12 +469,10 @@ namespace BridgeCareCore.Services
                     SimulationId = simulation.Id,
                     ScenarioBudgetId = budgetId,
                     LocationKeys = locationInformation,
-                    Treatment = worksheet.GetCellValue<string>(row, _keyFields.Count + 1), // Assumes that InitialHeaders stays constant
+                    Treatment = treatment, // Assumes that InitialHeaders stays constant
                     Year = projectYear,
                     ProjectSource = projectSource,
                     ProjectId = projectIdValue,
-                    ShadowForAnyTreatment = worksheet.GetCellValue<int>(row, _keyFields.Count + 3), // Assumes that InitialHeaders stays constant
-                    ShadowForSameTreatment = worksheet.GetCellValue<int>(row, _keyFields.Count + 4), // Assumes that InitialHeaders stays constant
                     Cost = cost,
                     Category = convertedCategory,
                 };

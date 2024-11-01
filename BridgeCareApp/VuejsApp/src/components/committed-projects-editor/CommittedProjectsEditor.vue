@@ -12,8 +12,6 @@
                     accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                     ref="committedProjectTemplateInput"
                     hidden/>
-                <v-btn @click="onUploadCommittedProjectTemplate" style="margin-right: auto;" variant="outlined"
-                    class="ghd-blue ghd-button-text ghd-outline-button-padding ghd-button" outline>Change Default Template</v-btn>
             </v-col>
             <v-col>
                 <v-btn @click='showImportExportCommittedProjectsDialog = true' 

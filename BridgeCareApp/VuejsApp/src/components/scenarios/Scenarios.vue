@@ -765,6 +765,7 @@ import { User } from '@/shared/models/iAM/user';
 import router from '@/router';
 import { useRoute } from 'vue-router';
 import ReportsService from '@/services/reports.service';
+import { downloadSimulationLog } from '@/shared/utils/simulation-log-utils';
 
     let store = useStore(); 
     const $router = useRouter();     
@@ -1360,7 +1361,8 @@ import ReportsService from '@/services/reports.service';
             clone: 'clone',
             delete: 'delete',
             commitedProjects: 'commitedProjects',
-            convert:'convert'
+            convert:'convert',
+            simulationLog: 'simulationLog',
         };
         availableSimulationActions = {
             cancel: 'cancel',
@@ -1407,6 +1409,12 @@ import ReportsService from '@/services/reports.service';
                 title: 'Delete',
                 action: availableActions.delete,
                 icon: getUrl("assets/icons/trash.svg"),
+                isCustomIcon: true
+            },
+            {
+                title: 'Simulation Log',
+                action: availableActions.simulationLog,
+                icon: getUrl("assets/icons/clipboard.svg"),
                 isCustomIcon: true
             }           
         ];
@@ -1604,6 +1612,16 @@ import ReportsService from '@/services/reports.service';
                 'executed in the order in which it was received.',
             buttons: []
         };
+    }
+
+    async function onDownloadSimulationLog(scenario: Scenario) {
+        await downloadSimulationLog(
+            scenario.networkId,
+            scenario.id,
+            scenario.name,
+            addSuccessNotificationAction,
+            addErrorNotificationAction,
+        );
     }
 
     async function onConfirmAnalysisRunAlertSubmit(submit: string) {
@@ -2244,6 +2262,9 @@ import ReportsService from '@/services/reports.service';
                 break;
             case availableActions.convert:
                 onShowConfirmConvertJsonToRelationalAlert(scenario);
+            case availableActions.simulationLog:
+                onDownloadSimulationLog(scenario);
+                break;
         }
     }
 

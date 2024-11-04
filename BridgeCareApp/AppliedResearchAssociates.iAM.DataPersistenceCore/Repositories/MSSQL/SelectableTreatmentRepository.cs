@@ -714,9 +714,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         _ =>
                             _.BudgetIds.Select(budgetId =>
                                 new ScenarioSelectableTreatmentScenarioBudgetEntity
-                                {
-                                    ScenarioSelectableTreatmentId = _.Id,
-                                    ScenarioBudgetId = budgetId
+                        {
+                                ScenarioSelectableTreatmentId = _.Id,
+                                ScenarioBudgetId = budgetId
                                 })).ToList();
 
                     _unitOfWork.Context.AddAll(treatmentBudgetJoinsToAdd, _unitOfWork.UserEntity?.Id);

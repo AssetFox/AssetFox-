@@ -890,6 +890,8 @@ import CashFlowService from '@/services/cash-flow.service';
             {
                 isTreatmentSet.value = response.data.length == 0;
 
+                store.commit('simpleScenarioSelectableTreatmentsMutator', response.data);
+
                 navigationTabs.value.forEach((tab) => {
                     if (tab.tabName === 'Treatment') {
                         if(isTreatmentSet.value === true)

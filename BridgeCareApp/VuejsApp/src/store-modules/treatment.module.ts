@@ -108,7 +108,10 @@ const mutations = {
     },
     IsSharedLibraryMutator(state: any, status: boolean) {
         state.isSharedLibrary = status;
-    }
+    },
+    setIsTreatmentSet(state: any, isTreatmentSet: boolean) {
+        state.isTreatmentSet = isTreatmentSet;
+    },
 };
 
 const actions = {
@@ -175,6 +178,9 @@ const actions = {
                         'simpleScenarioSelectableTreatmentsMutator',
                         response.data as SimpleTreatment[],
                     );
+
+                    const isTreatmentSet = response.data.length === 0;
+                    commit('setIsTreatmentSet', isTreatmentSet);
                 }
             },
         );

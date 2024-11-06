@@ -305,8 +305,6 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     private int? FirstUnshadowedYearForAnyTreatment;
 
-    private IEnumerable<CalculatedField> AllCalculatedFields => SimulationRunner.Simulation.Network.Explorer.CalculatedFields;
-
     private AnalysisMethod AnalysisMethod => SimulationRunner.Simulation.AnalysisMethod;
 
     private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
@@ -438,11 +436,11 @@ internal sealed class AssetContext : CalculateEvaluateScope
         }
     }
 
-    private void FixCalculatedFieldValuesWithoutPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration));
+    private void FixCalculatedFieldValuesWithoutPreDeteriorationTiming() => FixCalculatedFieldValues(SimulationRunner.CalculatedFieldsWithoutPreDeteriorationTiming);
 
-    private void FixCalculatedFieldValuesWithPostDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PostDeterioration));
+    private void FixCalculatedFieldValuesWithPostDeteriorationTiming() => FixCalculatedFieldValues(SimulationRunner.CalculatedFieldsWithPostDeteriorationTiming);
 
-    private void FixCalculatedFieldValuesWithPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PreDeterioration));
+    private void FixCalculatedFieldValuesWithPreDeteriorationTiming() => FixCalculatedFieldValues(SimulationRunner.CalculatedFieldsWithPreDeteriorationTiming);
 
     private Func<double> GetCalculator(IGrouping<NumberAttribute, PerformanceCurve> curves)
     {
@@ -637,7 +635,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     private void UnfixCalculatedFieldValuesWithoutPreDeteriorationTiming()
     {
-        foreach (var calculatedField in AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration))
+        foreach (var calculatedField in SimulationRunner.CalculatedFieldsWithoutPreDeteriorationTiming)
         {
             _ = NumberCache_Override.Remove(calculatedField.Name);
         }

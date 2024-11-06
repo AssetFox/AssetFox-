@@ -119,6 +119,10 @@ public sealed class SimulationRunner
 
         ActiveTreatments = Simulation.GetActiveTreatments();
 
+        CalculatedFieldsWithoutPreDeteriorationTiming = Simulation.Network.Explorer.CalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration).ToList();
+        CalculatedFieldsWithPostDeteriorationTiming = Simulation.Network.Explorer.CalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PostDeterioration).ToList();
+        CalculatedFieldsWithPreDeteriorationTiming = Simulation.Network.Explorer.CalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PreDeterioration).ToList();
+
         try
         {
             BudgetContexts = Simulation.GetBudgetContextsWithCostAllocationsForCommittedProjects();
@@ -362,6 +366,12 @@ public sealed class SimulationRunner
     private int StatusCode;
 
     private IReadOnlyCollection<ConditionActual> TargetConditionActuals = Array.Empty<ConditionActual>();
+
+    internal List<CalculatedField> CalculatedFieldsWithoutPreDeteriorationTiming;
+
+    internal List<CalculatedField> CalculatedFieldsWithPreDeteriorationTiming;
+
+    internal List<CalculatedField> CalculatedFieldsWithPostDeteriorationTiming;
 
     private enum CostCoverage
     {

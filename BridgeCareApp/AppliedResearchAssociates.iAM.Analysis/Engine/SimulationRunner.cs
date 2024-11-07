@@ -147,14 +147,14 @@ public sealed class SimulationRunner
             }
 
             applicablePriorities.Sort(BudgetPriorityComparer);
-            return applicablePriorities.AsEnumerable();
+            return applicablePriorities;
         });
 
-        CommittedProjectsPerAsset = Simulation.CommittedProjects.ToLookup(committedProject => committedProject.Asset);
+        CommittedProjectsPerAsset = Simulation.CommittedProjects.ToLookupAsDictionary(committedProject => committedProject.Asset);
         ConfigureCashFlowCommittedProjects();
 
-        ConditionsPerBudget = Simulation.InvestmentPlan.BudgetConditions.ToLookup(budgetCondition => budgetCondition.Budget);
-        CurvesPerAttribute = Simulation.PerformanceCurves.ToLookup(curve => curve.Attribute);
+        ConditionsPerBudget = Simulation.InvestmentPlan.BudgetConditions.ToLookupAsDictionary(budgetCondition => budgetCondition.Budget);
+        CurvesPerAttribute = Simulation.PerformanceCurves.ToLookupAsDictionary(curve => curve.Attribute);
         NumberAttributeByName = Simulation.Network.Explorer.NumberAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
 
         SortedDistributionRulesPerCashFlowRule = Simulation.InvestmentPlan.CashFlowRules.ToDictionary(
@@ -315,17 +315,18 @@ public sealed class SimulationRunner
         return simulationValidationResults;
     }
 
-    internal ILookup<AnalysisMaintainableAsset, CommittedProject> CommittedProjectsPerAsset { get; private set; }
+    internal Dictionary<AnalysisMaintainableAsset, CommittedProject[]> CommittedProjectsPerAsset { get; private set; }
 
-    internal ILookup<NumberAttribute, PerformanceCurve> CurvesPerAttribute { get; private set; }
+    internal Dictionary<NumberAttribute, PerformanceCurve[]> CurvesPerAttribute { get; private set; }
 
-    internal IReadOnlyDictionary<string, NumberAttribute> NumberAttributeByName { get; private set; }
+    internal Dictionary<string, NumberAttribute> NumberAttributeByName { get; private set; }
 
     internal Func<TreatmentOption, double> ObjectiveFunction { get; private set; }
 
     internal double GetInflationFactor(int year) => Simulation.InvestmentPlan.GetInflationFactor(year);
 
-    internal void ReportProgress(ProgressStatus progressStatus, double percentComplete = 0, int? year = null) => OnProgress(new ProgressEventArgs(progressStatus, percentComplete, year));
+    internal void ReportProgress(ProgressStatus progressStatus, double percentComplete = 0, int? year = null)
+        => OnProgress(new ProgressEventArgs(progressStatus, percentComplete, year));
 
     internal void Send(SimulationLogMessageBuilder message, bool throwOnFatal = true)
     {
@@ -343,29 +344,29 @@ public sealed class SimulationRunner
 
     private static readonly IComparer<BudgetPriority> BudgetPriorityComparer = SelectionComparer<BudgetPriority>.Create(priority => priority.PriorityLevel);
 
-    private IReadOnlyCollection<SelectableTreatment> ActiveTreatments;
+    private List<SelectableTreatment> ActiveTreatments;
 
-    private IReadOnlyList<BudgetContext> BudgetContexts;
+    private BudgetContext[] BudgetContexts;
 
-    private IReadOnlyDictionary<int, IEnumerable<BudgetPriority>> BudgetPrioritiesPerYear;
+    private Dictionary<int, List<BudgetPriority>> BudgetPrioritiesPerYear;
 
     private Func<bool> ConditionGoalsEvaluator;
 
-    private ILookup<Budget, BudgetCondition> ConditionsPerBudget;
+    private Dictionary<Budget, BudgetCondition[]> ConditionsPerBudget;
 
-    private IReadOnlyCollection<ConditionActual> DeficientConditionActuals = Array.Empty<ConditionActual>();
+    private List<ConditionActual> DeficientConditionActuals = new();
 
     internal SimulationMessageBuilder MessageBuilder;
 
-    private ICollection<AssetContext> AssetContexts;
+    private SortedSet<AssetContext> AssetContexts;
 
-    private IReadOnlyDictionary<CashFlowRule, SortedDictionary<decimal, CashFlowDistributionRule>> SortedDistributionRulesPerCashFlowRule;
+    private Dictionary<CashFlowRule, SortedDictionary<decimal, CashFlowDistributionRule>> SortedDistributionRulesPerCashFlowRule;
 
     private SpendingLimit SpendingLimit;
 
     private int StatusCode;
 
-    private IReadOnlyCollection<ConditionActual> TargetConditionActuals = Array.Empty<ConditionActual>();
+    private List<ConditionActual> TargetConditionActuals = new();
 
     internal List<CalculatedField> CalculatedFieldsWithoutPreDeteriorationTiming;
 
@@ -866,7 +867,7 @@ public sealed class SimulationRunner
         }
     }
 
-    private IReadOnlyCollection<ConditionActual> GetDeficientConditionActuals()
+    private List<ConditionActual> GetDeficientConditionActuals()
     {
         var results = new List<ConditionActual>();
 
@@ -891,7 +892,7 @@ public sealed class SimulationRunner
         return results;
     }
 
-    private IReadOnlyCollection<ConditionActual> GetTargetConditionActuals(int year)
+    private List<ConditionActual> GetTargetConditionActuals(int year)
     {
         var results = new List<ConditionActual>();
 
@@ -1058,11 +1059,11 @@ public sealed class SimulationRunner
             .Select(t => t.Cost)
             .ToArray();
 
-        var amountPerBudgetOfCurrentYear = new decimal[BudgetContexts.Count];
+        var amountPerBudgetOfCurrentYear = new decimal[BudgetContexts.Length];
 
-        var allocationIsAllowedPerBudgetAndTreatment = new bool[BudgetContexts.Count, treatmentsToFund.Count];
+        var allocationIsAllowedPerBudgetAndTreatment = new bool[BudgetContexts.Length, treatmentsToFund.Count];
 
-        for (var b = 0; b < BudgetContexts.Count; ++b)
+        for (var b = 0; b < BudgetContexts.Length; ++b)
         {
             var budgetContext = BudgetContexts[b];
 
@@ -1073,9 +1074,8 @@ public sealed class SimulationRunner
             treatmentConsideration.FundingCalculationInput.CurrentBudgetsToSpend.Add(
                 new(budgetContext.Budget.Name, amount, year));
 
-            var budgetConditions = ConditionsPerBudget[budgetContext.Budget];
             var budgetConditionIsMet =
-                !budgetConditions.Any() ||
+                !ConditionsPerBudget.TryGetValue(budgetContext.Budget, out var budgetConditions) ||
                 budgetConditions.Any(condition => condition.Criterion.EvaluateOrDefault(assetContext));
 
             for (var t = 0; t < treatmentsToFund.Count; ++t)
@@ -1206,10 +1206,10 @@ public sealed class SimulationRunner
 
             for (var y = 1; y < costPercentagePerYear.Length; ++y)
             {
-                var amountPerBudget = new decimal[BudgetContexts.Count];
+                var amountPerBudget = new decimal[BudgetContexts.Length];
                 var futureYear = year + y;
 
-                for (var b = 0; b < BudgetContexts.Count; ++b)
+                for (var b = 0; b < BudgetContexts.Length; ++b)
                 {
                     var budgetContext = BudgetContexts[b];
                     var amount = budgetContext.GetAmount(futureYear);
@@ -1282,7 +1282,7 @@ public sealed class SimulationRunner
         FundingCalculationOutput output,
         List<Action> costAllocators)
     {
-        for (var b = 0; b < BudgetContexts.Count; ++b)
+        for (var b = 0; b < BudgetContexts.Length; ++b)
         {
             var budgetContext = BudgetContexts[b];
 

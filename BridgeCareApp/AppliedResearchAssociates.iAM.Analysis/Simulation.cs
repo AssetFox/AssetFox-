@@ -67,7 +67,7 @@ public sealed class Simulation : WeakEntity, IValidator
 
     public void ClearResults() => ResultsOnDisk.Clear();
 
-    public IReadOnlyCollection<SelectableTreatment> GetActiveTreatments()
+    public List<SelectableTreatment> GetActiveTreatments()
     {
         var result = Treatments.Where(treatment => !treatment.ForCommittedProjectsOnly).ToList();
         _ = result.Remove(DesignatedPassiveTreatment);

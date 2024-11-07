@@ -38,7 +38,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     public AssetDetail Detail { get; private set; }
 
-    public IDictionary<int, Choice<Treatment, TreatmentProgress>> EventSchedule { get; } = new Dictionary<int, Choice<Treatment, TreatmentProgress>>();
+    public Dictionary<int, Choice<Treatment, TreatmentProgress>> EventSchedule { get; } = new();
 
     public SimulationRunner SimulationRunner { get; }
 
@@ -442,12 +442,12 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
     private void FixCalculatedFieldValuesWithPreDeteriorationTiming() => FixCalculatedFieldValues(SimulationRunner.CalculatedFieldsWithPreDeteriorationTiming);
 
-    private Func<double> GetCalculator(IGrouping<NumberAttribute, PerformanceCurve> curves)
+    private Func<double> GetCalculator(KeyValuePair<NumberAttribute, PerformanceCurve[]> curves)
     {
         List<PerformanceCurve> applicableCurves = new();
         List<PerformanceCurve> defaultCurves = new();
 
-        foreach (var curve in curves)
+        foreach (var curve in curves.Value)
         {
             var evaluation = Evaluate(curve.Criterion);
 
@@ -494,7 +494,8 @@ internal sealed class AssetContext : CalculateEvaluateScope
             : () => operativeCurves.Max(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value)));
     }
 
-    private IDictionary<string, Func<double>> GetPerformanceCurveCalculatorPerAttribute() => SimulationRunner.CurvesPerAttribute.ToDictionary(curves => curves.Key.Name, GetCalculator);
+    private IDictionary<string, Func<double>> GetPerformanceCurveCalculatorPerAttribute()
+        => SimulationRunner.CurvesPerAttribute.ToDictionary(curves => curves.Key.Name, GetCalculator);
 
     private void HandleTreatmentDuringRollForward(ConcurrentBag<RollForwardEventDetail> rollForwardEvents, int year)
     {
@@ -527,28 +528,31 @@ internal sealed class AssetContext : CalculateEvaluateScope
         SetInitialValues(SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
         SetInitialValues(SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
-        foreach (var committedProjects in SimulationRunner.CommittedProjectsPerAsset[Asset].GroupBy(cp => cp.Year))
+        if (SimulationRunner.CommittedProjectsPerAsset.TryGetValue(Asset, out var allCommittedProjects))
         {
-            var year = committedProjects.Key;
-            var numberOfProjects = committedProjects.Count();
-            if (numberOfProjects > 1)
+            foreach (var committedProjects in allCommittedProjects.GroupBy(cp => cp.Year))
             {
-                if (committedProjects.Any(cp => !cp.ShouldApplyConsequences))
+                var year = committedProjects.Key;
+                var numberOfProjects = committedProjects.Count();
+                if (numberOfProjects > 1)
                 {
-                    SimulationRunner.MessageBuilder = new("Cash-flow committed project overlaps with another committed project on the same asset.")
+                    if (committedProjects.Any(cp => !cp.ShouldApplyConsequences))
                     {
-                        AssetId = Asset.Id,
-                        AssetName = Asset.AssetName,
-                    };
-                    var error = SimulationLogMessageBuilders.RuntimeFatal(SimulationRunner.MessageBuilder, SimulationRunner.Simulation.Id);
-                    SimulationRunner.Send(error);
-                }
+                        SimulationRunner.MessageBuilder = new("Cash-flow committed project overlaps with another committed project on the same asset.")
+                        {
+                            AssetId = Asset.Id,
+                            AssetName = Asset.AssetName,
+                        };
+                        var error = SimulationLogMessageBuilders.RuntimeFatal(SimulationRunner.MessageBuilder, SimulationRunner.Simulation.Id);
+                        SimulationRunner.Send(error);
+                    }
 
-                EventSchedule.Add(year, new CommittedProjectBundle(committedProjects));
-            }
-            else if (numberOfProjects == 1)
-            {
-                EventSchedule.Add(year, committedProjects.Single());
+                    EventSchedule.Add(year, new CommittedProjectBundle(committedProjects));
+                }
+                else if (numberOfProjects == 1)
+                {
+                    EventSchedule.Add(year, committedProjects.Single());
+                }
             }
         }
 

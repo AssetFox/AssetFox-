@@ -1,6 +1,10 @@
 //#define dump_analysis_input
 //#define dump_analysis_output
 
+#if !DEBUG
+#define use_parallelism
+#endif
+
 #if dump_analysis_input || dump_analysis_output
 using System.IO;
 using System.Text.Json;
@@ -27,7 +31,7 @@ public sealed class SimulationRunner
 
     public event EventHandler<SimulationLogEventArgs> SimulationLog;
 
-#if !DEBUG
+#if use_parallelism
     private static readonly int MaxThreadsForSimulation = GetMaxThreadsForSimulation();
 
     private static int GetMaxThreadsForSimulation()
@@ -167,7 +171,7 @@ public sealed class SimulationRunner
         }
 
         AssetContexts = Simulation.Network.Assets
-#if !DEBUG
+#if use_parallelism
             .AsParallel()
             .WithDegreeOfParallelism(MaxThreadsForSimulation)
 #endif
@@ -385,13 +389,13 @@ public sealed class SimulationRunner
 
     private static void InParallel<T>(IEnumerable<T> items, Action<T> action)
     {
-#if DEBUG
+#if use_parallelism
+        _ = System.Threading.Tasks.Parallel.ForEach(items, new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = MaxThreadsForSimulation }, action);
+#else
         foreach (var item in items)
         {
             action(item);
         }
-#else
-        _ = System.Threading.Tasks.Parallel.ForEach(items, new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = MaxThreadsForSimulation }, action);
 #endif
     }
 
@@ -874,7 +878,7 @@ public sealed class SimulationRunner
         foreach (var goal in Simulation.AnalysisMethod.DeficientConditionGoals)
         {
             var goalContexts = AssetContexts
-#if !DEBUG
+#if use_parallelism
                 .AsParallel()
                 .WithDegreeOfParallelism(MaxThreadsForSimulation)
 #endif
@@ -904,7 +908,7 @@ public sealed class SimulationRunner
             }
 
             var goalContexts = AssetContexts
-#if !DEBUG
+#if use_parallelism
                 .AsParallel()
                 .WithDegreeOfParallelism(MaxThreadsForSimulation)
 #endif

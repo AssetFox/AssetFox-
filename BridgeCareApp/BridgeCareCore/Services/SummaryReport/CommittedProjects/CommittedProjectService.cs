@@ -17,6 +17,7 @@ using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
+using BridgeCareCore.Services.SummaryReport.CommittedProjects;
 using BridgeCareCore.Utils;
 using MoreLinq;
 using OfficeOpenXml;
@@ -260,258 +261,56 @@ namespace BridgeCareCore.Services
             return assets.ToDictionary(_ => _.Location.LocationIdentifier, _ => _.Id);
         }
 
-        /**
-         * Creates CommittedProjectDTO data for Committed Project Import
-         */
-        private List<SectionCommittedProjectDTO> CreateSectionCommittedProjectsForImport(Guid simulationId,
-            ExcelPackage excelPackage, string filename, string UserId)
-        {
-            // First, get the simulation
-            var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
-            if (simulation == null)
-            {
-                throw new ArgumentException($"No simulation was found for the given scenario.");
-            }
-            var investmentPlan = _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId);
+       
 
-            if (investmentPlan == null)
-            {
-                throw new RowNotInTableException("Simulation has no investment plan.");
-            }
-
-            // Get the Excel file workshhet containing the data to import
-            var worksheet = excelPackage.Workbook.Worksheets[0];
-
-            // Extract the names of the consequence headers and link them to their associated attribute IDs
-            var headers = worksheet.Cells.GroupBy(cell => cell.Start.Row).First().Select(_ => _.GetValue<string>()).Where(x => x != null)
-                .ToList();
-            var consequenceAttributeNames = headers.Skip(_keyFields.Count + InitialHeaders.Count).ToList();
-            var attributeIdsPerAttributeName = GetAttributeIdsPerAttributeName(consequenceAttributeNames.Distinct().ToList());
-            var end = worksheet.Dimension.End;  // Contains both column and row ends
-
-            // Get the location => asset ID lookup for all maintainable assets in the network
-            var maintainableAssetIdsPerLocationIdentifier = GetMaintainableAssetsPerLocationIdentifier(simulation.NetworkId);
-
-            int treatmentCategoryIndex = headers.IndexOf("CATEGORY") + 1;
-
-            if (treatmentCategoryIndex == 0)
-            {
-                throw new InvalidOperationException("Required 'TreatmentCategory' column is missing in the Excel sheet.");
-            }
-
-            int projectSourceIndex = headers.IndexOf("PROJECTSOURCE") + 1;
-
-            if (projectSourceIndex == 0)
-            {
-                throw new InvalidOperationException("Required 'ProjectSource' column is missing in the Excel sheet.");
-            }
-
-            int projectSourceIdIndex = headers.IndexOf("PROJECTSOURCEID") + 1;
-
-            if (projectSourceIndex == 0)
-            {
-                throw new InvalidOperationException("Required 'ProjectSourceId' column is missing in the Excel sheet.");
-            }
-
-            // Get the column ID for the network's key field
-            if (!headers.Contains(_networkKeyField))
-            {
-                throw new RowNotInTableException($"Unable to find a column in the committed project sheet named {_networkKeyField}.  This is a required column for the network associated with the specified scenario");
-            }
-            var locationColumnNames = new Dictionary<int, string>();
-            var keyColumn = 0;
-
-            var primaryKeyFieldNames = _unitOfWork.AdminSettingsRepo.GetKeyFields();
-
-            foreach (var kvp in _keyProperties.ToList())
-            {
-                var key = kvp.Key;
-                if (!primaryKeyFieldNames.Contains(key) && key != _networkKeyField)
-                {
-                    _keyProperties.Remove(key);
-                }
-            }
-
-            _keyFields = _keyProperties.Keys.ToList();
-
-            for (var column = 1; column <= _keyProperties.Count; column++)
-            {
-                var columnName = worksheet.GetCellValue<string>(1, column);
-                if (!_keyFields.Contains(columnName))
-                {
-                    var keyFieldList = new StringBuilder();
-                    foreach (var field in _keyProperties)
-                    {
-                        keyFieldList.Append(field);
-                    }
-                    throw new RowNotInTableException($"{columnName} is not a key field of the provided network.  Possible key fields are {keyFieldList}");
-                }
-                locationColumnNames.Add(column, columnName);
-                if (columnName == _networkKeyField)
-                {
-                    keyColumn = column;
-                }
-            }
-            if (keyColumn == 0)
-            {
-                // This should never be reached since we checked for existence unless there is a coding error
-                throw new RowNotInTableException($"The key location column for this network was found in the locations, but its specific column number was not identified");
-            }
-
-            // Create the output lookup
-            var projectsPerLocationIdentifierYearAndTreatmentTuple = new Dictionary<(string, int, string), SectionCommittedProjectDTO>();
-
-            var invalidLocationIdentifiers = new List<string>();
-            // Read in the data by row
-            for (var row = 2; row <= end.Row; row++)
-            {
-                // Get the project year for this work
-                var projectYearIndex = headers.IndexOf("YEAR") + 1;
-                var projectYear = worksheet.GetCellValue<int>(row, projectYearIndex);
-                var treatmentIndex = headers.IndexOf("TREATMENT") + 1;
-                var treatment = worksheet.GetCellValue<string>(row, treatmentIndex);  // Assumes that InitialHeaders stays constant
-
-                //Get project source 
-                var projectSourceValue = worksheet.Cells[row, projectSourceIndex].Text;
-
-                //Get Project Id
-                var projectIdValue = worksheet.GetCellValue<string>(row, projectSourceIdIndex);
-
-                // Attempt to convert the string to enum
-                ProjectSourceDTO projectSource;
-                if (!Enum.TryParse(projectSourceValue, true, out projectSource))
-                {
-                    projectSource = ProjectSourceDTO.None; // Default value if parsing fails
-                }
-
-                // Get the location information of the project.  This must include the maintainable asset ID using the "ID" key
-                var locationInformation = new Dictionary<string, string>();
-                var locationIdentifier = worksheet.GetCellValue<string>(row, keyColumn);
-                if (!maintainableAssetIdsPerLocationIdentifier.Keys.ToList().Contains(locationIdentifier))
-                {
-                    // The location matches an asset in the network
-                    //locationInformation["ID"] = Guid.NewGuid().ToString();
-                    invalidLocationIdentifiers.Add(locationIdentifier);
-                }
-                /*else
-                {
-                    invalidLocationIdentifiers.Add(locationIdentifier);
-                    //throw new RowNotInTableException($"An asset with the location identifier '{locationIdentifier}' does not exist");
-                }*/
-
-                // The location matches an asset in the network
-                locationInformation["ID"] = Guid.NewGuid().ToString();
-
-                for (var column = 1; column <= _keyFields.Count; column++)
-                {
-                    locationInformation.Add(locationColumnNames[column], worksheet.GetCellValue<string>(row, column));
-                }
-
-                // Determine the appropriate budget to assign if any
-                var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
-                var budgetIndex = headers.IndexOf("BUDGET") + 1;
-                var budgetName = worksheet.GetCellValue<string>(row, budgetIndex); // Assumes that InitialHeaders stays constant
-                var budgetNameIsEmpty = string.IsNullOrWhiteSpace(budgetName);
-                Guid? budgetId = null;
-
-                if (!budgetNameIsEmpty)
-                {
-                    if (budgets.All(_ => _.Name != budgetName))
-                    {
-                        throw new RowNotInTableException(
-                            $"Budget {budgetName} does not exist in the applied budget library.");
-                    }
-                    budgetId = budgets.Single(_ => _.Name == budgetName).Id;
-                }
-
-                var treatmentCategoryValue = worksheet.Cells[row, treatmentCategoryIndex].GetValue<string>();
-
-                // This to convert the incoming string to a TreatmentCategory
-                TreatmentCategory convertedCategory;
-                try
-                {
-                    convertedCategory = EnumDeserializer.Deserialize<TreatmentCategory>(treatmentCategoryValue);
-                }
-                catch
-                {
-                    convertedCategory = TreatmentCategory.Other; 
-                }
-
-                //Handle potentially malformed costs
-                var costIndex = headers.IndexOf("COST") + 1;
-                var cost = -1.0; //Default
-                try
-                {
-                    var cellValue = worksheet.GetCellValue<object>(row, costIndex);// Assumes that InitialHeaders stays constant
-
-                    if (cellValue is double doubleValue)
-                    {
-                        cost = doubleValue;
-                    }
-                    else if (cellValue is string stringValue && double.TryParse(stringValue, out double parsedValue))
-                    {
-                        cost = parsedValue;
-                    }
-                }
-                catch (FormatException)
-                {
-                    cost = -1;
-                }
-                catch (Exception)
-                {
-                    cost = -1;
-                }
-
-                // Build the committed project object
-                var project = new SectionCommittedProjectDTO
-                {
-                    Id = Guid.NewGuid(),
-                    SimulationId = simulation.Id,
-                    ScenarioBudgetId = budgetId,
-                    LocationKeys = locationInformation,
-                    Treatment = treatment, // Assumes that InitialHeaders stays constant
-                    Year = projectYear,
-                    ProjectSource = projectSource,
-                    ProjectId = projectIdValue,
-                    Cost = cost,
-                    Category = convertedCategory,
-                };
-                // factor needs additional column, so increment by 2
-                // otherwise support old export files
-                int incrementCount = 1;
-                if (newImportFile) { incrementCount = 2; }
-
-                // Add to the list of projects
-                projectsPerLocationIdentifierYearAndTreatmentTuple.Add((locationIdentifier, projectYear, treatment), project);
-            }
-
-            if (invalidLocationIdentifiers.Any())
-            {
-                var invalidIdsMessage = $"The following location identifiers do not match any asset in the network: {string.Join(", ", invalidLocationIdentifiers)}";
-                _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastWarning, invalidIdsMessage);
-            }
-
-            return projectsPerLocationIdentifierYearAndTreatmentTuple.Values.ToList();
-        }
-
-        public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, string UserId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
+        public void ImportCommittedProjectFiles(
+            Guid simulationId,
+            ExcelPackage excelPackage,
+            string filename,
+            string UserId,
+            CancellationToken? cancellationToken = null,
+            IWorkQueueLog queueLog = null)
         {
             queueLog ??= new DoNothingWorkQueueLog();
-            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
-            _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
+
             var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
-            _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(simulation.NetworkId);
+            var keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
+            var keyFields = keyProperties.Keys.Where(_ => _ != "ID").ToList();            
+            var networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(simulation.NetworkId);
+
+            var importer = new CommittedProjectImporter(
+                _unitOfWork,
+                _hubService,
+                networkKeyField,
+                keyProperties,
+                keyFields);
+
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+            {
                 return;
+            }
+
             queueLog.UpdateWorkQueueStatus("Creating Committed Projects");
-            var committedProjectDTOs =
-              CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, UserId);
+
+            var committedProjectDTOs = importer.ImportProjectsFromWorksheet(
+                excelPackage.Workbook.Worksheets[0],
+                simulationId,
+                UserId);
+
+
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+            {
                 return;
+            }
+
             queueLog.UpdateWorkQueueStatus("Deleting Old Committed Projects");
+
             _unitOfWork.CommittedProjectRepo.DeleteSimulationCommittedProjects(simulationId);
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+            {
                 return;
+            }
+
             queueLog.UpdateWorkQueueStatus("Upserting Created Committed Projects");
             _unitOfWork.CommittedProjectRepo.UpsertCommittedProjects(committedProjectDTOs);
         }
@@ -649,5 +448,7 @@ namespace BridgeCareCore.Services
                 }
             });
         }
+
+       
     }
 }

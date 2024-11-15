@@ -32,7 +32,7 @@ namespace BridgeCareCore.Services.General_Work_Queue.WorkItems
         public void DoWork(IServiceProvider serviceProvider, Action<string> updateStatusOnHandle, CancellationToken cancellationToken)
         {
             using var scope = serviceProvider.CreateScope();
-
+            
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
             var _committedProjectService = scope.ServiceProvider.GetRequiredService<ICommittedProjectService>();

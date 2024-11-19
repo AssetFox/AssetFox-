@@ -17,12 +17,12 @@ using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
-using BridgeCareCore.Services.SummaryReport.CommittedProjects;
 using BridgeCareCore.Utils;
 using MoreLinq;
 using OfficeOpenXml;
+using NLog;
 
-namespace BridgeCareCore.Services
+namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
 {
     public class CommittedProjectService : ICommittedProjectService
     {
@@ -31,7 +31,7 @@ namespace BridgeCareCore.Services
         public const string UnknownBudgetName = "Unknown";
 
         // TODO: Determine based on associated network
-        private string _networkKeyField ;
+        private string _networkKeyField;
         private Dictionary<string, List<KeySegmentDatum>> _keyProperties;
         private List<string> _keyFields;
         private bool newImportFile = false;
@@ -43,7 +43,7 @@ namespace BridgeCareCore.Services
             "BUDGET",
             "COST",
             "PROJECTSOURCE",
-            "PROJECTSOURCEID",            
+            "PROJECTSOURCEID",
             "CATEGORY"
         };
 
@@ -92,7 +92,7 @@ namespace BridgeCareCore.Services
                     project =>
                     {
                         var column = 1;
-                        var locationValue = String.Empty;
+                        var locationValue = string.Empty;
                         if (project.LocationKeys.ContainsKey(_networkKeyField))
                         {
                             locationValue = project.LocationKeys[_networkKeyField];
@@ -101,7 +101,7 @@ namespace BridgeCareCore.Services
 
                         // Add other data from key fields based on ID
                         var otherData = _keyFields.Where(_ => _ != _networkKeyField);
-                        if (!String.IsNullOrEmpty(locationValue) && otherData.Count() > 0)
+                        if (!string.IsNullOrEmpty(locationValue) && otherData.Count() > 0)
                         {
                             var assetId = _keyProperties[_networkKeyField].FirstOrDefault(_ => _.KeyValue.Value == locationValue);
                             if (assetId != null)
@@ -261,7 +261,7 @@ namespace BridgeCareCore.Services
             return assets.ToDictionary(_ => _.Location.LocationIdentifier, _ => _.Id);
         }
 
-       
+
 
         public void ImportCommittedProjectFiles(
             Guid simulationId,
@@ -275,14 +275,13 @@ namespace BridgeCareCore.Services
 
             var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
             var keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
-            var keyFields = keyProperties.Keys.Where(_ => _ != "ID").ToList();            
+            var keyFields = keyProperties.Keys.Where(_ => _ != "ID").ToList();
             var networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(simulation.NetworkId);
 
             var importer = new CommittedProjectImporter(
                 _unitOfWork,
-                _hubService,
+                _hubService,                
                 networkKeyField,
-                keyProperties,
                 keyFields);
 
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
@@ -294,7 +293,7 @@ namespace BridgeCareCore.Services
 
             var committedProjectDTOs = importer.ImportProjectsFromWorksheet(
                 excelPackage.Workbook.Worksheets[0],
-                simulationId,
+                simulation,
                 UserId);
 
 
@@ -326,7 +325,7 @@ namespace BridgeCareCore.Services
             double totalCost = 0;
             if (treatmentCosts == null)
                 return totalCost;
-            foreach(var cost in treatmentCosts)
+            foreach (var cost in treatmentCosts)
             {
                 var compiler = new CalculateEvaluateCompiler();
 
@@ -338,7 +337,7 @@ namespace BridgeCareCore.Services
                 var attributeIds = attributes.Select(a => a.Id).ToList();
                 var aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForMaintainableAsset(asset.Id, attributeIds);
                 var latestAggResults = new List<AggregatedResultDTO>();
-                foreach(var attr in attributes)
+                foreach (var attr in attributes)
                 {
                     var attrs = aggregatedResults.Where(_ => _.Attribute.Id == attr.Id).ToList();
                     if (attrs.Count == 0)
@@ -370,13 +369,13 @@ namespace BridgeCareCore.Services
             foreach (var consequence in treatmentConsequences)
             {
                 var compiler = new CalculateEvaluateCompiler();
-                if(consequence.CriterionLibrary.Id == Guid.Empty)
+                if (consequence.CriterionLibrary.Id == Guid.Empty)
                 {
                     consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute, ChangeValue = consequence.ChangeValue });
                     continue;
                 }
                 if (IsCriteriaValid(compiler, consequence.CriterionLibrary.MergedCriteriaExpression, asset.Id))
-                    consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute, ChangeValue = consequence.ChangeValue});
+                    consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute, ChangeValue = consequence.ChangeValue });
             }
             return consequencesToReturn;
         }
@@ -449,6 +448,6 @@ namespace BridgeCareCore.Services
             });
         }
 
-       
+
     }
 }

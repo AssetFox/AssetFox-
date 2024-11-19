@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.WorkQueue;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
+using BridgeCareCore.Services.SummaryReport.CommittedProjects;
 using BridgeCareCore.Services.Treatment;
 using Microsoft.Extensions.DependencyInjection;
 

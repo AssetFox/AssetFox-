@@ -292,23 +292,10 @@
         />
         <ConfirmDialog></ConfirmDialog>
     </v-div>
-    <SuccessfulUploadDialog 
-        v-model="showSuccessPopup"
-        message="Successfully uploaded committed projects."
+    <UploadDialog 
+        v-model="showUploadCompleteDialog"
+        :message="dialogMessage"
     />
-    <!-- <v-dialog v-model="showSuccessPopup" max-width="400px">
-        <v-card>
-            <v-card-text class="text-center">
-                Successfully uploaded committed projects.
-            </v-card-text>
-            <v-card-actions>
-                <v-row justify="center" class="w-100">
-                    <v-btn color="primary" variant="text" 
-                    class='ghd-white-bg ghd-blue ghd-button-text' @click="showSuccessPopup = false">OK</v-btn>
-                </v-row>
-            </v-card-actions>
-        </v-card>
-    </v-dialog> -->
 </v-card>
 </template>
 <script setup lang="ts">
@@ -360,7 +347,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import SaveButton from '@/shared/components/buttons/SaveButton.vue';
 import CancelButton from '@/shared/components/buttons/CancelButton.vue';
-import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUploadDialog.vue';
+import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
 
 
     let store = useStore();
@@ -408,7 +395,8 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
         [5, "ProjectBuilder"]
     ]);
 
-    const showSuccessPopup = ref(false);
+    const showUploadCompleteDialog = ref(false);
+    const dialogMessage = ref('');
 
     const uuidNIL: string = getBlankGuid();
     let addedRows = ref<SectionCommittedProject[]>([]);
@@ -1467,8 +1455,13 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
             clearChanges();
             onPaginationChanged().then(() => {
                 setAlertMessageAction('');
-            })
-            showSuccessPopup.value = true; 
+                if (totalItems.value > 0) {
+                    dialogMessage.value = 'Committed projects were imported. See alerts for further details.';
+                } else {
+                    dialogMessage.value = 'No committed projects were imported. See alerts for further details.';
+                }                
+                    showUploadCompleteDialog.value = true;
+                })
         } 
     }
 

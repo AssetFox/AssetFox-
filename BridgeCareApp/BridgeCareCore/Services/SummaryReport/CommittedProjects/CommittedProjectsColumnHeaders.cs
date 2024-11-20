@@ -14,7 +14,7 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
         public const string Cost = "COST";
         public const string ProjectSource = "PROJECTSOURCE";
         public const string ProjectSourceId = "PROJECTSOURCEID";
-        public const string Category = "CATEGORY";
+        public const string Category = "CATEGORY"; 
 
         public static readonly List<string> AllHeaders = new()
         {
@@ -32,6 +32,31 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
 
         public static readonly List<string> NoKeyHeaders = new()
         {
+            Treatment,
+            Year,
+            Budget,
+            Cost,
+            ProjectSource,
+            ProjectSourceId,
+            Category
+        };
+
+        public static readonly List<string> BridgeHeaders = new()
+        {
+            BRKey,
+            BMSID,
+            Treatment,
+            Year,
+            Budget,
+            Cost,
+            ProjectSource,
+            ProjectSourceId,
+            Category
+        };
+
+        public static readonly List<string> RoadHeaders = new()
+        {
+            CRS,
             Treatment,
             Year,
             Budget,

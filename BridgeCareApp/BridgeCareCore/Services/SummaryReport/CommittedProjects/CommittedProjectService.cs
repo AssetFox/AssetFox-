@@ -247,22 +247,6 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             return attributeDTOs.ToDictionary(_ => _.Name, _ => _.Id);
         }
 
-        /**
-         * Gets a Dictionary of MaintainableAsset Id per MaintainableAssetLocation LocationIdentifier
-         */
-        private Dictionary<string, Guid> GetMaintainableAssetsPerLocationIdentifier(Guid networkId)
-        {
-            var assets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithLocations(networkId);
-            if (!assets.Any())
-            {
-                throw new RowNotInTableException("There are no maintainable assets in the database.");
-            }
-
-            return assets.ToDictionary(_ => _.Location.LocationIdentifier, _ => _.Id);
-        }
-
-
-
         public void ImportCommittedProjectFiles(
             Guid simulationId,
             ExcelPackage excelPackage,
@@ -312,6 +296,11 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
 
             queueLog.UpdateWorkQueueStatus("Upserting Created Committed Projects");
             _unitOfWork.CommittedProjectRepo.UpsertCommittedProjects(committedProjectDTOs);
+
+            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+            {
+                return;
+            }
         }
 
         public double GetTreatmentCost(string assetKeyData, Guid treatmentId, Guid networkId)

@@ -20,6 +20,7 @@ using MoreLinq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using Microsoft.Extensions.DependencyModel;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -307,9 +308,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => simulationIds.Contains(_.SimulationId))
                 .Select(_ => _.Id)
                 .ToList();
+
             var badBudgets = projects
-                .Where(_ => _.ScenarioBudgetId != null && !budgetIds.Contains(_.ScenarioBudgetId ?? Guid.Empty))
+                .Where(_ => _.ScenarioBudgetId != null
+                    && _.ScenarioBudgetId != Guid.Empty // Allow empty GUIDs
+                    && !budgetIds.Contains(_.ScenarioBudgetId.Value))
                 .ToList();
+
             if (badBudgets.Any())
             {
                 var budgetList = new StringBuilder();

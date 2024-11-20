@@ -2,9 +2,9 @@
 {
     public enum ProjectSourceDTO
     {
-        None,
+        None, //default
         ProjectPick,
-        Committed, // default
+        Committed, 
         MPMS,
         SAP,
         ProjectBuilder

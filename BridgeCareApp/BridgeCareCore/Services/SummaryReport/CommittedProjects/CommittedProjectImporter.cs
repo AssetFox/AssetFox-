@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Utils;
+using Microsoft.IdentityModel.Tokens;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,8 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
         private readonly string _networkKeyField;
         private List<string> _keyFields;
 
+        private readonly List<string> importErrors = new();
+
         public CommittedProjectImporter(
             IUnitOfWork unitOfWork,
             IHubService hubService,
@@ -39,44 +42,45 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             SimulationDTO simulation,
             string userId)
         {
-            bool isValid = ValidateWorkSheet(worksheet, _hubService, _networkKeyField, userId);
-            if (!isValid)
+            bool validWorksheet = ValidateWorkSheet(worksheet, _hubService, _networkKeyField, userId);
+            if (!validWorksheet)
             {
                 return new List<SectionCommittedProjectDTO>();
             }
 
-            var headers = GetHeadersFromWorksheet(worksheet);
-
-            var importErrors = new List<string>();
-            var columnIndices = GetColumnIndices(headers);
-
-            var simulationId = simulation.Id;
-            var maintainableAssetIdsPerLocationIdentifier = GetMaintainableAssetsPerLocationIdentifier(simulation.NetworkId);
+            var headers = GetHeadersFromWorksheet(worksheet); 
             var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id)
                 .ToDictionary(b => b.Name, b => b.Id, StringComparer.OrdinalIgnoreCase);
 
-            var locationColumnNames = GetLocationColumnNamesAndKeyColumn(worksheet, headers, out var keyColumn, importErrors);            
+            // Validate columns once
+            var columnIndices = ValidateAndGetColumnIndices(
+                worksheet,
+                CompleteNetworkHeaders[_networkKeyField],
+                _hubService,
+                userId);
 
+            var locationColumnNames = GetLocationColumnNamesAndKeyColumn(worksheet, headers, out var keyColumn);           
             var projectsPerKey = new Dictionary<(string locationIdentifier, int projectYear, string treatment), SectionCommittedProjectDTO>();
-            var invalidLocationIdentifiers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            for (int row = 2; row <= worksheet.Dimension.End.Row; row++)
+            var maintainableAssetIdsPerLocationId = GetMaintainableAssetsPerLocationId(simulation.NetworkId);
+            if (maintainableAssetIdsPerLocationId.IsNullOrEmpty())
             {
-                var rowErrors = new List<string>();
+                HandleValidationError(_hubService, userId, $"No maintainable assets were found for Network Id: {simulation.NetworkId}");
+                return new List<SectionCommittedProjectDTO>();
+            }
+            
+            for (int row = 2; row <= worksheet.Dimension.End.Row; row++)
+            {                
                 try
                 {
                     var project = ProcessRow(
                         worksheet,
                         row,
                         columnIndices,
-                        headers,
-                        keyColumn,
                         locationColumnNames,
-                        maintainableAssetIdsPerLocationIdentifier,
+                        maintainableAssetIdsPerLocationId,
                         budgets,
-                        invalidLocationIdentifiers,
-                        simulationId,
-                        rowErrors);
+                        simulation.Id);
 
                     if (project != null)
                     {
@@ -84,78 +88,45 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
                         projectsPerKey[key] = project;
                     }
 
-                    // Log row-level errors
-                    if (rowErrors.Any())
-                    {
-                        _hubService.SendRealTimeMessage(userId, HubConstant.BroadcastWarning, $"Row {row} processing issues: {string.Join(", ", rowErrors)}");
-                    }
+                   
                 }
                 catch (Exception ex)
                 {
-                    _hubService.SendRealTimeMessage(userId, HubConstant.BroadcastWarning, $"Error processing row {row}: {ex.Message}");
+                    HandleValidationError(_hubService, userId, $"Error processing row {row}: {ex.Message}");
                 }
             }
-
-            // Notify about invalid location identifiers
-            if (invalidLocationIdentifiers.Any())
-            {
-                var firstColumnHeader = worksheet.GetCellValue<string>(1, 1) ?? string.Empty;
-                string identifierType = firstColumnHeader == "BRKey_" ? "Bridge" :
-                                        firstColumnHeader == "CRS" ? "Road" : "Location";
-
-                var invalidIdsMessage = $"{identifierType} identifiers not matching network assets: {string.Join(", ", invalidLocationIdentifiers)}";
-                //_hubService.SendRealTimeMessage(userId, HubConstant.BroadcastWarning, invalidIdsMessage);
-            }
-
+            
             return projectsPerKey.Values.ToList();
         }
 
         /// <summary>
         /// Processes a single row in the worksheet and creates a committed project DTO.
         /// </summary>
-        private static SectionCommittedProjectDTO ProcessRow(
+        private SectionCommittedProjectDTO ProcessRow(
             ExcelWorksheet worksheet,
             int row,
             Dictionary<string, int> columnIndices,
-            List<string> headers,
-            int keyColumn,
             Dictionary<int, string> locationColumnNames,
-            Dictionary<string, Guid> maintainableAssetIdsPerLocationIdentifier,
+            Dictionary<string, Guid> maintainableAssetIdsPerLocationId,
             Dictionary<string, Guid> budgets,
-            HashSet<string> invalidLocationIdentifiers,
-            Guid simulationId,
-            List<string> rowErrors)
+            Guid simulationId)
         {
-            var locationIdentifier = SafeGetLocationIdentifier(worksheet, row, keyColumn, rowErrors);
-            var assetId = Guid.Empty;
-
-            if (!string.IsNullOrWhiteSpace(locationIdentifier))
-            {
-                if (!maintainableAssetIdsPerLocationIdentifier.TryGetValue(locationIdentifier, out assetId))
-                {
-                    invalidLocationIdentifiers.Add(locationIdentifier);
-                    rowErrors.Add($"Location '{locationIdentifier}' does not match any network asset");
-                }
-            }
-
-            var locationInformation = BuildLocationInformation(locationColumnNames, worksheet, row, assetId);
-            var (budgetId, _) = SafeGetBudgetId(
-                SafeGetCellValueAsString(worksheet, row, columnIndices, CommittedProjectsColumnHeaders.Budget, headers, rowErrors),
-                budgets,
-                rowErrors);
+            var locationId = SafeGetLocationIdentifier(worksheet, row, columnIndices, _networkKeyField);
+            var assetId = ValidateLocationIdHasAssets(maintainableAssetIdsPerLocationId, locationId);
+            var locationInformation = BuildLocationInformation(locationColumnNames, worksheet, row, assetId);        
 
             return new SectionCommittedProjectDTO
             {
                 Id = Guid.NewGuid(),
                 SimulationId = simulationId,
-                ScenarioBudgetId = budgetId,
+                ScenarioBudgetId = SafeGetBudgetId(budgets, worksheet, row, columnIndices, CommittedProjectsColumnHeaders.Budget),
                 LocationKeys = locationInformation,
-                Treatment = SafeGetCellValueAsString(worksheet, row, columnIndices, CommittedProjectsColumnHeaders.Treatment, headers, rowErrors),
-                Year = SafeGetCellValueAsInt(worksheet, row, columnIndices, CommittedProjectsColumnHeaders.Year, headers, rowErrors),
-                ProjectSource = SafeGetProjectSource(worksheet, row, columnIndices, headers, rowErrors),
-                ProjectId = SafeGetCellValueAsString(worksheet, row, columnIndices, CommittedProjectsColumnHeaders.ProjectSourceId, headers, rowErrors),
-                Cost = SafeGetCellValueAsDouble(worksheet, row, columnIndices, CommittedProjectsColumnHeaders.Cost, headers, rowErrors),
-                Category = SafeGetTreatmentCategory(worksheet, row, columnIndices, headers, rowErrors)
+                Treatment = SafeGetTreatment(worksheet, row, columnIndices, CommittedProjectsColumnHeaders.Treatment),
+                Year = SafeGetProjectYear(worksheet, row, columnIndices, CommittedProjectsColumnHeaders.Year),
+                ProjectSource = SafeGetProjectSource(worksheet, row, columnIndices, CommittedProjectsColumnHeaders.ProjectSource),
+                ProjectId = SafeGetProjectSourceId(worksheet, row, columnIndices, CommittedProjectsColumnHeaders.ProjectSourceId),
+                Cost = SafeGetProjectCost(worksheet, row, columnIndices, CommittedProjectsColumnHeaders.Cost),
+                Category = SafeGetTreatmentCategory(worksheet, row, columnIndices, CommittedProjectsColumnHeaders.Category)
             };
         }
 
@@ -210,37 +181,28 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             _hubService.SendRealTimeMessage(userId, HubConstant.BroadcastWarning, message);
         }
 
-        /// <summary>
-        /// Retrieves headers from the first row of the worksheet.
-        /// </summary>
-        private static List<string> GetHeadersFromWorksheet(ExcelWorksheet worksheet)
+        private static readonly Dictionary<string, List<string>> CompleteNetworkHeaders = new(StringComparer.OrdinalIgnoreCase)
         {
-            return worksheet.Cells[1, 1, 1, worksheet.Dimension.End.Column]
-                .Select(cell => cell.GetValue<string>())
-                .Where(header => !string.IsNullOrEmpty(header))
-                .ToList();
-        }
+            { CommittedProjectsColumnHeaders.BRKey, CommittedProjectsColumnHeaders.BridgeHeaders },
+            { CommittedProjectsColumnHeaders.CRS, CommittedProjectsColumnHeaders.RoadHeaders }
+        };
 
-        /// <summary>
-        /// Gets a mapping of column names to their indices.
-        /// </summary>
-        private static Dictionary<string, int> GetColumnIndices(List<string> headers)
+        private Guid ValidateLocationIdHasAssets(
+            Dictionary<string, Guid> maintainableAssetIdsPerLocationId,
+            string locationId)
         {
-            var columnIndices = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-
-            for (int i = 0; i < headers.Count; i++)
+            if (!maintainableAssetIdsPerLocationId.TryGetValue(locationId, out var assetId))
             {
-                columnIndices[headers[i]] = i + 1; // Excel columns are 1-based
+                importErrors.Add($"Location '{locationId}' does not match any network asset");
             }
 
-            return columnIndices;
+            return assetId;
         }
 
         private Dictionary<int, string> GetLocationColumnNamesAndKeyColumn(
             ExcelWorksheet worksheet,
             List<string> headers,
-            out int keyColumn,
-            List<string> importErrors)
+            out int keyColumn)
         {
             var locationColumnNames = new Dictionary<int, string>();
             keyColumn = -1;
@@ -279,39 +241,6 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             return locationColumnNames;
         }
 
-        /// <summary>
-        /// Retrieves a mapping of location identifiers to maintainable asset IDs.
-        /// </summary>
-        private Dictionary<string, Guid> GetMaintainableAssetsPerLocationIdentifier(Guid networkId)
-        {
-            var assets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithLocations(networkId);
-            if (!assets.Any())
-            {
-                throw new InvalidOperationException("There are no maintainable assets in the database.");
-            }
-
-            return assets.ToDictionary(
-                asset => asset.Location.LocationIdentifier,
-                asset => asset.Id,
-                StringComparer.OrdinalIgnoreCase);
-        }
-
-        private static string SafeGetLocationIdentifier(
-           ExcelWorksheet worksheet,
-           int row,
-           int keyColumn,
-           List<string> errors)
-        {
-            var identifier = worksheet.GetCellValue<string>(row, keyColumn) ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(identifier))
-            {
-                errors.Add("Location identifier is null or empty");
-            }
-
-            return identifier;
-        }
-
         private static Dictionary<string, string> BuildLocationInformation(
             Dictionary<int, string> locationColumnNames,
             ExcelWorksheet worksheet,
@@ -334,120 +263,212 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             return locationInformation;
         }
 
-        private static (Guid? budgetId, string budgetName) SafeGetBudgetId(
-            string budgetName,
-            Dictionary<string, Guid> budgets,
-            List<string> errors)
+        /// <summary>
+        /// Retrieves headers from the first row of the worksheet.
+        /// </summary>
+        private static List<string> GetHeadersFromWorksheet(ExcelWorksheet worksheet)
         {
-            if (string.IsNullOrWhiteSpace(budgetName))
-            {
-                return (Guid.Empty, string.Empty);
-            }
-
-            if (!budgets.TryGetValue(budgetName, out var budgetId))
-            {
-                errors.Add($"Budget '{budgetName}' not found in budget library");
-                return (Guid.Empty, budgetName);
-            }
-
-            return (budgetId, budgetName);
+            return worksheet.Cells[1, 1, 1, worksheet.Dimension.End.Column]
+                .Select(cell => cell.GetValue<string>())
+                .Where(header => !string.IsNullOrEmpty(header))
+                .ToList();
         }
 
         /// <summary>
-        /// Parses a cell value as an integer.
+        /// Retrieves a mapping of location identifiers to maintainable asset IDs.
         /// </summary>
-        private static int SafeGetCellValueAsInt(
-            ExcelWorksheet worksheet,
-            int row,
-            Dictionary<string, int> columnIndices,
-            string columnName,
-            List<string> headers,
-            List<string> errors)
+        private Dictionary<string, Guid> GetMaintainableAssetsPerLocationId(Guid networkId)
         {
-            if (!columnIndices.TryGetValue(columnName, out var col) || !headers.Contains(columnName))
+            var assets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithLocations(networkId);
+            if (!assets.Any())
             {
-                errors.Add($"Column '{columnName}' not found. Using default: 0");
-                return 0;
+                return null;
             }
 
-            var cellValue = worksheet.GetCellValue<string>(row, col);
-            return int.TryParse(cellValue, out var intValue) ? intValue : 0;
+            return assets.ToDictionary(
+                asset => asset.Location.LocationIdentifier,
+                asset => asset.Id,
+                StringComparer.OrdinalIgnoreCase);
         }
 
-        private static double SafeGetCellValueAsDouble(
+        private string SafeGetLocationIdentifier(
             ExcelWorksheet worksheet,
             int row,
             Dictionary<string, int> columnIndices,
-            string columnName,
-            List<string> headers,
-            List<string> errors)
-        {
-            if (!columnIndices.TryGetValue(columnName, out var col) || !headers.Contains(columnName))
+            string columnName)
+        { 
+
+            var columnIndex = columnIndices[columnName];
+            var identifier = worksheet.GetCellValue<string>(row, columnIndex);
+
+            if (string.IsNullOrWhiteSpace(identifier))
             {
-                errors.Add($"Column '{columnName}' not found. Using default: -1");
-                return -1.0;
+                importErrors.Add($"Parsing error in Row: {row}, Column: {columnIndex}. Location identifier is null or empty");
             }
 
-            var cellValue = worksheet.GetCellValue<string>(row, col);
-            return double.TryParse(cellValue, out var doubleValue) ? doubleValue : -1.0;
-        }
-
-        private static string SafeGetCellValueAsString(
+            return identifier;
+        }   
+                
+        private static string SafeGetProjectSourceId(
             ExcelWorksheet worksheet,
             int row,
             Dictionary<string, int> columnIndices,
-            string columnName,
-            List<string> headers,
-            List<string> errors)
+            string columnName)
         {
-            if (!columnIndices.TryGetValue(columnName, out var col) || !headers.Contains(columnName))
+            var columnIndex = columnIndices[columnName];
+            if (columnIndex == -1)
             {
-                errors.Add($"Column '{columnName}' not found. Using default: empty string");
-                return string.Empty;
+                return "None"; //default value
             }
 
-            return worksheet.GetCellValue<string>(row, col) ?? string.Empty;
+            var sourceId = worksheet.GetCellValue<string>(row, columnIndex);
+            return string.IsNullOrWhiteSpace(sourceId)
+                ? "None"
+                : sourceId.Trim();
         }
 
         private static ProjectSourceDTO SafeGetProjectSource(
             ExcelWorksheet worksheet,
             int row,
             Dictionary<string, int> columnIndices,
-            List<string> headers,
-            List<string> errors)
+            string columnName)
         {
-            if (!columnIndices.TryGetValue(CommittedProjectsColumnHeaders.ProjectSource, out var col) ||
-                !headers.Contains(CommittedProjectsColumnHeaders.ProjectSource))
+            var columnIndex = columnIndices[columnName];
+            if (columnIndex == -1)
             {
-                errors.Add($"Column 'Project Source' not found. Using default: None");
-                return ProjectSourceDTO.None;
+                return ProjectSourceDTO.None; //default value
             }
 
-            var projectSourceValue = worksheet.GetCellValue<string>(row, col);
+            var projectSourceValue = worksheet.GetCellValue<string>(row, columnIndex);
             return Enum.TryParse(projectSourceValue, true, out ProjectSourceDTO projectSource)
                 ? projectSource
                 : ProjectSourceDTO.None;
+        }
+
+        private static Guid? SafeGetBudgetId(
+            Dictionary<string, Guid> budgets,
+            ExcelWorksheet worksheet,
+            int row,
+            Dictionary<string, int> columnIndices,
+            string columnName)
+        {
+            var columnIndex = columnIndices[columnName];
+            if (columnIndex == -1)
+            {
+                return Guid.Empty; //default value
+            }
+
+            var budgetName = worksheet.GetCellValue<string>(row, columnIndex);
+            return budgets.TryGetValue(budgetName, out var budgetId)
+                ? budgetId
+                : Guid.Empty;
+        }
+
+        private static double SafeGetProjectCost(
+            ExcelWorksheet worksheet,
+            int row,
+            Dictionary<string, int> columnIndices,
+            string columnName)
+        {
+            var columnIndex = columnIndices[columnName];
+            if (columnIndex == -1)
+            {
+                return 0.0; //default value
+            }
+
+            var costValue = worksheet.GetCellValue<string>(row, columnIndex);
+            return double.TryParse(costValue.Replace("$", "").Replace(",", ""), out double doubleVal)
+                ? doubleVal
+                : 0.0;
+        }
+
+        private static string SafeGetTreatment(
+            ExcelWorksheet worksheet,
+            int row,
+            Dictionary<string, int> columnIndices,
+            string columnName)
+        {
+            var columnIndex = columnIndices[columnName];
+            if (columnIndex == -1)
+            {
+                return "Default treatment"; //default value
+            }
+
+            var treatment = worksheet.GetCellValue<string>(row, columnIndex);
+            return string.IsNullOrWhiteSpace(treatment)
+                ? "Default treatment"
+                : treatment.Trim();
+        }
+
+        private static int SafeGetProjectYear(
+            ExcelWorksheet worksheet,
+            int row,
+            Dictionary<string, int> columnIndices,
+            string columnName)
+        {
+            var columnIndex = columnIndices[columnName];
+            if (columnIndex == -1)
+            {
+                return 0; //default value
+            }
+
+            var projectYear = worksheet.GetCellValue<string>(row, columnIndex);
+            return int.TryParse(projectYear, out var intValue) && intValue >= 1000 && intValue <= 9999
+                ? intValue
+                : 0;
         }
 
         private static TreatmentCategory SafeGetTreatmentCategory(
             ExcelWorksheet worksheet,
             int row,
             Dictionary<string, int> columnIndices,
-            List<string> headers,
-            List<string> errors)
+            string columnName)
         {
-            if (!columnIndices.TryGetValue(CommittedProjectsColumnHeaders.Category, out var col) ||
-                !headers.Contains(CommittedProjectsColumnHeaders.Category))
+            var columnIndex = columnIndices[columnName];
+            if (columnIndex == -1)
             {
-                errors.Add($"Column 'Category' not found. Using default: Other");
-                return TreatmentCategory.Other;
+                return TreatmentCategory.Other; //default value
             }
 
-            var treatmentCategoryValue = worksheet.GetCellValue<string>(row, col);
+            var treatmentCategoryValue = worksheet.GetCellValue<string>(row, columnIndex);
             return Enum.TryParse(treatmentCategoryValue, true, out TreatmentCategory convertedCategory)
                 ? convertedCategory
                 : TreatmentCategory.Other;
         }
 
+
+        private static Dictionary<string, int> ValidateAndGetColumnIndices(
+            ExcelWorksheet worksheet,
+            List<string> requiredColumns,
+            IHubService hubService,
+            string userId)
+        {
+            var headers = GetHeadersFromWorksheet(worksheet);
+            var columnIndices = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            var missingColumns = new List<string>();
+
+            foreach (var column in requiredColumns)
+            {
+                var index = headers.FindIndex(h => h.Equals(column, StringComparison.OrdinalIgnoreCase));
+                if (index != -1)
+                {
+                    columnIndices[column] = index + 1; // Excel columns are 1-based
+                }
+                else
+                {
+                    missingColumns.Add(column);
+                    columnIndices[column] = -1; // Indicate column not found
+                }
+            }
+
+            // Broadcast missing columns if any
+            if (missingColumns.Any())
+            {
+                hubService.SendRealTimeMessage(userId, HubConstant.BroadcastWarning,
+                    $"Missing columns: {string.Join(", ", missingColumns)}. These will use default values.");
+            }
+
+            return columnIndices;
+        }
     }
 }

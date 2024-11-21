@@ -839,25 +839,36 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
                 }
             });
         }
-
+    
     async function OnGetTemplateClick(){
-       await CommittedProjectsService.getUploadedCommittedProjectTemplate()
+        await CommittedProjectsService.getCommittedProjectTemplate(networkId)
             .then((response: AxiosResponse) => {
-                    if(response.data.toString() != ""){
-                        FileDownload(convertBase64ToArrayBuffer(response.data), 'Committed Project Template', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                        isAdminTemplateUploaded = true;
-                    }
-                    else{
-                         CommittedProjectsService.getCommittedProjectTemplate(networkId)
-                            .then((response: AxiosResponse) => {
-                        if (hasValue(response, 'data')) {
-                          const fileInfo: FileInfo = response.data as FileInfo;  
-                          FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
-                        }
-                });
-                    }
+                if (hasValue(response, 'data')) {
+                    const fileInfo: FileInfo = response.data as FileInfo;
+                    FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                }
             });
-        }
+    }
+    // async function OnGetTemplateClick(){
+    //    await CommittedProjectsService.getUploadedCommittedProjectTemplate()
+    //         .then((response: AxiosResponse) => {
+    //                 if(response.data.toString() != ""){
+    //                     FileDownload(convertBase64ToArrayBuffer(response.data), 'Committed Project Template', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    //                     isAdminTemplateUploaded = true;
+    //                 }
+    //                 else{
+    //                      CommittedProjectsService.getCommittedProjectTemplate(networkId)
+    //                         .then((response: AxiosResponse) => {
+    //                     if (hasValue(response, 'data')) {
+    //                       const fileInfo: FileInfo = response.data as FileInfo;  
+    //                       FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+    //                     }
+    //             });
+    //                 }
+    //         });
+    //     }
+
+    
 
      function OnAddCommittedProjectClick(){
         const newRow: SectionCommittedProject = clone(emptySectionCommittedProject)

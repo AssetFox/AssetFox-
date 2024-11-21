@@ -32,53 +32,15 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
 
         // TODO: Determine based on associated network
         private string _networkKeyField;
-        private Dictionary<string, List<KeySegmentDatum>> _keyProperties;
-        private List<string> _keyFields;
+        private readonly Dictionary<string, List<KeySegmentDatum>> _keyProperties;
+        private readonly List<string> _keyFields;        
         private bool newImportFile = false;
-
-        private static readonly List<string> InitialHeaders = new()
-        {
-            "TREATMENT",
-            "YEAR",
-            "BUDGET",
-            "COST",
-            "PROJECTSOURCE",
-            "PROJECTSOURCEID",
-            "CATEGORY"
-        };
-
-        private static readonly string NoTreatment = "No Treatment";
 
         public CommittedProjectService(IUnitOfWork unitOfWork, IHubService hubService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService;
-        }
-
-        /**
-         * Adds excel worksheet header row cell values for Committed Project Export
-         */
-        private void AddHeaderCells(ExcelWorksheet worksheet)
-        {
-            var column = 1;
-            if (_keyFields.Contains(_networkKeyField))
-            {
-                worksheet.Cells[1, column++].Value = _networkKeyField;
-            }
-
-            for (var keyColumnIndex = 0; keyColumnIndex < _keyFields.Count; keyColumnIndex++)
-            {
-                if (_keyFields[keyColumnIndex] != _networkKeyField)
-                {
-                    worksheet.Cells[1, column++].Value = _keyFields[keyColumnIndex];
-                }
-            }
-
-            for (var headerCount = 0; headerCount < InitialHeaders.Count; headerCount++)
-            {
-                worksheet.Cells[1, column++].Value = InitialHeaders[headerCount];
-            }
-        }
+        }        
 
         public FileInfoDTO ExportCommittedProjectsFile(Guid simulationId)
         {
@@ -103,24 +65,11 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
         }
 
         public FileInfoDTO CreateCommittedProjectTemplate(Guid networkId)
-        {
-            var fileName = $"CommittedProjectsTemplate.xlsx";
-
-            using var excelPackage = new ExcelPackage(new FileInfo(fileName));
-
-            var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
-            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
-            _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
+        {            
             _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(networkId);
-
-            AddHeaderCells(worksheet);
-
-            return new FileInfoDTO
-            {
-                FileName = fileName,
-                FileData = Convert.ToBase64String(excelPackage.GetAsByteArray()),
-                MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            };
+            var generator = new CommittedProjectsTemplateGenerator(_networkKeyField);
+            var template = generator.CreateCommittedProjectTemplate();
+            return template;        
         }
 
         /**

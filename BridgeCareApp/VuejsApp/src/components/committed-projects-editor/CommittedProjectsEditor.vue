@@ -1291,7 +1291,6 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     }
 
     const getBudgetStyle = (budgetId: string) => {
-        console.log("BudgetId: " + budgetId)
         const isInvalid = !budgetId || budgetId === "Empty budget";
         return isInvalid ? { border: '1px solid red', padding: '3px' } : {};
     };
@@ -1328,7 +1327,6 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
 
     function validateCommittedProjects() {
         currentPage.value.forEach(scp => {
-            console.log(scp.scenarioBudgetId)
 
             const errors = {
                 yearErrors: checkYear(scp),

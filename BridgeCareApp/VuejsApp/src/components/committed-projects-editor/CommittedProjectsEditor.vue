@@ -999,6 +999,9 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
                 case 'projectSource':
                     handleProjectSourceChange(row, scp, value);
                     break;
+                case 'cost':
+                    handleCostChange(row, scp, value);
+                    break;
                 default:
                     updateCommittedProject(row, value, property);
                     onPaginationChanged();
@@ -1078,13 +1081,6 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     }
 
     //Subroutines
-    function formatAsCurrency(value: any) {
-        if (hasValue(value)) {
-            return formatAsCurrency(value);
-        }
-
-        return null;
-    }
     function disableCrudButtons() {
     const rowChanges = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rowChanges.every(
@@ -1178,6 +1174,18 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     function handleFactorChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, factor: number) {
         updateCommittedProject(row, factor, 'performanceFactor');
         onPaginationChanged();
+    }
+
+    function handleCostChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, value: string) {
+        const parsedValue = parseFloat(value); 
+        if (isNaN(parsedValue)) {
+            scp.costErrors = ['Enter a valid numeric cost.'];
+            return;
+        }
+
+        row.cost = parsedValue; 
+        scp.costErrors = checkCost(parsedValue); 
+        updateCommittedProject(row, parsedValue, 'cost');
     }
 
     function handleProjectSourceChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, projectSource: string) {
@@ -1301,8 +1309,8 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     };
 
     const getCostStyle = (cost: number) => {
-        const isInvalidCosts = cost >= 0 || cost === null || cost === undefined;
-        return isInvalidCosts ? { border: '1px solid red', padding: '3px' } : {};
+        const isInvalidCost = cost === null || cost === undefined || cost <= 0;
+        return isInvalidCost ? { border: '1px solid red', padding: '3px' } : {};
     };
 
     function validTreatmentName(treatment: string) {

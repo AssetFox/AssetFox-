@@ -31,9 +31,8 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
         private ConcurrentDictionary<(string locationIdentifier, int projectYear, string treatment), SectionCommittedProjectDTO> _projectsPerKey = new();
         private ConcurrentDictionary<(string locationIdentifier, int projectYear, string treatment), bool> _processedKeys = new();
 
-
         // Configurable batch sizes for notifications
-        private const int MAX_ERROR_BATCH_SIZE = 10;
+        private const int MAX_ERROR_BATCH_SIZE = 5;
 
         public enum ErrorType
         {
@@ -647,6 +646,17 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
                         HubConstant.BroadcastWarning,
                         $"{errorTitle}\n{string.Join("\n", messagesToShow)}"
                     );
+
+
+                    //var message = new StringBuilder();
+                    //messagesToShow.ForEach(m => message.AppendLine(m));
+
+                    //_hubService.SendRealTimeMessage(
+                    //    userId,
+                    //    HubConstant.BroadcastWarning,
+                    //    errorTitle,
+                    //    message.ToString()
+                    //);
                 }
             }
         }

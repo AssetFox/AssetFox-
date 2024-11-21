@@ -80,115 +80,27 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             }
         }
 
-
-        /**
-         * Adds excel worksheet cell values for Committed Project Export
-         */
-        private void AddDataCells(ExcelWorksheet worksheet, List<BaseCommittedProjectDTO> committedProjectDTOs)
-        {
-            var row = 2;
-            committedProjectDTOs.OrderBy(_ => _.LocationKeys[_networkKeyField])
-                .ThenByDescending(_ => _.Year).ForEach(
-                    project =>
-                    {
-                        var column = 1;
-                        var locationValue = string.Empty;
-                        if (project.LocationKeys.ContainsKey(_networkKeyField))
-                        {
-                            locationValue = project.LocationKeys[_networkKeyField];
-                            worksheet.Cells[row, column++].Value = locationValue;
-                        }
-
-                        // Add other data from key fields based on ID
-                        var otherData = _keyFields.Where(_ => _ != _networkKeyField);
-                        if (!string.IsNullOrEmpty(locationValue) && otherData.Count() > 0)
-                        {
-                            var assetId = _keyProperties[_networkKeyField].FirstOrDefault(_ => _.KeyValue.Value == locationValue);
-                            if (assetId != null)
-                            {
-                                foreach (var field in otherData)
-                                {
-                                    worksheet.Cells[row, column++].Value = _keyProperties[field].FirstOrDefault(_ => _.AssetId == assetId.AssetId).KeyValue.Value;
-                                }
-                            }
-                            else
-                            {
-                                column += otherData.Count();
-                            }
-                        }
-                        else
-                        {
-                            column += otherData.Count();
-                        }
-
-                        worksheet.Cells[row, column++].Value = project.Treatment;
-                        worksheet.Cells[row, column++].Value = project.Year;
-                        worksheet.Cells[row, column++].Value = project.ShadowForAnyTreatment;
-                        worksheet.Cells[row, column++].Value = project.ShadowForSameTreatment;
-                        var linkedBudget = _unitOfWork.BudgetRepo.GetScenarioBudgets(project.SimulationId).FirstOrDefault(_ => _.Id == project.ScenarioBudgetId);
-                        var budgetName = linkedBudget?.Name ?? UnknownBudgetName;
-                        if (budgetName == UnknownBudgetName)
-                        {
-                            budgetName = "";
-                        }
-                        worksheet.Cells[row, column++].Value = budgetName;
-                        worksheet.Cells[row, column++].Value = project.Cost;
-                        worksheet.Cells[row, column++].Value = project.ProjectSource;
-                        worksheet.Cells[row, column++].Value = project.ProjectId;
-                        worksheet.Cells[row, column++].Value = string.Empty; // AREA
-                        worksheet.Cells[row, column++].Value = project.Category.ToString();
-
-                        row++;
-                    });
-        }
-
         public FileInfoDTO ExportCommittedProjectsFile(Guid simulationId)
         {
+            
             var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
-            var simulationName = simulation.Name;
-
-            _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(simulation.NetworkId);
-
-            var committedProjectDTOs = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
-
-            var fileName = $"CommittedProjects_{simulationName.Trim().Replace(" ", "_")}.xlsx";
-
-            using var excelPackage = new ExcelPackage(new FileInfo(fileName));
-
-            var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
-            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
+            var keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
+            var keyFields = keyProperties.Keys.Where(_ => _ != "ID").ToList();
+            var networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(simulation.NetworkId);
             var primaryKeyFieldNames = _unitOfWork.AdminSettingsRepo.GetKeyFields();
 
-            foreach (var kvp in _keyProperties.ToList())
-            {
-                var key = kvp.Key;
-                if (!primaryKeyFieldNames.Contains(key) && key != _networkKeyField)
-                {
-                    _keyProperties.Remove(key);
-                }
-            }
+            var exporter = new CommittedProjectsExporter(
+                _unitOfWork,
+                simulation,
+                networkKeyField,
+                keyFields,
+                keyProperties,
+                primaryKeyFieldNames.ToList());
 
-            _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
 
-            if (committedProjectDTOs.Any())
-            {
-                AddHeaderCells(worksheet);
-                AddDataCells(worksheet, committedProjectDTOs);
-            }
-            else
-            {
-                // Return a template
-                AddHeaderCells(worksheet);
-            }
-
-            return new FileInfoDTO
-            {
-                FileName = fileName,
-                FileData = Convert.ToBase64String(excelPackage.GetAsByteArray()),
-                MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            };
+            var fileInfo = exporter.ExportCommittedProjectsFile(simulationId);
+            return fileInfo;
         }
-
 
         public FileInfoDTO CreateCommittedProjectTemplate(Guid networkId)
         {

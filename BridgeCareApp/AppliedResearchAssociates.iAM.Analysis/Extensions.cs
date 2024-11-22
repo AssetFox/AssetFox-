@@ -87,6 +87,9 @@ internal static class Extensions
         return hash;
     }
 
+    public static Dictionary<TKey, TValue[]> ToLookupAsDictionary<TKey, TValue>(this IEnumerable<TValue> source, Func<TValue, TKey> keySelector, IEqualityComparer<TKey> comparer = null)
+        => source.GroupBy(keySelector, comparer).ToDictionary(g => g.Key, g => g.ToArray());
+
     public static SortedDictionary<TKey, TValue> ToSortedDictionary<TKey, TValue>(this IEnumerable<TValue> source, Func<TValue, TKey> keySelector, IComparer<TKey> comparer = null)
         => new(source.ToDictionary(keySelector), comparer);
 

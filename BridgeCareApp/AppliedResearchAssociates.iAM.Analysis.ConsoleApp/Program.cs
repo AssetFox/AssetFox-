@@ -19,13 +19,13 @@ rootCommand.SetHandler(static inputArgumentValue =>
     Console.WriteLine($"{elapsedBeforeRun} - Input complete.");
 
     var runner = new SimulationRunner(inputToRun);
-    runner.Progress += (sender, eventArgs) => Console.WriteLine(eventArgs);
+    runner.Progress += (sender, eventArgs) => Console.WriteLine($"[{timer.Elapsed}] {eventArgs}");
     runner.SimulationLog += (sender, eventArgs) => Console.WriteLine(eventArgs.MessageBuilder.ToString());
     runner.Run();
 
     var elapsedThroughRun = timer.Elapsed;
     var elapsedDuringRun = elapsedThroughRun - elapsedBeforeRun;
-    Console.WriteLine($"{elapsedThroughRun} - Analysis complete. Duration: {elapsedDuringRun}");
+    Console.WriteLine($"{elapsedThroughRun} - Analysis complete. Duration: {elapsedDuringRun} ({elapsedDuringRun.TotalSeconds}s)");
 
     var output = inputToRun.Results;
     var outputPath = Path.ChangeExtension(inputArgumentValue.FullName, $"output.{DateTime.Now:yyyy-MM-dd-HHmmssfff}.json");

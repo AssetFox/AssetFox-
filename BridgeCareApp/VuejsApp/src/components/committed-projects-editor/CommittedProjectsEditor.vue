@@ -905,6 +905,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
             CommittedProjectsService.deleteSpecificCommittedProjects(deletionIds.value).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     deletionIds.value = [];
+                    $emitter.emit('AllCommittedProjectsDeleted');
                     addSuccessNotificationAction({ message: 'Deleted committed projects' });
                 }
                 performUpsert();
@@ -912,12 +913,17 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
         } else {
             performUpsert();
         }
-        $emitter.emit('CommittedProjectsUpdated');
     }
 
      function handleUpsertResponse(response: AxiosResponse) {
         if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
             addSuccessNotificationAction({ message: 'Committed Projects Updated Successfully' });
+            console.log(selectedCpItems.value);
+            console.log(totalItems.value);
+            if(totalItems.value !== 0)
+            {
+                $emitter.emit('CommittedProjectsUpdated');
+            }
             addedRows.value = [];
             updatedRowsMap.clear();
             if (isNoTreatmentBefore.value !== isNoTreatmentBeforeCache.value) {
@@ -1083,6 +1089,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
 
         if (doDelete) {
             deleteSimulationCommittedProjectsAction(scenarioId);
+            $emitter.emit('AllCommittedProjectsDeleted');
             CommittedProjectsService.deleteSimulationCommittedProjects(scenarioId).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     onCancelClick();

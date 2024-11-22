@@ -1564,6 +1564,11 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function disableCrudButton() {
+        if (currentPage.value.length === 0) {
+            disableCrudButtonsResult.value = true;
+            return true;
+        }
+
         const allBudgetDataIsValid: boolean = currentPage.value.every((budget: Budget) => {
             let amountsAreValid = true;
             const addedAmounts = addedBudgetAmounts.value.get(budget.name);

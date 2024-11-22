@@ -302,9 +302,9 @@
                                              @submit='onSubmitImportExportInvestmentBudgetsDialogResult' 
                                              @submit-success-import="onSuccessImportSubmit"/>
     </v-row>
-    <SuccessfulUploadDialog 
+    <UploadDialog 
         v-model="showSuccessPopup"
-        message="Successfully uploaded investment budgets."
+        :message="dialogMessage"
     />
 </v-card>
     <ConfirmDialog></ConfirmDialog>
@@ -395,7 +395,7 @@ import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton
 import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
 import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
 import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
-import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUploadDialog.vue';
+import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
 import { BudgetPriority, BudgetPriorityLibrary } from '@/shared/models/iAM/budget-priority';
 import BudgetPriorityService from '@/services/budget-priority.service';
 import TreatmentService from '@/services/treatment.service';
@@ -472,6 +472,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let lastYear: number = 0;
     let firstYear: number = 0;
     let initializing: boolean = true;
+
+    const dialogMessage = ref('');
 
     const selectedBudgetLibrary = ref<BudgetLibrary>(clone(emptyBudgetLibrary));
     const investmentPlan = ref<InvestmentPlan>(clone(emptyInvestmentPlan));
@@ -1754,8 +1756,9 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 else{
 
                 }
+                dialogMessage.value = "Successfully uploaded investments."
+                showSuccessPopup.value = true;
             })
-            showSuccessPopup.value = true;
             $emitter.emit('InvestmentSettingsUpdated');                
         }        
     }

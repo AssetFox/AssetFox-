@@ -324,7 +324,8 @@ import {
     BudgetYearsGridData,
     emptyBudgetLibrary,
     emptyInvestmentPlan, InvestmentBudgetFileImport,
-    InvestmentPlan
+    InvestmentPlan,
+    SimpleBudgetDetail
 } from '@/shared/models/iAM/investment';
 import { any, clone, find, isNil, propEq } from 'ramda';
 import { SelectItem } from '@/shared/models/vue/select-item';
@@ -398,7 +399,7 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
 import { BudgetPriority, BudgetPriorityLibrary } from '@/shared/models/iAM/budget-priority';
 import BudgetPriorityService from '@/services/budget-priority.service';
 import TreatmentService from '@/services/treatment.service';
-import { Treatment } from '@/shared/models/iAM/treatment';
+import { SimpleTreatment, Treatment } from '@/shared/models/iAM/treatment';
 
 let store = useStore();
 const confirm = useConfirm();
@@ -421,6 +422,9 @@ const hasAdminAccess = computed<boolean>(()=> (store.state.authenticationModule.
 let isSuccessfulImport = ref<boolean>(store.state.investmentModule.isSuccessfulImport);
 let currentUserCriteriaFilter = ref<UserCriteriaFilter>(store.state.userModule.currentUserCriteriaFilter);
 let hasPermittedAccess = computed<boolean>(() => store.state.investmentModule.hasPermittedAccess);
+const stateGetScenarioSelectedTreatments = computed<SimpleTreatment[]>(() => store.state.treatmentModule.getScenarioSelectedTreatments);
+let stateScenarioSelectableTreatment = computed<Treatment[]>(() => store.state.treatmentModule.scenarioSelectableTreatments);
+let stateSimpleScenarioSelectableTreatments= computed<SimpleTreatment[]>(() => store.state.treatmentModule.simpleScenarioSelectableTreatments);
 
 async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess', payload);}
 async function getInvestmentAction(payload?: any): Promise<any> {await store.dispatch('getInvestment', payload);}
@@ -1404,8 +1408,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value: "";
                 firstYearOfAnalysisPeriodShift.value = 0;
                 investmentPlanMutator(investmentPlanUpsert)
-                if(librarySelectItemValue.value != null || deletionBudgetIds.value.length > 0)
-                    onShowCpChangeAlert();
                 clearChanges();                                            
                 addSuccessNotificationAction({message: "Modified investment"});
                 librarySelectItemValue.value = null;
@@ -1443,7 +1445,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         await BudgetPriorityService.upsertScenarioBudgetPriorities(budgetPrioritytoUpsert, selectedScenarioId);
 
         
-        
         await TreatmentService.getScenarioSelectedTreatments(selectedScenarioId).then(response => {
             if(response.data)
             {
@@ -1451,19 +1452,21 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     name: item.name,
                     id: item.id
                 }));
-
                 response.data.forEach((item: { budgetIds: string[]; budgets: { id: string; name: string }[] }) => {
+                    // Initialize budgetIds and budgets if they are undefined
                     item.budgetIds = item.budgetIds || [];
                     item.budgets = item.budgets || [];
 
                     nameIdPairs.forEach(({ id, name }) => {
-                        item.budgetIds.push(id);
-                        item.budgets.push({ id, name });
+                        // Add to budgetIds if the id is not already present
+                        if (!item.budgetIds.includes(id)) {
+                            item.budgetIds.push(id);
+                        }
 
-                    // Check for duplicates
-                    if (!item.budgets.some(budget => budget.id === id && budget.name === name)) {
-                        item.budgets.push({ id, name });
-                    }
+                        // Add to budgets only if there isn't an existing budget with the same id and name
+                        if (!item.budgets.some(budget => budget.id === id && budget.name === name)) {
+                            item.budgets.push({ id, name });
+                        }
                     });
                 });
 
@@ -1542,18 +1545,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             heading: 'Warning',
             choice: true,
             message: 'Are you sure you want to delete?',
-        };
-    }
-
-    function onShowCpChangeAlert() {
-        console.log(stateInvestmentPlan.value);
-        console.log(selectedBudgetLibrary.value);
-              
-        cpChangedAlertData.value = {
-            showDialog: true,
-            heading: 'Warning',
-            choice: false,
-            message: 'All related committed projects have had their budgets set to none.A new budget will need to be set for the aformentioned committed projects',
         };
     }
 

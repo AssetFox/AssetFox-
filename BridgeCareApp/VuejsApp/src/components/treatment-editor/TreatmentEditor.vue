@@ -279,7 +279,7 @@
                 </v-col>
             </v-row>
     </v-col>
-    <SuccessfulUploadDialog 
+    <UploadDialog 
         v-model="showSuccessPopup"
         :message="importSuccessMessage"
     />
@@ -419,7 +419,7 @@ import UpdateLibraryButton from '@/shared/components/buttons/UpdateLibraryButton
 import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton.vue';
 import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
 import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
-import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUploadDialog.vue';
+import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
 
     const emit = defineEmits(['submit'])    
     const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
@@ -1473,14 +1473,17 @@ async function getDistinctScenarioPerformanceFactorAttributeNamesAction(payload?
                 if(hasScenario.value){
                     await getSimpleScenarioSelectableTreatmentsAction(selectedScenarioId);
                     onDiscardChanges();
+                    
                 } else {
+                    
                     await getSimpleSelectableTreatmentsAction(selectedTreatmentLibrary.value.id);
                 }
                 setAlertMessageAction('');
+                // Set the success message and show the popup
+                importSuccessMessage.value = message;
+                showSuccessPopup.value = true;
             });
-            // Set the success message and show the popup
-            importSuccessMessage.value = message;
-            showSuccessPopup.value = true;
+            
             $emitter.emit('TreatmentSettingsUpdated');                 
         }        
     }

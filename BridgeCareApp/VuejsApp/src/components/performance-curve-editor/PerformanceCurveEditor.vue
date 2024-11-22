@@ -382,9 +382,9 @@
             />
         </v-row>
 
-        <SuccessfulUploadDialog 
+        <UploadDialog 
             v-model="showSuccessPopup"
-            message="Successfully uploaded performance curves."
+            :message="dialogMessage"
         />
         <Alert
             :dialogData="confirmDeleteAlertData"
@@ -515,7 +515,7 @@ import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton
 import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
 import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
 import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
-import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUploadDialog.vue';
+import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
 
 const emit = defineEmits(['submit'])
 let store = useStore();
@@ -573,6 +573,7 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
     let librarySelectItems  = ref<SelectItem[]>([]);
     let modifiedDate = ref<string>(''); 
     const showSuccessPopup = ref(false);
+    const dialogMessage = ref('');
     
     let performanceCurveGridHeaders: any[] = [
         {
@@ -1363,8 +1364,10 @@ function selectedPerformanceCurveLibraryMutator(payload:any){store.commit('selec
             onPaginationChanged().then(() => {
                 setAlertMessageAction('');
             })
+            dialogMessage.value = "Successfully uploaded performance curves.";
+            showSuccessPopup.value = true;
         }    
-        showSuccessPopup.value = true;
+        
         $emitter.emit('DeteriorationModelSettingsUpdated');                  
     }
 

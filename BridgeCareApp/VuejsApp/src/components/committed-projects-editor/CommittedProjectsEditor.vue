@@ -143,7 +143,9 @@
                                                 class="sm-txt"
                                                 density="compact"
                                                 variant="underlined"
-                                                :model-value="item.item[header.key]"/>
+                                                :model-value="item.item[header.key]"
+                                                :style="getBudgetStyle(item.item[header.key])"
+                                                :error-messages="item.item.budgetErrors"/>
 
                                             <v-text-field v-if="header.key === 'keyAttr'"
                                                 readonly
@@ -151,6 +153,7 @@
                                                 density="compact"
                                                 variant="underlined"
                                                 :model-value="item.item[header.key]"
+                                                :style="getKeyAttrStyle(item.item.errors)"
                                                 :rules="[inputRules['generalRules'].valueIsNotEmpty]"
                                                 :error-messages="item.item.errors"/>
 
@@ -176,6 +179,8 @@
                                                 class="sm-txt"
                                                 density="compact"
                                                 variant="underlined"
+                                                :style="getProjectSourceIdStyle(item.item[header.key])"
+                                                :error-messages="item.item.projectSourceIdErrors"
                                                 :model-value="item.item[header.key]"/>
 
                                             <template v-slot:input>
@@ -292,23 +297,10 @@
         />
         <ConfirmDialog></ConfirmDialog>
     </v-div>
-    <SuccessfulUploadDialog 
-        v-model="showSuccessPopup"
-        message="Successfully uploaded committed projects."
+    <UploadDialog 
+        v-model="showUploadCompleteDialog"
+        :message="dialogMessage"
     />
-    <!-- <v-dialog v-model="showSuccessPopup" max-width="400px">
-        <v-card>
-            <v-card-text class="text-center">
-                Successfully uploaded committed projects.
-            </v-card-text>
-            <v-card-actions>
-                <v-row justify="center" class="w-100">
-                    <v-btn color="primary" variant="text" 
-                    class='ghd-white-bg ghd-blue ghd-button-text' @click="showSuccessPopup = false">OK</v-btn>
-                </v-row>
-            </v-card-actions>
-        </v-card>
-    </v-dialog> -->
 </v-card>
 </template>
 <script setup lang="ts">
@@ -360,7 +352,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import TrashCanSvg from '@/shared/icons/TrashCanSvg.vue';
 import SaveButton from '@/shared/components/buttons/SaveButton.vue';
 import CancelButton from '@/shared/components/buttons/CancelButton.vue';
-import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUploadDialog.vue';
+import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
 
 
     let store = useStore();
@@ -388,9 +380,11 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
     const missingTreatments = ref< string[] >([]);
     const missingTreatmentsValue = ref< string[] >([]);
     const invalidProjectSources = ref<number[]>([]);
+    const invalidProjectSourceId = ref<string[]>([]);
     const invalidCosts = ref<number[]>([]);
     const invalidYears = ref<number[]>([]);
     const invalidTreatments = ref<string[]>([]);
+    const invalidBudgets = ref<string[]>([]);
     let allImportedTreatments;
     let scenarioId: string = getBlankGuid();
     let networkId: string = getBlankGuid();
@@ -408,7 +402,8 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
         [5, "ProjectBuilder"]
     ]);
 
-    const showSuccessPopup = ref(false);
+    const showUploadCompleteDialog = ref(false);
+    const dialogMessage = ref('');
 
     const uuidNIL: string = getBlankGuid();
     let addedRows = ref<SectionCommittedProject[]>([]);
@@ -784,6 +779,14 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
                 invalidProjectSources.value.push(item.projectSource);
             }
 
+            if (!validProjectSourceId(item.projectId)) {
+                invalidProjectSourceId.value = invalidProjectSourceId.value.map((id) => id.trim());
+            }
+
+            if (!validBudgetId(item.scenarioBudgetId)) {
+                invalidBudgets.value.push(item.scenarioBudgetId);
+            }
+
             if (!validCost(item.cost)) {
                 invalidCosts.value.push(item.cost);
             }
@@ -836,25 +839,36 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
                 }
             });
         }
-
+    
     async function OnGetTemplateClick(){
-       await CommittedProjectsService.getUploadedCommittedProjectTemplate()
+        await CommittedProjectsService.getCommittedProjectTemplate(networkId)
             .then((response: AxiosResponse) => {
-                    if(response.data.toString() != ""){
-                        FileDownload(convertBase64ToArrayBuffer(response.data), 'Committed Project Template', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                        isAdminTemplateUploaded = true;
-                    }
-                    else{
-                         CommittedProjectsService.getCommittedProjectTemplate(networkId)
-                            .then((response: AxiosResponse) => {
-                        if (hasValue(response, 'data')) {
-                          const fileInfo: FileInfo = response.data as FileInfo;  
-                          FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
-                        }
-                });
-                    }
+                if (hasValue(response, 'data')) {
+                    const fileInfo: FileInfo = response.data as FileInfo;
+                    FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                }
             });
-        }
+    }
+    // async function OnGetTemplateClick(){
+    //    await CommittedProjectsService.getUploadedCommittedProjectTemplate()
+    //         .then((response: AxiosResponse) => {
+    //                 if(response.data.toString() != ""){
+    //                     FileDownload(convertBase64ToArrayBuffer(response.data), 'Committed Project Template', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    //                     isAdminTemplateUploaded = true;
+    //                 }
+    //                 else{
+    //                      CommittedProjectsService.getCommittedProjectTemplate(networkId)
+    //                         .then((response: AxiosResponse) => {
+    //                     if (hasValue(response, 'data')) {
+    //                       const fileInfo: FileInfo = response.data as FileInfo;  
+    //                       FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+    //                     }
+    //             });
+    //                 }
+    //         });
+    //     }
+
+    
 
      function OnAddCommittedProjectClick(){
         const newRow: SectionCommittedProject = clone(emptySectionCommittedProject)
@@ -996,6 +1010,9 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
                 case 'projectSource':
                     handleProjectSourceChange(row, scp, value);
                     break;
+                case 'cost':
+                    handleCostChange(row, scp, value);
+                    break;
                 default:
                     updateCommittedProject(row, value, property);
                     onPaginationChanged();
@@ -1075,13 +1092,6 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
     }
 
     //Subroutines
-    function formatAsCurrency(value: any) {
-        if (hasValue(value)) {
-            return formatAsCurrency(value);
-        }
-
-        return null;
-    }
     function disableCrudButtons() {
     const rowChanges = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rowChanges.every(
@@ -1133,12 +1143,13 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
             year: scp.year,
             cost: scp.cost,
             scenarioBudgetId: scp.scenarioBudgetId? scp.scenarioBudgetId : '',
-            budget: budget? budget.name : '',
+            budget: budget? budget.name : 'Empty budget',
             treatment: scp.treatment,
             treatmentId: '',
             id: scp.id,
             errors: [],
             projectSourceErrors: [],
+            projectSourceIdErrors: [],
             treatmentErrors: [],
             costErrors: [],
             budgetErrors: [],
@@ -1156,10 +1167,11 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
         ) as SimpleBudgetDetail;
         if(!isNil(budget)){
             row.scenarioBudgetId = budget.id;
-            scp.budget = 'None'           
+            scp.budget = budget.name           
         }  
         else
-            row.scenarioBudgetId = null;
+            row.scenarioBudgetId = getBlankGuid(); // Invalid budget fallback
+            scp.budget = 'Empty budget'; 
         updateCommittedProject(row, row.scenarioBudgetId, 'scenarioBudgetId') 
         onPaginationChanged();       
     }
@@ -1173,6 +1185,18 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
     function handleFactorChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, factor: number) {
         updateCommittedProject(row, factor, 'performanceFactor');
         onPaginationChanged();
+    }
+
+    function handleCostChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, value: string) {
+        const parsedValue = parseFloat(value); 
+        if (isNaN(parsedValue)) {
+            scp.costErrors = ['Enter a valid numeric cost.'];
+            return;
+        }
+
+        row.cost = parsedValue; 
+        scp.costErrors = checkCost(parsedValue); 
+        updateCommittedProject(row, parsedValue, 'cost');
     }
 
     function handleProjectSourceChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, projectSource: string) {
@@ -1263,6 +1287,14 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
         return isInInvalidYears ? { border: '1px solid red', padding: '3px' } : {};
     };
 
+    const getProjectSourceIdStyle = (projectSourceId: string) => {
+        const trimmedProjectSourceId = projectSourceId.trim();
+        const isInInvalidProjectSourceId =
+            invalidProjectSourceId.value.includes(trimmedProjectSourceId) ||
+            trimmedProjectSourceId === 'None';
+        return isInInvalidProjectSourceId ? { border: '1px solid red', padding: '3px' } : {};
+    };
+
     const getProjectSourceStyle = (projectSource: string) => {
         let source = getProjectSourceKeyFromValueMap(projectSourceMap, projectSource);
         const isInInvalidProjectSources = typeof source === 'number' && invalidProjectSources.value.includes(source);
@@ -1277,14 +1309,20 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
         return undefined;
     }
 
-    const getCostStyle = (cost: number) => {
-        const isInInvalidCosts = invalidCosts.value.includes(cost);
-        return isInInvalidCosts ? { border: '1px solid red', padding: '3px' } : {};
+    const getBudgetStyle = (budgetId: string) => {
+        const isInvalid = !budgetId || budgetId === "Empty budget";
+        return isInvalid ? { border: '1px solid red', padding: '3px' } : {};
     };
 
-    function validYear(year: number) {
+    const getKeyAttrStyle = (errors: string[]) => {
+        const hasErrors = Array.isArray(errors) && errors.length > 0; 
+        return hasErrors ? { border: '1px solid red', padding: '3px' } : {};
+    };
 
-    }
+    const getCostStyle = (cost: number) => {
+        const isInvalidCost = cost === null || cost === undefined || cost <= 0;
+        return isInvalidCost ? { border: '1px solid red', padding: '3px' } : {};
+    };
 
     function validTreatmentName(treatment: string) {
         return treatmentSelectItems.value.includes(treatment);
@@ -1294,8 +1332,16 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
         return source !== 0 && source !== 'None'
     }
 
+    function validProjectSourceId(sourceId: string) {
+        return sourceId !== 'None'.trim();
+    }
+
     function validCost(cost: number) {
-        return cost !== -1.0 || cost !== -1;
+        return cost !== 0 && cost !== null && cost !== undefined;
+    }
+
+    function validBudgetId(budgetId: string) {
+        return budgetId !== getBlankGuid() || budgetId !== "Empty budget";
     }
 
     function validateCommittedProjects() {
@@ -1306,12 +1352,16 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
                 treatmentErrors: checkTreatment(scp.treatment),
                 costErrors: checkCost(scp.cost),
                 projectSourceErrors: checkProjectSource(scp.projectSource),
+                projectSourceIdErrors: checkProjectSourceId(scp.projectId),
+                budgetErrors: checkBudgetId(scp.scenarioBudgetId)
             };
 
             scp.yearErrors = errors.yearErrors;
             scp.treatmentErrors = errors.treatmentErrors;
             scp.costErrors = errors.costErrors;
             scp.projectSourceErrors = errors.projectSourceErrors;
+            scp.projectSourceIdErrors = errors.projectSourceIdErrors;
+            scp.budgetErrors = errors.budgetErrors;
         });
     }
 
@@ -1349,8 +1399,11 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
 
     function checkCost(cost: number) {
         const errors = [];
-        if (!validCost(cost)) {
-            errors.push('Fix project cost');
+        if (cost === 0) {
+            errors.push('Cost cannot be zero.');
+        }
+        if (cost === null || cost === undefined || cost < 0) {
+            errors.push('Enter a valid cost.');
         }
         return errors;
     }
@@ -1359,6 +1412,23 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
         const errors = [];
         if (!validProjectSource(source)) {
             errors.push('Select a valid project source');
+        }
+        return errors;
+    }
+
+    function checkProjectSourceId(sourceId: string) {
+        const errors = [];
+        const trimmedSourceId = sourceId.trim();
+        if (!validProjectSourceId(trimmedSourceId)) {
+            errors.push('Enter a valid project Id')
+        }
+        return errors;
+    }
+
+    function checkBudgetId(budgetId: string) {
+        const errors = [];
+        if (!budgetId || budgetId === getBlankGuid()) {
+            errors.push('Select a valid budget.');
         }
         return errors;
     }
@@ -1467,8 +1537,13 @@ import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUpload
             clearChanges();
             onPaginationChanged().then(() => {
                 setAlertMessageAction('');
-            })
-            showSuccessPopup.value = true; 
+                if (totalItems.value > 0) {
+                    dialogMessage.value = 'Committed projects were imported. See alerts for further details.';
+                } else {
+                    dialogMessage.value = 'No committed projects were imported. See alerts for further details.';
+                }                
+                    showUploadCompleteDialog.value = true;
+                })
         } 
     }
 

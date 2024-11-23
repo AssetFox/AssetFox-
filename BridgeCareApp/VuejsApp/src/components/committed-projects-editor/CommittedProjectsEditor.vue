@@ -420,6 +420,8 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     let isKeyAttributeValidMap: Map<string, boolean> = new Map<string, boolean>();
 
     let projectPagination = shallowReactive<Pagination>(clone(emptyPagination));
+        const hasValidationErrors = ref(false);
+
 
     const stateSectionCommittedProjects = computed<SectionCommittedProject[]>(() => store.state.committedProjectsModule.sectionCommittedProjects);
     const stateTreatmentLibraries = computed<TreatmentLibrary[]>(() =>store.state.treatmentModule.treatmentLibraries);
@@ -1100,34 +1102,23 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
 
     //Subroutines
     function disableCrudButtons() {
-    const rowChanges = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
-        const dataIsValid: boolean = rowChanges.every(
-        (scp: SectionCommittedProject) => {
-            return (
-                rules['generalRules'].valueIsNotEmpty(
-                    scp.simulationId,
-                ) === true &&
-                rules['generalRules'].valueIsNotEmpty(
-                    scp.year,
-                ) === true &&
-                rules['generalRules'].valueIsNotEmpty(
-                    scp.cost,
-                ) === true &&
-                rules['generalRules'].valueIsNotEmpty(
-                    scp.treatment
-                ) == true &&
-                rules['generalRules'].valueIsNotEmpty(
-                    scp.locationKeys[keyattr]
-                ) == true &&
-                rules['generalRules'].valueIsWithinRange(
-                    scp.year, [firstYear, lastYear],
-                ) === true
-                
-            );
-        });
-        disableCrudButtonsResult = !dataIsValid;
-        return !dataIsValid;
-}
+        updateValidationErrorsStatus();
+        // const rowChanges = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
+        // const dataIsValid: boolean = rowChanges.every(
+        // (scp: SectionCommittedProject) => {
+        //     return (
+        //         rules['generalRules'].valueIsNotEmpty(scp.simulationId) === true &&
+        //         rules['generalRules'].valueIsNotEmpty(scp.year) === true &&
+        //         rules['generalRules'].valueIsNotEmpty(scp.cost) === true && 
+        //         rules['costRules'].costGreaterThanZero(scp.cost) == true &&
+        //         rules['generalRules'].valueIsNotEmpty(scp.treatment) == true &&
+        //         rules['generalRules'].valueIsNotEmpty(scp.locationKeys[keyattr]) == true &&
+        //         rules['generalRules'].valueIsWithinRange(scp.year, [firstYear, lastYear]) === true                
+        //     );
+        // });
+        // disableCrudButtonsResult = !dataIsValid;
+        // return !dataIsValid;
+    }
 
 
     function setCpItems() {
@@ -1243,15 +1234,35 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     }
 
     function fetchProjectSources() {
-    CommittedProjectsService.getProjectSources().then((response: AxiosResponse) => {
-        if (hasValue(response, 'data')) {
+        CommittedProjectsService.getProjectSources().then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
 
-            projectSourceOptions.value = response.data.filter(
-                (option: string) => option !== "None" && option !== "ProjectPick"
-                );
-        }
-    });
-}
+                projectSourceOptions.value = response.data.filter(
+                    (option: string) => option !== "None" && option !== "ProjectPick"
+                    );
+            }
+        });
+    }
+
+    function updateValidationErrorsStatus() {
+        hasValidationErrors.value = missingTreatments.value.length > 0 ||
+                                    invalidProjectSources.value.length > 0 ||
+                                    invalidProjectSourceId.value.length > 0 ||
+                                    invalidCosts.value.length > 0 ||
+                                    invalidYears.value.length > 0 ||
+                                    invalidTreatments.value.length > 0 ||
+                                    invalidBudgets.value.length > 0 ||
+                                    currentPage.value.some((scp) => {
+                                        return (scp.errors && scp.errors.length > 0) ||
+                                            (scp.yearErrors && scp.yearErrors.length > 0) ||
+                                            (scp.treatmentErrors && scp.treatmentErrors.length > 0) ||
+                                            (scp.costErrors && scp.costErrors.length > 0) ||
+                                            (scp.projectSourceErrors && scp.projectSourceErrors.length > 0) ||
+                                            (scp.projectSourceIdErrors && scp.projectSourceIdErrors.length > 0) ||
+                                            (scp.budgetErrors && scp.budgetErrors.length > 0);
+                                    });
+    }
+
 
     function checkExistenceOfAssets(){//todo: refine this
         const uncheckKeys = currentPage.value.map(scp => scp.keyAttr).filter(key => isNil(isKeyAttributeValidMap.get(key)))
@@ -1344,7 +1355,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     }
 
     function validCost(cost: number) {
-        return cost !== 0 && cost !== null && cost !== undefined;
+        return cost > 0 && cost !== 0 && cost !== null && cost !== undefined;
     }
 
     function validBudgetId(budgetId: string) {

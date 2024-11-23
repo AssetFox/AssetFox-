@@ -325,7 +325,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     return p.ToEntity(attributes, keyAttrDict[p.SimulationId]);
                 }).ToList();
 
-            var locations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
+
+            committedProjectEntities.ForEach(cpe => cpe.CommittedProjectLocation.Id = Guid.NewGuid());
+
+            //var locations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
 
             // Determine the committed projects that exist
  
@@ -335,10 +338,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new Exception("Multiple committed projects cannot have the same year, treatment, and asset");
             }
             _unitOfWork.AsTransaction(() =>
-            {                
-                _unitOfWork.Context.UpsertAll(committedProjectEntities);
+            {
                 var committedProjectLocations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
-                _unitOfWork.Context.UpsertAll(committedProjectLocations);
+                committedProjectLocations.ForEach(cpl => cpl.Id = Guid.NewGuid());
+                _unitOfWork.Context.AddAll(committedProjectEntities);
+
+                _unitOfWork.Context.AddAll(committedProjectLocations);
             });
         }
 

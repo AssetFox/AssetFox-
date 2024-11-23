@@ -98,11 +98,17 @@ const committedProjectRules = {
         return (range.length > 1 && !range.every(x => x === 0)) || `There are no years in the investment settings`;
     },
 };
+const costRules ={
+    'costGreaterThanZero': (cost: number) => {
+        return cost > 0;
+    }
+}
 /**************************************************ALL RULES***********************************************************/
 export const rules: InputValidationRules = {
     'generalRules': generalRules,
     'cashFlowRules': cashFlowRules,
     'investmentRules': investmentRules,
     'treatmentRules': treatmentRules,
-    'committedProjectRules': committedProjectRules
+    'committedProjectRules': committedProjectRules,
+    'costRules': costRules
 };

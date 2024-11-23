@@ -72,42 +72,6 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             return template;        
         }
 
-        /**
-         * Gets a Dictionary of Attribute Id per Attribute Name
-         */
-        private Dictionary<string, Guid> GetAttributeIdsPerAttributeName(List<string> consequenceAttributeNames)
-        {
-            var attributeDTOs = _unitOfWork.AttributeRepo.GetAttributes();
-            var attributeNames = attributeDTOs.Select(_ => _.Name).ToList();
-
-            // Ignore factor columns as bad columns (used for performance factor)
-            foreach (var missingAttribute in consequenceAttributeNames)
-            {
-                if (missingAttribute.Contains("_factor"))
-                {
-                    attributeNames.Add(missingAttribute);
-
-                    newImportFile = true;
-                }
-            }
-
-            if (consequenceAttributeNames.Any(name => !attributeNames.Contains(name)))
-            {
-                var missingAttributes = consequenceAttributeNames.Except(attributeNames).ToList();
-
-
-                if (missingAttributes.Count == 1)
-                {
-                    throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
-                }
-
-                throw new RowNotInTableException(
-                    $"No attributes found having names: {string.Join(", ", missingAttributes)}.");
-            }
-
-            return attributeDTOs.ToDictionary(_ => _.Name, _ => _.Id);
-        }
-
         public void ImportCommittedProjectFiles(
             Guid simulationId,
             ExcelPackage excelPackage,
@@ -230,7 +194,7 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             return consequencesToReturn;
         }
 
-        private bool IsCriteriaValid(CalculateEvaluateCompiler compiler, string expression, Guid assetId)
+        private static bool IsCriteriaValid(CalculateEvaluateCompiler compiler, string expression, Guid assetId)
         {
             var attributes = InstantiateCompilerAndGetExpressionAttributes(expression, compiler);
             var attributeIds = attributes.Select(a => a.Id).ToList();
@@ -253,7 +217,7 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             return evaluator.Delegate(scope);
         }
 
-        private List<AttributeDTO> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)
+        private static List<AttributeDTO> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)
         {
             var modifiedExpression = mergedCriteriaExpression
                     .Replace("[", "")
@@ -283,7 +247,7 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             return attributes;
         }
 
-        private void InstantiateScope(List<AggregatedResultDTO> results, CalculateEvaluateScope scope)
+        private static void InstantiateScope(List<AggregatedResultDTO> results, CalculateEvaluateScope scope)
         {
             results.ForEach(_ =>
             {

@@ -269,7 +269,7 @@
                 />
                 <SaveButton 
                     @save="OnSaveClick"
-                    :disabled="!hasUnsavedChanges || disableCrudButtons()"
+                    :disabled="!hasUnsavedChanges || disableCrudButtons"
                 />
             </v-row>
         </v-col> 
@@ -360,15 +360,11 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     const $emitter = inject('emitter') as Emitter<Record<EventType, unknown>>
     created();
 
-    let searchItems = '';
-    let dataPerPage = 0;
-    let totalDataFound = 0;
     let hasScenario: boolean = false;
     let librarySelectItemValue = ref<string>("");
     const templateSelectItems = ref<string[]>([]);
     const templateItemSelected = ref<string>("");
     let hasSelectedLibrary: boolean = false;
-    let librarySelectItems: SelectItem[] = [];
     let attributeSelectItems: SelectItem[] = [];
     const treatmentSelectItems = ref< string[] >([]);
     const projectSourceOptions = ref< string [] >([]);
@@ -376,7 +372,6 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     const categorySelectItems = ref<SelectItem[]>([]);
     let importedProjectTreatmentName = ref<string>("");
     let importedProjectTreatmentBoolean = ref(false);
-    let categories: string[] = [];
     const missingTreatments = ref< string[] >([]);
     const missingTreatmentsValue = ref< string[] >([]);
     const invalidProjectSources = ref<number[]>([]);
@@ -391,7 +386,6 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     let inputRules: InputValidationRules = rules;
     let network: Network = clone(emptyNetwork);
     let isAdminTemplateUploaded: Boolean;
-    let fileData: AxiosResponse;
     
     const projectSourceMap = new Map<number, string>([
         [0, "None"],
@@ -420,7 +414,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     let isKeyAttributeValidMap: Map<string, boolean> = new Map<string, boolean>();
 
     let projectPagination = shallowReactive<Pagination>(clone(emptyPagination));
-        const hasValidationErrors = ref(false);
+    
 
 
     const stateSectionCommittedProjects = computed<SectionCommittedProject[]>(() => store.state.committedProjectsModule.sectionCommittedProjects);
@@ -432,7 +426,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     const selectedStateTreatmentLibrary = computed<TreatmentLibrary>(() => store.state.treatmentModule.selectedTreatmentLibrary);
     const stateSimpleScenarioSelectableTreatments = computed<SimpleTreatment[]>(() => store.state.treatmentModule.simpleScenarioSelectableTreatments);
 
-    async function getTreatmentLibrariesAction(payload?: any): Promise<any> { await store.dispatch('getTreatmentLibraries', payload); }
+    //async function getTreatmentLibrariesAction(payload?: any): Promise<any> { await store.dispatch('getTreatmentLibraries', payload); }
     async function getSimpleScenarioSelectableTreatmentsAction(payload?: any): Promise<any> { await store.dispatch('getSimpleScenarioSelectableTreatments', payload); }
     async function getScenarioSimpleBudgetDetailsAction(payload?: any): Promise<any> { await store.dispatch('getScenarioSimpleBudgetDetails', payload); }
     async function getAttributesAction(payload?: any): Promise<any> { await store.dispatch('getAttributes', payload); }
@@ -446,19 +440,12 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     function selectScenarioAction(payload?: any){  store.dispatch('selectScenario', payload); }
     function setAlertMessageAction(payload?: any){ store.dispatch('setAlertMessage', payload); }
     
-    let getUserNameByIdGetter: any = store.getters.getUserNameByIdGetter;
-    
-    let cpItems: SectionCommittedProjectTableData[] = [];
     let selectedCpItems = ref<SectionCommittedProjectTableData[]>([]);
     let sectionCommittedProjects = ref<SectionCommittedProject[]>([]);
-    let committedProjectsCount: number = 0;
     const showImportExportCommittedProjectsDialog = ref< boolean > (false);
     let selectedCommittedProject = ref<string>('');
-    let showCreateCommittedProjectConsequenceDialog: boolean = false;
-    let disableCrudButtonsResult: boolean = true;
     const alertDataForDeletingCommittedProjects = ref<AlertData>({ ...emptyAlertData });
     let reverseCatMap = clone(treatmentCategoryReverseMap);
-    let catMap = clone(treatmentCategoryMap);
     
     let keyattr: string = '';
 
@@ -618,10 +605,10 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
         setAlertMessageAction('');
     }
 
-        //Watch
-        watch(isNoTreatmentBefore, () => {
-            checkHasUnsavedChanges();
-        });
+    //Watch
+    watch(isNoTreatmentBefore, () => {
+        checkHasUnsavedChanges();
+    });
 
     watch(investmentYears, (newYears) => {
         if (newYears.length > 0) {
@@ -814,9 +801,9 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
         });
     }
 
-     watch(deletionIds, () => {
+    watch(deletionIds, () => {
         checkHasUnsavedChanges();
-     });
+    });
 
     watch(addedRows, () =>{
         checkHasUnsavedChanges();
@@ -872,7 +859,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
 
     
 
-     function OnAddCommittedProjectClick(){
+    function OnAddCommittedProjectClick(){
         const newRow: SectionCommittedProject = clone(emptySectionCommittedProject)
         newRow.id = getNewGuid();
         newRow.name = '';
@@ -883,9 +870,9 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
         newRow.projectId = '';
         addedRows.value.push(newRow)
         onPaginationChanged();   
-     }
+    }
 
-     function OnSaveClick() {
+    function OnSaveClick() {
         const upsertRequest = {
             libraryId: null,
             rowsForDeletion: deletionIds.value,
@@ -917,7 +904,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
         }
     }
 
-     function handleUpsertResponse(response: AxiosResponse) {
+    function handleUpsertResponse(response: AxiosResponse) {
         if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
             addSuccessNotificationAction({ message: 'Committed Projects Updated Successfully' });
             console.log(selectedCpItems.value);
@@ -963,22 +950,22 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
         });
     }
 
-     function updateNoTreatment(){
+    function updateNoTreatment(){
         if(isNoTreatmentBefore.value)
-                ScenarioService.setNoTreatmentBeforeCommitted(scenarioId).then((response: AxiosResponse) => {
-                    if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                        isNoTreatmentBeforeCache.value = isNoTreatmentBefore.value
-                    }
-                    resetPage()
-                });
-            else
-                ScenarioService.removeNoTreatmentBeforeCommitted(scenarioId).then((response: AxiosResponse) => {
-                    if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                        isNoTreatmentBeforeCache.value = isNoTreatmentBefore.value
-                    }
-                    resetPage()
-                });
-     }
+            ScenarioService.setNoTreatmentBeforeCommitted(scenarioId).then((response: AxiosResponse) => {
+                if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                    isNoTreatmentBeforeCache.value = isNoTreatmentBefore.value
+                }
+                resetPage()
+            });
+        else
+            ScenarioService.removeNoTreatmentBeforeCommitted(scenarioId).then((response: AxiosResponse) => {
+                if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                    isNoTreatmentBeforeCache.value = isNoTreatmentBefore.value
+                }
+                resetPage()
+            });
+    }
 
      function OnDeleteAllClick(){
         alertDataForDeletingCommittedProjects.value = {
@@ -1101,24 +1088,9 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     }
 
     //Subroutines
-    function disableCrudButtons() {
-        updateValidationErrorsStatus();
-        // const rowChanges = addedRows.value.concat(Array.from(updatedRowsMap.values()).map(r => r[1]));
-        // const dataIsValid: boolean = rowChanges.every(
-        // (scp: SectionCommittedProject) => {
-        //     return (
-        //         rules['generalRules'].valueIsNotEmpty(scp.simulationId) === true &&
-        //         rules['generalRules'].valueIsNotEmpty(scp.year) === true &&
-        //         rules['generalRules'].valueIsNotEmpty(scp.cost) === true && 
-        //         rules['costRules'].costGreaterThanZero(scp.cost) == true &&
-        //         rules['generalRules'].valueIsNotEmpty(scp.treatment) == true &&
-        //         rules['generalRules'].valueIsNotEmpty(scp.locationKeys[keyattr]) == true &&
-        //         rules['generalRules'].valueIsWithinRange(scp.year, [firstYear, lastYear]) === true                
-        //     );
-        // });
-        // disableCrudButtonsResult = !dataIsValid;
-        // return !dataIsValid;
-    }
+    const disableCrudButtons = computed(() => {
+        return hasValidationErrors.value;
+    });
 
 
     function setCpItems() {
@@ -1244,24 +1216,24 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
         });
     }
 
-    function updateValidationErrorsStatus() {
-        hasValidationErrors.value = missingTreatments.value.length > 0 ||
-                                    invalidProjectSources.value.length > 0 ||
-                                    invalidProjectSourceId.value.length > 0 ||
-                                    invalidCosts.value.length > 0 ||
-                                    invalidYears.value.length > 0 ||
-                                    invalidTreatments.value.length > 0 ||
-                                    invalidBudgets.value.length > 0 ||
-                                    currentPage.value.some((scp) => {
-                                        return (scp.errors && scp.errors.length > 0) ||
-                                            (scp.yearErrors && scp.yearErrors.length > 0) ||
-                                            (scp.treatmentErrors && scp.treatmentErrors.length > 0) ||
-                                            (scp.costErrors && scp.costErrors.length > 0) ||
-                                            (scp.projectSourceErrors && scp.projectSourceErrors.length > 0) ||
-                                            (scp.projectSourceIdErrors && scp.projectSourceIdErrors.length > 0) ||
-                                            (scp.budgetErrors && scp.budgetErrors.length > 0);
-                                    });
-    }
+    const hasValidationErrors = computed(() => {
+        return missingTreatments.value.length > 0 ||
+            invalidProjectSources.value.length > 0 ||
+            invalidProjectSourceId.value.length > 0 ||
+            invalidCosts.value.length > 0 ||
+            invalidYears.value.length > 0 ||
+            invalidTreatments.value.length > 0 ||
+            invalidBudgets.value.length > 0 ||
+            currentPage.value.some((scp) => {
+                return (scp.errors && scp.errors.length > 0) ||
+                    (scp.yearErrors && scp.yearErrors.length > 0) ||
+                    (scp.treatmentErrors && scp.treatmentErrors.length > 0) ||
+                    (scp.costErrors && scp.costErrors.length > 0) ||
+                    (scp.projectSourceErrors && scp.projectSourceErrors.length > 0) ||
+                    (scp.projectSourceIdErrors && scp.projectSourceIdErrors.length > 0) ||
+                    (scp.budgetErrors && scp.budgetErrors.length > 0);
+            });
+    });
 
 
     function checkExistenceOfAssets(){//todo: refine this

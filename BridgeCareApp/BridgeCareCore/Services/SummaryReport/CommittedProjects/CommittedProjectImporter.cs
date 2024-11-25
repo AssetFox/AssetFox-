@@ -76,9 +76,7 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
                 .ToDictionary(b => b.Name, b => b.Id, StringComparer.OrdinalIgnoreCase);
 
             // Validate columns once
-            var columnIndices = ValidateAndGetColumnIndices(
-                worksheet,
-                CompleteNetworkHeaders[_networkKeyField]);
+            var columnIndices = ValidateAndGetColumnIndices(headers, CompleteNetworkHeaders[_networkKeyField]);
 
             var locationColumnNames = GetLocationColumnNamesAndKeyColumn(worksheet, headers, out var keyColumn);           
             var projectsPerKey = new Dictionary<(string locationIdentifier, int projectYear, string treatment), SectionCommittedProjectDTO>();
@@ -504,13 +502,13 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
 
             if (rowValues.TryGetValue(columnIndex, out var cellValue) && cellValue != null)
             {
-                var treatment = cellValue.ToString();
+                var treatment = cellValue.ToString().Trim();
                 if (string.IsNullOrWhiteSpace(treatment))
                 {
                     AddValidationError(ErrorType.InvalidValue, $"Row {row}, Column {columnIndex} ('{columnName}'): Treatment is null or empty.");
                     return "Default treatment";
                 }
-                return treatment.Trim();
+                return treatment;
             }
             else
             {
@@ -585,11 +583,8 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
         }
 
 
-        private Dictionary<string, int> ValidateAndGetColumnIndices(
-            ExcelWorksheet worksheet,
-            List<string> requiredColumns)
+        private Dictionary<string, int> ValidateAndGetColumnIndices(List<string> headers, List<string> requiredColumns)
         {
-            var headers = GetHeadersFromWorksheet(worksheet);
             var columnIndices = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             var missingColumns = new List<string>();
 

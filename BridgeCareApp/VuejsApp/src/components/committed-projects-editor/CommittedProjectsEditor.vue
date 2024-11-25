@@ -639,13 +639,13 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     watch(selectedLibraryTreatments, onSelectedLibraryTreatmentsChanged)
     function onSelectedLibraryTreatmentsChanged() {
         treatmentSelectItems.value = selectedLibraryTreatments.value.map(
-            (treatment: SimpleTreatment) => (treatment.name.trim().toLocaleLowerCase())
+            (treatment: SimpleTreatment) => (treatment.name)
         );
     };
 
     watch(stateSimpleScenarioSelectableTreatments, () => {
         treatmentSelectItems.value = stateSimpleScenarioSelectableTreatments.value.map(
-            (treatment: SimpleTreatment) => (treatment.name.trim().toLocaleLowerCase())
+            (treatment: SimpleTreatment) => (treatment.name)
         );
     });
 
@@ -756,11 +756,16 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     }
 
     function validateImportedData(items: SectionCommittedProject[]) {
-        const treatmentSet = new Set(treatmentSelectItems.value); // Optimize includes check
+        // Create a Map for normalized treatments
+        const treatmentMap = new Map(
+            treatmentSelectItems.value.map((item: string) => [item.trim().toLowerCase().normalize(), item])
+        );
+
         items.forEach(item => {
+            const normalizedTreatment = item.treatment.trim().toLowerCase().normalize(); // Normalize incoming treatment
             importedProjectTreatmentName.value = item.treatment;
 
-            if (!treatmentSet.has(importedProjectTreatmentName.value)) {
+            if (!treatmentMap.has(normalizedTreatment)) {
                 missingTreatments.value.push(importedProjectTreatmentName.value);
             }
 
@@ -1269,8 +1274,10 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     //Add red boxes round missing treatments
     const getTreatmentStyle = (treatment: string) => {
         const treatmentNormalized = treatment.trim().toLowerCase();
-        const normalizedMissingTreatments = missingTreatmentsValue.value.map(item => item.trim().toLowerCase());
-        const isInMissingTreatments = normalizedMissingTreatments.includes(treatmentNormalized);
+
+        const isInMissingTreatments = missingTreatments.value.some(
+            (item: string) => item.trim().toLowerCase() === treatmentNormalized
+        );
 
         return isInMissingTreatments
             ? { border: '1px solid red', padding: '3px' }

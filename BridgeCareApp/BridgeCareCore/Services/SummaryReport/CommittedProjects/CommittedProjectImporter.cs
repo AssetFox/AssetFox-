@@ -93,6 +93,19 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             {
                 try
                 {
+                    // Read all cell values for the row
+                    var rowValues = new Dictionary<int, object>();
+                    for (int col = 1; col <= worksheet.Dimension.End.Column; col++)
+                    {
+                        rowValues[col] = worksheet.Cells[row, col].Value;
+                    }
+
+                    // Skip the row if it is blank
+                    if (IsRowBlank(rowValues))
+                    {
+                        return;
+                    }
+
                     var project = ProcessRow(
                         worksheet,
                         row,
@@ -655,6 +668,12 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
                 }
             }
         }
+
+        private static bool IsRowBlank(Dictionary<int, object> rowValues)
+        {
+            return rowValues.All(kvp => kvp.Value == null || string.IsNullOrWhiteSpace(kvp.Value.ToString()));
+        }
+
 
         private static string GetErrorTitle(ErrorType errorType, int count)
         {

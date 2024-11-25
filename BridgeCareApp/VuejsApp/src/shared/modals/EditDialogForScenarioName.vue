@@ -1,5 +1,5 @@
 <template>
-    <div class="text-center">
+    <div class="text-left">
       <div
         style="cursor:pointer;"
         color="primary"

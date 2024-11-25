@@ -332,6 +332,17 @@
                                 >
                                     <template slot="items" slot-scope="props" v-slot:item="props">
                                     <tr>
+                                        <td style="text-align: center;">
+                                                <v-btn
+                                                    @click="onNavigateToEditScenarioView(props.item)"
+                                                    class="no-background-btn"
+                                                    style="color: #2A578D"
+                                                    elevation="0"
+                                                    text
+                                                >
+                                                    <i class="fas fa-play-circle" style="font-size: 25px;"></i>
+                                                </v-btn>
+                                        </td>
                                         <td>
                                             <editScenarioNameDialog
                                                 size="large"

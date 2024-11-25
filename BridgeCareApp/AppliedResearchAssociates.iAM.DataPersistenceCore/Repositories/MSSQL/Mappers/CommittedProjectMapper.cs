@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static BaseCommittedProjectDTO ToDTO(this CommittedProjectEntity entity, string networkKeyAttribute)
         {
-            TreatmentCategory convertedCategory = entity.treatmentCategory != default(TreatmentCategory) ? entity.treatmentCategory : default(TreatmentCategory);
+            var convertedCategory = entity.treatmentCategory != default ? entity.treatmentCategory : default;
             if (Enum.TryParse(typeof(TreatmentCategory), entity.Category, true, out var convertedCategoryOut))
             {
                 convertedCategory = (TreatmentCategory)convertedCategoryOut;
@@ -50,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             switch (entity.CommittedProjectLocation.Discriminator)
             {
             case DataPersistenceConstants.SectionLocation:
-                if (entity.ScenarioBudgetId != null && entity.ScenarioBudget == null)
+                if (entity.ScenarioBudgetId != null && entity.ScenarioBudgetId != Guid.Empty && entity.ScenarioBudget == null)
                 {
                     throw new InvalidOperationException($"Scenario budget is not present in committed project.");
                 }

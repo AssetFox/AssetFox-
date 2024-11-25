@@ -20,8 +20,9 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Utils;
 using MoreLinq;
 using OfficeOpenXml;
+using NLog;
 
-namespace BridgeCareCore.Services
+namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
 {
     public class CommittedProjectService : ICommittedProjectService
     {
@@ -30,490 +31,101 @@ namespace BridgeCareCore.Services
         public const string UnknownBudgetName = "Unknown";
 
         // TODO: Determine based on associated network
-        private string _networkKeyField ;
-        private Dictionary<string, List<KeySegmentDatum>> _keyProperties;
-        private List<string> _keyFields;
+        private string _networkKeyField;
+        private readonly Dictionary<string, List<KeySegmentDatum>> _keyProperties;
+        private readonly List<string> _keyFields;        
         private bool newImportFile = false;
-
-        private static readonly List<string> InitialHeaders = new()
-        {
-            "TREATMENT",
-            "YEAR",
-            "BUDGET",
-            "COST",
-            "PROJECTSOURCE",
-            "PROJECTSOURCEID",            
-            "CATEGORY"
-        };
-
-        private static readonly string NoTreatment = "No Treatment";
 
         public CommittedProjectService(IUnitOfWork unitOfWork, IHubService hubService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService;
-        }
-
-        /**
-         * Adds excel worksheet header row cell values for Committed Project Export
-         */
-        private void AddHeaderCells(ExcelWorksheet worksheet)
-        {
-            var column = 1;
-            if (_keyFields.Contains(_networkKeyField))
-            {
-                worksheet.Cells[1, column++].Value = _networkKeyField;
-            }
-
-            for (var keyColumnIndex = 0; keyColumnIndex < _keyFields.Count; keyColumnIndex++)
-            {
-                if (_keyFields[keyColumnIndex] != _networkKeyField)
-                {
-                    worksheet.Cells[1, column++].Value = _keyFields[keyColumnIndex];
-                }
-            }
-
-            for (var headerCount = 0; headerCount < InitialHeaders.Count; headerCount++)
-            {
-                worksheet.Cells[1, column++].Value = InitialHeaders[headerCount];
-            }
-        }
-
-
-        /**
-         * Adds excel worksheet cell values for Committed Project Export
-         */
-        private void AddDataCells(ExcelWorksheet worksheet, List<BaseCommittedProjectDTO> committedProjectDTOs)
-        {
-            var row = 2;
-            committedProjectDTOs.OrderBy(_ => _.LocationKeys[_networkKeyField])
-                .ThenByDescending(_ => _.Year).ForEach(
-                    project =>
-                    {
-                        var column = 1;
-                        var locationValue = String.Empty;
-                        if (project.LocationKeys.ContainsKey(_networkKeyField))
-                        {
-                            locationValue = project.LocationKeys[_networkKeyField];
-                            worksheet.Cells[row, column++].Value = locationValue;
-                        }
-
-                        // Add other data from key fields based on ID
-                        var otherData = _keyFields.Where(_ => _ != _networkKeyField);
-                        if (!String.IsNullOrEmpty(locationValue) && otherData.Count() > 0)
-                        {
-                            var assetId = _keyProperties[_networkKeyField].FirstOrDefault(_ => _.KeyValue.Value == locationValue);
-                            if (assetId != null)
-                            {
-                                foreach (var field in otherData)
-                                {
-                                    worksheet.Cells[row, column++].Value = _keyProperties[field].FirstOrDefault(_ => _.AssetId == assetId.AssetId).KeyValue.Value;
-                                }
-                            }
-                            else
-                            {
-                                column += otherData.Count();
-                            }
-                        }
-                        else
-                        {
-                            column += otherData.Count();
-                        }
-
-                        worksheet.Cells[row, column++].Value = project.Treatment;
-                        worksheet.Cells[row, column++].Value = project.Year;
-                        worksheet.Cells[row, column++].Value = project.ShadowForAnyTreatment;
-                        worksheet.Cells[row, column++].Value = project.ShadowForSameTreatment;
-                        var linkedBudget = _unitOfWork.BudgetRepo.GetScenarioBudgets(project.SimulationId).FirstOrDefault(_ => _.Id == project.ScenarioBudgetId);
-                        var budgetName = linkedBudget?.Name ?? UnknownBudgetName;
-                        if (budgetName == UnknownBudgetName)
-                        {
-                            budgetName = "";
-                        }
-                        worksheet.Cells[row, column++].Value = budgetName;
-                        worksheet.Cells[row, column++].Value = project.Cost;
-                        worksheet.Cells[row, column++].Value = project.ProjectSource;
-                        worksheet.Cells[row, column++].Value = project.ProjectId;
-                        worksheet.Cells[row, column++].Value = string.Empty; // AREA
-                        worksheet.Cells[row, column++].Value = project.Category.ToString();
-
-                        row++;
-                    });
-        }
+        }        
 
         public FileInfoDTO ExportCommittedProjectsFile(Guid simulationId)
         {
+            
             var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
-            var simulationName = simulation.Name;
-
-            _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(simulation.NetworkId);
-
-            var committedProjectDTOs = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
-
-            var fileName = $"CommittedProjects_{simulationName.Trim().Replace(" ", "_")}.xlsx";
-
-            using var excelPackage = new ExcelPackage(new FileInfo(fileName));
-
-            var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
-            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
+            var keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
+            var keyFields = keyProperties.Keys.Where(_ => _ != "ID").ToList();
+            var networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(simulation.NetworkId);
             var primaryKeyFieldNames = _unitOfWork.AdminSettingsRepo.GetKeyFields();
 
-            foreach (var kvp in _keyProperties.ToList())
-            {
-                var key = kvp.Key;
-                if (!primaryKeyFieldNames.Contains(key) && key != _networkKeyField)
-                {
-                    _keyProperties.Remove(key);
-                }
-            }
+            var exporter = new CommittedProjectsExporter(
+                _unitOfWork,
+                simulation,
+                networkKeyField,
+                keyFields,
+                keyProperties,
+                primaryKeyFieldNames.ToList());
 
-            _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
 
-            if (committedProjectDTOs.Any())
-            {
-                AddHeaderCells(worksheet);
-                AddDataCells(worksheet, committedProjectDTOs);
-            }
-            else
-            {
-                // Return a template
-                AddHeaderCells(worksheet);
-            }
-
-            return new FileInfoDTO
-            {
-                FileName = fileName,
-                FileData = Convert.ToBase64String(excelPackage.GetAsByteArray()),
-                MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            };
+            var fileInfo = exporter.ExportCommittedProjectsFile(simulationId);
+            return fileInfo;
         }
-
 
         public FileInfoDTO CreateCommittedProjectTemplate(Guid networkId)
-        {
-            var fileName = $"CommittedProjectsTemplate.xlsx";
-
-            using var excelPackage = new ExcelPackage(new FileInfo(fileName));
-
-            var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
-            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
-            _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
+        {            
             _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(networkId);
-
-            AddHeaderCells(worksheet);
-
-            return new FileInfoDTO
-            {
-                FileName = fileName,
-                FileData = Convert.ToBase64String(excelPackage.GetAsByteArray()),
-                MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            };
+            var generator = new CommittedProjectsTemplateGenerator(_networkKeyField);
+            var template = generator.CreateCommittedProjectTemplate();
+            return template;        
         }
 
-        /**
-         * Gets a Dictionary of Attribute Id per Attribute Name
-         */
-        private Dictionary<string, Guid> GetAttributeIdsPerAttributeName(List<string> consequenceAttributeNames)
-        {
-            var attributeDTOs = _unitOfWork.AttributeRepo.GetAttributes();
-            var attributeNames = attributeDTOs.Select(_ => _.Name).ToList();
-
-            // Ignore factor columns as bad columns (used for performance factor)
-            foreach (var missingAttribute in consequenceAttributeNames)
-            {
-                if (missingAttribute.Contains("_factor"))
-                {
-                    attributeNames.Add(missingAttribute);
-
-                    newImportFile = true;
-                }
-            }
-
-            if (consequenceAttributeNames.Any(name => !attributeNames.Contains(name)))
-            {
-                var missingAttributes = consequenceAttributeNames.Except(attributeNames).ToList();
-
-
-                if (missingAttributes.Count == 1)
-                {
-                    throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
-                }
-
-                throw new RowNotInTableException(
-                    $"No attributes found having names: {string.Join(", ", missingAttributes)}.");
-            }
-
-            return attributeDTOs.ToDictionary(_ => _.Name, _ => _.Id);
-        }
-
-        /**
-         * Gets a Dictionary of MaintainableAsset Id per MaintainableAssetLocation LocationIdentifier
-         */
-        private Dictionary<string, Guid> GetMaintainableAssetsPerLocationIdentifier(Guid networkId)
-        {
-            var assets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithLocations(networkId);
-            if (!assets.Any())
-            {
-                throw new RowNotInTableException("There are no maintainable assets in the database.");
-            }
-
-            return assets.ToDictionary(_ => _.Location.LocationIdentifier, _ => _.Id);
-        }
-
-        /**
-         * Creates CommittedProjectDTO data for Committed Project Import
-         */
-        private List<SectionCommittedProjectDTO> CreateSectionCommittedProjectsForImport(Guid simulationId,
-            ExcelPackage excelPackage, string filename, string UserId)
-        {
-            // First, get the simulation
-            var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
-            if (simulation == null)
-            {
-                throw new ArgumentException($"No simulation was found for the given scenario.");
-            }
-            var investmentPlan = _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId);
-
-            if (investmentPlan == null)
-            {
-                throw new RowNotInTableException("Simulation has no investment plan.");
-            }
-
-            // Get the Excel file workshhet containing the data to import
-            var worksheet = excelPackage.Workbook.Worksheets[0];
-
-            // Extract the names of the consequence headers and link them to their associated attribute IDs
-            var headers = worksheet.Cells.GroupBy(cell => cell.Start.Row).First().Select(_ => _.GetValue<string>()).Where(x => x != null)
-                .ToList();
-            var consequenceAttributeNames = headers.Skip(_keyFields.Count + InitialHeaders.Count).ToList();
-            var attributeIdsPerAttributeName = GetAttributeIdsPerAttributeName(consequenceAttributeNames.Distinct().ToList());
-            var end = worksheet.Dimension.End;  // Contains both column and row ends
-
-            // Get the location => asset ID lookup for all maintainable assets in the network
-            var maintainableAssetIdsPerLocationIdentifier = GetMaintainableAssetsPerLocationIdentifier(simulation.NetworkId);
-
-            int treatmentCategoryIndex = headers.IndexOf("CATEGORY") + 1;
-
-            if (treatmentCategoryIndex == 0)
-            {
-                throw new InvalidOperationException("Required 'TreatmentCategory' column is missing in the Excel sheet.");
-            }
-
-            int projectSourceIndex = headers.IndexOf("PROJECTSOURCE") + 1;
-
-            if (projectSourceIndex == 0)
-            {
-                throw new InvalidOperationException("Required 'ProjectSource' column is missing in the Excel sheet.");
-            }
-
-            int projectSourceIdIndex = headers.IndexOf("PROJECTSOURCEID") + 1;
-
-            if (projectSourceIndex == 0)
-            {
-                throw new InvalidOperationException("Required 'ProjectSourceId' column is missing in the Excel sheet.");
-            }
-
-            // Get the column ID for the network's key field
-            if (!headers.Contains(_networkKeyField))
-            {
-                throw new RowNotInTableException($"Unable to find a column in the committed project sheet named {_networkKeyField}.  This is a required column for the network associated with the specified scenario");
-            }
-            var locationColumnNames = new Dictionary<int, string>();
-            var keyColumn = 0;
-
-            var primaryKeyFieldNames = _unitOfWork.AdminSettingsRepo.GetKeyFields();
-
-            foreach (var kvp in _keyProperties.ToList())
-            {
-                var key = kvp.Key;
-                if (!primaryKeyFieldNames.Contains(key) && key != _networkKeyField)
-                {
-                    _keyProperties.Remove(key);
-                }
-            }
-
-            _keyFields = _keyProperties.Keys.ToList();
-
-            for (var column = 1; column <= _keyProperties.Count; column++)
-            {
-                var columnName = worksheet.GetCellValue<string>(1, column);
-                if (!_keyFields.Contains(columnName))
-                {
-                    var keyFieldList = new StringBuilder();
-                    foreach (var field in _keyProperties)
-                    {
-                        keyFieldList.Append(field);
-                    }
-                    throw new RowNotInTableException($"{columnName} is not a key field of the provided network.  Possible key fields are {keyFieldList}");
-                }
-                locationColumnNames.Add(column, columnName);
-                if (columnName == _networkKeyField)
-                {
-                    keyColumn = column;
-                }
-            }
-            if (keyColumn == 0)
-            {
-                // This should never be reached since we checked for existence unless there is a coding error
-                throw new RowNotInTableException($"The key location column for this network was found in the locations, but its specific column number was not identified");
-            }
-
-            // Create the output lookup
-            var projectsPerLocationIdentifierYearAndTreatmentTuple = new Dictionary<(string, int, string), SectionCommittedProjectDTO>();
-
-            var invalidLocationIdentifiers = new List<string>();
-            // Read in the data by row
-            for (var row = 2; row <= end.Row; row++)
-            {
-                // Get the project year for this work
-                var projectYearIndex = headers.IndexOf("YEAR") + 1;
-                var projectYear = worksheet.GetCellValue<int>(row, projectYearIndex);
-                var treatmentIndex = headers.IndexOf("TREATMENT") + 1;
-                var treatment = worksheet.GetCellValue<string>(row, treatmentIndex);  // Assumes that InitialHeaders stays constant
-
-                //Get project source 
-                var projectSourceValue = worksheet.Cells[row, projectSourceIndex].Text;
-
-                //Get Project Id
-                var projectIdValue = worksheet.GetCellValue<string>(row, projectSourceIdIndex);
-
-                // Attempt to convert the string to enum
-                ProjectSourceDTO projectSource;
-                if (!Enum.TryParse(projectSourceValue, true, out projectSource))
-                {
-                    projectSource = ProjectSourceDTO.None; // Default value if parsing fails
-                }
-
-                // Get the location information of the project.  This must include the maintainable asset ID using the "ID" key
-                var locationInformation = new Dictionary<string, string>();
-                var locationIdentifier = worksheet.GetCellValue<string>(row, keyColumn);
-                if (!maintainableAssetIdsPerLocationIdentifier.Keys.ToList().Contains(locationIdentifier))
-                {
-                    // The location matches an asset in the network
-                    //locationInformation["ID"] = Guid.NewGuid().ToString();
-                    invalidLocationIdentifiers.Add(locationIdentifier);
-                }
-                /*else
-                {
-                    invalidLocationIdentifiers.Add(locationIdentifier);
-                    //throw new RowNotInTableException($"An asset with the location identifier '{locationIdentifier}' does not exist");
-                }*/
-
-                // The location matches an asset in the network
-                locationInformation["ID"] = Guid.NewGuid().ToString();
-
-                for (var column = 1; column <= _keyFields.Count; column++)
-                {
-                    locationInformation.Add(locationColumnNames[column], worksheet.GetCellValue<string>(row, column));
-                }
-
-                // Determine the appropriate budget to assign if any
-                var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
-                var budgetIndex = headers.IndexOf("BUDGET") + 1;
-                var budgetName = worksheet.GetCellValue<string>(row, budgetIndex); // Assumes that InitialHeaders stays constant
-                var budgetNameIsEmpty = string.IsNullOrWhiteSpace(budgetName);
-                Guid? budgetId = null;
-
-                if (!budgetNameIsEmpty)
-                {
-                    if (budgets.All(_ => _.Name != budgetName))
-                    {
-                        throw new RowNotInTableException(
-                            $"Budget {budgetName} does not exist in the applied budget library.");
-                    }
-                    budgetId = budgets.Single(_ => _.Name == budgetName).Id;
-                }
-
-                var treatmentCategoryValue = worksheet.Cells[row, treatmentCategoryIndex].GetValue<string>();
-
-                // This to convert the incoming string to a TreatmentCategory
-                TreatmentCategory convertedCategory;
-                try
-                {
-                    convertedCategory = EnumDeserializer.Deserialize<TreatmentCategory>(treatmentCategoryValue);
-                }
-                catch
-                {
-                    convertedCategory = TreatmentCategory.Other; 
-                }
-
-                //Handle potentially malformed costs
-                var costIndex = headers.IndexOf("COST") + 1;
-                var cost = -1.0; //Default
-                try
-                {
-                    var cellValue = worksheet.GetCellValue<object>(row, costIndex);// Assumes that InitialHeaders stays constant
-
-                    if (cellValue is double doubleValue)
-                    {
-                        cost = doubleValue;
-                    }
-                    else if (cellValue is string stringValue && double.TryParse(stringValue, out double parsedValue))
-                    {
-                        cost = parsedValue;
-                    }
-                }
-                catch (FormatException)
-                {
-                    cost = -1;
-                }
-                catch (Exception)
-                {
-                    cost = -1;
-                }
-
-                // Build the committed project object
-                var project = new SectionCommittedProjectDTO
-                {
-                    Id = Guid.NewGuid(),
-                    SimulationId = simulation.Id,
-                    ScenarioBudgetId = budgetId,
-                    LocationKeys = locationInformation,
-                    Treatment = treatment, // Assumes that InitialHeaders stays constant
-                    Year = projectYear,
-                    ProjectSource = projectSource,
-                    ProjectId = projectIdValue,
-                    Cost = cost,
-                    Category = convertedCategory,
-                };
-                // factor needs additional column, so increment by 2
-                // otherwise support old export files
-                int incrementCount = 1;
-                if (newImportFile) { incrementCount = 2; }
-
-                // Add to the list of projects
-                projectsPerLocationIdentifierYearAndTreatmentTuple.Add((locationIdentifier, projectYear, treatment), project);
-            }
-
-            if (invalidLocationIdentifiers.Any())
-            {
-                var invalidIdsMessage = $"The following location identifiers do not match any asset in the network: {string.Join(", ", invalidLocationIdentifiers)}";
-                _hubService.SendRealTimeMessage(UserId, HubConstant.BroadcastWarning, invalidIdsMessage);
-            }
-
-            return projectsPerLocationIdentifierYearAndTreatmentTuple.Values.ToList();
-        }
-
-        public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, string UserId, CancellationToken? cancellationToken = null, IWorkQueueLog queueLog = null)
+        public void ImportCommittedProjectFiles(
+            Guid simulationId,
+            ExcelPackage excelPackage,
+            string filename,
+            string UserId,
+            CancellationToken? cancellationToken = null,
+            IWorkQueueLog queueLog = null)
         {
             queueLog ??= new DoNothingWorkQueueLog();
-            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
-            _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
+
             var simulation = _unitOfWork.SimulationRepo.GetSimulation(simulationId);
-            _networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(simulation.NetworkId);
+            var keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
+            var keyFields = keyProperties.Keys.Where(_ => _ != "ID").ToList();
+            var networkKeyField = _unitOfWork.NetworkRepo.GetNetworkKeyAttribute(simulation.NetworkId);
+
+            var importer = new CommittedProjectImporter(
+                _unitOfWork,
+                _hubService,                
+                networkKeyField,
+                keyFields);
+
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+            {
                 return;
+            }
+
             queueLog.UpdateWorkQueueStatus("Creating Committed Projects");
-            var committedProjectDTOs =
-              CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, UserId);
+
+            var committedProjectDTOs = importer.ImportProjectsFromWorksheet(
+                excelPackage.Workbook.Worksheets[0],
+                simulation,
+                UserId);
+
+
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+            {
                 return;
+            }
+
             queueLog.UpdateWorkQueueStatus("Deleting Old Committed Projects");
+
             _unitOfWork.CommittedProjectRepo.DeleteSimulationCommittedProjects(simulationId);
             if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+            {
                 return;
+            }
+
             queueLog.UpdateWorkQueueStatus("Upserting Created Committed Projects");
             _unitOfWork.CommittedProjectRepo.UpsertCommittedProjects(committedProjectDTOs);
+
+            if (cancellationToken.HasValue && cancellationToken.Value.IsCancellationRequested)
+            {
+                return;
+            }
         }
 
         public double GetTreatmentCost(string assetKeyData, Guid treatmentId, Guid networkId)
@@ -527,7 +139,7 @@ namespace BridgeCareCore.Services
             double totalCost = 0;
             if (treatmentCosts == null)
                 return totalCost;
-            foreach(var cost in treatmentCosts)
+            foreach (var cost in treatmentCosts)
             {
                 var compiler = new CalculateEvaluateCompiler();
 
@@ -539,7 +151,7 @@ namespace BridgeCareCore.Services
                 var attributeIds = attributes.Select(a => a.Id).ToList();
                 var aggregatedResults = _unitOfWork.AggregatedResultRepo.GetAggregatedResultsForMaintainableAsset(asset.Id, attributeIds);
                 var latestAggResults = new List<AggregatedResultDTO>();
-                foreach(var attr in attributes)
+                foreach (var attr in attributes)
                 {
                     var attrs = aggregatedResults.Where(_ => _.Attribute.Id == attr.Id).ToList();
                     if (attrs.Count == 0)
@@ -571,18 +183,18 @@ namespace BridgeCareCore.Services
             foreach (var consequence in treatmentConsequences)
             {
                 var compiler = new CalculateEvaluateCompiler();
-                if(consequence.CriterionLibrary.Id == Guid.Empty)
+                if (consequence.CriterionLibrary.Id == Guid.Empty)
                 {
                     consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute, ChangeValue = consequence.ChangeValue });
                     continue;
                 }
                 if (IsCriteriaValid(compiler, consequence.CriterionLibrary.MergedCriteriaExpression, asset.Id))
-                    consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute, ChangeValue = consequence.ChangeValue});
+                    consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute, ChangeValue = consequence.ChangeValue });
             }
             return consequencesToReturn;
         }
 
-        private bool IsCriteriaValid(CalculateEvaluateCompiler compiler, string expression, Guid assetId)
+        private static bool IsCriteriaValid(CalculateEvaluateCompiler compiler, string expression, Guid assetId)
         {
             var attributes = InstantiateCompilerAndGetExpressionAttributes(expression, compiler);
             var attributeIds = attributes.Select(a => a.Id).ToList();
@@ -605,7 +217,7 @@ namespace BridgeCareCore.Services
             return evaluator.Delegate(scope);
         }
 
-        private List<AttributeDTO> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)
+        private static List<AttributeDTO> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)
         {
             var modifiedExpression = mergedCriteriaExpression
                     .Replace("[", "")
@@ -635,7 +247,7 @@ namespace BridgeCareCore.Services
             return attributes;
         }
 
-        private void InstantiateScope(List<AggregatedResultDTO> results, CalculateEvaluateScope scope)
+        private static void InstantiateScope(List<AggregatedResultDTO> results, CalculateEvaluateScope scope)
         {
             results.ForEach(_ =>
             {
@@ -649,5 +261,7 @@ namespace BridgeCareCore.Services
                 }
             });
         }
+
+
     }
 }

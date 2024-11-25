@@ -57,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var attributes = _unitOfWork.Context.Attribute.Where(_ => _.DataSourceId == id).ToList();
 
             attributes.ForEach(_ => _.DataSourceId = null);
-            _unitOfWork.Context.UpsertAll(attributes);
+            _unitOfWork.Context.UpdateAll(attributes);
 
             _unitOfWork.Context.DeleteEntity<DataSourceEntity>(_ => _.Id == id);
             return;

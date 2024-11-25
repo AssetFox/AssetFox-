@@ -99,7 +99,7 @@ internal sealed class TreatmentOutlook
     private readonly AssetContext AccumulationContext;
     private readonly Treatment InitialTreatment;
     private readonly int InitialYear;
-    private readonly IReadOnlyCollection<RemainingLifeCalculator> RemainingLifeCalculators;
+    private readonly RemainingLifeCalculator[] RemainingLifeCalculators;
 
     private double ConditionChange;
     private double CumulativeBenefit;
@@ -139,7 +139,7 @@ internal sealed class TreatmentOutlook
     {
         Action updateRemainingLife = null;
 
-        if (RemainingLifeCalculators.Count > 0)
+        if (RemainingLifeCalculators.Length > 0)
         {
             RemainingLife = 0;
 

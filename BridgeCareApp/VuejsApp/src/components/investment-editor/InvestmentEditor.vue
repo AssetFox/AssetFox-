@@ -302,9 +302,9 @@
                                              @submit='onSubmitImportExportInvestmentBudgetsDialogResult' 
                                              @submit-success-import="onSuccessImportSubmit"/>
     </v-row>
-    <SuccessfulUploadDialog 
+    <UploadDialog 
         v-model="showSuccessPopup"
-        message="Successfully uploaded investment budgets."
+        :message="dialogMessage"
     />
 </v-card>
     <ConfirmDialog></ConfirmDialog>
@@ -324,7 +324,8 @@ import {
     BudgetYearsGridData,
     emptyBudgetLibrary,
     emptyInvestmentPlan, InvestmentBudgetFileImport,
-    InvestmentPlan
+    InvestmentPlan,
+    SimpleBudgetDetail
 } from '@/shared/models/iAM/investment';
 import { any, clone, find, isNil, propEq } from 'ramda';
 import { SelectItem } from '@/shared/models/vue/select-item';
@@ -394,11 +395,11 @@ import DeleteLibraryButton from '@/shared/components/buttons/DeleteLibraryButton
 import ShareLibraryButton from '@/shared/components/buttons/ShareLibraryButton.vue';
 import DeleteSelectedButton from '@/shared/components/buttons/DeleteSelectedButton.vue';
 import CreateNewLibraryButton from '@/shared/components/buttons/CreateNewLibraryButton.vue';
-import SuccessfulUploadDialog from '@/shared/components/dialogs/SuccessfulUploadDialog.vue';
+import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
 import { BudgetPriority, BudgetPriorityLibrary } from '@/shared/models/iAM/budget-priority';
 import BudgetPriorityService from '@/services/budget-priority.service';
 import TreatmentService from '@/services/treatment.service';
-import { Treatment } from '@/shared/models/iAM/treatment';
+import { SimpleTreatment, Treatment } from '@/shared/models/iAM/treatment';
 
 let store = useStore();
 const confirm = useConfirm();
@@ -421,6 +422,9 @@ const hasAdminAccess = computed<boolean>(()=> (store.state.authenticationModule.
 let isSuccessfulImport = ref<boolean>(store.state.investmentModule.isSuccessfulImport);
 let currentUserCriteriaFilter = ref<UserCriteriaFilter>(store.state.userModule.currentUserCriteriaFilter);
 let hasPermittedAccess = computed<boolean>(() => store.state.investmentModule.hasPermittedAccess);
+const stateGetScenarioSelectedTreatments = computed<SimpleTreatment[]>(() => store.state.treatmentModule.getScenarioSelectedTreatments);
+let stateScenarioSelectableTreatment = computed<Treatment[]>(() => store.state.treatmentModule.scenarioSelectableTreatments);
+let stateSimpleScenarioSelectableTreatments= computed<SimpleTreatment[]>(() => store.state.treatmentModule.simpleScenarioSelectableTreatments);
 
 async function getHasPermittedAccessAction(payload?: any): Promise<any> {await store.dispatch('getHasPermittedAccess', payload);}
 async function getInvestmentAction(payload?: any): Promise<any> {await store.dispatch('getInvestment', payload);}
@@ -468,6 +472,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     let lastYear: number = 0;
     let firstYear: number = 0;
     let initializing: boolean = true;
+
+    const dialogMessage = ref('');
 
     const selectedBudgetLibrary = ref<BudgetLibrary>(clone(emptyBudgetLibrary));
     const investmentPlan = ref<InvestmentPlan>(clone(emptyInvestmentPlan));
@@ -1404,8 +1410,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 parentLibraryId = librarySelectItemValue.value ? librarySelectItemValue.value: "";
                 firstYearOfAnalysisPeriodShift.value = 0;
                 investmentPlanMutator(investmentPlanUpsert)
-                if(librarySelectItemValue.value != null || deletionBudgetIds.value.length > 0)
-                    onShowCpChangeAlert();
                 clearChanges();                                            
                 addSuccessNotificationAction({message: "Modified investment"});
                 librarySelectItemValue.value = null;
@@ -1443,7 +1447,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         await BudgetPriorityService.upsertScenarioBudgetPriorities(budgetPrioritytoUpsert, selectedScenarioId);
 
         
-        
         await TreatmentService.getScenarioSelectedTreatments(selectedScenarioId).then(response => {
             if(response.data)
             {
@@ -1451,19 +1454,21 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     name: item.name,
                     id: item.id
                 }));
-
                 response.data.forEach((item: { budgetIds: string[]; budgets: { id: string; name: string }[] }) => {
+                    // Initialize budgetIds and budgets if they are undefined
                     item.budgetIds = item.budgetIds || [];
                     item.budgets = item.budgets || [];
 
                     nameIdPairs.forEach(({ id, name }) => {
-                        item.budgetIds.push(id);
-                        item.budgets.push({ id, name });
+                        // Add to budgetIds if the id is not already present
+                        if (!item.budgetIds.includes(id)) {
+                            item.budgetIds.push(id);
+                        }
 
-                    // Check for duplicates
-                    if (!item.budgets.some(budget => budget.id === id && budget.name === name)) {
-                        item.budgets.push({ id, name });
-                    }
+                        // Add to budgets only if there isn't an existing budget with the same id and name
+                        if (!item.budgets.some(budget => budget.id === id && budget.name === name)) {
+                            item.budgets.push({ id, name });
+                        }
                     });
                 });
 
@@ -1545,18 +1550,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         };
     }
 
-    function onShowCpChangeAlert() {
-        console.log(stateInvestmentPlan.value);
-        console.log(selectedBudgetLibrary.value);
-              
-        cpChangedAlertData.value = {
-            showDialog: true,
-            heading: 'Warning',
-            choice: false,
-            message: 'All related committed projects have had their budgets set to none.A new budget will need to be set for the aformentioned committed projects',
-        };
-    }
-
     function onSubmitConfirmDeleteAlertResult(submit: boolean) {
         confirmDeleteAlertData.value = clone(emptyAlertData);
 
@@ -1571,6 +1564,8 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function disableCrudButton() {
+        const budgetsExist = currentPage.value.some(() => true);
+
         const allBudgetDataIsValid: boolean = currentPage.value.every((budget: Budget) => {
             let amountsAreValid = true;
             const addedAmounts = addedBudgetAmounts.value.get(budget.name);
@@ -1587,19 +1582,21 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         });
 
         if (hasSelectedLibrary.value) {
+            disableCrudButtonsResult.value = !(rules['generalRules'].valueIsNotEmpty(selectedBudgetLibrary.value.name) === true &&
+            allBudgetDataIsValid) || !budgetsExist;
             return !(rules['generalRules'].valueIsNotEmpty(selectedBudgetLibrary.value.name) === true &&
-                allBudgetDataIsValid);
+                allBudgetDataIsValid) || !budgetsExist;
         } else if (hasScenario.value) {
             const allInvestmentPlanDataIsValid: boolean = rules['generalRules'].valueIsNotEmpty(investmentPlan.value.minimumProjectCostLimit) === true &&
                 rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.value.minimumProjectCostLimit) === true &&
                 rules['generalRules'].valueIsNotEmpty(investmentPlan.value.inflationRatePercentage) === true &&
                 rules['generalRules'].valueIsWithinRange(investmentPlan.value.inflationRatePercentage, [0, 100]);
-
-            return !(allBudgetDataIsValid && allInvestmentPlanDataIsValid);
+            disableCrudButtonsResult.value = !(allBudgetDataIsValid && allInvestmentPlanDataIsValid) || !budgetsExist;
+            return !(allBudgetDataIsValid && allInvestmentPlanDataIsValid) || !budgetsExist;
         }
 
-        disableCrudButtonsResult.value = !allBudgetDataIsValid;
-        return !allBudgetDataIsValid;
+        disableCrudButtonsResult.value = !allBudgetDataIsValid || !budgetsExist;
+        return !allBudgetDataIsValid || !budgetsExist;
     }
 
     function onSearchClick() {
@@ -1763,8 +1760,9 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                 else{
 
                 }
+                dialogMessage.value = "Successfully uploaded investments."
+                showSuccessPopup.value = true;
             })
-            showSuccessPopup.value = true;
             $emitter.emit('InvestmentSettingsUpdated');                
         }        
     }

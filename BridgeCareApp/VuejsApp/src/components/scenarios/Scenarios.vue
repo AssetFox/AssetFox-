@@ -118,6 +118,17 @@
                                 >
                                     <template slot="items" slot-scope="props" v-slot:item="props">
                                         <tr>
+                                            <td style="text-align: center;">
+                                                <v-btn
+                                                    @click="onNavigateToEditScenarioView(props.item)"
+                                                    class="no-background-btn"
+                                                    style="color: #2A578D"
+                                                    elevation="0"
+                                                    text
+                                                >
+                                                    <i class="fas fa-play-circle" style="font-size: 25px;"></i>
+                                                </v-btn>
+                                            </td>
                                         <td>
                                         
                                             <editScenarioNameDialog
@@ -321,6 +332,17 @@
                                 >
                                     <template slot="items" slot-scope="props" v-slot:item="props">
                                     <tr>
+                                        <td style="text-align: center;">
+                                                <v-btn
+                                                    @click="onNavigateToEditScenarioView(props.item)"
+                                                    class="no-background-btn"
+                                                    style="color: #2A578D"
+                                                    elevation="0"
+                                                    text
+                                                >
+                                                    <i class="fas fa-play-circle" style="font-size: 25px;"></i>
+                                                </v-btn>
+                                        </td>
                                         <td>
                                             <editScenarioNameDialog
                                                 size="large"
@@ -826,6 +848,14 @@ import { downloadSimulationLog } from '@/shared/utils/simulation-log-utils';
     
     let networks: Network[] = [];
     let scenarioGridHeaders: any = [
+        {
+            title: '',
+            key: 'name',
+            align: 'left',
+            sortable: true,
+            class: 'header-border',
+            width: '',
+        },
         {
             title: 'Scenario',
             key: 'name',

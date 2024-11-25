@@ -35,6 +35,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         public void DeleteScenarioSelectableTreatment(TreatmentDTO scenarioSelectableTreatment, Guid simulationId);
 
+        public List<string> GetScenarioSelectableTreatmentNames(Guid simulationId);
+
         public void GetScenarioSelectableTreatmentsNoChildren(Simulation simulation);   // unused as of 12/21/23, but was called from 5 different places as of 4/2023. Might be a candidate for deletion if uses do not re-appear.
 
         TreatmentLibraryDTO GetSingleTreatmentLibaryNoChildren(Guid libraryId);

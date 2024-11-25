@@ -1564,10 +1564,17 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function disableCrudButton() {
-        if (currentPage.value.length === 0) {
+        /*if (currentPage.value.length === 0 || !currentPage.value) {
             disableCrudButtonsResult.value = true;
             return true;
-        }
+        }*/
+
+        /*if (!currentPage.value.some(() => true)) {
+            disableCrudButtonsResult.value = true;
+            return true;
+        }*/
+
+        const budgetsExist = currentPage.value.some(() => true);
 
         const allBudgetDataIsValid: boolean = currentPage.value.every((budget: Budget) => {
             let amountsAreValid = true;
@@ -1585,19 +1592,21 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
         });
 
         if (hasSelectedLibrary.value) {
+            disableCrudButtonsResult.value = !(rules['generalRules'].valueIsNotEmpty(selectedBudgetLibrary.value.name) === true &&
+            allBudgetDataIsValid) || !budgetsExist;
             return !(rules['generalRules'].valueIsNotEmpty(selectedBudgetLibrary.value.name) === true &&
-                allBudgetDataIsValid);
+                allBudgetDataIsValid) || !budgetsExist;
         } else if (hasScenario.value) {
             const allInvestmentPlanDataIsValid: boolean = rules['generalRules'].valueIsNotEmpty(investmentPlan.value.minimumProjectCostLimit) === true &&
                 rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.value.minimumProjectCostLimit) === true &&
                 rules['generalRules'].valueIsNotEmpty(investmentPlan.value.inflationRatePercentage) === true &&
                 rules['generalRules'].valueIsWithinRange(investmentPlan.value.inflationRatePercentage, [0, 100]);
-
-            return !(allBudgetDataIsValid && allInvestmentPlanDataIsValid);
+            disableCrudButtonsResult.value = !(allBudgetDataIsValid && allInvestmentPlanDataIsValid) || !budgetsExist;
+            return !(allBudgetDataIsValid && allInvestmentPlanDataIsValid) || !budgetsExist;
         }
 
-        disableCrudButtonsResult.value = !allBudgetDataIsValid;
-        return !allBudgetDataIsValid;
+        disableCrudButtonsResult.value = !allBudgetDataIsValid || !budgetsExist;
+        return !allBudgetDataIsValid || !budgetsExist;
     }
 
     function onSearchClick() {

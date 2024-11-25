@@ -71,9 +71,13 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             {
                 return new List<SectionCommittedProjectDTO>();
             }
-            
+
+            //Get Budgets
             var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id)
                 .ToDictionary(b => b.Name, b => b.Id, StringComparer.OrdinalIgnoreCase);
+
+            //Get Treatments
+            var treatments = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatmentNames(simulation.Id);
 
             // Validate columns once
             var columnIndices = ValidateAndGetColumnIndices(headers, CompleteNetworkHeaders[_networkKeyField]);
@@ -113,6 +117,7 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
                         locationColumnNames,
                         maintainableAssetIdsPerLocationId,
                         budgets,
+                        treatments,
                         simulation.Id);
 
                     if (project != null)
@@ -142,6 +147,7 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             Dictionary<int, string> locationColumnNames,
             Dictionary<string, Guid> maintainableAssetIdsPerLocationId,
             Dictionary<string, Guid> budgets,
+            List<string> treatments,
             Guid simulationId)
         {
             // Read all cell values for the row once
@@ -154,7 +160,7 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             // Extract key components
             var locationId = SafeGetLocationIdentifier(rowValues, columnIndices, _networkKeyField, row);
             var projectYear = SafeGetProjectYear(rowValues, columnIndices, CommittedProjectsColumnHeaders.Year, row);
-            var treatment = SafeGetTreatment(rowValues, columnIndices, CommittedProjectsColumnHeaders.Treatment, row);
+            var treatment = SafeGetTreatment(rowValues, columnIndices, treatments, CommittedProjectsColumnHeaders.Treatment, row);
 
             var key = (locationIdentifier: locationId, projectYear, treatment);
             // Check for duplicates
@@ -504,6 +510,7 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
         private string SafeGetTreatment(
              Dictionary<int, object> rowValues,
              Dictionary<string, int> columnIndices,
+             List<string> treatments,
              string columnName,
              int row)
         {
@@ -521,7 +528,19 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
                     AddValidationError(ErrorType.InvalidValue, $"Row {row}, Column {columnIndex} ('{columnName}'): Treatment is null or empty.");
                     return "Default treatment";
                 }
-                return treatment;
+
+                // Check if treatment exists in the provided treatments list 
+                var normalizedTreatment = treatment.ToLowerInvariant();
+                var matchingTreatment = treatments
+                    .FirstOrDefault(t => string.Equals(t.Trim(), treatment, StringComparison.OrdinalIgnoreCase));
+
+                if (matchingTreatment != null)
+                {
+                    return matchingTreatment; 
+                }
+
+                AddValidationError(ErrorType.InvalidValue, $"Row {row}, Column {columnIndex} ('{columnName}'): Treatment '{treatment}' not found in the valid treatments list.");
+                return "Default treatment";
             }
             else
             {

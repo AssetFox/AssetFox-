@@ -755,17 +755,9 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
         arraysToReset.forEach(arr => arr.value = []);
     }
 
-    function validateImportedData(items: SectionCommittedProject[]) {
-        // Create a Map for normalized treatments
-        const treatmentMap = new Map(
-            treatmentSelectItems.value.map((item: string) => [item.trim().toLowerCase().normalize(), item])
-        );
-
+    function validateImportedData(items: SectionCommittedProject[]) {        
         items.forEach(item => {
-            const normalizedTreatment = item.treatment.trim().toLowerCase().normalize(); // Normalize incoming treatment
-            importedProjectTreatmentName.value = item.treatment;
-
-            if (!treatmentMap.has(normalizedTreatment)) {
+            if (!validTreatmentName(item.treatment)) {
                 missingTreatments.value.push(importedProjectTreatmentName.value);
             }
 
@@ -1329,7 +1321,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
 
     function validTreatmentName(treatment: string) {
         return treatmentSelectItems.value.some(
-            (item: string) => item.toLowerCase() === treatment.toLowerCase()
+            (item: string) => item.trim().toLowerCase() === treatment.trim().toLowerCase()
         );
     }
 

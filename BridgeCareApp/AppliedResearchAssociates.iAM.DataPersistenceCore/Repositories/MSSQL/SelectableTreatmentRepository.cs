@@ -500,6 +500,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return names;
         }
 
+        public List<string> GetScenarioSelectableTreatmentNames(Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException("No simulation was found for the given scenario");
+            }
+
+            var names = _unitOfWork.Context.ScenarioSelectableTreatment
+                .AsNoTracking()
+                .Where(_ => _.SimulationId == simulationId)
+                .AsSplitQuery()
+                .Select(t => t.Name)
+                .OrderBy(s => s)
+                .ToList();
+
+            return names;
+        }
+
         public List<TreatmentDTO> GetSelectableTreatments(Guid libraryId)
         {
             if (!_unitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))

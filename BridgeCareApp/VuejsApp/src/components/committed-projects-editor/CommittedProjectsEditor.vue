@@ -756,11 +756,16 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     }
 
     function validateImportedData(items: SectionCommittedProject[]) {
-        const treatmentSet = new Set(treatmentSelectItems.value); // Optimize includes check
+        // Create a Map for normalized treatments
+        const treatmentMap = new Map(
+            treatmentSelectItems.value.map((item: string) => [item.trim().toLowerCase().normalize(), item])
+        );
+
         items.forEach(item => {
+            const normalizedTreatment = item.treatment.trim().toLowerCase().normalize(); // Normalize incoming treatment
             importedProjectTreatmentName.value = item.treatment;
 
-            if (!treatmentSet.has(importedProjectTreatmentName.value)) {
+            if (!treatmentMap.has(normalizedTreatment)) {
                 missingTreatments.value.push(importedProjectTreatmentName.value);
             }
 
@@ -1268,9 +1273,17 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
 
     //Add red boxes round missing treatments
     const getTreatmentStyle = (treatment: string) => {
-        const isInMissingTreatments = missingTreatmentsValue.value.includes(treatment);
-        return isInMissingTreatments ? { border: '1px solid red', padding: '3px' } : {};
+        const treatmentNormalized = treatment.trim().toLowerCase();
+
+        const isInMissingTreatments = missingTreatments.value.some(
+            (item: string) => item.trim().toLowerCase() === treatmentNormalized
+        );
+
+        return isInMissingTreatments
+            ? { border: '1px solid red', padding: '3px' }
+            : {};
     };
+
 
     const getYearStyle = (year: number) => {
         const isInInvalidYears = invalidYears.value.includes(year);
@@ -1315,7 +1328,9 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     };
 
     function validTreatmentName(treatment: string) {
-        return treatmentSelectItems.value.includes(treatment);
+        return treatmentSelectItems.value.some(
+            (item: string) => item.toLowerCase() === treatment.toLowerCase()
+        );
     }
 
     function validProjectSource(source: number | string) {

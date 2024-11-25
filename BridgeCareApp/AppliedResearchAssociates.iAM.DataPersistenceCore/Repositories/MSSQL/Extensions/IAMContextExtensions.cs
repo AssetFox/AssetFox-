@@ -236,48 +236,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             }
 
             context.SaveChanges();
-        }
-
-        public static void UpsertAll<T>(this IAMContext context, List<T> entities, Guid? userId = null) where T : class
-        {
-            if (!entities.Any())
-            {
-                return;
-            }
-           
-            var existingEntities = context.Set<T>();
-            entities.ForEach(entity =>
-            {
-                var idPropertyInfo = GetPropertyInfo<T>("Id");
-                var idValue = idPropertyInfo.GetValue(entity);
-                var existingEntity = existingEntities.Find(idValue);
-                if (existingEntity != null)
-                {
-                    SetPropertyValue(entity, BaseEntityProperty.CreatedBy,
-                        GetPropertyInfo<T>(BaseEntityProperty.CreatedBy).GetValue(existingEntity));
-                    SetPropertyValue(entity, BaseEntityProperty.CreatedDate,
-                        GetPropertyInfo<T>(BaseEntityProperty.CreatedDate).GetValue(existingEntity));
-                    SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy,
-                        userId ?? GetPropertyInfo<T>(BaseEntityProperty.LastModifiedBy)
-                            .GetValue(existingEntity));
-                    SetPropertyValue(entity, BaseEntityProperty.LastModifiedDate, DateTime.Now);
-
-                    context.Entry(existingEntity).CurrentValues.SetValues(entity);
-                }
-                else
-                {
-                    if (userId.HasValue)
-                    {
-                        SetPropertyValue(entity, BaseEntityProperty.CreatedBy, userId.Value);
-                        SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
-                    }
-
-                    existingEntities.Add(entity);
-                }
-            });
-
-            context.SaveChanges();
-        }
+        }        
 
         public static void DeleteEntity<T>(this IAMContext context, Expression<Func<T, bool>> predicate) where T : class
         {

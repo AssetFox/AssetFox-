@@ -1564,16 +1564,6 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     }
 
     function disableCrudButton() {
-        /*if (currentPage.value.length === 0 || !currentPage.value) {
-            disableCrudButtonsResult.value = true;
-            return true;
-        }*/
-
-        /*if (!currentPage.value.some(() => true)) {
-            disableCrudButtonsResult.value = true;
-            return true;
-        }*/
-
         const budgetsExist = currentPage.value.some(() => true);
 
         const allBudgetDataIsValid: boolean = currentPage.value.every((budget: Budget) => {

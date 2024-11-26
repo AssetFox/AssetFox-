@@ -180,7 +180,7 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
                 Treatment = treatment,
                 Year = projectYear,
                 ProjectSource = SafeGetProjectSource(rowValues, columnIndices, CommittedProjectsColumnHeaders.ProjectSource, row),
-                ProjectId = SafeGetProjectSourceId(rowValues, columnIndices, CommittedProjectsColumnHeaders.ProjectSourceId, row),
+                ProjectId = SafeGetProjectSourceId(rowValues, columnIndices, CommittedProjectsColumnHeaders.ProjectSourceId),
                 Cost = SafeGetProjectCost(rowValues, columnIndices, CommittedProjectsColumnHeaders.Cost, row),
                 Category = SafeGetTreatmentCategory(rowValues, columnIndices, CommittedProjectsColumnHeaders.Category, row)
             };
@@ -384,26 +384,25 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
         private string SafeGetProjectSourceId(
             Dictionary<int, object> rowValues,
             Dictionary<string, int> columnIndices,
-            string columnName,
-            int row)
+            string columnName)
         {
             var columnIndex = columnIndices[columnName];
             if (columnIndex == -1)
             {
-                return "None"; //default value
+                return string.Empty; //default value
             }
 
             if (rowValues.TryGetValue(columnIndex, out var cellValue) && cellValue != null)
             {
                 var sourceId = cellValue.ToString();
                 return string.IsNullOrWhiteSpace(sourceId)
-                    ? "None"
+                    ? string.Empty
                     : sourceId.Trim();
             }
             else
             {
-                AddValidationError(ErrorType.MissingValue, $"Row {row}, Column {columnIndex} ('{columnName}'): Project Source ID is missing.");
-                return "None";
+                //AddValidationError(ErrorType.MissingValue, $"Row {row}, Column {columnIndex} ('{columnName}'): Project Source ID is missing.");
+                return string.Empty;
             }
         }
 
@@ -632,6 +631,11 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
                     missingColumns.Add(column);
                     columnIndices[column] = -1; // Indicate column not found
                 }
+            }
+
+            if (missingColumns.Contains(CommittedProjectsColumnHeaders.ProjectSourceId))
+            {
+                missingColumns.Remove(CommittedProjectsColumnHeaders.ProjectSourceId);
             }
 
             // Broadcast missing columns if any

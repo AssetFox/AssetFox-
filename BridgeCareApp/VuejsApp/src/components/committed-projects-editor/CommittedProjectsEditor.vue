@@ -178,9 +178,7 @@
                                                 readonly
                                                 class="sm-txt"
                                                 density="compact"
-                                                variant="underlined"
-                                                :style="getProjectSourceIdStyle(item.item[header.key])"
-                                                :error-messages="item.item.projectSourceIdErrors"
+                                                variant="underlined"                                                
                                                 :model-value="item.item[header.key]"/>
 
                                             <template v-slot:input>
@@ -375,7 +373,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     const missingTreatments = ref< string[] >([]);
     const missingTreatmentsValue = ref< string[] >([]);
     const invalidProjectSources = ref<number[]>([]);
-    const invalidProjectSourceId = ref<string[]>([]);
+    //const invalidProjectSourceId = ref<string[]>([]);
     const invalidCosts = ref<number[]>([]);
     const invalidYears = ref<number[]>([]);
     const invalidTreatments = ref<string[]>([]);
@@ -755,17 +753,9 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
         arraysToReset.forEach(arr => arr.value = []);
     }
 
-    function validateImportedData(items: SectionCommittedProject[]) {
-        // Create a Map for normalized treatments
-        const treatmentMap = new Map(
-            treatmentSelectItems.value.map((item: string) => [item.trim().toLowerCase().normalize(), item])
-        );
-
+    function validateImportedData(items: SectionCommittedProject[]) {        
         items.forEach(item => {
-            const normalizedTreatment = item.treatment.trim().toLowerCase().normalize(); // Normalize incoming treatment
-            importedProjectTreatmentName.value = item.treatment;
-
-            if (!treatmentMap.has(normalizedTreatment)) {
+            if (!validTreatmentName(item.treatment)) {
                 missingTreatments.value.push(importedProjectTreatmentName.value);
             }
 
@@ -773,9 +763,9 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
                 invalidProjectSources.value.push(item.projectSource);
             }
 
-            if (!validProjectSourceId(item.projectId)) {
-                invalidProjectSourceId.value = invalidProjectSourceId.value.map((id) => id.trim());
-            }
+            // if (!validProjectSourceId(item.projectId)) {
+            //     invalidProjectSourceId.value = invalidProjectSourceId.value.map((id) => id.trim());
+            // }
 
             if (!validBudgetId(item.scenarioBudgetId)) {
                 invalidBudgets.value.push(item.scenarioBudgetId);
@@ -1124,7 +1114,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
             id: scp.id,
             errors: [],
             projectSourceErrors: [],
-            projectSourceIdErrors: [],
+            //projectSourceIdErrors: [],
             treatmentErrors: [],
             costErrors: [],
             budgetErrors: [],
@@ -1224,7 +1214,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
     const hasValidationErrors = computed(() => {
         return missingTreatments.value.length > 0 ||
             invalidProjectSources.value.length > 0 ||
-            invalidProjectSourceId.value.length > 0 ||
+            //invalidProjectSourceId.value.length > 0 ||
             invalidCosts.value.length > 0 ||
             invalidYears.value.length > 0 ||
             invalidTreatments.value.length > 0 ||
@@ -1235,7 +1225,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
                     (scp.treatmentErrors && scp.treatmentErrors.length > 0) ||
                     (scp.costErrors && scp.costErrors.length > 0) ||
                     (scp.projectSourceErrors && scp.projectSourceErrors.length > 0) ||
-                    (scp.projectSourceIdErrors && scp.projectSourceIdErrors.length > 0) ||
+                    //(scp.projectSourceIdErrors && scp.projectSourceIdErrors.length > 0) ||
                     (scp.budgetErrors && scp.budgetErrors.length > 0);
             });
     });
@@ -1290,13 +1280,13 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
         return isInInvalidYears ? { border: '1px solid red', padding: '3px' } : {};
     };
 
-    const getProjectSourceIdStyle = (projectSourceId: string) => {
-        const trimmedProjectSourceId = projectSourceId.trim();
-        const isInInvalidProjectSourceId =
-            invalidProjectSourceId.value.includes(trimmedProjectSourceId) ||
-            trimmedProjectSourceId === 'None';
-        return isInInvalidProjectSourceId ? { border: '1px solid red', padding: '3px' } : {};
-    };
+    // const getProjectSourceIdStyle = (projectSourceId: string) => {
+    //     const trimmedProjectSourceId = projectSourceId.trim();
+    //     const isInInvalidProjectSourceId =
+    //         invalidProjectSourceId.value.includes(trimmedProjectSourceId) ||
+    //         trimmedProjectSourceId === 'None';
+    //     return isInInvalidProjectSourceId ? { border: '1px solid red', padding: '3px' } : {};
+    // };
 
     const getProjectSourceStyle = (projectSource: string) => {
         let source = getProjectSourceKeyFromValueMap(projectSourceMap, projectSource);
@@ -1329,17 +1319,17 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
 
     function validTreatmentName(treatment: string) {
         return treatmentSelectItems.value.some(
-            (item: string) => item.toLowerCase() === treatment.toLowerCase()
+            (item: string) => item.trim().toLowerCase() === treatment.trim().toLowerCase()
         );
     }
 
-    function validProjectSource(source: number | string) {
-        return source !== 0 && source !== 'None'
+    function validProjectSource(source: string) {
+        return source !== 'None'
     }
 
-    function validProjectSourceId(sourceId: string) {
-        return sourceId !== 'None'.trim();
-    }
+    // function validProjectSourceId(sourceId: string) {
+    //     return sourceId !== 'None'.trim();
+    // }
 
     function validCost(cost: number) {
         return cost > 0 && cost !== 0 && cost !== null && cost !== undefined;
@@ -1357,7 +1347,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
                 treatmentErrors: checkTreatment(scp.treatment),
                 costErrors: checkCost(scp.cost),
                 projectSourceErrors: checkProjectSource(scp.projectSource),
-                projectSourceIdErrors: checkProjectSourceId(scp.projectId),
+                //projectSourceIdErrors: checkProjectSourceId(scp.projectId),
                 budgetErrors: checkBudgetId(scp.scenarioBudgetId)
             };
 
@@ -1365,7 +1355,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
             scp.treatmentErrors = errors.treatmentErrors;
             scp.costErrors = errors.costErrors;
             scp.projectSourceErrors = errors.projectSourceErrors;
-            scp.projectSourceIdErrors = errors.projectSourceIdErrors;
+            //scp.projectSourceIdErrors = errors.projectSourceIdErrors;
             scp.budgetErrors = errors.budgetErrors;
         });
     }
@@ -1421,14 +1411,14 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
         return errors;
     }
 
-    function checkProjectSourceId(sourceId: string) {
-        const errors = [];
-        const trimmedSourceId = sourceId.trim();
-        if (!validProjectSourceId(trimmedSourceId)) {
-            errors.push('Enter a valid project Id')
-        }
-        return errors;
-    }
+    // function checkProjectSourceId(sourceId: string) {
+    //     const errors = [];
+    //     const trimmedSourceId = sourceId.trim();
+    //     if (!validProjectSourceId(trimmedSourceId)) {
+    //         errors.push('Enter a valid project Id')
+    //     }
+    //     return errors;
+    // }
 
     function checkBudgetId(budgetId: string) {
         const errors = [];

@@ -371,7 +371,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
         {
             if (section.TreatmentStatus != TreatmentStatus.Applied)
             {
-                var fundingSection = section.TreatmentCause == TreatmentCause.SelectedTreatment && section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment ? section : null;
+                var fundingSection = section.TreatmentCause == TreatmentCause.SelectedTreatment
+                                    && section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment
+                                    ? section : null;
                 if (fundingSection != null)
                 {
                     if (!keyCashFlowFundingDetails.ContainsKey(brKey))
@@ -390,11 +392,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
         {
             if (section.TreatmentStatus != TreatmentStatus.Applied)
             {
-                var fundingSection = yearData.Assets.
-                                      FirstOrDefault(_ => CheckAndGetValue<string>(_.ValuePerTextAttribute, "CRS") == crs &&
-                                                    _.TreatmentCause == TreatmentCause.SelectedTreatment &&
-                                                    _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
-                                                    _.AppliedTreatment == section.AppliedTreatment);
+                var fundingSection = section.TreatmentCause == TreatmentCause.SelectedTreatment
+                                && section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment
+                                ? section : null;
                 if (fundingSection != null)
                 {
                     if (!keyCashFlowFundingDetails.ContainsKey(crs))
@@ -407,6 +407,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services
                     }
                 }
             }
-        }
+        }        
     }    
 }

@@ -27,7 +27,7 @@ export interface SectionCommittedProjectTableData {
     errors: string[];
     yearErrors: string[];
     projectSourceErrors: string[];
-    projectSourceIdErrors: string[];
+    //projectSourceIdErrors: string[];
     treatmentErrors: string[];
     costErrors: string[];
     budgetErrors: string[];

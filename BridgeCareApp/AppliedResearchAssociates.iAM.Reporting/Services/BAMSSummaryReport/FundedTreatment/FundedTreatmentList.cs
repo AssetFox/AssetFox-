@@ -305,19 +305,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
                     var treatmentOption = asset.TreatmentOptions.FirstOrDefault(o => o.TreatmentName == asset.AppliedTreatment);
 
                     // Build keyCashFlowFundingDetails
-                    if (asset.TreatmentStatus != TreatmentStatus.Applied)
-                    {
-                        var fundingSection = year.Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == id && _.TreatmentCause == TreatmentCause.SelectedTreatment && _.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment && _.AppliedTreatment == asset.AppliedTreatment);
-                        if (fundingSection != null && !keyCashFlowFundingDetails.ContainsKey(id))
-                        {
-                            keyCashFlowFundingDetails.Add(id, fundingSection?.TreatmentConsiderations ?? new());
-                        }
-                    }
+                    _reportHelper.BuildKeyCashFlowFundingDetails(year, asset, id, keyCashFlowFundingDetails);
 
-                    // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict
-                    var treatmentConsiderations = asset.TreatmentStatus == TreatmentStatus.Applied && asset.TreatmentCause != TreatmentCause.CashFlowProject ?
-                                                  asset.TreatmentConsiderations : keyCashFlowFundingDetails[id];
-                var treatmentConsideration = shouldBundleFeasibleTreatments ?
+                    // If TreatmentStatus Applied and TreatmentCause is not CashFlowProject it means no CF then consider section obj and if Progressed that means it is CF then use obj from dict                    
+                    var treatmentConsiderations = ((asset.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                                                   asset.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                   (asset.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                   asset.TreatmentStatus == TreatmentStatus.Progressed) ||
+                                                   (asset.TreatmentCause == TreatmentCause.CashFlowProject &&
+                                                   asset.TreatmentStatus == TreatmentStatus.Applied)) ?
+                                                   keyCashFlowFundingDetails[id] :
+                                                   asset.TreatmentConsiderations ?? new();
+
+                    var treatmentConsideration = shouldBundleFeasibleTreatments ?
                                              treatmentConsiderations.FirstOrDefault() :
                                              treatmentConsiderations.FirstOrDefault(_ => _.TreatmentName == asset.AppliedTreatment);
 

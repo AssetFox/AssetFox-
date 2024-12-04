@@ -3,6 +3,7 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
 {
@@ -28,12 +29,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
         public void BuildKeyCashFlowFundingDetails(SimulationYearDetail yearData, AssetDetail section, string crs, Dictionary<string, List<TreatmentConsiderationDetail>> keyCashFlowFundingDetails)
         {
             if (section.TreatmentStatus != TreatmentStatus.Applied)
-            {
-                var fundingSection = yearData.Assets.
-                                      FirstOrDefault(_ => checkAndGetValue<string>(_.ValuePerTextAttribute, "CRS") == crs &&
-                                                    _.TreatmentCause == TreatmentCause.SelectedTreatment &&
-                                                    _.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment &&
-                                                    _.AppliedTreatment == section.AppliedTreatment);
+            {                
+                var fundingSection = section.TreatmentCause == TreatmentCause.SelectedTreatment
+                                   && section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment
+                                   ? section : null;
                 if (fundingSection != null)
                 {
                     if (!keyCashFlowFundingDetails.ContainsKey(crs))

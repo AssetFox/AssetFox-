@@ -27,9 +27,9 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
         private List<string> _keyFields;
 
         // Thread-safe collections for error tracking and project management
-        private ConcurrentDictionary<ErrorType, ConcurrentBag<string>> _validationErrorMessages = new();
-        private ConcurrentDictionary<(string locationIdentifier, int projectYear, string treatment), SectionCommittedProjectDTO> _projectsPerKey = new();
-        private ConcurrentDictionary<(string locationIdentifier, int projectYear, string treatment), bool> _processedKeys = new();
+        private Dictionary<ErrorType, List<string>> _validationErrorMessages = new();
+        private Dictionary<(string locationIdentifier, int projectYear, string treatment), SectionCommittedProjectDTO> _projectsPerKey = new();
+        private Dictionary<(string locationIdentifier, int projectYear), bool> _processedKeys = new();
 
         // Configurable batch sizes for notifications
         private const int MAX_ERROR_BATCH_SIZE = 5;
@@ -62,9 +62,9 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             string userId)
         {
             // Reset collections for each import
-            _validationErrorMessages = new ConcurrentDictionary<ErrorType, ConcurrentBag<string>>();
-            _projectsPerKey = new ConcurrentDictionary<(string, int, string), SectionCommittedProjectDTO>();
-            _processedKeys = new ConcurrentDictionary<(string locationIdentifier, int projectYear, string treatment), bool>();
+            _validationErrorMessages = new Dictionary<ErrorType, List<string>>();
+            _projectsPerKey = new Dictionary<(string, int, string), SectionCommittedProjectDTO>();
+            _processedKeys = new Dictionary<(string locationIdentifier, int projectYear), bool>();
 
             var headers = GetHeadersFromWorksheet(worksheet);
             if (!ValidateWorkSheet(worksheet, _hubService, _networkKeyField, headers, userId))
@@ -92,8 +92,10 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
                 return new List<SectionCommittedProjectDTO>();
             }
 
-            var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-            Parallel.For(2, worksheet.Dimension.End.Row + 1, options, row =>
+            int startRow = 2; // Assuming headers are in row 1
+            int endRow = worksheet.Dimension.End.Row;
+
+            for (int row = startRow; row <= endRow; row++)
             {
                 try
                 {
@@ -107,12 +109,12 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
                     // Skip the row if it is blank
                     if (IsRowBlank(rowValues))
                     {
-                        return;
+                        continue;
                     }
 
                     var project = ProcessRow(
-                        worksheet,
                         row,
+                        rowValues,
                         columnIndices,
                         locationColumnNames,
                         maintainableAssetIdsPerLocationId,
@@ -130,7 +132,7 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
                 {
                     AddValidationError(ErrorType.GeneralError, $"Error processing row {row}");
                 }
-            });
+            };
           
             // Batch error reporting
             NotifyValidationErrors(userId);
@@ -141,8 +143,8 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
         /// Processes a single row in the worksheet and creates a committed project DTO.
         /// </summary>
         private SectionCommittedProjectDTO ProcessRow(
-            ExcelWorksheet worksheet,
             int row,
+            Dictionary<int, object> rowValues, 
             Dictionary<string, int> columnIndices,
             Dictionary<int, string> locationColumnNames,
             Dictionary<string, Guid> maintainableAssetIdsPerLocationId,
@@ -150,25 +152,19 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
             List<string> treatments,
             Guid simulationId)
         {
-            // Read all cell values for the row once
-            var rowValues = new Dictionary<int, object>();
-            for (int col = 1; col <= worksheet.Dimension.End.Column; col++)
-            {
-                rowValues[col] = worksheet.Cells[row, col].Value;
-            }
-
+            
             // Extract key components
             var locationId = SafeGetLocationIdentifier(rowValues, columnIndices, _networkKeyField, row);
             var projectYear = SafeGetProjectYear(rowValues, columnIndices, CommittedProjectsColumnHeaders.Year, row);
             var treatment = SafeGetTreatment(rowValues, columnIndices, treatments, CommittedProjectsColumnHeaders.Treatment, row);
 
-            var key = (locationIdentifier: locationId, projectYear, treatment);
+            var key = (locationIdentifier: locationId, projectYear);
             // Check for duplicates
             if (!_processedKeys.TryAdd(key, true))
             {
                 // Duplicate found
                 AddValidationError(ErrorType.DuplicateEntry,
-                    $"Duplicate Project Removed: Row {row}, Asset {locationId}, Year {projectYear}, Treatment '{treatment}'");
+                    $"Duplicate Project Removed: Row {row}, Asset {locationId}, Year {projectYear}'");
                 return null; // Skip further processing
             }
 
@@ -184,7 +180,7 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
                 Treatment = treatment,
                 Year = projectYear,
                 ProjectSource = SafeGetProjectSource(rowValues, columnIndices, CommittedProjectsColumnHeaders.ProjectSource, row),
-                ProjectId = SafeGetProjectSourceId(rowValues, columnIndices, CommittedProjectsColumnHeaders.ProjectSourceId, row),
+                ProjectId = SafeGetProjectSourceId(rowValues, columnIndices, CommittedProjectsColumnHeaders.ProjectSourceId),
                 Cost = SafeGetProjectCost(rowValues, columnIndices, CommittedProjectsColumnHeaders.Cost, row),
                 Category = SafeGetTreatmentCategory(rowValues, columnIndices, CommittedProjectsColumnHeaders.Category, row)
             };
@@ -266,8 +262,12 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
 
         private void AddValidationError(ErrorType errorType, string message)
         {
-            var errorBag = _validationErrorMessages.GetOrAdd(errorType, new ConcurrentBag<string>());
-            errorBag.Add(message);
+            if (!_validationErrorMessages.TryGetValue(errorType, out var errorList))
+            {
+                errorList = new List<string>();
+                _validationErrorMessages[errorType] = errorList;
+            }
+            errorList.Add(message);
         }
 
 
@@ -384,26 +384,25 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
         private string SafeGetProjectSourceId(
             Dictionary<int, object> rowValues,
             Dictionary<string, int> columnIndices,
-            string columnName,
-            int row)
+            string columnName)
         {
             var columnIndex = columnIndices[columnName];
             if (columnIndex == -1)
             {
-                return "None"; //default value
+                return string.Empty; //default value
             }
 
             if (rowValues.TryGetValue(columnIndex, out var cellValue) && cellValue != null)
             {
                 var sourceId = cellValue.ToString();
                 return string.IsNullOrWhiteSpace(sourceId)
-                    ? "None"
+                    ? string.Empty
                     : sourceId.Trim();
             }
             else
             {
-                AddValidationError(ErrorType.MissingValue, $"Row {row}, Column {columnIndex} ('{columnName}'): Project Source ID is missing.");
-                return "None";
+                //AddValidationError(ErrorType.MissingValue, $"Row {row}, Column {columnIndex} ('{columnName}'): Project Source ID is missing.");
+                return string.Empty;
             }
         }
 
@@ -632,6 +631,11 @@ namespace BridgeCareCore.Services.SummaryReport.CommittedProjects
                     missingColumns.Add(column);
                     columnIndices[column] = -1; // Indicate column not found
                 }
+            }
+
+            if (missingColumns.Contains(CommittedProjectsColumnHeaders.ProjectSourceId))
+            {
+                missingColumns.Remove(CommittedProjectsColumnHeaders.ProjectSourceId);
             }
 
             // Broadcast missing columns if any

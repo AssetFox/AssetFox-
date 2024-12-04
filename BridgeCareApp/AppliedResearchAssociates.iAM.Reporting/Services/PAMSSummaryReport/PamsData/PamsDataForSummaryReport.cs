@@ -313,7 +313,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                             .Assets.FirstOrDefault(_ => _.AssetName == section.AssetName);
                         previousYearCause = prevYearSection.TreatmentCause;
                         previousYearTreatment = prevYearSection.AppliedTreatment;
-                    }                    
+                    }
+
+                    CheckConditions(section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause, worksheet, row, column);
 
                     // Work done and cost for the given year                    
                     var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
@@ -354,7 +356,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                     i++;
 
                     if (row % 2 == 0) {
-                        if (section.TreatmentCause != TreatmentCause.CashFlowProject || section.TreatmentCause == TreatmentCause.CommittedProject) {
+                        if (section.TreatmentCause != TreatmentCause.CashFlowProject &&
+                            !(section.TreatmentCause == TreatmentCause.CommittedProject && previousYearCause == TreatmentCause.CommittedProject && previousYearTreatment.ToLower() != PAMSConstants.NoTreatment))
+                        {
                             ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.LightGray);
                         }
                     }
@@ -616,5 +620,31 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 _parametersModel.LengthBetween8and20 = "Y";
             }
         }
+
+        public void CheckConditions(string treatment, string previousYearTreatment, TreatmentCause previousYearCause,
+            TreatmentCause treatmentCause, ExcelWorksheet worksheet, int row, int column)
+        {
+            if (treatment != null && treatment.ToLower() != PAMSConstants.NoTreatment)
+            {
+                var range = worksheet.Cells[row, column, row, column + 1];
+                
+                if (treatmentCause == TreatmentCause.CommittedProject
+                    && previousYearCause == TreatmentCause.CommittedProject
+                    && previousYearTreatment.ToLower() != PAMSConstants.NoTreatment)
+                {
+                    var rangeWithPreviousColumn = worksheet.Cells[row, column - 2, row, column - 1];
+                    CommittedForConsecutiveYears(rangeWithPreviousColumn);
+                    CommittedForConsecutiveYears(range);
+                }
+            }
+        }
+
+        private void CommittedForConsecutiveYears(ExcelRange range)
+        {
+            ExcelHelper.ApplyColor(range, Color.FromArgb(255, 153, 0));
+            ExcelHelper.SetTextColor(range, Color.White);
+        }
+
+        
     }
 }

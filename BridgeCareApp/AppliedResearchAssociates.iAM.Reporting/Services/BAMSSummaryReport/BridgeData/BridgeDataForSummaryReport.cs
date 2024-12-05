@@ -378,8 +378,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 row = initialRow;
 
                 // Add work done cells
-                TreatmentCause previousYearCause = TreatmentCause.Undefined;
+                var previousYearCause = TreatmentCause.Undefined;
                 var previousYearTreatment = BAMSConstants.NoTreatment;
+                var previousYearTreatmentStatus = TreatmentStatus.Undefined;
                 var i = 0; double section_BRKEY = 0;
                 foreach (var section in yearlySectionData.Assets)
                 {
@@ -439,9 +440,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             .Assets.FirstOrDefault(_ => _reportHelper.CheckAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY);
                         previousYearCause = prevYearSection.TreatmentCause;
                         previousYearTreatment = prevYearSection.AppliedTreatment;
+                        previousYearTreatmentStatus = prevYearSection.TreatmentStatus;
                     }
-                    setColor((int)_reportHelper.CheckAndGetValue<double>(section.ValuePerNumericAttribute, "PARALLEL"), section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause,
-                        yearlySectionData.Year, index, worksheet, row, column);
+                    setColor(section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause, index, worksheet, row, column, section.TreatmentStatus, previousYearTreatmentStatus);
 
                     // Work done in a year
                     // Build keyCashFlowFundingDetails                    
@@ -508,7 +509,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     {
                         var cellColor = worksheet.Cells[row, column, row, column + 1].Style.Fill.BackgroundColor;
                         if (section.TreatmentCause != TreatmentCause.CashFlowProject &&
-                            !(section.TreatmentCause == TreatmentCause.CommittedProject && previousYearCause == TreatmentCause.CommittedProject && previousYearTreatment.ToLower() != BAMSConstants.NoTreatment))
+                            !HighlightWorkDoneCells.CommittedProjectsCashFlowed(section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause, section.TreatmentStatus, previousYearTreatmentStatus))
                         {
                             ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.LightGray);
                         }
@@ -756,10 +757,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
 
-        private void setColor(int parallelBridge, string treatment, string previousYearTreatment, TreatmentCause previousYearCause,
-           TreatmentCause treatmentCause, int year, int index, ExcelWorksheet worksheet, int row, int column)
+        private void setColor(string treatment, string previousYearTreatment, TreatmentCause previousYearCause,
+           TreatmentCause treatmentCause, int index, ExcelWorksheet worksheet, int row, int column, TreatmentStatus treatmentStatus, TreatmentStatus previousYearTreatmentStatus)
         {
-            _highlightWorkDoneCells.CheckConditions(parallelBridge, treatment, previousYearTreatment, previousYearCause, treatmentCause, year, index, worksheet, row, column);
+            _highlightWorkDoneCells.CheckConditions(treatment, previousYearTreatment, previousYearCause, treatmentCause, index, worksheet, row, column, treatmentStatus, previousYearTreatmentStatus);
         }
 
 

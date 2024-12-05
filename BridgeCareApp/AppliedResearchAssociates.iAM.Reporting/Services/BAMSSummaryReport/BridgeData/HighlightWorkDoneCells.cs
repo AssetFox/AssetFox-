@@ -2,13 +2,14 @@
 using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeData
 {
     public class HighlightWorkDoneCells
     {
-        public void CheckConditions(int parallelBridge, string treatment, string previousYearTreatment, TreatmentCause previousYearCause,
-            TreatmentCause treatmentCause, int year, int index, ExcelWorksheet worksheet, int row, int column)
+        public void CheckConditions(string treatment, string previousYearTreatment, TreatmentCause previousYearCause,
+            TreatmentCause treatmentCause, int index, ExcelWorksheet worksheet, int row, int column, TreatmentStatus treatmentStatus, TreatmentStatus previousYearTreatmentStatus)
         {
             if (treatment != null && treatment.ToLower() != BAMSConstants.NoTreatment)
             {
@@ -16,8 +17,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 var rangeForCashFlow = worksheet.Cells[row, column - 2, row, column + 1];
                 CashFlowedBridge(treatmentCause, rangeForCashFlow);
 
-                if (index != 1 && treatmentCause == TreatmentCause.CommittedProject
-                    && previousYearCause == TreatmentCause.CommittedProject && previousYearTreatment.ToLower() != BAMSConstants.NoTreatment)
+                if (index != 1 && CommittedProjectsCashFlowed(treatment, previousYearTreatment, previousYearCause, treatmentCause, treatmentStatus, previousYearTreatmentStatus))
                 {
                     var rangeWithPreviousColumn = worksheet.Cells[row, column - 2, row, column - 1];
                     CommittedForConsecutiveYears(rangeWithPreviousColumn);
@@ -68,6 +68,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.ApplyColor(range, Color.FromArgb(0, 255, 0));
                 ExcelHelper.SetTextColor(range, Color.Red);
             }
+        }
+
+        public static bool CommittedProjectsCashFlowed(string treatment, string previousYearTreatment, TreatmentCause previousYearCause, TreatmentCause treatmentCause, TreatmentStatus treatmentStatus, TreatmentStatus previousYearTreatmentStatus)
+        {
+            return treatment != null && previousYearTreatment != null
+                   && treatment.ToLower() != PAMSConstants.NoTreatment && treatment == previousYearTreatment
+                   && treatmentCause == TreatmentCause.CommittedProject
+                   && previousYearCause == TreatmentCause.CommittedProject
+                   && previousYearTreatmentStatus == TreatmentStatus.Progressed
+                   && (treatmentStatus == TreatmentStatus.Progressed || treatmentStatus == TreatmentStatus.Applied);
         }
     }
 }

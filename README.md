@@ -2,29 +2,26 @@
 
 This application is designed to assist transportation agencies in determining where best to perform maintenance, rehabilitation, and replacement of their transportation assets, such as bridges and pavements, using a **Lowest Life Cycle Cost (LLCC)** approach. 
 
-AssetFox is **asset-agnostic**, meaning any analysis can be performed on any asset, provided the following information is available:
+AssetFox is **asset-agnostic**, meaning an analysis can be performed on any asset, provided the following information is available:
 
-- **Budgets**
-- **Asset Deterioration Models**
-- **Treatments**
-- **Asset-specific data**, including attributes shared by all assets and location information
+- **Available Funds**
+- **Condition data**
+- **Deterioration Models**
+- **Treatments and Consequences**
 
 ### Features
 
-Once the required data is inputted, the system can:
-- Generate an asset network
-- Recommend an optimal set of treatments based on:
-  - Budget
-  - Location criteria
-  - Optimization and spending strategies
-  - Other configurations
+Once the required data is entered, the system can generate an optimal set of treatments based on:
+  - Budget (none, entered or unlimited)
+  - Minimum condition requirements
+  - Incorporating existing committed projects 
 
-AssetFox is a **web application**, enabling:
-- Shared analysis
+AssetFox is an enterprise level **web application**, enabling:
+- Roll-based user permissions
+- User-level information sharing
 - Data libraries
 - Network details
-- User-specific permissions
-
+  
 ---
 
 ## Architecture
@@ -71,9 +68,8 @@ AssetFox consists of the following components:
 ### 4. **Identity and Access Management (IAM)**
 - Requires a third-party IAM service:
   - **Azure AD B2C** (for development)
-  - **PennDOT's proprietary ESEC authentication** (for deployment)
-- Configured via `RolesToClaimsMapping.json` to map IAM roles to AssetFox-specific roles
-
+  - Configured via `RolesToClaimsMapping.json` to map IAM roles to AssetFox-specific roles
+  - No security option for testing and evaluation
 ---
 
 ## Setup

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,7 +14,6 @@ using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using Writer = System.Threading.Channels.ChannelWriter<BridgeCareCore.Services.Aggregation.AggregationStatusMemo>;
 
 namespace BridgeCareCore.Services.Aggregation
@@ -86,44 +84,25 @@ namespace BridgeCareCore.Services.Aggregation
                         .Where(_ => _.AssignedData != null && _.AssignedData.Any())
                         .SelectMany(_ => _.AssignedData.Select(__ => __.Attribute.Id).Distinct()).ToList();
 
-                    // In practice, every attribute's data is pulled from the same data source.
-                    // Changed to getting all the data sources and loading their sheets into memory, instead of possbily loading and deserializing
-                    // the same sheet 100+ times.
-
-                    int iter = 0;
+                    // create list of attribute data from configuration attributes (exclude attributes
+                    // that don't have command text as there will be no way to select data for them from
+                    // the data source)
                     try
                     {
-                        // Get all dataSources first
-                        var dataConnections = new Dictionary<BaseDataSourceDTO, AttributeConnection>();
                         foreach (var attribute in configurationAttributes)
                         {
-                            var dataSource = attributes.FirstOrDefault(_ => _.Id == attribute.Id)?.DataSource;
-                            if (dataSource == null || dataConnections.Keys.Any(existingDataSource => existingDataSource.Id == dataSource.Id))
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                dataConnections.Add(dataSource, AttributeConnectionBuilder.Build(attribute, dataSource, _unitOfWork));
-                            }
-                        }
-                        // With all dataSources having been fetched, get the data to populate the larger AttributeData list
-                        foreach (var attribute in configurationAttributes)
-                        {
-                            iter++;
                             if (attribute.ConnectionType != ConnectionType.NONE)
                             {
                                 var dataSource = attributes.FirstOrDefault(_ => _.Id == attribute.Id)?.DataSource;
-                                var connection = dataConnections.FirstOrDefault(kvp => kvp.Key.Id == dataSource.Id).Value;
-                                if (connection != null)
+                                if (dataSource != null)
                                 {
-                                    var specificData = AttributeDataBuilder.GetData(connection);
+                                    var specificData = AttributeDataBuilder
+                                        .GetData(AttributeConnectionBuilder.Build(attribute, dataSource, _unitOfWork));
                                     attributeData.AddRange(specificData);
                                 }
                             }
                         }
                     }
-
                     catch (Exception e)
                     {
                         var networkName = _unitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
@@ -174,7 +153,7 @@ namespace BridgeCareCore.Services.Aggregation
                         i++;
                         maintainableAsset.AssignedData.RemoveAll(_ =>
                             attributeIdsToBeUpdatedWithAssignedData.Contains(_.Attribute.Id));
-                        // Iterates through entire attributeData list
+                        //List<DatumLog> unmatchedDatum = maintainableAsset.AssignAttributeData(attributeData);
                         maintainableAsset.AssignAttributeData(attributeData);
                         try
                         {

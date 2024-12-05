@@ -299,8 +299,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 row = initialRow;
 
                 // Add work done cells
-                TreatmentCause previousYearCause = TreatmentCause.Undefined;
+                var previousYearCause = TreatmentCause.Undefined;
                 var previousYearTreatment = PAMSConstants.NoTreatment;
+                var previousYearTreatmentStatus = TreatmentStatus.Undefined;
                 var i = 0;
                 foreach (var section in yearlySectionData.Assets)
                 {
@@ -313,9 +314,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                             .Assets.FirstOrDefault(_ => _.AssetName == section.AssetName);
                         previousYearCause = prevYearSection.TreatmentCause;
                         previousYearTreatment = prevYearSection.AppliedTreatment;
+                        previousYearTreatmentStatus = prevYearSection.TreatmentStatus;
                     }
 
-                    CheckConditions(section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause, worksheet, row, column);
+                    CheckConditions(section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause, section.TreatmentStatus, previousYearTreatmentStatus, worksheet, row, column);
 
                     // Work done and cost for the given year                    
                     var crs = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CRS");
@@ -357,7 +359,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
                     if (row % 2 == 0) {
                         if (section.TreatmentCause != TreatmentCause.CashFlowProject &&
-                            !(section.TreatmentCause == TreatmentCause.CommittedProject && previousYearCause == TreatmentCause.CommittedProject && previousYearTreatment.ToLower() != PAMSConstants.NoTreatment))
+                            !CommittedProjectsCashFlowed(section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause, section.TreatmentStatus, previousYearTreatmentStatus))
                         {
                             ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.LightGray);
                         }
@@ -622,24 +624,29 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
         }
 
         public void CheckConditions(string treatment, string previousYearTreatment, TreatmentCause previousYearCause,
-            TreatmentCause treatmentCause, ExcelWorksheet worksheet, int row, int column)
+            TreatmentCause treatmentCause, TreatmentStatus treatmentStatus, TreatmentStatus previousYearTreatmentStatus,
+            ExcelWorksheet worksheet, int row, int column)
         {
-            if (treatment != null && treatment.ToLower() != PAMSConstants.NoTreatment)
+            if (CommittedProjectsCashFlowed(treatment, previousYearTreatment, previousYearCause, treatmentCause, treatmentStatus, previousYearTreatmentStatus))
             {
                 var range = worksheet.Cells[row, column, row, column + 1];
-                
-                if (treatmentCause == TreatmentCause.CommittedProject
-                    && previousYearCause == TreatmentCause.CommittedProject
-                    && previousYearTreatment.ToLower() != PAMSConstants.NoTreatment)
-                {
-                    var rangeWithPreviousColumn = worksheet.Cells[row, column - 2, row, column - 1];
-                    CommittedForConsecutiveYears(rangeWithPreviousColumn);
-                    CommittedForConsecutiveYears(range);
-                }
+                var rangeWithPreviousColumn = worksheet.Cells[row, column - 2, row, column - 1];
+                CommittedForConsecutiveYears(rangeWithPreviousColumn);
+                CommittedForConsecutiveYears(range);
             }
         }
 
-        private void CommittedForConsecutiveYears(ExcelRange range)
+        private static bool CommittedProjectsCashFlowed(string treatment, string previousYearTreatment, TreatmentCause previousYearCause, TreatmentCause treatmentCause, TreatmentStatus treatmentStatus, TreatmentStatus previousYearTreatmentStatus)
+        {
+            return treatment != null && previousYearTreatment != null
+                   && treatment.ToLower() != PAMSConstants.NoTreatment && treatment == previousYearTreatment
+                   && treatmentCause == TreatmentCause.CommittedProject
+                   && previousYearCause == TreatmentCause.CommittedProject
+                   && previousYearTreatmentStatus == TreatmentStatus.Progressed
+                   && (treatmentStatus == TreatmentStatus.Progressed || treatmentStatus == TreatmentStatus.Applied);
+        }
+
+        private static void CommittedForConsecutiveYears(ExcelRange range)
         {
             ExcelHelper.ApplyColor(range, Color.FromArgb(255, 153, 0));
             ExcelHelper.SetTextColor(range, Color.White);

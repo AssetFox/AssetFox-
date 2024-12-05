@@ -91,7 +91,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
 
                 // Add work done cells
                 var previousYearCause = TreatmentCause.Undefined;
-                var previousYearTreatment = BAMSConstants.NoTreatment;                
+                var previousYearTreatment = BAMSConstants.NoTreatment;
+                var previousYearTreatmentStatus = TreatmentStatus.Undefined;
                 foreach (var section in yearlySectionData.Assets)
                 {
                     // get unique key
@@ -111,7 +112,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
                                          .Assets.FirstOrDefault(_ => CheckGetValue(section.ValuePerNumericAttribute, primaryKey[0]).ToString() == primaryKeyValue);
                         previousYearCause = prevYearSection.TreatmentCause;
                         previousYearTreatment = prevYearSection.AppliedTreatment;
-                    }                   
+                        previousYearTreatmentStatus = prevYearSection.TreatmentStatus;
+                    }
+                    setColor(section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause, 0, worksheet, row, column, section.TreatmentStatus, previousYearTreatmentStatus);
 
                     // Work done in a year                                      
                     // Build keyCashFlowFundingDetails                    
@@ -232,10 +235,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.GeneralSummaryReport.
             worksheet.Column(2).SetTrueWidth(12);
         }
 
-        private void setColor(int parallelBridge, string treatment, string previousYearTreatment, TreatmentCause previousYearCause,
-           TreatmentCause treatmentCause, int year, int index, ExcelWorksheet worksheet, int row, int column)
+        private void setColor(string treatment, string previousYearTreatment, TreatmentCause previousYearCause,
+           TreatmentCause treatmentCause, int index, ExcelWorksheet worksheet, int row, int column, TreatmentStatus treatmentStatus, TreatmentStatus previousYearTreatmentStatus)
         {
-            _highlightWorkDoneCells.CheckConditions(parallelBridge, treatment, previousYearTreatment, previousYearCause, treatmentCause, year, index, worksheet, row, column);
+            _highlightWorkDoneCells.CheckConditions(treatment, previousYearTreatment, previousYearCause, treatmentCause, index, worksheet, row, column, treatmentStatus, previousYearTreatmentStatus);
         }
 
         private void AddDynamicHeadersCells(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears)

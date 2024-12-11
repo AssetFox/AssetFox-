@@ -173,7 +173,7 @@ const actions = {
             true,
             payload.currentUserCriteriaFilter,
         ).then((response: AxiosResponse) => {
-            dispatch('setAlertMessage', "A performance curve import has been added to the work queue");
+            dispatch('setAlertMessage', "A performance curve import has been added to the queue");
         });
     },
     async importLibraryPerformanceCurvesFile(
@@ -186,7 +186,7 @@ const actions = {
             false,
             payload.currentUserCriteriaFilter,
         ).then((response: AxiosResponse) => {
-            dispatch('setAlertMessage', "A performance curve import has been added to the work queue");
+            dispatch('setAlertMessage', "A performance curve import has been added to the queue");
         });
     },
     async getPerformanceCurveLibraryUsers({ commit }: any, libraryId: string) {

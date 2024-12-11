@@ -304,7 +304,7 @@ const actions = {
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     dispatch('addSuccessNotification', {
-                        message: 'Canceling work queue operation',
+                        message: 'Canceling queue operation',
                     });
                 }
             },
@@ -315,7 +315,7 @@ const actions = {
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     dispatch('addSuccessNotification', {
-                        message: 'Canceling work queue operation',
+                        message: 'Canceling queue operation',
                     });
                 }
             },

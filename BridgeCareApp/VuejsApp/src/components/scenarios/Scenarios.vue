@@ -10,7 +10,7 @@
                         class="tab-theme"
                         bg-color="primary"
                     >
-                        <GhdQueueSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'General work queue'"/> 
+                        <GhdQueueSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'Queue'"/> 
                         <GhdShareSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'Shared with me'"/>  
                         <GhdStarSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'My scenarios'"/>  
                         {{ item.name }} ( {{ item.count }} )
@@ -457,12 +457,12 @@
                             </v-card>
                         </v-col>
                     </v-window-item>
-                    <v-window-item value="General work queue">
+                    <v-window-item value="Queue">
                         <v-col cols = "12">
                             <v-card elevation="5">
                                 <v-card-title class="ghd-dialog-padding-top-title">
                                     <v-row justify-start>
-                                    <div class="dialog-header"><h5>Work Queue</h5></div>
+                                    <div class="dialog-header"><h5>Queue</h5></div>
                                     </v-row>
 
                                 </v-card-title>
@@ -545,7 +545,7 @@
                                 </v-data-table-server>
                                 <v-card-title class="ghd-dialog-padding-top-title">
                                     <v-row justify-start>
-                                    <div class="dialog-header"><h5>Fast Queue</h5></div>
+                                    <div class="dialog-header"><h5>Reports/Uploads Queue</h5></div>
                                     </v-row>
 
                                 </v-card-title>
@@ -1474,7 +1474,7 @@ import { downloadSimulationLog } from '@/shared/utils/simulation-log-utils';
         tabItems.push(
             { name: 'My scenarios', icon: getUrl("assets/icons/star-empty.svg"), count: totalUserScenarios.value },
             { name: 'Shared with me', icon: getUrl("assets/icons/share-empty.svg"), count: totalSharedScenarios.value },
-            { name: 'General work queue', icon: getUrl("assets/icons/queue.svg"), count: totalQueuedSimulations.value },
+            { name: 'Queue', icon: getUrl("assets/icons/queue.svg"), count: totalQueuedSimulations.value },
         );
         tab.value = 'My scenarios';
 
@@ -1706,7 +1706,7 @@ import { downloadSimulationLog } from '@/shared/utils/simulation-log-utils';
             
             //Add a small delay to avoid adding two items to the queue at the same time
             await new Promise(resolve => setTimeout(resolve, 500));
-            tab.value = 'General work queue';
+            tab.value = 'Queue';
         }
     }
 
@@ -1768,7 +1768,7 @@ import { downloadSimulationLog } from '@/shared/utils/simulation-log-utils';
 
         //Add a small delay to avoid adding two items to the queue at the same time
         await new Promise(resolve => setTimeout(resolve, 500));
-        tab.value = 'General work queue';
+        tab.value = 'Queue';
     }
 
     function onShowConfirmConvertJsonToRelationalAlert(scenario: Scenario) {

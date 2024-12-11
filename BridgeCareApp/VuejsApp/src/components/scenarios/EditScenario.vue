@@ -689,7 +689,7 @@ import CashFlowService from '@/services/cash-flow.service';
                     scenarioId: selectedScenarioId,
                 }).then(() => (selectedScenario = clone(emptyScenario)));
             }
-            router.push({ path: '/Scenarios/', query: { tab: 'General work queue' } }).catch(() => {});
+            router.push({ path: '/Scenarios/', query: { tab: 'Queue' } }).catch(() => {});
         }
 
     }
@@ -749,7 +749,7 @@ import CashFlowService from '@/services/cash-flow.service';
                 networkId: networkId,
                 scenarioId: selectedScenarioId,
             }).then(() => (selectedScenario = clone(emptyScenario)));
-            router.push({ path: '/Scenarios/', query: { tab: 'General work queue' } }).catch(() => {});
+            router.push({ path: '/Scenarios/', query: { tab: 'Queue' } }).catch(() => {});
         }
     }
 

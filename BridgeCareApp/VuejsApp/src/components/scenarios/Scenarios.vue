@@ -146,6 +146,17 @@
                                                 @open="prepareForNameEdit( props.item.name,)"
                                             >
                                                 {{ props.item.name }}
+                                                <i
+                                                    v-if="checkIfReportExists(props.item.id)"
+                                                    class="fas fa-check-circle"
+                                                    style="color: green; margin-left: 8px;"
+                                                ></i>
+                                                <i
+                                                    v-else
+                                                    class="fas fa-times-circle"
+                                                    style="color: red; margin-left: 8px;"
+                                                ></i>
+
                                                 <template v-slot:input>
                                                     <v-text-field
                                                         label="Edit"
@@ -363,6 +374,16 @@
                                                 "
                                             >
                                                 {{ props.item.name }}
+                                                <i
+                                                    v-if="checkIfReportExists(props.item.id)"
+                                                    class="fas fa-check-circle"
+                                                    style="color: green; margin-left: 8px;"
+                                                ></i>
+                                                <i
+                                                    v-else
+                                                    class="fas fa-times-circle"
+                                                    style="color: red; margin-left: 8px;"
+                                                ></i>
                                                 <template v-slot:input>
                                                     <v-text-field
                                                         label="Edit"

@@ -2,9 +2,9 @@
     <div class="top-banner">
         <v-container fluid>
             <v-row justify="center" align="center">
-            <v-col cols="12">
-                <h1 class="banner-title">Libraries</h1>
-            </v-col>
+                <v-col cols="12">
+                    <h1 class="banner-title">Libraries</h1>
+                </v-col>
             </v-row>
         </v-container>
     </div>
@@ -219,13 +219,16 @@ import { useStore } from 'vuex';
   width: 100%;
   background-color: #D87D2A; 
   color: white;
-  text-align: center;
+  text-align: left;
   margin-top: -39px;
+  margin-bottom: 5px;;
 }
 
 .banner-title {
-  font-size: 35px; 
+  font-size: 30px; 
   font-weight: bold;
   color: white;
+  margin: -10px;
+  margin-left: 5px;
 }
 </style>

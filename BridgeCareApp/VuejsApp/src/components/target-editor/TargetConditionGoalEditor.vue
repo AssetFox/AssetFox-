@@ -154,9 +154,10 @@
                                     <v-btn 
                                         id="TargetConditionGoalEditor-deleteTargetConditionGoal-vbtn" 
                                         @click="onRemoveTargetConditionGoalsIcon(item.item)"  
-                                        class="ghd-red" style="margin-top: 10px;"
+                                        class="ghd-red" style="margin-top: 10px; padding-bottom: 20px"
                                         flat
                                         icon>
+                                        
                                             <TrashCanSvg />
                                     </v-btn>
                                 </div>

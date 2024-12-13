@@ -217,7 +217,7 @@ import { useStore } from 'vuex';
 
 .top-banner {
   width: 100%;
-  background-color: #ffb700; 
+  background-color: #D87D2A; 
   color: white;
   text-align: center;
   margin-top: -39px;

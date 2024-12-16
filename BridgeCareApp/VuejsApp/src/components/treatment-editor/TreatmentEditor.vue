@@ -1,5 +1,5 @@
 <template>
-    <v-card height="1000px" class="elevation-0 vcard-main-layout" style="margin-top: -20px;">    
+    <v-card height="1000px" class="elevation-0 vcard-main-layout" style="margin-top: -10px;">    
     <v-row style="margin-top: 5px;">
         <v-col>
             <v-select

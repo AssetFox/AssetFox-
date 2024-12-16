@@ -220,12 +220,12 @@ import { useStore } from 'vuex';
   background-color: #D87D2A; 
   color: white;
   text-align: left;
-  margin-top: -39px;
+  margin-top: -42px;
   margin-bottom: 5px;;
 }
 
 .banner-title {
-  font-size: 30px; 
+  font-size: 28px; 
   font-weight: bold;
   color: white;
   margin: -10px;

@@ -577,7 +577,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
         await selectScenarioAction({ scenarioId: scenarioId });
         await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: scenarioId, workType: WorkType.ImportCommittedProject}).then(response => {
             if(response.data){
-                setAlertMessageAction("Committed project import has been added to the work queue");
+                setAlertMessageAction("Committed project import has been added to the queue");
             }
         });
         await initializePages();
@@ -1023,7 +1023,7 @@ import UploadDialog from '@/shared/components/dialogs/UploadDialog.vue';
                     result.file,
                     scenarioId,
                     ).then((response: any) =>{
-                        setAlertMessageAction("Committed project import has been added to the work queue");                        
+                        setAlertMessageAction("Committed project import has been added to the queue");                        
                     })
             } else {
                 addErrorNotificationAction({

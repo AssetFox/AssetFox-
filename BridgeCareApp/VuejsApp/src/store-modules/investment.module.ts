@@ -194,7 +194,7 @@ const actions = {
             true,
             payload.currentUserCriteriaFilter,
         ).then((response: AxiosResponse) => {
-            dispatch('setAlertMessage', "Investment Budgets import has been added to the work queue.");
+            dispatch('setAlertMessage', "Investment Budgets import has been added to the queue.");
         });
     },
     async importLibraryInvestmentBudgetsFile(
@@ -208,7 +208,7 @@ const actions = {
             false,
             payload.currentUserCriteriaFilter,
         ).then((response: AxiosResponse) => {
-            dispatch('setAlertMessage', "Investment Budgets import has been added to the work queue.");
+            dispatch('setAlertMessage', "Investment Budgets import has been added to the queue.");
         });
     },
     async getHasPermittedAccess({ commit }: any)

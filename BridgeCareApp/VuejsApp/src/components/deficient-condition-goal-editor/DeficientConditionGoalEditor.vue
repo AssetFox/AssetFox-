@@ -202,6 +202,7 @@
                                         id="DeficientConditionGoalEditor-editDeficientConditionGoalCriteria-vbtn"
                                         @click="onShowCriterionLibraryEditorDialog(item.item)"
                                         class="ghd-blue"
+                                        style="padding-top: 13px;"
                                         flat
                                         icon>
                                         <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>

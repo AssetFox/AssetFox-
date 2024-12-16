@@ -1,5 +1,5 @@
 <template>
-    <v-card height="1000px" class="elevation-0 vcard-main-layout" style="margin-top: -20px;">    
+    <v-card height="1000px" class="elevation-0 vcard-main-layout" style="margin-top: -10px;">    
     <v-row style="margin-top: 5px;">
         <v-col>
             <v-select
@@ -657,7 +657,7 @@ async function getDistinctScenarioPerformanceFactorAttributeNamesAction(payload?
               
             await ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioTreatment}).then(response => {
                 if(response.data){
-                    setAlertMessageAction("A treatment curve has been added to the work queue")
+                    setAlertMessageAction("A treatment curve has been added to the queue")
                 }
             })
         }
@@ -772,7 +772,7 @@ async function getDistinctScenarioPerformanceFactorAttributeNamesAction(payload?
             getDateModified();
             ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedTreatmentLibrary.value.id, workType: WorkType.ImportLibraryTreatment}).then(response => {
                 if(response.data){
-                    setAlertMessageAction("A treatment import has been added to the work queue")
+                    setAlertMessageAction("A treatment import has been added to the queue")
                 }
                 else
                     setAlertMessageAction("");

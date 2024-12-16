@@ -255,7 +255,7 @@
                                  selectedScenario.status
                              }}</span>
                 </div>
-                <div v-else style="margin-bottom: 20px; height: auto;">
+                <div v-else style="height: auto;">
                     <br>
                 </div>
             <v-container fluid v-bind="container">

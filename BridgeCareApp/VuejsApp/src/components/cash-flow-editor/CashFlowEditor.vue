@@ -136,7 +136,7 @@
                                 @click="onEditCashFlowRuleCriterionLibrary(item.item)"
                                 id="CashFlowEditor-editCashFlowRule-btn"
                                 class="ghd-blue"
-                                style="margin-top: 12px;"
+                                style="margin-top: 12px; padding-top: 13px;"
                                 flat
                                 icon>
                                 <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>

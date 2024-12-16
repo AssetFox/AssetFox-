@@ -577,7 +577,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
     //                 hasScenario.value = true;
     //                 ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
     //                     if(response.data){
-    //                         setAlertMessageAction("An investment import has been added to the work queue")
+    //                         setAlertMessageAction("An investment import has been added to the queue")
     //                     }
     //                 })
     //                 await initializePages();
@@ -605,7 +605,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             hasScenario.value = true;
             ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedScenarioId, workType: WorkType.ImportScenarioInvestment}).then(response => {
                 if(response.data){
-                    setAlertMessageAction("An investment import has been added to the work queue")
+                    setAlertMessageAction("An investment import has been added to the queue")
                 }
             })
                 await initializePages();
@@ -780,7 +780,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
             hasCreatedLibrary = false;
             ScenarioService.getFastQueuedWorkByDomainIdAndWorkType({domainId: selectedBudgetLibrary.value.id, workType: WorkType.ImportLibraryInvestment}).then(response => {
                 if(response.data){
-                    setAlertMessageAction("An investment import has been added to the work queue")
+                    setAlertMessageAction("An investment import has been added to the queue")
                 }
                 else
                     setAlertMessageAction("");
@@ -1330,7 +1330,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     currentUserCriteriaFilter: currentUserCriteriaFilter
                 })
                 .then((response: any) => {
-                        setAlertMessageAction("Investment Budgets import has been added to the work queue.");
+                        setAlertMessageAction("Investment Budgets import has been added to the queue.");
                 });
             } else {
                 importLibraryInvestmentBudgetsFileAction({
@@ -1339,7 +1339,7 @@ function isSuccessfulImportMutator(payload:any){store.commit('isSuccessfulImport
                     currentUserCriteriaFilter: currentUserCriteriaFilter
                 })
                 .then(() => {
-                        setAlertMessageAction("Investment Budgets import has been added to the work queue.");                     
+                        setAlertMessageAction("Investment Budgets import has been added to the queue.");                     
                 });
             }
 

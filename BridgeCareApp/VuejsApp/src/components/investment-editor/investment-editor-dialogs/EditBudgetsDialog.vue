@@ -68,17 +68,26 @@
                                     variant="underlined"
                                     :model-value='props.item.criterionLibrary.mergedCriteriaExpression'>
                                     <template v-slot:append-inner>
-                                        <v-btn id="EditBudgetsDialog-openCriteriaEditor-vbtn" @click="onShowCriterionLibraryEditorDialog(props.item)"  
-                                            class="ghd-blue" flat icon>
-                                            <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
+                                        <v-btn 
+                                            id="EditBudgetsDialog-openCriteriaEditor-vbtn"
+                                            @click="onShowCriterionLibraryEditorDialog(props.item)"
+                                            class="ghd-blue"
+                                            flat 
+                                            icon
+                                            style="height: 24px; width: 24px; min-width: unset; padding: 0; margin: 0; display: flex; align-items: center; justify-content: center;"
+                                        >
+                                            <img 
+                                                class="img-general"
+                                                :src="getUrl('/assets/icons/edit.svg')"
+                                            />
                                         </v-btn>                                        
                                     </template>
                                 </v-text-field>
                             </td>
                             <td>
                                 <v-btn id="EditBudgetsDialog-removeBudget-btn" @click="onRemoveBudget(props.item.id)" @mousedown="setCurrentOrder(props.item)" 
-                                    class="ghd-red" flat icon>
-                                    <TrashCanSvg />
+                                    class="ghd-red" style="padding-bottom: 30px; height: 25px; width: 25px;" flat icon>
+                                    <TrashCanSvg/>
                                 </v-btn>
                              
                             </td>

@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         private void CommittedForConsecutiveYears(ExcelRange range)
         {
-            ExcelHelper.ApplyColor(range, Color.FromArgb(255, 153, 0));
+            ExcelHelper.ApplyColor(range, Color.FromArgb(7384391));
             ExcelHelper.SetTextColor(range, Color.White);                        
         }
 

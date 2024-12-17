@@ -65,7 +65,7 @@
                                 </v-card>
                             </v-menu>     
                              <v-btn id="TreatmentConsequencesTab-EquationEditorBtn" v-if="header.key === 'equation'" @click='onShowConsequenceEquationEditorDialog(props.item)' class='edit-icon ghd-blue'
-                                    flat icon>
+                                    style="padding-top: 13px;" flat icon>
                                     <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                             </v-btn>                       
 
@@ -97,7 +97,7 @@
                                 </v-card>
                             </v-menu>
                             <v-btn id="TreatmentConsequencesTab-CriteriaEditorBtn" v-if="header.key === 'criterionLibrary'" @click='onShowConsequenceCriterionEditorDialog(props.item)'
-                                    class='edit-icon ghd-blue' flat icon>
+                                    class='edit-icon ghd-blue' style="padding-top: 13px;" flat icon>
                                     <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                             </v-btn>
 

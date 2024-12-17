@@ -100,7 +100,7 @@
                                     "
                                     class="edit-icon ghd-blue"
                                     flat
-                                    style="left:25px"                                    
+                                    style="left:25px; padding-top: 15px"                                    
                                 >
                                 <img class='img-general img-shift' :src="getUrl('/assets/icons/edit.svg')"/>
                                 </v-btn>   

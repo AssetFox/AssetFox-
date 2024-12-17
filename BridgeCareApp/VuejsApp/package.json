@@ -5,7 +5,7 @@
     "private": true,
     "description": "BridgeCare",
     "author": {
-        "name": "Asset Fox"
+        "name": "AssetFox"
     },
     "scripts": {
         "dev": "vite",

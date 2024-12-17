@@ -65,8 +65,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             if (projectPickType == TreatmentCause.CashFlowProject)
             {
-                ExcelHelper.ApplyColor(range, Color.FromArgb(0, 255, 0));
-                ExcelHelper.SetTextColor(range, Color.Red);
+                ExcelHelper.ApplyColor(range, Color.FromArgb(7384391));
+                ExcelHelper.SetTextColor(range, Color.White);
             }
         }
 

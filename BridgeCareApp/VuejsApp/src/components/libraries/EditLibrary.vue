@@ -1,44 +1,53 @@
 <template>
-        <v-row>
-            <v-col class="p-0">
-            <v-card
-                class="ghd-sidebar-libary"
-                height="100%"
-                elevation="0"
-                style="border-top-left-radius: 10px; border-bottom-left-radius: 10px; border: 1px solid #999999;"
-            >
-                <v-list class="ghd-navigation-list">
-                    <v-list-item
-                        class="settings-list ghd-control-text"
-                        :key="navigationTab.tabName"
-                        :model-value="navigationTab"
-                        v-for="navigationTab in visibleNavigationTabs()"                        
-                    >
-                        <v-list-item :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
-                            <template v-slot:prepend>
-                                    <!-- <v-icon class="mx-2" slot="prependIcon" v-text="navigationTab.tabIcon"></v-icon> -->
-                                    <TreatmentSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Treatment'"/>  
-                                    <TargetConditionGoalSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Target Condition Goal'"/>  
-                                    <RemainingLifeLimitSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Remaining Life Limit'"/>  
-                                    <PerformanceCurveSvg style="height: 34px; width: 36px"  class="library-icon" v-if="navigationTab.tabName === 'Deterioration Model'"/>  
-                                    <DeficientConditionGoalSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Deficient Condition Goal'"/>  
-                                    <InvestmentSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Investment'"/>  
-                                    <CashFlowSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Cash Flow'"/>  
-                                    <BudgetPrioritySvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Budget Priority'"/>  
-                                    <CalculatedAttributeSvg style="height: 32px; width: 32px"  class="library-icon-stroke" v-if="navigationTab.tabName === 'Calculated Attribute'"/>  
-                            </template>
-                                <v-list-item-title style="text-decoration: none; padding-left: 5px;">{{navigationTab.tabName}}</v-list-item-title>
-                        </v-list-item>
+    <div class="top-banner">
+        <v-container fluid>
+            <v-row justify="center" align="center">
+                <v-col cols="12">
+                    <h1 class="banner-title">Libraries</h1>
+                </v-col>
+            </v-row>
+        </v-container>
+    </div>
+    <v-row>
+        <v-col class="p-0">
+        <v-card
+            class="ghd-sidebar-libary"
+            height="100%"
+            elevation="0"
+            style="border-top-left-radius: 10px; border-bottom-left-radius: 10px; border: 1px solid #999999;"
+        >
+            <v-list class="ghd-navigation-list">
+                <v-list-item
+                    class="settings-list ghd-control-text"
+                    :key="navigationTab.tabName"
+                    :model-value="navigationTab"
+                    v-for="navigationTab in visibleNavigationTabs()"                        
+                >
+                    <v-list-item :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
+                        <template v-slot:prepend>
+                                <!-- <v-icon class="mx-2" slot="prependIcon" v-text="navigationTab.tabIcon"></v-icon> -->
+                                <TreatmentSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Treatment'"/>  
+                                <TargetConditionGoalSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Target Condition Goal'"/>  
+                                <RemainingLifeLimitSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Remaining Life Limit'"/>  
+                                <PerformanceCurveSvg style="height: 34px; width: 36px"  class="library-icon" v-if="navigationTab.tabName === 'Deterioration Model'"/>  
+                                <DeficientConditionGoalSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Deficient Condition Goal'"/>  
+                                <InvestmentSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Investment'"/>  
+                                <CashFlowSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Cash Flow'"/>  
+                                <BudgetPrioritySvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Budget Priority'"/>  
+                                <CalculatedAttributeSvg style="height: 32px; width: 32px"  class="library-icon-stroke" v-if="navigationTab.tabName === 'Calculated Attribute'"/>  
+                        </template>
+                            <v-list-item-title style="text-decoration: none; padding-left: 5px;">{{navigationTab.tabName}}</v-list-item-title>
                     </v-list-item>
-                </v-list>
-            </v-card>
-            <v-col cols = "12" class="ghd-content">
-                <v-container fluid grid-list-xs style="padding-left:20px;padding-right:20px;">
-                    <router-view></router-view>
-                </v-container>
-            </v-col>
+                </v-list-item>
+            </v-list>
+        </v-card>
+        <v-col cols = "10" class="ghd-content">
+            <v-container fluid grid-list-xs style="padding-left:20px;padding-right:20px;">
+                <router-view></router-view>
+            </v-container>
         </v-col>
-        </v-row>
+        </v-col>
+    </v-row>
 </template>
 
 <script lang="ts" setup>
@@ -206,4 +215,20 @@ import { useStore } from 'vuex';
     stroke: #999999 !important;
 }
 
+.top-banner {
+  width: 100%;
+  background-color: #D87D2A; 
+  color: white;
+  text-align: left;
+  margin-top: -42px;
+  margin-bottom: 5px;;
+}
+
+.banner-title {
+  font-size: 28px; 
+  font-weight: bold;
+  color: white;
+  margin: -10px;
+  margin-left: 5px;
+}
 </style>

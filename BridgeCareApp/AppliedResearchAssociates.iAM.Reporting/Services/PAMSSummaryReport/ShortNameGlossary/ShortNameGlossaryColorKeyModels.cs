@@ -13,12 +13,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Sho
                 TwoByOneRow(ExcelValueModels.Nothing),
 
                 CenteredHeader("Work Done Columns"),
-                TwoByOneRow(ColoredText("PMS Treatment is being cashed flowed.", Color.Red, PureGreen)),
+                TwoByOneRow(ColoredText("PMS Treatment is being cashed flowed.", Color.White, Color.FromArgb(7384391))),
                 TwoByOneRow(ColoredText("MPMS Project selected for consecutive years.", Color.White, Color.Orange)),
 
                 TwoByOneRow(ExcelValueModels.Nothing),
                 CenteredHeader("Details Columns"),
-                TwoByOneRow(ColoredText("Project is being cashed flowed.", Color.Red, PureGreen))
+                TwoByOneRow(ColoredText("Project is being cashed flowed.", Color.White, Color.FromArgb(7384391)))
         );
 
         private static ExcelRowModel CenteredHeader(string text)

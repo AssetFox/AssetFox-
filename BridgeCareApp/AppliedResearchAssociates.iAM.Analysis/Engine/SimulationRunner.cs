@@ -441,7 +441,7 @@ public sealed class SimulationRunner
             }
             else
             {
-                context.PrepareForTreatment();
+                context.PrepareForTreatment(year);
 
                 if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
                 {

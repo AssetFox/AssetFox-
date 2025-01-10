@@ -58,7 +58,17 @@ internal sealed class AssetContext : CalculateEvaluateScope
         ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
     }
 
-    public void ApplyPerformanceCurves() => ApplyPerformanceCurves(GetPerformanceCurveCalculatorPerAttribute());
+    public void ApplyPerformanceCurves()
+    {
+        var calculatorPerAttribute = GetPerformanceCurveCalculatorPerAttribute();
+
+        var dataUpdates = calculatorPerAttribute.Select(kv => (kv.Key, kv.Value())).ToArray();
+
+        foreach (var (key, value) in dataUpdates)
+        {
+            SetNumber(key, value);
+        }
+    }
 
     public void ApplyTreatment(Treatment treatment, int year)
     {
@@ -193,7 +203,7 @@ internal sealed class AssetContext : CalculateEvaluateScope
         Detail.TreatmentStatus = TreatmentStatus.Progressed;
     }
 
-    public void PrepareForTreatment()
+    public void PrepareForTreatment(int year, bool historicalFallForward = false)
     {
         FixCalculatedFieldValuesWithPreDeteriorationTiming();
 
@@ -211,6 +221,11 @@ internal sealed class AssetContext : CalculateEvaluateScope
         }
 
         FixCalculatedFieldValuesWithPostDeteriorationTiming();
+
+        if (year <= SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod)
+        {
+            SetHistoricalValues(year, historicalFallForward);
+        }
     }
 
     public void ResetDetail() => Detail = new AssetDetail(Asset);
@@ -245,22 +260,13 @@ internal sealed class AssetContext : CalculateEvaluateScope
 
         if (firstYearOfRollForward < SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod)
         {
-            SetHistoricalValues(firstYearOfRollForward.Value, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
-            SetHistoricalValues(firstYearOfRollForward.Value, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
-
-            HandleTreatmentDuringRollForward(rollForwardEvents, firstYearOfRollForward.Value);
+            HandleTreatmentDuringRollForward(rollForwardEvents, firstYearOfRollForward.Value, true);
 
             foreach (var year in Static.RangeFromBounds(firstYearOfRollForward.Value + 1, SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod - 1))
             {
-                SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
-                SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
-
-                HandleTreatmentDuringRollForward(rollForwardEvents, year);
+                HandleTreatmentDuringRollForward(rollForwardEvents, year, false);
             }
         }
-
-        SetHistoricalValues(SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
-        SetHistoricalValues(SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
     }
 
     public override void SetNumber(string key, double value)
@@ -306,16 +312,6 @@ internal sealed class AssetContext : CalculateEvaluateScope
     private int? FirstUnshadowedYearForAnyTreatment;
 
     private AnalysisMethod AnalysisMethod => SimulationRunner.Simulation.AnalysisMethod;
-
-    private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
-    {
-        var dataUpdates = calculatorPerAttribute.Select(kv => (kv.Key, kv.Value())).ToArray();
-
-        foreach (var (key, value) in dataUpdates)
-        {
-            SetNumber(key, value);
-        }
-    }
 
     private void ApplyTreatmentButNotMetadata(Treatment treatment)
     {
@@ -497,9 +493,9 @@ internal sealed class AssetContext : CalculateEvaluateScope
     private IDictionary<string, Func<double>> GetPerformanceCurveCalculatorPerAttribute()
         => SimulationRunner.CurvesPerAttribute.ToDictionary(curves => curves.Key.Name, GetCalculator);
 
-    private void HandleTreatmentDuringRollForward(ConcurrentBag<RollForwardEventDetail> rollForwardEvents, int year)
+    private void HandleTreatmentDuringRollForward(ConcurrentBag<RollForwardEventDetail> rollForwardEvents, int year, bool historicalFallForward)
     {
-        PrepareForTreatment();
+        PrepareForTreatment(year, historicalFallForward);
 
         if (EventSchedule.TryGetValue(year, out var scheduledEvent) &&
             scheduledEvent.IsT1(out var treatment))
@@ -602,6 +598,12 @@ internal sealed class AssetContext : CalculateEvaluateScope
             var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
             SimulationRunner.Send(messageBuilder);
         }
+    }
+
+    private void SetHistoricalValues(int referenceYear, bool fallForward)
+    {
+        SetHistoricalValues(referenceYear, fallForward, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
+        SetHistoricalValues(referenceYear, fallForward, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
     }
 
     private void SetHistoricalValues<T>(int referenceYear, bool fallForward, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)

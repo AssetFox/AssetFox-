@@ -188,7 +188,7 @@ internal sealed class TreatmentOutlook
                 throw new InvalidOperationException(MessageStrings.TreatmentOutlookIsConsumingAProgressEvent);
             }
 
-            AccumulationContext.PrepareForTreatment();
+            AccumulationContext.PrepareForTreatment(year);
 
             if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
             {

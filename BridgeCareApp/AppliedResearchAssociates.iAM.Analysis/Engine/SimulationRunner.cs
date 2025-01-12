@@ -195,7 +195,6 @@ public sealed class SimulationRunner
         InParallel(AssetContexts, context =>
         {
             context.RollForward(rollForwardEvents);
-            context.Asset.HistoryProvider.ClearHistory();
         });
 
         SpendingLimit = Simulation.AnalysisMethod.SpendingLimit;
@@ -218,12 +217,6 @@ public sealed class SimulationRunner
         SimulationOutput output = new();
         output.RollForwardEvents.AddRange(rollForwardEvents.OrderBy(e => e.Year).ThenBy(e => e.AssetId));
 
-        output.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(AssetContexts);
-        output.InitialAssetSummaries.AddRange(AssetContexts.Select(context => context.SummaryDetail));
-
-        Simulation.ResultsOnDisk.Initialize(output);
-        output = null;
-
         foreach (var year in Simulation.InvestmentPlan.YearsOfAnalysis)
         {
             if (CheckCanceled(cancellationToken))
@@ -235,6 +228,20 @@ public sealed class SimulationRunner
             ReportProgress(ProgressStatus.Running, percentComplete, year);
 
             var unhandledContexts = ApplyRequiredEvents(year);
+
+            if (year == Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod)
+            {
+                InParallel(AssetContexts, context =>
+                {
+                    context.Asset.HistoryProvider.ClearHistory();
+                });
+
+                output.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(AssetContexts);
+                output.InitialAssetSummaries.AddRange(AssetContexts.Select(context => context.SummaryDetail));
+
+                Simulation.ResultsOnDisk.Initialize(output);
+                output = null;
+            }
 
             if (CheckCanceled(cancellationToken))
             {

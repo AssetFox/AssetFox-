@@ -6,12 +6,12 @@
       "ValuePerNumericAttribute": {
         "AREA": 1,
         "AGE": 25,
-        "HEALTH": 86
+        "HEALTH": 85
       },
       "ValuePerTextAttribute": {}
     }
   ],
-  "InitialConditionOfNetwork": 86,
+  "InitialConditionOfNetwork": 85,
   "LastModifiedDate": "0001-01-01T00:00:00",
   "RollForwardEvents": [],
   "Years": [

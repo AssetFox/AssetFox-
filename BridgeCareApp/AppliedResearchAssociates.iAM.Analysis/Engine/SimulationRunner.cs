@@ -227,7 +227,7 @@ public sealed class SimulationRunner
             var percentComplete = (double)(year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod) / Simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod * 100;
             ReportProgress(ProgressStatus.Running, percentComplete, year);
 
-            var unhandledContexts = ApplyRequiredEvents(year);
+            ApplyDeteriorationAsNeeded(year);
 
             if (year == Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod)
             {
@@ -242,6 +242,8 @@ public sealed class SimulationRunner
                 Simulation.ResultsOnDisk.Initialize(output);
                 output = null;
             }
+
+            var unhandledContexts = ApplyRequiredEvents(year);
 
             if (CheckCanceled(cancellationToken))
             {
@@ -420,6 +422,23 @@ public sealed class SimulationRunner
         }
     }
 
+    private void ApplyDeteriorationAsNeeded(int year) => InParallel(AssetContexts, context =>
+    {
+        var yearIsScheduled = context.EventSchedule.TryGetValue(year, out var scheduledEvent);
+
+        if (yearIsScheduled && scheduledEvent.IsT2(out _))
+        {
+            if (Simulation.AnalysisMethod.ShouldDeteriorateDuringCashFlow)
+            {
+                context.ApplyPerformanceCurves();
+            }
+        }
+        else
+        {
+            context.PrepareForTreatment(year);
+        }
+    });
+
     private ICollection<AssetContext> ApplyRequiredEvents(int year)
     {
         var unhandledContexts = new List<AssetContext>();
@@ -430,11 +449,6 @@ public sealed class SimulationRunner
 
             if (yearIsScheduled && scheduledEvent.IsT2(out var progress))
             {
-                if (Simulation.AnalysisMethod.ShouldDeteriorateDuringCashFlow)
-                {
-                    context.ApplyPerformanceCurves();
-                }
-
                 if (progress.IsComplete)
                 {
                     context.ApplyTreatment(progress.Treatment, year);
@@ -446,64 +460,59 @@ public sealed class SimulationRunner
 
                 context.Detail.TreatmentCause = TreatmentCause.CashFlowProject;
             }
-            else
+            else if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
             {
-                context.PrepareForTreatment(year);
+                var costCoverage = TryToPayForTreatment(context, treatment, year, budgetContext => budgetContext.CurrentAmount);
 
-                if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
+                if (costCoverage == CostCoverage.None)
                 {
-                    var costCoverage = TryToPayForTreatment(context, treatment, year, budgetContext => budgetContext.CurrentAmount);
-
-                    if (costCoverage == CostCoverage.None)
+                    MessageBuilder = new SimulationMessageBuilder($"Treatment scheduled for year {year} cannot be funded normally. Spending limits will be temporarily removed to fund this treatment.")
                     {
-                        MessageBuilder = new SimulationMessageBuilder($"Treatment scheduled for year {year} cannot be funded normally. Spending limits will be temporarily removed to fund this treatment.")
-                        {
-                            ItemName = treatment.Name,
-                            ItemId = treatment.Id,
-                        };
+                        ItemName = treatment.Name,
+                        ItemId = treatment.Id,
+                    };
 
-                        var warning = SimulationLogMessageBuilders.RuntimeWarning(MessageBuilder, Simulation.Id);
-                        Send(warning);
+                    var warning = SimulationLogMessageBuilders.RuntimeWarning(MessageBuilder, Simulation.Id);
+                    Send(warning);
 
-                        var actualSpendingLimit = SpendingLimit;
-                        SpendingLimit = SpendingLimit.NoLimit;
-                        costCoverage = TryToPayForTreatment(context, treatment, year, budgetContext => budgetContext.CurrentAmount);
-                        SpendingLimit = actualSpendingLimit;
+                    var actualSpendingLimit = SpendingLimit;
+                    SpendingLimit = SpendingLimit.NoLimit;
+                    costCoverage = TryToPayForTreatment(context, treatment, year, budgetContext => budgetContext.CurrentAmount);
+                    SpendingLimit = actualSpendingLimit;
 
-                        context.Detail.TreatmentFundingIgnoresSpendingLimit = true;
-                    }
+                    context.Detail.TreatmentFundingIgnoresSpendingLimit = true;
+                }
 
-                    if (costCoverage == CostCoverage.Full)
-                    {
-                        context.ApplyTreatment(treatment, year);
-                    }
-                    else if (costCoverage == CostCoverage.CashFlow)
-                    {
-                        context.MarkTreatmentProgress(treatment);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("Analysis failed to fund scheduled event.");
-                    }
-
-                    if (treatment is CommittedProject committedProject)
-                    {
-                        context.Detail.ProjectSource = committedProject.ProjectSource.ToString();
-
-                        if (!committedProject.ShouldApplyConsequences)
-                        {
-                            context.Detail.TreatmentStatus = TreatmentStatus.Progressed;
-                        }
-                    }
-
-                    context.Detail.TreatmentCause = treatment is CommittedProject or CommittedProjectBundle
-                        ? TreatmentCause.CommittedProject
-                        : TreatmentCause.ScheduledTreatment;
+                if (costCoverage == CostCoverage.Full)
+                {
+                    context.ApplyTreatment(treatment, year);
+                }
+                else if (costCoverage == CostCoverage.CashFlow)
+                {
+                    context.MarkTreatmentProgress(treatment);
                 }
                 else
                 {
-                    unhandledContexts.Add(context);
+                    throw new InvalidOperationException("Analysis failed to fund scheduled event.");
                 }
+
+                if (treatment is CommittedProject committedProject)
+                {
+                    context.Detail.ProjectSource = committedProject.ProjectSource.ToString();
+
+                    if (!committedProject.ShouldApplyConsequences)
+                    {
+                        context.Detail.TreatmentStatus = TreatmentStatus.Progressed;
+                    }
+                }
+
+                context.Detail.TreatmentCause = treatment is CommittedProject or CommittedProjectBundle
+                    ? TreatmentCause.CommittedProject
+                    : TreatmentCause.ScheduledTreatment;
+            }
+            else
+            {
+                unhandledContexts.Add(context);
             }
         }
 

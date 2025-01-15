@@ -161,7 +161,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 UpdateSimulationAnalysisDetail(dto);
             });
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutputViaJson(simulationId);
-            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
+            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, ReportType = ReportTypeName };
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkID, explorer);
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);

@@ -50,7 +50,7 @@
           "ValuePerNumericAttribute": {
             "AREA": 1,
             "AGE": 25,
-            "HEALTH": 84
+            "HEALTH": 85
           },
           "ValuePerTextAttribute": {}
         }
@@ -61,7 +61,7 @@
           "BudgetName": "Bag of money"
         }
       ],
-      "ConditionOfNetwork": 84,
+      "ConditionOfNetwork": 85,
       "DeficientConditionGoals": [],
       "TargetConditionGoals": [],
       "Year": 2020
